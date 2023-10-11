@@ -198,9 +198,9 @@ def _impl(array, axis, highlevel, behavior):
                 ):
                     return layout
 
-                tags = backend.index_nplike.asarray(layout.tags)
+                tags = backend.index_nplike.asarray(layout.tags.data)
                 index = backend.index_nplike.asarray(
-                    backend.nplike.asarray(layout.index), copy=True
+                    backend.nplike.asarray(layout.index.data), copy=True
                 )
                 bigmask = backend.index_nplike.empty(len(index), dtype=np.bool_)
                 for tag, content in enumerate(layout.contents):

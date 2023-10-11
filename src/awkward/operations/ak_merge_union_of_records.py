@@ -75,8 +75,8 @@ def _impl(array, axis, highlevel, behavior):
         # Build unions for each field
         outer_field_contents = []
         for field in all_fields:
-            field_tags = index_nplike.asarray(tags, copy=True)
-            field_index = index_nplike.asarray(index, copy=True)
+            field_tags = index_nplike.asarray(tags.data, copy=True)
+            field_index = index_nplike.asarray(index.data, copy=True)
 
             # Build contents for union representing current field
             field_contents = [c.content(field) for c in contents if c.has_field(field)]
@@ -170,17 +170,19 @@ def _impl(array, axis, highlevel, behavior):
                 # We'll rebuild the union to include only the non-null items.
                 inner_union_index_parts = []
                 next_contents = []
-                next_tags_sparse = backend.index_nplike.asarray(layout.tags, copy=True)
+                next_tags_data_sparse = backend.index_nplike.asarray(
+                    layout.tags.data, copy=True
+                )
                 for tag, content in enumerate(layout.contents):
-                    is_this_tag = backend.index_nplike.asarray(layout.tags) == tag
+                    is_this_tag = layout.tags.data == tag
 
                     # Union arrays for this content
-                    tag_index = backend.index_nplike.asarray(layout.index)[is_this_tag]
+                    tag_index_data = layout.index.data[is_this_tag]
 
                     # For unmasked arrays, we can directly take the content
                     if isinstance(content, ak.contents.UnmaskedArray):
                         next_contents.append(content.content)
-                        inner_union_index_parts.append(tag_index)
+                        inner_union_index_parts.append(tag_index_data)
                     # Otherwise, we need to rebuild the index
                     elif content.is_option or content.is_indexed:
                         # Let's work with indexed option types for ease
@@ -188,12 +190,11 @@ def _impl(array, axis, highlevel, behavior):
                             content = content.to_IndexedOptionArray64()
 
                         # First, find the inner index that actually re-arranges the (non-null) items
-                        content_index = backend.index_nplike.asarray(content.index)
-                        merged_index = content_index[tag_index]
+                        merged_index = content.index.data[tag_index_data]
                         is_non_null = merged_index >= 0
                         inner_union_index_parts.append(merged_index[is_non_null])
                         # Mask out tags of items that are missing
-                        next_tags_sparse[is_this_tag] = backend.index_nplike.where(
+                        next_tags_data_sparse[is_this_tag] = backend.index_nplike.where(
                             is_non_null, tag, -1
                         )
 
@@ -202,67 +203,64 @@ def _impl(array, axis, highlevel, behavior):
                     # Non-indexed/option types are trivially included as-is
                     else:
                         next_contents.append(content)
-                        inner_union_index_parts.append(tag_index)
+                        inner_union_index_parts.append(tag_index_data)
 
                 # We'll create an outermost indexed-option type, which re-instates the missing values.
                 # This should have the same length as the original union, and its index should be "dense"
                 # (contiguous, monotonic integers; or -1). Therefore, we can directly compute it from the "sparse"
                 # tags index, which has the same length as the original union, and has only missing items set to -1.
                 outer_option_dense_index = compact_option_index(
-                    next_tags_sparse, backend=backend
+                    next_tags_data_sparse, backend=backend
                 )
 
                 # Ignore missing items for inner union, creating a dense array of tags
-                next_tags = next_tags_sparse[next_tags_sparse >= 0]
+                next_tags_data = next_tags_data_sparse[next_tags_data_sparse >= 0]
                 # Build dense index from parts for each tag
-                next_index = backend.index_nplike.empty(next_tags.size, dtype=np.int64)
+                next_index_data = backend.index_nplike.empty(
+                    next_tags_data.size, dtype=np.int64
+                )
                 for tag, content_index in enumerate(inner_union_index_parts):
-                    next_index[next_tags == tag] = content_index
+                    next_index_data[next_tags_data == tag] = content_index
 
                 # Return option around record of unions
                 return ak.contents.IndexedOptionArray(
                     ak.index.Index64(outer_option_dense_index),
                     invert_record_union(
-                        next_tags, next_index, next_contents, backend=backend
+                        next_tags_data, next_index_data, next_contents, backend=backend
                     ),
                 )
 
             # Any index types need to be re-written
             elif any(x.is_indexed for x in layout.contents):
                 # We'll create an outermost indexed-option type, which re-instates the missing values
-                current_index = backend.index_nplike.asarray(layout.index)
-                next_index = backend.index_nplike.empty(
-                    current_index.size, dtype=np.int64
+                next_index_data = backend.index_nplike.empty(
+                    layout.index.length, dtype=np.int64
                 )
 
                 # We'll rebuild the union to include only the non-null items.
                 next_contents = []
                 for tag, content in enumerate(layout.contents):
-                    is_this_tag = backend.index_nplike.asarray(layout.tags) == tag
+                    is_this_tag = layout.tags.data == tag
 
                     # Rewrite union index of indexed types
                     if content.is_indexed:
-                        content_index = backend.index_nplike.asarray(content.index)
-                        next_index[is_this_tag] = content_index[
-                            current_index[is_this_tag]
+                        next_index_data[is_this_tag] = content.index.data[
+                            content.index.data[is_this_tag]
                         ]
                         next_contents.append(content.content)
 
                     else:
-                        next_index[is_this_tag] = current_index[is_this_tag]
+                        next_index_data[is_this_tag] = content.index.data[is_this_tag]
                         next_contents.append(content)
 
                 return invert_record_union(
-                    backend.index_nplike.asarray(layout.tags),
-                    next_index,
-                    next_contents,
-                    backend=backend,
+                    layout.tags.data, next_index_data, next_contents, backend=backend
                 )
 
             else:
                 return invert_record_union(
-                    backend.index_nplike.asarray(layout.tags),
-                    backend.index_nplike.asarray(layout.index),
+                    layout.tags.data,
+                    layout.index.data,
                     layout.contents,
                     backend=backend,
                 )

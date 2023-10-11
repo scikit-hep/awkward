@@ -129,13 +129,13 @@ def _impl(array, highlevel, behavior):
                     mapping[i] = j
 
             if layout.is_indexed and layout.is_option:
-                original_index = numpy.asarray(layout.index)
+                original_index = numpy.asarray(layout.index.data)
                 index = mapping[original_index]
                 index[original_index < 0] = -1
                 index = ak.index.Index64(index)
 
             elif layout.is_indexed:
-                original_index = numpy.asarray(layout.index)
+                original_index = numpy.asarray(layout.index.data)
                 index = ak.index.Index64(mapping[original_index])
 
             elif layout.is_option:

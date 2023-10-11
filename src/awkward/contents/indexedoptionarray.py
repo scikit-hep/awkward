@@ -284,7 +284,7 @@ class IndexedOptionArray(Content):
             valid_when, lsb_order
         )
 
-    def mask_as_bool(self, valid_when=True):
+    def mask_as_bool(self, valid_when: bool = True) -> ArrayLike:
         if valid_when:
             return self._index.raw(self._backend.index_nplike) >= 0
         else:

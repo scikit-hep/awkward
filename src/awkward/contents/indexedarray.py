@@ -262,7 +262,7 @@ class IndexedArray(Content):
             self._index, self._content, parameters=self._parameters
         )
 
-    def mask_as_bool(self, valid_when=True):
+    def mask_as_bool(self, valid_when: bool = True) -> ArrayLike:
         if valid_when:
             return self._index.data >= 0
         else:

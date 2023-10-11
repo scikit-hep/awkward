@@ -210,7 +210,7 @@ class UnmaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def mask_as_bool(self, valid_when=True):
+    def mask_as_bool(self, valid_when: bool = True) -> ArrayLike:
         if valid_when:
             return self._backend.index_nplike.ones(self._content.length, dtype=np.bool_)
         else:

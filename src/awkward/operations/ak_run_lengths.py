@@ -161,7 +161,7 @@ def _impl(array, highlevel, behavior):
             elif not layout.is_numpy:
                 raise NotImplementedError("run_lengths on " + type(layout).__name__)
 
-            nextcontent, _ = lengths_of(backend.nplike.asarray(layout.data), None)
+            nextcontent, _ = lengths_of(layout.data, None)
             return ak.contents.NumpyArray(nextcontent)
 
         elif layout.branch_depth == (False, 2):
@@ -178,23 +178,25 @@ def _impl(array, highlevel, behavior):
                 # We also want to trim the _upper_ bound of content,
                 # so we manually convert the list type to zero-based
                 listoffsetarray = layout.to_ListOffsetArray64(False)
-                offsets = backend.index_nplike.asarray(listoffsetarray.offsets)
-                content = listoffsetarray.content[offsets[0] : offsets[-1]]
+                content = listoffsetarray.content[
+                    listoffsetarray.offsets[0] : listoffsetarray.offsets[-1]
+                ]
 
                 if content.is_indexed:
                     content = content.project()
 
+                offsets = listoffsetarray.offsets.data
                 nextcontent, nextoffsets = lengths_of(
                     ak.highlevel.Array(content), offsets - offsets[0]
                 )
                 return ak.contents.ListOffsetArray(
-                    ak.index.Index64(nextoffsets),
-                    ak.contents.NumpyArray(nextcontent),
+                    ak.index.Index64(nextoffsets), ak.contents.NumpyArray(nextcontent)
                 )
 
             listoffsetarray = layout.to_ListOffsetArray64(False)
-            offsets = backend.index_nplike.asarray(listoffsetarray.offsets)
-            content = listoffsetarray.content[offsets[0] : offsets[-1]]
+            content = listoffsetarray.content[
+                listoffsetarray.offsets[0] : listoffsetarray.offsets[-1]
+            ]
 
             if content.is_indexed:
                 content = content.project()
@@ -209,12 +211,10 @@ def _impl(array, highlevel, behavior):
                     + type(content).__name__
                 )
 
-            nextcontent, nextoffsets = lengths_of(
-                backend.nplike.asarray(content.data), offsets - offsets[0]
-            )
+            offsets = listoffsetarray.offsets.data
+            nextcontent, nextoffsets = lengths_of(content.data, offsets - offsets[0])
             return ak.contents.ListOffsetArray(
-                ak.index.Index64(nextoffsets),
-                ak.contents.NumpyArray(nextcontent),
+                ak.index.Index64(nextoffsets), ak.contents.NumpyArray(nextcontent)
             )
         else:
             return None

@@ -188,30 +188,28 @@ def _impl(array, counts, axis, highlevel, behavior):
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
                 listoffsetarray = layout.to_ListOffsetArray64(True)
-                outeroffsets = backend.index_nplike.asarray(listoffsetarray.offsets)
+                outeroffsets = listoffsetarray.offsets
 
                 content = unflatten_this_layout(
                     listoffsetarray.content[: outeroffsets[-1]]
                 )
                 if isinstance(content, ak.contents.ByteMaskedArray):
-                    inneroffsets = backend.index_nplike.asarray(content.content.offsets)
+                    inneroffsets = content.content.offsets
                 elif isinstance(content, ak.contents.RegularArray):
-                    inneroffsets = backend.index_nplike.asarray(
-                        content.to_ListOffsetArray64(True).offsets
-                    )
+                    inneroffsets = content.to_ListOffsetArray64(True).offsets
                 else:
-                    inneroffsets = backend.index_nplike.asarray(content.offsets)
+                    inneroffsets = content.offsets
 
                 positions = (
                     backend.index_nplike.searchsorted(
-                        inneroffsets, outeroffsets, side="right"
+                        inneroffsets.data, outeroffsets.data, side="right"
                     )
                     - 1
                 )
                 if (
                     backend.index_nplike.known_data
                     and not backend.index_nplike.array_equal(
-                        inneroffsets[positions], outeroffsets
+                        inneroffsets.data[positions], outeroffsets
                     )
                 ):
                     raise ValueError(
