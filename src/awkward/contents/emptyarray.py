@@ -98,7 +98,7 @@ class EmptyArray(Content):
 
     def __array__(self, dtype=None):
         deprecate(
-            f"np.asarray(content) is deprecated for {type(self)}. Use ak.to_numpy(content) instead",
+            f"np.asarray(content) is deprecated for {type(self).__name__}. Use ak.to_numpy(content) instead",
             version="2.6.0",
         )
         return numpy.empty(0, dtype=dtype)
