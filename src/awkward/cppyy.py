@@ -26,10 +26,10 @@ Note that this must be in a different venv or conda environment from ROOT, if yo
 
     if not _has_checked_version:
         if packaging.version.Version(cppyy.__version__) < packaging.version.Version(
-            "3.0.1"
+            "3.1.0"
         ):
             raise ImportError(
-                "Awkward Array can only work with cppyy 3.0.1 or later "
+                "Awkward Array can only work with cppyy 3.1.0 or later "
                 f"(you have version {cppyy.__version__})"
             )
         _has_checked_version = True
