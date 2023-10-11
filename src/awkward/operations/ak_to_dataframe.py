@@ -168,8 +168,7 @@ or
 
         elif layout.purelist_depth > 1:
             offsets, flattened = layout._offsets_and_flattened(axis=1, depth=1)
-            offsets = numpy.asarray(offsets)
-            starts, stops = offsets[:-1], offsets[1:]
+            starts, stops = offsets.data[:-1], offsets.data[1:]
             counts = stops - starts
             if ak._util.win or ak._util.bits32:
                 counts = layout.backend.index_nplike.astype(counts, np.int32)
