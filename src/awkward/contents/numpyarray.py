@@ -157,7 +157,7 @@ class NumpyArray(Content):
             f"np.asarray(content) is deprecated for {type(self)}. Use ak.to_numpy(content) instead",
             version="2.6.0",
         )
-        return numpy.array(self._data, dtype=dtype)
+        return numpy.asarray(self._data, dtype=dtype)
 
     @classmethod
     def simplified(cls, data, *, parameters=None, backend=None):
