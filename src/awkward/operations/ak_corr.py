@@ -3,6 +3,7 @@ __all__ = ("corr",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
+from awkward._layout import maybe_highlevel_to_lowlevel, wrap_layout
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -11,7 +12,17 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def corr(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
+def corr(
+    x,
+    y,
+    weight=None,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    highlevel=True,
+    behavior=None,
+):
     """
     Args:
         x: One coordinate to use in the correlation (anything #ak.to_layout recognizes).
@@ -33,6 +44,10 @@ def corr(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Computes the correlation of `x` and `y` (many types supported, including
     all Awkward Arrays and Records, must be broadcastable to each other).
@@ -55,12 +70,12 @@ def corr(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     yield x, y, weight
 
     # Implementation
-    return _impl(x, y, weight, axis, keepdims, mask_identity)
+    return _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-def _impl(x, y, weight, axis, keepdims, mask_identity):
+def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
     axis = regularize_axis(axis)
-    behavior = behavior_of(x, y, weight)
+    behavior = behavior_of(x, y, weight, behavior=behavior)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),
         behavior=behavior,
@@ -76,8 +91,12 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        xmean = ak.operations.ak_mean._impl(x, weight, axis, False, mask_identity)
-        ymean = ak.operations.ak_mean._impl(y, weight, axis, False, mask_identity)
+        xmean = ak.operations.ak_mean._impl(
+            x, weight, axis, False, mask_identity, highlevel=True, behavior=behavior
+        )
+        ymean = ak.operations.ak_mean._impl(
+            y, weight, axis, False, mask_identity, highlevel=True, behavior=behavior
+        )
         xdiff = x - xmean
         ydiff = y - ymean
         if weight is None:
@@ -130,4 +149,9 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 highlevel=True,
                 behavior=behavior,
             )
-        return sumwxy / ufuncs.sqrt(sumwxx * sumwyy)
+        return wrap_layout(
+            maybe_highlevel_to_lowlevel(sumwxy / ufuncs.sqrt(sumwxx * sumwyy)),
+            behavior=behavior,
+            highlevel=highlevel,
+            allow_other=True,
+        )

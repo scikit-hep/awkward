@@ -3,6 +3,7 @@ __all__ = ("covar",)
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
+from awkward._layout import maybe_highlevel_to_lowlevel, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -10,7 +11,17 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def covar(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
+def covar(
+    x,
+    y,
+    weight=None,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    highlevel=True,
+    behavior=None,
+):
     """
     Args:
         x: One coordinate to use in the covariance calculation (anything #ak.to_layout recognizes).
@@ -32,6 +43,10 @@ def covar(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Computes the covariance of `x` and `y` (many types supported, including
     all Awkward Arrays and Records, must be broadcastable to each other).
@@ -52,12 +67,12 @@ def covar(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     yield x, y, weight
 
     # Implementation
-    return _impl(x, y, weight, axis, keepdims, mask_identity)
+    return _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-def _impl(x, y, weight, axis, keepdims, mask_identity):
+def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
     axis = regularize_axis(axis)
-    behavior = behavior_of(x, y, weight)
+    behavior = behavior_of(x, y, weight, behavior=behavior)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),
         behavior=behavior,
@@ -73,8 +88,12 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        xmean = ak.operations.ak_mean._impl(x, weight, axis, False, mask_identity)
-        ymean = ak.operations.ak_mean._impl(y, weight, axis, False, mask_identity)
+        xmean = ak.operations.ak_mean._impl(
+            x, weight, axis, False, mask_identity, highlevel=True, behavior=behavior
+        )
+        ymean = ak.operations.ak_mean._impl(
+            y, weight, axis, False, mask_identity, highlevel=True, behavior=behavior
+        )
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x,
@@ -109,4 +128,9 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 highlevel=True,
                 behavior=behavior,
             )
-        return sumwxy / sumw
+        return wrap_layout(
+            maybe_highlevel_to_lowlevel(sumwxy / sumw),
+            behavior=behavior,
+            highlevel=highlevel,
+            allow_other=True,
+        )

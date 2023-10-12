@@ -4,7 +4,7 @@ import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis
+from awkward._layout import maybe_highlevel_to_lowlevel, maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -12,7 +12,17 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def var(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=False):
+def var(
+    x,
+    weight=None,
+    ddof=0,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    highlevel=True,
+    behavior=None,
+):
     """
     Args:
         x: The data on which to compute the variance (anything #ak.to_layout recognizes).
@@ -36,6 +46,10 @@ def var(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=Fals
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Computes the variance in each group of elements from `x` (many
     types supported, including all Awkward Arrays and Records). The grouping
@@ -66,11 +80,21 @@ def var(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=Fals
     yield x, weight
 
     # Implementation
-    return _impl(x, weight, ddof, axis, keepdims, mask_identity)
+    return _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior)
 
 
 @high_level_function()
-def nanvar(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=True):
+def nanvar(
+    x,
+    weight=None,
+    ddof=0,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=True,
+    highlevel=True,
+    behavior=None,
+):
     """
     Args:
         x: The data on which to compute the variance (anything #ak.to_layout recognizes).
@@ -94,6 +118,10 @@ def nanvar(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=T
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Like #ak.var, but treating NaN ("not a number") values as missing.
 
@@ -119,12 +147,14 @@ def nanvar(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=T
         axis,
         keepdims,
         mask_identity,
+        highlevel=highlevel,
+        behavior=behavior,
     )
 
 
-def _impl(x, weight, ddof, axis, keepdims, mask_identity):
+def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior):
     axis = regularize_axis(axis)
-    behavior = behavior_of(x, weight)
+    behavior = behavior_of(x, weight, behavior=behavior)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False),
         behavior=behavior,
@@ -137,7 +167,13 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
 
     with np.errstate(invalid="ignore", divide="ignore"):
         xmean = ak.operations.ak_mean._impl(
-            x, weight, axis, keepdims=True, mask_identity=True
+            x,
+            weight,
+            axis,
+            keepdims=True,
+            mask_identity=True,
+            highlevel=True,
+            behavior=behavior,
         )
         if weight is None:
             sumw = ak.operations.ak_count._impl(
@@ -146,7 +182,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
                 keepdims=True,
                 mask_identity=True,
                 highlevel=True,
-                behavior=None,
+                behavior=behavior,
             )
             sumwxx = ak.operations.ak_sum._impl(
                 (x - xmean) ** 2,
@@ -154,7 +190,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
                 keepdims=True,
                 mask_identity=True,
                 highlevel=True,
-                behavior=None,
+                behavior=behavior,
             )
         else:
             sumw = ak.operations.ak_sum._impl(
@@ -163,7 +199,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
                 keepdims=True,
                 mask_identity=True,
                 highlevel=True,
-                behavior=None,
+                behavior=behavior,
             )
             sumwxx = ak.operations.ak_sum._impl(
                 (x - xmean) ** 2 * weight,
@@ -171,7 +207,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
                 keepdims=True,
                 mask_identity=True,
                 highlevel=True,
-                behavior=None,
+                behavior=behavior,
             )
         if ddof != 0:
             out = (sumwxx / sumw) * (sumw / (sumw - ddof))
@@ -179,7 +215,9 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
             out = sumwxx / sumw
 
         if not mask_identity:
-            out = ak.highlevel.Array(ak.operations.fill_none(out, np.nan, axis=-1))
+            out = ak.operations.fill_none(
+                out, np.nan, axis=-1, behavior=behavior, highlevel=True
+            )
 
         if axis is None:
             if not keepdims:
@@ -189,7 +227,12 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity):
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        return out
+        return wrap_layout(
+            maybe_highlevel_to_lowlevel(out),
+            behavior=behavior,
+            highlevel=highlevel,
+            allow_other=True,
+        )
 
 
 @ak._connect.numpy.implements("var")

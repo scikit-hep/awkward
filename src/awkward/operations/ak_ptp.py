@@ -4,7 +4,7 @@ import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis
+from awkward._layout import maybe_highlevel_to_lowlevel, maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -12,7 +12,15 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
+def ptp(
+    array,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=True,
+    highlevel=True,
+    behavior=None,
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -63,12 +71,12 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, keepdims, mask_identity)
+    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-def _impl(array, axis, keepdims, mask_identity):
+def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
     axis = regularize_axis(axis)
-    behavior = behavior_of(array)
+    behavior = behavior_of(array, behavior=behavior)
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     with np.errstate(invalid="ignore", divide="ignore"):
@@ -96,7 +104,9 @@ def _impl(array, axis, keepdims, mask_identity):
         assert maxi is not None and mini is not None
 
         if not mask_identity:
-            out = ak.highlevel.Array(ak.operations.fill_none(out, 0, axis=-1))
+            out = ak.operations.fill_none(
+                out, 0, axis=-1, behavior=behavior, highlevel=True
+            )
 
         if axis is None:
             if not keepdims:
@@ -106,7 +116,12 @@ def _impl(array, axis, keepdims, mask_identity):
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        return out
+        return wrap_layout(
+            maybe_highlevel_to_lowlevel(out),
+            behavior=behavior,
+            highlevel=highlevel,
+            allow_other=True,
+        )
 
 
 @ak._connect.numpy.implements("ptp")

@@ -15,7 +15,17 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
+def linear_fit(
+    x,
+    y,
+    weight=None,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    highlevel=True,
+    behavior=None,
+):
     """
     Args:
         x: One coordinate to use in the linear fit (anything #ak.to_layout recognizes).
@@ -37,6 +47,10 @@ def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=Fa
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Computes the linear fit of `y` with respect to `x` (many types supported,
     including all Awkward Arrays and Records, must be broadcastable to each
@@ -72,12 +86,12 @@ def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=Fa
     yield x, y, weight
 
     # Implementation
-    return _impl(x, y, weight, axis, keepdims, mask_identity)
+    return _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior)
 
 
-def _impl(x, y, weight, axis, keepdims, mask_identity):
+def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
     axis = regularize_axis(axis)
-    behavior = behavior_of(x, y, weight)
+    behavior = behavior_of(x, y, weight, behavior=behavior)
     backend = backend_of(x, y, weight, coerce_to_common=True, default=cpu)
     x = ak.highlevel.Array(
         ak.operations.to_layout(x, allow_record=False, allow_other=False).to_backend(
@@ -247,4 +261,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
         if scalar:
             out = out[0]
 
-        return wrap_layout(out, highlevel=True, behavior=behavior, allow_other=scalar)
+        return wrap_layout(
+            out, highlevel=highlevel, behavior=behavior, allow_other=scalar
+        )
