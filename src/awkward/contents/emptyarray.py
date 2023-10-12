@@ -7,6 +7,7 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
+from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
@@ -94,6 +95,13 @@ class EmptyArray(Content):
 
     def __deepcopy__(self, memo):
         return self.copy()
+
+    def __array__(self, dtype=None):
+        deprecate(
+            f"np.asarray(content) is deprecated for {type(self).__name__}. Use ak.to_numpy(content) instead",
+            version="2.6.0",
+        )
+        return numpy.empty(0, dtype=dtype)
 
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):
