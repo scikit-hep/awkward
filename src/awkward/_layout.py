@@ -36,6 +36,31 @@ def wrap_layout(content, behavior=None, highlevel=True, like=None, allow_other=F
     return content
 
 
+def maybe_highlevel_to_lowlevel(obj):
+    """
+    Args:
+        obj: an object
+
+    Calls #ak.to_layout and returns the result iff. the object is a high-level
+    Awkward object, otherwise the object is returned as-is.
+
+    This function should be removed once scalars are properly handled by `to_layout`.
+    """
+    import awkward.highlevel
+
+    if isinstance(
+        obj,
+        (
+            awkward.highlevel.Array,
+            awkward.highlevel.Record,
+            awkward.highlevel.ArrayBuilder,
+        ),
+    ):
+        return awkward.to_layout(obj)
+    else:
+        return obj
+
+
 def from_arraylib(array, regulararray, recordarray):
     from awkward.contents import (
         ByteMaskedArray,
