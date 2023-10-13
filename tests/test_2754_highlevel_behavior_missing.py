@@ -56,13 +56,100 @@ def test_impl(func):
     )
 
 
-def test_covar():
-    ...
-
-
-def test_corr():
-    ...
-
-
-def test_linaer_fit():
-    ...
+@pytest.mark.parametrize("func", [ak.covar, ak.corr, ak.linear_fit])
+def test_covar(func):
+    assert isinstance(
+        func(
+            [[1, 2, 3, 4], [5], [10]],
+            [[4, 4, 0, 2], [1], [10]],
+            axis=-1,
+            highlevel=True,
+        ),
+        ak.Array,
+    )
+    assert isinstance(
+        func(
+            [[1, 2, 3, 4], [5], [10]],
+            [[4, 4, 0, 2], [1], [10]],
+            axis=-1,
+            highlevel=False,
+        ),
+        ak.contents.Content,
+    )
+    assert (
+        func(
+            ak.Array(
+                [[1, 2, 3, 4], [5], [10]],
+                behavior=behavior_1,
+            ),
+            [[4, 4, 0, 2], [1], [10]],
+            axis=-1,
+            highlevel=True,
+            behavior=behavior_2,
+        ).behavior
+        == behavior_2
+    )
+    assert (
+        func(
+            [[1, 2, 3, 4], [5], [10]],
+            ak.Array(
+                [[4, 4, 0, 2], [1], [10]],
+                behavior=behavior_1,
+            ),
+            axis=-1,
+            highlevel=True,
+            behavior=behavior_2,
+        ).behavior
+        == behavior_2
+    )
+    assert (
+        func(
+            ak.Array(
+                [[1, 2, 3, 4], [5], [10]],
+                behavior=behavior_1,
+            ),
+            [[4, 4, 0, 2], [1], [10]],
+            axis=-1,
+            highlevel=True,
+        ).behavior
+        == behavior_1
+    )
+    assert (
+        func(
+            [[1, 2, 3, 4], [5], [10]],
+            ak.Array(
+                [[4, 4, 0, 2], [1], [10]],
+                behavior=behavior_1,
+            ),
+            axis=-1,
+            highlevel=True,
+        ).behavior
+        == behavior_1
+    )
+    assert (
+        func(
+            [[1, 2, 3, 4], [5], [10]],
+            [[4, 4, 0, 2], [1], [10]],
+            weight=ak.Array(
+                [[1, 2, 3, 2], [1], [1]],
+                behavior=behavior_1,
+            ),
+            axis=-1,
+            highlevel=True,
+            behavior=behavior_2,
+        ).behavior
+        == behavior_2
+    )
+    assert (
+        func(
+            [[1, 2, 3, 4], [5], [10]],
+            [[4, 4, 0, 2], [1], [10]],
+            weight=ak.Array(
+                [[1, 2, 3, 2], [1], [1]],
+                behavior=behavior_1,
+            ),
+            axis=-1,
+            highlevel=True,
+        ).behavior
+        == behavior_1
+    )
