@@ -378,6 +378,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if isinstance(layout, ak.contents.Content):
             self._layout = layout
             self._numbaview = None
+            self.__class__ = get_array_class(layout, self._behavior)
         else:
             raise TypeError("layout must be a subclass of ak.contents.Content")
 
@@ -403,8 +404,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
-            self.__class__ = get_array_class(self._layout, behavior)
             self._behavior = behavior
+            self.__class__ = get_array_class(self._layout, behavior)
         else:
             raise TypeError("behavior must be None or a dict")
 
