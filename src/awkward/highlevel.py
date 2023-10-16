@@ -313,12 +313,17 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if backend is not None and backend != ak.operations.backend(layout):
             layout = ak.operations.to_backend(layout, backend, highlevel=False)
 
-        self.layout = layout
-        self.behavior = behavior
+        if behavior is not None and not isinstance(behavior, Mapping):
+            raise TypeError("behavior must be None or mapping")
+
+        self._layout = layout
+        self._behavior = behavior
 
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
             self.__doc__ = docstr
+
+        self._update_class()
 
         if check_valid:
             ak.operations.validity_error(self, exception=True)
@@ -329,6 +334,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         ak.jax.register_behavior_class(cls)
 
     _histogram_module_ = awkward._connect.hist
+
+    def _update_class(self):
+        self._numbaview = None
+        self.__class__ = get_array_class(self._layout, self._behavior)
 
     @property
     def layout(self):
@@ -377,8 +386,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def layout(self, layout):
         if isinstance(layout, ak.contents.Content):
             self._layout = layout
-            self._numbaview = None
-            self.__class__ = get_array_class(layout, self._behavior)
+            self._update_class()
         else:
             raise TypeError("layout must be a subclass of ak.contents.Content")
 
@@ -405,8 +413,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
             self._behavior = behavior
-            self._numbaview = None
-            self.__class__ = get_array_class(self._layout, behavior)
+            self._update_class()
         else:
             raise TypeError("behavior must be None or a dict")
 
@@ -1661,12 +1668,17 @@ class Record(NDArrayOperatorsMixin):
         if library is not None and library != ak.operations.library(layout):
             layout = ak.operations.to_library(layout, library, highlevel=False)
 
-        self.layout = layout
-        self.behavior = behavior
+        if behavior is not None and not isinstance(behavior, Mapping):
+            raise TypeError("behavior must be None or mapping")
+
+        self._layout = layout
+        self._behavior = behavior
 
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
             self.__doc__ = docstr
+
+        self._update_class()
 
         if check_valid:
             ak.operations.validity_error(self, exception=True)
@@ -1675,6 +1687,10 @@ class Record(NDArrayOperatorsMixin):
         super().__init_subclass__(**kwargs)
 
         ak.jax.register_behavior_class(cls)
+
+    def _update_class(self):
+        self._numbaview = None
+        self.__class__ = get_record_class(self._layout, self._behavior)
 
     @property
     def layout(self):
@@ -1717,8 +1733,7 @@ class Record(NDArrayOperatorsMixin):
     def layout(self, layout):
         if isinstance(layout, ak.record.Record):
             self._layout = layout
-            self._numbaview = None
-            self.__class__ = get_record_class(layout, self._behavior)
+            self._update_class()
         else:
             raise TypeError("layout must be a subclass of ak.record.Record")
 
@@ -1745,8 +1760,7 @@ class Record(NDArrayOperatorsMixin):
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
             self._behavior = behavior
-            self._numbaview = None
-            self.__class__ = get_record_class(self._layout, behavior)
+            self._update_class()
         else:
             raise TypeError("behavior must be None or a dict")
 
