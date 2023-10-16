@@ -1525,8 +1525,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 buffer_key="{form_key}-{attribute}",
                 byteorder="<",
             )
-        self.layout = layout
-        self.behavior = behavior
+        self._layout = layout
+        self._behavior = behavior
+        self._update_class()
 
     def __copy__(self):
         return Array(self._layout, behavior=self._behavior)
@@ -1565,9 +1566,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         if self._cpp_type is None:
             self._generator = ak._connect.cling.togenerator(
-                self.layout.form, flatlist_as_rvec=False
+                self._layout.form, flatlist_as_rvec=False
             )
-            self._lookup = ak._lookup.Lookup(self.layout)
+            self._lookup = ak._lookup.Lookup(self._layout)
             self._generator.generate(cppyy.cppdef)
             self._cpp_type = f"awkward::{self._generator.class_type()}"
 
@@ -2195,8 +2196,9 @@ class Record(NDArrayOperatorsMixin):
             byteorder="<",
         )
         layout = ak.record.Record(layout, at)
-        self.layout = layout
-        self.behavior = behavior
+        self._layout = layout
+        self._behavior = behavior
+        self._update_class()
 
     def __copy__(self):
         return Record(self._layout, behavior=self._behavior)
@@ -2347,8 +2349,11 @@ class ArrayBuilder(Sized):
     """
 
     def __init__(self, *, behavior=None, initial=1024, resize=8):
+        if behavior is not None and not isinstance(behavior, Mapping):
+            raise TypeError("behavior must be None or mapping")
+
         self._layout = _ext.ArrayBuilder(initial=initial, resize=resize)
-        self.behavior = behavior
+        self._behavior = behavior
 
     @classmethod
     def _wrap(cls, layout, behavior=None):
@@ -2368,7 +2373,7 @@ class ArrayBuilder(Sized):
         assert isinstance(layout, _ext.ArrayBuilder)
         out = cls.__new__(cls)
         out._layout = layout
-        out.behavior = behavior
+        out._behavior = behavior
         return out
 
     @property
