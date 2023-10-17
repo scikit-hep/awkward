@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("from_arrow",)
@@ -13,7 +13,9 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None):
+def from_arrow(
+    array, *, generate_bitmasks=False, highlevel=True, behavior=None, attrs=None
+):
     """
     Args:
         array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`, or `pyarrow.Table`):
@@ -25,6 +27,8 @@ def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None)
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts an Apache Arrow array into an Awkward Array.
@@ -38,13 +42,15 @@ def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None)
 
     See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_parquet, #ak.from_arrow_schema.
     """
-    return _impl(array, generate_bitmasks, highlevel, behavior)
+    return _impl(array, generate_bitmasks, highlevel, behavior, attrs)
 
 
-def _impl(array, generate_bitmasks, highlevel, behavior):
+def _impl(array, generate_bitmasks, highlevel, behavior, attrs):
     import awkward._connect.pyarrow
 
     pyarrow = awkward._connect.pyarrow.pyarrow
+
+    ctx = HighLevelContext(behavior=behavior, attrs=attrs).finalize()
 
     out = awkward._connect.pyarrow.handle_arrow(
         array, generate_bitmasks=generate_bitmasks, pass_empty_field=True
@@ -72,4 +78,4 @@ def _impl(array, generate_bitmasks, highlevel, behavior):
 
     ak._do.recursively_apply(out, remove_revertable)
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

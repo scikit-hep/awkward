@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of_obj
@@ -26,6 +27,7 @@ def broadcast_arrays(
     right_broadcast=True,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -46,6 +48,8 @@ def broadcast_arrays(
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Like NumPy's
@@ -194,6 +198,7 @@ def broadcast_arrays(
         right_broadcast,
         highlevel,
         behavior,
+        attrs,
     )
 
 
@@ -205,19 +210,25 @@ def _impl(
     right_broadcast,
     highlevel,
     behavior,
+    attrs,
 ):
     # Need at least one array!
     if len(arrays) == 0:
         return []
 
-    backend = backend_of(*arrays, default=cpu, coerce_to_common=True)
+    backend = backend_of(*arrays, default=cpu)
 
-    inputs = []
-    for x in arrays:
-        y = ak.operations.to_layout(x, allow_record=True, allow_unknown=True)
-        if not isinstance(y, (ak.contents.Content, ak.Record)):
-            y = ak.contents.NumpyArray(backend.nplike.asarray([y]))
-        inputs.append(y.to_backend(backend))
+    inputs = [
+        ak.operations.to_layout(
+            x,
+            allow_record=True,
+            allow_unknown=True,
+            primitive_policy="promote",
+            string_policy="promote",
+            none_policy="promote",
+        ).to_backend(backend)
+        for x in arrays
+    ]
 
     def action(inputs, depth, **kwargs):
         # The depth limit is the depth at which we must return, i.e.
@@ -243,11 +254,12 @@ def _impl(
     assert isinstance(out, tuple)
     return [
         wrap_layout(
-            content,
-            behavior=behavior_of_obj(array, behavior=behavior),
+            layout_out,
+            behavior=behavior_of_obj(array_in, behavior=behavior),
             highlevel=highlevel,
+            attrs=attrs_of_obj(array_in, attrs=attrs),
         )
-        for content, array in zip(out, arrays)
+        for layout_out, array_in in zip(out, arrays)
     ]
 
 

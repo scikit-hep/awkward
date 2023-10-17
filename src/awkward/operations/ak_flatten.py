@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
+from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -14,7 +14,7 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def flatten(array, axis=1, *, highlevel=True, behavior=None):
+def flatten(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -27,6 +27,8 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an array with one level of nesting removed by erasing the
@@ -167,14 +169,13 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior):
+def _impl(array, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
-    )
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     if axis is None:
         out = ak._do.remove_structure(layout, function_name="ak.flatten")
@@ -182,17 +183,13 @@ def _impl(array, axis, highlevel, behavior):
             isinstance(x, ak.contents.Content) for x in out
         )
 
-        result = ak._do.mergemany(out)
-
-        return wrap_layout(result, behavior, highlevel)
+        out = ak._do.mergemany(out)
 
     elif axis == 0 or maybe_posaxis(layout, axis, 1) == 0:
 
         def apply(layout):
-            backend = layout.backend
-
             if layout.is_unknown:
-                return apply(ak.contents.NumpyArray(backend.nplike.asarray([])))
+                return apply(ak.contents.NumpyArray(layout.backend.nplike.asarray([])))
 
             elif layout.is_indexed:
                 return apply(layout.project())
@@ -204,20 +201,22 @@ def _impl(array, axis, highlevel, behavior):
                 ):
                     return layout
 
-                tags = backend.index_nplike.asarray(layout.tags.data)
-                index = backend.index_nplike.asarray(
-                    backend.nplike.asarray(layout.index.data), copy=True
+                tags = layout.tags.data
+                index = layout.backend.index_nplike.asarray(
+                    layout.index.data, copy=True
                 )
-                bigmask = backend.index_nplike.empty(len(index), dtype=np.bool_)
+                big_mask = layout.backend.index_nplike.empty(
+                    layout.index.length, dtype=np.bool_
+                )
                 for tag, content in enumerate(layout.contents):
                     if content.is_option and not isinstance(
                         content, ak.contents.UnmaskedArray
                     ):
-                        bigmask[:] = False
-                        bigmask[tags == tag] = backend.index_nplike.asarray(
-                            content.mask_as_bool(valid_when=False)
+                        big_mask[:] = False
+                        big_mask[tags == tag] = content.mask_as_bool(
+                            valid_when=False
                         ).view(np.bool_)
-                        index[bigmask] = -1
+                        index[big_mask] = -1
 
                 good = index >= 0
                 return ak.contents.UnionArray(
@@ -233,9 +232,6 @@ def _impl(array, axis, highlevel, behavior):
                 return layout
 
         out = apply(layout)
-
-        return wrap_layout(out, behavior, highlevel, like=array)
-
     else:
         out = ak._do.flatten(layout, axis)
-        return wrap_layout(out, behavior, highlevel, like=array)
+    return ctx.wrap(out, highlevel=highlevel)

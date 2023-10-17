@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
+from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
@@ -18,7 +17,9 @@ cpu = NumpyBackend.instance()
 
 
 @high_level_function()
-def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
+def merge_option_of_records(
+    array, axis=-1, *, highlevel=True, behavior=None, attrs=None
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -29,6 +30,8 @@ def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Simplifies options of records, e.g.
@@ -44,13 +47,13 @@ def merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior):
+def _impl(array, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(array, behavior=behavior)
-    layout = ak.to_layout(array, allow_record=False)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     # First, normalise type-invsible "index-of-records" to "record-of-index"
     def apply_displace_index(layout, backend, **kwargs):
@@ -94,4 +97,4 @@ def _impl(array, axis, highlevel, behavior):
             )
 
     out = ak._do.recursively_apply(layout, apply)
-    return wrap_layout(out, highlevel=highlevel, behavior=behavior)
+    return ctx.wrap(out, highlevel=highlevel)

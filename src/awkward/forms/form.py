@@ -561,10 +561,18 @@ class Form:
             byteorder=ak._util.native_byteorder,
             highlevel=highlevel,
             behavior=behavior,
+            attrs=None,
             simplify=False,
         )
 
     def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
+        if highlevel:
+            deprecate(
+                "The `highlevel=True` variant of `Form.length_zero_array` is now deprecated. "
+                "Please use `ak.Array(form.length_zero_array(...), behavior=...)` if an `ak.Array` is required.",
+                version="2.3.0",
+            )
+
         # The naive implementation of a length-1 array requires that we have a sufficiently
         # large buffer to be able to build _any_ subtree.
         def max_prefer_unknown(this: ShapeItem, that: ShapeItem) -> ShapeItem:
@@ -662,6 +670,7 @@ class Form:
             byteorder=ak._util.native_byteorder,
             highlevel=highlevel,
             behavior=behavior,
+            attrs=None,
             simplify=False,
         )
 

@@ -34,6 +34,7 @@ def from_buffers(
     allow_noncanonical_form=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -61,6 +62,8 @@ def from_buffers(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Reconstitutes an Awkward Array from a Form, length, and a collection of memory
@@ -106,6 +109,7 @@ def from_buffers(
         byteorder,
         highlevel,
         behavior,
+        attrs,
         allow_noncanonical_form,
     )
 
@@ -119,6 +123,7 @@ def _impl(
     byteorder,
     highlevel,
     behavior,
+    attrs,
     simplify,
 ):
     backend = regularize_backend(backend)
@@ -142,7 +147,8 @@ def _impl(
     getkey = regularize_buffer_key(buffer_key)
 
     out = _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
-    return wrap_layout(out, behavior, highlevel)
+
+    return wrap_layout(out, highlevel=highlevel, attrs=attrs, behavior=behavior)
 
 
 def _from_buffer(

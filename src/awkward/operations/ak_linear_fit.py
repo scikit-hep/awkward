@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -29,6 +27,7 @@ def linear_fit(
     mask_identity=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -54,6 +53,8 @@ def linear_fit(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Computes the linear fit of `y` with respect to `x` (many types supported,
@@ -90,32 +91,30 @@ def linear_fit(
     yield x, y, weight
 
     # Implementation
-    return _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior)
+    return _impl(
+        x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs
+    )
 
 
-def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
+def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(x, y, weight, behavior=behavior)
-    backend = backend_of(x, y, weight, coerce_to_common=True, default=cpu)
-    x = ak.highlevel.Array(
-        ak.operations.to_layout(
-            x, allow_record=False, allow_unknown=False, primitive_policy="error"
-        ).to_backend(backend),
-        behavior=behavior,
-    )
-    y = ak.highlevel.Array(
-        ak.operations.to_layout(
-            y, allow_record=False, allow_unknown=False, primitive_policy="error"
-        ).to_backend(backend),
-        behavior=behavior,
-    )
-    if weight is not None:
-        weight = ak.highlevel.Array(
-            ak.operations.to_layout(
-                weight, allow_record=False, allow_unknown=False
-            ).to_backend(backend),
-            behavior=behavior,
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        x_layout, y_layout, weight_layout = ensure_same_backend(
+            ctx.unwrap(x, allow_record=False, primitive_policy="error"),
+            ctx.unwrap(y, allow_record=False, primitive_policy="error"),
+            ctx.unwrap(
+                weight,
+                allow_record=False,
+                allow_unknown=False,
+                primitive_policy="error",
+                none_policy="pass-through",
+            ),
         )
+
+    x = ctx.wrap(x_layout)
+    y = ctx.wrap(y_layout)
+    weight = ctx.wrap(weight_layout, allow_other=True)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
@@ -125,7 +124,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x,
@@ -133,7 +133,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwy = ak.operations.ak_sum._impl(
                 y,
@@ -141,7 +142,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwxx = ak.operations.ak_sum._impl(
                 x**2,
@@ -149,7 +151,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwxy = ak.operations.ak_sum._impl(
                 x * y,
@@ -157,7 +160,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
         else:
             sumw = ak.operations.ak_sum._impl(
@@ -166,7 +170,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x * weight,
@@ -174,7 +179,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwy = ak.operations.ak_sum._impl(
                 y * weight,
@@ -182,7 +188,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwxx = ak.operations.ak_sum._impl(
                 (x**2) * weight,
@@ -190,7 +197,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwxy = ak.operations.ak_sum._impl(
                 x * y * weight,
@@ -198,7 +206,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
         delta = (sumw * sumwxx) - (sumwx * sumwx)
         intercept = ((sumwxx * sumwy) - (sumwx * sumwxy)) / delta
@@ -224,6 +233,4 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
         if is_scalar:
             out = out[0]
 
-        return wrap_layout(
-            out, highlevel=highlevel, behavior=behavior, allow_other=is_scalar
-        )
+        return ctx.wrap(out, highlevel=highlevel, allow_other=is_scalar)

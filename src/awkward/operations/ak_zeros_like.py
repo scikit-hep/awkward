@@ -16,7 +16,13 @@ _ZEROS = object()
 
 @high_level_function()
 def zeros_like(
-    array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None
+    array,
+    *,
+    dtype=None,
+    including_unknown=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -28,6 +34,8 @@ def zeros_like(
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     This is the equivalent of NumPy's `np.zeros_like` for Awkward Arrays.
@@ -41,17 +49,18 @@ def zeros_like(
     yield (array,)
 
     # Implementation
-    return _impl(array, highlevel, behavior, dtype, including_unknown)
+    return _impl(array, highlevel, behavior, dtype, including_unknown, attrs)
 
 
-def _impl(array, highlevel, behavior, dtype, including_unknown):
+def _impl(array, highlevel, behavior, dtype, including_unknown, attrs):
     if dtype is not None:
         return ak.operations.ak_full_like._impl(
-            array, 0, highlevel, behavior, dtype, including_unknown
+            array, 0, highlevel, behavior, dtype, including_unknown, attrs
         )
-    return ak.operations.ak_full_like._impl(
-        array, _ZEROS, highlevel, behavior, dtype, including_unknown
-    )
+    else:
+        return ak.operations.ak_full_like._impl(
+            array, _ZEROS, highlevel, behavior, dtype, including_unknown, attrs
+        )
 
 
 @ak._connect.numpy.implements("zeros_like")

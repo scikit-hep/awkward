@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 
@@ -18,13 +16,15 @@ cpu = NumpyBackend.instance()
 
 
 @high_level_function()
-def run_lengths(array, *, highlevel=True, behavior=None):
+def run_lengths(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Computes the lengths of sequences of identical values at the deepest level
@@ -96,18 +96,20 @@ def run_lengths(array, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, highlevel, behavior)
+    return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl(array, highlevel, behavior):
-    backend = backend_of(array, default=cpu)
+def _impl(array, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     def lengths_of(data, offsets):
+        backend = layout.backend
+
         if backend.nplike.is_own_array(data):
             size = data.size
         else:
-            layout = ak.to_layout(data)
-            size = layout.length
+            size = ak.to_layout(data).length
 
         if size is not unknown_length and size == 0:
             return backend.index_nplike.empty(0, dtype=np.int64), offsets
@@ -125,7 +127,7 @@ def _impl(array, highlevel, behavior):
                 #                                      boundary diff ^
                 # To consider only the interior boundaries, we ignore the start and end
                 # offset values. These can be repeated with empty sublists, so we mask them out.
-                is_interior = backend.nplike.logical_and(
+                is_interior = backend.index_nplike.logical_and(
                     0 < offsets,
                     offsets < backend.index_nplike.shape_item_as_index(size),
                 )
@@ -223,10 +225,5 @@ def _impl(array, highlevel, behavior):
         else:
             return None
 
-    layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
-    )
-    behavior = behavior_of(array, behavior=behavior)
-
     out = ak._do.recursively_apply(layout, action)
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

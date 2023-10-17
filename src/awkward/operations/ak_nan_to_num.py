@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("nan_to_num",)
@@ -23,6 +22,7 @@ def nan_to_num(
     *,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -37,6 +37,8 @@ def nan_to_num(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Implements [np.nan_to_num](https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html)
     for Awkward Arrays, which replaces NaN ("not a number") or infinity with specified values.
@@ -47,47 +49,44 @@ def nan_to_num(
     yield (array,)
 
     # Implementation
-    return _impl(array, copy, nan, posinf, neginf, highlevel, behavior)
+    return _impl(array, copy, nan, posinf, neginf, highlevel, behavior, attrs)
 
 
-def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
-    behavior = behavior_of(array, behavior=behavior)
+def _impl(array, copy, nan, posinf, neginf, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout, nan_layout, posinf_layout, neginf_layout = ensure_same_backend(
+            ctx.unwrap(array),
+            ctx.unwrap(
+                nan,
+                allow_unknown=False,
+                none_policy="pass-through",
+                primitive_policy="pass-through",
+                allow_record=False,
+            ),
+            ctx.unwrap(
+                posinf,
+                allow_unknown=False,
+                none_policy="pass-through",
+                primitive_policy="pass-through",
+                allow_record=False,
+            ),
+            ctx.unwrap(
+                neginf,
+                allow_unknown=False,
+                none_policy="pass-through",
+                primitive_policy="pass-through",
+                allow_record=False,
+            ),
+        )
 
     broadcasting_ids = {}
-    broadcasting = []
-
-    layout = ak.operations.to_layout(array)
-    broadcasting.append(layout)
-
-    nan_layout = ak.operations.to_layout(
-        nan,
-        allow_unknown=False,
-        allow_none=True,
-        primitive_policy="pass-through",
-        allow_record=False,
-    )
+    broadcasting = [layout]
     if isinstance(nan_layout, ak.contents.Content):
         broadcasting_ids[id(nan)] = len(broadcasting)
         broadcasting.append(nan_layout)
-
-    posinf_layout = ak.operations.to_layout(
-        posinf,
-        allow_unknown=False,
-        allow_none=True,
-        primitive_policy="pass-through",
-        allow_record=False,
-    )
     if isinstance(posinf_layout, ak.contents.Content):
         broadcasting_ids[id(posinf)] = len(broadcasting)
         broadcasting.append(posinf_layout)
-
-    neginf_layout = ak.operations.to_layout(
-        neginf,
-        allow_unknown=False,
-        allow_none=True,
-        primitive_policy="pass-through",
-        allow_record=False,
-    )
     if isinstance(neginf_layout, ak.contents.Content):
         broadcasting_ids[id(neginf)] = len(broadcasting)
         broadcasting.append(neginf_layout)
@@ -143,7 +142,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         assert isinstance(out, tuple) and len(out) == 1
         out = out[0]
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)
 
 
 @ak._connect.numpy.implements("nan_to_num")

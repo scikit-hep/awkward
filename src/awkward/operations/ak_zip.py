@@ -5,9 +5,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("zip",)
@@ -26,11 +25,12 @@ def zip(
     optiontype_outside_record=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
-        arrays (dict or iterable of arrays): Each value in this dict or iterable
-            can be any array-like data that #ak.to_layout recognizes.
+         arrays (mapping or sequence of arrays): Each value in this mapping or
+            sequence can be any array-like data that #ak.to_layout recognizes.
         depth_limit (None or int): If None, attempt to fully broadcast the
             `array` to all levels. If an int, limit the number of dimensions
             that get broadcasted. The minimum value is `1`, for no
@@ -47,6 +47,8 @@ def zip(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Combines `arrays` into a single structure as the fields of a collection
@@ -155,6 +157,7 @@ def zip(
         optiontype_outside_record,
         highlevel,
         behavior,
+        attrs,
     )
 
 
@@ -167,32 +170,48 @@ def _impl(
     optiontype_outside_record,
     highlevel,
     behavior,
+    attrs,
 ):
     if depth_limit is not None and depth_limit <= 0:
         raise ValueError("depth_limit must be None or at least 1")
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        if isinstance(arrays, Mapping):
+            layouts = ensure_same_backend(
+                *(
+                    ctx.unwrap(
+                        x,
+                        allow_record=False,
+                        allow_unknown=False,
+                        none_policy="pass-through",
+                        primitive_policy="pass-through",
+                    )
+                    for x in arrays.values()
+                )
+            )
+            fields = list(arrays.keys())
 
-    if isinstance(arrays, Mapping):
-        behavior = behavior_of(*arrays.values(), behavior=behavior)
-        recordlookup = list(arrays)
-        layouts = [
-            ak.operations.to_layout(x, primitive_policy="pass-through")
-            for x in arrays.values()
-        ]
-
-    else:
-        arrays = list(arrays)
-        behavior = behavior_of(*arrays, behavior=behavior)
-        recordlookup = None
-        layouts = [
-            ak.operations.to_layout(x, primitive_policy="pass-through") for x in arrays
-        ]
+        else:
+            layouts = ensure_same_backend(
+                *(
+                    ctx.unwrap(
+                        x,
+                        allow_record=False,
+                        allow_unknown=False,
+                        none_policy="pass-through",
+                        primitive_policy="pass-through",
+                    )
+                    for x in arrays
+                )
+            )
+            fields = None
 
     # Promote any integers or records
+    backend = next((b.backend for b in layouts if hasattr(b, "backend")), "cpu")
     layout_is_content = [isinstance(x, ak.contents.Content) for x in layouts]
     layouts = [
         x
         if isinstance(x, (ak.contents.Content, ak.record.Record))
-        else ak.operations.to_layout(x, primitive_policy="promote")
+        else ak.operations.to_layout(x).to_backend(backend)
         for x in layouts
     ]
 
@@ -205,14 +224,16 @@ def _impl(
             parameters = dict(parameters)
         parameters["__record__"] = with_name
 
-    def action(inputs, depth, **ignore):
+    def action(inputs, depth, backend, **ignore):
         if depth_limit == depth or all(x.purelist_depth == 1 for x in inputs):
             # If we want to zip after option types at this depth
             if optiontype_outside_record and any(x.is_option for x in inputs):
                 return None
 
             return (
-                ak.contents.RecordArray(inputs, recordlookup, parameters=parameters),
+                ak.contents.RecordArray(
+                    inputs, fields, parameters=parameters, backend=backend
+                ),
             )
         else:
             return None
@@ -227,4 +248,4 @@ def _impl(
         out = out[0]
         assert isinstance(out, ak.record.Record)
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

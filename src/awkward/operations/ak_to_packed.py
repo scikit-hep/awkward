@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("to_packed",)
@@ -13,13 +12,15 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def to_packed(array, *, highlevel=True, behavior=None):
+def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an array with the same type and values as the input, but with packed inner structures:
@@ -75,12 +76,11 @@ def to_packed(array, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, highlevel, behavior)
+    return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl(array, highlevel, behavior):
-    layout = ak.operations.to_layout(
-        array, allow_record=True, allow_unknown=False, primitive_policy="error"
-    )
+def _impl(array, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
     out = layout.to_packed()
-    return wrap_layout(out, behavior, highlevel, like=array)
+    return ctx.wrap(out, highlevel=highlevel)

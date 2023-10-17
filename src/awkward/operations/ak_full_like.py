@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import ensure_known_scalar
 from awkward.operations.ak_zeros_like import _ZEROS
@@ -25,6 +24,7 @@ def full_like(
     including_unknown=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -37,6 +37,8 @@ def full_like(
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
@@ -88,14 +90,22 @@ def full_like(
     yield array, fill_value
 
     # Implementation
-    return _impl(array, fill_value, highlevel, behavior, dtype, including_unknown)
-
-
-def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
-    behavior = behavior_of(array, behavior=behavior)
-    layout = ak.operations.to_layout(
-        array, allow_record=True, allow_unknown=False, primitive_policy="error"
+    return _impl(
+        array, fill_value, highlevel, behavior, dtype, including_unknown, attrs
     )
+
+
+def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout, _ = ensure_same_backend(
+            ctx.unwrap(array, primitive_policy="error"),
+            ctx.unwrap(
+                fill_value,
+                primitive_policy="pass-through",
+                string_policy="pass-through",
+                allow_unknown=True,
+            ),
+        )
 
     if dtype is not None:
         # In the case of strings and byte strings,
@@ -198,7 +208,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
             if dtype is not None:
                 # Interpret strings as numeric/bool types
                 result = ak.operations.strings_astype(
-                    result, dtype, highlevel=highlevel, behavior=behavior
+                    result, dtype, highlevel=False, behavior=behavior
                 )
                 # Convert dtype
                 result = ak.operations.values_astype(
@@ -209,7 +219,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
             return None
 
     out = ak._do.recursively_apply(layout, action)
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)
 
 
 @ak._connect.numpy.implements("full_like")

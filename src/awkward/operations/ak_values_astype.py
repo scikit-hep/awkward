@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("values_astype",)
@@ -13,7 +13,9 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def values_astype(array, to, *, including_unknown=False, highlevel=True, behavior=None):
+def values_astype(
+    array, to, *, including_unknown=False, highlevel=True, behavior=None, attrs=None
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -24,6 +26,8 @@ def values_astype(array, to, *, including_unknown=False, highlevel=True, behavio
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts all numbers in the array to a new type, leaving the structure
@@ -62,14 +66,12 @@ def values_astype(array, to, *, including_unknown=False, highlevel=True, behavio
     yield (array,)
 
     # Implementation
-    return _impl(array, to, including_unknown, highlevel, behavior)
+    return _impl(array, to, including_unknown, highlevel, behavior, attrs)
 
 
-def _impl(array, to, including_unknown, highlevel, behavior):
-    to_dtype = np.dtype(to)
-    to_str = ak.types.numpytype.dtype_to_primitive(to_dtype)
-    layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
-    )
+def _impl(array, to, including_unknown, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+    to_str = ak.types.numpytype.dtype_to_primitive(np.dtype(to))
     out = ak._do.numbers_to_type(layout, to_str, including_unknown)
-    return wrap_layout(out, behavior, highlevel, like=array)
+    return ctx.wrap(out, highlevel=highlevel)

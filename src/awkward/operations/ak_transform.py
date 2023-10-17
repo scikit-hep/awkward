@@ -5,9 +5,7 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._broadcasting import (
     apply_step as apply_broadcasting_step,
 )
@@ -16,7 +14,7 @@ from awkward._broadcasting import (
     broadcast_unpack,
 )
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 
 __all__ = ("transform",)
 
@@ -40,6 +38,7 @@ def transform(
     expect_return_value=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -90,6 +89,8 @@ def transform(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Applies a `transformation` function to every node of an Awkward array or arrays
@@ -445,6 +446,7 @@ def transform(
         expect_return_value,
         behavior,
         highlevel,
+        attrs,
     )
 
 
@@ -464,32 +466,34 @@ def _impl(
     expect_return_value,
     behavior,
     highlevel,
+    attrs,
 ):
-    behavior = behavior_of(array, *more_arrays, behavior=behavior)
-    backend = backend_of(array, *more_arrays, default=cpu, coerce_to_common=True)
-    layout = ak.operations.ak_to_layout._impl(
-        array,
-        allow_record=False,
-        allow_unknown=False,
-        allow_none=False,
-        regulararray=True,
-        use_from_iter=True,
-        primitive_policy="error",
-        string_policy="as-characters",
-    ).to_backend(backend)
-    more_layouts = [
-        ak.operations.ak_to_layout._impl(
-            x,
-            allow_record=False,
-            allow_unknown=False,
-            allow_none=False,
-            regulararray=True,
-            use_from_iter=True,
-            primitive_policy="error",
-            string_policy="as-characters",
-        ).to_backend(backend)
-        for x in more_arrays
-    ]
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layouts = ensure_same_backend(
+            ctx.unwrap(
+                array,
+                allow_record=False,
+                allow_unknown=False,
+                none_policy="error",
+                regulararray=True,
+                use_from_iter=True,
+                primitive_policy="error",
+                string_policy="as-characters",
+            ),
+            *(
+                ctx.unwrap(
+                    x,
+                    allow_record=False,
+                    allow_unknown=False,
+                    none_policy="error",
+                    regulararray=True,
+                    use_from_iter=True,
+                    primitive_policy="error",
+                    string_policy="as-characters",
+                )
+                for x in more_arrays
+            ),
+        )
 
     options = {
         "allow_records": allow_records,
@@ -507,7 +511,7 @@ def _impl(
 
     transformer_did_terminate = False
 
-    if len(more_layouts) == 0:
+    if len(layouts) == 1:
 
         def action(layout, **kwargs):
             nonlocal transformer_did_terminate
@@ -527,8 +531,9 @@ def _impl(
 
         # An exception to the rule of ak._do.recursively_apply, for symmetry with
         # ak._broadcasting.apply_step, below. ak_transform._impl knows implementation details.
-        out = layout._recursively_apply(
+        out = layouts[0]._recursively_apply(
             action,
+            ctx.behavior,
             1,
             copy.copy(depth_context),
             lateral_context,
@@ -543,7 +548,7 @@ def _impl(
                 "but instead only returned None."
             )
         else:
-            return wrap_layout(out, behavior, highlevel)
+            return ctx.wrap(out, highlevel=highlevel)
 
     else:
 
@@ -576,11 +581,11 @@ def _impl(
                     f"transformation must return a Content, tuple of Contents, or None, not {type(out)}\n\n{out!r}"
                 )
 
-        inputs = [layout, *more_layouts]
+        backend = next((layout.backend for layout in layouts), cpu)
         isscalar = []
         out = apply_broadcasting_step(
             backend,
-            broadcast_pack(inputs, isscalar),
+            broadcast_pack(layouts, isscalar),
             action,
             0,
             copy.copy(depth_context),
@@ -598,6 +603,6 @@ def _impl(
                 "or tuple of Contents, but instead only returned None."
             )
         elif len(out) == 1:
-            return wrap_layout(out[0], behavior, highlevel)
+            return ctx.wrap(out[0], highlevel=highlevel)
         else:
-            return tuple(wrap_layout(x, behavior, highlevel) for x in out)
+            return tuple(ctx.wrap(x, highlevel=highlevel) for x in out)

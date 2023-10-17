@@ -11,8 +11,8 @@ import numpy
 from numba.core.errors import NumbaTypeError
 
 import awkward as ak
-from awkward._behavior import behavior_of, overlay_behavior
-from awkward._layout import wrap_layout
+from awkward._behavior import overlay_behavior
+from awkward._layout import HighLevelContext, wrap_layout
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -192,22 +192,29 @@ def unbox_Lookup(lookuptype, lookupobj, c):
 class ArrayView:
     @classmethod
     def fromarray(cls, array):
-        behavior = behavior_of(array)
-        layout = ak.operations.to_layout(
-            array, allow_record=False, allow_unknown=False, primitive_policy="error"
-        )
+        with HighLevelContext() as ctx:
+            layout = ctx.unwrap(
+                array,
+                allow_record=False,
+                allow_unknown=False,
+                use_from_iter=False,
+                primitive_policy="error",
+                string_policy="error",
+                none_policy="error",
+            )
 
         return ArrayView(
             to_numbatype(layout.form),
-            behavior,
+            ctx.behavior,
             ak._lookup.Lookup(layout),
             0,
             0,
             len(layout),
             (),
+            ctx.attrs,
         )
 
-    def __init__(self, type, behavior, lookup, pos, start, stop, fields):
+    def __init__(self, type, behavior, lookup, pos, start, stop, fields, attrs):
         self.type = type
         self.behavior = behavior
         self.lookup = lookup
@@ -215,11 +222,12 @@ class ArrayView:
         self.start = start
         self.stop = stop
         self.fields = fields
+        self.attrs = attrs
 
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         sliced = layout._getitem_range(self.start, self.stop)
-        return wrap_layout(sliced, self.behavior)
+        return wrap_layout(sliced, behavior=self.behavior, attrs=self.attrs)
 
 
 @numba.extending.typeof_impl.register(ArrayView)
@@ -261,6 +269,7 @@ class ArrayViewModel(numba.core.datamodel.models.StructModel):
             ("stop", numba.intp),
             ("arrayptrs", numba.types.CPointer(numba.intp)),
             ("pylookup", numba.types.pyobject),
+            ("pyattrs", numba.types.pyobject),
         ]
         super().__init__(dmm, fe_type, members)
 
@@ -276,6 +285,7 @@ def lower_const_view(context, builder, viewtype, view):
     stop = view.stop
     lookup = view.lookup
     arrayptrs = lookup.arrayptrs
+    attrs = view.attrs
 
     arrayptrs_val = context.make_constant_array(
         builder, numba.typeof(arrayptrs), arrayptrs
@@ -290,6 +300,9 @@ def lower_const_view(context, builder, viewtype, view):
     ).data
     proxyout.pylookup = context.add_dynamic_addr(
         builder, id(lookup), info=str(type(lookup))
+    )
+    proxyout.pyattrs = context.add_dynamic_addr(
+        builder, id(attrs), info=str(type(attrs))
     )
 
     return proxyout._getvalue()
@@ -308,6 +321,7 @@ def unbox_ArrayView(viewtype, view_obj, c):
     start_obj = c.pyapi.object_getattr_string(view_obj, "start")
     stop_obj = c.pyapi.object_getattr_string(view_obj, "stop")
     lookup_obj = c.pyapi.object_getattr_string(view_obj, "lookup")
+    attrs_obj = c.pyapi.object_getattr_string(view_obj, "attrs")
 
     lookup_val = c.pyapi.to_native_value(LookupType(), lookup_obj).value
     lookup_proxy = c.context.make_helper(c.builder, LookupType(), lookup_val)
@@ -320,10 +334,12 @@ def unbox_ArrayView(viewtype, view_obj, c):
         c.builder, LookupType.arraytype, lookup_proxy.arrayptrs
     ).data
     proxyout.pylookup = lookup_obj
+    proxyout.pyattrs = attrs_obj
 
     c.pyapi.decref(pos_obj)
     c.pyapi.decref(start_obj)
     c.pyapi.decref(stop_obj)
+    c.pyapi.decref(attrs_obj)
     c.pyapi.decref(lookup_obj)
 
     if c.context.enable_nrt:
@@ -374,10 +390,20 @@ def box_ArrayView(viewtype, viewval, c):
     start_obj = c.pyapi.long_from_ssize_t(proxyin.start)
     stop_obj = c.pyapi.long_from_ssize_t(proxyin.stop)
     lookup_obj = proxyin.pylookup
+    attrs_obj = proxyin.pyattrs
 
     out = c.pyapi.call_function_objargs(
         ArrayView_obj,
-        (type_obj, behavior_obj, lookup_obj, pos_obj, start_obj, stop_obj, fields_obj),
+        (
+            type_obj,
+            behavior_obj,
+            lookup_obj,
+            pos_obj,
+            start_obj,
+            stop_obj,
+            fields_obj,
+            attrs_obj,
+        ),
     )
 
     c.pyapi.decref(serializable2dict_obj)
@@ -579,21 +605,30 @@ def lower_iternext(context, builder, sig, args, result):
 class RecordView:
     @classmethod
     def fromrecord(cls, record):
-        behavior = behavior_of(record)
-        layout = ak.operations.to_layout(
-            record, allow_record=True, allow_unknown=False, primitive_policy="error"
-        )
+        with HighLevelContext() as ctx:
+            layout = ctx.unwrap(
+                record,
+                allow_record=True,
+                allow_unknown=False,
+                use_from_iter=False,
+                primitive_policy="error",
+                string_policy="error",
+                none_policy="error",
+            )
+        array_layout = layout.array
+
         assert isinstance(layout, ak.record.Record)
-        arraylayout = layout.array
+
         return RecordView(
             ArrayView(
-                to_numbatype(arraylayout.form),
-                behavior,
-                ak._lookup.Lookup(arraylayout),
+                to_numbatype(array_layout.form),
+                ctx.behavior,
+                ak._lookup.Lookup(array_layout),
                 0,
                 0,
-                len(arraylayout),
+                len(array_layout),
                 (),
+                ctx.attrs,
             ),
             layout.at,
         )
@@ -605,7 +640,9 @@ class RecordView:
     def torecord(self):
         arraylayout = self.arrayview.toarray().layout
         return wrap_layout(
-            ak.record.Record(arraylayout, self.at), self.arrayview.behavior
+            ak.record.Record(arraylayout, self.at),
+            behavior=self.arrayview.behavior,
+            attrs=self.arrayview.attrs,
         )
 
 

@@ -4,11 +4,9 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
-from awkward._nplikes.array_like import ArrayLike
-from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._layout import HighLevelContext, maybe_posaxis
+from awkward._nplikes.numpy_like import ArrayLike, NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
 
@@ -19,7 +17,9 @@ cpu = NumpyBackend.instance()
 
 
 @high_level_function()
-def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
+def merge_union_of_records(
+    array, axis=-1, *, highlevel=True, behavior=None, attrs=None
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -30,6 +30,8 @@ def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Simplifies unions of records, e.g.
@@ -55,18 +57,18 @@ def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior):
+def _impl(array, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(array, behavior=behavior)
-    layout = ak.to_layout(array, allow_record=False)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     def invert_record_union(
-        tags: ArrayLike, index: ArrayLike, contents, *, backend
+        tags: ArrayLike, index: ArrayLike, contents
     ) -> ak.contents.RecordArray:
-        index_nplike = backend.index_nplike
+        index_nplike = layout.backend.index_nplike
         # First, create an ordered list containing the union of all fields
         seen_fields = set()
         all_fields = []
@@ -102,7 +104,7 @@ def _impl(array, axis, highlevel, behavior):
                 # Make the tagged content an option, growing by one to ensure we
                 # have a known `None` value to index into
                 tagged_content = field_contents[tag_for_missing]
-                indexedoption_index = backend.index_nplike.arange(
+                indexedoption_index = index_nplike.arange(
                     tagged_content.length + 1, dtype=np.int64
                 )
                 indexedoption_index[
@@ -144,17 +146,17 @@ def _impl(array, axis, highlevel, behavior):
                 )
             )
         return ak.contents.RecordArray(
-            outer_field_contents, all_fields, backend=backend
+            outer_field_contents, all_fields, backend=layout.backend
         )
 
-    def compact_option_index(index: ArrayLike, *, backend) -> ArrayLike:
+    def compact_option_index(index: ArrayLike) -> ArrayLike:
         # Find dense (outer) index into non-null items.
         # This is in trivial order: the re-arranging is done by the union (below)
         is_none = index < 0
-        num_none = backend.index_nplike.count_nonzero(is_none)
-        dense_index = backend.index_nplike.empty(index.size, dtype=index.dtype)
+        num_none = layout.backend.index_nplike.count_nonzero(is_none)
+        dense_index = layout.backend.index_nplike.empty(index.size, dtype=index.dtype)
         dense_index[is_none] = -1
-        dense_index[~is_none] = backend.index_nplike.arange(
+        dense_index[~is_none] = layout.backend.index_nplike.arange(
             index.size - num_none,
             dtype=index.dtype,
         )
@@ -214,9 +216,7 @@ def _impl(array, axis, highlevel, behavior):
                 # This should have the same length as the original union, and its index should be "dense"
                 # (contiguous, monotonic integers; or -1). Therefore, we can directly compute it from the "sparse"
                 # tags index, which has the same length as the original union, and has only missing items set to -1.
-                outer_option_dense_index = compact_option_index(
-                    next_tags_data_sparse, backend=backend
-                )
+                outer_option_dense_index = compact_option_index(next_tags_data_sparse)
 
                 # Ignore missing items for inner union, creating a dense array of tags
                 next_tags_data = next_tags_data_sparse[next_tags_data_sparse >= 0]
@@ -230,9 +230,7 @@ def _impl(array, axis, highlevel, behavior):
                 # Return option around record of unions
                 return ak.contents.IndexedOptionArray(
                     ak.index.Index64(outer_option_dense_index),
-                    invert_record_union(
-                        next_tags_data, next_index_data, next_contents, backend=backend
-                    ),
+                    invert_record_union(next_tags_data, next_index_data, next_contents),
                 )
 
             # Any index types need to be re-written
@@ -259,16 +257,13 @@ def _impl(array, axis, highlevel, behavior):
                         next_contents.append(content)
 
                 return invert_record_union(
-                    layout.tags.data, next_index_data, next_contents, backend=backend
+                    layout.tags.data, next_index_data, next_contents
                 )
 
             else:
                 return invert_record_union(
-                    layout.tags.data,
-                    layout.index.data,
-                    layout.contents,
-                    backend=backend,
+                    layout.tags.data, layout.index.data, layout.contents
                 )
 
     out = ak._do.recursively_apply(layout, apply)
-    return wrap_layout(out, highlevel=highlevel, behavior=behavior)
+    return ctx.wrap(out, highlevel=highlevel)

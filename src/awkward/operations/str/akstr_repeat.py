@@ -5,23 +5,19 @@ from __future__ import annotations
 import numbers
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
-from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("repeat",)
 
-cpu = NumpyBackend.instance()
 typetracer = TypeTracerBackend.instance()
 np = NumpyMetadata.instance()
 
 
 @high_level_function(module="ak.str")
-def repeat(array, num_repeats, *, highlevel=True, behavior=None):
+def repeat(array, num_repeats, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -30,6 +26,8 @@ def repeat(array, num_repeats, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Replaces any string-valued or bytestring-valued data with the same value
@@ -46,25 +44,26 @@ def repeat(array, num_repeats, *, highlevel=True, behavior=None):
     on strings and bytestrings, respectively.
     """
     # Dispatch
-    yield (array, num_repeats)
+    yield array, num_repeats
 
     # Implementation
-    return _impl(array, num_repeats, highlevel, behavior)
+    return _impl(array, num_repeats, highlevel, behavior, attrs)
 
 
-def _impl(array, num_repeats, highlevel, behavior):
+def _impl(array, num_repeats, highlevel, behavior, attrs):
     from awkward._connect.pyarrow import import_pyarrow_compute
     from awkward.operations.str import _apply_through_arrow
 
     pc = import_pyarrow_compute("ak.str.repeat")
 
-    behavior = behavior_of(array, num_repeats, behavior=behavior)
-    backend = backend_of(array, num_repeats, coerce_to_common=True, default=cpu)
-    layout = ak.operations.to_layout(array).to_backend(backend)
-
-    num_repeats_layout = ak.operations.to_layout(num_repeats, allow_unknown=True)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout, num_repeats_layout = ensure_same_backend(
+            ctx.unwrap(array, allow_record=False),
+            ctx.unwrap(
+                num_repeats, allow_record=False, primitive_policy="pass-through"
+            ),
+        )
     if isinstance(num_repeats_layout, ak.contents.Content):
-        num_repeats_layout = num_repeats_layout.to_backend(backend)
 
         def action(inputs, **kwargs):
             if inputs[0].is_list and inputs[0].parameter("__array__") in (
@@ -99,4 +98,4 @@ def _impl(array, num_repeats, highlevel, behavior):
 
         out = ak._do.recursively_apply(layout, action)
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

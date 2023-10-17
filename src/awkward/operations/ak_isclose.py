@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("isclose",)
@@ -15,7 +14,15 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def isclose(
-    a, b, rtol=1e-05, atol=1e-08, equal_nan=False, *, highlevel=True, behavior=None
+    a,
+    b,
+    rtol=1e-05,
+    atol=1e-08,
+    equal_nan=False,
+    *,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -29,6 +36,8 @@ def isclose(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
     for Awkward Arrays.
@@ -37,12 +46,15 @@ def isclose(
     yield a, b
 
     # Implementation
-    return _impl(a, b, rtol, atol, equal_nan, highlevel, behavior)
+    return _impl(a, b, rtol, atol, equal_nan, highlevel, behavior, attrs)
 
 
-def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
-    one = ak.operations.to_layout(a)
-    two = ak.operations.to_layout(b)
+def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layouts = ensure_same_backend(
+            ctx.unwrap(a, allow_record=False),
+            ctx.unwrap(b, allow_record=False),
+        )
 
     def action(inputs, backend, **kwargs):
         if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
@@ -58,11 +70,10 @@ def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
                 ),
             )
 
-    behavior = behavior_of(a, b, behavior=behavior)
-    out = ak._broadcasting.broadcast_and_apply([one, two], action)
+    out = ak._broadcasting.broadcast_and_apply(layouts, action)
     assert isinstance(out, tuple) and len(out) == 1
 
-    return wrap_layout(out[0], behavior, highlevel)
+    return ctx.wrap(out[0], highlevel=highlevel)
 
 
 @ak._connect.numpy.implements("isclose")

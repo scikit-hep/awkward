@@ -37,13 +37,18 @@ class ArrayBuilderType(numba.types.Type):
 @numba.extending.register_model(ArrayBuilderType)
 class ArrayBuilderModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("rawptr", numba.types.voidptr), ("pyptr", numba.types.pyobject)]
+        members = [
+            ("rawptr", numba.types.voidptr),
+            ("pyptr", numba.types.pyobject),
+            ("pyattrs", numba.types.pyobject),
+        ]
         super().__init__(dmm, fe_type, members)
 
 
 @numba.core.imputils.lower_constant(ArrayBuilderType)
 def lower_const_ArrayBuilder(context, builder, arraybuildertype, arraybuilder):
     layout = arraybuilder._layout
+    attrs = arraybuilder._attrs
     rawptr = context.get_constant(numba.intp, arraybuilder._layout._ptr)
     proxyout = context.make_helper(builder, arraybuildertype)
     proxyout.rawptr = builder.inttoptr(
@@ -52,20 +57,26 @@ def lower_const_ArrayBuilder(context, builder, arraybuildertype, arraybuilder):
     proxyout.pyptr = context.add_dynamic_addr(
         builder, id(layout), info=str(type(layout))
     )
+    proxyout.pyattrs = context.add_dynamic_addr(
+        builder, id(attrs), info=str(type(attrs))
+    )
     return proxyout._getvalue()
 
 
 @numba.extending.unbox(ArrayBuilderType)
 def unbox_ArrayBuilder(arraybuildertype, arraybuilderobj, c):
+    attrs_obj = c.pyapi.object_getattr_string(arraybuilderobj, "_attrs")
     inner_obj = c.pyapi.object_getattr_string(arraybuilderobj, "_layout")
     rawptr_obj = c.pyapi.object_getattr_string(inner_obj, "_ptr")
 
     proxyout = c.context.make_helper(c.builder, arraybuildertype)
     proxyout.rawptr = c.pyapi.long_as_voidptr(rawptr_obj)
     proxyout.pyptr = inner_obj
+    proxyout.pyattrs = attrs_obj
 
     c.pyapi.decref(inner_obj)
     c.pyapi.decref(rawptr_obj)
+    c.pyapi.decref(attrs_obj)
 
     is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -90,8 +101,11 @@ def box_ArrayBuilder(arraybuildertype, arraybuilderval, c):
 
     proxyin = c.context.make_helper(c.builder, arraybuildertype, arraybuilderval)
     c.pyapi.incref(proxyin.pyptr)
+    attrs_obj = proxyin.pyattrs
 
-    out = c.pyapi.call_method(ArrayBuilder_obj, "_wrap", (proxyin.pyptr, behavior_obj))
+    out = c.pyapi.call_method(
+        ArrayBuilder_obj, "_wrap", (proxyin.pyptr, behavior_obj, attrs_obj)
+    )
 
     c.pyapi.decref(ArrayBuilder_obj)
     c.pyapi.decref(behavior_obj)

@@ -129,7 +129,7 @@ def _impl(
         array,
         allow_record=True,
         allow_unknown=False,
-        allow_none=False,
+        none_policy="error",
         regulararray=True,
         use_from_iter=True,
         primitive_policy="error",

@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("where",)
@@ -18,7 +16,7 @@ cpu = NumpyBackend.instance()
 
 @ak._connect.numpy.implements("where")
 @high_level_function()
-def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
+def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         condition: Array-like data (anything #ak.to_layout recognizes) of booleans.
@@ -33,6 +31,8 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     This function has a one-argument form, `condition` without `x` or `y`, and
@@ -54,14 +54,14 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
 
     # Implementation
     if len(args) == 0:
-        return _impl1(condition, mergebool, highlevel, behavior)
+        return _impl1(condition, mergebool, highlevel, behavior, attrs)
 
     elif len(args) == 1:
         raise ValueError("either both or neither of x and y should be given")
 
     elif len(args) == 2:
         x, y = args
-        return _impl3(condition, x, y, mergebool, highlevel, behavior)
+        return _impl3(condition, x, y, mergebool, highlevel, behavior, attrs)
 
     else:
         raise TypeError(
@@ -70,44 +70,27 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
         )
 
 
-def _impl1(condition, mergebool, highlevel, behavior):
-    akcondition = ak.operations.to_layout(
-        condition, allow_record=False, allow_unknown=False
+def _impl1(condition, mergebool, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(condition, allow_record=False, primitive_policy="error")
+    out = layout.backend.nplike.nonzero(layout.to_backend_array(allow_missing=False))
+
+    return tuple(
+        ctx.wrap(ak.contents.NumpyArray(x, backend=layout.backend), highlevel=highlevel)
+        for x in out
     )
-    backend = backend_of(akcondition, default=cpu)
 
-    akcondition = ak.contents.NumpyArray(ak.operations.to_numpy(akcondition))
-    out = backend.nplike.nonzero(ak.operations.to_numpy(akcondition))
-    if highlevel:
-        return tuple(
-            wrap_layout(
-                ak.contents.NumpyArray(x),
-                behavior_of(condition, behavior=behavior),
-            )
-            for x in out
+
+def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layouts = ensure_same_backend(
+            ctx.unwrap(x, allow_record=False, primitive_policy="pass-through"),
+            ctx.unwrap(y, allow_record=False, primitive_policy="pass-through"),
+            ctx.unwrap(condition, allow_record=False, primitive_policy="error"),
         )
-    else:
-        return tuple(ak.contents.NumpyArray(x) for x in out)
 
-
-def _impl3(condition, x, y, mergebool, highlevel, behavior):
-    behavior = behavior_of(condition, x, y, behavior=behavior)
-    backend = backend_of(condition, x, y, default=cpu, coerce_to_common=True)
-
-    condition_layout = ak.operations.to_layout(
-        condition, allow_record=False, allow_unknown=False
-    ).to_backend(backend)
-
-    x_layout = ak.operations.to_layout(x, allow_record=False, allow_unknown=True)
-    if isinstance(x_layout, ak.contents.Content):
-        x_layout = x_layout.to_backend(backend)
-
-    y_layout = ak.operations.to_layout(y, allow_record=False, allow_unknown=True)
-    if isinstance(y_layout, ak.contents.Content):
-        y_layout = y_layout.to_backend(backend)
-
-    def action(inputs, **kwargs):
-        condition, x, y = inputs
+    def action(inputs, backend, **kwargs):
+        x, y, condition = inputs
         if isinstance(condition, ak.contents.NumpyArray):
             npcondition = backend.index_nplike.asarray(condition.data)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
@@ -140,8 +123,6 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         else:
             return None
 
-    out = ak._broadcasting.broadcast_and_apply(
-        [condition_layout, x_layout, y_layout], action, numpy_to_regular=True
-    )
+    out = ak._broadcasting.broadcast_and_apply(layouts, action, numpy_to_regular=True)
 
-    return wrap_layout(out[0], behavior, highlevel)
+    return ctx.wrap(out[0], highlevel=highlevel)

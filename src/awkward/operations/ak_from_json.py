@@ -5,13 +5,15 @@ from __future__ import annotations
 import json
 import pathlib
 from collections.abc import Iterable, Sized
+from contextlib import nullcontext
+from io import BytesIO
 from urllib.parse import urlparse
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer
@@ -37,6 +39,7 @@ def from_json(
     resize=8,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -73,6 +76,8 @@ def from_json(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts a JSON string into an Awkward Array.
@@ -338,6 +343,7 @@ def from_json(
             resize,
             highlevel,
             behavior,
+            attrs,
         )
 
     else:
@@ -354,37 +360,8 @@ def from_json(
             resize,
             highlevel,
             behavior,
+            attrs,
         )
-
-
-class _BytesReader:
-    __slots__ = ("data", "current")
-
-    def __init__(self, data):
-        self.data = data
-        self.current = 0
-
-    def read(self, num_bytes):
-        before = self.current
-        self.current += num_bytes
-        return self.data[before : self.current]
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exception_type, exception_value, exception_traceback):
-        pass
-
-
-class _NoContextManager:
-    def __init__(self, file):
-        self.file = file
-
-    def __enter__(self):
-        return self.file
-
-    def __exit__(self, exception_type, exception_value, exception_traceback):
-        pass
 
 
 def _get_reader(source):
@@ -392,19 +369,19 @@ def _get_reader(source):
         source = source.encode("utf8", errors="surrogateescape")
 
     if isinstance(source, bytes):
-        return lambda: _BytesReader(source)
+        return BytesIO(source)
 
     elif isinstance(source, pathlib.Path):
         parsed_url = urlparse(str(source))
         if parsed_url.scheme == "" or parsed_url.netloc == "":
-            return lambda: open(source, "rb")  # pylint: disable=R1732
+            return open(source, "rb")
         else:
             import fsspec
 
-            return lambda: fsspec.open(source, "rb").open()
+            return fsspec.open(source, "rb").open()
 
     else:
-        return lambda: _NoContextManager(source)
+        return nullcontext(source)
 
 
 def _record_to_complex(layout, complex_record_fields):
@@ -460,12 +437,14 @@ def _no_schema(
     resize,
     highlevel,
     behavior,
+    attrs,
 ):
+    ctx = HighLevelContext(behavior=behavior, attrs=attrs).finalize()
     builder = _ext.ArrayBuilder(initial=initial, resize=resize)
 
     read_one = not line_delimited
 
-    with _get_reader(source)() as obj:
+    with _get_reader(source) as obj:
         try:
             _ext.fromjsonobj(
                 obj,
@@ -490,10 +469,7 @@ def _no_schema(
     if read_one:
         layout = layout[0]
 
-    if highlevel and isinstance(layout, (ak.contents.Content, ak.record.Record)):
-        return wrap_layout(layout, behavior, highlevel)
-    else:
-        return layout
+    return ctx.wrap(layout, highlevel=highlevel, allow_other=True)
 
 
 def _yes_schema(
@@ -509,6 +485,7 @@ def _yes_schema(
     resize,
     highlevel,
     behavior,
+    attrs,
 ):
     if isinstance(schema, (bytes, str)):
         schema = json.loads(schema)
@@ -538,7 +515,7 @@ def _yes_schema(
 
     read_one = not line_delimited
 
-    with _get_reader(source)() as obj:
+    with _get_reader(source) as obj:
         try:
             length = _ext.fromjsonobj_schema(
                 obj,
@@ -563,10 +540,7 @@ def _yes_schema(
     if is_record and read_one:
         layout = layout[0]
 
-    if highlevel and isinstance(layout, (ak.contents.Content, ak.record.Record)):
-        return wrap_layout(layout, behavior, highlevel)
-    else:
-        return layout
+    return wrap_layout(layout, highlevel=highlevel, attrs=attrs, behavior=behavior)
 
 
 def _build_assembly(schema, container, instructions):

@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
+from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
 from awkward.errors import AxisError
@@ -16,7 +15,7 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def firsts(array, axis=1, *, highlevel=True, behavior=None):
+def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -27,6 +26,8 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Selects the first element of each non-empty list and inserts None for each
@@ -51,13 +52,13 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior):
+def _impl(array, axis, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False)
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(array)
-    behavior = behavior_of(array, behavior=behavior)
 
     if not is_integer(axis):
         raise TypeError(f"'axis' must be an integer, not {axis!r}")
@@ -75,19 +76,17 @@ def _impl(array, axis, highlevel, behavior):
 
     else:
 
-        def action(layout, depth, depth_context, **kwargs):
+        def action(layout, depth, backend, **kwargs):
             posaxis = maybe_posaxis(layout, axis, depth)
 
             if posaxis == depth and layout.is_list:
-                nplike = layout._backend.index_nplike
-
                 # this is a copy of the raw array
-                index = starts = nplike.asarray(
-                    layout.starts.raw(nplike), dtype=np.int64, copy=True
+                index = starts = backend.index_nplike.asarray(
+                    layout.starts.data, dtype=np.int64, copy=True
                 )
 
                 # this might be a view
-                stops = layout.stops.raw(nplike)
+                stops = layout.stops.data
 
                 empties = starts == stops
                 index[empties] = -1
@@ -103,4 +102,4 @@ def _impl(array, axis, highlevel, behavior):
 
         out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

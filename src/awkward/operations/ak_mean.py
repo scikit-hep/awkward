@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_highlevel_to_lowlevel, maybe_posaxis, wrap_layout
+from awkward._layout import (
+    HighLevelContext,
+    ensure_same_backend,
+    maybe_highlevel_to_lowlevel,
+    maybe_posaxis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -25,6 +29,7 @@ def mean(
     mask_identity=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -49,6 +54,8 @@ def mean(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Computes the mean in each group of elements from `x` (many
@@ -96,7 +103,7 @@ def mean(
     yield x, weight
 
     # Implementation
-    return _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior)
+    return _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs)
 
 
 @high_level_function()
@@ -109,6 +116,7 @@ def nanmean(
     mask_identity=True,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -134,6 +142,8 @@ def nanmean(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Like #ak.mean, but treating NaN ("not a number") values as missing.
 
@@ -149,10 +159,10 @@ def nanmean(
     yield x, weight
 
     if weight is not None:
-        weight = ak.operations.ak_nan_to_none._impl(weight, False, behavior)
+        weight = ak.operations.ak_nan_to_none._impl(weight, True, behavior, attrs)
 
     return _impl(
-        ak.operations.ak_nan_to_none._impl(x, False, behavior),
+        ak.operations.ak_nan_to_none._impl(x, False, behavior, attrs),
         weight,
         axis,
         keepdims,
@@ -162,25 +172,23 @@ def nanmean(
     )
 
 
-def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior):
+def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(x, weight, behavior=behavior)
-    x = ak.highlevel.Array(
-        ak.operations.to_layout(
-            x, allow_record=False, allow_unknown=False, primitive_policy="error"
-        ),
-        behavior=behavior,
-    )
-    if weight is not None:
-        weight = ak.highlevel.Array(
-            ak.operations.to_layout(
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        x_layout, weight_layout = ensure_same_backend(
+            ctx.unwrap(x, allow_record=False, primitive_policy="error"),
+            ctx.unwrap(
                 weight,
                 allow_record=False,
                 allow_unknown=False,
                 primitive_policy="error",
+                none_policy="pass-through",
             ),
-            behavior=behavior,
         )
+
+    x = ctx.wrap(x_layout)
+    weight = ctx.wrap(weight_layout, allow_other=True)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
@@ -190,7 +198,8 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims=True,
                 mask_identity=True,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x,
@@ -198,7 +207,8 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims=True,
                 mask_identity=True,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
         else:
             sumw = ak.operations.ak_sum._impl(
@@ -207,7 +217,8 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x * weight,
@@ -215,14 +226,20 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior):
                 keepdims=True,
                 mask_identity=True,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
 
         out = sumwx / sumw
 
         if not mask_identity:
             out = ak.operations.fill_none(
-                out, np.nan, axis=-1, behavior=behavior, highlevel=True
+                out,
+                np.nan,
+                axis=-1,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
+                highlevel=True,
             )
 
         if axis is None:
@@ -232,11 +249,9 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior):
             if not keepdims:
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
-        return wrap_layout(
-            maybe_highlevel_to_lowlevel(out),
-            behavior=behavior,
-            highlevel=highlevel,
-            allow_other=True,
+
+        return ctx.wrap(
+            maybe_highlevel_to_lowlevel(out), highlevel=highlevel, allow_other=True
         )
 
 

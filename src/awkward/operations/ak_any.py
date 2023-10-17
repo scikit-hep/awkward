@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -24,6 +23,7 @@ def any(
     mask_identity=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -44,6 +44,8 @@ def any(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Returns True in each group of elements from `array` (many types supported,
     including all Awkward Arrays and Records) if any values are True; False
@@ -61,15 +63,13 @@ def any(
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
+    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
+def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
-    )
-    behavior = behavior_of(array, behavior=behavior)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     reducer = ak._reducers.Any()
 
     out = ak._do.reduce(
@@ -78,12 +78,9 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         axis=axis,
         mask=mask_identity,
         keepdims=keepdims,
-        behavior=behavior,
+        behavior=ctx.behavior,
     )
-    if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return wrap_layout(out, behavior, highlevel)
-    else:
-        return out
+    return ctx.wrap(out, highlevel=highlevel, allow_other=True)
 
 
 @ak._connect.numpy.implements("any")

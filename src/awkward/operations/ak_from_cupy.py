@@ -9,7 +9,7 @@ __all__ = ("from_cupy",)
 
 
 @high_level_function()
-def from_cupy(array, *, regulararray=False, highlevel=True, behavior=None):
+def from_cupy(array, *, regulararray=False, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array (cp.ndarray): The CuPy array to convert into an Awkward Array.
@@ -21,6 +21,8 @@ def from_cupy(array, *, regulararray=False, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts a CuPy array into an Awkward Array.
