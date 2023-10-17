@@ -18,9 +18,21 @@ from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    Content,
+    RemoveStructureOptionsType,
+    ToArrowOptionsType,
+)
 from awkward.errors import AxisError
 from awkward.forms.form import Form
 from awkward.forms.unionform import UnionForm
@@ -1431,7 +1443,14 @@ class UnionArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptionsType,
+    ):
         nptags = self._tags.raw(numpy)
         npindex = self._index.raw(numpy)
         copied_index = False
@@ -1514,7 +1533,9 @@ class UnionArray(Content):
             "Conversion of irreducible unions to backend arrays is not supported."
         )
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptionsType
+    ) -> list[Content]:
         out = []
         for i in range(len(self._contents)):
             index = self._index[self._tags.data == i]

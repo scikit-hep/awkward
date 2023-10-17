@@ -21,9 +21,21 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    Content,
+    RemoveStructureOptionsType,
+    ToArrowOptionsType,
+)
 from awkward.errors import AxisError
 from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.forms.form import Form
@@ -1033,7 +1045,14 @@ class ByteMaskedArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptionsType,
+    ):
         this_validbytes = self.mask_as_bool(valid_when=True)
 
         return self._content._to_arrow(
@@ -1047,7 +1066,9 @@ class ByteMaskedArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         return self.to_IndexedOptionArray64()._to_backend_array(allow_missing, backend)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptionsType
+    ) -> list[Content]:
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
             return self.project()._remove_structure(backend, options)

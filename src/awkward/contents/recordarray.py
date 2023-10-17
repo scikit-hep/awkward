@@ -21,9 +21,21 @@ from awkward._parameters import (
     type_parameters_equal,
 )
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    Content,
+    RemoveStructureOptionsType,
+    ToArrowOptionsType,
+)
 from awkward.errors import AxisError
 from awkward.forms.form import Form
 from awkward.forms.recordform import RecordForm
@@ -1087,7 +1099,14 @@ class RecordArray(Content):
                     backend=self._backend,
                 )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptionsType,
+    ):
         values = [
             (x if x.length == length else x[:length])._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
@@ -1150,7 +1169,9 @@ class RecordArray(Content):
 
         return out
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptionsType
+    ) -> list[Content]:
         if options["flatten_records"]:
             out = []
             for content in self._contents:
