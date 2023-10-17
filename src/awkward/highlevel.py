@@ -19,7 +19,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 import awkward._connect.hist
-from awkward._attrs import attrs_of
+from awkward._attrs import attrs_of, without_transient_attrs
 from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
@@ -27,7 +27,11 @@ from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
-from awkward._pickle import custom_reduce
+from awkward._pickle import (
+    custom_reduce,
+    unpickle_array_schema_1,
+    unpickle_record_schema_1,
+)
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
 
@@ -1532,7 +1536,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             behavior = None
         else:
             behavior = self._behavior
-        return object.__new__, (Array,), (form.to_dict(), length, container, behavior)
+
+        if self._attrs is None:
+            attrs = self._attrs
+        else:
+            attrs = without_transient_attrs(self._attrs)
+
+        return unpickle_array_schema_1, (
+            form.to_dict(),
+            length,
+            container,
+            behavior,
+            attrs,
+        )
 
     def __setstate__(self, state):
         form, length, container, behavior, *_ = state
@@ -2252,10 +2268,19 @@ class Record(NDArrayOperatorsMixin):
             behavior = None
         else:
             behavior = self._behavior
-        return (
-            object.__new__,
-            (Record,),
-            (form.to_dict(), length, container, behavior, packed_layout.at),
+
+        if self._attrs is None:
+            attrs = self._attrs
+        else:
+            attrs = without_transient_attrs(self._attrs)
+
+        return unpickle_record_schema_1, (
+            form.to_dict(),
+            length,
+            container,
+            behavior,
+            attrs,
+            packed_layout.at,
         )
 
     def __setstate__(self, state):
