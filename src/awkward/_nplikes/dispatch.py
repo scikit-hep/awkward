@@ -19,7 +19,7 @@ def register_nplike(cls: N) -> N:
     return cls
 
 
-def nplike_of(obj, *, default: D = UNSET) -> NumpyLike | D:
+def nplike_of_obj(obj, *, default: D = UNSET) -> NumpyLike | D:
     """
     Args:
         *arrays: iterable of possible array objects

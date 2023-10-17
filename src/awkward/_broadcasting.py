@@ -1032,7 +1032,8 @@ def broadcast_and_apply(
     function_name: str | None = None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
-    backend = backend_of(*inputs)
+    # Expect arrays to already have common backend
+    backend = backend_of(*inputs, coerce_to_common=False)
     isscalar = []
     out = apply_step(
         backend,

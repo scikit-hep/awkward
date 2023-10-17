@@ -190,10 +190,10 @@ class OperationErrorContext(ErrorContext):
     def any_backend_is_delayed(
         self, iterable: Iterable, *, depth: int = 1, depth_limit: int = 2
     ) -> bool:
-        from awkward._backends.dispatch import backend_of
+        from awkward._backends.dispatch import backend_of_obj
 
         for obj in iterable:
-            backend = backend_of(obj, default=None)
+            backend = backend_of_obj(obj, default=None)
             # Do we not recognise this as an object with a backend?
             if backend is None:
                 # Is this an iterable object, and are we permitted to recurse?
@@ -292,12 +292,13 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
-        from awkward._backends.dispatch import backend_of
+        from awkward._backends.dispatch import backend_of_obj
         from awkward._backends.numpy import NumpyBackend
 
         numpy_backend = NumpyBackend.instance()
         if self.primary() is not None or all(
-            backend_of(x, default=numpy_backend).nplike.is_eager for x in (array, where)
+            backend_of_obj(x, default=numpy_backend).nplike.is_eager
+            for x in (array, where)
         ):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
