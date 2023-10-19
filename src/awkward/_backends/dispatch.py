@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from collections.abc import Set
+from collections.abc import Collection
 
 from awkward._backends.backend import Backend
 from awkward._nplikes.numpy import Numpy
@@ -46,7 +46,7 @@ def register_backend(primary_nplike_cls: type[NumpyLike]):
     return wrapper
 
 
-def common_backend(backends: Set[Backend]) -> Backend:
+def common_backend(backends: Collection[Backend]) -> Backend:
     # Either we have one nplike, or one + typetracer
     if len(backends) == 1:
         return next(iter(backends))
@@ -68,7 +68,7 @@ def common_backend(backends: Set[Backend]) -> Backend:
             )
 
 
-def _backend_of(obj, default: D = UNSET) -> Backend | D:
+def backend_of_obj(obj, default: D = UNSET) -> Backend | D:
     cls = type(obj)
     try:
         lookup = _type_to_backend_lookup[cls]
@@ -80,7 +80,7 @@ def _backend_of(obj, default: D = UNSET) -> Backend | D:
                 break
         else:
             if default is UNSET:
-                raise TypeError(f"cannot find nplike for {cls.__name__}")
+                raise TypeError(f"cannot find backend for {cls.__name__}")
             else:
                 return default
         _type_to_backend_lookup[cls] = maybe_lookup
@@ -101,7 +101,7 @@ def backend_of(
     no default is given.
     """
     unique_backends = frozenset(
-        b for b in (_backend_of(o, default=None) for o in objects) if b is not None
+        b for b in (backend_of_obj(o, default=None) for o in objects) if b is not None
     )
 
     if len(unique_backends) == 0:

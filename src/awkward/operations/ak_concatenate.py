@@ -295,7 +295,6 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
         out = ak._broadcasting.broadcast_and_apply(
             content_or_others,
             action,
-            behavior=behavior,
             allow_records=True,
             right_broadcast=False,
         )[0]

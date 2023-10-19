@@ -67,6 +67,6 @@ def _impl(arrays, highlevel, behavior):
         ):
             return (_apply_through_arrow(pc.binary_join_element_wise, *layouts),)
 
-    (out,) = ak._broadcasting.broadcast_and_apply(layouts, action, behavior)
+    (out,) = ak._broadcasting.broadcast_and_apply(layouts, action)
 
     return wrap_layout(out, highlevel=highlevel, behavior=behavior)

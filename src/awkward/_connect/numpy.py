@@ -11,7 +11,7 @@ import numpy
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._backends.dispatch import backend_of, common_backend
+from awkward._backends.dispatch import backend_of, backend_of_obj, common_backend
 from awkward._behavior import (
     behavior_of,
     find_custom_cast,
@@ -45,7 +45,7 @@ def _find_backends(args: Iterable) -> Iterator[Backend]:
     while stack:
         arg = stack.popleft()
         # If the argument declares a backend, easy!
-        backend = backend_of(arg, default=None)
+        backend = backend_of_obj(arg, default=None)
         if backend is not None:
             yield backend
         # Otherwise, traverse into supported sequence types
@@ -55,7 +55,7 @@ def _find_backends(args: Iterable) -> Iterator[Backend]:
 
 def _to_rectilinear(arg, backend: Backend):
     # Is this object something we already associate with a backend?
-    arg_backend = backend_of(arg, default=None)
+    arg_backend = backend_of_obj(arg, default=None)
     if arg_backend is not None:
         arg_nplike = arg_backend.nplike
         # Is this argument already in a backend-supported form?
@@ -428,7 +428,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
         return None
 
     out = ak._broadcasting.broadcast_and_apply(
-        inputs, action, behavior, allow_records=False, function_name=ufunc.__name__
+        inputs, action, allow_records=False, function_name=ufunc.__name__
     )
 
     if len(out) == 1:

@@ -49,14 +49,19 @@ def test_behavior_forwarding_structure(operation_behavior):
         == merged_behavior
     )
     assert (
-        ak.operations.argsort(one, behavior=operation_behavior)[0].behavior
+        ak.operations.argsort(one, behavior=operation_behavior).behavior
         == merged_behavior
     )
 
-    assert (
-        ak.operations.broadcast_arrays(5, one, behavior=operation_behavior)[0].behavior
-        == merged_behavior
+    left_broadcast, right_broadcast = ak.operations.broadcast_arrays(5, one)
+    assert left_broadcast.behavior is None
+    assert right_broadcast.behavior is local_behavior
+
+    left_broadcast, right_broadcast = ak.operations.broadcast_arrays(
+        5, one, behavior=operation_behavior
     )
+    assert left_broadcast.behavior is operation_behavior
+    assert right_broadcast.behavior == merged_behavior
 
     assert (
         ak.operations.cartesian([one], behavior=operation_behavior).behavior

@@ -5,7 +5,7 @@ from collections.abc import Mapping
 
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
-from awkward._nplikes.dispatch import nplike_of
+from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -73,7 +73,7 @@ def from_arraylib(array, regulararray, recordarray):
     from awkward.index import Index8, Index64
 
     # overshadows global NumPy import for nplike-safety
-    nplike = nplike_of(array)
+    nplike = nplike_of_obj(array)
 
     def recurse(array, mask=None):
         cls = type(array)

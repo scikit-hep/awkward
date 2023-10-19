@@ -129,30 +129,34 @@ def find_array_typestr(
     return behavior.get(("__typestr__", parameters.get("__list__")), default)
 
 
-def behavior_of(*arrays, **kwargs):
+def behavior_of_obj(obj, behavior: Mapping | None = None) -> Mapping | None:
     from awkward.highlevel import Array, ArrayBuilder, Record
 
-    behavior = kwargs.get("behavior")
+    if behavior is not None:
+        return behavior
+    elif isinstance(obj, (Array, Record, ArrayBuilder)):
+        return obj._behavior
+    else:
+        return None
+
+
+def behavior_of(*arrays, behavior: Mapping | None = None) -> Mapping | None:
     if behavior is not None:
         # An explicit 'behavior' always wins.
         return behavior
 
     copied = False
-    highs = (
-        Array,
-        Record,
-        ArrayBuilder,
-    )
     for x in arrays[::-1]:
-        if isinstance(x, highs) and x.behavior is not None:
-            if behavior is None:
-                behavior = x.behavior
-            elif behavior is x.behavior:
-                pass
-            elif not copied:
-                behavior = dict(behavior)
-                behavior.update(x.behavior)
-                copied = True
-            else:
-                behavior.update(x.behavior)
+        x_behavior = behavior_of_obj(x)
+        # Don't merge shared behaviors!
+        if x_behavior is None or behavior is x_behavior:
+            pass
+        elif behavior is None:
+            behavior = x_behavior
+        elif not copied:
+            behavior = dict(behavior)
+            behavior.update(x_behavior)
+            copied = True
+        else:
+            behavior.update(x_behavior)
     return behavior

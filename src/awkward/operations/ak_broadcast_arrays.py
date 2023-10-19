@@ -3,7 +3,7 @@ __all__ = ("broadcast_arrays",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
+from awkward._behavior import behavior_of_obj
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
@@ -228,18 +228,23 @@ def _impl(
         else:
             return None
 
-    behavior = behavior_of(*arrays, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
         inputs,
         action,
-        behavior,
         left_broadcast=left_broadcast,
         right_broadcast=right_broadcast,
         broadcast_parameters_rule=broadcast_parameters_rule,
         numpy_to_regular=True,
     )
     assert isinstance(out, tuple)
-    return [wrap_layout(x, behavior, highlevel) for x in out]
+    return [
+        wrap_layout(
+            content,
+            behavior=behavior_of_obj(array, behavior=behavior),
+            highlevel=highlevel,
+        )
+        for content, array in zip(out, arrays)
+    ]
 
 
 @ak._connect.numpy.implements("broadcast_arrays")

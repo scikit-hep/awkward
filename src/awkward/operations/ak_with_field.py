@@ -160,7 +160,6 @@ def _impl(base, what, where, highlevel, behavior):
         out = ak._broadcasting.broadcast_and_apply(
             [base, what],
             action,
-            behavior,
             right_broadcast=False,
         )
 

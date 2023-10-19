@@ -568,7 +568,6 @@ def _impl(
             0,
             copy.copy(depth_context),
             lateral_context,
-            behavior,
             options,
         )
         assert isinstance(out, tuple)

@@ -110,9 +110,7 @@ def evaluate(
             return None
 
     behavior = behavior_of(*arrays)
-    out = ak._broadcasting.broadcast_and_apply(
-        arrays, action, behavior, allow_records=False
-    )
+    out = ak._broadcasting.broadcast_and_apply(arrays, action, allow_records=False)
     assert isinstance(out, tuple) and len(out) == 1
     return wrap_layout(out[0], behavior)
 
@@ -153,8 +151,6 @@ def re_evaluate(local_dict=None):
             return None
 
     behavior = behavior_of(*arrays)
-    out = ak._broadcasting.broadcast_and_apply(
-        arrays, action, behavior, allow_records=False
-    )
+    out = ak._broadcasting.broadcast_and_apply(arrays, action, allow_records=False)
     assert isinstance(out, tuple) and len(out) == 1
     return wrap_layout(out[0], behavior)
