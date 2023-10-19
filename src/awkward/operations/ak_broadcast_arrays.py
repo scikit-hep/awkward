@@ -232,7 +232,6 @@ def _impl(
     out = ak._broadcasting.broadcast_and_apply(
         inputs,
         action,
-        behavior,
         left_broadcast=left_broadcast,
         right_broadcast=right_broadcast,
         broadcast_parameters_rule=broadcast_parameters_rule,

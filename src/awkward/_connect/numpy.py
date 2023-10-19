@@ -428,7 +428,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
         return None
 
     out = ak._broadcasting.broadcast_and_apply(
-        inputs, action, behavior, allow_records=False, function_name=ufunc.__name__
+        inputs, action, allow_records=False, function_name=ufunc.__name__
     )
 
     if len(out) == 1:

@@ -55,7 +55,7 @@ def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
             )
 
     behavior = behavior_of(a, b, behavior=behavior)
-    out = ak._broadcasting.broadcast_and_apply([one, two], action, behavior)
+    out = ak._broadcasting.broadcast_and_apply([one, two], action)
     assert isinstance(out, tuple) and len(out) == 1
 
     return wrap_layout(out[0], behavior, highlevel)

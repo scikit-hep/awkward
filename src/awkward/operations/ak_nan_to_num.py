@@ -117,7 +117,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
             else:
                 return None
 
-        out = ak._broadcasting.broadcast_and_apply(broadcasting, action, behavior)
+        out = ak._broadcasting.broadcast_and_apply(broadcasting, action)
         assert isinstance(out, tuple) and len(out) == 1
         out = out[0]
 

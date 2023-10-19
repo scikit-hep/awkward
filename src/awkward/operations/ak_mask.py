@@ -120,7 +120,6 @@ def _impl(array, mask, valid_when, highlevel, behavior):
     out = ak._broadcasting.broadcast_and_apply(
         [layoutarray, layoutmask],
         action,
-        behavior,
         numpy_to_regular=True,
         right_broadcast=False,
     )

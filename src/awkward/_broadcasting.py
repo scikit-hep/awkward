@@ -411,7 +411,6 @@ def apply_step(
     depth: int,
     depth_context,
     lateral_context,
-    behavior,
     options: BroadcastOptions,
 ):
     # This happens when descending anyway, but setting the option does it before action.
@@ -451,7 +450,6 @@ def apply_step(
                     depth,
                     depth_context,
                     lateral_context,
-                    behavior,
                     options,
                 )
 
@@ -517,7 +515,6 @@ def apply_step(
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
-                    behavior,
                     options,
                 )
             )
@@ -636,7 +633,6 @@ def apply_step(
                 depth + 1,
                 copy.copy(depth_context),
                 lateral_context,
-                behavior,
                 options,
             )
             assert isinstance(outcontent, tuple)
@@ -701,7 +697,6 @@ def apply_step(
                 depth + 1,
                 copy.copy(depth_context),
                 lateral_context,
-                behavior,
                 options,
             )
             assert isinstance(outcontent, tuple)
@@ -758,7 +753,6 @@ def apply_step(
             depth,
             copy.copy(depth_context),
             lateral_context,
-            behavior,
             options,
         )
         assert isinstance(outcontent, tuple)
@@ -815,7 +809,6 @@ def apply_step(
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
-                        behavior,
                         options,
                     )
                 )
@@ -884,7 +877,6 @@ def apply_step(
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
-                        behavior,
                         options,
                     )
                 )
@@ -923,7 +915,6 @@ def apply_step(
             depth,
             copy.copy(depth_context),
             lateral_context,
-            behavior,
             options,
         )
 
@@ -938,7 +929,6 @@ def apply_step(
             depth,
             copy.copy(depth_context),
             lateral_context,
-            behavior,
             options,
         )
 
@@ -954,7 +944,6 @@ def apply_step(
             depth,
             copy.copy(depth_context),
             lateral_context,
-            behavior,
             options,
         )
 
@@ -1000,7 +989,6 @@ def apply_step(
         depth_context=depth_context,
         lateral_context=lateral_context,
         continuation=continuation,
-        behavior=behavior,
         backend=backend,
         options=options,
     )
@@ -1021,7 +1009,6 @@ def apply_step(
 def broadcast_and_apply(
     inputs,
     action,
-    behavior,
     depth_context: dict[str, Any] | None = None,
     lateral_context: dict[str, Any] | None = None,
     allow_records: bool = True,
@@ -1042,7 +1029,6 @@ def broadcast_and_apply(
         0,
         depth_context,
         lateral_context,
-        behavior,
         {
             "allow_records": allow_records,
             "left_broadcast": left_broadcast,

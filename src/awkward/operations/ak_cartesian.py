@@ -390,7 +390,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 return None
 
         out = ak._broadcasting.broadcast_and_apply(
-            new_layouts, apply_build_record, behavior, right_broadcast=False
+            new_layouts, apply_build_record, right_broadcast=False
         )
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]

@@ -95,6 +95,6 @@ def _impl(array, num_repeats, highlevel, behavior):
             ):
                 return _apply_through_arrow(pc.binary_repeat, layout, num_repeats)
 
-        out = ak._do.recursively_apply(layout, action, behavior)
+        out = ak._do.recursively_apply(layout, action)
 
     return wrap_layout(out, behavior, highlevel)
