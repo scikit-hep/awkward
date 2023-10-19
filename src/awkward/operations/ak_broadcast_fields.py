@@ -3,7 +3,7 @@ __all__ = ("broadcast_fields",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
+from awkward._behavior import behavior_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 
@@ -58,7 +58,6 @@ def broadcast_fields(*arrays, highlevel=True, behavior=None):
 def _impl(arrays, highlevel, behavior):
     backend = backend_of(*arrays, default=cpu, coerce_to_common=True)
     layouts = [ak.to_layout(x).to_backend(backend) for x in arrays]
-    behavior = behavior_of(*arrays, behavior=behavior)
 
     def identity(content):
         return content
@@ -156,5 +155,10 @@ def _impl(arrays, highlevel, behavior):
         return [pull(layout) for pull, layout in zip(pullbacks, inner_layouts)]
 
     return [
-        wrap_layout(x, highlevel=highlevel, behavior=behavior) for x in recurse(layouts)
+        wrap_layout(
+            content,
+            behavior=behavior_of_obj(array, behavior=behavior),
+            highlevel=highlevel,
+        )
+        for content, array in zip(recurse(layouts), arrays)
     ]
