@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from itertools import product
+
 import pytest
 
 import awkward as ak
@@ -12,37 +14,45 @@ behavior = {**behavior_1, **behavior_2}
 
 
 @pytest.mark.parametrize(
-    "func",
+    ("func", "axis"),
     [
-        ak.softmax,
-        ak.any,
-        ak.min,
-        ak.argmin,
-        ak.sum,
-        ak.ptp,
-        ak.std,
-        ak.count_nonzero,
-        lambda *args, **kwargs: ak.moment(*args, **kwargs, n=3),
-        ak.argmax,
-        ak.all,
-        ak.mean,
-        ak.max,
-        ak.prod,
-        ak.count,
-        ak.var,
+        pytest.param(ak.softmax, 0, marks=pytest.mark.xfail()),
+        pytest.param(ak.std, 0, marks=pytest.mark.xfail()),
+        pytest.param(ak.var, 0, marks=pytest.mark.xfail()),
+        (ak.softmax, 1),
+        (ak.std, 1),
+        (ak.var, 1),
+        *product(
+            (
+                ak.any,
+                ak.min,
+                ak.argmin,
+                ak.sum,
+                ak.ptp,
+                ak.count_nonzero,
+                lambda *args, **kwargs: ak.moment(*args, **kwargs, n=3),
+                ak.argmax,
+                ak.all,
+                ak.mean,
+                ak.max,
+                ak.prod,
+                ak.count,
+            ),
+            ([0, 1]),
+        ),
     ],
 )
-def test_impl(func):
+def test_reducers(axis, func):
     assert isinstance(
-        func([[1, 2, 3, 4], [5], [10]], axis=-1, highlevel=True), ak.Array
+        func([[1, 2, 3, 4], [5], [10]], axis=axis, highlevel=True), ak.Array
     )
     assert isinstance(
-        func([[1, 2, 3, 4], [5], [10]], axis=-1, highlevel=False), ak.contents.Content
+        func([[1, 2, 3, 4], [5], [10]], axis=axis, highlevel=False), ak.contents.Content
     )
     assert (
         func(
             ak.Array([[1, 2, 3, 4], [5], [10]], behavior=behavior_1),
-            axis=-1,
+            axis=axis,
             highlevel=True,
             behavior=behavior_2,
         ).behavior
@@ -51,7 +61,7 @@ def test_impl(func):
     assert (
         func(
             ak.Array([[1, 2, 3, 4], [5], [10]], behavior=behavior_1),
-            axis=-1,
+            axis=axis,
             highlevel=True,
         ).behavior
         == behavior_1
