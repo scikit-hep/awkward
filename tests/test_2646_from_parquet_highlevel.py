@@ -7,6 +7,7 @@ import pytest
 import awkward as ak
 
 pytest.importorskip("pyarrow")
+pytest.importorskip("fsspec")
 
 
 def test(tmp_path):

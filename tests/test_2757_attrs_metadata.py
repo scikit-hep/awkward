@@ -113,6 +113,7 @@ def test_single_arg_ops(func):
     ],
 )
 def test_string_operations_unary(func):
+    pytest.importorskip("pyarrow")
     # Default no attrs
     assert (
         func(
@@ -164,6 +165,7 @@ def test_string_operations_unary(func):
     ],
 )
 def test_string_operations_unary_with_arg(func, arg):
+    pytest.importorskip("pyarrow")
     # Default no attrs
     assert (
         func(
@@ -239,6 +241,7 @@ def test_string_operations_unary_with_arg_slice():
     ],
 )
 def test_string_operations_binary(func):
+    pytest.importorskip("pyarrow")
     assert (
         func(
             [["hello", "world!"], [], ["it's a beautiful day!"]],
