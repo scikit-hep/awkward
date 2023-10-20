@@ -125,7 +125,12 @@ def _impl(
     import pyarrow.feather
 
     layout = ak.operations.ak_to_layout._impl(
-        array, allow_record=True, allow_other=False, regulararray=True
+        array,
+        allow_record=True,
+        allow_other=False,
+        regulararray=True,
+        coerce_iterables=True,
+        scalar_policy="error",
     )
 
     table = ak.operations.ak_to_arrow_table._impl(

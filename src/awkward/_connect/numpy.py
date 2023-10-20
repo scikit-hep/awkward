@@ -96,7 +96,12 @@ def array_function(func, types, args, kwargs: dict[str, Any], behavior: Mapping 
         result = func(*rectilinear_args, **rectilinear_kwargs)
         # We want the result to be a layout (this will fail for functions returning non-array convertibles)
         out = ak.operations.ak_to_layout._impl(
-            result, allow_record=True, allow_other=True, regulararray=True
+            result,
+            allow_record=True,
+            allow_other=True,
+            regulararray=True,
+            coerce_iterables=True,
+            scalar_policy="allow",
         )
         return wrap_layout(out, behavior=behavior, allow_other=True)
 

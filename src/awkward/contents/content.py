@@ -649,16 +649,15 @@ class Content:
             nplike = nplike_of_obj(where, default=None)
             # We can end up with non-array objects associated with an nplike
             if nplike is not None and nplike.is_own_array(where):
-                # Is it a scalar, not array?
-                if len(where.shape) == 0:
-                    raise AssertionError(
-                        "scalar arrays should be handled by integer-like indexing"
-                    )
-                else:
-                    layout = ak.operations.ak_to_layout._impl(
-                        where, allow_record=False, allow_other=False, regulararray=False
-                    )
-                    return self._getitem(layout)
+                layout = ak.operations.ak_to_layout._impl(
+                    where,
+                    allow_record=False,
+                    allow_other=False,
+                    regulararray=False,
+                    coerce_iterables=False,
+                    scalar_policy="error",
+                )
+                return self._getitem(layout)
 
             elif len(where) == 0:
                 return self._carry(
@@ -674,7 +673,12 @@ class Content:
 
             else:
                 layout = ak.operations.ak_to_layout._impl(
-                    where, allow_record=False, allow_other=False, regulararray=False
+                    where,
+                    allow_record=False,
+                    allow_other=False,
+                    regulararray=False,
+                    coerce_iterables=True,
+                    scalar_policy="error",
                 )
                 return self._getitem(layout)
 

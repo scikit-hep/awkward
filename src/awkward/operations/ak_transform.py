@@ -464,11 +464,21 @@ def _impl(
     behavior = behavior_of(array, *more_arrays, behavior=behavior)
     backend = backend_of(array, *more_arrays, default=cpu, coerce_to_common=True)
     layout = ak.operations.ak_to_layout._impl(
-        array, allow_record=False, allow_other=False, regulararray=True
+        array,
+        allow_record=False,
+        allow_other=False,
+        regulararray=True,
+        coerce_iterables=True,
+        scalar_policy="error",
     ).to_backend(backend)
     more_layouts = [
         ak.operations.ak_to_layout._impl(
-            x, allow_record=False, allow_other=False, regulararray=True
+            x,
+            allow_record=False,
+            allow_other=False,
+            regulararray=True,
+            coerce_iterables=True,
+            scalar_policy="error",
         ).to_backend(backend)
         for x in more_arrays
     ]

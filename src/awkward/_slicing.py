@@ -279,16 +279,15 @@ def normalise_item(item, backend: Backend) -> SliceItem:
         nplike = nplike_of_obj(item, default=None)
         # We can end up with non-array objects associated with an nplike
         if nplike is not None and nplike.is_own_array(item):
-            # Is it a scalar, not array?
-            if len(item.shape) == 0:
-                raise AssertionError(
-                    "scalar arrays should be handled by integer-like indexing"
-                )
-            else:
-                layout = ak.operations.ak_to_layout._impl(
-                    item, allow_record=False, allow_other=True, regulararray=False
-                )
-                return normalise_item(layout, backend)
+            layout = ak.operations.ak_to_layout._impl(
+                item,
+                allow_record=False,
+                allow_other=False,
+                regulararray=False,
+                coerce_iterables=False,
+                scalar_policy="error",
+            )
+            return normalise_item(layout, backend)
 
         # Empty index array
         elif len(item) == 0:
@@ -301,7 +300,12 @@ def normalise_item(item, backend: Backend) -> SliceItem:
         # Other iterable
         else:
             layout = ak.operations.ak_to_layout._impl(
-                item, allow_record=False, allow_other=True, regulararray=False
+                item,
+                allow_record=False,
+                allow_other=True,
+                regulararray=False,
+                coerce_iterables=True,
+                scalar_policy="error",
             )
             return normalise_item(layout, backend)
 
