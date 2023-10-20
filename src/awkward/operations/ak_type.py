@@ -85,7 +85,10 @@ def type(array, *, behavior=None):
 def _impl(array, behavior):
     behavior = behavior_of(array, behavior=behavior)
 
-    if isinstance(array, _ext.ArrayBuilder):
+    if isinstance(array, (ak.highlevel.Record, ak.highlevel.Array)):
+        return _impl(array.layout, behavior)
+
+    elif isinstance(array, _ext.ArrayBuilder):
         form = ak.forms.from_json(array.form())
         return ak.types.ArrayType(form.type, len(array), behavior=behavior)
 
@@ -102,6 +105,16 @@ def _impl(array, behavior):
 
     elif isinstance(array, bool):  # np.bool_ in np.generic (above)
         return ak.types.ScalarType(ak.types.NumpyType("bool"), behavior=behavior)
+
+    elif isinstance(array, (str, bytes)):
+        return ak.types.ArrayType(
+            ak.types.NumpyType(
+                "uint8",
+                parameters={"__array__": "char" if isinstance(array, str) else "byte"},
+            ),
+            len(array),
+            behavior=behavior,
+        )
 
     elif isinstance(array, numbers.Integral):
         return ak.types.ScalarType(ak.types.NumpyType("int64"), behavior=behavior)
@@ -122,13 +135,9 @@ def _impl(array, behavior):
         # Don't go through `to_layout`: we want to avoid snapshotting this array
         return _impl(array._layout, behavior)
 
+    elif array is None:
+        return ak.types.ScalarType(ak.types.UnknownType(), behavior=behavior)
+
     else:
-        layout = ak.to_layout(array, allow_other=True, allow_record=True)
-        if layout is None:
-            return ak.types.ScalarType(ak.types.UnknownType(), behavior=behavior)
-
-        elif isinstance(layout, (ak.contents.Content, ak.record.Record)):
-            return _impl(layout, behavior)
-
-        else:
-            raise TypeError(f"unrecognized array type: {array!r}")
+        layout = ak.to_layout(array, allow_other=False, allow_record=False)
+        return _impl(layout, behavior)

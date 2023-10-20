@@ -113,8 +113,12 @@ def _impl(array, mask, valid_when, highlevel, behavior):
         else:
             return None
 
-    layoutarray = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    layoutmask = ak.operations.to_layout(mask, allow_record=False, allow_other=False)
+    layoutarray = ak.operations.to_layout(
+        array, allow_record=False, allow_other=False, scalar_policy="error"
+    )
+    layoutmask = ak.operations.to_layout(
+        mask, allow_record=False, allow_other=False, scalar_policy="error"
+    )
 
     behavior = behavior_of(array, mask, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(

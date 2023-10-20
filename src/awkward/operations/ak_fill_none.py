@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("fill_none",)
-import numbers
 
 import awkward as ak
 from awkward._backends.dispatch import backend_of
@@ -9,7 +8,7 @@ from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._regularize import is_sized_iterable, regularize_axis
+from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
 
 np = NumpyMetadata.instance()
@@ -70,49 +69,33 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 
 def _impl(array, value, axis, highlevel, behavior):
     axis = regularize_axis(axis)
-    arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     behavior = behavior_of(array, value, behavior=behavior)
-    backend = backend_of(arraylayout, default=cpu)
+    # Ensure a common backend exists
+    backend = backend_of(array, value, default=cpu)
+    arraylayout = ak.operations.to_layout(
+        array, allow_record=True, allow_other=False
+    ).to_backend(backend)
+    valuelayout = ak.operations.to_layout(
+        value,
+        allow_record=True,
+        allow_other=False,
+        use_from_iter=True,
+        scalar_policy="allow",
+    )
 
-    # Convert value type to appropriate layout
-    if (
-        isinstance(value, np.ndarray)
-        and issubclass(value.dtype.type, (np.bool_, np.number))
-        and len(value.shape) != 0
-    ):
-        valuelayout = ak.operations.to_layout(
-            backend.nplike.asarray(value)[np.newaxis],
-            allow_record=False,
-            allow_other=False,
-        )
-    elif isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
-        isinstance(value, np.ndarray)
-        and issubclass(value.dtype.type, (np.bool_, np.number))
-    ):
-        valuelayout = ak.operations.to_layout(
-            backend.nplike.asarray(value), allow_record=False, allow_other=False
-        )
-    elif (
-        is_sized_iterable(value)
-        and not (isinstance(value, (str, bytes)))
-        or isinstance(value, (ak.highlevel.Record, ak.record.Record))
-    ):
-        valuelayout = ak.operations.to_layout(
-            value, allow_record=True, allow_other=False
-        )
-        if isinstance(valuelayout, ak.record.Record):
-            valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
-        elif len(valuelayout) == 0:
-            offsets = ak.index.Index64(
-                backend.index_nplike.asarray([0, 0], dtype=np.int64)
-            )
-            valuelayout = ak.contents.ListOffsetArray(offsets, valuelayout)
-        else:
-            valuelayout = ak.contents.RegularArray(valuelayout, len(valuelayout), 1)
+    if isinstance(valuelayout, ak.record.Record):
+        valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
+    elif isinstance(valuelayout, ak.contents.Content):
+        valuelayout = valuelayout[np.newaxis, ...]
     else:
         valuelayout = ak.operations.to_layout(
-            [value], allow_record=False, allow_other=False
+            value,
+            allow_record=True,
+            allow_other=False,
+            use_from_iter=True,
+            scalar_policy="promote",
         )
+    valuelayout = valuelayout.to_backend(backend)
 
     if axis is None:
 

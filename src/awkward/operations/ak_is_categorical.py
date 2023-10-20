@@ -25,5 +25,7 @@ def is_categorical(array):
 
 
 def _impl(array):
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=False, allow_other=False, scalar_policy="error"
+    )
     return layout.purelist_parameter("__array__") == "categorical"

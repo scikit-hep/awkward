@@ -28,7 +28,9 @@ def validity_error(array, *, exception=False):
 
 
 def _impl(array, exception):
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=False, allow_other=False, scalar_policy="error"
+    )
     out = ak._do.validity_error(layout, path="highlevel")
 
     if out not in (None, "") and exception:

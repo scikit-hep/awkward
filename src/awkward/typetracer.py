@@ -41,7 +41,7 @@ T = TypeVar("T", Array, Record)
 def _length_0_1_if_typetracer(array, function, highlevel: bool, behavior) -> T:
     typetracer_backend = TypeTracerBackend.instance()
 
-    layout = to_layout(array, allow_other=False)
+    layout = to_layout(array, allow_other=False, scalar_policy="error")
     behavior = behavior_of(array, behavior=behavior)
 
     if layout.backend is typetracer_backend:
@@ -95,7 +95,7 @@ def touch_data(array, *, highlevel: bool = True, behavior=None) -> T:
     Recursively touches the data and returns a shall copy of the given array.
     """
     behavior = behavior_of(array, behavior=behavior)
-    layout = to_layout(array, allow_other=False)
+    layout = to_layout(array, allow_other=False, scalar_policy="error")
     _touch_data(layout)
     return wrap_layout(layout, behavior=behavior, highlevel=highlevel)
 

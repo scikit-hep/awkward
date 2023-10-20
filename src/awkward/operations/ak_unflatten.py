@@ -99,7 +99,9 @@ def _impl(array, counts, axis, highlevel, behavior):
             counts = int(counts)
         current_offsets = None
     else:
-        counts = ak.operations.to_layout(counts, allow_record=False, allow_other=False)
+        counts = ak.operations.to_layout(
+            counts, allow_record=False, allow_other=False, scalar_policy="error"
+        )
         if counts.is_indexed and not counts.is_option:
             counts = counts.project()
 

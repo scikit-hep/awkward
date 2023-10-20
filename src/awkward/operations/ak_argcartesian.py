@@ -110,7 +110,9 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         backend = backend_of(*arrays.values(), default=cpu, coerce_to_common=True)
         layouts = {
             n: ak._do.local_index(
-                ak.operations.to_layout(x, allow_record=False, allow_other=False),
+                ak.operations.to_layout(
+                    x, allow_record=False, allow_other=False, scalar_policy="error"
+                ),
                 axis,
             ).to_backend(backend)
             for n, x in arrays.items()
@@ -121,7 +123,9 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         backend = backend_of(*arrays, default=cpu, coerce_to_common=True)
         layouts = [
             ak._do.local_index(
-                ak.operations.to_layout(x, allow_record=False, allow_other=False),
+                ak.operations.to_layout(
+                    x, allow_record=False, allow_other=False, scalar_policy="error"
+                ),
                 axis,
             ).to_backend(backend)
             for x in arrays

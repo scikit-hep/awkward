@@ -89,7 +89,9 @@ def full_like(
 
 def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
     behavior = behavior_of(array, behavior=behavior)
-    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=True, allow_other=False, scalar_policy="error"
+    )
 
     if dtype is not None:
         # In the case of strings and byte strings,

@@ -468,8 +468,9 @@ def _impl(
         allow_record=False,
         allow_other=False,
         regulararray=True,
-        coerce_iterables=True,
+        use_from_iter=True,
         scalar_policy="error",
+        string_as_characters=True,
     ).to_backend(backend)
     more_layouts = [
         ak.operations.ak_to_layout._impl(
@@ -477,8 +478,9 @@ def _impl(
             allow_record=False,
             allow_other=False,
             regulararray=True,
-            coerce_iterables=True,
+            use_from_iter=True,
             scalar_policy="error",
+            string_as_characters=True,
         ).to_backend(backend)
         for x in more_arrays
     ]

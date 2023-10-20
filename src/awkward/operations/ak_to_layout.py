@@ -30,9 +30,10 @@ def to_layout(
     *,
     allow_record=True,
     allow_other=False,
+    use_from_iter=True,
+    scalar_policy="promote",
+    string_as_characters=True,
     regulararray=True,
-    coerce_iterables=True,
-    scalar_policy="error",
 ):
     """
     Args:
@@ -45,6 +46,14 @@ def to_layout(
             otherwise, if the output would be a scalar record, raise an error.
         allow_other (bool): If True, allow non-Awkward outputs; otherwise,
             if the output would be another type, raise an error.
+        use_from_iter (bool): If True, allow conversion of iterable inputs to
+            arrays using #ak.from_iter; otherwise, throw an Exception.
+        scalar_policy ("error", "allow", "promote"): If "error", throw an Exception
+            for scalar inputs; if "allow", return the scalar input; otherwise,
+            for "promote" return a length-one array containing the scalar.
+        string_as_characters (bool): If True, scalar strings are converted
+            to an array of characters; otherwise, scalar strings are taken to be
+            the Python object itself.
         regulararray (bool): Prefer to create #ak.contents.RegularArray nodes for
             regular array objects.
 
@@ -60,7 +69,15 @@ def to_layout(
     yield (array,)
 
     # Implementation
-    return _impl(array, allow_record, allow_other, regulararray=regulararray)
+    return _impl(
+        array,
+        allow_record,
+        allow_other,
+        regulararray,
+        use_from_iter,
+        scalar_policy,
+        string_as_characters,
+    )
 
 
 def maybe_merge_mappings(primary, secondary):
@@ -96,8 +113,9 @@ def _impl(
     allow_record,
     allow_other,
     regulararray,
-    coerce_iterables,
+    use_from_iter,
     scalar_policy,
+    string_as_characters,
 ) -> Any:
     # Well-defined types
     if isinstance(obj, ak.contents.Content):
@@ -163,7 +181,20 @@ def _impl(
         )
         return _handle_array_like(obj, promoted_layout, scalar_policy=scalar_policy)
     # Scalars
-    elif isinstance(obj, (str, bytes, datetime, date, time, Number, bool)):
+    elif isinstance(obj, (str, bytes)):
+        maybe_layout = ak.operations.from_iter([obj], highlevel=False)
+        if scalar_policy == "allow":
+            if string_as_characters:
+                return maybe_layout[0]
+            else:
+                return obj
+        elif scalar_policy == "promote":
+            return maybe_layout
+        else:
+            raise TypeError(
+                f"Encountered a scalar ({type(obj).__name__}), but scalars conversion/promotion is disabled"
+            )
+    elif isinstance(obj, (datetime, date, time, Number, bool)):  # or obj is None:
         maybe_layout = ak.operations.from_iter([obj], highlevel=False)
         if scalar_policy == "allow":
             return maybe_layout[0]
@@ -175,7 +206,7 @@ def _impl(
             )
     # Iterables
     elif isinstance(obj, Iterable):
-        if coerce_iterables:
+        if use_from_iter:
             return ak.operations.from_iter(obj, highlevel=False)
         else:
             raise TypeError(

@@ -59,7 +59,9 @@ def ravel(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=False, allow_other=False, scalar_policy="error"
+    )
 
     out = ak._do.remove_structure(layout, function_name="ak.ravel", drop_nones=False)
     assert isinstance(out, tuple) and all(

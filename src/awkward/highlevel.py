@@ -299,7 +299,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         else:
             layout = ak.operations.to_layout(
-                data, allow_record=False, regulararray=False
+                data, allow_record=False, regulararray=False, scalar_policy="error"
             )
 
         if not isinstance(layout, ak.contents.Content):

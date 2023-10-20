@@ -654,8 +654,9 @@ class Content:
                     allow_record=False,
                     allow_other=False,
                     regulararray=False,
-                    coerce_iterables=False,
+                    use_from_iter=False,
                     scalar_policy="error",
+                    string_as_characters=True,
                 )
                 return self._getitem(layout)
 
@@ -677,8 +678,9 @@ class Content:
                     allow_record=False,
                     allow_other=False,
                     regulararray=False,
-                    coerce_iterables=True,
+                    use_from_iter=True,
                     scalar_policy="error",
+                    string_as_characters=True,
                 )
                 return self._getitem(layout)
 

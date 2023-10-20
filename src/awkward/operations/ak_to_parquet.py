@@ -187,8 +187,9 @@ def to_parquet(
         allow_record=True,
         allow_other=False,
         regulararray=True,
-        coerce_iterables=True,
+        use_from_iter=True,
         scalar_policy="error",
+        string_as_characters=True,
     )
     table = ak.operations.ak_to_arrow_table._impl(
         layout,
