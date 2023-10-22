@@ -207,7 +207,9 @@ def _impl(
     # Iterables
     elif isinstance(obj, Iterable):
         if use_from_iter:
-            return ak.operations.from_iter(obj, highlevel=False)
+            return ak.operations.from_iter(
+                obj, highlevel=False, allow_record=allow_record
+            )
         else:
             raise TypeError(
                 "Encountered an iterable object, but coercing iterables is disabled"
