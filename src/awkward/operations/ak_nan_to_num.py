@@ -56,21 +56,33 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
     broadcasting.append(layout)
 
     nan_layout = ak.operations.to_layout(
-        nan, allow_other=False, scalar_policy="allow", allow_record=False
+        nan,
+        allow_other=False,
+        allow_none=True,
+        scalar_policy="allow",
+        allow_record=False,
     )
     if isinstance(nan_layout, ak.contents.Content):
         broadcasting_ids[id(nan)] = len(broadcasting)
         broadcasting.append(nan_layout)
 
     posinf_layout = ak.operations.to_layout(
-        posinf, allow_other=False, scalar_policy="allow", allow_record=False
+        posinf,
+        allow_other=False,
+        allow_none=True,
+        scalar_policy="allow",
+        allow_record=False,
     )
     if isinstance(posinf_layout, ak.contents.Content):
         broadcasting_ids[id(posinf)] = len(broadcasting)
         broadcasting.append(posinf_layout)
 
     neginf_layout = ak.operations.to_layout(
-        neginf, allow_other=False, scalar_policy="allow", allow_record=False
+        neginf,
+        allow_other=False,
+        allow_none=True,
+        scalar_policy="allow",
+        allow_record=False,
     )
     if isinstance(neginf_layout, ak.contents.Content):
         broadcasting_ids[id(neginf)] = len(broadcasting)

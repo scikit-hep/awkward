@@ -30,6 +30,7 @@ def to_layout(
     *,
     allow_record=True,
     allow_other=False,
+    allow_none=False,
     use_from_iter=True,
     scalar_policy="promote",
     string_as_characters=True,
@@ -45,7 +46,9 @@ def to_layout(
         allow_record (bool): If True, allow #ak.record.Record as an output;
             otherwise, if the output would be a scalar record, raise an error.
         allow_other (bool): If True, allow non-Awkward outputs; otherwise,
-            if the output would be another type, raise an error.
+            raise an error.
+        allow_none (bool): If True, allow None outputs; otherwise, raise an
+            error.
         use_from_iter (bool): If True, allow conversion of iterable inputs to
             arrays using #ak.from_iter; otherwise, throw an Exception.
         scalar_policy ("error", "allow", "promote"): If "error", throw an Exception
@@ -73,6 +76,7 @@ def to_layout(
         array,
         allow_record,
         allow_other,
+        allow_none,
         regulararray,
         use_from_iter,
         scalar_policy,
@@ -91,19 +95,23 @@ def maybe_merge_mappings(primary, secondary):
         return {**primary, **secondary}
 
 
-def _handle_array_like(obj, layout, *, scalar_policy):
+def _handle_as_scalar(obj, layout, *, scalar_policy):
     assert scalar_policy in ("allow", "promote", "error")
 
+    if scalar_policy == "allow":
+        return layout[0]
+    elif scalar_policy == "promote":
+        return layout
+    else:
+        assert scalar_policy == "error"
+        raise TypeError(
+            f"Encountered a scalar ({type(obj).__name__}), but scalars conversion/promotion is disabled"
+        )
+
+
+def _handle_array_like(obj, layout, *, scalar_policy):
     if obj.ndim == 0:
-        if scalar_policy == "allow":
-            return layout[0]
-        elif scalar_policy == "promote":
-            return layout
-        else:
-            assert scalar_policy == "error"
-            raise TypeError(
-                f"Encountered a scalar ({type(obj).__name__}), but scalars conversion/promotion is disabled"
-            )
+        return _handle_as_scalar(obj, layout, scalar_policy=scalar_policy)
     else:
         return layout
 
@@ -112,6 +120,7 @@ def _impl(
     obj,
     allow_record,
     allow_other,
+    allow_none,
     regulararray,
     use_from_iter,
     scalar_policy,
@@ -182,28 +191,27 @@ def _impl(
         return _handle_array_like(obj, promoted_layout, scalar_policy=scalar_policy)
     # Scalars
     elif isinstance(obj, (str, bytes)):
-        maybe_layout = ak.operations.from_iter([obj], highlevel=False)
+        layout = ak.operations.from_iter([obj], highlevel=False)
         if scalar_policy == "allow":
             if string_as_characters:
-                return maybe_layout[0]
+                return layout[0]
             else:
                 return obj
         elif scalar_policy == "promote":
-            return maybe_layout
+            return layout
         else:
             raise TypeError(
                 f"Encountered a scalar ({type(obj).__name__}), but scalars conversion/promotion is disabled"
             )
-    elif isinstance(obj, (datetime, date, time, Number, bool)):  # or obj is None:
-        maybe_layout = ak.operations.from_iter([obj], highlevel=False)
-        if scalar_policy == "allow":
-            return maybe_layout[0]
-        elif scalar_policy == "promote":
-            return maybe_layout
+    elif isinstance(obj, (datetime, date, time, Number, bool)):
+        layout = ak.operations.from_iter([obj], highlevel=False)
+        return _handle_as_scalar(obj, layout, scalar_policy=scalar_policy)
+    elif obj is None:
+        if allow_none:
+            layout = ak.operations.from_iter([obj], highlevel=False)
+            return _handle_as_scalar(obj, layout, scalar_policy=scalar_policy)
         else:
-            raise TypeError(
-                f"Encountered a scalar ({type(obj).__name__}), but scalars conversion/promotion is disabled"
-            )
+            raise TypeError("Encountered None value, and `allow_none` is `False`")
     # Iterables
     elif isinstance(obj, Iterable):
         if use_from_iter:
@@ -219,5 +227,5 @@ def _impl(
         return obj
     else:
         raise TypeError(
-            f"Encountered unknown type {type(obj).__name__}, and `pass_through_unknown` is `False`"
+            f"Encountered unknown type {type(obj).__name__}, and `allow_other` is `False`"
         )

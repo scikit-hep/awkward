@@ -88,7 +88,11 @@ def _impl(base, what, where, highlevel, behavior):
             base, allow_record=True, allow_other=False
         ).to_backend(backend)
         what = ak.operations.to_layout(
-            what, allow_record=True, allow_other=True, scalar_policy="allow"
+            what,
+            allow_record=True,
+            allow_other=False,
+            allow_none=True,
+            scalar_policy="allow",
         )
         if isinstance(what, (ak.contents.Content, ak.record.Record)):
             what = what.to_backend(backend)

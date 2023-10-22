@@ -25,6 +25,7 @@ def _impl(array):
         array,
         allow_record=True,
         allow_other=False,
+        allow_none=False,
         regulararray=True,
         use_from_iter=True,
         scalar_policy="error",

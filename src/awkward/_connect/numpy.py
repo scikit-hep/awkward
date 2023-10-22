@@ -101,6 +101,7 @@ def array_function(func, types, args, kwargs: dict[str, Any], behavior: Mapping 
             result,
             allow_record=True,
             allow_other=True,
+            allow_none=True,
             regulararray=True,
             use_from_iter=True,
             scalar_policy="allow",
