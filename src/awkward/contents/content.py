@@ -238,7 +238,7 @@ class Content:
         self,
         forget_length: bool = UNSET,
         *,
-        length_policy: Literal["keep", "drop_outer", "drop_recursive"] = "drop_outer",
+        length_policy: Literal["keep", "drop_outer", "drop_recursive"] = "keep",
     ) -> Self:
         if forget_length is not UNSET:
             deprecate(

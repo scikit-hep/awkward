@@ -84,7 +84,7 @@ def _impl(array, value_set, skip_nones, highlevel, behavior):
                         skip_nulls=skip_nones,
                     ),
                     highlevel=False,
-                ).to_typetracer(forget_length=True)
+                ).to_typetracer(length_policy="drop_recursive")
             else:
                 return ak.from_arrow(
                     pc.is_in(

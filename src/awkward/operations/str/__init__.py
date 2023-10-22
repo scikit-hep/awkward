@@ -147,7 +147,7 @@ def _apply_through_arrow(
             operation(*converted_args, **kwargs),
             generate_bitmasks=generate_bitmasks,
             highlevel=False,
-        ).to_typetracer(forget_length=True)
+        ).to_typetracer(length_policy="drop_recursive")
 
     else:
         converted_args = [
@@ -255,7 +255,7 @@ def _get_split_action(
                         ),
                     )
                     .length_zero_array(highlevel=False)
-                    .to_typetracer(forget_length=True)
+                    .to_typetracer(length_policy="drop_recursive")
                 )
 
             elif layout.is_list and layout.parameter("__array__") == "bytestring":
@@ -269,7 +269,7 @@ def _get_split_action(
                         ),
                     )
                     .length_zero_array(highlevel=False)
-                    .to_typetracer(forget_length=True)
+                    .to_typetracer(length_policy="drop_recursive")
                 )
         else:
             if layout.is_list and layout.parameter("__array__") == "string":

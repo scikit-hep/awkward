@@ -86,7 +86,7 @@ def _impl(array, value_set, skip_nones, highlevel, behavior):
                     ),
                     highlevel=False,
                     generate_bitmasks=True,
-                ).to_typetracer(forget_length=True)
+                ).to_typetracer(length_policy="drop_recursive")
             else:
                 return ak.from_arrow(
                     pc.index_in(
