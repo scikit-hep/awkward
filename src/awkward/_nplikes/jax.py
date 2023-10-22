@@ -4,7 +4,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpylike import ArrayLike
+from awkward._nplikes.numpylike import ArrayLike, UfuncLike
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import Final
 
@@ -17,6 +17,11 @@ class Jax(ArrayModuleNumpyLike):
     def __init__(self):
         jax = ak.jax.import_jax()
         self._module = jax.numpy
+
+    def prepare_ufunc(self, ufunc: UfuncLike) -> UfuncLike:
+        from awkward._connect.jax import get_jax_ufunc
+
+        return get_jax_ufunc(ufunc)
 
     @property
     def ma(self):

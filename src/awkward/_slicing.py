@@ -137,7 +137,7 @@ def prepare_advanced_indexing(items, backend: Backend):
 
     # Then broadcast the index items
     nplike = backend.index_nplike
-    broadcasted = nplike.broadcast_arrays(*broadcastable)
+    broadcasted = nplike.broadcast_arrays(*[nplike.asarray(x) for x in broadcastable])
 
     # And re-assemble the index with the broadcasted items
     prepared = []

@@ -10,6 +10,7 @@ from awkward._nplikes.numpylike import (
     IndexType,
     NumpyLike,
     NumpyMetadata,
+    UfuncLike,
     UniqueAllResult,
 )
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -21,6 +22,9 @@ np = NumpyMetadata.instance()
 
 class ArrayModuleNumpyLike(NumpyLike):
     known_data: Final = True
+
+    def prepare_ufunc(self, ufunc: UfuncLike) -> UfuncLike:
+        return ufunc
 
     ############################ array creation
 
@@ -145,6 +149,29 @@ class ArrayModuleNumpyLike(NumpyLike):
         return self._module.searchsorted(x, values, side=side, sorter=sorter)
 
     ############################ manipulation
+
+    def apply_ufunc(
+        self,
+        ufunc: UfuncLike,
+        method: str,
+        args: list[Any],
+        kwargs: dict[str, Any] | None = None,
+    ) -> ArrayLike | tuple[ArrayLike]:
+        # Determine input argument dtypes
+        input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
+        # Resolve these for the given ufunc
+        arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
+        resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
+        # Interpret the arguments under these dtypes
+        resolved_args = [
+            self.asarray(arg, dtype=dtype) for arg, dtype in zip(args, resolved_dtypes)
+        ]
+        # Broadcast these resolved arguments
+        broadcasted_args = self.broadcast_arrays(*resolved_args)
+        # Allow other nplikes to replace implementation
+        impl = self.prepare_ufunc(ufunc)
+        # Compute the result
+        return impl(*broadcasted_args, **kwargs)
 
     def broadcast_arrays(self, *arrays: ArrayLike) -> list[ArrayLike]:
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)

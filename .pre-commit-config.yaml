@@ -48,7 +48,7 @@ repos:
   rev: v2.2.5
   hooks:
   - id: codespell
-    args: ["-L", "ue,subjet,parms,fo,numer,thre"]
+    args: ["-L", "ue,subjet,parms,fo,numer,thre,nin,nout"]
 
 - repo: local
   hooks:
