@@ -5,6 +5,6 @@ import awkward as ak
 
 
 def test():
-    layout = ak.to_layout([{"x": 10}]).to_typetracer(forget_length=True)
+    layout = ak.to_layout([{"x": 10}]).to_typetracer(length_policy="drop_recursive")
     named = ak.with_name(layout, "x_like")
     assert ak.parameters(named) == {"__record__": "x_like"}

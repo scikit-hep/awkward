@@ -7,7 +7,7 @@ from awkward._nplikes.shape import unknown_length
 
 
 def test_known_scalar_regularization():
-    layout = ak.to_layout([1, 2, 3, 4, 5, 6]).to_typetracer(forget_length=False)
+    layout = ak.to_layout([1, 2, 3, 4, 5, 6]).to_typetracer(length_policy="keep")
     assert layout[:].length == 6
     assert layout[:3].length == 3
     assert layout[2:4].length == 2
@@ -15,21 +15,23 @@ def test_known_scalar_regularization():
 
 
 def test_unknown_length_regularization():
-    layout = ak.to_layout([1, 2, 3, 4, 5, 6]).to_typetracer(forget_length=False)
+    layout = ak.to_layout([1, 2, 3, 4, 5, 6]).to_typetracer(length_policy="keep")
     assert layout[unknown_length::].length == unknown_length
     assert layout[:unknown_length:].length == unknown_length
     assert layout[::unknown_length].length == unknown_length
 
 
 def test_unknown_scalar_regularization():
-    layout = ak.to_layout([1, 2, 3, 4, 5, 6]).to_typetracer(forget_length=False)
+    layout = ak.to_layout([1, 2, 3, 4, 5, 6]).to_typetracer(length_policy="keep")
     assert layout[layout[0] : :].length == unknown_length
     assert layout[: layout[0]].length == unknown_length
     assert layout[:: layout[0]].length == unknown_length
 
 
 def test_slice_regularization_unknown_length():
-    layout = ak.to_layout([1, 2, 3, 4, 5, 6]).to_typetracer(forget_length=True)
+    layout = ak.to_layout([1, 2, 3, 4, 5, 6]).to_typetracer(
+        length_policy="drop_recursive"
+    )
     assert layout[:].length == unknown_length
     assert layout[:3].length == unknown_length
     assert layout[2:4].length == unknown_length

@@ -9,10 +9,10 @@ from awkward._nplikes.shape import unknown_length
 
 def test_mixed_known_lengths():
     first = ak.from_numpy(np.arange(3 * 4).reshape(3, 4), highlevel=False)
-    first_tt = first.to_typetracer(forget_length=False)
+    first_tt = first.to_typetracer(length_policy="keep")
 
     second = ak.from_numpy(6 - np.arange(3 * 4).reshape(3, 4) * 2, highlevel=False)
-    second_tt = second.to_typetracer(forget_length=True)
+    second_tt = second.to_typetracer(length_policy="drop_recursive")
 
     result_tt = ak.concatenate((first_tt, second_tt), axis=1)
     result = ak.concatenate((first, second), axis=1)
@@ -23,10 +23,10 @@ def test_mixed_known_lengths():
 
 def test_known_lengths():
     first = ak.from_numpy(np.arange(3 * 4).reshape(3, 4), highlevel=False)
-    first_tt = first.to_typetracer(forget_length=False)
+    first_tt = first.to_typetracer(length_policy="keep")
 
     second = ak.from_numpy(6 - np.arange(3 * 4).reshape(3, 4) * 2, highlevel=False)
-    second_tt = second.to_typetracer(forget_length=False)
+    second_tt = second.to_typetracer(length_policy="keep")
 
     result_tt = ak.concatenate((first_tt, second_tt), axis=1)
     result = ak.concatenate((first, second), axis=1)
@@ -37,10 +37,10 @@ def test_known_lengths():
 
 def test_unknown_lengths():
     first = ak.from_numpy(np.arange(3 * 4).reshape(3, 4), highlevel=False)
-    first_tt = first.to_typetracer(forget_length=True)
+    first_tt = first.to_typetracer(length_policy="drop_recursive")
 
     second = ak.from_numpy(6 - np.arange(3 * 4).reshape(3, 4) * 2, highlevel=False)
-    second_tt = second.to_typetracer(forget_length=True)
+    second_tt = second.to_typetracer(length_policy="drop_recursive")
 
     result_tt = ak.concatenate((first_tt, second_tt), axis=1)
     result = ak.concatenate((first, second), axis=1)

@@ -17,10 +17,10 @@ def test_array_without_length():
     array = ak.Array(
         ak.to_layout(
             [[100.0, 200.0, 22.0], [4.0, 5.0], [8.0, 9.0, 10.0, 11.0]]
-        ).to_typetracer(forget_length=True)
+        ).to_typetracer(length_policy="drop_recursive")
     )
     counts = ak.Array(
-        ak.to_layout([2, 1, 1, 1, 2, 2]).to_typetracer(forget_length=True)
+        ak.to_layout([2, 1, 1, 1, 2, 2]).to_typetracer(length_policy="drop_recursive")
     )
     ak.unflatten(array, counts)
 
@@ -36,7 +36,7 @@ def test_scalar():
 def test_unknown_scalar():
     array = ak.Array(
         ak.to_layout([[100, 200, 22], [4, 5, 5], [8, 9, 10]]).to_typetracer(
-            forget_length=True
+            length_policy="drop_recursive"
         )
     )
     ak.unflatten(array, array[0, 0])
@@ -46,6 +46,6 @@ def test_unknown_length():
     array = ak.Array(
         ak.to_layout(
             [[100.0, 200.0, 22.0], [4.0, 5.0, 5.0], [8.0, 9.0, 10.0]]
-        ).to_typetracer(forget_length=True)
+        ).to_typetracer(length_policy="drop_recursive")
     )
     ak.unflatten(array, array.layout.length)

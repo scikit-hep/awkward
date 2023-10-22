@@ -8,7 +8,7 @@ def test():
     array = ak.Array([1, [2, 3]])
     result = array + array
 
-    array_tt = ak.Array(array.layout.to_typetracer(forget_length=True))
+    array_tt = ak.Array(array.layout.to_typetracer(length_policy="drop_recursive"))
     result_tt = array_tt + array_tt
 
     assert result_tt.layout.form == result.layout.form

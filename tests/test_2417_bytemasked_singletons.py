@@ -21,6 +21,6 @@ def test():
     assert (
         ak.singletons(array, highlevel=False).form
         == ak.singletons(
-            array.layout.to_typetracer(forget_length=True), highlevel=False
+            array.layout.to_typetracer(length_policy="drop_recursive"), highlevel=False
         ).form
     )

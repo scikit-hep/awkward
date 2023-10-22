@@ -21,7 +21,7 @@ def test_repr():
 
     array2 = ak.Array(
         ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout.to_typetracer(
-            forget_length=True
+            length_policy="drop_recursive"
         )
     )
     assert repr(array2) == "<Array-typetracer [...] type='## * var * float64'>"

@@ -8,7 +8,7 @@ from awkward._nplikes.shape import unknown_length
 
 def test():
     layout = ak.to_layout([[1, 2, 3, 4], [5, 6, 7, 8], [4, 5, 6, 9]]).to_typetracer(
-        forget_length=True
+        length_policy="drop_recursive"
     )
     result = layout.to_RegularArray()
     assert result.size is unknown_length

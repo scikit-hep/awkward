@@ -81,7 +81,9 @@ def test():
 
     form = ak.forms.from_dict(fromjson)
 
-    ttlayout = form.length_zero_array(highlevel=False).to_typetracer(forget_length=True)
+    ttlayout = form.length_zero_array(highlevel=False).to_typetracer(
+        length_policy="drop_recursive"
+    )
 
     ttarray = ak.Array(ttlayout, behavior=ak.behavior)
     backend = ttlayout.backend
