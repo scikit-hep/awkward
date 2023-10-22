@@ -14,6 +14,7 @@ from awkward._backends.dispatch import (
     regularize_backend,
 )
 from awkward._behavior import get_array_class, get_record_class
+from awkward._errors import deprecate
 from awkward._kernels import KernelError
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
@@ -233,10 +234,25 @@ class Content:
     def form_cls(self) -> type[Form]:
         raise NotImplementedError
 
-    def to_typetracer(self, forget_length: bool = False) -> Self:
-        return self._to_typetracer(forget_length)
+    def to_typetracer(
+        self,
+        forget_length: bool = UNSET,
+        *,
+        length_policy: Literal["keep", "drop_outer", "drop_recursive"] = "drop_outer",
+    ) -> Self:
+        if forget_length is not UNSET:
+            deprecate(
+                "The `forget_length` argument of `Content.to_typetracer` is deprecated. "
+                "It has been replaced with `length_policy`, which can take the values of"
+                "'keep', 'drop_outer', or 'drop_recursive'",
+                version="2.6.0",
+            )
+            length_policy = "drop_outer"
+        return self._to_typetracer(length_policy)
 
-    def _to_typetracer(self, forget_length: bool) -> Self:
+    def _to_typetracer(
+        self, length_policy: Literal["keep", "drop_outer", "drop_recursive"]
+    ) -> Self:
         raise NotImplementedError
 
     def _touch_data(self, recursive: bool):

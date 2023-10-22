@@ -16,7 +16,15 @@ from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Callable,
+    Final,
+    Literal,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.errors import AxisError
@@ -480,13 +488,20 @@ class UnionArray(Content):
         for i, content in enumerate(self._contents):
             content._to_buffers(form.content(i), getkey, container, backend, byteorder)
 
-    def _to_typetracer(self, forget_length: bool) -> Self:
+    def _to_typetracer(
+        self, length_policy: Literal["keep", "drop_outer", "drop_recursive"]
+    ) -> Self:
         tt = TypeTracer.instance()
         tags = self._tags.to_nplike(tt)
         return UnionArray(
-            tags.forget_length() if forget_length else tags,
+            tags.forget_length() if length_policy != "keep" else tags,
             self._index.to_nplike(tt),
-            [x._to_typetracer(False) for x in self._contents],
+            [
+                x._to_typetracer(
+                    "keep" if length_policy == "drop_outer" else length_policy
+                )
+                for x in self._contents
+            ],
             parameters=self._parameters,
         )
 

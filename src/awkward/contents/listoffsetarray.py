@@ -16,7 +16,15 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Callable,
+    Final,
+    Literal,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.errors import AxisError
@@ -207,11 +215,15 @@ class ListOffsetArray(Content):
         )
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
-    def _to_typetracer(self, forget_length: bool) -> Self:
+    def _to_typetracer(
+        self, length_policy: Literal["keep", "drop_outer", "drop_recursive"]
+    ) -> Self:
         offsets = self._offsets.to_nplike(TypeTracer.instance())
         return ListOffsetArray(
-            offsets.forget_length() if forget_length else offsets,
-            self._content._to_typetracer(False),
+            offsets.forget_length() if length_policy != "keep" else offsets,
+            self._content._to_typetracer(
+                "keep" if length_policy == "drop_outer" else length_policy
+            ),
             parameters=self._parameters,
         )
 

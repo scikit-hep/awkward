@@ -19,7 +19,15 @@ from awkward._parameters import (
     type_parameters_equal,
 )
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Callable,
+    Final,
+    Literal,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.errors import AxisError
@@ -349,13 +357,18 @@ class RecordArray(Content):
                     form.content(field), getkey, container, backend, byteorder
                 )
 
-    def _to_typetracer(self, forget_length: bool) -> Self:
+    def _to_typetracer(
+        self, length_policy: Literal["keep", "drop_outer", "drop_recursive"]
+    ) -> Self:
         backend = TypeTracerBackend.instance()
-        contents = [x._to_typetracer(forget_length) for x in self._contents]
+        contents = [
+            x._to_typetracer("keep" if length_policy == "drop_outer" else length_policy)
+            for x in self._contents
+        ]
         return RecordArray(
             contents,
             self._fields,
-            unknown_length if forget_length else self._length,
+            unknown_length if length_policy != "keep" else self._length,
             parameters=self._parameters,
             backend=backend,
         )

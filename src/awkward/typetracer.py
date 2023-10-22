@@ -178,6 +178,8 @@ def typetracer_from_form(form, *, highlevel: bool = True, behavior=None):
             "'form' argument must be a Form or its Python dict/JSON string representation"
         )
 
-    layout = form.length_zero_array(highlevel=False).to_typetracer(forget_length=True)
+    layout = form.length_zero_array(highlevel=False).to_typetracer(
+        length_policy="drop_recursive"
+    )
 
     return wrap_layout(layout, behavior=behavior, highlevel=highlevel)

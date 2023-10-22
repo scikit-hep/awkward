@@ -19,7 +19,15 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Callable,
+    Final,
+    Literal,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
 from awkward.contents.content import Content
 from awkward.errors import AxisError
@@ -141,9 +149,11 @@ class UnmaskedArray(Content):
         assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
-    def _to_typetracer(self, forget_length: bool) -> Self:
+    def _to_typetracer(
+        self, length_policy: Literal["keep", "drop_outer", "drop_recursive"]
+    ) -> Self:
         return UnmaskedArray(
-            self._content._to_typetracer(forget_length),
+            self._content._to_typetracer(length_policy),
             parameters=self._parameters,
         )
 

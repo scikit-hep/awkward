@@ -17,7 +17,15 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Callable,
+    Final,
+    Literal,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import Content
@@ -307,13 +315,18 @@ class BitMaskedArray(Content):
         )
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
-    def _to_typetracer(self, forget_length: bool) -> Self:
+    def _to_typetracer(
+        self, length_policy: Literal["keep", "drop_outer", "drop_recursive"]
+    ) -> Self:
         tt = TypeTracer.instance()
+        mask = self._mask.to_nplike(tt)
         return BitMaskedArray(
-            self._mask.to_nplike(tt),
-            self._content._to_typetracer(False),
+            mask.forget_length() if length_policy != "keep" else mask,
+            self._content._to_typetracer(
+                "keep" if length_policy == "drop_outer" else length_policy
+            ),
             self._valid_when,
-            unknown_length if forget_length else self.length,
+            unknown_length if length_policy != "keep" else self.length,
             self._lsb_order,
             parameters=self._parameters,
         )

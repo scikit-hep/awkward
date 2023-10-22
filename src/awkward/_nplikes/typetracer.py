@@ -1465,7 +1465,7 @@ def typetracer_with_report(
     forget_length: bool = True,
 ) -> tuple[ak.contents.Content, TypeTracerReport]:
     layout = form.length_zero_array(highlevel=False).to_typetracer(
-        forget_length=forget_length
+        length_policy="drop_recursive" if forget_length else "keep"
     )
     report = TypeTracerReport()
     _attach_report(layout, form, report, getkey)
