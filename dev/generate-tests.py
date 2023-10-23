@@ -368,9 +368,7 @@ def genspectests(specdict):
                             if isinstance(val, list):
                                 f.write(
                                     " " * 4
-                                    + "assert {0}[:len(pytest_{0})] == pytest.approx(pytest_{0})\n".format(
-                                        arg
-                                    )
+                                    + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
                                 )
                             else:
                                 f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
@@ -516,9 +514,7 @@ def gencpukerneltests(specdict):
                         if isinstance(val, list):
                             f.write(
                                 " " * 4
-                                + "assert {0}[:len(pytest_{0})] == pytest.approx(pytest_{0})\n".format(
-                                    arg
-                                )
+                                + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
                             )
                         else:
                             f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
@@ -735,9 +731,7 @@ def gencudakerneltests(specdict):
                             if isinstance(val, list):
                                 f.write(
                                     " " * 4
-                                    + "assert cupy.array_equal({0}[:len(pytest_{0})], cupy.array(pytest_{0}))\n".format(
-                                        arg
-                                    )
+                                    + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
                                 )
                             else:
                                 f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")

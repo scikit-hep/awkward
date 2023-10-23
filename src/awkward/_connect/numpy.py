@@ -357,10 +357,8 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
                 for x in contents
             ):
                 raise TypeError(
-                    "{}.{} is not implemented for string types. "
-                    "To register an implementation, add a name to these string(s) and register a behavior overload".format(
-                        type(ufunc).__module__, ufunc.__name__
-                    )
+                    f"{type(ufunc).__module__}.{ufunc.__name__} is not implemented for string types. "
+                    "To register an implementation, add a name to these string(s) and register a behavior overload"
                 )
 
         if ufunc is numpy.matmul:
