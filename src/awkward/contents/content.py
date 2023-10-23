@@ -498,9 +498,7 @@ class Content:
                     )
                 else:
                     raise NotImplementedError(
-                        "FIXME: unhandled case of SliceMissing with RecordArray containing {}".format(
-                            content
-                        )
+                        f"FIXME: unhandled case of SliceMissing with RecordArray containing {content}"
                     )
 
             return ak.contents.RecordArray(

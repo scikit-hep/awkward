@@ -160,7 +160,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             ):
                 raise ValueError(
                     "structure imposed by 'counts' does not fit in the array or partition "
-                    "at axis={}".format(axis)
+                    f"at axis={axis}"
                 )
 
             offsets = current_offsets[: position + 1]
@@ -214,7 +214,7 @@ def _impl(array, counts, axis, highlevel, behavior):
                 ):
                     raise ValueError(
                         "structure imposed by 'counts' does not fit in the array or partition "
-                        "at axis={}".format(axis)
+                        f"at axis={axis}"
                     )
                 positions[0] = 0
 

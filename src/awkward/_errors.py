@@ -410,14 +410,12 @@ def deprecate(
         date = ""
     else:
         date = " (target date: " + date + ")"
-    warning = """In version {}{}, this will be {}.
+    warning = f"""In version {version}{date}, this will be {will_be}.
 To raise these warnings as errors (and get stack traces to find out where they're called), run
     import warnings
     warnings.filterwarnings("error", module="awkward.*")
 after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
-Issue: {}.""".format(
-        version, date, will_be, message
-    )
+Issue: {message}."""
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
 
 
