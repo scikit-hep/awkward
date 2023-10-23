@@ -54,7 +54,7 @@ def copy(array):
         <Array [{x: 1}, {x: 2}, {x: 3}] type='3 * {x: int64}'>
 
     This is key to Awkward Array's efficiency (memory and speed): operations that
-    only change part of a structure re-use pieces from the original ("structural
+    only change part of a structure reuse pieces from the original ("structural
     sharing"). Changing data in-place would result in many surprising long-distance
     changes, so we don't support it. However, an #ak.Array's data might come from
     a mutable third-party library, so this function allows you to make a true copy.

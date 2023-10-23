@@ -42,7 +42,7 @@ def test_jvp_nested_list():
     def func(x):
         return x[::-1] ** 2
 
-    # TODO: enable leak checing
+    # TODO: enable leak checking
     # with jax.checking_leaks():
     value_jvp, jvp_grad = jax.jvp(func, (array,), (tangent,))
     assert value_jvp.to_list() == [[1.0, 4.0, 9.0, 16.0, 25.0]]

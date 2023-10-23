@@ -120,7 +120,7 @@ namespace awkward {
   const std::set<std::string> reserved_words_({
     // comments
     "(", ")", "\\", "\n", "",
-    // defining functinos
+    // defining functions
     ":", ";", "recurse",
     // declaring globals
     "variable", "input", "output",
