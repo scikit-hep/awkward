@@ -143,6 +143,15 @@ namespace awkward {
             buffers["node" + std::to_string(id_) + "-data"]));
         }
 
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-data"))
+          data_.concatenate(reinterpret_cast<PRIMITIVE*>(buffer));
+      }
+
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
@@ -322,6 +331,17 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder; otherwise, it searches the builder contents to locate a
+      /// matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-offsets"))
+          offsets_.concatenate(reinterpret_cast<PRIMITIVE*>(buffer));
+        content_.to_buffer(buffer, name);
+      }
+
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
@@ -403,6 +423,9 @@ namespace awkward {
 
       void
       to_buffers(std::map<std::string, void*>& /* buffers */) const noexcept {}
+
+      void
+      to_buffer(void* /* buffer */, const char* /* name */) const noexcept {}
 
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
@@ -584,6 +607,17 @@ namespace awkward {
         for (size_t i = 0; i < fields_count_; i++)
           visit_at(contents, i, [&buffers](auto& content) {
             content.builder.to_buffers(buffers);
+          });
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the buffers of the
+      /// builder contents to user-defined pointers if the given node name matches
+      /// with the node associated with that builder.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        for (size_t i = 0; i < fields_count_; i++)
+          visit_at(contents, i, [&buffer, &name](auto& content) {
+            content.builder.to_buffer(buffer, name);
           });
       }
 
@@ -797,6 +831,17 @@ namespace awkward {
           });
       }
 
+      /// @brief Copies and concatenates the accumulated data in the buffers of the
+      /// builder contents to user-defined pointers if the given node name matches
+      /// with the node associated with that builder.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        for (size_t i = 0; i < fields_count_; i++)
+          visit_at(contents, i, [&buffer, &name](auto& content) {
+            content.to_buffer(buffer, name);
+          });
+      }
+
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
@@ -975,6 +1020,14 @@ namespace awkward {
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the buffers of the
+      /// builder content to user-defined pointers if the given node name matches
+      /// with the node associated with that builder.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        content_.to_buffer(buffer, name);
       }
 
       /// @brief Copies and concatenates all the accumulated data in the builder
@@ -1173,6 +1226,17 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder; otherwise, it searches the builder contents to locate a
+      /// matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-index"))
+          index_.concatenate(reinterpret_cast<PRIMITIVE*>(buffer));
+        content_.to_buffer(buffer, name);
+      }
+
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
@@ -1300,6 +1364,14 @@ namespace awkward {
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the buffers of the
+      /// builder content to user-defined pointers if the given node name matches
+      /// with the node associated with that builder.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        content_.to_buffer(buffer, name);
       }
 
       /// @brief Copies and concatenates all the accumulated data in the builder
@@ -1501,6 +1573,17 @@ namespace awkward {
         mask_.concatenate(reinterpret_cast<int8_t*>(
             buffers["node" + std::to_string(id_) + "-mask"]));
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder; otherwise, it searches the builder contents to locate a
+      /// matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-mask"))
+          mask_.concatenate(reinterpret_cast<int8_t*>(buffer));
+        content_.to_buffer(buffer, name);
       }
 
       /// @brief Copies and concatenates all the accumulated data in the builder
@@ -1756,6 +1839,19 @@ namespace awkward {
         mask_.append(reinterpret_cast<uint8_t*>(
             buffers["node" + std::to_string(id_) + "-mask"]), mask_.length() - 1, 0, 1);
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder; otherwise, it searches the builder contents to locate a
+      /// matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-mask")) {
+          mask_.concatenate_from(reinterpret_cast<uint8_t*>(buffer), 0, 1);
+          mask_.append(reinterpret_cast<uint8_t*>(buffer), mask_.length() - 1, 0, 1);
+        }
+        content_.to_buffer(buffer, name);
       }
 
       /// @brief Copies and concatenates all the accumulated data in the builder
@@ -2027,6 +2123,28 @@ namespace awkward {
         for (size_t i = 0; i < contents_count_; i++)
           visit_at(contents_, i, [&buffers](auto& content) {
             content.to_buffers(buffers);
+          });
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the builder buffers to
+      /// user-defined pointers if the given node name matches with any one of the nodes
+      /// associated with the builder; otherwise, it searches the builder contents to
+      /// locate a matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        auto index_sequence((std::index_sequence_for<BUILDERS...>()));
+
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-tags")) {
+          tags_.concatenate(reinterpret_cast<TAGS*>(buffer));
+        }
+
+        else if (std::string(name) == std::string("node" + std::to_string(id_) + "-index")) {
+          index_.concatenate(reinterpret_cast<INDEX*>(buffer));
+        }
+
+        for (size_t i = 0; i < contents_count_; i++)
+          visit_at(contents_, i, [&buffer, &name](auto& content) {
+            content.to_buffer(buffer, name);
           });
       }
 
