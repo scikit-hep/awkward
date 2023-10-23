@@ -291,7 +291,7 @@ def _array_ufunc_string_likes(
     ):
         left = ak.without_parameters(left, highlevel=False)
     elif isinstance(left, (str, bytes)):
-        left = ak.without_parameters(ak.to_layout([left]), highlevel=False)
+        left = ak.without_parameters([left], highlevel=False)
     else:
         return
 
@@ -301,7 +301,7 @@ def _array_ufunc_string_likes(
     ):
         right = ak.without_parameters(right, highlevel=False)
     elif isinstance(right, (str, bytes)):
-        right = ak.without_parameters(ak.to_layout([right]), highlevel=False)
+        right = ak.without_parameters([right], highlevel=False)
     else:
         return
 
