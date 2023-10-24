@@ -80,7 +80,7 @@ def _impl(array, value, axis, highlevel, behavior):
         allow_record=True,
         allow_other=False,
         use_from_iter=True,
-        scalar_policy="allow",
+        primitive_policy="pass-through",
     )
 
     if isinstance(valuelayout, ak.record.Record):
@@ -93,7 +93,7 @@ def _impl(array, value, axis, highlevel, behavior):
             allow_record=True,
             allow_other=False,
             use_from_iter=True,
-            scalar_policy="promote",
+            primitive_policy="promote",
         )
     valuelayout = valuelayout.to_backend(backend)
 

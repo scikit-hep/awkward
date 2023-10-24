@@ -95,13 +95,13 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
     backend = backend_of(x, y, weight, coerce_to_common=True, default=cpu)
     x = ak.highlevel.Array(
         ak.operations.to_layout(
-            x, allow_record=False, allow_other=False, scalar_policy="error"
+            x, allow_record=False, allow_other=False, primitive_policy="error"
         ).to_backend(backend),
         behavior=behavior,
     )
     y = ak.highlevel.Array(
         ak.operations.to_layout(
-            y, allow_record=False, allow_other=False, scalar_policy="error"
+            y, allow_record=False, allow_other=False, primitive_policy="error"
         ).to_backend(backend),
         behavior=behavior,
     )
@@ -203,7 +203,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
         slope_error = ufuncs.sqrt(sumw / delta)
 
         is_scalar = not isinstance(
-            ak.operations.to_layout(intercept, scalar_policy="allow"),
+            ak.operations.to_layout(intercept, primitive_policy="pass-through"),
             ak.contents.Content,
         )
 

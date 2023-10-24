@@ -89,7 +89,7 @@ def _impl(
     else:
         layout = ak._do.local_index(
             ak.operations.to_layout(
-                array, allow_record=False, allow_other=False, scalar_policy="error"
+                array, allow_record=False, allow_other=False, primitive_policy="error"
             ),
             axis,
         )

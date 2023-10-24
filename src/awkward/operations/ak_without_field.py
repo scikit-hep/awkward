@@ -50,7 +50,7 @@ def _impl(base, where, highlevel, behavior):
 
     behavior = behavior_of(base, behavior=behavior)
     base = ak.operations.to_layout(
-        base, allow_record=True, allow_other=False, scalar_policy="error"
+        base, allow_record=True, allow_other=False, primitive_policy="error"
     )
 
     def action(layout, depth_context, **kwargs):

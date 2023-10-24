@@ -163,14 +163,14 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior):
     behavior = behavior_of(x, weight, behavior=behavior)
     x = ak.highlevel.Array(
         ak.operations.to_layout(
-            x, allow_record=False, allow_other=False, scalar_policy="error"
+            x, allow_record=False, allow_other=False, primitive_policy="error"
         ),
         behavior=behavior,
     )
     if weight is not None:
         weight = ak.highlevel.Array(
             ak.operations.to_layout(
-                weight, allow_record=False, allow_other=False, scalar_policy="error"
+                weight, allow_record=False, allow_other=False, primitive_policy="error"
             ),
             behavior=behavior,
         )

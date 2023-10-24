@@ -656,8 +656,8 @@ class Content:
                     allow_none=False,
                     regulararray=False,
                     use_from_iter=False,
-                    scalar_policy="error",
-                    string_as_characters=True,
+                    primitive_policy="error",
+                    string_policy="as-characters",
                 )
                 return self._getitem(layout)
 
@@ -681,8 +681,8 @@ class Content:
                     allow_none=False,
                     regulararray=False,
                     use_from_iter=True,
-                    scalar_policy="error",
-                    string_as_characters=True,
+                    primitive_policy="error",
+                    string_policy="as-characters",
                 )
                 return self._getitem(layout)
 

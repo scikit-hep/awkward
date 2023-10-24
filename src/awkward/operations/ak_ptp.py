@@ -78,7 +78,7 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
     axis = regularize_axis(axis)
     behavior = behavior_of(array, behavior=behavior)
     layout = ak.operations.to_layout(
-        array, allow_record=False, allow_other=False, scalar_policy="error"
+        array, allow_record=False, allow_other=False, primitive_policy="error"
     )
 
     with np.errstate(invalid="ignore", divide="ignore"):

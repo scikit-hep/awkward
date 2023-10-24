@@ -77,8 +77,8 @@ def _impl(
             allow_none=False,
             regulararray=True,
             use_from_iter=True,
-            scalar_policy="forbid",
-            string_as_characters=True,
+            primitive_policy="forbid",
+            string_policy="as-characters",
         ).to_backend(cpu)
         if length is None:
             length = layouts[name].length

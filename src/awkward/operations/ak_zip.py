@@ -171,21 +171,24 @@ def _impl(
         behavior = behavior_of(*arrays.values(), behavior=behavior)
         recordlookup = list(arrays)
         layouts = [
-            ak.operations.to_layout(x, scalar_policy="allow") for x in arrays.values()
+            ak.operations.to_layout(x, primitive_policy="pass-through")
+            for x in arrays.values()
         ]
 
     else:
         arrays = list(arrays)
         behavior = behavior_of(*arrays, behavior=behavior)
         recordlookup = None
-        layouts = [ak.operations.to_layout(x, scalar_policy="allow") for x in arrays]
+        layouts = [
+            ak.operations.to_layout(x, primitive_policy="pass-through") for x in arrays
+        ]
 
     # Promote any integers or records
     layout_is_content = [isinstance(x, ak.contents.Content) for x in layouts]
     layouts = [
         x
         if isinstance(x, (ak.contents.Content, ak.record.Record))
-        else ak.operations.to_layout(x, scalar_policy="promote")
+        else ak.operations.to_layout(x, primitive_policy="promote")
         for x in layouts
     ]
 

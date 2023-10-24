@@ -39,7 +39,7 @@ def _impl(array, highlevel):
             return None
 
     layout = ak.operations.to_layout(
-        array, allow_record=False, allow_other=False, scalar_policy="error"
+        array, allow_record=False, allow_other=False, primitive_policy="error"
     )
     behavior = behavior_of(array)
     ak._do.recursively_apply(layout, action, behavior=behavior)

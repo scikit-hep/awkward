@@ -33,6 +33,6 @@ def fields(array):
 
 def _impl(array):
     layout = ak.operations.to_layout(
-        array, allow_record=True, allow_other=False, scalar_policy="error"
+        array, allow_record=True, allow_other=False, primitive_policy="error"
     )
     return layout.fields.copy()

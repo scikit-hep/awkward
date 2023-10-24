@@ -131,8 +131,8 @@ def _impl(
         allow_none=False,
         regulararray=True,
         use_from_iter=True,
-        scalar_policy="error",
-        string_as_characters=True,
+        primitive_policy="error",
+        string_policy="as-characters",
     )
 
     table = ak.operations.ak_to_arrow_table._impl(

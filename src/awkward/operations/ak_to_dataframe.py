@@ -210,7 +210,7 @@ or
             return [(ak.operations.to_numpy(layout), row_arrays, col_names)]
 
     layout = ak.operations.to_layout(
-        array, allow_record=True, allow_other=False, scalar_policy="error"
+        array, allow_record=True, allow_other=False, primitive_policy="error"
     )
     if isinstance(layout, ak.record.Record):
         layout2 = layout.array[layout.at : layout.at + 1]

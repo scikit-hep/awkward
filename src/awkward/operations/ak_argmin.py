@@ -123,7 +123,7 @@ def nanargmin(
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
     axis = regularize_axis(axis)
     layout = ak.operations.to_layout(
-        array, allow_record=False, allow_other=False, scalar_policy="error"
+        array, allow_record=False, allow_other=False, primitive_policy="error"
     )
     behavior = behavior_of(array, behavior=behavior)
     reducer = ak._reducers.ArgMin()

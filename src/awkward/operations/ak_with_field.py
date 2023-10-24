@@ -92,7 +92,7 @@ def _impl(base, what, where, highlevel, behavior):
             allow_record=True,
             allow_other=False,
             allow_none=True,
-            scalar_policy="allow",
+            primitive_policy="pass-through",
         )
         if isinstance(what, (ak.contents.Content, ak.record.Record)):
             what = what.to_backend(backend)

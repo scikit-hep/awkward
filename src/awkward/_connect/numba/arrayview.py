@@ -191,7 +191,7 @@ class ArrayView:
     def fromarray(cls, array):
         behavior = behavior_of(array)
         layout = ak.operations.to_layout(
-            array, allow_record=False, allow_other=False, scalar_policy="error"
+            array, allow_record=False, allow_other=False, primitive_policy="error"
         )
 
         return ArrayView(
@@ -578,7 +578,7 @@ class RecordView:
     def fromrecord(cls, record):
         behavior = behavior_of(record)
         layout = ak.operations.to_layout(
-            record, allow_record=True, allow_other=False, scalar_policy="error"
+            record, allow_record=True, allow_other=False, primitive_policy="error"
         )
         assert isinstance(layout, ak.record.Record)
         arraylayout = layout.array

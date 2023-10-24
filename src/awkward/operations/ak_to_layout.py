@@ -32,8 +32,8 @@ def to_layout(
     allow_other=False,
     allow_none=False,
     use_from_iter=True,
-    scalar_policy="promote",
-    string_as_characters=True,
+    primitive_policy="promote",
+    string_policy="as-characters",
     regulararray=True,
 ):
     """
@@ -51,12 +51,13 @@ def to_layout(
             error.
         use_from_iter (bool): If True, allow conversion of iterable inputs to
             arrays using #ak.from_iter; otherwise, throw an Exception.
-        scalar_policy ("error", "allow", "promote"): If "error", throw an Exception
-            for scalar inputs; if "allow", return the scalar input; otherwise,
+        primitive_policy ("error", "pass-through", "promote"): If "error", throw an Exception
+            for scalar inputs; if "pass-through", return the scalar input; otherwise,
             for "promote" return a length-one array containing the scalar.
-        string_as_characters (bool): If True, scalar strings are converted
-            to an array of characters; otherwise, scalar strings are taken to be
-            the Python object itself.
+        string_policy ("error", "pass-through", "as-characters", "promote"): If "error", throw an Exception
+            for scalar inputs; if "pass-through", return the scalar input;
+            ir "as-characters", return an array of characters; otherwise,
+            for "promote" return a length-one array containing the string.
         regulararray (bool): Prefer to create #ak.contents.RegularArray nodes for
             regular array objects.
 
@@ -79,8 +80,8 @@ def to_layout(
         allow_none,
         regulararray,
         use_from_iter,
-        scalar_policy,
-        string_as_characters,
+        primitive_policy,
+        string_policy,
     )
 
 
@@ -95,33 +96,28 @@ def maybe_merge_mappings(primary, secondary):
         return {**primary, **secondary}
 
 
-def _handle_as_scalar(obj, *, scalar_policy):
-    assert scalar_policy in ("allow", "promote", "error")
+def _handle_as_primitive(obj, layout, *, primitive_policy):
+    assert primitive_policy in ("pass-through", "promote", "error")
 
-    if scalar_policy == "allow":
+    if primitive_policy == "pass-through":
         return obj
-    elif scalar_policy == "promote":
-        layout = ak.operations.from_iter([obj], highlevel=False)
+    elif primitive_policy == "promote":
         return layout
-    else:
-        assert scalar_policy == "error"
+    elif primitive_policy == "error":
         raise TypeError(
             f"Encountered a scalar ({type(obj).__name__}), but scalars conversion/promotion is disabled"
         )
+    else:
+        raise ValueError(
+            f"Encountered an invalid primitive policy value {primitive_policy!r}. "
+            f'The permitted values are "pass-through", "promote", and "error".'
+        )
 
 
-def _handle_array_like(obj, layout, *, scalar_policy):
-    assert scalar_policy in ("allow", "promote", "error")
+def _handle_array_like(obj, layout, *, primitive_policy):
+    assert primitive_policy in ("pass-through", "promote", "error")
     if obj.ndim == 0:
-        if scalar_policy == "allow":
-            return obj
-        elif scalar_policy == "promote":
-            return layout
-        else:
-            assert scalar_policy == "error"
-            raise TypeError(
-                f"Encountered a scalar ({type(obj).__name__}), but scalars conversion/promotion is disabled"
-            )
+        return _handle_as_primitive(obj, layout, primitive_policy=primitive_policy)
     else:
         return layout
 
@@ -133,8 +129,8 @@ def _impl(
     allow_none,
     regulararray,
     use_from_iter,
-    scalar_policy,
-    string_as_characters,
+    primitive_policy,
+    string_policy,
 ) -> Any:
     # Well-defined types
     if isinstance(obj, ak.contents.Content):
@@ -162,17 +158,23 @@ def _impl(
             recordarray=True,
             highlevel=False,
         )
-        return _handle_array_like(obj, promoted_layout, scalar_policy=scalar_policy)
+        return _handle_array_like(
+            obj, promoted_layout, primitive_policy=primitive_policy
+        )
     elif Cupy.is_own_array(obj):
         promoted_layout = ak.operations.from_cupy(
             obj, regulararray=regulararray, highlevel=False
         )
-        return _handle_array_like(obj, promoted_layout, scalar_policy=scalar_policy)
+        return _handle_array_like(
+            obj, promoted_layout, primitive_policy=primitive_policy
+        )
     elif Jax.is_own_array(obj):
         promoted_layout = ak.operations.from_jax(
             obj, regulararray=regulararray, highlevel=False
         )
-        return _handle_array_like(obj, promoted_layout, scalar_policy=scalar_policy)
+        return _handle_array_like(
+            obj, promoted_layout, primitive_policy=primitive_policy
+        )
     elif TypeTracer.is_own_array(obj):
         backend = TypeTracerBackend.instance()
 
@@ -185,7 +187,9 @@ def _impl(
             )
 
         promoted_layout = ak.contents.NumpyArray(obj, parameters=None, backend=backend)
-        return _handle_array_like(obj, promoted_layout, scalar_policy=scalar_policy)
+        return _handle_array_like(
+            obj, promoted_layout, primitive_policy=primitive_policy
+        )
     elif ak._util.in_module(obj, "pyarrow"):
         return ak.operations.from_arrow(obj, highlevel=False)
     elif hasattr(obj, "__dlpack__") and hasattr(obj, "__dlpack_device__"):
@@ -198,26 +202,40 @@ def _impl(
             recordarray=True,
             highlevel=False,
         )
-        return _handle_array_like(obj, promoted_layout, scalar_policy=scalar_policy)
+        return _handle_array_like(
+            obj, promoted_layout, primitive_policy=primitive_policy
+        )
     # Scalars
     elif isinstance(obj, (str, bytes)):
         layout = ak.operations.from_iter([obj], highlevel=False)
-        if scalar_policy == "allow":
-            if string_as_characters:
-                return layout[0]
-            else:
-                return obj
-        elif scalar_policy == "promote":
+        if string_policy == "pass-through":
+            return obj
+        elif string_policy == "as-characters":
+            return layout[0]
+        elif string_policy == "promote":
             return layout
-        else:
+        elif string_policy == "error":
             raise TypeError(
-                f"Encountered a scalar ({type(obj).__name__}), but scalars conversion/promotion is disabled"
+                f"Encountered a {type(obj).__name__}, but string conversion/promotion is disabled"
+            )
+        else:
+            raise ValueError(
+                f"Encountered an invalid string policy value {primitive_policy!r}. "
+                f'The permitted values are "pass-through", "as-characters", "promote", and "error".'
             )
     elif isinstance(obj, (datetime, date, time, Number, bool)):
-        return _handle_as_scalar(obj, scalar_policy=scalar_policy)
+        return _handle_as_primitive(
+            obj,
+            ak.operations.from_iter([obj], highlevel=False),
+            primitive_policy=primitive_policy,
+        )
     elif obj is None:
         if allow_none:
-            return _handle_as_scalar(obj, scalar_policy=scalar_policy)
+            return _handle_as_primitive(
+                obj,
+                ak.operations.from_iter([obj], highlevel=False),
+                primitive_policy=primitive_policy,
+            )
         else:
             raise TypeError("Encountered None value, and `allow_none` is `False`")
     # Iterables

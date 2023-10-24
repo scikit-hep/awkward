@@ -206,7 +206,7 @@ def _impl(
         parameters["__record__"] = with_name
 
     layout = ak.operations.to_layout(
-        array, allow_record=False, allow_other=False, scalar_policy="error"
+        array, allow_record=False, allow_other=False, primitive_policy="error"
     )
     out = ak._do.combinations(
         layout,

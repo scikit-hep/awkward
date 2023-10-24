@@ -286,8 +286,8 @@ def normalise_item(item, backend: Backend) -> SliceItem:
                 allow_none=False,
                 regulararray=False,
                 use_from_iter=False,
-                scalar_policy="error",
-                string_as_characters=True,
+                primitive_policy="error",
+                string_policy="as-characters",
             )
             return normalise_item(layout, backend)
 
@@ -308,8 +308,8 @@ def normalise_item(item, backend: Backend) -> SliceItem:
                 allow_none=False,
                 regulararray=False,
                 use_from_iter=True,
-                scalar_policy="error",
-                string_as_characters=True,
+                primitive_policy="error",
+                string_policy="as-characters",
             )
             return normalise_item(layout, backend)
 

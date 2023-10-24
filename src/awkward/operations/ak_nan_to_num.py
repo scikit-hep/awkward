@@ -59,7 +59,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         nan,
         allow_other=False,
         allow_none=True,
-        scalar_policy="allow",
+        primitive_policy="pass-through",
         allow_record=False,
     )
     if isinstance(nan_layout, ak.contents.Content):
@@ -70,7 +70,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         posinf,
         allow_other=False,
         allow_none=True,
-        scalar_policy="allow",
+        primitive_policy="pass-through",
         allow_record=False,
     )
     if isinstance(posinf_layout, ak.contents.Content):
@@ -81,7 +81,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         neginf,
         allow_other=False,
         allow_none=True,
-        scalar_policy="allow",
+        primitive_policy="pass-through",
         allow_record=False,
     )
     if isinstance(neginf_layout, ak.contents.Content):

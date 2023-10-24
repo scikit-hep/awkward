@@ -67,7 +67,11 @@ def _to_rectilinear(arg, backend: Backend):
         # Otherwise, cast to layout and convert
         else:
             layout = ak.to_layout(
-                arg, allow_record=False, allow_other=False, scalar_policy="error"
+                arg,
+                allow_record=False,
+                allow_other=False,
+                primitive_policy="error",
+                string_policy="error",
             )
             return layout.to_backend(backend).to_backend_array(allow_missing=True)
     elif isinstance(arg, tuple):
@@ -104,8 +108,8 @@ def array_function(func, types, args, kwargs: dict[str, Any], behavior: Mapping 
             allow_none=True,
             regulararray=True,
             use_from_iter=True,
-            scalar_policy="allow",
-            string_as_characters=True,
+            primitive_policy="pass-through",
+            string_policy="pass-through",
         )
         return wrap_layout(out, behavior=behavior, allow_other=True)
 
@@ -145,18 +149,13 @@ def _array_ufunc_custom_cast(inputs, behavior: Mapping | None, backend):
     nextinputs = []
     for x in args:
         cast_fcn = find_custom_cast(x, behavior)
-        if cast_fcn is not None:
-            maybe_layout = ak.operations.to_layout(
-                cast_fcn(x), allow_record=True, allow_other=True, scalar_policy="allow"
-            )
-        else:
-            maybe_layout = ak.operations.to_layout(
-                x,
-                allow_record=True,
-                allow_other=True,
-                scalar_policy="allow",
-                string_as_characters=False,
-            )
+        maybe_layout = ak.operations.to_layout(
+            x if cast_fcn is None else cast_fcn(x),
+            allow_record=True,
+            allow_other=True,
+            primitive_policy="pass-through",
+            string_policy="pass-through",
+        )
         if isinstance(maybe_layout, (ak.contents.Content, ak.record.Record)):
             maybe_layout = maybe_layout.to_backend(backend)
 
