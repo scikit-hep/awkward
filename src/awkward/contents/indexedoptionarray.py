@@ -1192,42 +1192,39 @@ class IndexedOptionArray(Content):
             negaxis, starts, nextshifts, nextparents, outlength, ascending, stable
         )
 
-        # Are we sorting the current dimension?
-        if (not branch) and negaxis == depth:
-            # `out` will contain the argsort result for the non-None values, i.e.
-            # `next._argsort_next` is only given the non-None values.
-            # When computing argsort for *this* layout, we want to return
-            # the indices of each `None` value, rather than `None` itself.
-            # By convention, we choose to sort None values to the end of the
-            # list, meaning we need to grow `out` to account for the indices of
-            # the missing values
-
-            # First, let's find the location of these missing values
-            nulls_index = ak.index.Index64.empty(numnull, self._backend.index_nplike)
-            assert nulls_index.nplike is self._backend.index_nplike
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_IndexedArray_index_of_nulls",
-                    nulls_index.dtype.type,
-                    self._index.dtype.type,
-                    parents.dtype.type,
-                    starts.dtype.type,
-                ](
-                    nulls_index.data,
-                    self._index.data,
-                    self._index.length,
-                    parents.data,
-                    starts.data,
-                )
+        # `next._argsort_next` is given the non-None values. We choose to
+        # sort None values to the end of the list, meaning we need to grow `out`
+        # to account for these None values. First, we locate these nones within
+        # their sublists
+        nulls_merged = False
+        nulls_index = ak.index.Index64.empty(numnull, self._backend.index_nplike)
+        assert nulls_index.nplike is self._backend.index_nplike
+        self._backend.maybe_kernel_error(
+            self._backend[
+                "awkward_IndexedArray_index_of_nulls",
+                nulls_index.dtype.type,
+                self._index.dtype.type,
+                parents.dtype.type,
+                starts.dtype.type,
+            ](
+                nulls_index.data,
+                self._index.data,
+                self._index.length,
+                parents.data,
+                starts.data,
             )
-            # Now, we append these indices to the non-None argsort result
-            out = out._mergemany(
-                [
-                    ak.contents.NumpyArray(
-                        nulls_index.data, parameters=None, backend=self._backend
-                    )
-                ]
-            )
+        )
+        # If we wrap a NumpyArray (i.e., axis=-1), then we want `argmax` to return
+        # the indices of each `None` value, rather than `None` itself.
+        # We can test for this condition by seeing whether the NumpyArray of indices
+        # is mergeable with our content (`out = next._argsort_next result`).
+        # If so, try to concatenate them at the end of `out`.`
+        nulls_index_content = ak.contents.NumpyArray(
+            nulls_index.data, parameters=None, backend=self._backend
+        )
+        if out._mergeable_next(nulls_index_content, True):
+            out = out._mergemany([nulls_index_content])
+            nulls_merged = True
 
         nextoutindex = ak.index.Index64.empty(
             parents.length, self._backend.index_nplike
@@ -1255,10 +1252,9 @@ class IndexedOptionArray(Content):
             )
         )
 
-        # Are we sorting the current dimension?
-        if (not branch) and negaxis == depth:
+        if nulls_merged:
             # awkward_IndexedArray_local_preparenext uses -1 to
-            # indicate `None` values. Yet, given that *this* code-path runs
+            # indicate `None` values. Given that this code-path runs
             # only when the `None` value indices are explicitly stored in out,
             # we need to mapping the -1 values to their corresponding indices
             # in `out`
@@ -1269,30 +1265,34 @@ class IndexedOptionArray(Content):
                     nextoutindex.length,
                 )
             )
-            return out._carry(nextoutindex, False).copy(
-                parameters=parameters_union(out._parameters, self._parameters)
-            )
 
+        out = ak.contents.IndexedOptionArray.simplified(
+            nextoutindex, out, parameters=self._parameters
+        )
+
+        inject_nones = (
+            True
+            if (
+                (numnull is not unknown_length and numnull > 0)
+                and not branch
+                and negaxis != depth
+            )
+            else False
+        )
+
+        # If we want the None's at this depth to be injected
+        # into the dense ([x y z None None]) rearranger result.
+        # Here, we index the dense content with an index
+        # that maps the values to the correct locations
+        if inject_nones:
+            return ak.contents.IndexedOptionArray.simplified(
+                outindex, out, parameters=self._parameters
+            )
+        # Otherwise, if we are rearranging (e.g sorting) the contents of this layout,
+        # then we do NOT want to return an optional layout,
+        # OR we are branching
         else:
-            out = ak.contents.IndexedOptionArray.simplified(
-                nextoutindex, out, parameters=self._parameters
-            )
-
-            inject_nones = numnull is not unknown_length and numnull > 0
-
-            # If we want the None's at this depth to be injected
-            # into the dense ([x y z None None]) rearranger result.
-            # Here, we index the dense content with an index
-            # that maps the values to the correct locations
-            if inject_nones:
-                return ak.contents.IndexedOptionArray.simplified(
-                    outindex, out, parameters=self._parameters
-                )
-            # Otherwise, if we are rearranging (e.g sorting) the contents of this layout,
-            # then we do NOT want to return an optional layout,
-            # OR we are branching
-            else:
-                return out
+            return out
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         assert (
