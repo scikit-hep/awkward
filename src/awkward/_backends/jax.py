@@ -4,7 +4,7 @@ from __future__ import annotations
 import awkward_cpp
 
 import awkward as ak
-from awkward._backends.backend import Backend, KernelKeyType, UfuncLike
+from awkward._backends.backend import Backend, KernelKeyType
 from awkward._backends.dispatch import register_backend
 from awkward._kernels import JaxKernel
 from awkward._nplikes.jax import Jax
@@ -43,8 +43,3 @@ class JaxBackend(Backend):
         from awkward._connect.jax import get_jax_reducer
 
         return get_jax_reducer(reducer)
-
-    def prepare_ufunc(self, ufunc: UfuncLike) -> UfuncLike:
-        from awkward._connect.jax import get_jax_ufunc
-
-        return get_jax_ufunc(ufunc)

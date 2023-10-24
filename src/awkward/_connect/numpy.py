@@ -385,13 +385,8 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
                 parameters_intersect, (c._parameters for c in contents)
             )
 
-            args = [x.data if isinstance(x, NumpyArray) else x for x in inputs]
-
-            # Give backend a chance to change the ufunc implementation
-            impl = backend.prepare_ufunc(ufunc)
-
-            # Invoke ufunc
-            result = impl(*args, **kwargs)
+            input_args = [x.data if isinstance(x, NumpyArray) else x for x in inputs]
+            result = backend.nplike.apply_ufunc(ufunc, method, input_args, kwargs)
 
             if isinstance(result, tuple):
                 return tuple(

@@ -13,6 +13,7 @@ from awkward._nplikes.numpylike import (
     IndexType,
     NumpyLike,
     NumpyMetadata,
+    UfuncLike,
     UniqueAllResult,
 )
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -387,8 +388,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     try_touch_data(item)
                     try_touch_data(self)
 
-                    if is_unknown_scalar(item):
-                        item = self.nplike.promote_scalar(item)
+                    item = self.nplike.asarray(item)
 
                     # If this is the first advanced index, insert the location
                     if not advanced_shapes:
@@ -415,7 +415,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     try_touch_data(item)
                     try_touch_data(self)
 
-                    item = self.nplike.promote_scalar(item)
+                    item = self.nplike.asarray(item)
 
                     if is_unknown_length(dimension_length) or is_unknown_integer(item):
                         continue
@@ -469,7 +469,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
         if len(kwargs) > 0:
             raise ValueError("TypeTracerArray does not support kwargs for ufuncs")
-        return self.nplike._apply_ufunc(ufunc, *inputs)
+        return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
 
     def __bool__(self) -> bool:
         raise RuntimeError("cannot realise an unknown value")
@@ -504,26 +504,39 @@ class TypeTracer(NumpyLike):
     is_eager: Final = True
     supports_structured_dtypes: Final = True
 
-    def _apply_ufunc(self, ufunc, *inputs):
-        for x in inputs:
-            assert not isinstance(x, PlaceholderArray)
+    def apply_ufunc(
+        self,
+        ufunc: UfuncLike,
+        method: str,
+        args: list[Any],
+        kwargs: dict[str, Any] | None = None,
+    ) -> TypeTracerArray | tuple[TypeTracerArray]:
+        for x in args:
             try_touch_data(x)
 
-        inputs = [x.content if isinstance(x, MaybeNone) else x for x in inputs]
-
-        broadcasted = self.broadcast_arrays(*inputs)
-        placeholders = [numpy.empty(0, x.dtype) for x in broadcasted]
-
-        result = ufunc(*placeholders)
-        if isinstance(result, numpy.ndarray):
-            return TypeTracerArray._new(result.dtype, shape=broadcasted[0].shape)
-        elif isinstance(result, tuple):
-            return (
-                TypeTracerArray._new(x.dtype, shape=b.shape)
-                for x, b in zip(result, broadcasted)
+        # Unwrap options, assume they don't occur
+        args = [x.content if isinstance(x, MaybeNone) else x for x in args]
+        # Determine input argument dtypes
+        input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
+        # Resolve these for the given ufunc
+        arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
+        resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
+        # Interpret the arguments under these dtypes
+        resolved_args = [
+            self.asarray(arg, dtype=dtype) for arg, dtype in zip(args, resolved_dtypes)
+        ]
+        # Broadcast these resolved arguments
+        broadcasted_args = self.broadcast_arrays(*resolved_args)
+        result_dtypes = resolved_dtypes[ufunc.nin :]
+        if len(result_dtypes) == 1:
+            return TypeTracerArray._new(
+                result_dtypes[0], shape=broadcasted_args[0].shape
             )
         else:
-            raise TypeError
+            return (
+                TypeTracerArray._new(dtype, shape=b.shape)
+                for dtype, b in zip(result_dtypes, broadcasted_args)
+            )
 
     def _axis_is_valid(self, axis: int, ndim: int) -> bool:
         if axis < 0:
@@ -801,18 +814,6 @@ class TypeTracer(NumpyLike):
         return TypeTracerArray._new(x.dtype, (values.size,))
 
     ############################ manipulation
-
-    def promote_scalar(self, obj) -> TypeTracerArray:
-        assert not isinstance(obj, PlaceholderArray)
-        if is_unknown_scalar(obj):
-            return obj
-        elif isinstance(obj, (Number, bool)):
-            # TODO: statically define these types for all nplikes
-            as_array = numpy.asarray(obj)
-            return TypeTracerArray._new(as_array.dtype, ())
-        else:
-            raise TypeError(f"expected scalar type, received {obj}")
-
     def shape_item_as_index(self, x1: ShapeItem) -> IndexType:
         if x1 is unknown_length:
             return TypeTracerArray._new(np.int64, shape=())
@@ -1206,7 +1207,7 @@ class TypeTracer(NumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         assert not isinstance(x1, PlaceholderArray)
-        return self._apply_ufunc(numpy.add, x1, x2)
+        return self.apply_ufunc(numpy.add, "__call__", (x1, x2))
 
     def logical_and(
         self,
@@ -1215,7 +1216,7 @@ class TypeTracer(NumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> TypeTracerArray:
         assert not isinstance(x1, PlaceholderArray)
-        return self._apply_ufunc(numpy.logical_and, x1, x2)
+        return self.apply_ufunc(numpy.logical_and, "__call__", (x1, x2))
 
     def logical_or(
         self,
@@ -1225,21 +1226,21 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
-        return self._apply_ufunc(numpy.logical_or, x1, x2)
+        return self.apply_ufunc(numpy.logical_or, "__call__", (x1, x2))
 
     def logical_not(
         self, x: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> TypeTracerArray:
         assert not isinstance(x, PlaceholderArray)
-        return self._apply_ufunc(numpy.logical_not, x)
+        return self.apply_ufunc(numpy.logical_not, "__call__", (x,))
 
     def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> TypeTracerArray:
         assert not isinstance(x, PlaceholderArray)
-        return self._apply_ufunc(numpy.sqrt, x)
+        return self.apply_ufunc(numpy.sqrt, "__call__", (x,))
 
     def exp(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> TypeTracerArray:
         assert not isinstance(x, PlaceholderArray)
-        return self._apply_ufunc(numpy.exp, x)
+        return self.apply_ufunc(numpy.exp, "__call__", (x,))
 
     def divide(
         self,
@@ -1249,7 +1250,7 @@ class TypeTracer(NumpyLike):
     ) -> TypeTracerArray:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
-        return self._apply_ufunc(numpy.divide, x1, x2)
+        return self.apply_ufunc(numpy.divide, "__call__", (x1, x2))
 
     ############################ almost-ufuncs
 

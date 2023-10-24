@@ -242,8 +242,32 @@ if hasattr(numpy, "timedelta64"):
     NumpyMetadata.timedelta64 = numpy.timedelta64
 
 
+class UfuncLike(Protocol):
+    nargs: int
+    nin: int
+    nout: int
+
+    def resolve_dtypes(
+        self, dtypes: tuple[numpy.dtype | type, ...]
+    ) -> tuple[numpy.dtype, ...]:
+        ...
+
+    def __call__(self, *args: ArrayLike, **kwargs) -> ArrayLike:
+        ...
+
+
 class NumpyLike(PublicSingleton, Protocol):
     ############################ Awkward features
+
+    @abstractmethod
+    def apply_ufunc(
+        self,
+        ufunc: UfuncLike,
+        method: str,
+        args: list[Any],
+        kwargs: dict[str, Any] | None = None,
+    ) -> ArrayLike | tuple[ArrayLike]:
+        ...
 
     @property
     @abstractmethod
