@@ -37,6 +37,15 @@ class _UnknownLength(PrivateSingleton):
     __rmul__ = __mul__
     __imul__ = __mul__
 
+    def __truediv__(self, other) -> Self | NotImplemented:
+        if isinstance(other, int) or other is self:
+            return self
+        else:
+            return NotImplemented
+
+    __rtruediv__ = __truediv__
+    __itruediv__ = __truediv__
+
     def __floordiv__(self, other) -> Self | NotImplemented:
         if isinstance(other, int) or other is self:
             return self
