@@ -257,6 +257,8 @@ ignore_errors = true
 ignore_missing_imports = true
 
 [tool.ruff]
+typing-modules = ["awkward._typing"]
+src = ["src"]
 extend-exclude = [
     "studies",
     "pybind11",
@@ -264,6 +266,7 @@ extend-exclude = [
     "docs-*",
     "src/awkward/_typeparser/generated_parser.py",
 ]
+[tool.ruff.lint]
 select = [
     "E", "F", "W", # flake8
     "B", "B904",   # flake8-bugbear
@@ -282,7 +285,7 @@ select = [
     "NPY",         # NumPy specific rules
     "TID251",      # flake8-tidy-imports
 ]
-extend-ignore = [
+ignore = [
     "E501",    # Line too long
     "UP030",   # {0} -> {}
     "PLR",     # Design related pylint codes
@@ -292,8 +295,6 @@ extend-ignore = [
     "PLW0603", # Using the global statement to update is discouraged
     "PLC1901", # x == "" can be simplified to not x (empty string is falsey)
 ]
-typing-modules = ["awkward._typing"]
-src = ["src"]
 unfixable = [
     "T20",  # Removes print statements
     "F841", # Removes unused variables
@@ -301,7 +302,7 @@ unfixable = [
 external = []
 mccabe.max-complexity = 100
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "dev/*" = ["T20", "TID251"]
 "src/awkward/numba/*" = ["TID251"]
 "src/awkward/_errors.py" = ["TID251"]
@@ -315,10 +316,7 @@ mccabe.max-complexity = 100
 "src/awkward/_operators.py" = ["TID251"]
 "tests*/*" = ["T20", "TID251"]
 
-[tool.ruff.flake8-tidy-imports.banned-api]
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
 "numpy".msg = "Use `numpy = ak._nplikes.Numpy.instance()` instead"
 "jax".msg = "Use `jax = ak._nplikes.Jax.instance()` instead"
 "cupy".msg = "Use `cupy = ak._nplikes.Cupy.instance()` instead"
-
-[tool.nbqa.addopts]
-pyupgrade = ["--py38-plus"]
