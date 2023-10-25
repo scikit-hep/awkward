@@ -12,7 +12,8 @@
 #include <stdexcept>
 #include <stdint.h>
 #include <typeinfo>
-
+#include <map>
+#include <vector>
 
 namespace awkward {
 
