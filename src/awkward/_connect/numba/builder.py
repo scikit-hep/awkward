@@ -29,7 +29,7 @@ class ArrayBuilderType(numba.types.Type):
                 ak._connect.numba.arrayview.repr_behavior(behavior)
             )
         )
-        self.behavior = tuple(behavior.items())
+        self.behavior = behavior if behavior is None else tuple(behavior.items())
 
 
 @numba.extending.register_model(ArrayBuilderType)
