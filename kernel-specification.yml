@@ -4500,14 +4500,14 @@ kernels:
     description: null
     definition: |
       def awkward_Index_nones_as_index(toindex, length):
-          last_index = 0
+          num_non_null = 0
           for i in range(length):
-              if toindex[i] > last_index:
-                  last_index = toindex[i]
+              if toindex[i] != -1:
+                  num_non_null += 1
           for i in range(length):
               if toindex[i] == -1:
-                  last_index = last_index + 1
-                  toindex[i] = last_index
+                  toindex[i] = num_non_null
+                  num_non_null += 1
     automatic-tests: false
     manual-tests: []
 

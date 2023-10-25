@@ -1265,10 +1265,15 @@ class IndexedOptionArray(Content):
                     nextoutindex.length,
                 )
             )
-
-        out = ak.contents.IndexedOptionArray.simplified(
-            nextoutindex, out, parameters=self._parameters
-        )
+            # Drop the option type: we have ensured that we don't have any
+            # -1 values in `nextoutindex` now!
+            out = out._carry(nextoutindex, False).copy(
+                parameters=parameters_union(out._parameters, self._parameters)
+            )
+        else:
+            out = ak.contents.IndexedOptionArray.simplified(
+                nextoutindex, out, parameters=self._parameters
+            )
 
         inject_nones = (
             True
