@@ -270,6 +270,47 @@ namespace awkward {
     visit_impl<sizeof...(CONTENTs)>::visit(contents, index, fun);
   }
 
+  /// @brief Helper function to retrieve the names of the buffers.
+  ///
+  /// Only to to used with C interface. Not recommended as it can cause a mismatch
+  /// between the buffer names and sizes.
+  template<typename LayoutBuilder>
+  std::vector<std::string> buffer_name_helper(const LayoutBuilder* builder) {
+    std::map <std::string, size_t> names_nbytes = {};
+    std::vector<std::string> buffer_name;
+    builder->buffer_nbytes(names_nbytes);
+    for (auto it: names_nbytes) {
+      buffer_name.push_back(it.first);
+    }
+    return buffer_name;
+  }
+
+  /// @brief Helper function to retrieve the sizes (in bytes) of the buffers.
+  ///
+  /// Only to to used with C interface. Not recommended as it can cause a mismatch
+  /// between the buffer names and sizes.
+  template<typename LayoutBuilder>
+  std::vector<size_t> buffer_size_helper(const LayoutBuilder* builder) {
+    std::map <std::string, size_t> names_nbytes = {};
+    std::vector<size_t> buffer_size;
+    builder->buffer_nbytes(names_nbytes);
+    for (auto it: names_nbytes) {
+      buffer_size.push_back(it.second);
+    }
+    return buffer_size;
+  }
+
+  /// @brief Helper function to retrieve the number of the buffers.
+  ///
+  /// Only to to used with C interface. Not recommended as it can cause a mismatch
+  /// between the buffer names and sizes.
+  template<typename LayoutBuilder>
+  size_t num_buffers_helper(const LayoutBuilder* builder) {
+    std::map <std::string, size_t> names_nbytes = {};
+    builder->buffer_nbytes(names_nbytes);
+    return names_nbytes.size();
+  }
+
 }  // namespace awkward
 
 #endif  // AWKWARD_CPP_HEADERS_UTILS_H_
