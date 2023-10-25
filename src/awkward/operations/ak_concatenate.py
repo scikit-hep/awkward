@@ -66,7 +66,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(
-            arrays, allow_record=False, allow_other=False, primitive_policy="error"
+            arrays, allow_record=False, allow_unknown=False, primitive_policy="error"
         )
         # Only handle concatenation along `axis=0`
         # Let ambiguous depth arrays fall through
@@ -81,7 +81,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             ak.operations.to_layout(
                 x,
                 allow_record=axis != 0,
-                allow_other=False,
+                allow_unknown=False,
                 primitive_policy="pass-through",
             )
             for x in arrays

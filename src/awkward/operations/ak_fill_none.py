@@ -73,7 +73,7 @@ def _impl(array, value, axis, highlevel, behavior):
     # Ensure a common backend exists
     backend = backend_of(array, value, default=cpu)
     arraylayout = ak.operations.to_layout(
-        array, allow_record=True, allow_other=False
+        array, allow_record=True, allow_unknown=False
     ).to_backend(backend)
     valuelayout = ak.operations.to_layout(
         value,

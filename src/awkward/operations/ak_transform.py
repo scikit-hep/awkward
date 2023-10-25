@@ -466,7 +466,7 @@ def _impl(
     layout = ak.operations.ak_to_layout._impl(
         array,
         allow_record=False,
-        allow_other=False,
+        allow_unknown=False,
         allow_none=False,
         regulararray=True,
         use_from_iter=True,
@@ -477,7 +477,7 @@ def _impl(
         ak.operations.ak_to_layout._impl(
             x,
             allow_record=False,
-            allow_other=False,
+            allow_unknown=False,
             allow_none=False,
             regulararray=True,
             use_from_iter=True,

@@ -213,7 +213,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         behavior = behavior_of(*arrays.values(), behavior=behavior)
         array_layouts = {
             name: ak.operations.to_layout(
-                layout, allow_record=False, allow_other=False
+                layout, allow_record=False, allow_unknown=False
             ).to_backend(backend)
             for name, layout in arrays.items()
         }
@@ -226,7 +226,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         behavior = behavior_of(*arrays, behavior=behavior)
         array_layouts = [
             ak.operations.to_layout(
-                layout, allow_record=False, allow_other=False
+                layout, allow_record=False, allow_unknown=False
             ).to_backend(backend)
             for layout in arrays
         ]

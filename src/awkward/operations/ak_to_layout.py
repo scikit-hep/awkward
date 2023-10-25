@@ -29,7 +29,7 @@ def to_layout(
     array,
     *,
     allow_record=True,
-    allow_other=False,
+    allow_unknown=False,
     allow_none=False,
     use_from_iter=True,
     primitive_policy="promote",
@@ -45,7 +45,7 @@ def to_layout(
             iterable (for #ak.from_iter to convert).
         allow_record (bool): If True, allow #ak.record.Record as an output;
             otherwise, if the output would be a scalar record, raise an error.
-        allow_other (bool): If True, allow non-Awkward outputs; otherwise,
+        allow_unknown (bool): If True, allow non-Awkward outputs; otherwise,
             raise an error.
         allow_none (bool): If True, allow None outputs; otherwise, raise an
             error.
@@ -76,7 +76,7 @@ def to_layout(
     return _impl(
         array,
         allow_record,
-        allow_other,
+        allow_unknown,
         allow_none,
         regulararray,
         use_from_iter,
@@ -125,7 +125,7 @@ def _handle_array_like(obj, layout, *, primitive_policy):
 def _impl(
     obj,
     allow_record,
-    allow_other,
+    allow_unknown,
     allow_none,
     regulararray,
     use_from_iter,
@@ -249,9 +249,9 @@ def _impl(
                 "Encountered an iterable object, but coercing iterables is disabled"
             )
     # Unknown types
-    elif allow_other:
+    elif allow_unknown:
         return obj
     else:
         raise TypeError(
-            f"Encountered unknown type {type(obj).__name__}, and `allow_other` is `False`"
+            f"Encountered unknown type {type(obj).__name__}, and `allow_unknown` is `False`"
         )

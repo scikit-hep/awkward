@@ -63,7 +63,7 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior):
     behavior = behavior_of(x, behavior=behavior)
     x = ak.highlevel.Array(
         ak.operations.to_layout(
-            x, allow_record=False, allow_other=False, primitive_policy="error"
+            x, allow_record=False, allow_unknown=False, primitive_policy="error"
         ),
         behavior=behavior,
     )

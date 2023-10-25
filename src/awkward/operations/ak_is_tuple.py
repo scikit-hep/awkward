@@ -24,7 +24,7 @@ def _impl(array):
     layout = ak.operations.ak_to_layout._impl(
         array,
         allow_record=True,
-        allow_other=False,
+        allow_unknown=False,
         allow_none=False,
         regulararray=True,
         use_from_iter=True,

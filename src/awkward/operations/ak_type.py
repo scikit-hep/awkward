@@ -139,5 +139,5 @@ def _impl(array, behavior):
         return ak.types.ScalarType(ak.types.UnknownType(), behavior=behavior)
 
     else:
-        layout = ak.to_layout(array, allow_other=False, allow_record=False)
+        layout = ak.to_layout(array, allow_unknown=False, allow_record=False)
         return _impl(layout, behavior)

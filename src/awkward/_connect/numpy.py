@@ -69,7 +69,7 @@ def _to_rectilinear(arg, backend: Backend):
             layout = ak.to_layout(
                 arg,
                 allow_record=False,
-                allow_other=False,
+                allow_unknown=False,
                 primitive_policy="error",
                 string_policy="error",
             )
@@ -104,7 +104,7 @@ def array_function(func, types, args, kwargs: dict[str, Any], behavior: Mapping 
         out = ak.operations.ak_to_layout._impl(
             result,
             allow_record=True,
-            allow_other=True,
+            allow_unknown=True,
             allow_none=True,
             regulararray=True,
             use_from_iter=True,
@@ -152,7 +152,7 @@ def _array_ufunc_custom_cast(inputs, behavior: Mapping | None, backend):
         maybe_layout = ak.operations.to_layout(
             x if cast_fcn is None else cast_fcn(x),
             allow_record=True,
-            allow_other=True,
+            allow_unknown=True,
             primitive_policy="pass-through",
             string_policy="pass-through",
         )
@@ -271,7 +271,7 @@ def _array_ufunc_categorical(
         out = getattr(ufunc, method)(*nextinputs, **kwargs)
         if not isinstance(out, tuple):
             out = (out,)
-        return tuple(ak.to_layout(x, allow_other=True) for x in out)
+        return tuple(ak.to_layout(x, allow_unknown=True) for x in out)
 
 
 def _array_ufunc_string_likes(

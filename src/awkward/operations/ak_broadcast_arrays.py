@@ -210,7 +210,7 @@ def _impl(
 
     inputs = []
     for x in arrays:
-        y = ak.operations.to_layout(x, allow_record=True, allow_other=True)
+        y = ak.operations.to_layout(x, allow_record=True, allow_unknown=True)
         if not isinstance(y, (ak.contents.Content, ak.Record)):
             y = ak.contents.NumpyArray(backend.nplike.asarray([y]))
         inputs.append(y.to_backend(backend))

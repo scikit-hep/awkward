@@ -95,20 +95,20 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
     backend = backend_of(x, y, weight, coerce_to_common=True, default=cpu)
     x = ak.highlevel.Array(
         ak.operations.to_layout(
-            x, allow_record=False, allow_other=False, primitive_policy="error"
+            x, allow_record=False, allow_unknown=False, primitive_policy="error"
         ).to_backend(backend),
         behavior=behavior,
     )
     y = ak.highlevel.Array(
         ak.operations.to_layout(
-            y, allow_record=False, allow_other=False, primitive_policy="error"
+            y, allow_record=False, allow_unknown=False, primitive_policy="error"
         ).to_backend(backend),
         behavior=behavior,
     )
     if weight is not None:
         weight = ak.highlevel.Array(
             ak.operations.to_layout(
-                weight, allow_record=False, allow_other=False
+                weight, allow_record=False, allow_unknown=False
             ).to_backend(backend),
             behavior=behavior,
         )

@@ -652,7 +652,7 @@ class Content:
                 layout = ak.operations.ak_to_layout._impl(
                     where,
                     allow_record=False,
-                    allow_other=False,
+                    allow_unknown=False,
                     allow_none=False,
                     regulararray=False,
                     use_from_iter=False,
@@ -677,7 +677,7 @@ class Content:
                 layout = ak.operations.ak_to_layout._impl(
                     where,
                     allow_record=False,
-                    allow_other=False,
+                    allow_unknown=False,
                     allow_none=False,
                     regulararray=False,
                     use_from_iter=True,

@@ -60,7 +60,7 @@ def ravel(array, *, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     layout = ak.operations.to_layout(
-        array, allow_record=False, allow_other=False, primitive_policy="error"
+        array, allow_record=False, allow_unknown=False, primitive_policy="error"
     )
 
     out = ak._do.remove_structure(layout, function_name="ak.ravel", drop_nones=False)

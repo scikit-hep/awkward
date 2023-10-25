@@ -111,7 +111,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         layouts = {
             n: ak._do.local_index(
                 ak.operations.to_layout(
-                    x, allow_record=False, allow_other=False, primitive_policy="error"
+                    x, allow_record=False, allow_unknown=False, primitive_policy="error"
                 ),
                 axis,
             ).to_backend(backend)
@@ -124,7 +124,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         layouts = [
             ak._do.local_index(
                 ak.operations.to_layout(
-                    x, allow_record=False, allow_other=False, primitive_policy="error"
+                    x, allow_record=False, allow_unknown=False, primitive_policy="error"
                 ),
                 axis,
             ).to_backend(backend)
