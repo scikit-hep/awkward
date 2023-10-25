@@ -105,7 +105,7 @@ def _handle_as_primitive(obj, layout, *, primitive_policy):
         return layout
     elif primitive_policy == "error":
         raise TypeError(
-            f"Encountered a scalar ({type(obj).__name__}), but scalars conversion/promotion is disabled"
+            f"Encountered a scalar ({type(obj).__name__}), but scalar conversion/promotion is disabled"
         )
     else:
         raise ValueError(
