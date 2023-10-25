@@ -273,8 +273,7 @@ namespace awkward {
 
   /// @brief Helper function to retrieve the names of the buffers.
   ///
-  /// Only to to used with C interface. Not recommended as it can cause a mismatch
-  /// between the buffer names and sizes.
+  /// Note: use with caution, beware of a potential mismatch between retrieved values!
   template<typename LayoutBuilder>
   std::vector<std::string> buffer_name_helper(const LayoutBuilder* builder) {
     std::map <std::string, size_t> names_nbytes = {};
@@ -288,8 +287,7 @@ namespace awkward {
 
   /// @brief Helper function to retrieve the sizes (in bytes) of the buffers.
   ///
-  /// Only to to used with C interface. Not recommended as it can cause a mismatch
-  /// between the buffer names and sizes.
+  /// Note: use with caution, beware of a potential mismatch between retrieved values!
   template<typename LayoutBuilder>
   std::vector<size_t> buffer_size_helper(const LayoutBuilder* builder) {
     std::map <std::string, size_t> names_nbytes = {};
@@ -303,8 +301,7 @@ namespace awkward {
 
   /// @brief Helper function to retrieve the number of the buffers.
   ///
-  /// Only to to used with C interface. Not recommended as it can cause a mismatch
-  /// between the buffer names and sizes.
+  /// Note: use with caution, beware of a potential mismatch between retrieved values!
   template<typename LayoutBuilder>
   size_t num_buffers_helper(const LayoutBuilder* builder) {
     std::map <std::string, size_t> names_nbytes = {};
