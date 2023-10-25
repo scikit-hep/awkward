@@ -15,12 +15,21 @@ def test():
                     ak.index.Index64(
                         np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, -1], dtype=np.int64)
                     ),
-                    ak.contents.NumpyArray(np.arange(10)),
+                    ak.contents.NumpyArray(np.arange(10, dtype=np.uint8)),
                 )
             ],
             ["x"],
         ),
     )
     assert ak.almost_equal(
-        ak.fill_none(layout, 9, axis=0), ak.zip({"x": np.arange(10)})
+        ak.fill_none(layout, 9, axis=0),
+        ak.zip(
+            {
+                "x": np.arange(
+                    10,
+                    # Default arraybuilder type
+                    dtype=np.int64,
+                )
+            }
+        ),
     )
