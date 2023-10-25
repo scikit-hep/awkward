@@ -57,7 +57,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
 
     nan_layout = ak.operations.to_layout(
         nan,
-        allow_other=False,
+        allow_unknown=False,
         allow_none=True,
         primitive_policy="pass-through",
         allow_record=False,
@@ -68,7 +68,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
 
     posinf_layout = ak.operations.to_layout(
         posinf,
-        allow_other=False,
+        allow_unknown=False,
         allow_none=True,
         primitive_policy="pass-through",
         allow_record=False,
@@ -79,7 +79,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
 
     neginf_layout = ak.operations.to_layout(
         neginf,
-        allow_other=False,
+        allow_unknown=False,
         allow_none=True,
         primitive_policy="pass-through",
         allow_record=False,

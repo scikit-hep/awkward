@@ -78,7 +78,7 @@ def _impl(array, value, axis, highlevel, behavior):
     valuelayout = ak.operations.to_layout(
         value,
         allow_record=True,
-        allow_other=False,
+        allow_unknown=False,
         use_from_iter=True,
         primitive_policy="pass-through",
     )
@@ -91,7 +91,7 @@ def _impl(array, value, axis, highlevel, behavior):
         valuelayout = ak.operations.to_layout(
             value,
             allow_record=True,
-            allow_other=False,
+            allow_unknown=False,
             use_from_iter=True,
             primitive_policy="promote",
         )
