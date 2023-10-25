@@ -7,6 +7,8 @@ import awkward as ak
 
 numba = pytest.importorskip("numba")
 
+from numba.core.errors import NumbaTypeError  # noqa: E402
+
 import awkward.numba.layoutbuilder as lb  # noqa: E402
 
 ak.numba.register_and_check()
@@ -593,7 +595,7 @@ def test_unbox_for_loop():
 
     builder = lb.Empty()
     # Unknown attribute 'append' of type lb.Empty
-    with pytest.raises(numba.core.errors.TypingError):
+    with pytest.raises(NumbaTypeError):
         f2(builder)
 
 

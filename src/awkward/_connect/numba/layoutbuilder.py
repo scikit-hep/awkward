@@ -302,6 +302,16 @@ def Empty_length(builder):
     return getter
 
 
+@numba.extending.overload_method(EmptyType, "append")
+def Empty_append(builder, datum):
+    if isinstance(builder, EmptyType):
+
+        def append(builder, datum):
+            raise NumbaTypeError("Empty cannot append data")
+
+        return append
+
+
 ########## ListOffset #########################################################
 
 
