@@ -90,13 +90,15 @@ def _impl(array, axis, highlevel, behavior):
         if isinstance(layout, ak.record.Record):
             return 1
         else:
-            return layout.length
+            return layout.backend.index_nplike.shape_item_as_index(layout.length)
 
     def action(layout, depth, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
 
         if posaxis == depth and layout.is_list:
-            return ak.contents.NumpyArray(layout.stops.data - layout.starts.data)
+            return ak.contents.NumpyArray(
+                layout.stops.data - layout.starts.data, backend=layout.backend
+            )
 
         elif layout.is_leaf:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
