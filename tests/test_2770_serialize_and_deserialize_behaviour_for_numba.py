@@ -7,7 +7,7 @@ import awkward as ak
 numba = pytest.importorskip("numba")
 
 
-def test_ArrayBuilder_inNumba():
+def test_ArrayBuilder_behavior():
     SOME_ATTRS = {"FOO": "BAR"}
     builder = ak.ArrayBuilder(behavior=SOME_ATTRS)
 
@@ -16,12 +16,29 @@ def test_ArrayBuilder_inNumba():
         return array
 
     assert builder.behavior is SOME_ATTRS
-    # In Python, when we create a dictionary literal like {'FOO': 'BAR'}, it
-    # creates a new dictionary object. If we serialize this dictionary to
-    # a JSON string, or to a tuple and then deserialize it, we get a new dictionary
-    # object that is structurally identical to the original one, but it is not
-    # the same object in terms of identity.
+    assert func(builder).behavior is SOME_ATTRS
 
-    # To check if two dictionaries are equal in terms of their contents,
-    # we should use the == operator instead of is.
-    assert func(builder).behavior == SOME_ATTRS
+    def make_add_xyr():
+        def add_xyr(left, right):
+            x = left.x + right.x
+            y = left.y + right.y
+            return ak.zip(
+                {
+                    "x": x,
+                    "y": y,
+                    "r": np.sqrt(x**2 + y**2),
+                },
+                with_name="xyr",
+            )
+
+        return add_xyr
+
+
+    behavior = {(np.add, "xyr", "xyr"): make_add_xyr()}
+
+
+    a = ak.Array([{"x": 3, "y": 4, "r": 5}], with_name="xyr", behavior=behavior)
+    b = ak.Array([{"x": 3, "y": 4, "r": 5}], with_name="xyr", behavior=behavior)
+
+    builder = ak.ArrayBuilder(behavior=behavior)
+    assert func(builder).behavior is behavior
