@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import numpy as np
 import pytest
 
 import awkward as ak
@@ -33,12 +34,7 @@ def test_ArrayBuilder_behavior():
 
         return add_xyr
 
-
     behavior = {(np.add, "xyr", "xyr"): make_add_xyr()}
-
-
-    a = ak.Array([{"x": 3, "y": 4, "r": 5}], with_name="xyr", behavior=behavior)
-    b = ak.Array([{"x": 3, "y": 4, "r": 5}], with_name="xyr", behavior=behavior)
 
     builder = ak.ArrayBuilder(behavior=behavior)
     assert func(builder).behavior is behavior
