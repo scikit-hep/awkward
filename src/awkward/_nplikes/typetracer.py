@@ -801,14 +801,11 @@ class TypeTracer(NumpyLike):
         try_touch_data(x)
         try_touch_data(values)
         try_touch_data(sorter)
-        if (
-            not (
-                is_unknown_length(x.size)
-                or sorter is None
-                or is_unknown_length(sorter.size)
-            )
-            and x.size != sorter.size
-        ):
+        if not (
+            is_unknown_length(x.size)
+            or sorter is None
+            or is_unknown_length(sorter.size)
+        ) and x.size != sorter.size:
             raise ValueError("x.size should equal sorter.size")
 
         return TypeTracerArray._new(x.dtype, (values.size,))
