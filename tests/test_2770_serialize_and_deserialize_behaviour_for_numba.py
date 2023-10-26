@@ -75,3 +75,23 @@ def test_ArrayBuilder_non_picklable_behavior():
         print("Lambda functions have the same identity")
     else:
         print("Lambda functions have different identities")
+
+    @numba.njit
+    def make_ab(builder):
+        builder.begin_record("xyz")
+        builder.field("x").integer(3)
+        builder.field("y").integer(4)
+        builder.field("z").integer(3)
+        builder.end_record()
+
+        builder.begin_record("xyz")
+        builder.field("x").integer(3)
+        builder.field("y").integer(4)
+        builder.field("z").integer(3)
+        builder.end_record()
+        return builder
+
+    result = make_ab(builder).snapshot()
+
+    print(result)
+    assert result.behavior == make_ab(builder).behavior
