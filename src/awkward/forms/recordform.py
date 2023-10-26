@@ -48,6 +48,8 @@ class RecordForm(Form):
 
         self._fields = None if fields is None else list(fields)
         self._contents = list(contents)
+        if fields is not None:
+            assert len(self._fields) == len(self._contents)
         self._init(parameters=parameters, form_key=form_key)
 
     @property
