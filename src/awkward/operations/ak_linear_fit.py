@@ -94,21 +94,21 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
     behavior = behavior_of(x, y, weight, behavior=behavior)
     backend = backend_of(x, y, weight, coerce_to_common=True, default=cpu)
     x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False).to_backend(
-            backend
-        ),
+        ak.operations.to_layout(
+            x, allow_record=False, allow_unknown=False, primitive_policy="error"
+        ).to_backend(backend),
         behavior=behavior,
     )
     y = ak.highlevel.Array(
-        ak.operations.to_layout(y, allow_record=False, allow_other=False).to_backend(
-            backend
-        ),
+        ak.operations.to_layout(
+            y, allow_record=False, allow_unknown=False, primitive_policy="error"
+        ).to_backend(backend),
         behavior=behavior,
     )
     if weight is not None:
         weight = ak.highlevel.Array(
             ak.operations.to_layout(
-                weight, allow_record=False, allow_other=False
+                weight, allow_record=False, allow_unknown=False
             ).to_backend(backend),
             behavior=behavior,
         )
@@ -202,65 +202,24 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior):
         intercept_error = ufuncs.sqrt(sumwxx / delta)
         slope_error = ufuncs.sqrt(sumw / delta)
 
-        intercept = ak.operations.to_layout(
-            intercept, allow_record=True, allow_other=True
-        )
-        slope = ak.operations.to_layout(slope, allow_record=True, allow_other=True)
-        intercept_error = ak.operations.to_layout(
-            intercept_error, allow_record=True, allow_other=True
-        )
-        slope_error = ak.operations.to_layout(
-            slope_error, allow_record=True, allow_other=True
+        is_scalar = not isinstance(
+            ak.operations.to_layout(intercept, primitive_policy="pass-through"),
+            ak.contents.Content,
         )
 
-        scalar = False
-        if not isinstance(
-            intercept,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            intercept = ak.contents.NumpyArray(backend.nplike.asarray([intercept]))
-            scalar = True
-        if not isinstance(
-            slope,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            slope = ak.contents.NumpyArray(backend.nplike.asarray([slope]))
-            scalar = True
-        if not isinstance(
-            intercept_error,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            intercept_error = ak.contents.NumpyArray(
-                backend.nplike.asarray([intercept_error])
-            )
-            scalar = True
-        if not isinstance(
-            slope_error,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            slope_error = ak.contents.NumpyArray(backend.nplike.asarray([slope_error]))
-            scalar = True
+        intercept = ak.operations.to_layout(intercept)
+        slope = ak.operations.to_layout(slope)
+        intercept_error = ak.operations.to_layout(intercept_error)
+        slope_error = ak.operations.to_layout(slope_error)
 
         out = ak.contents.RecordArray(
             [intercept, slope, intercept_error, slope_error],
             ["intercept", "slope", "intercept_error", "slope_error"],
             parameters={"__record__": "LinearFit"},
         )
-        if scalar:
+        if is_scalar:
             out = out[0]
 
         return wrap_layout(
-            out, highlevel=highlevel, behavior=behavior, allow_other=scalar
+            out, highlevel=highlevel, behavior=behavior, allow_other=is_scalar
         )

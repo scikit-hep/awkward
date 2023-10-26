@@ -66,7 +66,13 @@ def _to_rectilinear(arg, backend: Backend):
             )
         # Otherwise, cast to layout and convert
         else:
-            layout = ak.to_layout(arg, allow_record=False, allow_other=False)
+            layout = ak.to_layout(
+                arg,
+                allow_record=False,
+                allow_unknown=False,
+                primitive_policy="error",
+                string_policy="error",
+            )
             return layout.to_backend(backend).to_backend_array(allow_missing=True)
     elif isinstance(arg, tuple):
         return tuple(_to_rectilinear(x, backend) for x in arg)
@@ -96,7 +102,14 @@ def array_function(func, types, args, kwargs: dict[str, Any], behavior: Mapping 
         result = func(*rectilinear_args, **rectilinear_kwargs)
         # We want the result to be a layout (this will fail for functions returning non-array convertibles)
         out = ak.operations.ak_to_layout._impl(
-            result, allow_record=True, allow_other=True, regulararray=True
+            result,
+            allow_record=True,
+            allow_unknown=True,
+            allow_none=True,
+            regulararray=True,
+            use_from_iter=True,
+            primitive_policy="pass-through",
+            string_policy="pass-through",
         )
         return wrap_layout(out, behavior=behavior, allow_other=True)
 
@@ -136,12 +149,13 @@ def _array_ufunc_custom_cast(inputs, behavior: Mapping | None, backend):
     nextinputs = []
     for x in args:
         cast_fcn = find_custom_cast(x, behavior)
-        if cast_fcn is not None:
-            x = cast_fcn(x)
-        # String conversion
-        elif isinstance(x, (str, bytes)):
-            x = ak.to_layout([x])
-        maybe_layout = ak.operations.to_layout(x, allow_record=True, allow_other=True)
+        maybe_layout = ak.operations.to_layout(
+            x if cast_fcn is None else cast_fcn(x),
+            allow_record=True,
+            allow_unknown=True,
+            primitive_policy="pass-through",
+            string_policy="pass-through",
+        )
         if isinstance(maybe_layout, (ak.contents.Content, ak.record.Record)):
             maybe_layout = maybe_layout.to_backend(backend)
 
@@ -257,7 +271,7 @@ def _array_ufunc_categorical(
         out = getattr(ufunc, method)(*nextinputs, **kwargs)
         if not isinstance(out, tuple):
             out = (out,)
-        return tuple(ak.to_layout(x, allow_other=True) for x in out)
+        return tuple(ak.to_layout(x, allow_unknown=True) for x in out)
 
 
 def _array_ufunc_string_likes(
@@ -265,54 +279,66 @@ def _array_ufunc_string_likes(
 ):
     assert method == "__call__"
 
-    if (
-        ufunc in (numpy.equal, numpy.not_equal)
-        and len(inputs) == 2
-        and isinstance(inputs[0], ak.contents.Content)
-        and isinstance(inputs[1], ak.contents.Content)
-        and inputs[0].parameter("__array__") in ("string", "bytestring")
-        and inputs[1].parameter("__array__") == inputs[0].parameter("__array__")
+    if ufunc not in (numpy.equal, numpy.not_equal) or len(inputs) != 2:
+        return
+
+    left, right = inputs
+
+    if isinstance(left, ak.contents.Content) and left.parameter("__array__") in (
+        "string",
+        "bytestring",
     ):
-        left, right = inputs
-        nplike = left.backend.nplike
-
         left = ak.without_parameters(left, highlevel=False)
+    elif isinstance(left, (str, bytes)):
+        left = ak.without_parameters([left], highlevel=False)
+    else:
+        return
+
+    if isinstance(right, ak.contents.Content) and right.parameter("__array__") in (
+        "string",
+        "bytestring",
+    ):
         right = ak.without_parameters(right, highlevel=False)
+    elif isinstance(right, (str, bytes)):
+        right = ak.without_parameters([right], highlevel=False)
+    else:
+        return
 
-        # first condition: string lengths must be the same
-        left_counts_layout = ak._do.reduce(
-            left, ak._reducers.Count(), axis=-1, mask=False
+    left, right = ak.broadcast_arrays(left, right, highlevel=False, depth_limit=1)
+    nplike = left.backend.nplike
+
+    # first condition: string lengths must be the same
+    left_counts_layout = ak._do.reduce(left, ak._reducers.Count(), axis=-1, mask=False)
+    assert left_counts_layout.is_numpy
+    right_counts_layout = ak._do.reduce(
+        right, ak._reducers.Count(), axis=-1, mask=False
+    )
+    assert right_counts_layout.is_numpy
+
+    counts1 = nplike.asarray(left_counts_layout.data)
+    counts2 = nplike.asarray(right_counts_layout.data)
+
+    out = counts1 == counts2
+
+    # only compare characters in strings that are possibly equal (same length)
+    possible = nplike.logical_and(out, counts1)
+    possible_counts = counts1[possible]
+
+    if len(possible_counts) > 0:
+        onepossible = left[possible]
+        twopossible = right[possible]
+        reduced = ak.operations.all(
+            wrap_layout(onepossible) == wrap_layout(twopossible),
+            axis=-1,
+            highlevel=False,
         )
-        assert left_counts_layout.is_numpy
-        right_counts_layout = ak._do.reduce(
-            right, ak._reducers.Count(), axis=-1, mask=False
-        )
-        assert right_counts_layout.is_numpy
+        # update same-length strings with a verdict about their characters
+        out[possible] = reduced.data
 
-        counts1 = nplike.asarray(left_counts_layout.data)
-        counts2 = nplike.asarray(right_counts_layout.data)
+    if ufunc is numpy.not_equal:
+        out = nplike.logical_not(out)
 
-        out = counts1 == counts2
-
-        # only compare characters in strings that are possibly equal (same length)
-        possible = nplike.logical_and(out, counts1)
-        possible_counts = counts1[possible]
-
-        if len(possible_counts) > 0:
-            onepossible = left[possible]
-            twopossible = right[possible]
-            reduced = ak.operations.all(
-                wrap_layout(onepossible) == wrap_layout(twopossible),
-                axis=-1,
-                highlevel=False,
-            )
-            # update same-length strings with a verdict about their characters
-            out[possible] = reduced.data
-
-        if ufunc is numpy.not_equal:
-            out = nplike.logical_not(out)
-
-        return (ak.contents.NumpyArray(out),)
+    return (ak.contents.NumpyArray(out),)
 
 
 def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):

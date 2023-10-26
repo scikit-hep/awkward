@@ -260,7 +260,9 @@ def nansum(
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=False, allow_unknown=False, primitive_policy="error"
+    )
     behavior = behavior_of(array, behavior=behavior)
     reducer = ak._reducers.Sum()
 

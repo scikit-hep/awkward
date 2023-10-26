@@ -77,7 +77,9 @@ def ptp(
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
     axis = regularize_axis(axis)
     behavior = behavior_of(array, behavior=behavior)
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=False, allow_unknown=False, primitive_policy="error"
+    )
 
     with np.errstate(invalid="ignore", divide="ignore"):
         maxi = ak.operations.ak_max._impl(

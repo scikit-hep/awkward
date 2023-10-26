@@ -757,7 +757,7 @@ class TypeTracer(NumpyLike):
         else:
             length = unknown_length
 
-        default_int_type = np.int64 if (ak._util.win or ak._util.bits32) else np.int32
+        default_int_type = np.int32 if (ak._util.win or ak._util.bits32) else np.int64
         return TypeTracerArray._new(dtype or default_int_type, (length,))
 
     def meshgrid(

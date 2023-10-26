@@ -22,7 +22,14 @@ def is_tuple(array):
 
 def _impl(array):
     layout = ak.operations.ak_to_layout._impl(
-        array, allow_record=True, allow_other=False, regulararray=True
+        array,
+        allow_record=True,
+        allow_unknown=False,
+        allow_none=False,
+        regulararray=True,
+        use_from_iter=True,
+        primitive_policy="error",
+        string_policy="as-characters",
     )
 
     return layout.is_tuple

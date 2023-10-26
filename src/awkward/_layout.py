@@ -9,7 +9,11 @@ from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._typing import TYPE_CHECKING
 from awkward.errors import AxisError
+
+if TYPE_CHECKING:
+    from awkward.contents import Content
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -177,7 +181,7 @@ def from_arraylib(array, regulararray, recordarray):
     return layout
 
 
-def maybe_posaxis(layout, axis, depth):
+def maybe_posaxis(layout: Content, axis: int, depth: int) -> int | None:
     from awkward.record import Record
 
     if isinstance(layout, Record):

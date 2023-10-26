@@ -106,7 +106,9 @@ def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None
 
 def _impl(array, target, axis, clip, highlevel, behavior):
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=False, allow_unknown=False, primitive_policy="error"
+    )
     out = ak._do.pad_none(layout, target, axis, clip=clip)
 
     return wrap_layout(out, behavior, highlevel, like=array)

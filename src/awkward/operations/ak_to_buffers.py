@@ -128,7 +128,9 @@ def to_buffers(
 
 
 def _impl(array, container, buffer_key, form_key, id_start, backend, byteorder):
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=False, allow_unknown=False, primitive_policy="error"
+    )
 
     if backend is not None:
         backend = regularize_backend(backend)

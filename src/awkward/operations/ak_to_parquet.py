@@ -183,7 +183,14 @@ def to_parquet(
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
 
     layout = ak.operations.ak_to_layout._impl(
-        data, allow_record=True, allow_other=False, regulararray=True
+        data,
+        allow_record=True,
+        allow_unknown=False,
+        allow_none=False,
+        regulararray=True,
+        use_from_iter=True,
+        primitive_policy="error",
+        string_policy="as-characters",
     )
     table = ak.operations.ak_to_arrow_table._impl(
         layout,

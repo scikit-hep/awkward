@@ -45,7 +45,9 @@ def unzip(array, *, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     behavior = behavior_of(array, behavior=behavior)
-    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=True, allow_unknown=False, primitive_policy="error"
+    )
     fields = ak.operations.fields(layout)
 
     def check_for_union(layout, **kwargs):

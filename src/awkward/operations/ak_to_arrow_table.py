@@ -97,7 +97,9 @@ def _impl(
 ):
     from awkward._connect.pyarrow import direct_Content_subclass, pyarrow
 
-    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=True, allow_unknown=False, primitive_policy="error"
+    )
     if isinstance(layout, ak.record.Record):
         layout = layout.array[layout.at : layout.at + 1]
         record_is_scalar = True

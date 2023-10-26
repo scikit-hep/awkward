@@ -86,7 +86,7 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
 def _impl(array, counts, axis, highlevel, behavior):
     axis = regularize_axis(axis)
     layout = ak.operations.to_layout(
-        array, allow_record=False, allow_other=False
+        array, allow_record=False, allow_unknown=False
     ).to_packed()
     behavior = behavior_of(array, behavior=behavior)
     backend = layout.backend
@@ -99,7 +99,9 @@ def _impl(array, counts, axis, highlevel, behavior):
             counts = int(counts)
         current_offsets = None
     else:
-        counts = ak.operations.to_layout(counts, allow_record=False, allow_other=False)
+        counts = ak.operations.to_layout(
+            counts, allow_record=False, allow_unknown=False, primitive_policy="error"
+        )
         if counts.is_indexed and not counts.is_option:
             counts = counts.project()
 

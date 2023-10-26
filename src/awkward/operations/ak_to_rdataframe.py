@@ -71,7 +71,14 @@ def _impl(
     length = None
     for name, array in arrays.items():
         layouts[name] = ak.operations.ak_to_layout._impl(
-            array, allow_record=False, allow_other=False, regulararray=True
+            array,
+            allow_record=False,
+            allow_unknown=False,
+            allow_none=False,
+            regulararray=True,
+            use_from_iter=True,
+            primitive_policy="forbid",
+            string_policy="as-characters",
         ).to_backend(cpu)
         if length is None:
             length = layouts[name].length

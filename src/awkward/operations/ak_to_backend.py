@@ -61,7 +61,7 @@ def _impl(array, backend, highlevel, behavior):
     layout = ak.operations.to_layout(
         array,
         allow_record=True,
-        allow_other=False,
+        allow_unknown=False,
     )
     behavior = behavior_of(array, behavior=behavior)
     backend_layout = layout.to_backend(regularize_backend(backend))

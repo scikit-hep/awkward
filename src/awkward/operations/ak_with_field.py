@@ -85,9 +85,16 @@ def _impl(base, what, where, highlevel, behavior):
         backend = backend_of(base, what, default=cpu, coerce_to_common=True)
 
         base = ak.operations.to_layout(
-            base, allow_record=True, allow_other=False
+            base, allow_record=True, allow_unknown=False
         ).to_backend(backend)
-        what = ak.operations.to_layout(what, allow_record=True, allow_other=True)
+        what = ak.operations.to_layout(
+            what,
+            allow_record=True,
+            allow_unknown=False,
+            allow_none=True,
+            primitive_policy="pass-through",
+            string_policy="promote",
+        )
         if isinstance(what, (ak.contents.Content, ak.record.Record)):
             what = what.to_backend(backend)
 

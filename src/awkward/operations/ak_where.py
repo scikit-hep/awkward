@@ -68,7 +68,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None):
 
 def _impl1(condition, mergebool, highlevel, behavior):
     akcondition = ak.operations.to_layout(
-        condition, allow_record=False, allow_other=False
+        condition, allow_record=False, allow_unknown=False
     )
     backend = backend_of(akcondition, default=cpu)
 
@@ -91,14 +91,14 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
     backend = backend_of(condition, x, y, default=cpu, coerce_to_common=True)
 
     condition_layout = ak.operations.to_layout(
-        condition, allow_record=False, allow_other=False
+        condition, allow_record=False, allow_unknown=False
     ).to_backend(backend)
 
-    x_layout = ak.operations.to_layout(x, allow_record=False, allow_other=True)
+    x_layout = ak.operations.to_layout(x, allow_record=False, allow_unknown=True)
     if isinstance(x_layout, ak.contents.Content):
         x_layout = x_layout.to_backend(backend)
 
-    y_layout = ak.operations.to_layout(y, allow_record=False, allow_other=True)
+    y_layout = ak.operations.to_layout(y, allow_record=False, allow_unknown=True)
     if isinstance(y_layout, ak.contents.Content):
         y_layout = y_layout.to_backend(backend)
 

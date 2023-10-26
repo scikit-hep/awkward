@@ -167,43 +167,32 @@ def _impl(
     if depth_limit is not None and depth_limit <= 0:
         raise ValueError("depth_limit must be None or at least 1")
 
-    if isinstance(arrays, dict):
+    if isinstance(arrays, Mapping):
         behavior = behavior_of(*arrays.values(), behavior=behavior)
-        recordlookup = []
-        layouts = []
-        num_scalars = 0
-        for n, x in arrays.items():
-            recordlookup.append(n)
-            try:
-                layout = ak.operations.to_layout(
-                    x, allow_record=False, allow_other=False
-                )
-            except TypeError:
-                num_scalars += 1
-                layout = ak.operations.to_layout(
-                    [x], allow_record=False, allow_other=False
-                )
-            layouts.append(layout)
+        recordlookup = list(arrays)
+        layouts = [
+            ak.operations.to_layout(x, primitive_policy="pass-through")
+            for x in arrays.values()
+        ]
 
     else:
         arrays = list(arrays)
         behavior = behavior_of(*arrays, behavior=behavior)
         recordlookup = None
-        layouts = []
-        num_scalars = 0
-        for x in arrays:
-            try:
-                layout = ak.operations.to_layout(
-                    x, allow_record=False, allow_other=False
-                )
-            except TypeError:
-                num_scalars += 1
-                layout = ak.operations.to_layout(
-                    [x], allow_record=False, allow_other=False
-                )
-            layouts.append(layout)
+        layouts = [
+            ak.operations.to_layout(x, primitive_policy="pass-through") for x in arrays
+        ]
 
-    to_record = num_scalars == len(arrays)
+    # Promote any integers or records
+    layout_is_content = [isinstance(x, ak.contents.Content) for x in layouts]
+    layouts = [
+        x
+        if isinstance(x, (ak.contents.Content, ak.record.Record))
+        else ak.operations.to_layout(x, primitive_policy="promote")
+        for x in layouts
+    ]
+
+    to_record = not any(layout_is_content)
 
     if with_name is not None:
         if parameters is None:
