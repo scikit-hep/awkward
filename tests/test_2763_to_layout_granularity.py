@@ -52,3 +52,22 @@ def test_primitives():
     )
     out = ak.to_layout(4.0, primitive_policy="pass-through")
     assert isinstance(out, float) and out == 4.0
+
+
+def test_with_field():
+    result = ak.with_field([{"x": 1}], "hello", "x", highlevel=False)
+    assert result.is_equal_to(
+        ak.contents.RecordArray(
+            [
+                ak.contents.ListOffsetArray(
+                    ak.index.Index64([0, 5]),
+                    ak.contents.NumpyArray(
+                        np.array([104, 101, 108, 108, 111], dtype=np.uint8),
+                        parameters={"__array__": "char"},
+                    ),
+                    parameters={"__array__": "string"},
+                )
+            ],
+            ["x"],
+        )
+    )
