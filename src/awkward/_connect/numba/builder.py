@@ -29,7 +29,7 @@ class ArrayBuilderType(numba.types.Type):
                 ak._connect.numba.arrayview.repr_behavior(behavior)
             )
         )
-        self.behavior = behavior if behavior is None else tuple(behavior.items())
+        self.behavior = behavior  # if behavior is None else tuple(behavior.items())
 
 
 @numba.extending.register_model(ArrayBuilderType)
@@ -74,8 +74,16 @@ def box_ArrayBuilder(arraybuildertype, arraybuilderval, c):
     ArrayBuilder_obj = c.pyapi.unserialize(
         c.pyapi.serialize_object(ak.highlevel.ArrayBuilder)
     )
-    behavior_obj = c.pyapi.unserialize(
-        c.pyapi.serialize_object(arraybuildertype.behavior)
+    serializable2dict_obj = c.pyapi.unserialize(
+        c.pyapi.serialize_object(ak._connect.numba.arrayview.serializable2dict)
+    )
+    behavior2_obj = c.pyapi.unserialize(
+        c.pyapi.serialize_object(
+            ak._connect.numba.arrayview.dict2serializable(arraybuildertype.behavior)
+        )
+    )
+    behavior_obj = c.pyapi.call_function_objargs(
+        serializable2dict_obj, (behavior2_obj,)
     )
 
     proxyin = c.context.make_helper(c.builder, arraybuildertype, arraybuilderval)

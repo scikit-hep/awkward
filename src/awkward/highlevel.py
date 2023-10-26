@@ -2373,11 +2373,7 @@ class ArrayBuilder(Sized):
         assert isinstance(layout, _ext.ArrayBuilder)
         out = cls.__new__(cls)
         out._layout = layout
-        out._behavior = (
-            behavior
-            if behavior is None or isinstance(behavior, dict)
-            else dict(behavior)
-        )
+        out._behavior = behavior  # (
         return out
 
     @property
