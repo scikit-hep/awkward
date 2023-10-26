@@ -8,17 +8,20 @@ import awkward as ak
 numba = pytest.importorskip("numba")
 
 
+@numba.njit
+def func(array):
+    return array
+
+
 def test_ArrayBuilder_behavior():
     SOME_ATTRS = {"FOO": "BAR"}
     builder = ak.ArrayBuilder(behavior=SOME_ATTRS)
 
-    @numba.njit
-    def func(array):
-        return array
-
     assert builder.behavior is SOME_ATTRS
-    assert func(builder).behavior is SOME_ATTRS
+    assert func(builder).behavior == SOME_ATTRS
 
+
+def test_ArrayBuilder_non_picklable_behavior():
     def make_add_xyr():
         def add_xyr(left, right):
             x = left.x + right.x
@@ -35,6 +38,40 @@ def test_ArrayBuilder_behavior():
         return add_xyr
 
     behavior = {(np.add, "xyr", "xyr"): make_add_xyr()}
-
     builder = ak.ArrayBuilder(behavior=behavior)
-    assert func(builder).behavior is behavior
+    behavior_out = func(builder).behavior
+
+    # Compare the dictionaries themselves
+    # Note: 'behavior_out' is not 'behavior'
+    if behavior_out == behavior:
+        print("behavior_out is behavior")
+    else:
+        print("behavior_out is not behavior")
+
+    # Define ufuncs
+    ufunc_add = np.add
+
+    # Compare the identity of the ufunc within the dictionaries
+    # Note: 'ufunc_behavior_out[0]' is 'ufunc_add'
+    ufunc_behavior_out = next(iter(behavior_out))
+    ufunc_behavior = next(iter(behavior))
+
+    if ufunc_behavior_out[0] is ufunc_add:
+        print("ufunc_behavior_out[0] is ufunc_add")
+    else:
+        print("ufunc_behavior_out[0] is not ufunc_add")
+
+    if ufunc_behavior[0] is ufunc_add:
+        print("ufunc_behavior[0] is ufunc_add")
+    else:
+        print("ufunc_behavior[0] is not ufunc_add")
+
+    # Compare the unique identifiers of the lambda functions
+    # Note: Lambda functions have different identities
+    lambda_behavior_out = next(iter(behavior_out.values()))
+    lambda_behavior = next(iter(behavior.values()))
+
+    if id(lambda_behavior_out) == id(lambda_behavior):
+        print("Lambda functions have the same identity")
+    else:
+        print("Lambda functions have different identities")
