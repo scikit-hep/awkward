@@ -11,10 +11,7 @@ pyarrow = pytest.importorskip("pyarrow")
 def test_categorical_is_valid():
     # validate a categorical array by its content
     arr = ak.Array([2019, 2020, 2021, 2020, 2019])
-    with pytest.warns(
-        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
-    ):
-        categorical = ak.operations.ak_to_categorical.to_categorical(arr)
+    categorical = ak.str.to_categorical(arr)
     assert ak.operations.is_valid(categorical)
 
 

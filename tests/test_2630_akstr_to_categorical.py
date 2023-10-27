@@ -8,11 +8,6 @@ import awkward as ak
 pytest.importorskip("pyarrow")
 
 
-# These tests are copied from `test_0401_add_categorical_type_for_arrow_dictionary.py`
-# Once `ak.to_categorical` is no-longer deprecated, the old tests can be deleted
-# Other tests that check categorical properties (but not to_categorical) should be converted to use `ak.str.to_categorical`
-
-
 def test_to_categorical_nested():
     array = ak.Array([["one", "two", "three"], [], ["one", "two"], ["three"]])
     assert not ak.operations.ak_is_categorical.is_categorical(array)

@@ -120,7 +120,7 @@
   "_auto/ak.to_arrow.any-ext": "../reference/generated/ak.to_arrow.html",
   "_auto/ak.to_arrow_table.any-ext": "../reference/generated/ak.to_arrow_table.html",
   "_auto/ak.to_buffers.any-ext": "../reference/generated/ak.to_buffers.html",
-  "_auto/ak.to_categorical.any-ext": "../reference/generated/ak.to_categorical.html",
+  "_auto/ak.to_categorical.any-ext": "../reference/generated/ak.str.to_categorical.html",
   "_auto/ak.to_cupy.any-ext": "../reference/generated/ak.to_cupy.html",
   "_auto/ak.to_jax.any-ext": "../reference/generated/ak.to_jax.html",
   "_auto/ak.to_json.any-ext": "../reference/generated/ak.to_json.html",
