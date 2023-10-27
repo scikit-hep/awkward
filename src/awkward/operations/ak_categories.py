@@ -18,7 +18,7 @@ def categories(array, highlevel=True):
     #ak.contents.IndexedOptionArray labeled with parameter
     `"__array__" = "categorical"`), then this function returns its categories.
 
-    See also #ak.is_categorical, #ak.to_categorical, #ak.from_categorical.
+    See also #ak.is_categorical, #ak.str.to_categorical, #ak.from_categorical.
     """
     # Dispatch
     yield (array,)

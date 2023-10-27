@@ -9,10 +9,9 @@ numpy = Numpy.instance()
 
 
 def test():
-    with pytest.warns(
-        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
-    ):
-        this = ak.to_categorical(["one", "two", "one", "three", "one", "four"])
+    pytest.importorskip("pyarrow")
+
+    this = ak.str.to_categorical(["one", "two", "one", "three", "one", "four"])
     assert ak.is_categorical(this)
     # Ensure packing by itself doesn't change the type
     this_packed = ak.to_packed(this)

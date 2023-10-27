@@ -23,8 +23,7 @@ def from_categorical(array, *, highlevel=True, behavior=None):
     size of the dataset. (Conversion to categorical is expensive; conversion
     from categorical is cheap.)
 
-    See also #ak.is_categorical, #ak.categories, #ak.to_categorical,
-    #ak.str.to_categorical, #ak.from_categorical.
+    See also #ak.is_categorical, #ak.categories, #ak.str.to_categorical.
     """
     # Dispatch
     yield (array,)
