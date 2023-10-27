@@ -5,6 +5,7 @@ from numbers import Number
 from typing import Callable
 
 import numpy
+import packaging.version
 
 import awkward as ak
 from awkward._nplikes.dispatch import register_nplike
@@ -30,6 +31,9 @@ from awkward._typing import (
 )
 
 np = NumpyMetadata.instance()
+NUMPY_HAS_NEP_50 = packaging.version.Version(
+    numpy.__version__
+) >= packaging.version.Version("1.24")
 
 
 def is_unknown_length(array: Any) -> bool:
@@ -516,26 +520,46 @@ class TypeTracer(NumpyLike):
 
         # Unwrap options, assume they don't occur
         args = [x.content if isinstance(x, MaybeNone) else x for x in args]
-        # Determine input argument dtypes
-        input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
-        # Resolve these for the given ufunc
-        arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
-        resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
-        # Interpret the arguments under these dtypes
-        resolved_args = [
-            self.asarray(arg, dtype=dtype) for arg, dtype in zip(args, resolved_dtypes)
-        ]
-        # Broadcast these resolved arguments
-        broadcasted_args = self.broadcast_arrays(*resolved_args)
-        result_dtypes = resolved_dtypes[ufunc.nin :]
+        if NUMPY_HAS_NEP_50:
+            # Determine input argument dtypes
+            input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
+            # Resolve these for the given ufunc
+            arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
+            resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
+            # Interpret the arguments under these dtypes
+            resolved_args = [
+                self.asarray(arg, dtype=dtype)
+                for arg, dtype in zip(args, resolved_dtypes)
+            ]
+            # Broadcast these resolved arguments
+            broadcasted_args = self.broadcast_arrays(*resolved_args)
+            broadcasted_shape = broadcasted_args[0].shape
+            result_dtypes = resolved_dtypes[ufunc.nin :]
+        else:
+            array_like_args = [
+                self.asarray(arg, dtype=arg.dtype)
+                for arg in args
+                if hasattr(arg, "dtype")
+            ]
+            broadcasted_args = self.broadcast_arrays(*array_like_args)
+            broadcasted_shape = broadcasted_args[0].shape
+
+            numpy_args = [
+                (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+                for x in args
+            ]
+            numpy_result = ufunc(*numpy_args, **kwargs)
+            if ufunc.nout == 1:
+                result_dtypes = [numpy_result.dtype]
+            else:
+                result_dtypes = [x.dtype for x in numpy_result]
+
         if len(result_dtypes) == 1:
-            return TypeTracerArray._new(
-                result_dtypes[0], shape=broadcasted_args[0].shape
-            )
+            return TypeTracerArray._new(result_dtypes[0], shape=broadcasted_shape)
         else:
             return (
-                TypeTracerArray._new(dtype, shape=b.shape)
-                for dtype, b in zip(result_dtypes, broadcasted_args)
+                TypeTracerArray._new(dtype, shape=broadcasted_shape)
+                for dtype in result_dtypes
             )
 
     def _axis_is_valid(self, axis: int, ndim: int) -> bool:

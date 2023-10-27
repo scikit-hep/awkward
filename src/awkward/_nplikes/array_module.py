@@ -4,6 +4,7 @@ from __future__ import annotations
 import math
 
 import numpy
+import packaging.version
 
 from awkward._nplikes.numpylike import (
     ArrayLike,
@@ -18,6 +19,9 @@ from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import Any, Final, Literal
 
 np = NumpyMetadata.instance()
+NUMPY_HAS_NEP_50 = packaging.version.Version(
+    numpy.__version__
+) >= packaging.version.Version("1.24")
 
 
 class ArrayModuleNumpyLike(NumpyLike):
@@ -157,15 +161,22 @@ class ArrayModuleNumpyLike(NumpyLike):
         args: list[Any],
         kwargs: dict[str, Any] | None = None,
     ) -> ArrayLike | tuple[ArrayLike]:
-        # Determine input argument dtypes
-        input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
-        # Resolve these for the given ufunc
-        arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
-        resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
-        # Interpret the arguments under these dtypes
-        resolved_args = [
-            self.asarray(arg, dtype=dtype) for arg, dtype in zip(args, resolved_dtypes)
-        ]
+        if NUMPY_HAS_NEP_50:
+            # Determine input argument dtypes
+            input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
+            # Resolve these for the given ufunc
+            arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
+            resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
+            # Interpret the arguments under these dtypes
+            resolved_args = [
+                self.asarray(arg, dtype=dtype)
+                for arg, dtype in zip(args, resolved_dtypes)
+            ]
+        else:
+            resolved_args = [
+                self.asarray(arg, dtype=arg.dtype) if hasattr(arg, "dtype") else arg
+                for arg in args
+            ]
         # Broadcast these resolved arguments
         broadcasted_args = self.broadcast_arrays(*resolved_args)
         # Allow other nplikes to replace implementation
