@@ -487,7 +487,7 @@ class UnionArray(Content):
         return UnionArray(
             tags.forget_length() if forget_length else tags,
             self._index.to_nplike(tt),
-            [x._to_typetracer(False) for x in self._contents],
+            [x._to_typetracer(forget_length) for x in self._contents],
             parameters=self._parameters,
         )
 

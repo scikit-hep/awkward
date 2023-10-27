@@ -235,7 +235,7 @@ class ByteMaskedArray(Content):
         mask = self._mask.to_nplike(tt)
         return ByteMaskedArray(
             mask.forget_length() if forget_length else mask,
-            self._content._to_typetracer(False),
+            self._content._to_typetracer(forget_length),
             self._valid_when,
             parameters=self._parameters,
         )
