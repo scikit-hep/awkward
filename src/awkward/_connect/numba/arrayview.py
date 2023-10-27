@@ -917,9 +917,7 @@ def overload_contains(obj, element):
             """
 def contains_impl(obj, element):
     {}
-    return False""".format(
-                "\n    ".join(statements)
-            ),
+    return False""".format("\n    ".join(statements)),
             "contains_impl",
         )
 

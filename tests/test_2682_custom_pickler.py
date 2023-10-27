@@ -64,23 +64,19 @@ def test_default_pickler():
 
 
 def test_noop_pickler(tmp_path):
-    assert (
-        pickle_complex_array_and_return_form(
-            """
+    assert pickle_complex_array_and_return_form(
+        """
 def plugin(obj, protocol: int):
     return NotImplemented""",
-            tmp_path,
-        )
-        == ak.forms.from_dict(
-            {"class": "ListOffsetArray", "offsets": "i64", "content": "int64"}
-        )
+        tmp_path,
+    ) == ak.forms.from_dict(
+        {"class": "ListOffsetArray", "offsets": "i64", "content": "int64"}
     )
 
 
 def test_non_packing_pickler(tmp_path):
-    assert (
-        pickle_complex_array_and_return_form(
-            """
+    assert pickle_complex_array_and_return_form(
+        """
 def plugin(obj, protocol):
     import awkward as ak
     if isinstance(obj, ak.Array):
@@ -92,11 +88,9 @@ def plugin(obj, protocol):
         )
     else:
         return NotImplemented""",
-            tmp_path,
-        )
-        == ak.forms.from_dict(
-            {"class": "ListArray", "starts": "i64", "stops": "i64", "content": "int64"}
-        )
+        tmp_path,
+    ) == ak.forms.from_dict(
+        {"class": "ListArray", "starts": "i64", "stops": "i64", "content": "int64"}
     )
 
 

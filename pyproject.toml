@@ -257,7 +257,6 @@ ignore_errors = true
 ignore_missing_imports = true
 
 [tool.ruff]
-typing-modules = ["awkward._typing"]
 src = ["src"]
 extend-exclude = [
     "studies",
@@ -266,9 +265,9 @@ extend-exclude = [
     "docs-*",
     "src/awkward/_typeparser/generated_parser.py",
 ]
+
 [tool.ruff.lint]
-select = [
-    "E", "F", "W", # flake8
+extend-select = [
     "B", "B904",   # flake8-bugbear
     "I",           # isort
     "C4",          # flake8-comprehensions
@@ -294,11 +293,13 @@ ignore = [
     "PLW2901", # Outer for loop variable  overwritten by inner assignment target
     "PLW0603", # Using the global statement to update is discouraged
     "PLC1901", # x == "" can be simplified to not x (empty string is falsey)
+    "ISC001",  # Conflicts with the formatter in 0.1.2
 ]
 unfixable = [
     "T20",  # Removes print statements
     "F841", # Removes unused variables
 ]
+typing-modules = ["awkward._typing"]
 external = []
 mccabe.max-complexity = 100
 

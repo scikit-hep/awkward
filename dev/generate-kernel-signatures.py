@@ -428,9 +428,7 @@ def by_signature(cuda_kernel_templates):
                             file.write(
                                 """    f.dir = [{}]
     out[{}] = f
-""".format(
-                                    ", ".join(dirlist), ", ".join(special)
-                                )
+""".format(", ".join(dirlist), ", ".join(special))
                             )
                 else:
                     file.write(

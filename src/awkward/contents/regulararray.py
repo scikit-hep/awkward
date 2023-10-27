@@ -297,9 +297,10 @@ class RegularArray(Content):
             return self
 
         zeros_length = index_nplike.index_as_shape_item(stop - start)
-        substart, substop = start * index_nplike.shape_item_as_index(
-            self._size
-        ), stop * index_nplike.shape_item_as_index(self._size)
+        substart, substop = (
+            start * index_nplike.shape_item_as_index(self._size),
+            stop * index_nplike.shape_item_as_index(self._size),
+        )
         return RegularArray(
             self._content._getitem_range(substart, substop),
             self._size,

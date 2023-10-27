@@ -44,8 +44,7 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
     # Dispatch
     if (
         # Is an array with a known backend
-        backend_of(arrays, default=None)
-        is not None
+        backend_of(arrays, default=None) is not None
     ):
         yield (arrays,)
     else:
@@ -61,8 +60,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
     # Simple single-array, axis=0 fast-path
     if (
         # Is an array with a known backend
-        backend_of(arrays, default=None)
-        is not None
+        backend_of(arrays, default=None) is not None
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(
