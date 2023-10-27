@@ -224,7 +224,7 @@ class IndexedArray(Content):
         index = self._index.to_nplike(TypeTracer.instance())
         return IndexedArray(
             index.forget_length() if forget_length else index,
-            self._content._to_typetracer(False),
+            self._content._to_typetracer(forget_length),
             parameters=self._parameters,
         )
 
