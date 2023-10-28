@@ -80,20 +80,15 @@ jobs:
           python -m pip install build
           python -m build -w awkward-cpp
 
-      - name: Install awkward-cpp
-        run: python -m pip install -v @(get-childitem -path awkward-cpp/dist/*.whl)
-
-      - name: Build & install awkward
-        run: python -m pip install -v .
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install --only-binary "numpy,pandas,pyarrow,numexpr,numexpr"
+          -v . @(get-childitem -path awkward-cpp/dist/*.whl)
+          pytest-github-actions-annotate-failures
+          -r requirements-test.txt
 
       - name: Print versions
         run: python -m pip list
-
-      - name: Check if kernel specification is sorted
-        run: pipx run nox -s diagnostics -- --check-spec-sorted
-
-      - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
 
       - name: Test specification
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -156,20 +151,16 @@ jobs:
           python -m pip install build
           python -m build -w ./awkward-cpp
 
-      - name: Install awkward-cpp
-        run: python -m pip install -v ./awkward-cpp/dist/*.whl
-
-      - name: Build & install awkward
-        run: python -m pip install -v .
+      - name: Install awkward, awkward-cpp, dask-awkward, and dependencies
+        run: >-
+          python -m pip install --only-binary "numpy,pandas,pyarrow,numexpr"
+          -v . ./awkward-cpp/dist/*.whl
+          pytest-github-actions-annotate-failures
+          dask-awkward
+          -r requirements-test.txt
 
       - name: Print versions
         run: python -m pip list
-
-      - name: Check if kernel specification is sorted
-        run: pipx run nox -s diagnostics -- --check-spec-sorted
-
-      - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
 
       - name: Test specification
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -190,24 +181,16 @@ jobs:
     strategy:
       matrix:
         python-version:
+          - '3.12'
           - '3.11'
           - '3.10'
           - '3.9'
-          - '3.8'
-        numpy-package:
-          - "numpy"
-        pyarrow-package:
-          - "pyarrow"
+        extra-pip-constraints:
+          - "-r requirements-test.txt"
         include:
+          # Lower bounds
           - python-version: '3.8'
-            numpy-package: "numpy==1.18.0"
-            pyarrow-package: "pyarrow"
-          - python-version: '3.8'
-            numpy-package: "numpy"
-            pyarrow-package: "pyarrow==7.0.0"
-          - python-version: '3.12'
-            numpy-package: "numpy>=1.26.0b1"
-            pyarrow-package: "pyarrow;python_version<'3.12'"
+            extra-pip-constraints: "-r requirements-test-minimal.txt"
 
     runs-on: ubuntu-22.04
 
@@ -246,20 +229,20 @@ jobs:
           python -m pip install build
           python -m build -w ./awkward-cpp
 
-      - name: Install awkward-cpp
-        run: python -m pip install -v ./awkward-cpp/dist/*.whl "${{ matrix.numpy-package }}" "${{ matrix.pyarrow-package }}"
-
-      - name: Build & install awkward
-        run: python -m pip install -v .
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install --only-binary "numpy,pandas,pyarrow,numexpr"
+          -v . ./awkward-cpp/dist/*.whl
+          pytest-github-actions-annotate-failures
+          ${{ matrix.extra-pip-constraints }}
 
       - name: Print versions
         run: python -m pip list
 
       - name: Check if kernel specification is sorted
+        # We don't need to run this all the time
+        if: matrix.python-version == '3.12'
         run: pipx run nox -s diagnostics -- --check-spec-sorted
-
-      - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
 
       - name: Test specification
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -332,20 +315,16 @@ jobs:
           python3 -m pip install build
           python3 -m build -w ./awkward-cpp
 
-      - name: Install awkward-cpp
-        run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
-
-      - name: Build & install awkward
-        run: python3 -m pip install -v .
-
-      - name: Also install dask-awkward
-        run: python3 -m pip install dask-awkward
+      - name: Install awkward, awkward-cpp, dask-awkward, and dependencies
+        run: >-
+          python -m pip install --only-binary "numpy,pandas,pyarrow,numexpr"
+          -v . ./awkward-cpp/dist/*.whl
+          pytest-github-actions-annotate-failures
+          dask-awkward
+          -r requirements-test.txt
 
       - name: Print versions
         run: python -m pip list
-
-      - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
 
       - name: Test
         run: python -m pytest -vv -rs tests
