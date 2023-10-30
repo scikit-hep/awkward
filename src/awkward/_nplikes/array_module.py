@@ -169,35 +169,57 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     ############################ manipulation
 
-    def apply_ufunc(
-        self,
-        ufunc: UfuncLike,
-        method: str,
-        args: list[Any],
-        kwargs: dict[str, Any] | None = None,
-    ) -> ArrayLike | tuple[ArrayLike]:
-        # Does NumPy support value-less ufunc resolution?
-        if NUMPY_HAS_NEP_50:
+    # Does NumPy support value-less ufunc resolution?
+    if NUMPY_HAS_NEP_50:
+
+        def apply_ufunc(
+            self,
+            ufunc: UfuncLike,
+            method: str,
+            args: list[Any],
+            kwargs: dict[str, Any] | None = None,
+        ) -> ArrayLike | tuple[ArrayLike]:
             # Determine input argument dtypes
             input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
             # Resolve these for the given ufunc
             arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
             resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
-            # Interpret the arguments under these dtypes
+            # Interpret the arguments under these dtypes, converting scalars to length-1 arrays
             resolved_args = [
                 self.asarray(arg, dtype=dtype)
                 for arg, dtype in zip(args, resolved_dtypes)
             ]
-        else:
-            # Otherwise, perform default NumPy coercion (value-dependent)
+            # Broadcast to ensure all-scalar or all-nd-array
+            broadcasted_args = self.broadcast_arrays(*resolved_args)
+            # Allow other nplikes to replace implementation
+            impl = self.prepare_ufunc(ufunc)
+            # Compute the result
+            return impl(*broadcasted_args, **(kwargs or {}))
+
+    else:
+        # Otherwise, perform default NumPy coercion (value-dependent)
+        def apply_ufunc(
+            self,
+            ufunc: UfuncLike,
+            method: str,
+            args: list[Any],
+            kwargs: dict[str, Any] | None = None,
+        ) -> ArrayLike | tuple[ArrayLike]:
+            # Convert np.generic to scalar arrays
             resolved_args = [
                 self.asarray(arg, dtype=arg.dtype) if hasattr(arg, "dtype") else arg
                 for arg in args
             ]
-        # Allow other nplikes to replace implementation
-        impl = self.prepare_ufunc(ufunc)
-        # Compute the result
-        return impl(*resolved_args, **(kwargs or {}))
+            broadcasted_args = self.broadcast_arrays(*resolved_args)
+            # Choose the broadcasted argument if it wasn't a Python scalar
+            non_generic_value_promoted_args = [
+                y if hasattr(x, "ndim") else x
+                for x, y in zip(resolved_args, broadcasted_args)
+            ]
+            # Allow other nplikes to replace implementation
+            impl = self.prepare_ufunc(ufunc)
+            # Compute the result
+            return impl(*non_generic_value_promoted_args, **(kwargs or {}))
 
     def broadcast_arrays(self, *arrays: ArrayLike) -> list[ArrayLike]:
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)

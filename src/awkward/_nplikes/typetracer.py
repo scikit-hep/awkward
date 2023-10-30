@@ -508,19 +508,20 @@ class TypeTracer(NumpyLike):
     is_eager: Final = True
     supports_structured_dtypes: Final = True
 
-    def apply_ufunc(
-        self,
-        ufunc: UfuncLike,
-        method: str,
-        args: list[Any],
-        kwargs: dict[str, Any] | None = None,
-    ) -> TypeTracerArray | tuple[TypeTracerArray]:
-        for x in args:
-            try_touch_data(x)
+    if NUMPY_HAS_NEP_50:
 
-        # Unwrap options, assume they don't occur
-        args = [x.content if isinstance(x, MaybeNone) else x for x in args]
-        if NUMPY_HAS_NEP_50:
+        def apply_ufunc(
+            self,
+            ufunc: UfuncLike,
+            method: str,
+            args: list[Any],
+            kwargs: dict[str, Any] | None = None,
+        ) -> TypeTracerArray | tuple[TypeTracerArray]:
+            for x in args:
+                try_touch_data(x)
+
+            # Unwrap options, assume they don't occur
+            args = [x.content if isinstance(x, MaybeNone) else x for x in args]
             # Determine input argument dtypes
             input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
             # Resolve these for the given ufunc
@@ -531,36 +532,65 @@ class TypeTracer(NumpyLike):
                 self.asarray(arg, dtype=dtype)
                 for arg, dtype in zip(args, resolved_dtypes)
             ]
-            # Broadcast these resolved arguments
+            # Broadcast to ensure all-scalar or all-nd-array
             broadcasted_args = self.broadcast_arrays(*resolved_args)
             broadcasted_shape = broadcasted_args[0].shape
             result_dtypes = resolved_dtypes[ufunc.nin :]
-        else:
-            array_like_args = [
-                self.asarray(arg, dtype=arg.dtype)
-                for arg in args
-                if hasattr(arg, "dtype")
-            ]
-            broadcasted_args = self.broadcast_arrays(*array_like_args)
-            broadcasted_shape = broadcasted_args[0].shape
 
-            numpy_args = [
-                (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
-                for x in args
-            ]
-            numpy_result = ufunc(*numpy_args, **(kwargs or {}))
-            if ufunc.nout == 1:
-                result_dtypes = [numpy_result.dtype]
+            if len(result_dtypes) == 1:
+                return TypeTracerArray._new(result_dtypes[0], shape=broadcasted_shape)
             else:
-                result_dtypes = [x.dtype for x in numpy_result]
+                return (
+                    TypeTracerArray._new(dtype, shape=broadcasted_shape)
+                    for dtype in result_dtypes
+                )
 
-        if len(result_dtypes) == 1:
-            return TypeTracerArray._new(result_dtypes[0], shape=broadcasted_shape)
-        else:
-            return (
-                TypeTracerArray._new(dtype, shape=broadcasted_shape)
-                for dtype in result_dtypes
-            )
+    else:
+
+        def apply_ufunc(
+            self,
+            ufunc: UfuncLike,
+            method: str,
+            args: list[Any],
+            kwargs: dict[str, Any] | None = None,
+        ) -> TypeTracerArray | tuple[TypeTracerArray]:
+            for x in args:
+                try_touch_data(x)
+
+            # Unwrap options, assume they don't occur
+            args = [x.content if isinstance(x, MaybeNone) else x for x in args]
+            # Convert np.generic to scalar arrays
+            resolved_args = [
+                self.asarray(arg, dtype=arg.dtype) if hasattr(arg, "dtype") else arg
+                for arg in args
+            ]
+            # Broadcast all inputs together
+            broadcasted_args = self.broadcast_arrays(*resolved_args)
+            broadcasted_shape = broadcasted_args[0].shape
+            # Choose the broadcasted argument if it wasn't a Python scalar
+            non_generic_value_promoted_args = [
+                y if hasattr(x, "ndim") else x
+                for x, y in zip(resolved_args, broadcasted_args)
+            ]
+            # Build proxy (empty) arrays
+            proxy_args = [
+                (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+                for x in non_generic_value_promoted_args
+            ]
+            # Determine result dtype from proxy call
+            proxy_result = ufunc(*proxy_args, **(kwargs or {}))
+            if ufunc.nout == 1:
+                result_dtypes = [proxy_result.dtype]
+            else:
+                result_dtypes = [x.dtype for x in proxy_result]
+
+            if len(result_dtypes) == 1:
+                return TypeTracerArray._new(result_dtypes[0], shape=broadcasted_shape)
+            else:
+                return (
+                    TypeTracerArray._new(dtype, shape=broadcasted_shape)
+                    for dtype in result_dtypes
+                )
 
     def _axis_is_valid(self, axis: int, ndim: int) -> bool:
         if axis < 0:
@@ -997,7 +1027,7 @@ class TypeTracer(NumpyLike):
         all_arrays = []
         for x in arrays:
             if not hasattr(x, "shape"):
-                x = self.promote_scalar(x)
+                x = self.asarray(x)
             all_arrays.append(x)
 
         shapes = [x.shape for x in all_arrays]
