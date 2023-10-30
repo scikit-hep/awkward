@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import math
+from functools import lru_cache
 
 import numpy
+import packaging.version
 
 from awkward._nplikes.numpylike import (
     ArrayLike,
@@ -18,6 +20,20 @@ from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import Any, Final, Literal
 
 np = NumpyMetadata.instance()
+NUMPY_HAS_NEP_50 = packaging.version.Version(
+    numpy.__version__
+) >= packaging.version.Version("1.24")
+
+
+@lru_cache
+def _nplike_concatenate_has_casting(module: Any) -> bool:
+    x = module.zeros(2)
+    try:
+        module.concatenate((x, x), casting="same_kind")
+    except TypeError:
+        return False
+    else:
+        return True
 
 
 class ArrayModuleNumpyLike(NumpyLike):
@@ -128,12 +144,15 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
-    ) -> ArrayLike:
+    ) -> bool:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
-        return self._module.asarray(
-            self._module.array_equal(x1, x2, equal_nan=equal_nan)
-        )
+        if equal_nan:
+            both_nan = self._module.logical_and(x1 == np.nan, x2 == np.nan)
+            both_equal = x1 == x2
+            return self._module.all(self._module.logical_or(both_equal, both_nan))
+        else:
+            return self._module.array_equal(x1, x2)
 
     def searchsorted(
         self,
@@ -150,28 +169,57 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     ############################ manipulation
 
-    def apply_ufunc(
-        self,
-        ufunc: UfuncLike,
-        method: str,
-        args: list[Any],
-        kwargs: dict[str, Any] | None = None,
-    ) -> ArrayLike | tuple[ArrayLike]:
-        # Determine input argument dtypes
-        input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
-        # Resolve these for the given ufunc
-        arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
-        resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
-        # Interpret the arguments under these dtypes
-        resolved_args = [
-            self.asarray(arg, dtype=dtype) for arg, dtype in zip(args, resolved_dtypes)
-        ]
-        # Broadcast these resolved arguments
-        broadcasted_args = self.broadcast_arrays(*resolved_args)
-        # Allow other nplikes to replace implementation
-        impl = self.prepare_ufunc(ufunc)
-        # Compute the result
-        return impl(*broadcasted_args, **kwargs)
+    # Does NumPy support value-less ufunc resolution?
+    if NUMPY_HAS_NEP_50:
+
+        def apply_ufunc(
+            self,
+            ufunc: UfuncLike,
+            method: str,
+            args: list[Any],
+            kwargs: dict[str, Any] | None = None,
+        ) -> ArrayLike | tuple[ArrayLike]:
+            # Determine input argument dtypes
+            input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
+            # Resolve these for the given ufunc
+            arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
+            resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
+            # Interpret the arguments under these dtypes, converting scalars to length-1 arrays
+            resolved_args = [
+                self.asarray(arg, dtype=dtype)
+                for arg, dtype in zip(args, resolved_dtypes)
+            ]
+            # Broadcast to ensure all-scalar or all-nd-array
+            broadcasted_args = self.broadcast_arrays(*resolved_args)
+            # Allow other nplikes to replace implementation
+            impl = self.prepare_ufunc(ufunc)
+            # Compute the result
+            return impl(*broadcasted_args, **(kwargs or {}))
+
+    else:
+        # Otherwise, perform default NumPy coercion (value-dependent)
+        def apply_ufunc(
+            self,
+            ufunc: UfuncLike,
+            method: str,
+            args: list[Any],
+            kwargs: dict[str, Any] | None = None,
+        ) -> ArrayLike | tuple[ArrayLike]:
+            # Convert np.generic to scalar arrays
+            resolved_args = [
+                self.asarray(arg, dtype=arg.dtype) if hasattr(arg, "dtype") else arg
+                for arg in args
+            ]
+            broadcasted_args = self.broadcast_arrays(*resolved_args)
+            # Choose the broadcasted argument if it wasn't a Python scalar
+            non_generic_value_promoted_args = [
+                y if hasattr(x, "ndim") else x
+                for x, y in zip(resolved_args, broadcasted_args)
+            ]
+            # Allow other nplikes to replace implementation
+            impl = self.prepare_ufunc(ufunc)
+            # Compute the result
+            return impl(*non_generic_value_promoted_args, **(kwargs or {}))
 
     def broadcast_arrays(self, *arrays: ArrayLike) -> list[ArrayLike]:
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)
@@ -327,7 +375,10 @@ class ArrayModuleNumpyLike(NumpyLike):
         axis: int | None = 0,
     ) -> ArrayLike:
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)
-        return self._module.concatenate(arrays, axis=axis, casting="same_kind")
+        if _nplike_concatenate_has_casting(self._module):
+            return self._module.concatenate(arrays, axis=axis, casting="same_kind")
+        else:
+            return self._module.concatenate(arrays, axis=axis)
 
     def repeat(
         self,
@@ -507,10 +558,11 @@ class ArrayModuleNumpyLike(NumpyLike):
         return self._module.max(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def count_nonzero(
-        self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
+        self, x: ArrayLike, *, axis: int | tuple[int, ...] | None = None
     ) -> ArrayLike:
         assert not isinstance(x, PlaceholderArray)
-        return self._module.count_nonzero(x, axis=axis, keepdims=keepdims)
+        assert isinstance(axis, int) or axis is None
+        return self._module.count_nonzero(x, axis=axis)
 
     def cumsum(
         self,
