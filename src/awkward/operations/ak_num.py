@@ -88,9 +88,9 @@ def _impl(array, axis, highlevel, behavior):
 
     if maybe_posaxis(layout, axis, 1) == 0:
         if isinstance(layout, ak.record.Record):
-            return layout.backend.index_nplikes.shape_item_as_index(1)
+            return layout.backend.index_nplike.shape_item_as_index(1)
         else:
-            return layout.backend.index_nplikes.shape_item_as_index(layout.length)
+            return layout.backend.index_nplike.shape_item_as_index(layout.length)
 
     def action(layout, depth, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
