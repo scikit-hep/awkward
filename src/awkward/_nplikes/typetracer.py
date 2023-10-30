@@ -5,6 +5,7 @@ from numbers import Number
 from typing import Callable
 
 import numpy
+import packaging.version
 
 import awkward as ak
 from awkward._nplikes.dispatch import register_nplike
@@ -30,6 +31,9 @@ from awkward._typing import (
 )
 
 np = NumpyMetadata.instance()
+NUMPY_HAS_NEP_50 = packaging.version.Version(
+    numpy.__version__
+) >= packaging.version.Version("1.24")
 
 
 def is_unknown_length(array: Any) -> bool:
@@ -504,39 +508,89 @@ class TypeTracer(NumpyLike):
     is_eager: Final = True
     supports_structured_dtypes: Final = True
 
-    def apply_ufunc(
-        self,
-        ufunc: UfuncLike,
-        method: str,
-        args: list[Any],
-        kwargs: dict[str, Any] | None = None,
-    ) -> TypeTracerArray | tuple[TypeTracerArray]:
-        for x in args:
-            try_touch_data(x)
+    if NUMPY_HAS_NEP_50:
 
-        # Unwrap options, assume they don't occur
-        args = [x.content if isinstance(x, MaybeNone) else x for x in args]
-        # Determine input argument dtypes
-        input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
-        # Resolve these for the given ufunc
-        arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
-        resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
-        # Interpret the arguments under these dtypes
-        resolved_args = [
-            self.asarray(arg, dtype=dtype) for arg, dtype in zip(args, resolved_dtypes)
-        ]
-        # Broadcast these resolved arguments
-        broadcasted_args = self.broadcast_arrays(*resolved_args)
-        result_dtypes = resolved_dtypes[ufunc.nin :]
-        if len(result_dtypes) == 1:
-            return TypeTracerArray._new(
-                result_dtypes[0], shape=broadcasted_args[0].shape
-            )
-        else:
-            return (
-                TypeTracerArray._new(dtype, shape=b.shape)
-                for dtype, b in zip(result_dtypes, broadcasted_args)
-            )
+        def apply_ufunc(
+            self,
+            ufunc: UfuncLike,
+            method: str,
+            args: list[Any],
+            kwargs: dict[str, Any] | None = None,
+        ) -> TypeTracerArray | tuple[TypeTracerArray]:
+            for x in args:
+                try_touch_data(x)
+
+            # Unwrap options, assume they don't occur
+            args = [x.content if isinstance(x, MaybeNone) else x for x in args]
+            # Determine input argument dtypes
+            input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
+            # Resolve these for the given ufunc
+            arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
+            resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
+            # Interpret the arguments under these dtypes
+            resolved_args = [
+                self.asarray(arg, dtype=dtype)
+                for arg, dtype in zip(args, resolved_dtypes)
+            ]
+            # Broadcast to ensure all-scalar or all-nd-array
+            broadcasted_args = self.broadcast_arrays(*resolved_args)
+            broadcasted_shape = broadcasted_args[0].shape
+            result_dtypes = resolved_dtypes[ufunc.nin :]
+
+            if len(result_dtypes) == 1:
+                return TypeTracerArray._new(result_dtypes[0], shape=broadcasted_shape)
+            else:
+                return (
+                    TypeTracerArray._new(dtype, shape=broadcasted_shape)
+                    for dtype in result_dtypes
+                )
+
+    else:
+
+        def apply_ufunc(
+            self,
+            ufunc: UfuncLike,
+            method: str,
+            args: list[Any],
+            kwargs: dict[str, Any] | None = None,
+        ) -> TypeTracerArray | tuple[TypeTracerArray]:
+            for x in args:
+                try_touch_data(x)
+
+            # Unwrap options, assume they don't occur
+            args = [x.content if isinstance(x, MaybeNone) else x for x in args]
+            # Convert np.generic to scalar arrays
+            resolved_args = [
+                self.asarray(arg, dtype=arg.dtype) if hasattr(arg, "dtype") else arg
+                for arg in args
+            ]
+            # Broadcast all inputs together
+            broadcasted_args = self.broadcast_arrays(*resolved_args)
+            broadcasted_shape = broadcasted_args[0].shape
+            # Choose the broadcasted argument if it wasn't a Python scalar
+            non_generic_value_promoted_args = [
+                y if hasattr(x, "ndim") else x
+                for x, y in zip(resolved_args, broadcasted_args)
+            ]
+            # Build proxy (empty) arrays
+            proxy_args = [
+                (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+                for x in non_generic_value_promoted_args
+            ]
+            # Determine result dtype from proxy call
+            proxy_result = ufunc(*proxy_args, **(kwargs or {}))
+            if ufunc.nout == 1:
+                result_dtypes = [proxy_result.dtype]
+            else:
+                result_dtypes = [x.dtype for x in proxy_result]
+
+            if len(result_dtypes) == 1:
+                return TypeTracerArray._new(result_dtypes[0], shape=broadcasted_shape)
+            else:
+                return (
+                    TypeTracerArray._new(dtype, shape=broadcasted_shape)
+                    for dtype in result_dtypes
+                )
 
     def _axis_is_valid(self, axis: int, ndim: int) -> bool:
         if axis < 0:
@@ -973,7 +1027,7 @@ class TypeTracer(NumpyLike):
         all_arrays = []
         for x in arrays:
             if not hasattr(x, "shape"):
-                x = self.promote_scalar(x)
+                x = self.asarray(x)
             all_arrays.append(x)
 
         shapes = [x.shape for x in all_arrays]
@@ -1321,7 +1375,7 @@ class TypeTracer(NumpyLike):
             raise NotImplementedError
 
     def count_nonzero(
-        self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
+        self, x: ArrayLike, *, axis: int | None = None
     ) -> TypeTracerArray:
         assert not isinstance(x, PlaceholderArray)
         try_touch_data(x)

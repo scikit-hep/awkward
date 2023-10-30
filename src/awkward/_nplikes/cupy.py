@@ -47,13 +47,15 @@ class Cupy(ArrayModuleNumpyLike):
         np_array = numpy.frombuffer(buffer, dtype=dtype, count=count)
         return self._module.asarray(np_array)
 
-    def array_equal(self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False):
+    def array_equal(
+        self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
+    ) -> bool:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         if x1.shape != x2.shape:
             return False
         else:
-            return self._module.all(x1 - x2 == 0)
+            return self._module.array_equal(x1, x2, equal_nan=equal_nan).get()
 
     def repeat(
         self, x: ArrayLike, repeats: ArrayLike | int, *, axis: int | None = None
@@ -106,13 +108,10 @@ class Cupy(ArrayModuleNumpyLike):
             return out
 
     def count_nonzero(
-        self,
-        x: ArrayLike,
-        *,
-        axis: int | tuple[int, ...] | None = None,
-        keepdims: bool = False,
+        self, x: ArrayLike, *, axis: int | tuple[int, ...] | None = None
     ) -> ArrayLike:
         assert not isinstance(x, PlaceholderArray)
+        assert isinstance(axis, int) or axis is None
         out = self._module.count_nonzero(x, axis=axis)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()

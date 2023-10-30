@@ -639,7 +639,7 @@ class NumpyLike(PublicSingleton, Protocol):
 
     @abstractmethod
     def count_nonzero(
-        self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
+        self, x: ArrayLike, *, axis: int | tuple[int, ...] | None = None
     ) -> ArrayLike:
         ...
 
