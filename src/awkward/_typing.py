@@ -2,10 +2,11 @@
 # ruff: noqa: PLE0604
 from __future__ import annotations
 
-import numpy
 import sys
 import typing
 from typing import *  # noqa: F403
+
+import numpy
 
 __all__ = list(
     {

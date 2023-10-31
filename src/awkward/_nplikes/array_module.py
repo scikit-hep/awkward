@@ -17,7 +17,7 @@ from awkward._nplikes.numpylike import (
 )
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._typing import Any, cast, Final, Literal, DType
+from awkward._typing import Any, DType, Final, Literal, cast
 
 np = NumpyMetadata.instance()
 NUMPY_HAS_NEP_50 = packaging.version.Version(
