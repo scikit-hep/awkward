@@ -2,12 +2,14 @@
 # ruff: noqa: PLE0604
 from __future__ import annotations
 
+import numpy
 import sys
 import typing
 from typing import *  # noqa: F403
 
 __all__ = list(
     {
+        "ClassVar",
         "Final",
         "Self",
         "final",
@@ -27,7 +29,7 @@ __all__ = list(
 AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)  # noqa: F405
 
 if sys.version_info < (3, 11):
-    from typing import Final, SupportsIndex, runtime_checkable
+    from typing import ClassVar, Final, SupportsIndex, runtime_checkable
 
     from typing_extensions import (
         Literal,
@@ -40,6 +42,7 @@ if sys.version_info < (3, 11):
     )
 else:
     from typing import (
+        ClassVar,
         Final,
         Literal,
         Protocol,
@@ -57,3 +60,5 @@ JSONSerializable: TypeAlias = (
     "str | int | float | bool | None | list | tuple | JSONMapping"
 )
 JSONMapping: TypeAlias = "dict[str, JSONSerializable]"
+
+DType = TypeVar("DType", bound=numpy.dtype)
