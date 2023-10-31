@@ -12,4 +12,5 @@ def test_unknown_length():
 
 def test_known_length():
     array = ak.Array([0, 1, 2, 3], backend="typetracer")
-    assert ak.num(array, axis=0) == 4
+    # This is now the new behavior - always return typetracers
+    assert isinstance(ak.num(array, axis=0), TypeTracerArray)
