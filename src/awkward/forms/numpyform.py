@@ -9,14 +9,19 @@ from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
-from awkward._typing import JSONSerializable, Self, final
-from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward._typing import DType, JSONMapping, JSONSerializable, Self, final
+from awkward._util import UNSET, Sentinel
+from awkward.forms.form import Form, _SpecifierMatcher
 
 np = NumpyMetadata.instance()
 
 
-def from_dtype(dtype, parameters=None, *, time_units_as_parameter: bool = UNSET):
+def from_dtype(
+    dtype,
+    parameters: JSONMapping | None = None,
+    *,
+    time_units_as_parameter: bool | Sentinel = UNSET,
+):
     if dtype.subdtype is None:
         inner_shape = ()
     else:
@@ -182,6 +187,7 @@ class NumpyForm(Form):
             for key in keys:
                 if key in self._parameters:
                     return self._parameters[key]
+        return None
 
     @property
     def purelist_isregular(self):
@@ -219,7 +225,7 @@ class NumpyForm(Form):
     def _columns(self, path, output, list_indicator):
         output.append(".".join(path))
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         return self
 
     def _prune_columns(self, is_inside_record_or_union: bool) -> Self:
@@ -294,7 +300,7 @@ class NumpyForm(Form):
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
-    ) -> Iterator[tuple[str, np.dtype]]:
+    ) -> Iterator[tuple[str, DType]]:
         from awkward.types.numpytype import primitive_to_dtype
 
         yield (getkey(self, "data"), primitive_to_dtype(self.primitive))

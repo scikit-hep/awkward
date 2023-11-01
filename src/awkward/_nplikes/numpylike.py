@@ -5,10 +5,12 @@ from abc import abstractmethod
 
 import numpy
 
-from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.shape import ShapeItem
 from awkward._singleton import PublicSingleton
 from awkward._typing import (
+    TYPE_CHECKING,
     Any,
+    DType,
     Literal,
     NamedTuple,
     Protocol,
@@ -17,6 +19,12 @@ from awkward._typing import (
     TypeAlias,
     overload,
 )
+
+if TYPE_CHECKING:
+    from types import EllipsisType
+
+    from numpy.typing import DTypeLike
+
 
 IndexType: TypeAlias = "int | ArrayLike"
 
@@ -31,7 +39,7 @@ class UniqueAllResult(NamedTuple):
 class ArrayLike(Protocol):
     @property
     @abstractmethod
-    def dtype(self) -> dtype:
+    def dtype(self) -> DType:
         ...
 
     @property
@@ -64,8 +72,8 @@ class ArrayLike(Protocol):
         self,
         key: SupportsIndex
         | slice
-        | Ellipsis
-        | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
+        | EllipsisType
+        | tuple[SupportsIndex | slice | EllipsisType | ArrayLike, ...]
         | ArrayLike,
     ) -> Self:
         ...
@@ -73,23 +81,23 @@ class ArrayLike(Protocol):
     @overload
     def __setitem__(
         self,
-        key: SupportsIndex
-        | slice
-        | Ellipsis
-        | tuple[SupportsIndex | slice | Ellipsis | ArrayLike, ...]
+        key: slice
+        | EllipsisType
+        | tuple[SupportsIndex | slice | EllipsisType, ...]
         | ArrayLike,
-        value: int | float | bool | complex | ArrayLike,
+        value: int | float | bool | complex,
     ):
         ...
 
     @overload
     def __setitem__(
         self,
-        key: slice
-        | Ellipsis
-        | tuple[SupportsIndex | slice | Ellipsis, ...]
+        key: SupportsIndex
+        | slice
+        | EllipsisType
+        | tuple[SupportsIndex | slice | EllipsisType | ArrayLike, ...]
         | ArrayLike,
-        value: int | float | bool | complex,
+        value: int | float | bool | complex | ArrayLike,
     ):
         ...
 
@@ -114,7 +122,7 @@ class ArrayLike(Protocol):
         ...
 
     @abstractmethod
-    def view(self, dtype: dtype) -> Self:
+    def view(self, dtype: DType) -> Self:
         ...
 
     # Scalar UFUNCS
@@ -155,7 +163,7 @@ class ArrayLike(Protocol):
         ...
 
     @abstractmethod
-    def __eq__(self, other: int | complex | float | bool | Self) -> Self:
+    def __eq__(self, other: int | complex | float | bool | Self) -> Self:  # type: ignore[override]
         ...
 
     @abstractmethod
@@ -170,9 +178,11 @@ class ArrayLike(Protocol):
     def __invert__(self) -> Self:
         ...
 
+    @abstractmethod
     def __dlpack_device__(self) -> tuple[int, int]:
         ...
 
+    @abstractmethod
     def __dlpack__(self, stream: Any = None) -> Any:
         ...
 
@@ -195,6 +205,9 @@ class NumpyMetadata(PublicSingleton):
     str_ = numpy.str_
     bytes_ = numpy.bytes_
 
+    datetime64 = numpy.datetime64
+    timedelta64 = numpy.timedelta64
+
     intp = numpy.intp
     integer = numpy.integer
     signedinteger = numpy.signedinteger
@@ -208,8 +221,9 @@ class NumpyMetadata(PublicSingleton):
     dtype = numpy.dtype
     ufunc = numpy.ufunc
     iinfo = numpy.iinfo
+    finfo = numpy.finfo
     errstate = numpy.errstate
-    newaxis = numpy.newaxis
+    newaxis: None = numpy.newaxis
 
     ndarray = numpy.ndarray
 
@@ -217,29 +231,20 @@ class NumpyMetadata(PublicSingleton):
     inf = numpy.inf
 
     nat = numpy.datetime64("NaT")
-    datetime_data = numpy.datetime_data
-
-    @property
-    def issubdtype(self):
-        return numpy.issubdtype
+    datetime_data = staticmethod(numpy.datetime_data)
+    issubdtype = staticmethod(numpy.issubdtype)
 
     AxisError = numpy.AxisError
 
 
 if hasattr(numpy, "float16"):
-    NumpyMetadata.float16 = numpy.float16
+    NumpyMetadata.float16 = numpy.float16  # type: ignore[attr-defined]
 
 if hasattr(numpy, "float128"):
-    NumpyMetadata.float128 = numpy.float128
+    NumpyMetadata.float128 = numpy.float128  # type: ignore[attr-defined]
 
 if hasattr(numpy, "complex256"):
-    NumpyMetadata.complex256 = numpy.complex256
-
-if hasattr(numpy, "datetime64"):
-    NumpyMetadata.datetime64 = numpy.datetime64
-
-if hasattr(numpy, "timedelta64"):
-    NumpyMetadata.timedelta64 = numpy.timedelta64
+    NumpyMetadata.complex256 = numpy.complex256  # type: ignore[attr-defined]
 
 
 class UfuncLike(Protocol):
@@ -266,7 +271,7 @@ class NumpyLike(PublicSingleton, Protocol):
         method: str,
         args: list[Any],
         kwargs: dict[str, Any] | None = None,
-    ) -> ArrayLike | tuple[ArrayLike]:
+    ) -> ArrayLike | tuple[ArrayLike, ...]:
         ...
 
     @property
@@ -291,7 +296,7 @@ class NumpyLike(PublicSingleton, Protocol):
         self,
         obj,
         *,
-        dtype: numpy.dtype | None = None,
+        dtype: DTypeLike | None = None,
         copy: bool | None = None,
     ) -> ArrayLike:
         ...
@@ -302,7 +307,7 @@ class NumpyLike(PublicSingleton, Protocol):
 
     @abstractmethod
     def frombuffer(
-        self, buffer, *, dtype: numpy.dtype | None = None, count: int = -1
+        self, buffer, *, dtype: DTypeLike | None = None, count: ShapeItem = -1
     ) -> ArrayLike:
         ...
 
@@ -315,7 +320,7 @@ class NumpyLike(PublicSingleton, Protocol):
         self,
         shape: ShapeItem | tuple[ShapeItem, ...],
         *,
-        dtype: numpy.dtype | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         ...
 
@@ -324,7 +329,7 @@ class NumpyLike(PublicSingleton, Protocol):
         self,
         shape: ShapeItem | tuple[ShapeItem, ...],
         *,
-        dtype: numpy.dtype | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         ...
 
@@ -333,7 +338,7 @@ class NumpyLike(PublicSingleton, Protocol):
         self,
         shape: ShapeItem | tuple[ShapeItem, ...],
         *,
-        dtype: numpy.dtype | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         ...
 
@@ -343,23 +348,21 @@ class NumpyLike(PublicSingleton, Protocol):
         shape: ShapeItem | tuple[ShapeItem, ...],
         fill_value,
         *,
-        dtype: numpy.dtype | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         ...
 
     @abstractmethod
-    def zeros_like(
-        self, x: ArrayLike, *, dtype: numpy.dtype | None = None
-    ) -> ArrayLike:
+    def zeros_like(self, x: ArrayLike, *, dtype: DTypeLike | None = None) -> ArrayLike:
         ...
 
     @abstractmethod
-    def ones_like(self, x: ArrayLike, *, dtype: numpy.dtype | None = None) -> ArrayLike:
+    def ones_like(self, x: ArrayLike, *, dtype: DTypeLike | None = None) -> ArrayLike:
         ...
 
     @abstractmethod
     def full_like(
-        self, x: ArrayLike, fill_value, *, dtype: numpy.dtype | None = None
+        self, x: ArrayLike, fill_value, *, dtype: DTypeLike | None = None
     ) -> ArrayLike:
         ...
 
@@ -370,7 +373,7 @@ class NumpyLike(PublicSingleton, Protocol):
         stop: float | int | None = None,
         step: float | int = 1,
         *,
-        dtype: numpy.dtype | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         ...
 
@@ -385,7 +388,7 @@ class NumpyLike(PublicSingleton, Protocol):
     @abstractmethod
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
-    ) -> ArrayLike:
+    ) -> bool:
         ...
 
     @abstractmethod
@@ -409,16 +412,8 @@ class NumpyLike(PublicSingleton, Protocol):
     def broadcast_to(self, x: ArrayLike, shape: tuple[ShapeItem, ...]) -> ArrayLike:
         ...
 
-    @overload
-    def shape_item_as_index(self, x1: int) -> int:
-        ...
-
-    @overload
-    def shape_item_as_index(self, x1: type[unknown_length]) -> ArrayLike:
-        ...
-
     @abstractmethod
-    def shape_item_as_index(self, x1):
+    def shape_item_as_index(self, x1: ShapeItem) -> int | ArrayLike:
         ...
 
     @abstractmethod
@@ -666,14 +661,12 @@ class NumpyLike(PublicSingleton, Protocol):
 
     @abstractmethod
     def astype(
-        self, x: ArrayLike, dtype: numpy.dtype, *, copy: bool | None = True
+        self, x: ArrayLike, dtype: DTypeLike, *, copy: bool | None = True
     ) -> ArrayLike:
         ...
 
     @abstractmethod
-    def can_cast(
-        self, from_: numpy.dtype | ArrayLike, to: numpy.dtype | ArrayLike
-    ) -> bool:
+    def can_cast(self, from_: DType | ArrayLike, to: DType | ArrayLike) -> bool:
         ...
 
     @abstractmethod

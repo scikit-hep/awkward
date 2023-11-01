@@ -7,9 +7,9 @@ from collections.abc import Callable, Iterator
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_union, type_parameters_equal
-from awkward._typing import JSONSerializable, Self, final
+from awkward._typing import DType, JSONSerializable, Self, final
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, _SpecifierMatcher
 
 np = NumpyMetadata.instance()
 
@@ -150,18 +150,10 @@ class UnmaskedForm(Form):
         if next_content is None:
             return None
         else:
-            return UnmaskedForm(
-                next_content,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
+            return self.copy(content=next_content)
 
-    def _select_columns(self, match_specifier):
-        return UnmaskedForm(
-            self._content._select_columns(match_specifier),
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
+        return self.copy(content=self._content._select_columns(match_specifier))
 
     def _column_types(self):
         return self._content._column_types()
@@ -183,6 +175,6 @@ class UnmaskedForm(Form):
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
-    ) -> Iterator[tuple[str, np.dtype]]:
+    ) -> Iterator[tuple[str, DType]]:
         if recursive:
             yield from self._content._expected_from_buffers(getkey, recursive)

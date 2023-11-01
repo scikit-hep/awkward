@@ -2,15 +2,20 @@
 from __future__ import annotations
 
 from awkward._singleton import PrivateSingleton
-from awkward._typing import Self, TypeAlias
+from awkward._typing import TYPE_CHECKING, Self, TypeAlias
 
-ShapeItem: TypeAlias = "int | type[unknown_length]"
+__all__ = ("ShapeItem", "UnknownLength", "unknown_length")
+
+ShapeItem: TypeAlias = "int | UnknownLength"
+
+if TYPE_CHECKING:
+    from types import NotImplementedType
 
 
-class _UnknownLength(PrivateSingleton):
+class UnknownLength(PrivateSingleton):
     _instance_name: str
 
-    def __add__(self, other) -> Self | NotImplemented:
+    def __add__(self, other) -> Self | NotImplementedType:
         if isinstance(other, int) or other is self:
             return self
         else:
@@ -19,7 +24,7 @@ class _UnknownLength(PrivateSingleton):
     __radd__ = __add__
     __iadd__ = __add__
 
-    def __sub__(self, other) -> Self | NotImplemented:
+    def __sub__(self, other) -> Self | NotImplementedType:
         if isinstance(other, int) or other is self:
             return self
         else:
@@ -28,7 +33,7 @@ class _UnknownLength(PrivateSingleton):
     __rsub__ = __sub__
     __isub__ = __sub__
 
-    def __mul__(self, other) -> Self | NotImplemented:
+    def __mul__(self, other) -> Self | NotImplementedType:
         if isinstance(other, int) or other is self:
             return self
         else:
@@ -37,7 +42,7 @@ class _UnknownLength(PrivateSingleton):
     __rmul__ = __mul__
     __imul__ = __mul__
 
-    def __floordiv__(self, other) -> Self | NotImplemented:
+    def __floordiv__(self, other) -> Self | NotImplementedType:
         if isinstance(other, int) or other is self:
             return self
         else:
@@ -81,7 +86,7 @@ class _UnknownLength(PrivateSingleton):
 
 
 # Inform the singleton if its module name
-_UnknownLength._instance_name = f"{__name__}.unknown_length"
+UnknownLength._instance_name = f"{__name__}.unknown_length"
 
 # Ensure we have a single instance
-unknown_length = _UnknownLength._new()
+unknown_length = UnknownLength._new()

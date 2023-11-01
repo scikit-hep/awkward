@@ -2,10 +2,11 @@
 # ruff: noqa: PLE0604
 from __future__ import annotations
 
-import numpy
 import sys
 import typing
 from typing import *  # noqa: F403
+
+import numpy
 
 __all__ = list(
     {
@@ -16,6 +17,7 @@ __all__ = list(
         "Protocol",
         "Unpack",
         "TypeAlias",
+        "TypeGuard",
         "runtime_checkable",
         "AxisMaybeNone",
         "TypedDict",
@@ -37,6 +39,7 @@ if sys.version_info < (3, 11):
         Self,
         TypeAlias,
         TypedDict,
+        TypeGuard,
         Unpack,
         final,
     )
@@ -50,6 +53,7 @@ else:
         SupportsIndex,
         TypeAlias,
         TypedDict,
+        TypeGuard,
         Unpack,
         final,
         runtime_checkable,
@@ -61,4 +65,4 @@ JSONSerializable: TypeAlias = (
 )
 JSONMapping: TypeAlias = "dict[str, JSONSerializable]"
 
-DType = TypeVar("DType", bound=numpy.dtype)
+DType: TypeAlias = numpy.dtype

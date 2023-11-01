@@ -14,7 +14,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@register_backend(Numpy)
+@register_backend(Numpy)  # type: ignore[type-abstract]
 class NumpyBackend(Backend):
     name: Final[str] = "cpu"
 

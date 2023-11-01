@@ -6,25 +6,23 @@ from operator import mul
 
 from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._typing import Self
+from awkward._typing import Any, DType, Self
 
 np = NumpyMetadata.instance()
 
 
 class PlaceholderArray(ArrayLike):
-    def __init__(
-        self, nplike: NumpyLike, shape: tuple[ShapeItem, ...], dtype: np.dtype
-    ):
+    def __init__(self, nplike: NumpyLike, shape: tuple[ShapeItem, ...], dtype: DType):
         self._nplike = nplike
         self._shape = shape
         self._dtype = np.dtype(dtype)
 
     @property
-    def dtype(self) -> np.dtype:
+    def dtype(self) -> DType:
         return self._dtype
 
     @property
-    def shape(self) -> tuple[int, ...]:
+    def shape(self) -> tuple[ShapeItem, ...]:
         return self._shape
 
     @property
@@ -32,7 +30,7 @@ class PlaceholderArray(ArrayLike):
         return len(self._shape)
 
     @property
-    def size(self) -> int:
+    def size(self) -> ShapeItem:
         return reduce(mul, self._shape)
 
     @property
@@ -40,8 +38,8 @@ class PlaceholderArray(ArrayLike):
         return 0
 
     @property
-    def strides(self) -> tuple[int, ...]:
-        out = (self._dtype.itemsize,)
+    def strides(self) -> tuple[ShapeItem, ...]:
+        out: tuple[ShapeItem, ...] = (self._dtype.itemsize,)
         for item in reversed(self._shape):
             out = (item * out[0], *out)
         return out
@@ -50,7 +48,7 @@ class PlaceholderArray(ArrayLike):
     def T(self):
         return type(self)(self._nplike, self._shape[::-1], self._dtype)
 
-    def view(self, dtype: dtype) -> Self:
+    def view(self, dtype: DType) -> Self:
         dtype = np.dtype(dtype)
         if len(self._shape) >= 1:
             last, remainder = divmod(
@@ -108,7 +106,7 @@ class PlaceholderArray(ArrayLike):
         raise RuntimeError
 
     def __len__(self) -> int:
-        return self._shape[0]
+        return int(self._shape[0])
 
     def __add__(self, other):
         raise RuntimeError
@@ -149,4 +147,10 @@ class PlaceholderArray(ArrayLike):
     def __truediv__(self, other):
         raise RuntimeError
 
-    __iter__ = None
+    __iter__: None = None
+
+    def __dlpack_device__(self) -> tuple[int, int]:
+        raise RuntimeError
+
+    def __dlpack__(self, stream: Any = None) -> Any:
+        raise RuntimeError

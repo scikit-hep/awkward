@@ -13,7 +13,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@register_backend(TypeTracer)
+@register_backend(TypeTracer)  # type: ignore[type-abstract]
 class TypeTracerBackend(Backend):
     name: Final[str] = "typetracer"
 

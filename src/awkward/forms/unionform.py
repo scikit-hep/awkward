@@ -8,9 +8,9 @@ from collections.abc import Callable, Iterable
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
-from awkward._typing import Iterator, JSONSerializable, Self, final
+from awkward._typing import DType, Iterator, JSONSerializable, Self, final
 from awkward._util import UNSET
-from awkward.forms.form import Form, index_to_dtype
+from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
 
 np = NumpyMetadata.instance()
 
@@ -168,6 +168,8 @@ class UnionForm(Form):
                     return None
             return out
 
+        return None
+
     @property
     def purelist_isregular(self):
         for content in self._contents:
@@ -236,7 +238,7 @@ class UnionForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Form | None:
         contents = []
         for content in self._contents:
             next_content = content._prune_columns(True)
@@ -253,26 +255,14 @@ class UnionForm(Form):
         elif len(contents) == 1:
             return contents[0]
         else:
-            return UnionForm(
-                self._tags,
-                self._index,
-                contents,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
+            return self.copy(contents=contents)
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         contents = [
             content._select_columns(match_specifier) for content in self._contents
         ]
 
-        return UnionForm(
-            self._tags,
-            self._index,
-            contents,
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+        return self.copy(contents=contents)
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
@@ -296,7 +286,7 @@ class UnionForm(Form):
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
-    ) -> Iterator[tuple[str, np.dtype]]:
+    ) -> Iterator[tuple[str, DType]]:
         yield (getkey(self, "tags"), index_to_dtype[self._tags])
         yield (getkey(self, "index"), index_to_dtype[self._index])
         if recursive:
