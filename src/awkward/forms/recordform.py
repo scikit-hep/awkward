@@ -8,10 +8,10 @@ import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import JSONSerializable, final
+from awkward._typing import DType, JSONSerializable, Self, final
 from awkward._util import UNSET
 from awkward.errors import FieldNotFoundError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, _SpecifierMatcher
 
 np = NumpyMetadata.instance()
 
@@ -198,6 +198,7 @@ class RecordForm(Form):
             for key in keys:
                 if key in self._parameters:
                     return self._parameters[key]
+        return None
 
     @property
     def purelist_isregular(self):
@@ -246,7 +247,7 @@ class RecordForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _prune_columns(self, is_inside_record_or_union: bool):
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
@@ -256,18 +257,13 @@ class RecordForm(Form):
             contents.append(next_content)
             fields.append(field)
 
-        if fields or not is_inside_record_or_union:
-            return RecordForm(
-                contents,
-                fields,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
         # If all subtrees are pruned (or we have no subtrees!), then we should prune this form too
-        else:
+        if not fields and is_inside_record_or_union:
             return None
+        else:
+            return self.copy(contents=contents, fields=fields)
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
@@ -283,12 +279,7 @@ class RecordForm(Form):
             contents.append(next_content)
             fields.append(field)
 
-        return RecordForm(
-            contents,
-            fields,
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+        return self.copy(contents=contents, fields=fields)
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
@@ -312,7 +303,7 @@ class RecordForm(Form):
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
-    ) -> Iterator[tuple[str, np.dtype]]:
+    ) -> Iterator[tuple[str, DType]]:
         if recursive:
             for content in self._contents:
                 yield from content._expected_from_buffers(getkey, recursive)

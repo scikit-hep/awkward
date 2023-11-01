@@ -2,20 +2,21 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 import awkward as ak
 from awkward._kernels import KernelError
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._singleton import PublicSingleton
-from awkward._typing import Callable, Tuple, TypeAlias, TypeVar, Unpack
+from awkward._typing import Callable, Tuple, TypeAlias, TypeVar
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
 T_co = TypeVar("T_co", covariant=True)
-KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[np.dtype, ...]]]
+KernelKeyType: TypeAlias = Tuple[Any, ...]
 KernelType: TypeAlias = "Callable[..., KernelError | None]"
 
 
@@ -49,6 +50,7 @@ class Backend(PublicSingleton, ABC):
                 errors="surrogateescape"
             ).lstrip("\n").lstrip("(")
 
+        assert error.str is not None
         message = error.str.decode(errors="surrogateescape")
 
         if error.attempt != ak._util.kSliceNone:

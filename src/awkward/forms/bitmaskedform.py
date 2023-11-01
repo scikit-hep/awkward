@@ -8,9 +8,9 @@ from collections.abc import Callable
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import type_parameters_equal
-from awkward._typing import Iterator, JSONSerializable, Self, final
+from awkward._typing import DType, Iterator, JSONSerializable, Self, final
 from awkward._util import UNSET
-from awkward.forms.form import Form, index_to_dtype
+from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
 
 np = NumpyMetadata.instance()
 
@@ -209,24 +209,10 @@ class BitMaskedForm(Form):
         if next_content is None:
             return None
         else:
-            return BitMaskedForm(
-                self._mask,
-                next_content,
-                self._valid_when,
-                self._lsb_order,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
+            return self.copy(content=next_content)
 
-    def _select_columns(self, match_specifier):
-        return BitMaskedForm(
-            self._mask,
-            self._content._select_columns(match_specifier),
-            self._valid_when,
-            self._lsb_order,
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
+        return self.copy(content=self._content._select_columns(match_specifier))
 
     def _column_types(self):
         return self._content._column_types()
@@ -263,7 +249,7 @@ class BitMaskedForm(Form):
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
-    ) -> Iterator[tuple[str, np.dtype]]:
+    ) -> Iterator[tuple[str, DType]]:
         yield (getkey(self, "mask"), index_to_dtype[self._mask])
         if recursive:
             yield from self._content._expected_from_buffers(getkey, recursive)

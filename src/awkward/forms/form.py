@@ -17,7 +17,15 @@ from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_union
-from awkward._typing import Final, Iterator, JSONMapping, JSONSerializable, Self
+from awkward._typing import (
+    ClassVar,
+    DType,
+    Final,
+    Iterator,
+    JSONMapping,
+    JSONSerializable,
+    Self,
+)
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
@@ -328,16 +336,14 @@ class _SpecifierMatcher:
                 next_specifiers.extend(self._match_to_next_specifiers[pattern])
 
         if has_matched:
-            return _SpecifierMatcher(
-                next_specifiers, match_if_empty=next_match_if_empty
-            )
+            return type(self)(next_specifiers, match_if_empty=next_match_if_empty)
         elif self.is_empty and self._match_if_empty:
             return self
         else:
-            return
+            return None
 
 
-def regularize_buffer_key(buffer_key: str | callable) -> Callable[[Form, str], str]:
+def regularize_buffer_key(buffer_key: str | Callable) -> Callable[[Form, str], str]:
     if isinstance(buffer_key, str):
 
         def getkey(form, attribute):
@@ -358,7 +364,7 @@ def regularize_buffer_key(buffer_key: str | callable) -> Callable[[Form, str], s
         )
 
 
-index_to_dtype: Final[dict[str, np.dtype]] = {
+index_to_dtype: Final[dict[str, DType]] = {
     "i8": np.dtype("<i1"),
     "u8": np.dtype("<u1"),
     "i32": np.dtype("<i4"),
@@ -368,16 +374,16 @@ index_to_dtype: Final[dict[str, np.dtype]] = {
 
 
 class Form:
-    is_numpy = False
-    is_unknown = False
-    is_list = False
-    is_regular = False
-    is_option = False
-    is_indexed = False
-    is_record = False
-    is_union = False
+    is_numpy: ClassVar = False
+    is_unknown: ClassVar = False
+    is_list: ClassVar = False
+    is_regular: ClassVar = False
+    is_option: ClassVar = False
+    is_indexed: ClassVar = False
+    is_record: ClassVar = False
+    is_union: ClassVar = False
 
-    def _init(self, *, parameters, form_key):
+    def _init(self, *, parameters: JSONMapping | None, form_key: str | None):
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{} 'parameters' must be of type dict or None, not {}".format(
@@ -511,6 +517,8 @@ class Form:
         specifier = [[] if item == "" else item.split(".") for item in set(specifier)]
         match_specifier = _SpecifierMatcher(specifier, match_if_empty=False)
         selection = self._select_columns(match_specifier)
+        assert selection is not None, "top-level selections always return a Form"
+
         if prune_unions_and_records:
             return selection._prune_columns(False)
         else:
@@ -522,10 +530,10 @@ class Form:
     def _columns(self, path, output, list_indicator):
         raise NotImplementedError
 
-    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Form | None:
         raise NotImplementedError
 
-    def _select_columns(self, match_specifier) -> Self | None:
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Form | None:
         raise NotImplementedError
 
     def _column_types(self):
@@ -658,7 +666,7 @@ class Form:
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
-    ) -> Iterator[tuple[str, np.dtype]]:
+    ) -> Iterator[tuple[str, DType]]:
         raise NotImplementedError
 
     def expected_from_buffers(

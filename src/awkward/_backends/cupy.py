@@ -13,7 +13,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@register_backend(Cupy)
+@register_backend(Cupy)  # type: ignore[type-abstract]
 class CupyBackend(Backend):
     name: Final[str] = "cuda"
 

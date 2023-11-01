@@ -16,7 +16,7 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@register_backend(Jax)
+@register_backend(Jax)  # type: ignore[type-abstract]
 class JaxBackend(Backend):
     name: Final[str] = "jax"
 

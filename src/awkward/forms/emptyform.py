@@ -10,9 +10,9 @@ import awkward as ak
 from awkward._errors import deprecate
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
-from awkward._typing import Iterator, JSONSerializable, Self, final
-from awkward._util import UNSET
-from awkward.forms.form import Form, JSONMapping
+from awkward._typing import DType, Iterator, JSONSerializable, Self, final
+from awkward._util import UNSET, Sentinel
+from awkward.forms.form import Form, JSONMapping, _SpecifierMatcher
 
 np = NumpyMetadata.instance()
 
@@ -22,22 +22,29 @@ class EmptyForm(Form):
     is_numpy = True
     is_unknown = True
 
-    def __init__(self, *, parameters: JSONMapping | None = None, form_key=None):
+    def __init__(
+        self, *, parameters: JSONMapping | None = None, form_key: str | None = None
+    ):
         if not (parameters is None or len(parameters) == 0):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
         self._init(parameters=parameters, form_key=form_key)
 
     def copy(
-        self, *, parameters: JSONMapping | None = UNSET, form_key=UNSET
+        self,
+        *,
+        parameters: JSONMapping | Sentinel | None = UNSET,
+        form_key: str | Sentinel | None = UNSET,
     ) -> EmptyForm:
-        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
+        if not (parameters is UNSET or parameters is None or len(parameters) == 0):  # type: ignore[arg-type]
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
         return EmptyForm(
-            form_key=self._form_key if form_key is UNSET else form_key,
+            form_key=self._form_key if form_key is UNSET else form_key,  # type: ignore[arg-type]
         )
 
     @classmethod
-    def simplified(cls, *, parameters=None, form_key=None) -> Form:
+    def simplified(
+        cls, *, parameters: JSONMapping | None = None, form_key: str | None = None
+    ) -> Form:
         if not (parameters is None or len(parameters) == 0):
             raise TypeError(f"{cls.__name__} cannot contain parameters")
         return cls(parameters=parameters, form_key=form_key)
@@ -123,7 +130,7 @@ class EmptyForm(Form):
     def _columns(self, path, output, list_indicator):
         output.append(".".join(path))
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         return self
 
     def _prune_columns(self, is_inside_record_or_union: bool) -> Self:
@@ -152,5 +159,5 @@ class EmptyForm(Form):
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
-    ) -> Iterator[tuple[str, np.dtype]]:
+    ) -> Iterator[tuple[str, DType]]:
         yield from ()
