@@ -17,7 +17,7 @@ from awkward._nplikes.numpylike import (
 )
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._typing import DType, TYPE_CHECKING, Any, Final, Literal, cast
+from awkward._typing import TYPE_CHECKING, Any, Final, Literal, cast
 
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
