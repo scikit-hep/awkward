@@ -47,7 +47,7 @@ class Numpy(ArrayModuleNumpyLike):
         if isinstance(x, PlaceholderArray):
             return True
         else:
-            return x.flags["C_CONTIGUOUS"]
+            return x.flags["C_CONTIGUOUS"]  # type: ignore[attr-defined]
 
     def packbits(
         self,
@@ -57,7 +57,7 @@ class Numpy(ArrayModuleNumpyLike):
         bitorder: Literal["big", "little"] = "big",
     ):
         assert not isinstance(x, PlaceholderArray)
-        return numpy.packbits(x, axis=axis, bitorder=bitorder)
+        return numpy.packbits(x, axis=axis, bitorder=bitorder)  # type: ignore[arg-type]
 
     def unpackbits(
         self,
@@ -68,4 +68,4 @@ class Numpy(ArrayModuleNumpyLike):
         bitorder: Literal["big", "little"] = "big",
     ):
         assert not isinstance(x, PlaceholderArray)
-        return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
+        return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)  # type: ignore[arg-type]

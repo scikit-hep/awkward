@@ -6,8 +6,8 @@ from collections.abc import Collection
 from awkward._backends.backend import Backend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
-from awkward._typing import Callable, TypeAlias, TypeVar
-from awkward._util import UNSET
+from awkward._typing import Callable, TypeAlias, TypeVar, cast
+from awkward._util import UNSET, Sentinel
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -19,7 +19,7 @@ BackendLookup: TypeAlias = "Callable[[T], Backend]"
 BackendLookupFactory: TypeAlias = "Callable[[type[T]], BackendLookup[T]]"
 
 
-_type_to_backend_lookup: dict[type[T], BackendLookup] = {}
+_type_to_backend_lookup: dict[type, BackendLookup] = {}
 _backend_lookup_factories: list[BackendLookupFactory] = []
 _name_to_backend_cls: dict[str, type[Backend]] = {}
 
@@ -68,7 +68,7 @@ def common_backend(backends: Collection[Backend]) -> Backend:
             )
 
 
-def backend_of_obj(obj, default: D = UNSET) -> Backend | D:
+def backend_of_obj(obj, default: D | Sentinel = UNSET) -> Backend | D:
     cls = type(obj)
     try:
         lookup = _type_to_backend_lookup[cls]
@@ -82,13 +82,13 @@ def backend_of_obj(obj, default: D = UNSET) -> Backend | D:
             if default is UNSET:
                 raise TypeError(f"cannot find backend for {cls.__name__}")
             else:
-                return default
+                return cast(D, default)
         _type_to_backend_lookup[cls] = maybe_lookup
         return maybe_lookup(obj)
 
 
 def backend_of(
-    *objects, default: D = UNSET, coerce_to_common: bool = False
+    *objects, default: D | Sentinel = UNSET, coerce_to_common: bool = False
 ) -> Backend | D:
     """
     Args:
@@ -108,7 +108,7 @@ def backend_of(
         if default is UNSET:
             raise ValueError("could not find backend for", objects)
         else:
-            return default
+            return cast(D, default)
     elif len(unique_backends) == 1:
         return next(iter(unique_backends))
     elif coerce_to_common:

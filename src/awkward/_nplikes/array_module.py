@@ -17,7 +17,10 @@ from awkward._nplikes.numpylike import (
 )
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._typing import Any, DType, Final, Literal, cast
+from awkward._typing import DType, TYPE_CHECKING, Any, Final, Literal, cast
+
+if TYPE_CHECKING:
+    from numpy.typing import DTypeLike
 
 np = NumpyMetadata.instance()
 NUMPY_HAS_NEP_50 = packaging.version.Version(
@@ -49,7 +52,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         self,
         obj,
         *,
-        dtype: DType | None = None,
+        dtype: DTypeLike | None = None,
         copy: bool | None = None,
     ) -> ArrayLike:
         if isinstance(obj, PlaceholderArray):
@@ -74,7 +77,7 @@ class ArrayModuleNumpyLike(NumpyLike):
             return self._module.ascontiguousarray(x)
 
     def frombuffer(
-        self, buffer, *, dtype: DType | None = None, count: ShapeItem = -1
+        self, buffer, *, dtype: DTypeLike | None = None, count: ShapeItem = -1
     ) -> ArrayLike:
         if isinstance(buffer, PlaceholderArray):
             raise TypeError("placeholder arrays are not supported in `frombuffer`")
@@ -84,17 +87,26 @@ class ArrayModuleNumpyLike(NumpyLike):
         return self._module.from_dlpack(x)
 
     def zeros(
-        self, shape: ShapeItem | tuple[ShapeItem, ...], *, dtype: DType | None = None
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         return self._module.zeros(shape, dtype=dtype)
 
     def ones(
-        self, shape: ShapeItem | tuple[ShapeItem, ...], *, dtype: DType | None = None
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         return self._module.ones(shape, dtype=dtype)
 
     def empty(
-        self, shape: ShapeItem | tuple[ShapeItem, ...], *, dtype: DType | None = None
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         return self._module.empty(shape, dtype=dtype)
 
@@ -103,24 +115,24 @@ class ArrayModuleNumpyLike(NumpyLike):
         shape: ShapeItem | tuple[ShapeItem, ...],
         fill_value,
         *,
-        dtype: DType | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         return self._module.full(shape, fill_value, dtype=dtype)
 
-    def zeros_like(self, x: ArrayLike, *, dtype: DType | None = None) -> ArrayLike:
+    def zeros_like(self, x: ArrayLike, *, dtype: DTypeLike | None = None) -> ArrayLike:
         if isinstance(x, PlaceholderArray):
             return self.zeros(x.shape, dtype=dtype or x.dtype)
         else:
             return self._module.zeros_like(x, dtype=dtype)
 
-    def ones_like(self, x: ArrayLike, *, dtype: DType | None = None) -> ArrayLike:
+    def ones_like(self, x: ArrayLike, *, dtype: DTypeLike | None = None) -> ArrayLike:
         if isinstance(x, PlaceholderArray):
             return self.ones(x.shape, dtype=dtype or x.dtype)
         else:
             return self._module.ones_like(x, dtype=dtype)
 
     def full_like(
-        self, x: ArrayLike, fill_value, *, dtype: DType | None = None
+        self, x: ArrayLike, fill_value, *, dtype: DTypeLike | None = None
     ) -> ArrayLike:
         if isinstance(x, PlaceholderArray):
             return self.full(x.shape, fill_value, dtype=dtype or x.dtype)
@@ -133,7 +145,7 @@ class ArrayModuleNumpyLike(NumpyLike):
         stop: float | int | None = None,
         step: float | int = 1,
         *,
-        dtype: DType | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         assert not isinstance(start, PlaceholderArray)
         assert not isinstance(stop, PlaceholderArray)
@@ -212,14 +224,13 @@ class ArrayModuleNumpyLike(NumpyLike):
         ) -> ArrayLike | tuple[ArrayLike]:
             # Convert np.generic to scalar arrays
             resolved_args = [
-                self.asarray(arg, dtype=arg.dtype) if hasattr(arg, "dtype") else arg
+                self.asarray(arg, dtype=arg.dtype if hasattr(arg, "dtype") else None)
                 for arg in args
             ]
             broadcasted_args = self.broadcast_arrays(*resolved_args)
             # Choose the broadcasted argument if it wasn't a Python scalar
             non_generic_value_promoted_args = [
-                y if hasattr(x, "ndim") else x
-                for x, y in zip(resolved_args, broadcasted_args)
+                y if hasattr(x, "ndim") else x for x, y in zip(args, broadcasted_args)
             ]
             # Allow other nplikes to replace implementation
             impl = self.prepare_ufunc(ufunc)
@@ -436,7 +447,7 @@ class ArrayModuleNumpyLike(NumpyLike):
     def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
         if isinstance(x, PlaceholderArray):
             # Assume contiguous
-            strides: tuple[int, ...] = (x.itemsize,)
+            strides: tuple[ShapeItem, ...] = (x.dtype.itemsize,)
             for item in x.shape[-1:0:-1]:
                 strides = (item * strides[0], *strides)
             return strides
@@ -598,12 +609,12 @@ class ArrayModuleNumpyLike(NumpyLike):
         )
 
     def astype(
-        self, x: ArrayLike, dtype: numpy.dtype, *, copy: bool | None = True
+        self, x: ArrayLike, dtype: DTypeLike, *, copy: bool | None = True
     ) -> ArrayLike:
         assert not isinstance(x, PlaceholderArray)
-        return x.astype(dtype, copy=copy)  # type: ignore
+        return x.astype(dtype, copy=copy)  # type: ignore[attr-defined]
 
-    def can_cast(self, from_: DType | ArrayLike, to: DType | ArrayLike) -> bool:
+    def can_cast(self, from_: DTypeLike | ArrayLike, to: DTypeLike | ArrayLike) -> bool:
         return self._module.can_cast(from_, to, casting="same_kind")
 
     @classmethod

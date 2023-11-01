@@ -8,7 +8,11 @@ from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpylike import ArrayLike
 from awkward._nplikes.placeholder import PlaceholderArray
-from awkward._typing import Final
+from awkward._nplikes.shape import ShapeItem
+from awkward._typing import TYPE_CHECKING, Final
+
+if TYPE_CHECKING:
+    from numpy.typing import DTypeLike
 
 
 @register_nplike
@@ -40,7 +44,7 @@ class Cupy(ArrayModuleNumpyLike):
         return self._module.ndarray
 
     def frombuffer(
-        self, buffer, *, dtype: numpy.dtype | None = None, count: int = -1
+        self, buffer, *, dtype: DTypeLike | None = None, count: ShapeItem = -1
     ) -> ArrayLike:
         assert not isinstance(buffer, PlaceholderArray)
         assert not isinstance(count, PlaceholderArray)
@@ -81,7 +85,7 @@ class Cupy(ArrayModuleNumpyLike):
         self,
         x: ArrayLike,
         *,
-        axis: int | tuple[int, ...] | None = None,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
@@ -96,7 +100,7 @@ class Cupy(ArrayModuleNumpyLike):
         self,
         x: ArrayLike,
         *,
-        axis: int | tuple[int, ...] | None = None,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
@@ -108,7 +112,7 @@ class Cupy(ArrayModuleNumpyLike):
             return out
 
     def count_nonzero(
-        self, x: ArrayLike, *, axis: int | tuple[int, ...] | None = None
+        self, x: ArrayLike, *, axis: ShapeItem | tuple[ShapeItem, ...] | None = None
     ) -> ArrayLike:
         assert not isinstance(x, PlaceholderArray)
         assert isinstance(axis, int) or axis is None
@@ -122,7 +126,7 @@ class Cupy(ArrayModuleNumpyLike):
         self,
         x: ArrayLike,
         *,
-        axis: int | tuple[int, ...] | None = None,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
@@ -137,7 +141,7 @@ class Cupy(ArrayModuleNumpyLike):
         self,
         x: ArrayLike,
         *,
-        axis: int | tuple[int, ...] | None = None,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
@@ -164,4 +168,4 @@ class Cupy(ArrayModuleNumpyLike):
         if isinstance(x, PlaceholderArray):
             return True
         else:
-            return x.flags["C_CONTIGUOUS"]
+            return x.flags["C_CONTIGUOUS"]  # type: ignore[attr-defined]

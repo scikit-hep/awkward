@@ -220,40 +220,21 @@ disable = [
 
 [tool.mypy]
 files = ["src/awkward/**/*.py"]
-exclude = ["^src/awkward/[^/]+\\.py$"]
 plugins = [
     "numpy.typing.mypy_plugin"
 ]
 python_version = "3.11"
+ignore_errors = true
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
-    'awkward.__init__',
-    'awkward._connect.*',
-    'awkward._cpu_kernels',
-    'awkward._errors',
-    'awkward._kernel_signatures',
-    'awkward._libawkward',
-    'awkward._util',
-    'awkward.forms',
-    'awkward.forth',
-    'awkward.highlevel',
-    'awkward.nplike',
-    'awkward.numba',
-    'awkward.types',
-    'awkward.types._awkward_datashape_parser',
-    'numba.*',
-    'llvmlite.*',
-    'ROOT.*',
-    'cppyy.*',
-    'jax.*',
-    'pandas.*',
-    'cupy.*',
-    'pyarrow.*',
-    'fsspec.*',
-    'numexpr.*',
+    'awkward._nplikes.*',
+    'awkward._behavior.*',
+    'awkward._backends.*',
+    'awkward.forms.*',
 ]
-ignore_errors = true
+ignore_errors = false
 ignore_missing_imports = true
 
 [tool.ruff]
@@ -306,6 +287,7 @@ mccabe.max-complexity = 100
 [tool.ruff.lint.per-file-ignores]
 "dev/*" = ["T20", "TID251"]
 "src/awkward/numba/*" = ["TID251"]
+"src/awkward/_typing.py" = ["TID251"]
 "src/awkward/_errors.py" = ["TID251"]
 "src/awkward/errors.py" = ["TID251"]
 "src/awkward/_connect/*" = ["TID251"]

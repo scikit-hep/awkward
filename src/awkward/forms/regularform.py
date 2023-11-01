@@ -9,9 +9,9 @@ from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import JSONSerializable, final
+from awkward._typing import DType, JSONSerializable, Self, final
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, _SpecifierMatcher
 
 np = NumpyMetadata.instance()
 
@@ -151,25 +151,15 @@ class RegularForm(Form):
             path = (*path, list_indicator)
         self._content._columns(path, output, list_indicator)
 
-    def _prune_columns(self, is_inside_record_or_union: bool):
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         next_content = self._content._prune_columns(is_inside_record_or_union)
         if next_content is None:
             return None
         else:
-            return RegularForm(
-                next_content,
-                self._size,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
+            return self.copy(content=next_content)
 
-    def _select_columns(self, match_specifier):
-        return RegularForm(
-            self._content._select_columns(match_specifier),
-            self._size,
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
+        return self.copy(content=self._content._select_columns(match_specifier))
 
     def _column_types(self):
         if self.parameter("__array__") in ("string", "bytestring"):
@@ -194,6 +184,6 @@ class RegularForm(Form):
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
-    ) -> Iterator[tuple[str, np.dtype]]:
+    ) -> Iterator[tuple[str, DType]]:
         if recursive:
             yield from self._content._expected_from_buffers(getkey, recursive)

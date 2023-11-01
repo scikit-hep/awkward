@@ -33,6 +33,6 @@ def to_nplike(
     if isinstance(from_nplike, awkward._nplikes.cupy.Cupy) and not isinstance(
         nplike, awkward._nplikes.cupy.Cupy
     ):
-        array = array.get()
+        array = array.get()  # type: ignore[attr-defined]
 
     return nplike.asarray(array)
