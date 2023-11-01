@@ -84,7 +84,7 @@ from awkward.operations.str.akstr_trim_whitespace import *
 from awkward.operations.str.akstr_upper import *
 
 
-def _drop_option_preserving_form(layout):
+def _drop_option_preserving_form(layout, ensure_trivial_mask: bool = True):
     from awkward._do import recursively_apply
     from awkward.contents import UnmaskedArray, IndexedOptionArray, IndexedArray
 
@@ -98,7 +98,8 @@ def _drop_option_preserving_form(layout):
         else:
             index_nplike = this.backend.index_nplike
             assert not (
-                index_nplike.known_data
+                ensure_trivial_mask
+                and index_nplike.known_data
                 and index_nplike.any(this.mask_as_bool(valid_when=False))
             ), "did not expect option type, but arrow returned a non-erasable option"
             # Re-write indexed options as indexed
