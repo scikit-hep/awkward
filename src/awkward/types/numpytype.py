@@ -143,7 +143,7 @@ class NumpyType(Type):
             out = [typestr]
 
         else:
-            if unit := cast(str, self.parameter("__unit__")) is not None:
+            if (unit := cast(str, self.parameter("__unit__"))) is not None:
                 numpy_unit = str(np.dtype(f"M8[{unit}]"))
                 bracket_index = numpy_unit.index("[")
                 units = "unit=" + json.dumps(numpy_unit[bracket_index + 1 : -1])
