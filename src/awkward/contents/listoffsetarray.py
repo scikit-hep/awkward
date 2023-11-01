@@ -211,7 +211,7 @@ class ListOffsetArray(Content):
         offsets = self._offsets.to_nplike(TypeTracer.instance())
         return ListOffsetArray(
             offsets.forget_length() if forget_length else offsets,
-            self._content._to_typetracer(forget_length),
+            self._content._to_typetracer(False),
             parameters=self._parameters,
         )
 

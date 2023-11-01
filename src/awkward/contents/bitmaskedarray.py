@@ -311,7 +311,7 @@ class BitMaskedArray(Content):
         tt = TypeTracer.instance()
         return BitMaskedArray(
             self._mask.to_nplike(tt),
-            self._content._to_typetracer(forget_length),
+            self._content._to_typetracer(False),
             self._valid_when,
             unknown_length if forget_length else self.length,
             self._lsb_order,

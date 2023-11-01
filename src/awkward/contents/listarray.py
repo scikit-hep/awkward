@@ -228,7 +228,7 @@ class ListArray(Content):
         return ListArray(
             starts.forget_length() if forget_length else starts,
             self._stops.to_nplike(tt),
-            self._content._to_typetracer(forget_length),
+            self._content._to_typetracer(False),
             parameters=self._parameters,
         )
 
