@@ -56,6 +56,7 @@ def _is_maybe_optional_list_of_string(layout):
 
 def _impl(array, value_set, skip_nones, highlevel, behavior):
     from awkward._connect.pyarrow import import_pyarrow_compute
+    from awkward.operations.str import _apply_through_arrow
 
     pc = import_pyarrow_compute("ak.str.is_in")
 
@@ -70,30 +71,9 @@ def _impl(array, value_set, skip_nones, highlevel, behavior):
 
     def apply(layout, **kwargs):
         if _is_maybe_optional_list_of_string(layout):
-            if layout.backend is typetracer:
-                return ak.from_arrow(
-                    pc.is_in(
-                        ak.to_arrow(
-                            layout.form.length_zero_array(highlevel=False),
-                            extensionarray=False,
-                        ),
-                        ak.to_arrow(
-                            value_set_layout.form.length_zero_array(highlevel=False),
-                            extensionarray=False,
-                        ),
-                        skip_nulls=skip_nones,
-                    ),
-                    highlevel=False,
-                ).to_typetracer(forget_length=True)
-            else:
-                return ak.from_arrow(
-                    pc.is_in(
-                        ak.to_arrow(layout, extensionarray=False),
-                        ak.to_arrow(value_set_layout, extensionarray=False),
-                        skip_nulls=skip_nones,
-                    ),
-                    highlevel=False,
-                )
+            return _apply_through_arrow(
+                pc.is_in, layout, value_set_layout, skip_nulls=skip_nones
+            )
 
     out = ak._do.recursively_apply(layout, apply, behavior=behavior)
 
