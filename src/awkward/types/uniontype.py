@@ -1,25 +1,34 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from itertools import permutations
 
 from awkward._behavior import find_array_typestr
 from awkward._parameters import parameters_are_equal, type_parameters_equal
-from awkward._typing import Self, final
-from awkward._util import UNSET
+from awkward._typing import Any, JSONMapping, Self, final
+from awkward._util import UNSET, Sentinel
 from awkward.types.type import Type
 
 
 @final
 class UnionType(Type):
-    def copy(self, *, contents: list[Type] = UNSET, parameters=UNSET) -> Self:
+    _contents: list[Type]
+
+    def copy(
+        self,
+        *,
+        contents: list[Type] | Sentinel = UNSET,
+        parameters: JSONMapping | None | Sentinel = UNSET,
+    ) -> Self:
         return UnionType(
-            self._contents if contents is UNSET else contents,
-            parameters=self._parameters if parameters is UNSET else parameters,
+            self._contents if contents is UNSET else contents,  # type: ignore[arg-type]
+            parameters=self._parameters if parameters is UNSET else parameters,  # type: ignore[arg-type]
         )
 
-    def __init__(self, contents, *, parameters=None):
+    def __init__(
+        self, contents: Iterable[Type], *, parameters: JSONMapping | None = None
+    ):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{} 'contents' must be iterable, not {}".format(
@@ -35,20 +44,20 @@ class UnionType(Type):
                         type(self).__name__, repr(content)
                     )
                 )
-        if parameters is not None and not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, Mapping):
             raise TypeError(
-                "{} 'parameters' must be of type dict or None, not {}".format(
+                "{} 'parameters' must be of type Mapping or None, not {}".format(
                     type(self).__name__, repr(parameters)
                 )
             )
-        self._contents = contents
+        self._contents: list[Type] = contents
         self._parameters = parameters
 
     @property
-    def contents(self):
+    def contents(self) -> list[Type]:
         return self._contents
 
-    def _str(self, indent, compact, behavior):
+    def _str(self, indent: str, compact: bool, behavior: Mapping | None) -> list[str]:
         typestr = find_array_typestr(behavior, self._parameters)
         if typestr is not None:
             out = [typestr]
@@ -88,11 +97,11 @@ class UnionType(Type):
 
         return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         args = [repr(self._contents), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _is_equal_to(self, other, all_parameters: bool):
+    def _is_equal_to(self, other: Any, all_parameters: bool) -> bool:
         compare_parameters = (
             parameters_are_equal if all_parameters else type_parameters_equal
         )

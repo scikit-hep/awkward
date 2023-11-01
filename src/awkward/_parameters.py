@@ -36,7 +36,7 @@ def type_parameters_equal(
 
 
 def parameters_are_equal(
-    one: JSONMapping, two: JSONMapping, only_array_record=False
+    one: JSONMapping | None, two: JSONMapping | None, only_array_record=False
 ) -> bool:
     if one is None and two is None:
         return True

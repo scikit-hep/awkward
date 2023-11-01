@@ -3,43 +3,46 @@ from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Mapping
 
 import awkward as ak
 from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._typing import Self
-from awkward._util import UNSET
+from awkward._typing import Any, JSONMapping, JSONSerializable, Self
+from awkward._util import UNSET, Sentinel
 from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
 
 np = NumpyMetadata.instance()
 
 
 class Type:
-    def copy(self, *, parameters=UNSET) -> Self:
+    _parameters: JSONMapping | None
+
+    def copy(self, *, parameters: JSONMapping | None | Sentinel = UNSET) -> Self:
         raise NotImplementedError
 
     @property
-    def parameters(self):
+    def parameters(self) -> JSONMapping:
         if self._parameters is None:  # pylint: disable=E0203
             self._parameters = {}
         return self._parameters
 
-    def parameter(self, key):
+    def parameter(self, key: str) -> JSONSerializable | None:
         if self._parameters is None:
             return None
         else:
             return self._parameters.get(key)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "".join(self._str("", True, None))
 
-    def _str(self, indent: str, compact: bool, behavior: dict | None) -> list[str]:
+    def _str(self, indent: str, compact: bool, behavior: Mapping | None) -> list[str]:
         raise NotImplementedError
 
     def show(self, stream=sys.stdout):
         # TODO: deprecate lowlevel show
         stream.write("".join([*self._str("", False, None), "\n"]))
 
-    _str_parameters_exclude = ("__categorical__",)
+    _str_parameters_exclude: tuple[str, ...] = ("__categorical__",)
 
     def _str_categorical_begin(self) -> str:
         if self.parameter("__categorical__") is not None:
@@ -53,8 +56,8 @@ class Type:
         else:
             return ""
 
-    def _str_parameters(self) -> str:
-        out = []
+    def _str_parameters(self) -> str | None:
+        out: list[str] = []
         if self._parameters is not None:
             for k, v in self._parameters.items():
                 if v is None:
@@ -69,20 +72,20 @@ class Type:
             return "parameters={" + ", ".join(out) + "}"
 
     def _repr_args(self) -> list[str]:
-        out = []
+        out: list[str] = []
 
         if self._parameters is not None and len(self._parameters) > 0:
-            out.append("parameters=" + repr(self._parameters))
+            out.append(f"parameters={self._parameters!r}")
 
         return out
 
-    def is_equal_to(self, other, *, all_parameters: bool = False) -> bool:
+    def is_equal_to(self, other: Any, *, all_parameters: bool = False) -> bool:
         return self._is_equal_to(other, all_parameters)
 
     __eq__ = is_equal_to
 
-    def _is_equal_to(self, other, all_parameters: bool) -> bool:
-        raise ak._errors.wrap_error(NotImplementedError)
+    def _is_equal_to(self, other: Any, all_parameters: bool) -> bool:
+        raise NotImplementedError
 
 
 class _DataShapeTransformer(Transformer):
