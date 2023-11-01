@@ -89,7 +89,8 @@ def _impl(array, value, axis, highlevel, behavior):
     elif isinstance(valuelayout, ak.contents.Content):
         valuelayout = valuelayout[np.newaxis, ...]
     else:
-        # Now we know we've got Python scalars/strings, we can promote without
+        # Now that we know `valuelayout` isn't a low-level type, we must have scalars
+        # Thus, we can safely promote these scalars to a layout without
         # adding a new axis
         valuelayout = ak.operations.to_layout(
             value,
