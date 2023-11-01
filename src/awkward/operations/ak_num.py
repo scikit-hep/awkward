@@ -87,10 +87,11 @@ def _impl(array, axis, highlevel, behavior):
         raise TypeError(f"'axis' must be an integer, not {axis!r}")
 
     if maybe_posaxis(layout, axis, 1) == 0:
+        index_nplike = layout.backend.index_nplike
         if isinstance(layout, ak.record.Record):
-            return 1
+            return index_nplike.asarray(index_nplike.shape_item_as_index(1))
         else:
-            return layout.length
+            return index_nplike.asarray(index_nplike.shape_item_as_index(layout.length))
 
     def action(layout, depth, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
