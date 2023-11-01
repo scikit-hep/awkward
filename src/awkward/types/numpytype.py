@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Mapping
 
 from awkward._behavior import find_array_typestr
 from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._parameters import parameters_are_equal, type_parameters_equal
-from awkward._typing import Self, final
-from awkward._util import UNSET
+from awkward._typing import Any, JSONMapping, cast, final
+from awkward._util import UNSET, Sentinel
 from awkward.types.type import Type
 
 np = NumpyMetadata.instance()
@@ -94,30 +95,35 @@ for primitive, dtype in _primitive_to_dtype_dict.items():
 
 @final
 class NumpyType(Type):
-    def copy(self, *, primitive: Type = UNSET, parameters=UNSET) -> Self:
+    def copy(
+        self,
+        *,
+        primitive: str | Sentinel = UNSET,
+        parameters: JSONMapping | Sentinel | None = UNSET,
+    ) -> NumpyType:
         return NumpyType(
-            self._primitive if primitive is UNSET else primitive,
-            parameters=self._parameters if parameters is UNSET else parameters,
+            self._primitive if primitive is UNSET else primitive,  # type: ignore[arg-type]
+            parameters=self._parameters if parameters is UNSET else parameters,  # type: ignore[arg-type]
         )
 
-    def __init__(self, primitive, *, parameters=None):
+    def __init__(self, primitive: str, *, parameters: JSONMapping | None = None):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))
-        if parameters is not None and not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, Mapping):
             raise TypeError(
-                "{} 'parameters' must be of type dict or None, not {}".format(
+                "{} 'parameters' must be of type Mapping or None, not {}".format(
                     type(self).__name__, repr(parameters)
                 )
             )
-        self._primitive = primitive
-        self._parameters = parameters
+        self._primitive: str = primitive
+        self._parameters: JSONMapping | None = parameters
 
     @property
-    def primitive(self):
+    def primitive(self) -> str:
         return self._primitive
 
-    _str_parameters_exclude = ("__categorical__", "__unit__")
+    _str_parameters_exclude: tuple[str, ...] = ("__categorical__", "__unit__")
 
-    def _get_typestr(self, behavior) -> str | None:
+    def _get_typestr(self, behavior: Mapping | None) -> str | None:
         typestr = find_array_typestr(behavior, self._parameters)
         if typestr is not None:
             return typestr
@@ -125,20 +131,20 @@ class NumpyType(Type):
         if self._parameters is None:
             return None
 
-        name = self._parameters.get("__array__")
+        name = cast("str | None", self._parameters.get("__array__"))
         if name in {"byte", "char"}:
             return name
 
         return None
 
-    def _str(self, indent, compact, behavior):
+    def _str(self, indent: str, compact: bool, behavior: Mapping | None) -> list[str]:
         typestr = self._get_typestr(behavior)
         if typestr is not None:
             out = [typestr]
 
         else:
-            if self.parameter("__unit__") is not None:
-                numpy_unit = str(np.dtype("M8[" + self._parameters["__unit__"] + "]"))
+            if unit := cast(str, self.parameter("__unit__")) is not None:
+                numpy_unit = str(np.dtype(f"M8[{unit}]"))
                 bracket_index = numpy_unit.index("[")
                 units = "unit=" + json.dumps(numpy_unit[bracket_index + 1 : -1])
             else:
@@ -155,15 +161,15 @@ class NumpyType(Type):
                     units = ""
                 elif params is None:
                     params = ""
-                out = [self._primitive, "[", units, params, "]"]
+                out = [self._primitive, "[", units, params, "]"]  # type: ignore[list-item]
 
         return [self._str_categorical_begin(), *out, self._str_categorical_end()]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         args = [repr(self._primitive), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _is_equal_to(self, other, all_parameters: bool) -> bool:
+    def _is_equal_to(self, other: Any, all_parameters: bool) -> bool:
         compare_parameters = (
             parameters_are_equal if all_parameters else type_parameters_equal
         )

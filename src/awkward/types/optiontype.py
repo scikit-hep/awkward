@@ -1,14 +1,16 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from awkward._behavior import find_array_typestr
 from awkward._parameters import (
     parameters_are_equal,
     parameters_union,
     type_parameters_equal,
 )
-from awkward._typing import Self, final
-from awkward._util import UNSET
+from awkward._typing import Any, JSONMapping, final
+from awkward._util import UNSET, Sentinel
 from awkward.types.listtype import ListType
 from awkward.types.regulartype import RegularType
 from awkward.types.type import Type
@@ -17,33 +19,38 @@ from awkward.types.uniontype import UnionType
 
 @final
 class OptionType(Type):
-    def copy(self, *, content: Type = UNSET, parameters=UNSET) -> Self:
+    def copy(
+        self,
+        *,
+        content: Type | Sentinel = UNSET,
+        parameters: JSONMapping | Sentinel | None = UNSET,
+    ) -> OptionType:
         return OptionType(
-            self._content if content is UNSET else content,
-            parameters=self._parameters if parameters is UNSET else parameters,
+            self._content if content is UNSET else content,  # type: ignore[arg-type]
+            parameters=self._parameters if parameters is UNSET else parameters,  # type: ignore[arg-type]
         )
 
-    def __init__(self, content, *, parameters=None):
+    def __init__(self, content: Type, *, parameters: JSONMapping | None = None):
         if not isinstance(content, Type):
             raise TypeError(
                 "{} 'content' must be a Type subclass, not {}".format(
                     type(self).__name__, repr(content)
                 )
             )
-        if parameters is not None and not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, Mapping):
             raise TypeError(
-                "{} 'parameters' must be of type dict or None, not {}".format(
+                "{} 'parameters' must be of type Mapping or None, not {}".format(
                     type(self).__name__, repr(parameters)
                 )
             )
-        self._content = content
-        self._parameters = parameters
+        self._content: Type = content
+        self._parameters: JSONMapping | None = parameters
 
     @property
-    def content(self):
+    def content(self) -> Type:
         return self._content
 
-    def _str(self, indent, compact, behavior):
+    def _str(self, indent: str, compact: bool, behavior: Mapping | None) -> list[str]:
         typestr = find_array_typestr(behavior, self._parameters)
 
         head = []
@@ -80,11 +87,11 @@ class OptionType(Type):
             *tail,
         ]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         args = [repr(self._content), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def simplify_option_union(self):
+    def simplify_option_union(self) -> Type:
         if isinstance(self._content, UnionType):
             contents = []
             for content in self._content.contents:
@@ -106,7 +113,7 @@ class OptionType(Type):
         else:
             return self
 
-    def _is_equal_to(self, other, all_parameters: bool) -> bool:
+    def _is_equal_to(self, other: Any, all_parameters: bool) -> bool:
         compare_parameters = (
             parameters_are_equal if all_parameters else type_parameters_equal
         )
