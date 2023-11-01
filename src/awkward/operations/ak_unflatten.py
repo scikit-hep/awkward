@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 __all__ = ("unflatten",)
 import awkward as ak
+from awkward._backends.dispatch import backend_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import maybe_posaxis, wrap_layout
@@ -10,6 +12,7 @@ from awkward._nplikes.typetracer import is_unknown_scalar
 from awkward._regularize import is_integer_like, regularize_axis
 
 np = NumpyMetadata.instance()
+numpy_backend = NumpyBackend.instance()
 
 
 @high_level_function()
@@ -85,11 +88,13 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
 
 def _impl(array, counts, axis, highlevel, behavior):
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False
-    ).to_packed()
     behavior = behavior_of(array, behavior=behavior)
-    backend = layout.backend
+    backend = backend_of(array, counts, default=numpy_backend, coerce_to_common=True)
+    layout = (
+        ak.operations.to_layout(array, allow_record=False, allow_unknown=False)
+        .to_packed()
+        .to_backend(backend)
+    )
 
     if is_integer_like(counts):
         # Regularize unknown values to unknown lengths
@@ -101,7 +106,7 @@ def _impl(array, counts, axis, highlevel, behavior):
     else:
         counts = ak.operations.to_layout(
             counts, allow_record=False, allow_unknown=False, primitive_policy="error"
-        )
+        ).to_backend(backend)
         if counts.is_indexed and not counts.is_option:
             counts = counts.project()
 
