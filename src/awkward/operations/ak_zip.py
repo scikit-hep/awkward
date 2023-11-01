@@ -214,7 +214,7 @@ def _impl(
             return None
 
     out = ak._broadcasting.broadcast_and_apply(
-        layouts, action, behavior, right_broadcast=right_broadcast
+        layouts, action, right_broadcast=right_broadcast
     )
     assert isinstance(out, tuple) and len(out) == 1
     out = out[0]

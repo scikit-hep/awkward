@@ -118,8 +118,7 @@ def _impl(array, separator, highlevel, behavior):
             )
 
         (out,) = ak._broadcasting.broadcast_and_apply(
-            (layout, separator_layout),
-            apply_binary,
+            (layout, separator_layout), apply_binary
         )
 
     return wrap_layout(out, highlevel=highlevel, behavior=behavior)

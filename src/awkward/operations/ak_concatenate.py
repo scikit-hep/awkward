@@ -296,10 +296,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
                 return None
 
         out = ak._broadcasting.broadcast_and_apply(
-            content_or_others,
-            action,
-            allow_records=True,
-            right_broadcast=False,
+            content_or_others, action, allow_records=True, right_broadcast=False
         )[0]
 
     return wrap_layout(out, behavior, highlevel)

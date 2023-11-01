@@ -165,9 +165,7 @@ def _impl(base, what, where, highlevel, behavior):
                 return None
 
         out = ak._broadcasting.broadcast_and_apply(
-            [base, what],
-            action,
-            right_broadcast=False,
+            [base, what], action, right_broadcast=False
         )
 
         assert isinstance(out, tuple) and len(out) == 1

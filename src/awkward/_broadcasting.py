@@ -1009,6 +1009,7 @@ def apply_step(
 def broadcast_and_apply(
     inputs,
     action,
+    *,
     depth_context: dict[str, Any] | None = None,
     lateral_context: dict[str, Any] | None = None,
     allow_records: bool = True,
