@@ -21,7 +21,7 @@ metadata = NumpyMetadata.instance()
 
 
 class KernelError(Protocol):
-    filename: bytes | None  # pylint: disable=E0602
+    filename: bytes | None
     str: bytes | None
     attempt: int
     id: int

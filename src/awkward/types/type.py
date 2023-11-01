@@ -22,7 +22,7 @@ class Type:
 
     @property
     def parameters(self) -> JSONMapping:
-        if self._parameters is None:  # pylint: disable=E0203
+        if self._parameters is None:
             self._parameters = {}
         return self._parameters
 
