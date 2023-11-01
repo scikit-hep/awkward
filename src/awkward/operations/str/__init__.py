@@ -84,7 +84,7 @@ from awkward.operations.str.akstr_trim_whitespace import *
 from awkward.operations.str.akstr_upper import *
 
 
-def _drop_option_preserving_form(layout):
+def _drop_option_preserving_form(layout, ensure_empty_mask: bool = False):
     from awkward._do import recursively_apply
     from awkward.contents import UnmaskedArray, IndexedOptionArray, IndexedArray
 
@@ -98,7 +98,8 @@ def _drop_option_preserving_form(layout):
         else:
             index_nplike = this.backend.index_nplike
             assert not (
-                index_nplike.known_data
+                ensure_empty_mask
+                and index_nplike.known_data
                 and index_nplike.any(this.mask_as_bool(valid_when=False))
             ), "did not expect option type, but arrow returned a non-erasable option"
             # Re-write indexed options as indexed
@@ -120,6 +121,7 @@ def _apply_through_arrow(
     expect_option_type=False,
     string_to32=False,
     bytestring_to32=False,
+    ensure_empty_mask=False,
     **kwargs,
 ):
     from awkward._backends.dispatch import backend_of
@@ -170,7 +172,7 @@ def _apply_through_arrow(
     if expect_option_type:
         return out
     else:
-        return _drop_option_preserving_form(out)
+        return _drop_option_preserving_form(out, ensure_empty_mask=ensure_empty_mask)
 
 
 def _get_ufunc_action(
