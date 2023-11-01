@@ -81,6 +81,7 @@ def _impl(array, value, axis, highlevel, behavior):
         allow_unknown=False,
         use_from_iter=True,
         primitive_policy="pass-through",
+        string_policy="pass-through",
     )
 
     if isinstance(valuelayout, ak.record.Record):
@@ -88,12 +89,15 @@ def _impl(array, value, axis, highlevel, behavior):
     elif isinstance(valuelayout, ak.contents.Content):
         valuelayout = valuelayout[np.newaxis, ...]
     else:
+        # Now we know we've got Python scalars/strings, we can promote without
+        # adding a new axis
         valuelayout = ak.operations.to_layout(
             value,
             allow_record=True,
             allow_unknown=False,
             use_from_iter=True,
             primitive_policy="promote",
+            string_policy="promote",
         )
     valuelayout = valuelayout.to_backend(backend)
 
