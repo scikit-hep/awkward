@@ -71,5 +71,6 @@ repos:
   rev: v1.6.1
   hooks:
     - id: mypy
+      files: src
       additional_dependencies:
         - numpy>=1.24
