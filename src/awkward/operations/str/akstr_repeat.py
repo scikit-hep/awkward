@@ -79,7 +79,7 @@ def _impl(array, num_repeats, highlevel, behavior):
                 return (_apply_through_arrow(pc.binary_repeat, *inputs),)
 
         (out,) = ak._broadcasting.broadcast_and_apply(
-            (layout, num_repeats_layout), action, behavior
+            (layout, num_repeats_layout), action
         )
 
     else:

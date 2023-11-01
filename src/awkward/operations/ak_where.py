@@ -137,9 +137,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
             return None
 
     out = ak._broadcasting.broadcast_and_apply(
-        [condition_layout, x_layout, y_layout],
-        action,
-        numpy_to_regular=True,
+        [condition_layout, x_layout, y_layout], action, numpy_to_regular=True
     )
 
     return wrap_layout(out[0], behavior, highlevel)

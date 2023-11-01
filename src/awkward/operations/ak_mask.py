@@ -122,10 +122,7 @@ def _impl(array, mask, valid_when, highlevel, behavior):
 
     behavior = behavior_of(array, mask, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
-        [layoutarray, layoutmask],
-        action,
-        numpy_to_regular=True,
-        right_broadcast=False,
+        [layoutarray, layoutmask], action, numpy_to_regular=True, right_broadcast=False
     )
     assert isinstance(out, tuple) and len(out) == 1
     return wrap_layout(out[0], behavior, highlevel)
