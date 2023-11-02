@@ -8,6 +8,7 @@ import sys
 import threading
 import warnings
 from collections.abc import Mapping
+from contextlib import contextmanager
 
 from awkward._typing import TYPE_CHECKING, Any, JSONMapping, Protocol, runtime_checkable
 
@@ -75,11 +76,24 @@ def get_custom_reducer() -> PickleReducer | None:
             return _plugin
 
 
-def custom_reduce(obj, protocol) -> tuple | NotImplemented:
-    plugin = get_custom_reducer()
-    if plugin is None:
+_DISABLE_CUSTOM_REDUCER = False
+
+
+@contextmanager
+def use_builtin_reducer():
+    global _DISABLE_CUSTOM_REDUCER
+    old_value, _DISABLE_CUSTOM_REDUCER = _DISABLE_CUSTOM_REDUCER, True
+    try:
+        yield
+    finally:
+        _DISABLE_CUSTOM_REDUCER = old_value
+
+
+def custom_reduce(obj, protocol: int) -> tuple | NotImplemented:
+    if (plugin := get_custom_reducer()) is None or _DISABLE_CUSTOM_REDUCER:
         return NotImplemented
-    return plugin(obj, protocol)
+    else:
+        return plugin(obj, protocol)
 
 
 def unpickle_array_schema_1(
