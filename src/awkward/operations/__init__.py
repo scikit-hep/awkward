@@ -23,6 +23,7 @@ from awkward.operations.ak_count_nonzero import *
 from awkward.operations.ak_covar import *
 from awkward.operations.ak_drop_none import *
 from awkward.operations.ak_enforce_type import *
+from awkward.operations.ak_field_attrs import *
 from awkward.operations.ak_fields import *
 from awkward.operations.ak_fill_none import *
 from awkward.operations.ak_firsts import *
@@ -100,6 +101,7 @@ from awkward.operations.ak_values_astype import *
 from awkward.operations.ak_var import *
 from awkward.operations.ak_where import *
 from awkward.operations.ak_with_field import *
+from awkward.operations.ak_with_field_attr import *
 from awkward.operations.ak_with_name import *
 from awkward.operations.ak_with_parameter import *
 from awkward.operations.ak_without_field import *
