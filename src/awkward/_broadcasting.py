@@ -11,7 +11,7 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import (
     parameters_are_empty,

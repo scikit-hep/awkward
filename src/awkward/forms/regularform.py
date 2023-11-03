@@ -5,7 +5,7 @@ __all__ = ("RegularForm",)
 from collections.abc import Callable, Iterator
 
 import awkward as ak
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer

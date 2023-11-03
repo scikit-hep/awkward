@@ -5,7 +5,7 @@ __all__ = ("RecordForm",)
 from collections.abc import Callable, Iterable, Iterator
 
 import awkward as ak
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import DType, JSONSerializable, Self, final

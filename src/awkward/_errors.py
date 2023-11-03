@@ -10,8 +10,8 @@ from functools import wraps
 
 import numpy
 
-from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._typing import Any, TypeVar
+from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._typing import Any, ParamSpec, TypeVar
 
 np = NumpyMetadata.instance()
 
@@ -75,13 +75,13 @@ class ErrorContext:
             if self.primary() is self:
                 self._slate.__dict__.clear()
 
-    def handle_exception(self, cls: type[E], exception: E) -> E:
+    def handle_exception(self, cls: type[E], exception: E):
         if sys.version_info >= (3, 11, 0, "final"):
             self.decorate_exception(cls, exception)
         else:
             raise self.decorate_exception(cls, exception)
 
-    def decorate_exception(self, cls: type[E], exception: E) -> E:
+    def decorate_exception(self, cls: type[E], exception: E) -> Exception:
         if sys.version_info >= (3, 11, 0, "final"):
             if issubclass(cls, (NotImplementedError, AssertionError)):
                 exception.add_note(
@@ -91,6 +91,7 @@ class ErrorContext:
                 exception.add_note(self.note)
             return exception
         else:
+            new_exception: Exception
             if issubclass(cls, (NotImplementedError, AssertionError)):
                 # Raise modified exception
                 new_exception = cls(
@@ -212,6 +213,8 @@ class OperationErrorContext(ErrorContext):
         return False
 
     def __init__(self, name, args: Iterable[Any], kwargs: Mapping[str, Any]):
+        string_args: list[str] | PartialFunction
+        string_kwargs: dict[str, str] | PartialFunction
         if self.primary() is None and (
             self.any_backend_is_delayed(args)
             or self.any_backend_is_delayed(kwargs.values())
@@ -419,12 +422,13 @@ Issue: {message}."""
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
 
 
-T = TypeVar("T", bound=Callable)
+T = TypeVar("T")
+P = ParamSpec("P")
 
 
-def with_operation_context(func: T) -> T:
+def with_operation_context(func: Callable[P, T]) -> Callable[P, T]:
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         # NOTE: this decorator assumes that the operation is exposed under `ak.`
         with OperationErrorContext(f"ak.{func.__qualname__}", args, kwargs):
             return func(*args, **kwargs)

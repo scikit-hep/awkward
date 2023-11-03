@@ -5,7 +5,7 @@ from awkward._backends.dispatch import regularize_backend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 
 np = NumpyMetadata.instance()
 

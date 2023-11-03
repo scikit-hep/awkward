@@ -5,7 +5,7 @@ from awkward._backends.backend import Backend, KernelKeyType
 from awkward._backends.dispatch import register_backend
 from awkward._kernels import TypeTracerKernel
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer, TypeTracerArray
 from awkward._typing import Final
 

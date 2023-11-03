@@ -15,7 +15,7 @@ from awkward._dispatch import high_level_function
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
 
 np = NumpyMetadata.instance()

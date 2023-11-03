@@ -7,7 +7,7 @@ import jax
 
 import awkward as ak
 from awkward import _reducers
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._reducers import Reducer
 from awkward._typing import Final, Self, TypeVar
