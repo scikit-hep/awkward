@@ -4,14 +4,15 @@ from __future__ import annotations
 import copy
 
 from awkward._nplikes import to_nplike
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
+from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._typing import Any, DType, Final, Self
+from awkward._typing import Any, DType, Final, Self, cast
 
 np: Final = NumpyMetadata.instance()
 numpy: Final = Numpy.instance()
@@ -40,12 +41,20 @@ class Index:
     _expected_dtype: DType | None = None
 
     def __init__(
-        self, data, *, metadata: dict | None = None, nplike: NumpyLike | None = None
+        self,
+        data,
+        *,
+        metadata: dict | None = None,
+        nplike: NumpyLike | None = None,
     ):
         assert not isinstance(data, Index)
         if nplike is None:
-            nplike = nplike_of_obj(data, default=Numpy.instance())
-        self._nplike = nplike
+            self._nplike = cast(
+                "NumpyLike[ArrayLike]", nplike_of_obj(data, default=Numpy.instance())
+            )
+        else:
+            self._nplike = nplike
+
         if metadata is not None and not isinstance(metadata, dict):
             raise TypeError("Index metadata must be None or a dict")
         self._metadata = metadata
@@ -58,7 +67,7 @@ class Index:
         if len(self._data.shape) != 1:
             raise TypeError("Index data must be one-dimensional")
 
-        if issubclass(self._data.dtype.type, np.longlong):
+        if np.issubdtype(self._data.dtype, np.longlong):
             assert (
                 np.dtype(np.longlong).itemsize == 8
             ), "longlong is always 64-bit, right?"
@@ -136,6 +145,7 @@ class Index:
             data = self._data
         else:
             data = self.raw(tt)
+
         assert hasattr(data, "forget_length")
         return type(self)(data.forget_length(), metadata=self._metadata, nplike=tt)
 
@@ -147,20 +157,20 @@ class Index:
 
     @property
     def __cuda_array_interface__(self):
-        return self._data.__cuda_array_interface__
+        return self._data.__cuda_array_interface__  # type: ignore[attr-defined]
 
     @property
     def __array_interface__(self):
-        return self._data.__array_interface__
+        return self._data.__array_interface__  # type: ignore[attr-defined]
 
     def __dlpack_device__(self) -> tuple[int, int]:
-        return self._data.__dlpack_device__()
+        return self._data.__dlpack_device__()  # type: ignore[attr-defined]
 
     def __dlpack__(self, stream: Any = None) -> Any:
         if stream is None:
-            return self._data.__dlpack__()
+            return self._data.__dlpack__()  # type: ignore[attr-defined]
         else:
-            return self._data.__dlpack__(stream)
+            return self._data.__dlpack__(stream=stream)  # type: ignore[attr-defined]
 
     def __repr__(self) -> str:
         return self._repr("", "", "")

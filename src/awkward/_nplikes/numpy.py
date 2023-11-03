@@ -3,17 +3,21 @@ from __future__ import annotations
 
 import numpy
 
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
+from awkward._nplikes.numpylike import NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
-from awkward._typing import Final, Literal
+from awkward._typing import TYPE_CHECKING, Final, Literal
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray  # noqa: F401
 
 np = NumpyMetadata.instance()
 
 
 @register_nplike
-class Numpy(ArrayModuleNumpyLike):
+class Numpy(ArrayModuleNumpyLike["NDArray"]):
     is_eager: Final = True
     supports_structured_dtypes: Final = True
 

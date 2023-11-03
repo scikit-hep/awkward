@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpylike import NumpyLike
 from awkward._typing import Any, TypeVar, cast
 from awkward._util import UNSET, Sentinel
@@ -19,7 +20,12 @@ def register_nplike(cls: N) -> N:
     return cls
 
 
-def nplike_of_obj(obj: Any, *, default: D | Sentinel = UNSET) -> NumpyLike | D:
+ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
+
+
+def nplike_of_obj(
+    obj: Any, *, default: D | Sentinel = UNSET
+) -> NumpyLike[ArrayLikeT] | D:
     """
     Args:
         *arrays: iterable of possible array objects
