@@ -8,13 +8,13 @@ from awkward._backends.backend import Backend
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_array_like, is_integer_like, is_sized_iterable
 from awkward._typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
-    from awkward._nplikes.numpylike import ArrayLike
+    from awkward._nplikes.numpy_like import ArrayLike
     from awkward.contents.content import Content
 
 np = NumpyMetadata.instance()

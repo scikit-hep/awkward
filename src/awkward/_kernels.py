@@ -9,7 +9,7 @@ import awkward as ak
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import try_touch_data
 from awkward._typing import Protocol, TypeAlias
 
@@ -21,7 +21,7 @@ metadata = NumpyMetadata.instance()
 
 
 class KernelError(Protocol):
-    filename: bytes | None  # pylint: disable=E0602
+    filename: bytes | None
     str: bytes | None
     attempt: int
     id: int

@@ -8,7 +8,7 @@ from awkward._behavior import behavior_of
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import TYPE_CHECKING
 from awkward.errors import AxisError
 

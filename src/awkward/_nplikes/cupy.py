@@ -6,7 +6,7 @@ import numpy
 import awkward as ak
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpylike import ArrayLike
+from awkward._nplikes.numpy_like import ArrayLike
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import TYPE_CHECKING, Final

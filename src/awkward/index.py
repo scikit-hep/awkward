@@ -4,19 +4,21 @@ from __future__ import annotations
 import copy
 
 from awkward._nplikes import to_nplike
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._typing import Any, Final, Self
+from awkward._typing import Any, DType, Final, Self, cast
 
 np: Final = NumpyMetadata.instance()
 numpy: Final = Numpy.instance()
 
 
-_dtype_to_form: Final = {
+_dtype_to_form: Final[dict[DType, str]] = {
     np.dtype(np.int8): "i8",
     np.dtype(np.uint8): "u8",
     np.dtype(np.int32): "i32",
@@ -24,7 +26,7 @@ _dtype_to_form: Final = {
     np.dtype(np.int64): "i64",
 }
 
-_form_to_dtype: Final = {v: k for k, v in _dtype_to_form.items()}
+_form_to_dtype: Final[dict[str, DType]] = {v: k for k, v in _dtype_to_form.items()}
 
 
 def _form_to_zero_length(form: str) -> Index:
@@ -36,13 +38,23 @@ def _form_to_zero_length(form: str) -> Index:
 
 
 class Index:
-    _expected_dtype = None
+    _expected_dtype: DType | None = None
 
-    def __init__(self, data, *, metadata=None, nplike=None):
+    def __init__(
+        self,
+        data,
+        *,
+        metadata: dict | None = None,
+        nplike: NumpyLike | None = None,
+    ):
         assert not isinstance(data, Index)
         if nplike is None:
-            nplike = nplike_of_obj(data, default=Numpy.instance())
-        self._nplike = nplike
+            self._nplike = cast(
+                "NumpyLike[ArrayLike]", nplike_of_obj(data, default=Numpy.instance())
+            )
+        else:
+            self._nplike = nplike
+
         if metadata is not None and not isinstance(metadata, dict):
             raise TypeError("Index metadata must be None or a dict")
         self._metadata = metadata
@@ -55,7 +67,7 @@ class Index:
         if len(self._data.shape) != 1:
             raise TypeError("Index data must be one-dimensional")
 
-        if issubclass(self._data.dtype.type, np.longlong):
+        if np.issubdtype(self._data.dtype, np.longlong):
             assert (
                 np.dtype(np.longlong).itemsize == 8
             ), "longlong is always 64-bit, right?"
@@ -86,31 +98,35 @@ class Index:
                 )
 
     @classmethod
-    def zeros(cls, length, nplike, dtype=None):
+    def zeros(
+        cls, length: ShapeItem, nplike: NumpyLike, dtype: DType | None = None
+    ) -> Index:
         if dtype is None:
             dtype = cls._expected_dtype
         return Index(nplike.zeros(length, dtype=dtype), nplike=nplike)
 
     @classmethod
-    def empty(cls, length, nplike, dtype=None):
+    def empty(
+        cls, length: ShapeItem, nplike: NumpyLike, dtype: DType | None = None
+    ) -> Index:
         if dtype is None:
             dtype = cls._expected_dtype
         return Index(nplike.empty(length, dtype=dtype), nplike=nplike)
 
     @property
-    def data(self):
+    def data(self) -> ArrayLike:
         return self._data
 
     @property
-    def nplike(self):
+    def nplike(self) -> NumpyLike:
         return self._nplike
 
     @property
-    def dtype(self):
+    def dtype(self) -> DType:
         return self._data.dtype
 
     @property
-    def metadata(self):
+    def metadata(self) -> dict:
         if self._metadata is None:
             self._metadata = {}
         return self._metadata
@@ -120,44 +136,46 @@ class Index:
         return self._data.ctypes.data
 
     @property
-    def length(self):
+    def length(self) -> ShapeItem:
         return self._data.shape[0]
 
-    def forget_length(self):
+    def forget_length(self) -> Self:
         tt = TypeTracer.instance()
         if isinstance(self._nplike, type(tt)):
             data = self._data
         else:
             data = self.raw(tt)
+
+        assert hasattr(data, "forget_length")
         return type(self)(data.forget_length(), metadata=self._metadata, nplike=tt)
 
-    def raw(self, nplike):
+    def raw(self, nplike: NumpyLike) -> ArrayLike:
         return to_nplike(self.data, nplike, from_nplike=self._nplike)
 
-    def __len__(self):
-        return self.length
+    def __len__(self) -> int:
+        return int(self.length)
 
     @property
     def __cuda_array_interface__(self):
-        return self._data.__cuda_array_interface__
+        return self._data.__cuda_array_interface__  # type: ignore[attr-defined]
 
     @property
     def __array_interface__(self):
-        return self._data.__array_interface__
+        return self._data.__array_interface__  # type: ignore[attr-defined]
 
     def __dlpack_device__(self) -> tuple[int, int]:
-        return self._data.__dlpack_device__()
+        return self._data.__dlpack_device__()  # type: ignore[attr-defined]
 
     def __dlpack__(self, stream: Any = None) -> Any:
         if stream is None:
-            return self._data.__dlpack__()
+            return self._data.__dlpack__()  # type: ignore[attr-defined]
         else:
-            return self._data.__dlpack__(stream)
+            return self._data.__dlpack__(stream=stream)  # type: ignore[attr-defined]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self._repr("", "", "")
 
-    def _repr(self, indent, pre, post):
+    def _repr(self, indent: str, pre: str, post: str) -> str:
         out = [indent, pre, "<Index dtype="]
         out.append(repr(str(self.dtype)))
         out.append(" len=")
@@ -191,7 +209,7 @@ class Index:
         return "".join(out)
 
     @property
-    def form(self):
+    def form(self) -> str:
         return _dtype_to_form[self._data.dtype]
 
     def __getitem__(self, where):
@@ -207,26 +225,28 @@ class Index:
     def __setitem__(self, where, what):
         self._data[where] = what
 
-    def to64(self):
+    def to64(self) -> Index:
         return Index(self._nplike.astype(self._data, dtype=np.int64))
 
-    def __copy__(self):
+    def __copy__(self) -> Self:
         return type(self)(self._data, metadata=self._metadata, nplike=self._nplike)
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: dict) -> Self:
         return type(self)(
             copy.deepcopy(self._data, memo),
             metadata=copy.deepcopy(self._metadata, memo),
             nplike=self._nplike,
         )
 
-    def _nbytes_part(self):
+    def _nbytes_part(self) -> ShapeItem:
         return self.data.nbytes
 
     def to_nplike(self, nplike: NumpyLike) -> Self:
         return type(self)(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 
-    def is_equal_to(self, other, index_dtype=True, numpyarray=True):
+    def is_equal_to(
+        self, other: Any, index_dtype: bool = True, numpyarray: bool = True
+    ) -> bool:
         if index_dtype:
             return (
                 not self._nplike.known_data
@@ -237,11 +257,11 @@ class Index:
             return self._nplike.array_equal(self.data, other.data)
 
     def _touch_data(self):
-        if not self._nplike.known_data:
+        if hasattr(self._data, "touch_data"):
             self._data.touch_data()
 
     def _touch_shape(self):
-        if not self._nplike.known_data:
+        if hasattr(self._data, "touch_shape"):
             self._data.touch_shape()
 
 

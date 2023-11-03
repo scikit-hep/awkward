@@ -6,7 +6,7 @@ from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import maybe_highlevel_to_lowlevel, maybe_posaxis, wrap_layout
 from awkward._nplikes import ufuncs
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
 np = NumpyMetadata.instance()

@@ -234,6 +234,9 @@ module = [
     'awkward._backends.*',
     'awkward.forms.*',
     'awkward.types.*',
+    'awkward._errors',
+    'awkward._dispatch',
+    'awkward.index',
 ]
 ignore_errors = false
 ignore_missing_imports = true

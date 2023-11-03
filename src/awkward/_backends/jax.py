@@ -9,7 +9,7 @@ from awkward._backends.dispatch import register_backend
 from awkward._kernels import JaxKernel
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Final
 
 np = NumpyMetadata.instance()

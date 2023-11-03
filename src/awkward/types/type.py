@@ -6,7 +6,7 @@ import sys
 from collections.abc import Mapping
 
 import awkward as ak
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Any, JSONMapping, JSONSerializable, Self
 from awkward._util import UNSET, Sentinel
 from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
@@ -22,7 +22,7 @@ class Type:
 
     @property
     def parameters(self) -> JSONMapping:
-        if self._parameters is None:  # pylint: disable=E0203
+        if self._parameters is None:
             self._parameters = {}
         return self._parameters
 
