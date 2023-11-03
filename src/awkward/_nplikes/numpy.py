@@ -37,7 +37,7 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
         return self._module.ndarray
 
     @classmethod
-    def is_own_array_type(cls, type_) -> bool:
+    def is_own_array_type(cls, type_: type) -> bool:
         """
         Args:
             type_: object to test

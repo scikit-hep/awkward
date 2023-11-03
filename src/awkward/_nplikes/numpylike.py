@@ -551,5 +551,5 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
 
     @classmethod
     @abstractmethod
-    def is_own_array_type(cls, type_) -> bool:
+    def is_own_array_type(cls, type_: type) -> bool:
         ...
