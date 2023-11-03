@@ -8,7 +8,7 @@ from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from awkward._nplikes.numpylike import NumpyLike
+    from awkward._nplikes.numpy_like import NumpyLike
 from awkward._nplikes.array_like import ArrayLike
 
 

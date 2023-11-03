@@ -5,7 +5,7 @@ from collections.abc import Collection
 
 from awkward._backends.backend import Backend
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._typing import Callable, TypeAlias, TypeVar, cast
 from awkward._util import UNSET, Sentinel
 

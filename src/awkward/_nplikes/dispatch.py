@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from awkward._nplikes.array_like import ArrayLike
-from awkward._nplikes.numpylike import NumpyLike
+from awkward._nplikes.numpy_like import NumpyLike
 from awkward._typing import Any, TypeVar, cast
 from awkward._util import UNSET, Sentinel
 

@@ -9,7 +9,7 @@ from awkward._nplikes import ufuncs
 from awkward._typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from awkward._nplikes.numpylike import UfuncLike
+    from awkward._nplikes.numpy_like import UfuncLike
     from awkward._reducers import Reducer
     from awkward.contents.content import Content
     from awkward.highlevel import Array

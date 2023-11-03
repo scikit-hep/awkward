@@ -7,7 +7,7 @@ from functools import lru_cache
 import numpy
 import packaging.version
 
-from awkward._nplikes.numpylike import (
+from awkward._nplikes.numpy_like import (
     ArrayLike,
     IndexType,
     NumpyLike,

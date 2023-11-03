@@ -10,7 +10,7 @@ from numba.core.errors import NumbaTypeError
 import awkward as ak
 from awkward._behavior import behavior_of, overlay_behavior
 from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 
 np = NumpyMetadata.instance()
 

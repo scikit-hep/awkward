@@ -9,7 +9,7 @@ from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._typing import Any, DType, Final, Self, cast

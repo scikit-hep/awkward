@@ -10,7 +10,7 @@ from functools import wraps
 
 import numpy
 
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Any, ParamSpec, TypeVar
 
 np = NumpyMetadata.instance()

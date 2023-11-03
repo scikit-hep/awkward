@@ -8,7 +8,7 @@ from inspect import signature
 
 import awkward as ak
 from awkward._errors import deprecate
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import DType, Iterator, JSONSerializable, Self, final
 from awkward._util import UNSET, Sentinel

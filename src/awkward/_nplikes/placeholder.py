@@ -5,7 +5,7 @@ from functools import reduce
 from operator import mul
 
 from awkward._nplikes.array_like import ArrayLike
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import TYPE_CHECKING, Any, DType, Self
 

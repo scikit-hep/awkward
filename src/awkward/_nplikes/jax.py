@@ -5,7 +5,7 @@ import awkward as ak
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpylike import UfuncLike
+from awkward._nplikes.numpy_like import UfuncLike
 from awkward._typing import Final, cast
 
 

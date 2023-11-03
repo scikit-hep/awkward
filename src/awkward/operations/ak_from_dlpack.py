@@ -6,7 +6,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import from_arraylib, wrap_layout
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike
+from awkward._nplikes.numpy_like import NumpyLike
 
 
 @high_level_function()

@@ -10,7 +10,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._regularize import is_integer

@@ -5,7 +5,7 @@ from abc import abstractmethod
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import Any as AnyType
 from awkward._typing import Final, Protocol

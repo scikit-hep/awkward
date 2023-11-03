@@ -10,7 +10,7 @@ import packaging.version
 
 import awkward as ak
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpylike import (
+from awkward._nplikes.numpy_like import (
     ArrayLike,
     IndexType,
     NumpyLike,

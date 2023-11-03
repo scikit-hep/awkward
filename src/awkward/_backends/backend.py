@@ -7,7 +7,7 @@ from typing import Any
 import awkward as ak
 from awkward._kernels import KernelError
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyLike, NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._singleton import PublicSingleton
 from awkward._typing import Callable, Tuple, TypeAlias, TypeVar
 

@@ -15,7 +15,7 @@ from awkward._nplikes import to_nplike
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._parameters import (
