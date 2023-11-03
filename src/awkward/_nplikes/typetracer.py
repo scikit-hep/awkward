@@ -1513,8 +1513,8 @@ def _attach_report(
 ):
     if isinstance(layout, (ak.contents.BitMaskedArray, ak.contents.ByteMaskedArray)):
         assert isinstance(form, (ak.forms.BitMaskedForm, ak.forms.ByteMaskedForm))
-        layout.mask.data.form_key = getkey(form, "mask")
-        layout.mask.data.report = report
+        layout.mask.data.form_key = getkey(form, "mask")  # type: ignore[attr-defined]
+        layout.mask.data.report = report  # type: ignore[attr-defined]
         _attach_report(layout.content, form.content, report, getkey)
 
     elif isinstance(layout, ak.contents.EmptyArray):
@@ -1522,22 +1522,22 @@ def _attach_report(
 
     elif isinstance(layout, (ak.contents.IndexedArray, ak.contents.IndexedOptionArray)):
         assert isinstance(form, (ak.forms.IndexedForm, ak.forms.IndexedOptionForm))
-        layout.index.data.form_key = getkey(form, "index")
-        layout.index.data.report = report
+        layout.index.data.form_key = getkey(form, "index")  # type: ignore[attr-defined]
+        layout.index.data.report = report  # type: ignore[attr-defined]
         _attach_report(layout.content, form.content, report, getkey)
 
     elif isinstance(layout, ak.contents.ListArray):
         assert isinstance(form, ak.forms.ListForm)
-        layout.starts.data.form_key = getkey(form, "starts")
-        layout.starts.data.report = report
-        layout.stops.data.form_key = getkey(form, "stops")
-        layout.stops.data.report = report
+        layout.starts.data.form_key = getkey(form, "starts")  # type: ignore[attr-defined]
+        layout.starts.data.report = report  # type: ignore[attr-defined]
+        layout.stops.data.form_key = getkey(form, "stops")  # type: ignore[attr-defined]
+        layout.stops.data.report = report  # type: ignore[attr-defined]
         _attach_report(layout.content, form.content, report, getkey)
 
     elif isinstance(layout, ak.contents.ListOffsetArray):
         assert isinstance(form, ak.forms.ListOffsetForm)
-        layout.offsets.data.form_key = getkey(form, "offsets")
-        layout.offsets.data.report = report
+        layout.offsets.data.form_key = getkey(form, "offsets")  # type: ignore[attr-defined]
+        layout.offsets.data.report = report  # type: ignore[attr-defined]
         _attach_report(layout.content, form.content, report, getkey)
 
     elif isinstance(layout, ak.contents.NumpyArray):
@@ -1556,10 +1556,10 @@ def _attach_report(
 
     elif isinstance(layout, ak.contents.UnionArray):
         assert isinstance(form, ak.forms.UnionForm)
-        layout.tags.data.form_key = getkey(form, "tags")
-        layout.tags.data.report = report
-        layout.index.data.form_key = getkey(form, "index")
-        layout.index.data.report = report
+        layout.tags.data.form_key = getkey(form, "tags")  # type: ignore[attr-defined]
+        layout.tags.data.report = report  # type: ignore[attr-defined]
+        layout.index.data.form_key = getkey(form, "index")  # type: ignore[attr-defined]
+        layout.index.data.report = report  # type: ignore[attr-defined]
         for x, y in zip(layout.contents, form.contents):
             _attach_report(x, y, report, getkey)
 

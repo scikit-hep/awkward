@@ -17,6 +17,7 @@ from awkward._typing import (
     Self,
     SupportsIndex,
     TypeAlias,
+    TypeVar,
     overload,
 )
 
@@ -122,7 +123,7 @@ class ArrayLike(Protocol):
         ...
 
     @abstractmethod
-    def view(self, dtype: DType) -> Self:
+    def view(self, dtype: DTypeLike) -> Self:
         ...
 
     # Scalar UFUNCS
@@ -185,6 +186,9 @@ class ArrayLike(Protocol):
     @abstractmethod
     def __dlpack__(self, stream: Any = None) -> Any:
         ...
+
+
+ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
 
 
 class NumpyMetadata(PublicSingleton):
