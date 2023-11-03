@@ -7,7 +7,7 @@ from awkward._dispatch import high_level_function
 from awkward._errors import deprecate
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()

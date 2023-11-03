@@ -6,7 +6,7 @@ import re
 from collections.abc import Mapping
 
 from awkward._behavior import find_array_typestr
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._typing import Any, JSONMapping, cast, final
 from awkward._util import UNSET, Sentinel

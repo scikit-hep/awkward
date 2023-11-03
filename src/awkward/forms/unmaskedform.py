@@ -5,7 +5,7 @@ __all__ = ("UnmaskedForm",)
 from collections.abc import Callable, Iterator
 
 import awkward as ak
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_union, type_parameters_equal
 from awkward._typing import DType, JSONSerializable, Self, final
 from awkward._util import UNSET

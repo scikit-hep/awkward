@@ -12,7 +12,7 @@ import awkward._lookup
 from awkward._backends.numpy import NumpyBackend
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward.types.numpytype import primitive_to_dtype
 
 cpp_type_of = {

@@ -4,11 +4,15 @@ from __future__ import annotations
 from functools import reduce
 from operator import mul
 
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
+from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._typing import Any, DType, Self
+from awkward._typing import TYPE_CHECKING, Any, DType, Self
 
 np = NumpyMetadata.instance()
+
+if TYPE_CHECKING:
+    from numpy.typing import DTypeLike
 
 
 class PlaceholderArray(ArrayLike):
@@ -48,7 +52,7 @@ class PlaceholderArray(ArrayLike):
     def T(self):
         return type(self)(self._nplike, self._shape[::-1], self._dtype)
 
-    def view(self, dtype: DType) -> Self:
+    def view(self, dtype: DTypeLike) -> Self:
         dtype = np.dtype(dtype)
         if len(self._shape) >= 1:
             last, remainder = divmod(
