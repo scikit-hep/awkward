@@ -71,3 +71,28 @@ def test_with_field():
             ["x"],
         )
     )
+
+
+def test_fill_none():
+    array = ak.Array([None, 1, 2, None])
+    result = ak.fill_none(array, "hello world!")
+    assert result.layout.is_equal_to(
+        ak.contents.UnionArray(
+            ak.index.Index8([1, 0, 0, 1]),
+            ak.index.Index64([0, 0, 1, 0]),
+            [
+                ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
+                ak.contents.ListOffsetArray(
+                    ak.index.Index64([0, 12]),
+                    ak.contents.NumpyArray(
+                        np.array(
+                            [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33],
+                            dtype=np.uint8,
+                        ),
+                        parameters={"__array__": "char"},
+                    ),
+                    parameters={"__array__": "string"},
+                ),
+            ],
+        )
+    )
