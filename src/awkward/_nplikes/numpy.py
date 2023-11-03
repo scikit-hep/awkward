@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import numpy
 
-from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpylike import NumpyMetadata
@@ -11,7 +10,7 @@ from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._typing import TYPE_CHECKING, Final, Literal
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray  # noqa: F401
+    from numpy.typing import NDArray
 
 np = NumpyMetadata.instance()
 
@@ -47,7 +46,7 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
         """
         return issubclass(type_, numpy.ndarray)
 
-    def is_c_contiguous(self, x: ArrayLike) -> bool:
+    def is_c_contiguous(self, x: NDArray | PlaceholderArray) -> bool:
         if isinstance(x, PlaceholderArray):
             return True
         else:
@@ -55,7 +54,7 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
 
     def packbits(
         self,
-        x: ArrayLike,
+        x: NDArray,
         *,
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
@@ -65,7 +64,7 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
 
     def unpackbits(
         self,
-        x: ArrayLike,
+        x: NDArray,
         *,
         axis: int | None = None,
         count: int | None = None,
