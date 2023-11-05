@@ -15,7 +15,7 @@ def is_categorical(array):
     `"__array__" = "categorical"`), then this function returns True;
     otherwise, it returns False.
 
-    See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
+    See also #ak.categories, #ak.str.to_categorical, #ak.from_categorical.
     """
     # Dispatch
     yield (array,)
