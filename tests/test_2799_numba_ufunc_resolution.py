@@ -25,7 +25,7 @@ def test_numba_ufunc_nep_50():
 
     # FIXME: what error will Numba throw here for an out-of-bounds integer?
     with pytest.warns(FutureWarning, match=r"not create a writeable array"):
-        result = add(array, 2**63 - 1)
+        result = add(array, np.int16(np.iinfo(np.int8).max + 1))
 
     flattened = ak.to_numpy(ak.flatten(result))
     assert flattened.dtype == np.dtype(np.int8)
@@ -39,7 +39,7 @@ def test_numba_ufunc_legacy():
 
     array = ak.values_astype([[1, 2, 3], [4]], np.int8)
     with pytest.warns(FutureWarning, match=r"not create a writeable array"):
-        result = add(array, 2**63 - 1)
+        result = add(array, np.int16(np.iinfo(np.int8).max + 1))
 
     flattened = ak.to_numpy(ak.flatten(result))
-    assert flattened.dtype == np.dtype(np.int64)
+    assert flattened.dtype == np.dtype(np.int16)
