@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import jax.numpy
 
 from awkward._connect.jax.reducers import get_jax_reducer  # noqa: F401

@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 __all__ = ("merge_union_of_records",)
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend

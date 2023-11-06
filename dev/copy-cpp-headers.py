@@ -1,4 +1,6 @@
 """Copy the header-only cpp headers into the various package directories that they are required"""
+from __future__ import annotations
+
 import pathlib
 import shutil
 

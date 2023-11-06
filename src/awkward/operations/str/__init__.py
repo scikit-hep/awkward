@@ -5,6 +5,7 @@
 
 # string transforms
 # https://arrow.apache.org/docs/python/api/compute.html#string-transforms
+from __future__ import annotations
 from awkward.operations.str.akstr_capitalize import *
 
 # string padding
