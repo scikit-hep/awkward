@@ -1,11 +1,13 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("from_parquet",)
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._regularize import is_integer
+
+__all__ = ("from_parquet",)
 
 
 @high_level_function()

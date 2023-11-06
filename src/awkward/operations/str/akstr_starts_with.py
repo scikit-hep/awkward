@@ -1,13 +1,13 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
-
-__all__ = ("starts_with",)
-
 
 import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
+
+__all__ = ("starts_with",)
 
 
 @high_level_function(module="ak.str")

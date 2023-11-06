@@ -1,7 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("UnionForm",)
 from collections import Counter
 from collections.abc import Callable, Iterable
 
@@ -11,6 +11,8 @@ from awkward._parameters import type_parameters_equal
 from awkward._typing import DType, Iterator, JSONSerializable, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
+
+__all__ = ("UnionForm",)
 
 np = NumpyMetadata.instance()
 

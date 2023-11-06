@@ -1,7 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("from_buffers",)
 import math
 
 import awkward as ak
@@ -15,6 +15,8 @@ from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._regularize import is_integer
 from awkward.forms.form import index_to_dtype, regularize_buffer_key
+
+__all__ = ("from_buffers",)
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()

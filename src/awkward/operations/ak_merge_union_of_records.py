@@ -1,7 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("merge_union_of_records",)
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
@@ -11,6 +11,8 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
+
+__all__ = ("merge_union_of_records",)
 
 np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()

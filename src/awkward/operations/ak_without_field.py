@@ -1,7 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("without_field",)
 from collections.abc import Sequence
 
 import awkward as ak
@@ -9,6 +9,8 @@ from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("without_field",)
 
 np = NumpyMetadata.instance()
 

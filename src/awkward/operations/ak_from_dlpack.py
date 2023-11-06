@@ -1,7 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("from_dlpack",)
+from __future__ import annotations
 
 from awkward._connect.dlpack import DLPackDevice
 from awkward._dispatch import high_level_function
@@ -9,6 +8,8 @@ from awkward._layout import from_arraylib, wrap_layout
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike
+
+__all__ = ("from_dlpack",)
 
 
 @high_level_function()

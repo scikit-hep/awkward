@@ -1,7 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("unflatten",)
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
@@ -12,6 +12,8 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
 from awkward._regularize import is_integer_like, regularize_axis
+
+__all__ = ("unflatten",)
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()

@@ -1,7 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("almost_equal",)
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
@@ -9,6 +9,8 @@ from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
+
+__all__ = ("almost_equal",)
 
 np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()

@@ -1,12 +1,13 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("mixin_class", "mixin_class_method")
+from __future__ import annotations
 
 import functools
 import sys
 
 import awkward as ak
+
+__all__ = ("mixin_class", "mixin_class_method")
 
 
 def mixin_class(registry, name=None):

@@ -1,10 +1,12 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("to_jax",)
 import awkward as ak
 from awkward._backends.jax import JaxBackend
 from awkward._dispatch import high_level_function
+
+__all__ = ("to_jax",)
 
 
 @high_level_function()

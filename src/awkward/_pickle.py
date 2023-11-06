@@ -1,4 +1,7 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 """Interface for plugin-configurable pickle __reduce_ex__ implementation"""
+
 from __future__ import annotations
 
 import sys

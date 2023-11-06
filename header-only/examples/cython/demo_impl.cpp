@@ -1,3 +1,5 @@
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 #include <stdlib.h>
 #include "awkward/LayoutBuilder.h"
 #include "demo_impl.h"

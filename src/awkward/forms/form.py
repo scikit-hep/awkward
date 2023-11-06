@@ -1,7 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("from_dict", "from_type", "from_json", "reserved_nominal_parameters", "Form")
+from __future__ import annotations
 
 import itertools
 import json
@@ -26,6 +25,8 @@ from awkward._typing import (
     JSONSerializable,
     Self,
 )
+
+__all__ = ("from_dict", "from_type", "from_json", "reserved_nominal_parameters", "Form")
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
