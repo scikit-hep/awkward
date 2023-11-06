@@ -42,5 +42,5 @@ def test_numba_ufunc_legacy():
         result = add(array, np.int16(np.iinfo(np.int8).max + 1))
 
     flattened = ak.to_numpy(ak.flatten(result))
-    # Seems like Numba chooses int64 here, on all platforms
-    assert flattened.dtype == np.dtype(np.int_)
+    # Seems like Numba chooses int64 here unless a 32-bit platform
+    assert flattened.dtype == np.dtype(np.int32 if ak._util.bits32 else np.int64)
