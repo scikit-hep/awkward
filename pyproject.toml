@@ -287,6 +287,7 @@ unfixable = [
 typing-modules = ["awkward._typing"]
 external = []
 mccabe.max-complexity = 100
+isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "dev/*" = ["T20", "TID251"]
