@@ -56,7 +56,6 @@ def _impl(array, highlevel, behavior):
             # pc.ascii_is_upper is defined on binary, but for consistency with is_lower and is_title...
             bytestring_to_string=True,
         ),
-        behavior,
     )
 
     return wrap_layout(out, behavior, highlevel)

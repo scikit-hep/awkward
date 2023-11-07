@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 import json
 import math
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -32,6 +32,7 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.contents.content import (
+    ApplyActionOptions,
     Content,
     RemoveStructureOptionsType,
     ToArrowOptionsType,
@@ -1079,8 +1080,13 @@ class ByteMaskedArray(Content):
         return self.project()
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if self._backend.nplike.known_data:
             content = self._content[0 : self._mask.length]
         else:
@@ -1097,7 +1103,6 @@ class ByteMaskedArray(Content):
                     self._mask,
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1112,7 +1117,6 @@ class ByteMaskedArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
@@ -1125,7 +1129,6 @@ class ByteMaskedArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

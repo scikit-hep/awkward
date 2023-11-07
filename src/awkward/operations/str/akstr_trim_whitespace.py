@@ -52,7 +52,6 @@ def _impl(array, highlevel, behavior):
         ak.operations.str._get_ufunc_action(
             pc.utf8_trim_whitespace, pc.ascii_trim_whitespace, bytestring_to_string=True
         ),
-        behavior,
     )
 
     return wrap_layout(out, behavior, highlevel)

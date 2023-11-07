@@ -101,6 +101,6 @@ def _impl(array, axis, highlevel, behavior):
                     f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
-        out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
+        out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
     return wrap_layout(out, behavior, highlevel)

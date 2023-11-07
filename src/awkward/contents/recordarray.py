@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
-from collections.abc import Iterable, MutableMapping, Sequence
+from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -32,6 +32,7 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.contents.content import (
+    ApplyActionOptions,
     Content,
     RemoveStructureOptionsType,
     ToArrowOptionsType,
@@ -1192,8 +1193,13 @@ class RecordArray(Content):
             )
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if self._backend.nplike.known_data:
             contents = [x[: self._length] for x in self._contents]
         else:
@@ -1211,7 +1217,6 @@ class RecordArray(Content):
                     [
                         content._recursively_apply(
                             action,
-                            behavior,
                             depth,
                             copy.copy(depth_context),
                             lateral_context,
@@ -1231,7 +1236,6 @@ class RecordArray(Content):
                 for content in contents:
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1244,7 +1248,6 @@ class RecordArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

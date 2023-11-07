@@ -35,7 +35,6 @@ def recursively_apply(
     if isinstance(layout, Content):
         return layout._recursively_apply(
             action,
-            behavior,
             1,
             copy.copy(depth_context),
             lateral_context,

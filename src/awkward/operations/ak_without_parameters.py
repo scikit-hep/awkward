@@ -44,7 +44,7 @@ def _impl(array, highlevel, behavior):
 
     out = ak._do.recursively_apply(
         layout,
-        (lambda layout, behavior=behavior, **kwargs: None),
+        (lambda layout, **kwargs: None),
         keep_parameters=False,
     )
 

@@ -34,6 +34,7 @@ from awkward._typing import (
     AxisMaybeNone,
     JSONMapping,
     Literal,
+    Protocol,
     Self,
     SupportsIndex,
     TypeAlias,
@@ -72,7 +73,23 @@ float | int | str | list[JSONValueType] | dict[str, JSONValueType]
 """
 
 
-class RecursivelyApplyOptionsType(TypedDict):
+class ImplementsApplyAction(Protocol):
+    def __call__(
+        self,
+        layout: Content,
+        *,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        continuation: Callable[[], Content],
+        behavior: Mapping | None,
+        backend: Backend,
+        options: ApplyActionOptions,
+    ) -> Content | None:
+        ...
+
+
+class ApplyActionOptions(TypedDict):
     allow_records: bool
     keep_parameters: bool
     numpy_to_regular: bool
@@ -1119,12 +1136,11 @@ class Content:
 
     def _recursively_apply(
         self,
-        action: ActionType,
-        behavior: dict | None,
+        action: ImplementsApplyAction,
         depth: int,
-        depth_context: dict[str, Any] | None,
-        lateral_context: dict[str, Any] | None,
-        options: RecursivelyApplyOptionsType,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
     ) -> Content | None:
         raise NotImplementedError
 

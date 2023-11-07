@@ -65,7 +65,7 @@ def _impl(array, highlevel, behavior):
                         "union of different sets of fields, cannot ak.unzip"
                     )
 
-    ak._do.recursively_apply(layout, check_for_union, behavior, return_array=False)
+    ak._do.recursively_apply(layout, check_for_union, return_array=False)
 
     if len(fields) == 0:
         return (wrap_layout(layout, behavior, highlevel, allow_other=True),)

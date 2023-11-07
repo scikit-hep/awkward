@@ -52,7 +52,6 @@ def _impl(array, highlevel, behavior):
         ak.operations.str._get_ufunc_action(
             pc.utf8_length, pc.binary_length, bytestring_to_string=False
         ),
-        behavior,
     )
 
     return wrap_layout(out, behavior, highlevel)

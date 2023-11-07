@@ -65,10 +65,6 @@ def _impl(array, highlevel, behavior):
                 pc.dictionary_encode, layout, expect_option_type=False
             )
 
-    out = ak._do.recursively_apply(
-        ak.operations.to_layout(array),
-        action,
-        behavior,
-    )
+    out = ak._do.recursively_apply(ak.operations.to_layout(array), action)
 
     return wrap_layout(out, behavior, highlevel)

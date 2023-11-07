@@ -113,9 +113,9 @@ def _impl(array, axis, highlevel, behavior):
                 return layout.drop_none()
 
     options = {"none_indexes": []}
-    out = ak._do.recursively_apply(layout, action, behavior, options)
+    out = ak._do.recursively_apply(layout, action, options)
 
     if len(options["none_indexes"]) > 0:
-        out = ak._do.recursively_apply(out, recompute_offsets, behavior, options)
+        out = ak._do.recursively_apply(out, recompute_offsets, options)
 
     return wrap_layout(out, behavior, highlevel, like=behavior)

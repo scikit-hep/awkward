@@ -60,7 +60,6 @@ def _impl(array, start, stop, replacement, highlevel, behavior):
         ak.operations.str._get_ufunc_action(
             pc.utf8_replace_slice, pc.binary_replace_slice, start, stop, replacement
         ),
-        behavior,
     )
 
     return wrap_layout(out, behavior, highlevel)

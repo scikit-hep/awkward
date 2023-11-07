@@ -59,7 +59,7 @@ def _impl(array, name, highlevel, behavior):
         else:
             return None
 
-    out = ak._do.recursively_apply(layout, action, behavior)
+    out = ak._do.recursively_apply(layout, action)
 
     def action2(layout, **ignore):
         if layout.is_union:
@@ -72,6 +72,6 @@ def _impl(array, name, highlevel, behavior):
         else:
             return None
 
-    out2 = ak._do.recursively_apply(out, action2, behavior)
+    out2 = ak._do.recursively_apply(out, action2)
 
     return wrap_layout(out2, behavior, highlevel)

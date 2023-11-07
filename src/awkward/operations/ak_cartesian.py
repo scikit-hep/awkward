@@ -359,7 +359,6 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 nextlayout = ak._do.recursively_apply(
                     layout,
                     apply_pad_inner_list,
-                    behavior,
                     lateral_context={"n": n_inside},
                 )
                 return add_outer_dimensions(nextlayout, n_outside)
@@ -380,7 +379,6 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             ak._do.recursively_apply(
                 layout,
                 apply_pad_inner_list_at_axis,
-                behavior,
                 lateral_context={"i": i},
             )
             for i, layout in enumerate(layouts)
