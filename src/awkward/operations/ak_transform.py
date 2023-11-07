@@ -533,7 +533,6 @@ def _impl(
         # ak._broadcasting.apply_step, below. ak_transform._impl knows implementation details.
         out = layouts[0]._recursively_apply(
             action,
-            ctx.behavior,
             1,
             copy.copy(depth_context),
             lateral_context,
