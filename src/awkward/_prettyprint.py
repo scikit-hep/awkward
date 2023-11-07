@@ -9,15 +9,19 @@ import re
 import awkward as ak
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
+from awkward._typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from awkward.contents.content import Content
 
 numpy = Numpy.instance()
 
 
-def half(integer):
+def half(integer: int) -> int:
     return int(math.ceil(integer / 2))
 
 
-def alternate(length):
+def alternate(length: int):
     halfindex = half(length)
     forward = iter(range(halfindex))
     backward = iter(range(length - 1, halfindex - 1, -1))
@@ -42,7 +46,7 @@ is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
 # to form an error string: private reimplementation of ak.Array.__getitem__
 
 
-def get_at(data, index):
+def get_at(data: Content, index: int):
     out = data._layout._getitem_at(index)
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
@@ -56,7 +60,7 @@ def get_at(data, index):
         return out
 
 
-def get_field(data, field):
+def get_field(data: Content, field: str):
     out = data._layout._getitem_field(field)
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
@@ -70,7 +74,7 @@ def get_field(data, field):
         return out
 
 
-def custom_str(current):
+def custom_str(current: Any) -> str | None:
     if (
         issubclass(type(current), ak.highlevel.Record)
         and type(current).__str__ is not ak.highlevel.Record.__str__
@@ -93,12 +97,12 @@ def custom_str(current):
         return None
 
 
-def valuestr_horiz(data, limit_cols):
+def valuestr_horiz(data: Any, limit_cols: int) -> tuple[int, list[str]]:
     if isinstance(data, (ak.highlevel.Array, ak.highlevel.Record)) and (
         not data.layout.backend.nplike.known_data
     ):
         if isinstance(data, ak.highlevel.Array):
-            return 5, "[...]"
+            return 5, ["[...]"]
 
     original_limit_cols = limit_cols
 
@@ -231,7 +235,7 @@ def valuestr_horiz(data, limit_cols):
         return len(out), [out]
 
 
-def valuestr(data, limit_rows, limit_cols):
+def valuestr(data: Any, limit_rows: int, limit_cols: int) -> str:
     if isinstance(data, (ak.highlevel.Array, ak.highlevel.Record)) and (
         not data.layout.backend.nplike.known_data
     ):
