@@ -1,4 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
 import packaging.version
 import pytest
 
@@ -30,7 +32,7 @@ def test_set_attrs():
 
 
 def test_serialise_with_transient_attrs(array_pickler):
-    attrs = {**SOME_ATTRS, "_transient_key": lambda: None}
+    attrs = {**SOME_ATTRS, "@transient_key": lambda: None}
     array = ak.Array([1, 2, 3], attrs=attrs)
     result = array_pickler.loads(array_pickler.dumps(array))
     assert result.attrs == SOME_ATTRS
@@ -44,7 +46,7 @@ def test_serialise_with_nonserialisable_attrs(array_pickler):
 
 
 def test_transient_metadata_persists():
-    attrs = {**SOME_ATTRS, "_transient_key": lambda: None}
+    attrs = {**SOME_ATTRS, "@transient_key": lambda: None}
     array = ak.Array([[1, 2, 3]], attrs=attrs)
     num = ak.num(array)
     assert num.attrs is attrs
