@@ -33,8 +33,9 @@ from awkward._util import UNSET
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.errors import AxisError
 from awkward.forms.form import Form
@@ -1005,7 +1006,7 @@ class IndexedArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         if (
             not options["categorical_as_dictionary"]
@@ -1059,7 +1060,7 @@ class IndexedArray(Content):
         return self.project()._to_backend_array(allow_missing, backend)
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         return self.project()._remove_structure(backend, options)
 

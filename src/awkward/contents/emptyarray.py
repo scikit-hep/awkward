@@ -29,8 +29,9 @@ from awkward._util import UNSET
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.errors import AxisError
 from awkward.forms.emptyform import EmptyForm
@@ -365,7 +366,7 @@ class EmptyArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         if options["emptyarray_to"] is None:
             return pyarrow.Array.from_buffers(
@@ -396,7 +397,7 @@ class EmptyArray(Content):
         return backend.nplike.empty(0, dtype=np.float64)
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         return [self]
 

@@ -34,8 +34,9 @@ from awkward._util import UNSET
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.errors import AxisError
 from awkward.forms.form import Form
@@ -1106,7 +1107,7 @@ class RecordArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         values = [
             (x if x.length == length else x[:length])._to_arrow(
@@ -1171,7 +1172,7 @@ class RecordArray(Content):
         return out
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         if options["flatten_records"]:
             out = []

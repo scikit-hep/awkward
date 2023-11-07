@@ -31,8 +31,9 @@ from awkward._util import UNSET
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.form import Form
@@ -1497,7 +1498,7 @@ class ListArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         return self.to_ListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
@@ -1513,7 +1514,7 @@ class ListArray(Content):
             return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         return self.to_ListOffsetArray64(False)._remove_structure(backend, options)
 

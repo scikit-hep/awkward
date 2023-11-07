@@ -33,8 +33,9 @@ from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.forms.form import Form
@@ -696,7 +697,7 @@ class BitMaskedArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         return self.to_ByteMaskedArray()._to_arrow(
             pyarrow, mask_node, validbytes, length, options
@@ -706,7 +707,7 @@ class BitMaskedArray(Content):
         return self.to_ByteMaskedArray()._to_backend_array(allow_missing, backend)
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:

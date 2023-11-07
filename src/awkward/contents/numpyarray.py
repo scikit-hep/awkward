@@ -38,8 +38,9 @@ from awkward._util import UNSET
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.errors import AxisError
 from awkward.forms.form import Form
@@ -1211,7 +1212,7 @@ class NumpyArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         if self._data.ndim != 1:
             return self.to_RegularArray()._to_arrow(
@@ -1246,7 +1247,7 @@ class NumpyArray(Content):
         return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         if options["keepdims"]:
             shape = (1,) * (self._data.ndim - 1) + (-1,)
