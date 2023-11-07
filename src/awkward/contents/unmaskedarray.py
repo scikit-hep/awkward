@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 import math
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -32,9 +32,11 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.contents.content import (
+    ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.errors import AxisError
 from awkward.forms.form import Form
@@ -493,7 +495,7 @@ class UnmaskedArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         return self._content._to_arrow(pyarrow, self, None, length, options)
 
@@ -505,7 +507,7 @@ class UnmaskedArray(Content):
             return content
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
@@ -517,8 +519,13 @@ class UnmaskedArray(Content):
         return self.content
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if options["return_array"]:
             if options["return_simplified"]:
                 make = UnmaskedArray.simplified
@@ -529,7 +536,6 @@ class UnmaskedArray(Content):
                 return make(
                     self._content._recursively_apply(
                         action,
-                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -543,7 +549,6 @@ class UnmaskedArray(Content):
             def continuation():
                 self._content._recursively_apply(
                     action,
-                    behavior,
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
@@ -556,7 +561,6 @@ class UnmaskedArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

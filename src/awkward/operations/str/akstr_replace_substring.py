@@ -66,7 +66,6 @@ def _impl(array, pattern, replacement, max_replacements, highlevel, behavior):
             replacement,
             max_replacements=max_replacements,
         ),
-        behavior,
     )
 
     return wrap_layout(out, behavior, highlevel)

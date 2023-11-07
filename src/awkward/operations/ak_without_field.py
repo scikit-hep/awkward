@@ -72,7 +72,6 @@ def _impl(base, where, highlevel, behavior):
                         next_content = ak._do.recursively_apply(
                             content,
                             action,
-                            behavior,
                             depth_context={"where": next_where},
                         )
                         next_contents.append(next_content)
@@ -96,7 +95,5 @@ def _impl(base, where, highlevel, behavior):
         else:
             return None
 
-    out = ak._do.recursively_apply(
-        base, action, behavior, depth_context={"where": where}
-    )
+    out = ak._do.recursively_apply(base, action, depth_context={"where": where})
     return wrap_layout(out, behavior, highlevel)

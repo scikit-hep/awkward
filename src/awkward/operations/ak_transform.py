@@ -511,7 +511,7 @@ def _impl(
 
         def action(layout, **kwargs):
             nonlocal transformer_did_terminate
-            out = transformation(layout, **kwargs)
+            out = transformation(layout, **kwargs, behavior=behavior)
 
             if out is None:
                 return out
@@ -529,7 +529,6 @@ def _impl(
         # ak._broadcasting.apply_step, below. ak_transform._impl knows implementation details.
         out = layout._recursively_apply(
             action,
-            behavior,
             1,
             copy.copy(depth_context),
             lateral_context,
@@ -550,7 +549,7 @@ def _impl(
 
         def action(inputs, **kwargs):
             nonlocal transformer_did_terminate
-            out = transformation(tuple(inputs), **kwargs)
+            out = transformation(tuple(inputs), **kwargs, behavior=behavior)
 
             if out is None:
                 if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):

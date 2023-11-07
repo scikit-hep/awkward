@@ -87,7 +87,7 @@ def _impl(array, separator, highlevel, behavior):
                 bytestring_to32=True,
             )
 
-        out = ak._do.recursively_apply(layout, apply_unary, behavior=behavior)
+        out = ak._do.recursively_apply(layout, apply_unary)
     else:
         separator_layout = ak.to_layout(separator, allow_record=False).to_backend(
             backend

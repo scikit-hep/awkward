@@ -61,6 +61,6 @@ def _impl(array, pattern, max_splits, reverse, highlevel, behavior):
         reverse=reverse,
         bytestring_to_string=False,
     )
-    out = ak._do.recursively_apply(layout, action, behavior)
+    out = ak._do.recursively_apply(layout, action)
 
     return wrap_layout(out, behavior, highlevel)

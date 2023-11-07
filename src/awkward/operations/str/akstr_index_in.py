@@ -82,6 +82,6 @@ def _impl(array, value_set, skip_nones, highlevel, behavior):
                 generate_bitmasks=True,
             )
 
-    out = ak._do.recursively_apply(layout, apply, behavior=behavior)
+    out = ak._do.recursively_apply(layout, apply)
 
     return wrap_layout(out, highlevel=highlevel, behavior=behavior)

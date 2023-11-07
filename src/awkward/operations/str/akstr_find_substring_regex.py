@@ -58,5 +58,5 @@ def _impl(array, pattern, ignore_case, highlevel, behavior):
         ignore_case=ignore_case,
         pattern=pattern,
     )
-    out = ak._do.recursively_apply(layout, apply, behavior=behavior)
+    out = ak._do.recursively_apply(layout, apply)
     return wrap_layout(out, highlevel=highlevel, behavior=behavior)

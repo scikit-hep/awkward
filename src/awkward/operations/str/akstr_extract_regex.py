@@ -76,7 +76,6 @@ def _impl(array, pattern, highlevel, behavior):
             bytestring_to_string=False,
             expect_option_type=True,
         ),
-        behavior,
     )
 
     return wrap_layout(out, behavior, highlevel)

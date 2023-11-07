@@ -62,7 +62,7 @@ def _impl(array, axis, highlevel, behavior):
             if layout.is_regular:
                 return continuation().to_ListOffsetArray64(False)
 
-        out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
+        out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
     elif maybe_posaxis(layout, axis, 1) == 0:
         out = layout  # the top-level is already regular (ArrayType)
@@ -80,6 +80,6 @@ def _impl(array, axis, highlevel, behavior):
                     f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
-        out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
+        out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
     return wrap_layout(out, behavior, highlevel)

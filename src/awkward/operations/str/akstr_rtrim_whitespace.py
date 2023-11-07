@@ -53,7 +53,6 @@ def _impl(array, highlevel, behavior):
             pc.ascii_rtrim_whitespace,
             bytestring_to_string=True,
         ),
-        behavior,
     )
 
     return wrap_layout(out, behavior, highlevel)

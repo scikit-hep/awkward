@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -30,9 +30,11 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.contents.content import (
+    ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.forms.form import Form
 from awkward.forms.regularform import RegularForm
@@ -1316,7 +1318,7 @@ class RegularArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         assert self._backend.nplike.known_data
 
@@ -1375,7 +1377,7 @@ class RegularArray(Content):
             )
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         if (
             self.parameter("__array__") == "string"
@@ -1400,11 +1402,16 @@ class RegularArray(Content):
         return self.to_ListOffsetArray64()._drop_none()
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if options["regular_to_jagged"]:
             return self.to_ListOffsetArray64(False)._recursively_apply(
-                action, behavior, depth, depth_context, lateral_context, options
+                action, depth, depth_context, lateral_context, options
             )
 
         if self._backend.nplike.known_data:
@@ -1419,7 +1426,6 @@ class RegularArray(Content):
                 return RegularArray(
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth + 1,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1435,7 +1441,6 @@ class RegularArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
@@ -1448,7 +1453,6 @@ class RegularArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

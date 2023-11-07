@@ -34,6 +34,7 @@ from awkward._typing import (
     AxisMaybeNone,
     JSONMapping,
     Literal,
+    Protocol,
     Self,
     SupportsIndex,
     TypeAlias,
@@ -72,7 +73,23 @@ float | int | str | list[JSONValueType] | dict[str, JSONValueType]
 """
 
 
-class RecursivelyApplyOptionsType(TypedDict):
+class ImplementsApplyAction(Protocol):
+    def __call__(
+        self,
+        layout: Content,
+        *,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        continuation: Callable[[], Content],
+        behavior: Mapping | None,
+        backend: Backend,
+        options: ApplyActionOptions,
+    ) -> Content | None:
+        ...
+
+
+class ApplyActionOptions(TypedDict):
     allow_records: bool
     keep_parameters: bool
     numpy_to_regular: bool
@@ -82,7 +99,7 @@ class RecursivelyApplyOptionsType(TypedDict):
     function_name: str | None
 
 
-class RemoveStructureOptionsType(TypedDict):
+class RemoveStructureOptions(TypedDict):
     flatten_records: bool
     function_name: str
     drop_nones: bool
@@ -91,7 +108,7 @@ class RemoveStructureOptionsType(TypedDict):
     list_to_regular: bool
 
 
-class ToArrowOptionsType(TypedDict):
+class ToArrowOptions(TypedDict):
     list_to32: bool
     string_to32: bool
     bytestring_to32: bool
@@ -1090,7 +1107,7 @@ class Content:
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         raise NotImplementedError
 
@@ -1113,18 +1130,17 @@ class Content:
         raise NotImplementedError
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         raise NotImplementedError
 
     def _recursively_apply(
         self,
-        action: ActionType,
-        behavior: dict | None,
+        action: ImplementsApplyAction,
         depth: int,
-        depth_context: dict[str, Any] | None,
-        lateral_context: dict[str, Any] | None,
-        options: RecursivelyApplyOptionsType,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
     ) -> Content | None:
         raise NotImplementedError
 

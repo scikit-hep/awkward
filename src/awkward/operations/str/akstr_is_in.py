@@ -76,6 +76,6 @@ def _impl(array, value_set, skip_nones, highlevel, behavior):
                 pc.is_in, layout, value_set_layout, skip_nulls=skip_nones
             )
 
-    out = ak._do.recursively_apply(layout, apply, behavior=behavior)
+    out = ak._do.recursively_apply(layout, apply)
 
     return wrap_layout(out, highlevel=highlevel, behavior=behavior)

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -29,9 +29,11 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.contents.content import (
+    ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.form import Form
@@ -1496,7 +1498,7 @@ class ListArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         return self.to_ListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
@@ -1512,7 +1514,7 @@ class ListArray(Content):
             return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         return self.to_ListOffsetArray64(False)._remove_structure(backend, options)
 
@@ -1525,8 +1527,13 @@ class ListArray(Content):
         )
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if (
             self._backend.nplike.known_data
             and self._backend.nplike.known_data
@@ -1554,7 +1561,6 @@ class ListArray(Content):
                     stops,
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth + 1,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1568,7 +1574,6 @@ class ListArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
@@ -1581,7 +1586,6 @@ class ListArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -29,9 +29,11 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.contents.content import (
+    ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.errors import AxisError
 from awkward.forms.form import Form
@@ -1898,7 +1900,7 @@ class ListOffsetArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         is_string = self.parameter("__array__") == "string"
         is_bytestring = self.parameter("__array__") == "bytestring"
@@ -2081,7 +2083,7 @@ class ListOffsetArray(Content):
             return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         if (
             self.parameter("__array__") == "string"
@@ -2157,8 +2159,13 @@ class ListOffsetArray(Content):
         return ak.contents.ListOffsetArray(new_offsets, new_content)
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if self._backend.nplike.known_data:
             offsetsmin = self._offsets[0]
             offsets = ak.index.Index(
@@ -2176,7 +2183,6 @@ class ListOffsetArray(Content):
                     offsets,
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth + 1,
                         copy.copy(depth_context),
                         lateral_context,
@@ -2190,7 +2196,6 @@ class ListOffsetArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
@@ -2203,7 +2208,6 @@ class ListOffsetArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

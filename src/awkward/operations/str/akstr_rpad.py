@@ -60,7 +60,6 @@ def _impl(array, width, padding, highlevel, behavior):
         ak.operations.str._get_ufunc_action(
             pc.utf8_rpad, pc.ascii_rpad, width, padding, bytestring_to_string=True
         ),
-        behavior,
     )
 
     return wrap_layout(out, behavior, highlevel)

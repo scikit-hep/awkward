@@ -208,7 +208,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown):
         else:
             return None
 
-    out = ak._do.recursively_apply(layout, action, behavior)
+    out = ak._do.recursively_apply(layout, action)
     return wrap_layout(out, behavior, highlevel)
 
 

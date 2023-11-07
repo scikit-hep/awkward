@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import copy
 import ctypes
-from collections.abc import Iterable, MutableMapping, Sequence
+from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -29,9 +29,11 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.contents.content import (
+    ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.errors import AxisError
 from awkward.forms.form import Form
@@ -1449,7 +1451,7 @@ class UnionArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         nptags = self._tags.raw(numpy)
         npindex = self._index.raw(numpy)
@@ -1534,7 +1536,7 @@ class UnionArray(Content):
         )
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         out = []
         for i in range(len(self._contents)):
@@ -1547,8 +1549,13 @@ class UnionArray(Content):
         return out
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if options["return_array"]:
             if options["return_simplified"]:
                 make = UnionArray.simplified
@@ -1562,7 +1569,6 @@ class UnionArray(Content):
                     [
                         content._recursively_apply(
                             action,
-                            behavior,
                             depth,
                             copy.copy(depth_context),
                             lateral_context,
@@ -1579,7 +1585,6 @@ class UnionArray(Content):
                 for content in self._contents:
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1592,7 +1597,6 @@ class UnionArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

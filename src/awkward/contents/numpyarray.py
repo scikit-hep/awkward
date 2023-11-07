@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -36,9 +36,11 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.contents.content import (
+    ApplyActionOptions,
     Content,
-    RemoveStructureOptionsType,
-    ToArrowOptionsType,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
 )
 from awkward.errors import AxisError
 from awkward.forms.form import Form
@@ -1210,7 +1212,7 @@ class NumpyArray(Content):
         mask_node: Content | None,
         validbytes: Content | None,
         length: int,
-        options: ToArrowOptionsType,
+        options: ToArrowOptions,
     ):
         if self._data.ndim != 1:
             return self.to_RegularArray()._to_arrow(
@@ -1245,7 +1247,7 @@ class NumpyArray(Content):
         return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
 
     def _remove_structure(
-        self, backend: Backend, options: RemoveStructureOptionsType
+        self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         if options["keepdims"]:
             shape = (1,) * (self._data.ndim - 1) + (-1,)
@@ -1259,11 +1261,16 @@ class NumpyArray(Content):
         ]
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if self._data.ndim != 1 and options["numpy_to_regular"]:
             return self.to_RegularArray()._recursively_apply(
-                action, behavior, depth, depth_context, lateral_context, options
+                action, depth, depth_context, lateral_context, options
             )
 
         if options["return_array"]:
@@ -1287,7 +1294,6 @@ class NumpyArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

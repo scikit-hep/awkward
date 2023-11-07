@@ -65,6 +65,6 @@ def _impl(array, start, stop, step, highlevel, behavior):
         elif layout.is_list and layout.parameter("__array__") == "bytestring":
             return layout[:, start:stop:step]
 
-    out = ak._do.recursively_apply(ak.operations.to_layout(array), action, behavior)
+    out = ak._do.recursively_apply(ak.operations.to_layout(array), action)
 
     return wrap_layout(out, behavior, highlevel)

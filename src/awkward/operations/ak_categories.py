@@ -46,6 +46,6 @@ def _impl(array, highlevel):
         array, allow_record=False, allow_unknown=False, primitive_policy="error"
     )
     behavior = behavior_of(array)
-    ak._do.recursively_apply(layout, action, behavior=behavior)
+    ak._do.recursively_apply(layout, action)
 
     return wrap_layout(output[0], behavior, highlevel)
