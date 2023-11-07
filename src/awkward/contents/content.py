@@ -82,6 +82,26 @@ class RecursivelyApplyOptionsType(TypedDict):
     function_name: str | None
 
 
+class RemoveStructureOptionsType(TypedDict):
+    flatten_records: bool
+    function_name: str
+    drop_nones: bool
+    keepdims: bool
+    allow_records: bool
+    list_to_regular: bool
+
+
+class ToArrowOptionsType(TypedDict):
+    list_to32: bool
+    string_to32: bool
+    bytestring_to32: bool
+    emptyarray_to: np.dtype | None
+    categorical_as_dictionary: bool
+    extensionarray: bool
+    count_nulls: bool
+    record_is_scalar: bool
+
+
 class Content:
     is_numpy = False
     is_unknown = False
@@ -1067,10 +1087,10 @@ class Content:
     def _to_arrow(
         self,
         pyarrow: Any,
-        mask_node: Any,
-        validbytes: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
         length: int,
-        options: dict[str, Any],
+        options: ToArrowOptionsType,
     ):
         raise NotImplementedError
 
@@ -1092,7 +1112,9 @@ class Content:
     def _drop_none(self) -> Content:
         raise NotImplementedError
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptionsType
+    ) -> list[Content]:
         raise NotImplementedError
 
     def _recursively_apply(
@@ -1100,8 +1122,8 @@ class Content:
         action: ActionType,
         behavior: dict | None,
         depth: int,
-        depth_context: dict | None,
-        lateral_context: dict | None,
+        depth_context: dict[str, Any] | None,
+        lateral_context: dict[str, Any] | None,
         options: RecursivelyApplyOptionsType,
     ) -> Content | None:
         raise NotImplementedError

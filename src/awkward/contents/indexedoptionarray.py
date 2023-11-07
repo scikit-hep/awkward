@@ -20,9 +20,21 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    Content,
+    RemoveStructureOptionsType,
+    ToArrowOptionsType,
+)
 from awkward.errors import AxisError
 from awkward.forms.form import Form
 from awkward.forms.indexedoptionform import IndexedOptionForm
@@ -1524,7 +1536,14 @@ class IndexedOptionArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptionsType,
+    ):
         index = numpy.asarray(self._index.data, copy=True)
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
@@ -1602,7 +1621,9 @@ class IndexedOptionArray(Content):
             else:
                 return content
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptionsType
+    ) -> list[Content]:
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
             return self.project()._remove_structure(backend, options)
