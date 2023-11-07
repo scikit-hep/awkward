@@ -214,7 +214,7 @@ class IndexedOptionArray(Content):
         index = self._index.to_nplike(TypeTracer.instance())
         return IndexedOptionArray(
             index.forget_length() if forget_length else index,
-            self._content._to_typetracer(False),
+            self._content._to_typetracer(forget_length),
             parameters=self._parameters,
         )
 

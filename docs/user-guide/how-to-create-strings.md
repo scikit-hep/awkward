@@ -95,7 +95,7 @@ Categorical strings
 
 A large set of strings with few unique values are more efficiently manipulated as integers than as strings. In Pandas, this is [categorical data](https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html), in R, it's called a [factor](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/factor), and in Arrow and Parquet, it's [dictionary encoding](https://arrow.apache.org/blog/2019/09/05/faster-strings-cpp-parquet/).
 
-The {func}`ak.to_categorical` function makes Awkward Arrays categorical in this sense. {func}`ak.to_arrow` and {func}`ak.to_parquet` recognize categorical data and convert it to the corresponding Arrow and Parquet types.
+The {func}`ak.str.to_categorical` (requires PyArrow) function makes Awkward Arrays categorical in this sense. {func}`ak.to_arrow` and {func}`ak.to_parquet` recognize categorical data and convert it to the corresponding Arrow and Parquet types.
 
 ```{code-cell} ipython3
 uncategorized = ak.Array(["three", "one", "two", "two", "three", "one", "one", "one"])
@@ -103,7 +103,7 @@ uncategorized
 ```
 
 ```{code-cell} ipython3
-categorized = ak.to_categorical(uncategorized)
+categorized = ak.str.to_categorical(uncategorized)
 categorized
 ```
 
