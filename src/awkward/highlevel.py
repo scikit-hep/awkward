@@ -27,6 +27,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
 from awkward._pickle import custom_reduce
+from awkward._prettyprint import Formatter
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import TypeVar
 
@@ -1279,7 +1280,16 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return f"<{pytype}{valuestr} type={typestr}>"
 
-    def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
+    def show(
+        self,
+        limit_rows=20,
+        limit_cols=80,
+        type=False,
+        stream=sys.stdout,
+        *,
+        formatter=None,
+        precision=3,
+    ):
         """
         Args:
             limit_rows (int): Maximum number of rows (lines) to use in the output.
@@ -1289,12 +1299,25 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
 
+            formatter (Mapping or None): Mapping of types/type-classes to string formatters.
+                If None, use the default formatter.
+
         Display the contents of the array within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
+
+        The `formatter` argument controls the formatting of individual values, c.f.
+        https://numpy.org/doc/stable/reference/generated/numpy.set_printoptions.html
+        As Awkward Array does not implement strings as a NumPy dtype, the `numpystr`
+        key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
+        string values, falling back upon `"str_kind"`.
         """
         import awkward._prettyprint
 
-        valuestr = awkward._prettyprint.valuestr(self, limit_rows, limit_cols)
+        formatter_impl = Formatter(formatter, precision=precision)
+
+        valuestr = awkward._prettyprint.valuestr(
+            self, limit_rows, limit_cols, formatter=formatter_impl
+        )
         if type:
             tmp = io.StringIO()
             self.type.show(stream=tmp)
@@ -2071,7 +2094,16 @@ class Record(NDArrayOperatorsMixin):
 
         return f"<{pytype}{valuestr} type={typestr}>"
 
-    def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
+    def show(
+        self,
+        limit_rows=20,
+        limit_cols=80,
+        type=False,
+        stream=sys.stdout,
+        *,
+        formatter=None,
+        precision=3,
+    ):
         """
         Args:
             limit_rows (int): Maximum number of rows (lines) to use in the output.
@@ -2080,13 +2112,24 @@ class Record(NDArrayOperatorsMixin):
                 of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
+            formatter (Mapping or None): Mapping of types/type-classes to string formatters.
+                If None, use the default formatter.
 
-        Display the contents of the record within `limit_rows` and `limit_cols`, using
+        Display the contents of the array within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
+
+        The `formatter` argument controls the formatting of individual values, c.f.
+        https://numpy.org/doc/stable/reference/generated/numpy.set_printoptions.html
+        As Awkward Array does not implement strings as a NumPy dtype, the `numpystr`
+        key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
+        string values, falling back upon `"str_kind"`.
         """
         import awkward._prettyprint
 
-        valuestr = awkward._prettyprint.valuestr(self, limit_rows, limit_cols)
+        formatter_impl = Formatter(formatter, precision=precision)
+        valuestr = awkward._prettyprint.valuestr(
+            self, limit_rows, limit_cols, formatter=formatter_impl
+        )
         if type:
             tmp = io.StringIO()
             self.type.show(stream=tmp)
@@ -2465,7 +2508,16 @@ class ArrayBuilder(Sized):
 
         return f"<ArrayBuilder type={typestr}>"
 
-    def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
+    def show(
+        self,
+        limit_rows=20,
+        limit_cols=80,
+        type=False,
+        stream=sys.stdout,
+        *,
+        formatter=None,
+        precision=3,
+    ):
         """
         Args:
             limit_rows (int): Maximum number of rows (lines) to use in the output.
@@ -2474,15 +2526,28 @@ class ArrayBuilder(Sized):
                 of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
+            formatter (Mapping or None): Mapping of types/type-classes to string formatters.
+                If None, use the default formatter.
 
         Display the contents of the array within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
 
+        The `formatter` argument controls the formatting of individual values, c.f.
+        https://numpy.org/doc/stable/reference/generated/numpy.set_printoptions.html
+        As Awkward Array does not implement strings as a NumPy dtype, the `numpystr`
+        key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
+        string values, falling back upon `"str_kind"`.
+
         This method takes a snapshot of the data and calls show on it, and a snapshot
         copies data.
         """
+        formatter_impl = Formatter(formatter, precision=precision)
         return self.snapshot().show(
-            limit_rows=limit_rows, limit_cols=limit_cols, type=type, stream=stream
+            limit_rows=limit_rows,
+            limit_cols=limit_cols,
+            type=type,
+            stream=stream,
+            formatter=formatter_impl,
         )
 
     def __array__(self, dtype=None):
