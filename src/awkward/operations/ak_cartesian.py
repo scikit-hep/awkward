@@ -1,5 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("cartesian",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 from collections.abc import Mapping
 
 import awkward as ak
@@ -11,6 +13,8 @@ from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
+
+__all__ = ("cartesian",)
 
 np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()

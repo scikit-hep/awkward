@@ -1,7 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("Array", "ArrayBuilder", "Record")
+from __future__ import annotations
 
 import builtins
 import copy
@@ -30,6 +29,8 @@ from awkward._operators import NDArrayOperatorsMixin
 from awkward._pickle import custom_reduce
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import TypeVar
+
+__all__ = ("Array", "ArrayBuilder", "Record")
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()

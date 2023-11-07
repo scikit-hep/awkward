@@ -1,3 +1,5 @@
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include "awkward/LayoutBuilder.h"

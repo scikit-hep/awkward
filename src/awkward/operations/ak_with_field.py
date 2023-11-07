@@ -1,5 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("with_field",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import copy
 
 import awkward as ak
@@ -11,9 +13,9 @@ from awkward._layout import wrap_layout
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
 
+__all__ = ("with_field",)
+
 np = NumpyMetadata.instance()
-
-
 cpu = NumpyBackend.instance()
 
 

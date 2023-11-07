@@ -1,9 +1,13 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("to_dataframe",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("to_dataframe",)
 
 numpy = Numpy.instance()
 np = NumpyMetadata.instance()

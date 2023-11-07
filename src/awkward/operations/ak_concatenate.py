@@ -1,5 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("concatenate",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
@@ -12,6 +14,8 @@ from awkward._regularize import regularize_axis
 from awkward._typing import Sequence
 from awkward.contents import Content
 from awkward.operations.ak_fill_none import fill_none
+
+__all__ = ("concatenate",)
 
 np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()

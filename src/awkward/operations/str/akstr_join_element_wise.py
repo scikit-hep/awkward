@@ -1,6 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("join_element_wise",)
+from __future__ import annotations
 
 import awkward as ak
 from awkward._backends.dispatch import backend_of
@@ -9,6 +9,8 @@ from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
+
+__all__ = ("join_element_wise",)
 
 cpu = NumpyBackend.instance()
 typetracer = TypeTracerBackend.instance()

@@ -1,8 +1,8 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+# ruff: noqa: B023
+
 from __future__ import annotations
 
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-# ruff: noqa: B023
-__all__ = ("enforce_type",)
 from itertools import permutations
 
 import awkward as ak
@@ -13,6 +13,8 @@ from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._typing import NamedTuple
 from awkward.types.numpytype import primitive_to_dtype
+
+__all__ = ("enforce_type",)
 
 np = NumpyMetadata.instance()
 

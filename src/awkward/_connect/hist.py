@@ -1,7 +1,9 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 """
 Provide native support for Awkward Arrays in Hist via `Hist.fill_flattened`.
 """
+
 from __future__ import annotations
 
 import numpy as np

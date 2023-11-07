@@ -101,8 +101,8 @@ html_theme_options = {
         {
             "name": "Gitter",
             "url": "https://gitter.im/Scikit-HEP/awkward-array",
-            "icon": "fa-brands fa-gitter"
-        }
+            "icon": "fa-brands fa-gitter",
+        },
     ],
     "use_edit_page_button": True,
     "external_links": [

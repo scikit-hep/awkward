@@ -128,13 +128,6 @@ filterwarnings = [
 ]
 log_cli_level = "info"
 
-[tool.isort]
-profile = "black"
-skip_glob = [
-    "src/awkward/__init__.py",
-    "src/awkward/_nplikes/__init__.py",
-]
-
 [tool.pylint.master]
 py-version = "3.7"
 jobs = "0"
@@ -294,6 +287,7 @@ unfixable = [
 typing-modules = ["awkward._typing"]
 external = []
 mccabe.max-complexity = 100
+isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "dev/*" = ["T20", "TID251"]

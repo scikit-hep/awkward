@@ -1,12 +1,15 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("zeros_like",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 
-np = NumpyMetadata.instance()
+__all__ = ("zeros_like",)
 
+np = NumpyMetadata.instance()
 
 _ZEROS = object()
 

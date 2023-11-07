@@ -1,5 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("to_layout",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 from collections.abc import Iterable
 from datetime import date, datetime, time
@@ -17,6 +18,8 @@ from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
+
+__all__ = ("to_layout",)
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()

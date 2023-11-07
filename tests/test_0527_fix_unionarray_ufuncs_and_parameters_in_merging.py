@@ -1,11 +1,13 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
 
-# https://github.com/scikit-hep/awkward-1.0/issues/459#issuecomment-694941328
+# https://github.com/scikit-hep/awkward/issues/459#issuecomment-694941328
 #
 # So the rules would be,
 #    * if arrays have different `__array__` or `__record__` parameters, they are not equal;

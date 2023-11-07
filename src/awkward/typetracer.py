@@ -1,14 +1,6 @@
-from __future__ import annotations
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = [
-    "is_unknown_array",
-    "is_unknown_scalar",
-    "TypeTracerReport",
-    "typetracer_with_report",
-    "PlaceholderArray",
-    "unknown_length",
-    "touch_data",
-]
+from __future__ import annotations
 
 import awkward.forms
 from awkward._backends.typetracer import TypeTracerBackend
@@ -34,6 +26,16 @@ from awkward.forms.form import regularize_buffer_key
 from awkward.highlevel import Array, Record
 from awkward.operations.ak_to_layout import to_layout
 from awkward.types.numpytype import is_primitive
+
+__all__ = [
+    "is_unknown_array",
+    "is_unknown_scalar",
+    "TypeTracerReport",
+    "typetracer_with_report",
+    "PlaceholderArray",
+    "unknown_length",
+    "touch_data",
+]
 
 T = TypeVar("T", Array, Record)
 

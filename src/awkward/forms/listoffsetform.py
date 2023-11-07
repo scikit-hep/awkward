@@ -1,7 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("ListOffsetForm",)
+from __future__ import annotations
 
 from collections.abc import Callable
 
@@ -18,6 +17,8 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
+
+__all__ = ("ListOffsetForm",)
 
 np = NumpyMetadata.instance()
 

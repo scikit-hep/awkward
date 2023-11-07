@@ -1,5 +1,10 @@
 #!/usr/bin/env python
+
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 """Download and extract a GitHub asset by name and SHA"""
+
+from __future__ import annotations
 
 import argparse
 import io

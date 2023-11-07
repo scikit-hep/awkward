@@ -1,5 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("from_json",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import json
 import pathlib
 from collections.abc import Iterable, Sized
@@ -13,6 +15,8 @@ from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer
+
+__all__ = ("from_json",)
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()

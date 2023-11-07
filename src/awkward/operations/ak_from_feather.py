@@ -1,9 +1,11 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("from_feather",)
+from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+
+__all__ = ("from_feather",)
 
 
 @high_level_function()
