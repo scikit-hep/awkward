@@ -41,4 +41,4 @@ def attrs_of(*arrays, attrs: Mapping | None = None) -> Mapping:
 
 
 def without_transient_attrs(attrs: dict[str, Any]) -> JSONMapping:
-    return {k: v for k, v in attrs.items() if not k.startswith("_transient_")}
+    return {k: v for k, v in attrs.items() if not k.startswith("@")}

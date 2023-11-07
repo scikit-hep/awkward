@@ -357,7 +357,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         The mutable mapping containing top-level metadata, which is serialised
         with the array during pickling.
 
-        Keys prefixed with `_transient_` are identified as "transient" attributes
+        Keys prefixed with `@` are identified as "transient" attributes
         which are discarded prior to pickling, permitting the storage of
         non-pickleable types.
         """
@@ -1759,7 +1759,7 @@ class Record(NDArrayOperatorsMixin):
         The mapping containing top-level metadata, which is serialised
         with the record during pickling.
 
-        Keys prefixed with `_transient_` are identified as "transient" attributes
+        Keys prefixed with `@` are identified as "transient" attributes
         which are discarded prior to pickling, permitting the storage of
         non-pickleable types.
         """
@@ -2486,7 +2486,7 @@ class ArrayBuilder(Sized):
         The mapping containing top-level metadata, which is serialised
         with the array during pickling.
 
-        Keys prefixed with `_transient_` are identified as "transient" attributes
+        Keys prefixed with `@` are identified as "transient" attributes
         which are discarded prior to pickling, permitting the storage of
         non-pickleable types.
         """
