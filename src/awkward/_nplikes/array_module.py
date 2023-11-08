@@ -14,7 +14,7 @@ from awkward._nplikes.numpy_like import (
 )
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._typing import TYPE_CHECKING, Any, Final, Literal, TypeVar, cast
+from awkward._typing import TYPE_CHECKING, Any, DType, Final, Literal, TypeVar, cast
 
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
@@ -207,6 +207,17 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         else:
             return self._apply_ufunc_legacy(ufunc, method, args, kwargs)
 
+    def _get_nep_50_dtype(
+        self, obj: Any
+    ) -> DType | type[int] | type[complex] | type[float]:
+        if hasattr(obj, "dtype"):
+            return obj.dtype
+        elif isinstance(obj, bool):
+            return np.dtype(np.bool_)
+        else:
+            assert isinstance(obj, (int, complex, float))
+            return type(obj)
+
     # Does NumPy support value-less ufunc resolution?
     def _apply_ufunc_nep_50(
         self,
@@ -216,7 +227,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         kwargs: dict[str, Any] | None = None,
     ) -> ArrayLikeT | tuple[ArrayLikeT]:
         # Determine input argument dtypes
-        input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
+        input_arg_dtypes = [self._get_nep_50_dtype(obj) for obj in args]
         # Resolve these for the given ufunc
         arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
         resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
