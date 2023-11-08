@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
+from awkward._backends.dispatch import backend_of_obj
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import regularize_axis
@@ -23,7 +22,9 @@ cpu = NumpyBackend.instance()
 
 @ak._connect.numpy.implements("concatenate")
 @high_level_function()
-def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None):
+def concatenate(
+    arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None, attrs=None
+):
     """
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
@@ -39,6 +40,8 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Returns an array with `arrays` concatenated. For `axis=0`, this means that
     one whole array follows another. For `axis=1`, it means that the `arrays`
@@ -48,47 +51,72 @@ def concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None
     # Dispatch
     if (
         # Is an array with a known backend
-        backend_of(arrays, default=None) is not None
+        backend_of_obj(arrays, default=None) is not None
     ):
         yield (arrays,)
     else:
         yield arrays
 
     # Implementation
-    return _impl(arrays, axis, mergebool, highlevel, behavior)
+    return _impl(arrays, axis, mergebool, highlevel, behavior, attrs)
 
 
-def _impl(arrays, axis, mergebool, highlevel, behavior):
+def _merge_as_union(
+    contents: Sequence[Content], parameters=None
+) -> ak.contents.UnionArray:
+    length = sum([c.length for c in contents])
+    first = contents[0]
+    tags = ak.index.Index8.empty(length, first.backend.index_nplike)
+    index = ak.index.Index64.empty(length, first.backend.index_nplike)
+
+    offset = 0
+    for i, content in enumerate(contents):
+        content.backend.maybe_kernel_error(
+            content.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
+                tags.data, offset, content.length, i
+            )
+        )
+        content.backend.maybe_kernel_error(
+            content.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.data, offset, content.length
+            )
+        )
+        offset += content.length
+
+    return ak.contents.UnionArray.simplified(
+        tags, index, contents, parameters=parameters
+    )
+
+
+def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(*arrays, behavior=behavior)
     # Simple single-array, axis=0 fast-path
     if (
         # Is an array with a known backend
-        backend_of(arrays, default=None) is not None
+        backend_of_obj(arrays, default=None) is not None
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(
-            arrays, allow_record=False, allow_unknown=False, primitive_policy="error"
+            arrays, allow_record=False, primitive_policy="error"
         )
         # Only handle concatenation along `axis=0`
         # Let ambiguous depth arrays fall through
         if maybe_posaxis(content, axis, 1) == 0:
-            return ak.operations.ak_flatten._impl(content, 1, highlevel, behavior)
+            return ak.operations.ak_flatten._impl(arrays, 1, highlevel, behavior, attrs)
 
     # Now that we're sure `arrays` is not a singular array
-    backend = backend_of(*arrays, default=cpu, coerce_to_common=True)
-    content_or_others = [
-        x.to_backend(backend) if isinstance(x, ak.contents.Content) else x
-        for x in (
-            ak.operations.to_layout(
-                x,
-                allow_record=axis != 0,
-                allow_unknown=False,
-                primitive_policy="pass-through",
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        content_or_others = ensure_same_backend(
+            *(
+                ctx.unwrap(
+                    x,
+                    allow_record=axis != 0,
+                    allow_unknown=False,
+                    primitive_policy="pass-through",
+                )
+                for x in arrays
             )
-            for x in arrays
         )
-    ]
 
     contents = [x for x in content_or_others if isinstance(x, ak.contents.Content)]
     if len(contents) == 0:
@@ -143,7 +171,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
 
     else:
 
-        def action(inputs, depth, **kwargs):
+        def action(inputs, depth, backend, **kwargs):
             if any(
                 x.minmax_depth == (1, 1)
                 for x in inputs
@@ -303,31 +331,4 @@ def _impl(arrays, axis, mergebool, highlevel, behavior):
             content_or_others, action, allow_records=True, right_broadcast=False
         )[0]
 
-    return wrap_layout(out, behavior, highlevel)
-
-
-def _merge_as_union(
-    contents: Sequence[Content], parameters=None
-) -> ak.contents.UnionArray:
-    length = sum([c.length for c in contents])
-    first = contents[0]
-    tags = ak.index.Index8.empty(length, first.backend.index_nplike)
-    index = ak.index.Index64.empty(length, first.backend.index_nplike)
-
-    offset = 0
-    for i, content in enumerate(contents):
-        content.backend.maybe_kernel_error(
-            content.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
-                tags.data, offset, content.length, i
-            )
-        )
-        content.backend.maybe_kernel_error(
-            content.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
-                index.data, offset, content.length
-            )
-        )
-        offset += content.length
-
-    return ak.contents.UnionArray.simplified(
-        tags, index, contents, parameters=parameters
-    )
+    return ctx.wrap(out, highlevel=highlevel)

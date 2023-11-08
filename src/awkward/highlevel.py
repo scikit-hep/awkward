@@ -19,6 +19,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 import awkward._connect.hist
+from awkward._attrs import attrs_of, without_transient_attrs
 from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
@@ -26,10 +27,14 @@ from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
-from awkward._pickle import custom_reduce
+from awkward._pickle import (
+    custom_reduce,
+    unpickle_array_schema_1,
+    unpickle_record_schema_1,
+)
 from awkward._prettyprint import Formatter
 from awkward._regularize import is_non_string_like_iterable
-from awkward._typing import TypeVar
+from awkward._typing import Any, TypeVar
 
 __all__ = ("Array", "ArrayBuilder", "Record")
 
@@ -271,6 +276,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         with_name=None,
         check_valid=False,
         backend=None,
+        attrs=None,
     ):
         self._cpp_type = None
         if isinstance(data, ak.contents.Content):
@@ -279,6 +285,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         elif isinstance(data, Array):
             layout = data._layout
             behavior = behavior_of(data, behavior=behavior)
+            attrs = attrs_of(data, attrs=attrs)
 
         elif isinstance(data, dict):
             fields = []
@@ -309,17 +316,21 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         if with_name is not None:
             layout = ak.operations.with_name(
-                layout, with_name, highlevel=False, behavior=behavior
+                layout, with_name, highlevel=False, behavior=behavior, attrs=attrs
             )
 
-        if backend is not None and backend != ak.operations.backend(layout):
+        if not (backend is None or backend == layout.backend.name):
             layout = ak.operations.to_backend(layout, backend, highlevel=False)
 
         if behavior is not None and not isinstance(behavior, Mapping):
-            raise TypeError("behavior must be None or mapping")
+            raise TypeError("behavior must be None or a mapping")
+
+        if attrs is not None and not isinstance(attrs, Mapping):
+            raise TypeError("attrs must be None or a mapping")
 
         self._layout = layout
         self._behavior = behavior
+        self._attrs = attrs
 
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
@@ -340,6 +351,27 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def _update_class(self):
         self._numbaview = None
         self.__class__ = get_array_class(self._layout, self._behavior)
+
+    @property
+    def attrs(self) -> Mapping[str, Any]:
+        """
+        The mutable mapping containing top-level metadata, which is serialised
+        with the array during pickling.
+
+        Keys prefixed with `@` are identified as "transient" attributes
+        which are discarded prior to pickling, permitting the storage of
+        non-pickleable types.
+        """
+        if self._attrs is None:
+            self._attrs = {}
+        return self._attrs
+
+    @attrs.setter
+    def attrs(self, value: Mapping[str, Any]):
+        if isinstance(value, Mapping):
+            self._attrs = value
+        else:
+            raise TypeError("attrs must be a mapping")
 
     @property
     def layout(self):
@@ -1100,7 +1132,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 raise TypeError("only fields may be assigned in-place (by field name)")
 
             self._layout = ak.operations.with_field(
-                self._layout, what, where, highlevel=False
+                self._layout,
+                what,
+                where,
+                highlevel=False,
+                attrs=self._attrs,
+                behavior=self._behavior,
             )
             self._numbaview = None
 
@@ -1132,7 +1169,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 raise TypeError("only fields may be removed in-place (by field name)")
 
             self._layout = ak.operations.ak_without_field._impl(
-                self._layout, where, highlevel=False, behavior=self._behavior
+                self._layout,
+                where,
+                highlevel=False,
+                behavior=self._behavior,
+                attrs=self._attrs,
             )
             self._numbaview = None
 
@@ -1476,7 +1517,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #__array_ufunc__.
         """
         return ak._connect.numpy.array_function(
-            func, types, args, kwargs, behavior=self._behavior
+            func, types, args, kwargs, behavior=self._behavior, attrs=self._attrs
         )
 
     @non_inspectable_property
@@ -1518,7 +1559,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             behavior = None
         else:
             behavior = self._behavior
-        return object.__new__, (Array,), (form.to_dict(), length, container, behavior)
+
+        if self._attrs is None:
+            attrs = self._attrs
+        else:
+            attrs = without_transient_attrs(self._attrs)
+
+        return unpickle_array_schema_1, (
+            form.to_dict(),
+            length,
+            container,
+            behavior,
+            attrs,
+        )
 
     def __setstate__(self, state):
         form, length, container, behavior, *_ = state
@@ -1551,15 +1604,18 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
         self._layout = layout
         self._behavior = behavior
+        self._attrs = None
+
         self._update_class()
 
     def __copy__(self):
-        return Array(self._layout, behavior=self._behavior)
+        return Array(self._layout, behavior=self._behavior, attrs=self._attrs)
 
     def __deepcopy__(self, memo):
         return Array(
             copy.deepcopy(self._layout, memo),
             behavior=copy.deepcopy(self._behavior, memo),
+            attrs=copy.deepcopy(self._attrs, memo),
         )
 
     def __bool__(self):
@@ -1653,13 +1709,15 @@ class Record(NDArrayOperatorsMixin):
         behavior=None,
         with_name=None,
         check_valid=False,
-        library=None,
+        backend=None,
+        attrs=None,
     ):
         if isinstance(data, ak.record.Record):
             layout = data
 
         elif isinstance(data, Record):
             layout = data._layout
+            attrs = data.attrs
 
         elif isinstance(data, str):
             layout = ak.operations.from_json(data, highlevel=False)
@@ -1690,14 +1748,15 @@ class Record(NDArrayOperatorsMixin):
         if with_name is not None:
             layout = ak.operations.with_name(layout, with_name, highlevel=False)
 
-        if library is not None and library != ak.operations.library(layout):
-            layout = ak.operations.to_library(layout, library, highlevel=False)
+        if not (backend is None or backend == layout.backend.name):
+            layout = ak.operations.to_backend(layout, backend, highlevel=False)
 
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or mapping")
 
         self._layout = layout
         self._behavior = behavior
+        self._attrs = attrs
 
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
@@ -1716,6 +1775,27 @@ class Record(NDArrayOperatorsMixin):
     def _update_class(self):
         self._numbaview = None
         self.__class__ = get_record_class(self._layout, self._behavior)
+
+    @property
+    def attrs(self) -> Mapping[str, Any]:
+        """
+        The mapping containing top-level metadata, which is serialised
+        with the record during pickling.
+
+        Keys prefixed with `@` are identified as "transient" attributes
+        which are discarded prior to pickling, permitting the storage of
+        non-pickleable types.
+        """
+        if self._attrs is None:
+            self._attrs = {}
+        return self._attrs
+
+    @attrs.setter
+    def attrs(self, value: Mapping[str, Any]):
+        if isinstance(value, Mapping):
+            self._attrs = value
+        else:
+            raise TypeError("attrs must be a mapping")
 
     @property
     def layout(self):
@@ -1924,7 +2004,12 @@ class Record(NDArrayOperatorsMixin):
                 raise TypeError("only fields may be assigned in-place (by field name)")
 
             self._layout = ak.operations.ak_with_field._impl(
-                self._layout, what, where, highlevel=False, behavior=self._behavior
+                self._layout,
+                what,
+                where,
+                highlevel=False,
+                behavior=self._behavior,
+                attrs=self._attrs,
             )
             self._numbaview = None
 
@@ -1957,7 +2042,11 @@ class Record(NDArrayOperatorsMixin):
                 raise TypeError("only fields may be removed in-place (by field name)")
 
             self._layout = ak.operations.ak_without_field._impl(
-                self._layout, where, highlevel=False, behavior=self._behavior
+                self._layout,
+                where,
+                highlevel=False,
+                behavior=self._behavior,
+                attrs=self._attrs,
             )
             self._numbaview = None
 
@@ -2222,10 +2311,19 @@ class Record(NDArrayOperatorsMixin):
             behavior = None
         else:
             behavior = self._behavior
-        return (
-            object.__new__,
-            (Record,),
-            (form.to_dict(), length, container, behavior, packed_layout.at),
+
+        if self._attrs is None:
+            attrs = self._attrs
+        else:
+            attrs = without_transient_attrs(self._attrs)
+
+        return unpickle_record_schema_1, (
+            form.to_dict(),
+            length,
+            container,
+            behavior,
+            attrs,
+            packed_layout.at,
         )
 
     def __setstate__(self, state):
@@ -2242,15 +2340,18 @@ class Record(NDArrayOperatorsMixin):
         layout = ak.record.Record(layout, at)
         self._layout = layout
         self._behavior = behavior
+        self._attrs = None
+
         self._update_class()
 
     def __copy__(self):
-        return Record(self._layout, behavior=self._behavior)
+        return Record(self._layout, behavior=self._behavior, attrs=self._attrs)
 
     def __deepcopy__(self, memo):
         return Record(
             copy.deepcopy(self._layout, memo),
             behavior=copy.deepcopy(self._behavior, memo),
+            attrs=copy.deepcopy(self._attrs, memo),
         )
 
     def __bool__(self):
@@ -2392,15 +2493,16 @@ class ArrayBuilder(Sized):
     be considered the "least effort" approach.
     """
 
-    def __init__(self, *, behavior=None, initial=1024, resize=8):
+    def __init__(self, *, behavior=None, attrs=None, initial=1024, resize=8):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or mapping")
 
         self._layout = _ext.ArrayBuilder(initial=initial, resize=resize)
         self._behavior = behavior
+        self._attrs = attrs
 
     @classmethod
-    def _wrap(cls, layout, behavior=None):
+    def _wrap(cls, layout, behavior=None, attrs=None):
         """
         Args:
             layout (`ak._ext.ArrayBuilder`): Low-level builder to wrap.
@@ -2418,7 +2520,29 @@ class ArrayBuilder(Sized):
         out = cls.__new__(cls)
         out._layout = layout
         out._behavior = behavior
+        out._attrs = attrs
         return out
+
+    @property
+    def attrs(self) -> Mapping[str, Any]:
+        """
+        The mapping containing top-level metadata, which is serialised
+        with the array during pickling.
+
+        Keys prefixed with `@` are identified as "transient" attributes
+        which are discarded prior to pickling, permitting the storage of
+        non-pickleable types.
+        """
+        if self._attrs is None:
+            self._attrs = {}
+        return self._attrs
+
+    @attrs.setter
+    def attrs(self, value: Mapping[str, Any]):
+        if isinstance(value, Mapping):
+            self._attrs = value
+        else:
+            raise TypeError("attrs must be a mapping")
 
     @property
     def behavior(self):
@@ -2602,20 +2726,20 @@ class ArrayBuilder(Sized):
 
         The currently accumulated data are *copied* into the new array.
         """
-        formstr, length, container = self._layout.to_buffers()
-        form = ak.forms.from_json(formstr)
-
         with ak._errors.OperationErrorContext("ak.ArrayBuilder.snapshot", [], {}):
-            return ak.operations.from_buffers(
+            formstr, length, container = self._layout.to_buffers()
+            form = ak.forms.from_json(formstr)
+            return ak.operations.ak_from_buffers._impl(
                 form,
                 length,
                 container,
                 buffer_key="{form_key}-{attribute}",
                 backend="cpu",
                 byteorder=ak._util.native_byteorder,
-                allow_noncanonical_form=True,
+                simplify=True,
                 highlevel=True,
                 behavior=self._behavior,
+                attrs=self._attrs,
             )
 
     def null(self):

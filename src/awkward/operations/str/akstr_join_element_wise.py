@@ -3,27 +3,25 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
-from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 
 __all__ = ("join_element_wise",)
 
-cpu = NumpyBackend.instance()
 typetracer = TypeTracerBackend.instance()
 
 
 @high_level_function(module="ak.str")
-def join_element_wise(*arrays, highlevel=True, behavior=None):
+def join_element_wise(*arrays, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Broadcasts and concatenates all but the last array of strings in `arrays`;
@@ -46,10 +44,10 @@ def join_element_wise(*arrays, highlevel=True, behavior=None):
     yield arrays
 
     # Implementation
-    return _impl(arrays, highlevel, behavior)
+    return _impl(arrays, highlevel, behavior, attrs)
 
 
-def _impl(arrays, highlevel, behavior):
+def _impl(arrays, highlevel, behavior, attrs):
     from awkward._connect.pyarrow import import_pyarrow_compute
     from awkward.operations.str import _apply_through_arrow
 
@@ -58,9 +56,8 @@ def _impl(arrays, highlevel, behavior):
     if len(arrays) < 1:
         raise TypeError("at least one array is required")
 
-    behavior = behavior_of(*arrays, behavior=behavior)
-    backend = backend_of(*arrays, coerce_to_common=True, default=cpu)
-    layouts = [ak.to_layout(x).to_backend(backend) for x in arrays]
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layouts = ensure_same_backend(*(ctx.unwrap(x) for x in arrays))
 
     def action(layouts, **kwargs):
         if all(
@@ -71,4 +68,4 @@ def _impl(arrays, highlevel, behavior):
 
     (out,) = ak._broadcasting.broadcast_and_apply(layouts, action)
 
-    return wrap_layout(out, highlevel=highlevel, behavior=behavior)
+    return ctx.wrap(out, highlevel=highlevel)

@@ -33,7 +33,7 @@ def validity_error(array, *, exception=False):
 
 def _impl(array, exception):
     layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
+        array, allow_record=False, primitive_policy="error"
     )
     out = ak._do.validity_error(layout, path="highlevel")
 

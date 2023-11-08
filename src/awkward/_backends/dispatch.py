@@ -89,7 +89,7 @@ def backend_of_obj(obj, default: D | Sentinel = UNSET) -> Backend | D:
 
 
 def backend_of(
-    *objects, default: D | Sentinel = UNSET, coerce_to_common: bool = False
+    *objects, default: D | Sentinel = UNSET, coerce_to_common: bool = True
 ) -> Backend | D:
     """
     Args:
@@ -116,9 +116,9 @@ def backend_of(
         return common_backend(unique_backends)
     else:
         raise ValueError(
-            "could not find singular backend for",
-            objects,
-            "and coercion is not permitted",
+            f"could not find singular backend for "
+            f"{', '.join(type(t).__name__ for t in objects)} "
+            f"and coercion is not permitted",
         )
 
 

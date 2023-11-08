@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_highlevel_to_lowlevel, wrap_layout
+from awkward._layout import (
+    HighLevelContext,
+    maybe_highlevel_to_lowlevel,
+)
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -17,7 +19,14 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def softmax(
-    x, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None
+    x,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -39,6 +48,8 @@ def softmax(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Computes the softmax in each group of elements from `x` (many
     types supported, including all Awkward Arrays and Records). The grouping
@@ -59,18 +70,15 @@ def softmax(
     yield (x,)
 
     # Implementation
-    return _impl(x, axis, keepdims, mask_identity, highlevel, behavior)
+    return _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs)
 
 
-def _impl(x, axis, keepdims, mask_identity, highlevel, behavior):
+def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(x, behavior=behavior)
-    x = ak.highlevel.Array(
-        ak.operations.to_layout(
-            x, allow_record=False, allow_unknown=False, primitive_policy="error"
-        ),
-        behavior=behavior,
-    )
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        x_layout = ctx.unwrap(x, allow_record=False, primitive_policy="error")
+    x = ctx.wrap(x_layout)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         expx = ufuncs.exp(x)
@@ -80,11 +88,11 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior):
             keepdims,
             mask_identity,
             highlevel=True,
-            behavior=behavior,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
         )
-        return wrap_layout(
+        return ctx.wrap(
             maybe_highlevel_to_lowlevel(expx / denom),
-            behavior=behavior,
             highlevel=highlevel,
             allow_other=True,
         )

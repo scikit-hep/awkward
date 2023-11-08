@@ -21,6 +21,7 @@ def from_rdataframe(
     with_name=None,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -37,6 +38,8 @@ def from_rdataframe(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts ROOT RDataFrame columns into an Awkward Array.

@@ -7,7 +7,7 @@ from itertools import permutations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
@@ -20,7 +20,7 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def enforce_type(array, type, *, highlevel=True, behavior=None):
+def enforce_type(array, type, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -28,6 +28,8 @@ def enforce_type(array, type, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an array whose structure is modified to match the given type.
@@ -227,40 +229,9 @@ def enforce_type(array, type, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, type, highlevel, behavior)
+    return _impl(array, type, highlevel, behavior, attrs)
 
 
-def _impl(array, type_, highlevel, behavior):
-    layout = ak.to_layout(array, allow_record=True)
-
-    if isinstance(type_, str):
-        type_ = ak.types.from_datashape(type_, highlevel=False)
-
-    if isinstance(type_, (ak.types.ArrayType, ak.types.ScalarType)):
-        raise TypeError(
-            "High-level type objects are not supported by this function. Instead, "
-            "a low-level type object (instance of ak.types.Type) should be used. "
-            "If you are using a high-level type `type` from another array (e.g. using `array.type`), "
-            "then the low-level type object can be found under `type.content`"
-        )
-
-    # Ensure we re-wrap records!
-    if isinstance(layout, ak.record.Record):
-        out = ak.record.Record(
-            _enforce_type(layout.array[layout.at : layout.at + 1], type_), 0
-        )
-    else:
-        out = _enforce_type(layout, type_)
-
-    return wrap_layout(
-        out,
-        like=array,
-        behavior=behavior,
-        highlevel=highlevel,
-    )
-
-
-# TODO: move this if it ends up being useful elsewhere
 def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
     """
     Args:
@@ -331,6 +302,9 @@ def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
         return False
     else:
         raise TypeError(layout)
+
+
+# TODO: move this if it ends up being useful elsewhere
 
 
 # TODO: move this if it ends up being useful elsewhere
@@ -1279,3 +1253,29 @@ def _enforce_type(
         return _recurse_record_any(layout, type_)
     else:
         raise NotImplementedError(type(layout), type_)
+
+
+def _impl(array, type_, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=True)
+
+    if isinstance(type_, str):
+        type_ = ak.types.from_datashape(type_, highlevel=False)
+
+    if isinstance(type_, (ak.types.ArrayType, ak.types.ScalarType)):
+        raise TypeError(
+            "High-level type objects are not supported by this function. Instead, "
+            "a low-level type object (instance of ak.types.Type) should be used. "
+            "If you are using a high-level type `type` from another array (e.g. using `array.type`), "
+            "then the low-level type object can be found under `type.content`"
+        )
+
+    # Ensure we re-wrap records!
+    if isinstance(layout, ak.record.Record):
+        out = ak.record.Record(
+            _enforce_type(layout.array[layout.at : layout.at + 1], type_), 0
+        )
+    else:
+        out = _enforce_type(layout, type_)
+
+    return ctx.wrap(out, highlevel=highlevel)

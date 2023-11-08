@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
 import awkward as ak
@@ -26,8 +25,8 @@ def test_axis_wrap_if_negative_record_v2():
 
     r = ak.Record(dict_cell_chain_field)
 
-    with pytest.raises(np.AxisError):
-        r = ak.operations.to_regular(r, 0)
+    with pytest.raises(TypeError, match="ak.Record objects are not allowed"):
+        ak.operations.to_regular(r, 0)
 
     list_cell_chain_field = [
         [["TRA", "TRAV1", 15], ["TRB", "TRBV1", 12]],

@@ -36,7 +36,7 @@ def test_zeros_like(dtype, like_dtype):
 
 @pytest.mark.parametrize("dtype", [np.float64, np.int64, np.uint8, None])
 @pytest.mark.parametrize("like_dtype", [np.float64, np.int64, np.uint8, None])
-@pytest.mark.parametrize("value", [1.0, -20, np.iinfo(np.uint64).max])
+@pytest.mark.parametrize("value", [1.0, -20, np.iinfo(np.int64).max])
 def test_full_like(dtype, like_dtype, value):
     array = ak.contents.numpyarray.NumpyArray(
         np.array([99, 88, 77, 66, 66], dtype=dtype)

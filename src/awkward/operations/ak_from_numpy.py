@@ -10,7 +10,13 @@ __all__ = ("from_numpy",)
 
 @high_level_function()
 def from_numpy(
-    array, *, regulararray=False, recordarray=True, highlevel=True, behavior=None
+    array,
+    *,
+    regulararray=False,
+    recordarray=True,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -29,6 +35,8 @@ def from_numpy(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts a NumPy array into an Awkward Array.

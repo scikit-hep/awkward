@@ -7,13 +7,20 @@ from __future__ import annotations
 import sys
 import threading
 import warnings
+from collections.abc import Mapping
+from contextlib import contextmanager
 
-from awkward._typing import Any, Protocol, runtime_checkable
+from awkward._typing import TYPE_CHECKING, Any, JSONMapping, Protocol, runtime_checkable
 
 if sys.version_info < (3, 12):
     import importlib_metadata
 else:
     import importlib.metadata as importlib_metadata
+
+
+if TYPE_CHECKING:
+    from awkward._nplikes.shape import ShapeItem
+    from awkward.highlevel import Array, Record
 
 
 @runtime_checkable
@@ -69,8 +76,72 @@ def get_custom_reducer() -> PickleReducer | None:
             return _plugin
 
 
-def custom_reduce(obj, protocol) -> tuple | NotImplemented:
-    plugin = get_custom_reducer()
-    if plugin is None:
+_DISABLE_CUSTOM_REDUCER = False
+
+
+@contextmanager
+def use_builtin_reducer():
+    global _DISABLE_CUSTOM_REDUCER
+    old_value, _DISABLE_CUSTOM_REDUCER = _DISABLE_CUSTOM_REDUCER, True
+    try:
+        yield
+    finally:
+        _DISABLE_CUSTOM_REDUCER = old_value
+
+
+def custom_reduce(obj, protocol: int) -> tuple | NotImplemented:
+    if (plugin := get_custom_reducer()) is None or _DISABLE_CUSTOM_REDUCER:
         return NotImplemented
-    return plugin(obj, protocol)
+    else:
+        return plugin(obj, protocol)
+
+
+def unpickle_array_schema_1(
+    form_dict: dict,
+    length: ShapeItem,
+    container: Mapping[str, Any],
+    behavior: JSONMapping | None,
+    attrs: JSONMapping | None,
+) -> Array:
+    from awkward.operations.ak_from_buffers import _impl
+
+    return _impl(
+        form_dict,
+        length,
+        container,
+        backend="cpu",
+        behavior=behavior,
+        attrs=attrs,
+        highlevel=True,
+        buffer_key="{form_key}-{attribute}",
+        byteorder="<",
+        simplify=False,
+    )
+
+
+def unpickle_record_schema_1(
+    form_dict: dict,
+    length: ShapeItem,
+    container: Mapping[str, Any],
+    behavior: JSONMapping | None,
+    attrs: JSONMapping | None,
+    at: int,
+) -> Record:
+    from awkward.highlevel import Record
+    from awkward.operations.ak_from_buffers import _impl
+    from awkward.record import Record as LowLevelRecord
+
+    array_layout = _impl(
+        form_dict,
+        length,
+        container,
+        backend="cpu",
+        behavior=behavior,
+        attrs=attrs,
+        highlevel=False,
+        buffer_key="{form_key}-{attribute}",
+        byteorder="<",
+        simplify=False,
+    )
+    layout = LowLevelRecord(array_layout, at)
+    return Record(layout, behavior=behavior, attrs=attrs)

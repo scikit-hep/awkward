@@ -33,7 +33,7 @@ def to_layout(
     *,
     allow_record=True,
     allow_unknown=False,
-    allow_none=False,
+    none_policy="error",
     use_from_iter=True,
     primitive_policy="promote",
     string_policy="as-characters",
@@ -50,10 +50,11 @@ def to_layout(
             otherwise, if the output would be a scalar record, raise an error.
         allow_unknown (bool): If True, allow non-Awkward outputs; otherwise,
             raise an error.
-        allow_none (bool): If True, allow None outputs; otherwise, raise an
-            error.
         use_from_iter (bool): If True, allow conversion of iterable inputs to
             arrays using #ak.from_iter; otherwise, throw an Exception.
+        none_policy (bool): ("error", "pass-through", "promote"): If "error", throw an Exception
+            for None inputs; if "pass-through", return None; otherwise,
+            for "promote" return a length-one array containing the None with unknown type.
         primitive_policy ("error", "pass-through", "promote"): If "error", throw an Exception
             for scalar inputs; if "pass-through", return the scalar input; otherwise,
             for "promote" return a length-one array containing the scalar.
@@ -80,7 +81,7 @@ def to_layout(
         array,
         allow_record,
         allow_unknown,
-        allow_none,
+        none_policy,
         regulararray,
         use_from_iter,
         primitive_policy,
@@ -117,6 +118,24 @@ def _handle_as_primitive(obj, layout, *, primitive_policy):
         )
 
 
+def _handle_as_none(obj, layout, *, none_policy):
+    assert none_policy in ("pass-through", "promote", "error")
+
+    if none_policy == "pass-through":
+        return obj
+    elif none_policy == "promote":
+        return layout
+    elif none_policy == "error":
+        raise TypeError(
+            "Encountered a None value, but None conversion/promotion is disabled"
+        )
+    else:
+        raise ValueError(
+            f"Encountered an invalid none-policy value {none_policy!r}. "
+            f'The permitted values are "pass-through", "promote", and "error".'
+        )
+
+
 def _handle_array_like(obj, layout, *, primitive_policy):
     assert primitive_policy in ("pass-through", "promote", "error")
     if obj.ndim == 0:
@@ -129,7 +148,7 @@ def _impl(
     obj,
     allow_record,
     allow_unknown,
-    allow_none,
+    none_policy,
     regulararray,
     use_from_iter,
     primitive_policy,
@@ -233,14 +252,11 @@ def _impl(
             primitive_policy=primitive_policy,
         )
     elif obj is None:
-        if allow_none:
-            return _handle_as_primitive(
-                obj,
-                ak.operations.from_iter([obj], highlevel=False),
-                primitive_policy=primitive_policy,
-            )
-        else:
-            raise TypeError("Encountered None value, and `allow_none` is `False`")
+        return _handle_as_none(
+            obj,
+            ak.operations.from_iter([obj], highlevel=False),
+            none_policy=none_policy,
+        )
     # Iterables
     elif isinstance(obj, Iterable):
         if use_from_iter:

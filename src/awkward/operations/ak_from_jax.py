@@ -10,7 +10,7 @@ __all__ = ("from_jax",)
 
 
 @high_level_function()
-def from_jax(array, *, regulararray=False, highlevel=True, behavior=None):
+def from_jax(array, *, regulararray=False, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array (jax.numpy.DeviceArray): The JAX DeviceArray to convert into an Awkward Array.
@@ -22,6 +22,8 @@ def from_jax(array, *, regulararray=False, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts a JAX DeviceArray array into an Awkward Array.

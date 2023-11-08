@@ -5,11 +5,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -29,11 +26,12 @@ def argcartesian(
     with_name=None,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
-        arrays (dict or iterable of arrays): Each value in this dict or iterable
-            can be any array-like data that #ak.to_layout recognizes.
+        arrays (mapping or sequence of arrays): Each value in this mapping or
+            sequence can be any array-like data that #ak.to_layout recognizes.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -53,6 +51,8 @@ def argcartesian(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Computes a Cartesian product (i.e. cross product) of data from a set of
@@ -103,37 +103,18 @@ def argcartesian(
         yield arrays
 
     # Implementation
-    return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
+    return _impl(
+        arrays, axis, nested, parameters, with_name, highlevel, behavior, attrs
+    )
 
 
-def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
+def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
 
-    if isinstance(arrays, dict):
-        behavior = behavior_of(*arrays.values(), behavior=behavior)
-        backend = backend_of(*arrays.values(), default=cpu, coerce_to_common=True)
-        layouts = {
-            n: ak._do.local_index(
-                ak.operations.to_layout(
-                    x, allow_record=False, allow_unknown=False, primitive_policy="error"
-                ),
-                axis,
-            ).to_backend(backend)
-            for n, x in arrays.items()
-        }
+    if isinstance(arrays, Mapping):
+        index_arrays = {n: ak.local_index(x, axis) for n, x in arrays.items()}
     else:
-        arrays = list(arrays)
-        behavior = behavior_of(*arrays, behavior=behavior)
-        backend = backend_of(*arrays, default=cpu, coerce_to_common=True)
-        layouts = [
-            ak._do.local_index(
-                ak.operations.to_layout(
-                    x, allow_record=False, allow_unknown=False, primitive_policy="error"
-                ),
-                axis,
-            ).to_backend(backend)
-            for x in arrays
-        ]
+        index_arrays = [ak.local_index(x) for x in arrays]
 
     if with_name is not None:
         if parameters is None:
@@ -142,13 +123,11 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             parameters = dict(parameters)
         parameters["__record__"] = with_name
 
-    result = ak.operations.cartesian(
-        layouts,
+    return ak.operations.cartesian(
+        index_arrays,
         axis=axis,
         nested=nested,
         parameters=parameters,
-        highlevel=False,
+        highlevel=highlevel,
         behavior=behavior,
     )
-
-    return wrap_layout(result, behavior, highlevel)

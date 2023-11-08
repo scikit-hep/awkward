@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
+from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
 from awkward.errors import AxisError
@@ -16,7 +15,7 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def is_none(array, axis=0, *, highlevel=True, behavior=None):
+def is_none(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -28,6 +27,8 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None):
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Returns an array whose value is True where an element of `array` is None;
     False otherwise (at a given `axis` depth).
@@ -36,18 +37,18 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior):
+def _impl(array, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(array)
-    behavior = behavior_of(array, behavior=behavior)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     if not is_integer(axis):
         raise TypeError(f"'axis' must be an integer, not {axis!r}")
 
-    def action(layout, depth, lateral_context, **kwargs):
+    def action(layout, depth, backend, lateral_context, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
 
         if posaxis is not None and posaxis + 1 == depth:
@@ -58,9 +59,8 @@ def _impl(array, axis, highlevel, behavior):
                 return ak.contents.NumpyArray(layout.mask_as_bool(valid_when=False))
 
             else:
-                nplike = layout._backend.nplike
                 return ak.contents.NumpyArray(
-                    nplike.zeros(layout.length, dtype=np.bool_)
+                    backend.nplike.zeros(layout.length, dtype=np.bool_)
                 )
 
         elif layout.is_leaf:
@@ -68,4 +68,4 @@ def _impl(array, axis, highlevel, behavior):
 
     out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

@@ -5,9 +5,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("without_field",)
@@ -16,7 +15,7 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def without_field(array, where, *, highlevel=True, behavior=None):
+def without_field(array, where, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -26,6 +25,8 @@ def without_field(array, where, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an #ak.Array or #ak.Record (or low-level equivalent, if
@@ -41,10 +42,10 @@ def without_field(array, where, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, where, highlevel, behavior)
+    return _impl(array, where, highlevel, behavior, attrs)
 
 
-def _impl(base, where, highlevel, behavior):
+def _impl(base, where, highlevel, behavior, attrs):
     if isinstance(where, str):
         where = [where]
     elif not (isinstance(where, Sequence) and all(isinstance(x, str) for x in where)):
@@ -52,10 +53,8 @@ def _impl(base, where, highlevel, behavior):
             "Field names must be given as a single string, or a sequence of strings"
         )
 
-    behavior = behavior_of(base, behavior=behavior)
-    base = ak.operations.to_layout(
-        base, allow_record=True, allow_unknown=False, primitive_policy="error"
-    )
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        base = ctx.unwrap(base, allow_record=True, primitive_policy="error")
 
     def action(layout, depth_context, **kwargs):
         if isinstance(layout, ak.contents.RecordArray):
@@ -96,4 +95,4 @@ def _impl(base, where, highlevel, behavior):
             return None
 
     out = ak._do.recursively_apply(base, action, depth_context={"where": where})
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

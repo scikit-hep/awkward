@@ -5,7 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("ravel",)
@@ -14,13 +14,15 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def ravel(array, *, highlevel=True, behavior=None):
+def ravel(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an array with all level of nesting removed by erasing the
@@ -59,13 +61,12 @@ def ravel(array, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, highlevel, behavior)
+    return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl(array, highlevel, behavior):
-    layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
-    )
+def _impl(array, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     out = ak._do.remove_structure(layout, function_name="ak.ravel", drop_nones=False)
     assert isinstance(out, tuple) and all(
@@ -74,7 +75,7 @@ def _impl(array, highlevel, behavior):
 
     result = ak._do.mergemany(out)
 
-    return wrap_layout(result, behavior, highlevel, like=array)
+    return ctx.wrap(result, highlevel=highlevel)
 
 
 @ak._connect.numpy.implements("ravel")

@@ -3,16 +3,22 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 
 __all__ = ("replace_substring",)
 
 
 @high_level_function(module="ak.str")
 def replace_substring(
-    array, pattern, replacement, *, max_replacements=None, highlevel=True, behavior=None
+    array,
+    pattern,
+    replacement,
+    *,
+    max_replacements=None,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -25,6 +31,8 @@ def replace_substring(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Replaces non-overlapping subsequences of any string or bytestring-valued
@@ -48,17 +56,21 @@ def replace_substring(
     yield (array,)
 
     # Implementation
-    return _impl(array, pattern, replacement, max_replacements, highlevel, behavior)
+    return _impl(
+        array, pattern, replacement, max_replacements, highlevel, behavior, attrs
+    )
 
 
-def _impl(array, pattern, replacement, max_replacements, highlevel, behavior):
+def _impl(array, pattern, replacement, max_replacements, highlevel, behavior, attrs):
     from awkward._connect.pyarrow import import_pyarrow_compute
 
-    pc = import_pyarrow_compute("ak.str.replace_substring")
-    behavior = behavior_of(array, behavior=behavior)
+    pc = import_pyarrow_compute("g")
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array)
 
     out = ak._do.recursively_apply(
-        ak.operations.to_layout(array),
+        layout,
         ak.operations.str._get_ufunc_action(
             pc.replace_substring,
             pc.replace_substring,
@@ -68,4 +80,4 @@ def _impl(array, pattern, replacement, max_replacements, highlevel, behavior):
         ),
     )
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

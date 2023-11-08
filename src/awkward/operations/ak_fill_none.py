@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
@@ -19,7 +17,7 @@ cpu = NumpyBackend.instance()
 
 
 @high_level_function()
-def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
+def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -33,6 +31,8 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Replaces missing values (None) with a given `value`.
@@ -67,49 +67,47 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     yield array, value
 
     # Implementation
-    return _impl(array, value, axis, highlevel, behavior)
+    return _impl(array, value, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, value, axis, highlevel, behavior):
+def _impl(array, value, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(array, value, behavior=behavior)
-    # Ensure a common backend exists
-    backend = backend_of(array, value, default=cpu)
-    arraylayout = ak.operations.to_layout(
-        array, allow_record=True, allow_unknown=False
-    ).to_backend(backend)
-    valuelayout = ak.operations.to_layout(
-        value,
-        allow_record=True,
-        allow_unknown=False,
-        use_from_iter=True,
-        primitive_policy="pass-through",
-        string_policy="pass-through",
-    )
 
-    if isinstance(valuelayout, ak.record.Record):
-        valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
-    elif isinstance(valuelayout, ak.contents.Content):
-        valuelayout = valuelayout[np.newaxis, ...]
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        array_layout, value_layout = ensure_same_backend(
+            ctx.unwrap(array, allow_record=True, allow_unknown=False),
+            ctx.unwrap(
+                value,
+                allow_record=True,
+                allow_unknown=False,
+                use_from_iter=True,
+                primitive_policy="pass-through",
+                string_policy="pass-through",
+            ),
+        )
+
+    if isinstance(value_layout, ak.record.Record):
+        value_layout = value_layout.array[value_layout.at : value_layout.at + 1]
+    elif isinstance(value_layout, ak.contents.Content):
+        value_layout = value_layout[np.newaxis, ...]
     else:
         # Now that we know `valuelayout` isn't a low-level type, we must have scalars
         # Thus, we can safely promote these scalars to a layout without
         # adding a new axis
-        valuelayout = ak.operations.to_layout(
+        value_layout = ak.operations.to_layout(
             value,
             allow_record=True,
             allow_unknown=False,
             use_from_iter=True,
             primitive_policy="promote",
             string_policy="promote",
-        )
-    valuelayout = valuelayout.to_backend(backend)
+        ).to_backend(array_layout.backend)
 
     if axis is None:
 
         def action(layout, continuation, **kwargs):
             if layout.is_option:
-                return ak._do.fill_none(continuation(), valuelayout)
+                return ak._do.fill_none(continuation(), value_layout)
 
     else:
 
@@ -117,7 +115,7 @@ def _impl(array, value, axis, highlevel, behavior):
             posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis is not None and posaxis + 1 == depth:
                 if layout.is_option:
-                    return ak._do.fill_none(layout, valuelayout)
+                    return ak._do.fill_none(layout, value_layout)
                 elif layout.is_union or layout.is_record or layout.is_indexed:
                     return None
                 else:
@@ -128,5 +126,5 @@ def _impl(array, value, axis, highlevel, behavior):
                     f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
-    out = ak._do.recursively_apply(arraylayout, action)
-    return wrap_layout(out, behavior, highlevel)
+    out = ak._do.recursively_apply(array_layout, action)
+    return ctx.wrap(out, highlevel=highlevel)

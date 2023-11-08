@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("mask",)
@@ -14,7 +13,7 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
+def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -26,6 +25,8 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an array for which
@@ -98,10 +99,10 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     yield array, mask
 
     # Implementation
-    return _impl(array, mask, valid_when, highlevel, behavior)
+    return _impl(array, mask, valid_when, highlevel, behavior, attrs)
 
 
-def _impl(array, mask, valid_when, highlevel, behavior):
+def _impl(array, mask, valid_when, highlevel, behavior, attrs):
     def action(inputs, backend, **kwargs):
         layoutarray, layoutmask = inputs
         if layoutmask.is_numpy:
@@ -117,16 +118,14 @@ def _impl(array, mask, valid_when, highlevel, behavior):
         else:
             return None
 
-    layoutarray = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
-    )
-    layoutmask = ak.operations.to_layout(
-        mask, allow_record=False, allow_unknown=False, primitive_policy="error"
-    )
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layouts = ensure_same_backend(
+            ctx.unwrap(array, allow_record=False, primitive_policy="error"),
+            ctx.unwrap(mask, allow_record=False, primitive_policy="error"),
+        )
 
-    behavior = behavior_of(array, mask, behavior=behavior)
     out = ak._broadcasting.broadcast_and_apply(
-        [layoutarray, layoutmask], action, numpy_to_regular=True, right_broadcast=False
+        layouts, action, numpy_to_regular=True, right_broadcast=False
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return wrap_layout(out[0], behavior, highlevel)
+    return ctx.wrap(out[0], highlevel=highlevel)

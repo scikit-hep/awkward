@@ -3,21 +3,22 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 
 __all__ = ("trim_whitespace",)
 
 
 @high_level_function(module="ak.str")
-def trim_whitespace(array, *, highlevel=True, behavior=None):
+def trim_whitespace(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Removes any leading or trailing whitespace from any string or
@@ -38,20 +39,22 @@ def trim_whitespace(array, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, highlevel, behavior)
+    return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl(array, highlevel, behavior):
+def _impl(array, highlevel, behavior, attrs):
     from awkward._connect.pyarrow import import_pyarrow_compute
 
-    pc = import_pyarrow_compute("ak.str.trim_whitespace")
-    behavior = behavior_of(array, behavior=behavior)
+    pc = import_pyarrow_compute("e")
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array)
 
     out = ak._do.recursively_apply(
-        ak.operations.to_layout(array),
+        layout,
         ak.operations.str._get_ufunc_action(
             pc.utf8_trim_whitespace, pc.ascii_trim_whitespace, bytestring_to_string=True
         ),
     )
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

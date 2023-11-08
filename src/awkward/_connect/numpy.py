@@ -88,7 +88,14 @@ def _to_rectilinear(arg, backend: Backend):
         return arg
 
 
-def array_function(func, types, args, kwargs: dict[str, Any], behavior: Mapping | None):
+def array_function(
+    func,
+    types,
+    args,
+    kwargs: dict[str, Any],
+    behavior: Mapping | None,
+    attrs: Mapping[str, Any] | None = None,
+):
     function = implemented.get(func)
     if function is not None:
         return function(*args, **kwargs)
@@ -106,13 +113,13 @@ def array_function(func, types, args, kwargs: dict[str, Any], behavior: Mapping 
             result,
             allow_record=True,
             allow_unknown=True,
-            allow_none=True,
+            none_policy="pass-through",
             regulararray=True,
             use_from_iter=True,
             primitive_policy="pass-through",
             string_policy="pass-through",
         )
-        return wrap_layout(out, behavior=behavior, allow_other=True)
+        return wrap_layout(out, behavior=behavior, allow_other=True, attrs=attrs)
 
 
 def implements(numpy_function):
@@ -152,7 +159,6 @@ def _array_ufunc_custom_cast(inputs, behavior: Mapping | None, backend):
         cast_fcn = find_custom_cast(x, behavior)
         maybe_layout = ak.operations.to_layout(
             x if cast_fcn is None else cast_fcn(x),
-            allow_record=True,
             allow_unknown=True,
             primitive_policy="pass-through",
             string_policy="pass-through",

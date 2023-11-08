@@ -5,7 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -16,7 +16,14 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def argsort(
-    array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None
+    array,
+    axis=-1,
+    *,
+    ascending=True,
+    stable=True,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -33,6 +40,8 @@ def argsort(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an array of integer indexes that would sort the array if applied
@@ -57,16 +66,15 @@ def argsort(
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, ascending, stable, highlevel, behavior)
+    return _impl(array, axis, ascending, stable, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, ascending, stable, highlevel, behavior):
+def _impl(array, axis, ascending, stable, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
-    )
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     out = ak._do.argsort(layout, axis, ascending, stable)
-    return wrap_layout(out, behavior, highlevel, like=array)
+    return ctx.wrap(out, highlevel=highlevel)
 
 
 @ak._connect.numpy.implements("argsort")

@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
@@ -20,7 +18,7 @@ numpy_backend = NumpyBackend.instance()
 
 
 @high_level_function()
-def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
+def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -34,6 +32,8 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an array with an additional level of nesting. This is roughly the
@@ -87,40 +87,48 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, counts, axis, highlevel, behavior)
+    return _impl(array, counts, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, counts, axis, highlevel, behavior):
+def _impl(array, counts, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(array, behavior=behavior)
-    backend = backend_of(array, counts, default=numpy_backend, coerce_to_common=True)
-    layout = (
-        ak.operations.to_layout(array, allow_record=False, allow_unknown=False)
-        .to_packed()
-        .to_backend(backend)
-    )
 
-    if is_integer_like(counts):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout, maybe_counts_layout = ensure_same_backend(
+            ctx.unwrap(array, allow_record=False, primitive_policy="error").to_packed(),
+            ctx.unwrap(
+                counts,
+                allow_record=False,
+                allow_unknown=True,
+                primitive_policy="pass-through",
+                string_policy="error",
+            ),
+        )
+
+    if is_integer_like(maybe_counts_layout):
         # Regularize unknown values to unknown lengths
-        if is_unknown_scalar(counts) or counts is unknown_length:
+        if (
+            is_unknown_scalar(maybe_counts_layout)
+            or maybe_counts_layout is unknown_length
+        ):
             counts = unknown_length
         else:
             counts = int(counts)
         current_offsets = None
     else:
-        counts = ak.operations.to_layout(
-            counts, allow_record=False, allow_unknown=False, primitive_policy="error"
-        ).to_backend(backend)
-        if counts.is_indexed and not counts.is_option:
-            counts = counts.project()
+        if maybe_counts_layout.is_indexed and not maybe_counts_layout.is_option:
+            maybe_counts_layout = maybe_counts_layout.project()
 
-        if counts.is_option and (counts.content.is_numpy or counts.content.is_unknown):
-            mask = counts.mask_as_bool(valid_when=False)
+        if maybe_counts_layout.is_option and (
+            maybe_counts_layout.content.is_numpy
+            or maybe_counts_layout.content.is_unknown
+        ):
+            mask = maybe_counts_layout.mask_as_bool(valid_when=False)
             counts = ak.operations.fill_none(
-                counts, 0, axis=-1, highlevel=False
+                maybe_counts_layout, 0, axis=-1, highlevel=False
             ).to_backend_array()
-        elif counts.is_numpy or counts.is_unknown:
-            counts = counts.to_backend_array()
+        elif maybe_counts_layout.is_numpy or maybe_counts_layout.is_unknown:
+            counts = maybe_counts_layout.to_backend_array()
             mask = False
         else:
             raise ValueError(
@@ -133,12 +141,18 @@ def _impl(array, counts, axis, highlevel, behavior):
         if not np.issubdtype(counts.dtype, np.integer):
             raise ValueError("counts must be integers")
 
-        current_offsets = backend.index_nplike.empty(counts.size + 1, dtype=np.int64)
+        current_offsets = maybe_counts_layout.backend.index_nplike.empty(
+            counts.size + 1, dtype=np.int64
+        )
         current_offsets[0] = 0
-        backend.index_nplike.cumsum(counts, maybe_out=current_offsets[1:])
+        maybe_counts_layout.backend.index_nplike.cumsum(
+            counts, maybe_out=current_offsets[1:]
+        )
 
     def unflatten_this_layout(layout):
         nonlocal current_offsets
+
+        index_nplike = layout.backend.index_nplike
 
         if isinstance(counts, int) or counts is unknown_length:
             if (
@@ -151,10 +165,10 @@ def _impl(array, counts, axis, highlevel, behavior):
 
         else:
             position = (
-                backend.index_nplike.searchsorted(
+                index_nplike.searchsorted(
                     current_offsets,
-                    backend.index_nplike.asarray(
-                        [backend.index_nplike.shape_item_as_index(layout.length)]
+                    index_nplike.asarray(
+                        [index_nplike.shape_item_as_index(layout.length)]
                     ),
                     side="right",
                 )[0]
@@ -177,13 +191,13 @@ def _impl(array, counts, axis, highlevel, behavior):
             offsets = current_offsets[: position + 1]
             current_offsets = current_offsets[
                 position:
-            ] - backend.index_nplike.shape_item_as_index(layout.length)
+            ] - index_nplike.shape_item_as_index(layout.length)
 
             out = ak.contents.ListOffsetArray(ak.index.Index64(offsets), layout)
             if not isinstance(mask, (bool, np.bool_)):
                 index = ak.index.Index8(
-                    backend.index_nplike.asarray(mask, dtype=np.int8),
-                    nplike=backend.nplike,
+                    index_nplike.asarray(mask, dtype=np.int8),
+                    nplike=index_nplike,
                 )
                 out = ak.contents.ByteMaskedArray(index, out, valid_when=False)
 
@@ -194,7 +208,7 @@ def _impl(array, counts, axis, highlevel, behavior):
 
     else:
 
-        def apply(layout, depth, **kwargs):
+        def apply(layout, depth, backend, **kwargs):
             posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
@@ -243,4 +257,4 @@ def _impl(array, counts, axis, highlevel, behavior):
             f"at axis={axis}"
         )
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

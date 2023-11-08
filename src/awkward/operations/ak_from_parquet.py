@@ -23,6 +23,7 @@ def from_parquet(
     generate_bitmasks=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -46,6 +47,8 @@ def from_parquet(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Reads data from a local or remote Parquet file or collection of files.
@@ -77,6 +80,7 @@ def from_parquet(
         highlevel,
         behavior,
         fs,
+        attrs,
     )
 
 
@@ -204,6 +208,7 @@ def _load(
     highlevel,
     behavior,
     fs,
+    attrs,
     metadata=None,
 ):
     arrays = []
@@ -224,14 +229,18 @@ def _load(
 
     assert len(arrays) != 0
     if len(arrays) == 1:
-        # make high-level
-        if isinstance(arrays[0], ak.record.Record):
-            return ak.Record(arrays[0])
-        return wrap_layout(arrays[0], highlevel=highlevel, behavior=behavior)
+        return wrap_layout(
+            arrays[0], highlevel=highlevel, attrs=attrs, behavior=behavior
+        )
     else:
         # TODO: if each array is a record?
         return ak.operations.ak_concatenate._impl(
-            arrays, axis=0, mergebool=True, highlevel=highlevel, behavior=behavior
+            arrays,
+            axis=0,
+            mergebool=True,
+            highlevel=highlevel,
+            behavior=behavior,
+            attrs=attrs,
         )
 
 
@@ -293,6 +302,7 @@ def _read_parquet_file(
         generate_bitmasks,
         # why is high-level False here?
         False,
+        None,
         None,
     )
 
