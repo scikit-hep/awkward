@@ -45,7 +45,7 @@ def _length_0_1_if_typetracer(
     function,
     highlevel: bool,
     behavior: Mapping | None,
-    attrs: Mapping[str, Any] | None,
+    attrs: Mapping[str, Any],
 ) -> T:
     typetracer_backend = TypeTracerBackend.instance()
 
@@ -71,7 +71,7 @@ def length_zero_if_typetracer(
     *,
     highlevel: bool = True,
     behavior: Mapping | None = None,
-    attrs: Mapping[str, Any] | None,
+    attrs: Mapping[str, Any] | None = None,
 ) -> T:
     """
     Args:
@@ -97,7 +97,7 @@ def length_one_if_typetracer(
     *,
     highlevel: bool = True,
     behavior: Mapping | None = None,
-    attrs: Mapping[str, Any] | None,
+    attrs: Mapping[str, Any] | None = None,
 ) -> Array | Record:
     """
     Args:
@@ -123,7 +123,7 @@ def touch_data(
     *,
     highlevel: bool = True,
     behavior: Mapping | None = None,
-    attrs: Mapping[str, Any] | None,
+    attrs: Mapping[str, Any] | None = None,
 ) -> Array | Record:
     """
     Args:
@@ -158,7 +158,7 @@ def typetracer_with_report(
     buffer_key: str | Callable = "{form_key}",
     highlevel: bool = False,
     behavior: Mapping | None = None,
-    attrs: Mapping[str, Any] | None,
+    attrs: Mapping[str, Any] | None = None,
 ) -> tuple[Content, TypeTracerReport]:
     """
     Args:
@@ -215,7 +215,7 @@ def typetracer_from_form(
     *,
     highlevel: bool = True,
     behavior: Mapping | None = None,
-    attrs: Mapping[str, Any] | None,
+    attrs: Mapping[str, Any] | None = None,
 ) -> Array | Content:
     """
     Args:
