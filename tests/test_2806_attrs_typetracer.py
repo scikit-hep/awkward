@@ -27,7 +27,7 @@ def test_typetracer_with_report():
     assert meta.attrs is SOME_ATTRS
 
     meta, report = typetracer_with_report(form, highlevel=True, attrs=None)
-    assert meta.attrs is None
+    assert meta._attrs is None
 
 
 @pytest.mark.parametrize(
@@ -47,4 +47,4 @@ def test_function(function):
         }
     )
     assert function(array, attrs=SOME_ATTRS).attrs is SOME_ATTRS
-    assert function(array).attrs is None
+    assert function(array)._attrs is None
