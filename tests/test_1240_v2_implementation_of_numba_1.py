@@ -23,7 +23,7 @@ from awkward._connect.numba.arrayview import NumbaLookup  # noqa: E402
 def roundtrip(layout):
     assert isinstance(layout, ak.contents.Content)
 
-    lookup = NumbaLookup(layout)
+    lookup = NumbaLookup(layout, None)
     assert isinstance(lookup, ak._lookup.Lookup)
 
     numbatype = ak_numba_arrayview.to_numbatype(layout.form)

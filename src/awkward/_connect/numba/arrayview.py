@@ -628,11 +628,11 @@ class RecordView:
         self.at = at
 
     def torecord(self):
-        arraylayout = self.arrayview.toarray().layout
+        array = self.arrayview.toarray()
         return wrap_layout(
-            ak.record.Record(arraylayout, self.at),
+            ak.record.Record(array.layout, self.at),
             behavior=self.arrayview.behavior,
-            attrs=self.arrayview.attrs,
+            attrs=array.attrs,
         )
 
 

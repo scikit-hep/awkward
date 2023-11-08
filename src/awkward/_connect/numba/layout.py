@@ -309,7 +309,6 @@ class ContentType(numba.types.Type):
         proxyout.stop = builder.add(viewproxy.start, builder.load(regular_stop))
         proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.pylookup = viewproxy.pylookup
-        proxyout.pyattrs = viewproxy.pyattrs
         return proxyout._getvalue()
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, key):
@@ -522,7 +521,6 @@ class RegularArrayType(ContentType, ak._lookup.RegularLookup):
         proxyout.stop = stop
         proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.pylookup = viewproxy.pylookup
-        proxyout.pyattrs = viewproxy.pyattrs
         return proxyout._getvalue()
 
     @property
@@ -614,7 +612,6 @@ class ListArrayType(ContentType, ak._lookup.ListLookup):
         )
         proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.pylookup = viewproxy.pylookup
-        proxyout.pyattrs = viewproxy.pyattrs
         return proxyout._getvalue()
 
     @property
@@ -697,7 +694,6 @@ class IndexedArrayType(ContentType, ak._lookup.IndexedLookup):
         )
         proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.pylookup = viewproxy.pylookup
-        proxynext.pyattrs = viewproxy.pyattrs
 
         return self.contenttype.lower_getitem_at_check(
             context,
@@ -804,7 +800,6 @@ class IndexedOptionArrayType(ContentType, ak._lookup.IndexedOptionLookup):
                 )
                 proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.pylookup = viewproxy.pylookup
-                proxynext.pyattrs = viewproxy.pyattrs
 
                 outdata = self.contenttype.lower_getitem_at_check(
                     context,
@@ -913,7 +908,6 @@ class ByteMaskedArrayType(ContentType, ak._lookup.ByteMaskedLookup):
                 proxynext.stop = viewproxy.stop
                 proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.pylookup = viewproxy.pylookup
-                proxynext.pyattrs = viewproxy.pyattrs
 
                 outdata = self.contenttype.lower_getitem_at_check(
                     context,
@@ -1047,7 +1041,6 @@ class BitMaskedArrayType(ContentType, ak._lookup.BitMaskedLookup):
                 proxynext.stop = viewproxy.stop
                 proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.pylookup = viewproxy.pylookup
-                proxynext.pyattrs = viewproxy.pyattrs
 
                 outdata = self.contenttype.lower_getitem_at_check(
                     context,
@@ -1141,7 +1134,6 @@ class UnmaskedArrayType(ContentType, ak._lookup.UnmaskedLookup):
         proxynext.stop = viewproxy.stop
         proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.pylookup = viewproxy.pylookup
-        proxynext.pyattrs = viewproxy.pyattrs
 
         outdata = self.contenttype.lower_getitem_at_check(
             context,
@@ -1369,7 +1361,6 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
             )
             proxynext.arrayptrs = viewproxy.arrayptrs
             proxynext.pylookup = viewproxy.pylookup
-            proxynext.pyattrs = viewproxy.pyattrs
 
             return contenttype.lower_getitem_at_check(
                 context,
@@ -1399,7 +1390,6 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
         proxynext.stop = viewproxy.stop
         proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.pylookup = viewproxy.pylookup
-        proxynext.pyattrs = viewproxy.pyattrs
 
         return proxynext._getvalue()
 
@@ -1428,7 +1418,6 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
         )
         proxynext.arrayptrs = arrayviewproxy.arrayptrs
         proxynext.pylookup = arrayviewproxy.pylookup
-        proxynext.pyattrs = arrayviewproxy.pyattrs
 
         nextviewtype = ak._connect.numba.arrayview.wrap(
             contenttype, arrayviewtype, None
