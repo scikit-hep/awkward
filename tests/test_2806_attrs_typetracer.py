@@ -5,9 +5,7 @@ from __future__ import annotations
 import pytest
 
 import awkward as ak
-from awkward.typetracer import (
-    typetracer_with_report,
-)
+from awkward.typetracer import typetracer_with_report
 
 SOME_ATTRS = {"foo": "FOO"}
 

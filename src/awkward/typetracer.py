@@ -7,7 +7,6 @@ from collections.abc import Callable, Mapping
 import awkward.forms
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._do import touch_data as _touch_data
-from awkward._errors import deprecate
 from awkward._layout import HighLevelContext, wrap_layout
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import unknown_length
@@ -20,7 +19,6 @@ from awkward._nplikes.typetracer import (
     typetracer_with_report as _typetracer_with_report,
 )
 from awkward._typing import Any, TypeVar
-from awkward._util import UNSET
 from awkward.contents import Content
 from awkward.forms import Form
 from awkward.forms.form import regularize_buffer_key
@@ -153,7 +151,6 @@ def touch_data(
 
 def typetracer_with_report(
     form: Form | str | Mapping,
-    forget_length: bool = UNSET,
     *,
     buffer_key: str | Callable = "{form_key}",
     highlevel: bool = False,
@@ -190,21 +187,9 @@ def typetracer_with_report(
             "'form' argument must be a Form or its Python dict/JSON string representation"
         )
 
-    if forget_length is UNSET:
-        forget_length = True
-    else:
-        deprecate(
-            "passing `forget_length` to typetracer_with_report is deprecated. "
-            "In future, this argument will be removed, and the function will "
-            "always forget lengths",
-            "2.5.0",
-        )
-
     getkey = regularize_buffer_key(buffer_key)
 
-    layout, report = _typetracer_with_report(
-        form, getkey=getkey, forget_length=forget_length
-    )
+    layout, report = _typetracer_with_report(form, getkey=getkey)
     return wrap_layout(
         layout, behavior=behavior, highlevel=highlevel, attrs=attrs
     ), report
