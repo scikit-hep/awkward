@@ -17,11 +17,13 @@ ak_numba_layout = pytest.importorskip("awkward._connect.numba.layout")
 
 ak_numba.register_and_check()
 
+from awkward._connect.numba.arrayview import NumbaLookup  # noqa: E402
+
 
 def roundtrip(layout):
     assert isinstance(layout, ak.contents.Content)
 
-    lookup = ak._lookup.Lookup(layout)
+    lookup = NumbaLookup(layout)
     assert isinstance(lookup, ak._lookup.Lookup)
 
     numbatype = ak_numba_arrayview.to_numbatype(layout.form)

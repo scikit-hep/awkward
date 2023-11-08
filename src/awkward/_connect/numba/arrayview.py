@@ -13,6 +13,7 @@ from numba.core.errors import NumbaTypeError
 import awkward as ak
 from awkward._behavior import overlay_behavior
 from awkward._layout import HighLevelContext, wrap_layout
+from awkward._lookup import Lookup
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 np = NumpyMetadata.instance()
@@ -152,7 +153,17 @@ def to_numbatype(form):
 ########## Lookup
 
 
-@numba.extending.typeof_impl.register(ak._lookup.Lookup)
+class NumbaLookup(Lookup):
+    def __init__(self, layout, attrs, generator=None):
+        super().__init__(layout, generator=generator)
+        self._attrs = attrs
+
+    @property
+    def attrs(self):
+        return self._attrs
+
+
+@numba.extending.typeof_impl.register(NumbaLookup)
 def typeof_Lookup(obj, c):
     return LookupType()
 
@@ -206,15 +217,14 @@ class ArrayView:
         return ArrayView(
             to_numbatype(layout.form),
             ctx.behavior,
-            ak._lookup.Lookup(layout),
+            NumbaLookup(layout, ctx.attrs),
             0,
             0,
             len(layout),
             (),
-            ctx.attrs,
         )
 
-    def __init__(self, type, behavior, lookup, pos, start, stop, fields, attrs):
+    def __init__(self, type, behavior, lookup, pos, start, stop, fields):
         self.type = type
         self.behavior = behavior
         self.lookup = lookup
@@ -222,12 +232,11 @@ class ArrayView:
         self.start = start
         self.stop = stop
         self.fields = fields
-        self.attrs = attrs
 
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         sliced = layout._getitem_range(self.start, self.stop)
-        return wrap_layout(sliced, behavior=self.behavior, attrs=self.attrs)
+        return wrap_layout(sliced, behavior=self.behavior, attrs=self.lookup.attrs)
 
 
 @numba.extending.typeof_impl.register(ArrayView)
@@ -269,7 +278,6 @@ class ArrayViewModel(numba.core.datamodel.models.StructModel):
             ("stop", numba.intp),
             ("arrayptrs", numba.types.CPointer(numba.intp)),
             ("pylookup", numba.types.pyobject),
-            ("pyattrs", numba.types.pyobject),
         ]
         super().__init__(dmm, fe_type, members)
 
@@ -285,7 +293,6 @@ def lower_const_view(context, builder, viewtype, view):
     stop = view.stop
     lookup = view.lookup
     arrayptrs = lookup.arrayptrs
-    attrs = view.attrs
 
     arrayptrs_val = context.make_constant_array(
         builder, numba.typeof(arrayptrs), arrayptrs
@@ -300,9 +307,6 @@ def lower_const_view(context, builder, viewtype, view):
     ).data
     proxyout.pylookup = context.add_dynamic_addr(
         builder, id(lookup), info=str(type(lookup))
-    )
-    proxyout.pyattrs = context.add_dynamic_addr(
-        builder, id(attrs), info=str(type(attrs))
     )
 
     return proxyout._getvalue()
@@ -321,7 +325,6 @@ def unbox_ArrayView(viewtype, view_obj, c):
     start_obj = c.pyapi.object_getattr_string(view_obj, "start")
     stop_obj = c.pyapi.object_getattr_string(view_obj, "stop")
     lookup_obj = c.pyapi.object_getattr_string(view_obj, "lookup")
-    attrs_obj = c.pyapi.object_getattr_string(view_obj, "attrs")
 
     lookup_val = c.pyapi.to_native_value(LookupType(), lookup_obj).value
     lookup_proxy = c.context.make_helper(c.builder, LookupType(), lookup_val)
@@ -334,12 +337,10 @@ def unbox_ArrayView(viewtype, view_obj, c):
         c.builder, LookupType.arraytype, lookup_proxy.arrayptrs
     ).data
     proxyout.pylookup = lookup_obj
-    proxyout.pyattrs = attrs_obj
 
     c.pyapi.decref(pos_obj)
     c.pyapi.decref(start_obj)
     c.pyapi.decref(stop_obj)
-    c.pyapi.decref(attrs_obj)
     c.pyapi.decref(lookup_obj)
 
     if c.context.enable_nrt:
@@ -390,20 +391,10 @@ def box_ArrayView(viewtype, viewval, c):
     start_obj = c.pyapi.long_from_ssize_t(proxyin.start)
     stop_obj = c.pyapi.long_from_ssize_t(proxyin.stop)
     lookup_obj = proxyin.pylookup
-    attrs_obj = proxyin.pyattrs
 
     out = c.pyapi.call_function_objargs(
         ArrayView_obj,
-        (
-            type_obj,
-            behavior_obj,
-            lookup_obj,
-            pos_obj,
-            start_obj,
-            stop_obj,
-            fields_obj,
-            attrs_obj,
-        ),
+        (type_obj, behavior_obj, lookup_obj, pos_obj, start_obj, stop_obj, fields_obj),
     )
 
     c.pyapi.decref(serializable2dict_obj)
@@ -623,12 +614,11 @@ class RecordView:
             ArrayView(
                 to_numbatype(array_layout.form),
                 ctx.behavior,
-                ak._lookup.Lookup(array_layout),
+                NumbaLookup(array_layout, ctx.attrs),
                 0,
                 0,
                 len(array_layout),
                 (),
-                ctx.attrs,
             ),
             layout.at,
         )
