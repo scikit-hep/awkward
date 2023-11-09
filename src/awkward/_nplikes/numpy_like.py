@@ -105,8 +105,8 @@ class UfuncLike(Protocol):
     nout: int
 
     def resolve_dtypes(
-        self, dtypes: tuple[numpy.dtype | type, ...]
-    ) -> tuple[numpy.dtype, ...]:
+        self, dtypes: tuple[DType | type[int] | type[complex] | type[float] | None, ...]
+    ) -> tuple[DType, ...]:
         ...
 
     def __call__(self, *args: ArrayLikeT, **kwargs) -> ArrayLikeT:

@@ -539,6 +539,17 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         else:
             return self._apply_ufunc_legacy(ufunc, method, args, kwargs)
 
+    def _get_nep_50_dtype(
+        self, obj: Any
+    ) -> DType | type[int] | type[complex] | type[float]:
+        if hasattr(obj, "dtype"):
+            return obj.dtype
+        elif isinstance(obj, bool):
+            return np.dtype(np.bool_)
+        else:
+            assert isinstance(obj, (int, complex, float))
+            return type(obj)
+
     def _apply_ufunc_nep_50(
         self,
         ufunc: UfuncLike,
@@ -552,7 +563,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         # Unwrap options, assume they don't occur
         args = [x.content if isinstance(x, MaybeNone) else x for x in args]
         # Determine input argument dtypes
-        input_arg_dtypes = [getattr(obj, "dtype", type(obj)) for obj in args]
+        input_arg_dtypes = [self._get_nep_50_dtype(obj) for obj in args]
         # Resolve these for the given ufunc
         arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
         resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
