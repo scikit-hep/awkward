@@ -64,6 +64,9 @@ namespace awkward {
     // Delete copy constructor
     FromJsonObjectSchema(const FromJsonObjectSchema&) = delete;
 
+    // Delete copy-assignment constructor
+    FromJsonObjectSchema& operator=(FromJsonObjectSchema&) = delete;
+
     /// @brief HERE
     inline int64_t current_stack_depth() const noexcept {
       return current_stack_depth_;
