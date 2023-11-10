@@ -47,7 +47,7 @@ namespace awkward {
     dtype_to_name(dtype dt);
 
     /// @brief Convert a dtype enum into a NumPy format string.
-    const std::string
+    EXPORT_SYMBOL const std::string
     dtype_to_format(dtype dt, const std::string& format = "");
 
     /// @brief Puts quotation marks around a string and escapes the appropriate

@@ -25,15 +25,11 @@ Please check https://github.com/scikit-hep/awkward#installation-for-developers t
 endif()
 
 # Setup the RPATH for built libraries
-if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-  message(STATUS "Using Emscripten")
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-  set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
-elseif(APPLE)
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+if(APPLE)
   set(CMAKE_INSTALL_RPATH "@loader_path")
 else()
-  set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+  set(CMAKE_INSTALL_RPATH "\$ORIGIN")
 endif()
 
 # Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)],
