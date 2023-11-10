@@ -31,7 +31,7 @@ namespace awkward {
   /// @brief HERE
   ///
   /// THERE
-  class LIBAWKWARD_EXPORT_SYMBOL ForthOutputBuffer {
+  class EXPORT_SYMBOL ForthOutputBuffer {
   public:
     ForthOutputBuffer(int64_t initial, double resize);
 
@@ -193,7 +193,7 @@ namespace awkward {
   };
 
   template <typename OUT>
-  class LIBAWKWARD_EXPORT_SYMBOL ForthOutputBufferOf : public ForthOutputBuffer {
+  class EXPORT_SYMBOL ForthOutputBufferOf : public ForthOutputBuffer {
   public:
     ForthOutputBufferOf(int64_t initial, double resize);
 

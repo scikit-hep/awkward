@@ -13,7 +13,7 @@ namespace awkward {
   /// @class DatetimeBuilder
   ///
   /// @brief Builder node that accumulates integers (`int64_t`).
-  class LIBAWKWARD_EXPORT_SYMBOL DatetimeBuilder: public Builder {
+  class EXPORT_SYMBOL DatetimeBuilder: public Builder {
   public:
     /// @brief Create an empty DatetimeBuilder.
     /// @param options Configuration options for building an array;

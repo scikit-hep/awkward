@@ -14,7 +14,7 @@ namespace awkward {
   /// @class Complex128Builder
   ///
   /// @brief Builder node that accumulates real numbers (`double`).
-  class LIBAWKWARD_EXPORT_SYMBOL Complex128Builder: public Builder {
+  class EXPORT_SYMBOL Complex128Builder: public Builder {
   public:
     /// @brief Create an empty Complex128Builder.
     /// @param options Configuration options for building an array;

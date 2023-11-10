@@ -40,7 +40,7 @@ namespace awkward {
   /// representation in JSON format.
   /// @param minus_infinity_string User-defined string for a negative
   /// infinity representation in JSON format.
-  LIBAWKWARD_EXPORT_SYMBOL void
+  EXPORT_SYMBOL void
     fromjsonobject(FileLikeObject* source,
                    ArrayBuilder& builder,
                    int64_t buffersize,
@@ -49,7 +49,7 @@ namespace awkward {
                    const char* posinf_string = nullptr,
                    const char* neginf_string = nullptr);
 
-  class FromJsonObjectSchema {
+  class EXPORT_SYMBOL FromJsonObjectSchema {
   public:
     FromJsonObjectSchema(FileLikeObject* source,
              int64_t buffersize,

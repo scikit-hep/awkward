@@ -19,7 +19,7 @@ namespace awkward {
   ///
   /// THERE
   template <typename T, typename I>
-  class LIBAWKWARD_EXPORT_SYMBOL ForthMachineOf {
+  class EXPORT_SYMBOL ForthMachineOf {
 
     template <typename TYPE> using IndexTypeOf = typename std::vector<TYPE>::size_type;
 

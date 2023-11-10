@@ -54,31 +54,21 @@ target_include_directories(awkward-parent INTERFACE rapidjson/include)
 add_subdirectory(header-only EXCLUDE_FROM_ALL)
 target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
 
-# First tier: cpu-kernels (object files, static library, and dynamic library).
-add_library(awkward-cpu-kernels-objects OBJECT ${CPU_KERNEL_SOURCES})
-set_target_properties(awkward-cpu-kernels-objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(awkward-cpu-kernels-objects PUBLIC awkward-parent)
+# First tier: cpu-kernels
+add_library(awkward-cpu-kernels SHARED ${CPU_KERNEL_SOURCES})
+target_link_libraries(awkward-cpu-kernels PUBLIC awkward-parent)
 set_target_properties(
-  awkward-cpu-kernels-objects
+  awkward-cpu-kernels
   PROPERTIES CXX_VISIBILITY_PRESET hidden
              VISIBILITY_INLINES_HIDDEN ON
              CXX_EXTENSIONS NO)
 
-add_library(awkward-cpu-kernels-static STATIC $<TARGET_OBJECTS:awkward-cpu-kernels-objects>)
-set_property(TARGET awkward-cpu-kernels-static PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(awkward-cpu-kernels-static PUBLIC awkward-parent)
-
-add_library(awkward-cpu-kernels SHARED $<TARGET_OBJECTS:awkward-cpu-kernels-objects>)
-target_link_libraries(awkward-cpu-kernels PUBLIC awkward-parent)
-
-# Second tier: libawkward (object files, static library, and dynamic library).
-add_library(awkward-objects OBJECT ${LIBAWKWARD_SOURCES})
-set_target_properties(awkward-objects PROPERTIES POSITION_INDEPENDENT_CODE 1)
-target_compile_definitions(awkward-objects PRIVATE LIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL)
+# Second tier: libawkward
+add_library(awkward SHARED ${LIBAWKWARD_SOURCES})
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
   # Avoid emitting vtables in the dependent libraries
   target_compile_options(
-    awkward-objects
+    awkward
     PRIVATE -Werror=weak-vtables
             -Wweak-vtables
             -Wshorten-64-to-32
@@ -90,21 +80,12 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
             -Wconversion
             -Wunused)
 endif()
-target_link_libraries(awkward-objects PUBLIC awkward-parent)
+target_link_libraries(awkward PUBLIC awkward-parent)
 set_target_properties(
-  awkward-objects
+  awkward
   PROPERTIES CXX_VISIBILITY_PRESET hidden
              VISIBILITY_INLINES_HIDDEN ON
              CXX_EXTENSIONS NO)
-
-add_library(awkward-static STATIC $<TARGET_OBJECTS:awkward-objects>)
-set_property(TARGET awkward-static PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static ${CMAKE_DL_LIBS})
-target_link_libraries(awkward-static PUBLIC awkward-parent)
-
-add_library(awkward SHARED $<TARGET_OBJECTS:awkward-objects>)
-target_link_libraries(awkward PRIVATE awkward-cpu-kernels-static ${CMAKE_DL_LIBS})
-target_link_libraries(awkward PUBLIC awkward-parent)
 
 # Third tier: Python modules.
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
@@ -112,8 +93,8 @@ find_package(pybind11 CONFIG REQUIRED)
 
 # Install python bindings
 file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
-pybind11_add_module(_ext ${LAYOUT_SOURCES})
-target_link_libraries(_ext PRIVATE awkward-static)
+pybind11_add_module(_ext MODULE ${LAYOUT_SOURCES})
+target_link_libraries(_ext PRIVATE awkward)
 set_target_properties(
   _ext
   PROPERTIES CXX_VISIBILITY_PRESET hidden

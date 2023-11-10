@@ -19,7 +19,7 @@ namespace awkward {
     /// @brief NumPy dtypes that can be interpreted within Awkward C++
     /// (only the primitive, fixed-width types). Non-native-endian types
     /// are considered NOT_PRIMITIVE.
-    enum class dtype {
+    enum class EXPORT_SYMBOL dtype {
         NOT_PRIMITIVE,
         boolean,
         int8,
@@ -43,7 +43,7 @@ namespace awkward {
     };
 
     /// @brief Returns the name associated with a given dtype.
-    const std::string
+    EXPORT_SYMBOL const std::string
     dtype_to_name(dtype dt);
 
     /// @brief Convert a dtype enum into a NumPy format string.
@@ -100,7 +100,7 @@ namespace awkward {
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
     template <typename T>
-    class LIBAWKWARD_EXPORT_SYMBOL array_deleter {
+    class EXPORT_SYMBOL array_deleter {
     public:
       /// @brief Called by `std::shared_ptr` when its reference count reaches
       /// zero.
