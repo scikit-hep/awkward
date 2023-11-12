@@ -82,16 +82,21 @@ jobs:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-"${{ needs.pyodide-python-version.outputs.python-version }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
 
+    - name: Install dependencies
+      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
+      run: python3 -m pip install -r docs/requirements-wasm.txt
+
     - name: Download latest pyodide-build
+      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
       with:
         repository: pyodide/pyodide
         ref: abb8bec1f63e632c221586cd94f70f6605d2517d
         path: pyodide
 
-    - name: Install dependencies
+    - name: Install pyodide-build (patched)
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
-      run: python3 -m pip install -r docs/requirements-wasm.txt ./pyodide/pyodide-build
+      run: python3 -m pip install --no-deps ./pyodide/pyodide-build
 
     - name: Determine EMSDK version
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
