@@ -202,6 +202,11 @@ jobs:
       with:
         submodules: true
 
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "${{ env.X86_64_PYTHON_VERSION }}"
+
     - name: Extract pre-built manylinux cppyy wheels
       uses: shrink/actions-docker-extract@v3
       with:
