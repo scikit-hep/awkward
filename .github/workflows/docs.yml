@@ -67,7 +67,6 @@ jobs:
       with:
         submodules: true
 
-
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -83,9 +82,15 @@ jobs:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-"${{ needs.pyodide-python-version.outputs.python-version }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
 
+    - name: Download latest pyodide-build
+      uses: actions/checkout@v4
+      with:
+        repository: pyodide/pyodide
+        ref: abb8bec1f63e632c221586cd94f70f6605d2517d
+
     - name: Install dependencies
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
-      run: python3 -m pip install -r docs/requirements-wasm.txt
+      run: python3 -m pip install -r docs/requirements-wasm.txt ./pyodide/pyodide-build
 
     - name: Determine EMSDK version
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
