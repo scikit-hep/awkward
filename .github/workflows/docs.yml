@@ -193,9 +193,51 @@ jobs:
         name: awkward
         path: dist/awkward*.whl
 
+  execute-cppyy:
+    needs: [awkward-cpp-x86-64, awkward]
+    runs-on: ubuntu-22.04
+    name: Execute cppyy notebook
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Extract pre-built manylinux cppyy wheels
+      uses: shrink/actions-docker-extract@v3
+      with:
+        image: docker.io/agoose77/cppyy-wheels:cp311
+        path: /wheels/."
+        destination: /tmp/wheels/
+
+    - name: Download awkward wheel
+      uses: actions/download-artifact@v3
+      with:
+        name: awkward
+        path: /tmp/wheels/
+
+    - name: Download awkward-cpp x86_64 wheel
+      uses: actions/download-artifact@v3
+      with:
+        name: awkward-cpp-x86-64
+        path: /tmp/wheels/
+
+    - name: Install dependencies
+      working-directory: docs
+      run: python -m pip install /tmp/wheels/*.whl -r requirements.txt
+
+    - name: Execute cppyy notebook
+      working-directory: docs
+      run: jupyter nbconvert --to notebook --execute --inplace user-guide/how-to-use-in-cpp-cppyy.ipynb
+
+    - name: Save executed notebook
+      uses: actions/upload-artifact@v3
+      with:
+        name: how-to-use-in-cpp-cppyy
+        path: docs/user-guide/how-to-use-in-cpp-cppyy.ipynb
+
   build-docs:
     runs-on: ubuntu-22.04
-    needs: [awkward-cpp-wasm, awkward-cpp-x86-64, awkward]
+    needs: [awkward-cpp-wasm, awkward-cpp-x86-64, awkward, execute-cppyy]
     name: Build Docs
     defaults:
       run:
@@ -274,6 +316,12 @@ jobs:
       if: github.event_name == 'push'
       run: |
         echo "DOCS_VERSION=main" >> $GITHUB_ENV
+
+    - name: Download cppyy notebook
+      uses: actions/download-artifact@v3
+      with:
+        name: how-to-use-in-cpp-cppyy
+        path: docs/user-guide
 
     - name: Generate Python documentation
       run: sphinx-build -M html . _build/ -T

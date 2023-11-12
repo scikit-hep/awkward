@@ -326,6 +326,8 @@ jobs:
         run: python -m pytest -vv -rs tests
 
   Linux-cppyy:
+    # TODO: remove this part of the workflow
+    # cppyy is not yet released. Let's load some pre-built wheels via docker (as a binary store)
     runs-on: ubuntu-22.04
 
     env:
