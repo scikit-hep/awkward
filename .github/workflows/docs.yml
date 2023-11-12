@@ -210,9 +210,9 @@ jobs:
     - name: Extract pre-built manylinux cppyy wheels
       uses: shrink/actions-docker-extract@v3
       with:
-        image: docker.io/agoose77/cppyy-wheels:cp311
-        path: /wheels/."
-        destination: /tmp/wheels/
+        image: "docker.io/agoose77/cppyy-wheels:cp311"
+        path: "/wheels/."
+        destination: "/tmp/cppyy-wheels"
 
     - name: Download awkward wheel
       uses: actions/download-artifact@v3
