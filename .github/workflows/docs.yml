@@ -87,6 +87,7 @@ jobs:
       with:
         repository: pyodide/pyodide
         ref: abb8bec1f63e632c221586cd94f70f6605d2517d
+        path: pyodide
 
     - name: Install dependencies
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
