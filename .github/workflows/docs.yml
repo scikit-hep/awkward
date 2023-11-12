@@ -212,7 +212,7 @@ jobs:
       with:
         image: "docker.io/agoose77/cppyy-wheels:cp311"
         path: "/wheels/."
-        destination: "/tmp/cppyy-wheels"
+        destination: "/tmp/wheels/"
 
     - name: Download awkward wheel
       uses: actions/download-artifact@v3
