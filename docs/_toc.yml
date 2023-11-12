@@ -157,8 +157,10 @@ subtrees:
                 title: "Using arrays in C++"
                 subtrees:
                   - entries:
+                      - file: user-guide/how-to-use-in-cpp-layoutbuilder
+                        title: "Building Awkward Arrays in C++ with LayoutBuilder"
                       - file: user-guide/how-to-use-in-cpp-cppyy
-                        title: "JIT compiling operations in cppyy"
+                        title: "JIT compiling operations with C++ in cppyy"
 
               - file: user-guide/how-to-specialize
                 title: "Specialized behavior"
@@ -174,7 +176,5 @@ subtrees:
                         title: "For physics: Lorentz vectors [todo]"
                       - file: user-guide/how-to-specialize-differentiate-jax
                         title: "Differentiation using JAX"
-                      - file: user-guide/how-to-use-header-only-layoutbuilder
-                        title: "Building Awkward Arrays in C++"
 
       - file: reference/index
