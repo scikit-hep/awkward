@@ -157,7 +157,7 @@ subtrees:
                 title: "Using arrays in C++"
                 subtrees:
                   - entries:
-                      - file: user-guide/how-to-use-in-cpp-layoutbuilder
+                      - file: user-guide/how-to-use-header-only-layoutbuilder
                         title: "Building Awkward Arrays in C++ with LayoutBuilder"
                       - file: user-guide/how-to-use-in-cpp-cppyy
                         title: "JIT compiling operations with C++ in cppyy"
