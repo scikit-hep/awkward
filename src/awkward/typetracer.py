@@ -8,9 +8,13 @@ import awkward.forms
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._do import touch_data as _touch_data
 from awkward._layout import HighLevelContext, wrap_layout
+from awkward._nplikes.numpy import NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import (
+    MaybeNone,
+    OneOf,
+    TypeTracerArray,
     TypeTracerReport,
     is_unknown_array,
     is_unknown_scalar,
@@ -18,12 +22,15 @@ from awkward._nplikes.typetracer import (
 from awkward._nplikes.typetracer import (
     typetracer_with_report as _typetracer_with_report,
 )
-from awkward._typing import Any, TypeVar
+from awkward._typing import TYPE_CHECKING, Any, TypeVar
 from awkward.contents import Content
 from awkward.forms import Form
 from awkward.forms.form import regularize_buffer_key
 from awkward.highlevel import Array, Record
 from awkward.types.numpytype import is_primitive
+
+if TYPE_CHECKING:
+    from numpy.typing import DTypeLike  # noqa: TID251
 
 __all__ = [
     "is_unknown_array",
@@ -33,7 +40,14 @@ __all__ = [
     "PlaceholderArray",
     "unknown_length",
     "touch_data",
+    "TypeTracerArray",
+    "MaybeNone",
+    "OneOf",
+    "create_unknown_scalar",
 ]
+
+
+np = NumpyMetadata
 
 T = TypeVar("T", Array, Record)
 
@@ -230,3 +244,7 @@ def typetracer_from_form(
     layout = form.length_zero_array(highlevel=False).to_typetracer(forget_length=True)
 
     return wrap_layout(layout, behavior=behavior, highlevel=highlevel, attrs=attrs)
+
+
+def create_unknown_scalar(dtype: DTypeLike) -> TypeTracerArray:
+    return TypeTracerArray._new(np.dtype(dtype), shape=())
