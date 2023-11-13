@@ -14,7 +14,7 @@ namespace awkward {
   /// @brief HERE
   ///
   /// THERE
-  class LIBAWKWARD_EXPORT_SYMBOL ForthInputBuffer {
+  class EXPORT_SYMBOL ForthInputBuffer {
   public:
     /// @brief HERE
     ForthInputBuffer(const std::shared_ptr<void> ptr,
