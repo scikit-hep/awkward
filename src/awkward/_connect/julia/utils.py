@@ -135,9 +135,7 @@ def init_julia(julia_project=None, quiet=False, julia_kwargs=None, return_aux=Fa
         "compiled_modules"
     ]
 
-    from julia import Main as _Main
-
-    Main = _Main
+    from julia import Main as julia_main
 
     if julia_activated_env is None:
         julia_activated_env = processed_julia_project
@@ -158,12 +156,12 @@ def init_julia(julia_project=None, quiet=False, julia_kwargs=None, return_aux=Fa
             )
 
     if julia_initialized and julia_activated_env != processed_julia_project:
-        Main.eval("using Pkg")
+        julia_main.eval("using Pkg")
 
         io_arg = _get_io_arg(quiet)
         # Can't pass IO to Julia call as it evaluates to PyObject, so just directly
         # use Main.eval:
-        Main.eval(
+        julia_main.eval(
             f'Pkg.activate("{_escape_filename(processed_julia_project)}",'
             f"shared = Bool({int(is_shared)}), "
             f"{io_arg})"
@@ -176,19 +174,19 @@ def init_julia(julia_project=None, quiet=False, julia_kwargs=None, return_aux=Fa
 
     julia_initialized = True
     if return_aux:
-        return Main, {"compiled_modules": using_compiled_modules}
-    return Main
+        return julia_main, {"compiled_modules": using_compiled_modules}
+    return julia_main
 
 
-def _add_awkward_to_julia_project(Main, io_arg):
-    Main.eval("using Pkg")
-    Main.eval("Pkg.Registry.update()")
-    Main.awkward_spec = Main.PackageSpec(
+def _add_awkward_to_julia_project(julia_main, io_arg):
+    julia_main.eval("using Pkg")
+    julia_main.eval("Pkg.Registry.update()")
+    julia_main.awkward_spec = julia_main.PackageSpec(
         name="AwkwardArray",
         url="https://github.com/jpivarski/AwkwardArray.jl",
         rev="v" + __awkward_array_jl_version__,
     )
-    Main.eval(f"Pkg.add([awkward_spec], {io_arg})")
+    julia_main.eval(f"Pkg.add([awkward_spec], {io_arg})")
 
 
 def _escape_filename(filename):
@@ -198,9 +196,9 @@ def _escape_filename(filename):
     return str_repr
 
 
-def _backend_version_assertion(Main):
+def _backend_version_assertion(julia_main):
     try:
-        backend_version = Main.eval("string(pkgversion(AwkwardArray))")
+        backend_version = julia_main.eval("string(pkgversion(AwkwardArray))")
         expected_backend_version = __awkward_array_jl_version__
         if backend_version != expected_backend_version:  # pragma: no cover
             warnings.warn(
@@ -221,24 +219,24 @@ def _backend_version_assertion(Main):
         )
 
 
-def _update_julia_project(Main, is_shared, io_arg):
+def _update_julia_project(julia_main, is_shared, io_arg):
     try:
         if is_shared:
-            _add_awkward_to_julia_project(Main, io_arg)
-        Main.eval("using Pkg")
-        Main.eval(f"Pkg.resolve({io_arg})")
+            _add_awkward_to_julia_project(julia_main, io_arg)
+        julia_main.eval("using Pkg")
+        julia_main.eval(f"Pkg.resolve({io_arg})")
     except (JuliaError, RuntimeError) as e:
         raise ImportError(_import_error()) from e
 
 
-def _load_backend(Main):
+def _load_backend(julia_main):
     try:
         # Load namespace, so that various internal operators work:
-        Main.eval("using AwkwardArray")
+        julia_main.eval("using AwkwardArray")
     except (JuliaError, RuntimeError) as e:
         raise ImportError(_import_error()) from e
 
-    _backend_version_assertion(Main)
+    _backend_version_assertion(julia_main)
 
     # Load Julia package AwkwardArray.jl
     from julia import AwkwardArray
