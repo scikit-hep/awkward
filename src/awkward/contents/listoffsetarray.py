@@ -415,7 +415,7 @@ class ListOffsetArray(Content):
             next_content = self._content[this_start:]
 
         if index_nplike.known_data and not index_nplike.array_equal(
-            this_zero_offsets, offsets
+            this_zero_offsets, offsets.data
         ):
             raise ValueError("cannot broadcast nested list")
 

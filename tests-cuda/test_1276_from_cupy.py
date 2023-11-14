@@ -4,8 +4,14 @@ from __future__ import annotations
 
 import cupy as cp
 import numpy as np
+import pytest
 
 import awkward as ak
+
+try:
+    ak.numba.register_and_check()
+except ImportError:
+    pytest.skip(reason="too old Numba version", allow_module_level=True)
 
 
 def test_from_cupy():

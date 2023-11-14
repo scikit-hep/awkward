@@ -217,7 +217,8 @@ def synchronize_cuda(stream=None):
             [],
         )
         raise invoked_kernel.error_context.decorate_exception(
+            ValueError,
             ValueError(
                 f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
-            )
+            ),
         )
