@@ -16,7 +16,7 @@ namespace awkward {
   /// @class BoolBuilder
   ///
   /// @brief Builder node that accumulates boolean values.
-  class LIBAWKWARD_EXPORT_SYMBOL BoolBuilder: public Builder {
+  class EXPORT_SYMBOL BoolBuilder: public Builder {
   public:
     /// @brief Create an empty BoolBuilder.
     /// @param options Configuration options for building an array;

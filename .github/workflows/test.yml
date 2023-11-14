@@ -267,11 +267,6 @@ jobs:
         if: matrix.python-version == '3.9'
 
   Linux-ROOT-dask-awkward:
-    strategy:
-      matrix:
-        python-version:
-          - '3.8'
-
     runs-on: ubuntu-20.04
 
     env:
@@ -296,7 +291,7 @@ jobs:
           cache-environment: true
           environment-name: awkward
           create-args: >-
-            python=${{ env.PYTHON_VERSION }}
+            python=3.8
             numpy
             root
 
@@ -308,7 +303,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./awkward-cpp/dist
-          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -329,3 +324,57 @@ jobs:
 
       - name: Test
         run: python -m pytest -vv -rs tests
+
+  Linux-cppyy:
+    # TODO: remove this part of the workflow
+    # cppyy is not yet released. Let's load some pre-built wheels via docker (as a binary store)
+    runs-on: ubuntu-22.04
+
+    env:
+      PIP_ONLY_BINARY: cmake
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: 'Python ${{ matrix.python-version }}'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v3
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w ./awkward-cpp
+
+      - name: Extract pre-built manylinux cppyy wheels
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: "docker.io/agoose77/cppyy-wheels:cp311"
+          path: "/wheels/."
+          destination: "/tmp/cppyy-wheels"
+
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install --only-binary "numpy,pandas,pyarrow,numexpr"
+          -v . ./awkward-cpp/dist/*.whl
+          pytest-github-actions-annotate-failures
+          /tmp/cppyy-wheels/*
+
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Test
+        run: python -m pytest -vv -rs tests -k cppyy
