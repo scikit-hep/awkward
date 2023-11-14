@@ -324,7 +324,7 @@ class SlicingErrorContext(ErrorContext):
             formatted_array = PartialFunction(
                 WeakMethodProxy(self.format_argument), self._width, array
             )
-            formatted_slice = PartialFunction(WeakMethodProxy(self.format_slice), where)
+            formatted_slice = PartialFunction(self.format_slice, where)
         else:
             formatted_array = self.format_argument(self._width, array)
             formatted_slice = self.format_slice(where)
