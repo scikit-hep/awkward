@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import warnings
+from functools import lru_cache
 from pathlib import Path
 
 from julia.api import JuliaError
@@ -18,6 +19,7 @@ julia_kwargs_at_initialization = None
 julia_activated_env = None
 
 
+@lru_cache
 def _load_juliainfo():
     """Execute julia.core.JuliaInfo.load(), and store as juliainfo."""
     global juliainfo
@@ -36,28 +38,18 @@ def _load_juliainfo():
     return juliainfo
 
 
-def is_julia_version_greater_eq(juliainfo=None, version=(1, 9, 0)):
+def _julia_version() -> tuple[int, ...]:
     """Check if Julia version is greater than specified version."""
-    if juliainfo is None:
-        juliainfo = _load_juliainfo()
-    current_version = (
+    juliainfo = _load_juliainfo()
+    return (
         juliainfo.version_major,
         juliainfo.version_minor,
         juliainfo.version_patch,
     )
-    return current_version >= version
 
 
 def _check_for_conflicting_libraries():  # pragma: no cover
     """Check whether there are conflicting modules, and display warnings."""
-
-
-def _julia_version_assertion():
-    if not is_julia_version_greater_eq(version=(1, 9, 0)):
-        raise NotImplementedError(
-            "AwkwardArray requires Julia 1.9.0 or greater. "
-            "Please update your Julia installation."
-        )
 
 
 def _set_julia_project_env(julia_project, is_shared):
@@ -89,8 +81,7 @@ def _import_error():
 
 def _get_io_arg(quiet):
     io = "devnull" if quiet else "stderr"
-    io_arg = f"io={io}" if is_julia_version_greater_eq(version=(1, 9, 0)) else ""
-    return io_arg
+    return f"io={io}"
 
 
 def init_julia(julia_project=None, quiet=False, julia_kwargs=None, return_aux=False):
@@ -107,7 +98,12 @@ def init_julia(julia_project=None, quiet=False, julia_kwargs=None, return_aux=Fa
 
     from julia.core import JuliaInfo, UnsupportedPythonError
 
-    _julia_version_assertion()
+    if _julia_version() < (1, 9, 0):
+        raise NotImplementedError(
+            "AwkwardArray requires Julia 1.9.0 or greater. "
+            "Please update your Julia installation."
+        )
+
     processed_julia_project, is_shared = _process_julia_project(julia_project)
     _set_julia_project_env(processed_julia_project, is_shared)
 
@@ -200,14 +196,6 @@ def _escape_filename(filename):
     str_repr = str(filename)
     str_repr = str_repr.replace("\\", "\\\\")
     return str_repr
-
-
-def _julia_version_assertion():
-    if not is_julia_version_greater_eq(version=(1, 9, 0)):
-        raise NotImplementedError(
-            "AwkwardArray requires Julia 1.9.0 or greater. "
-            "Please update your Julia installation."
-        )
 
 
 def _backend_version_assertion(Main):
