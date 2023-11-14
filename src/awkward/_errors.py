@@ -8,6 +8,7 @@ import threading
 import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
 from functools import wraps
+from weakref import proxy as weak_proxy
 
 import numpy
 
@@ -67,11 +68,6 @@ class ErrorContext:
             ):
                 self.handle_exception(exception_type, exception_value)
         finally:
-            # `_kwargs` may hold cyclic references, that we really want to avoid
-            # as this can lead to large buffers remaining in memory for longer than absolutely necessary
-            # Let's just clear this, now.
-            self._kwargs.clear()
-
             # Step out of the way so that another ErrorContext can become primary.
             if self.primary() is self:
                 self._slate.__dict__.clear()
@@ -226,8 +222,8 @@ class OperationErrorContext(ErrorContext):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
-            string_args = PartialFunction(self._format_args, args)
-            string_kwargs = PartialFunction(self._format_kwargs, kwargs)
+            string_args = PartialFunction(weak_proxy(self._format_args), args)
+            string_kwargs = PartialFunction(weak_proxy(self._format_kwargs), kwargs)
 
         super().__init__(
             name=name,
@@ -307,8 +303,10 @@ class SlicingErrorContext(ErrorContext):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
-            formatted_array = PartialFunction(self.format_argument, self._width, array)
-            formatted_slice = PartialFunction(self.format_slice, where)
+            formatted_array = PartialFunction(
+                weak_proxy(self.format_argument), self._width, array
+            )
+            formatted_slice = PartialFunction(weak_proxy(self.format_slice), where)
         else:
             formatted_array = self.format_argument(self._width, array)
             formatted_slice = self.format_slice(where)
