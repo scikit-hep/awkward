@@ -128,8 +128,8 @@ class CupyKernel(BaseKernel):
         # Number of threads are given by `length`
         return min(length, 1024), 1, 1
 
-    def _cast(self, x, t):
-        if t:
+    def _cast(self, x, type_):
+        if type_:
             # Do we have a CuPy-owned array?
             if self._cupy.is_own_array(x):
                 assert self._cupy.is_c_contiguous(x)
