@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-Strings
-=======
+Using arrays in C++
+=====================
 
 ```{tableofcontents}
 ```
