@@ -8,7 +8,7 @@ import threading
 import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
 from functools import wraps
-from weakref import proxy as weak_proxy
+from weakref import ref as weak_ref
 
 import numpy
 
@@ -19,6 +19,22 @@ np = NumpyMetadata.instance()
 
 
 E = TypeVar("E", bound=Exception)
+T = TypeVar("T")
+S = TypeVar("S")
+P = ParamSpec("P")
+
+
+class WeakMethodProxy:
+    """A proxy for a method of a weakly referenced object"""
+
+    def __init__(self, method):
+        self._this = weak_ref(method.__self__)
+        self._impl = method.__func__
+
+    def __call__(self, *args, **kwargs):
+        this = self._this()
+        method = self._impl.__get__(this, type(this))
+        return method(*args, **kwargs)
 
 
 class PartialFunction:
@@ -222,8 +238,10 @@ class OperationErrorContext(ErrorContext):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
-            string_args = PartialFunction(weak_proxy(self._format_args), args)
-            string_kwargs = PartialFunction(weak_proxy(self._format_kwargs), kwargs)
+            string_args = PartialFunction(WeakMethodProxy(self._format_args), args)
+            string_kwargs = PartialFunction(
+                WeakMethodProxy(self._format_kwargs), kwargs
+            )
 
         super().__init__(
             name=name,
@@ -304,9 +322,9 @@ class SlicingErrorContext(ErrorContext):
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
             formatted_array = PartialFunction(
-                weak_proxy(self.format_argument), self._width, array
+                WeakMethodProxy(self.format_argument), self._width, array
             )
-            formatted_slice = PartialFunction(weak_proxy(self.format_slice), where)
+            formatted_slice = PartialFunction(WeakMethodProxy(self.format_slice), where)
         else:
             formatted_array = self.format_argument(self._width, array)
             formatted_slice = self.format_slice(where)
@@ -419,10 +437,6 @@ To raise these warnings as errors (and get stack traces to find out where they'r
 after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
 Issue: {message}."""
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
-
-
-T = TypeVar("T")
-P = ParamSpec("P")
 
 
 def with_operation_context(func: Callable[P, T]) -> Callable[P, T]:
