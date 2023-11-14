@@ -1,4 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import sys
 import warnings
 
@@ -80,10 +83,7 @@ def evaluate(
     names, ex_uses_vml = numexpr.necompiler._names_cache[expr_key]
     arguments = getArguments(names, local_dict, global_dict)
 
-    arrays = [
-        ak.operations.to_layout(x, allow_record=True, allow_unknown=True)
-        for x in arguments
-    ]
+    arrays = [ak.operations.to_layout(x, allow_unknown=True) for x in arguments]
 
     def action(inputs, **ignore):
         if all(
@@ -128,10 +128,7 @@ def re_evaluate(local_dict=None):
     names = numexpr.necompiler._numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
 
-    arrays = [
-        ak.operations.to_layout(x, allow_record=True, allow_unknown=True)
-        for x in arguments
-    ]
+    arrays = [ak.operations.to_layout(x, allow_unknown=True) for x in arguments]
 
     def action(inputs, **ignore):
         if all(

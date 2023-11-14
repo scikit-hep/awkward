@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import glob
 import math
@@ -215,7 +217,8 @@ def synchronize_cuda(stream=None):
             [],
         )
         raise invoked_kernel.error_context.decorate_exception(
+            ValueError,
             ValueError(
                 f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
-            )
+            ),
         )

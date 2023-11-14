@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
@@ -33,6 +34,7 @@ from awkward._typing import (
     AxisMaybeNone,
     JSONMapping,
     Literal,
+    Protocol,
     Self,
     SupportsIndex,
     TypeAlias,
@@ -71,7 +73,23 @@ float | int | str | list[JSONValueType] | dict[str, JSONValueType]
 """
 
 
-class RecursivelyApplyOptionsType(TypedDict):
+class ImplementsApplyAction(Protocol):
+    def __call__(
+        self,
+        layout: Content,
+        *,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        continuation: Callable[[], Content],
+        behavior: Mapping | None,
+        backend: Backend,
+        options: ApplyActionOptions,
+    ) -> Content | None:
+        ...
+
+
+class ApplyActionOptions(TypedDict):
     allow_records: bool
     keep_parameters: bool
     numpy_to_regular: bool
@@ -79,6 +97,26 @@ class RecursivelyApplyOptionsType(TypedDict):
     return_simplified: bool
     return_array: bool
     function_name: str | None
+
+
+class RemoveStructureOptions(TypedDict):
+    flatten_records: bool
+    function_name: str
+    drop_nones: bool
+    keepdims: bool
+    allow_records: bool
+    list_to_regular: bool
+
+
+class ToArrowOptions(TypedDict):
+    list_to32: bool
+    string_to32: bool
+    bytestring_to32: bool
+    emptyarray_to: np.dtype | None
+    categorical_as_dictionary: bool
+    extensionarray: bool
+    count_nulls: bool
+    record_is_scalar: bool
 
 
 class Content:
@@ -653,7 +691,7 @@ class Content:
                     where,
                     allow_record=False,
                     allow_unknown=False,
-                    allow_none=False,
+                    none_policy="error",
                     regulararray=False,
                     use_from_iter=False,
                     primitive_policy="error",
@@ -678,7 +716,7 @@ class Content:
                     where,
                     allow_record=False,
                     allow_unknown=False,
-                    allow_none=False,
+                    none_policy="error",
                     regulararray=False,
                     use_from_iter=True,
                     primitive_policy="error",
@@ -1066,10 +1104,10 @@ class Content:
     def _to_arrow(
         self,
         pyarrow: Any,
-        mask_node: Any,
-        validbytes: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
         length: int,
-        options: dict[str, Any],
+        options: ToArrowOptions,
     ):
         raise NotImplementedError
 
@@ -1091,17 +1129,18 @@ class Content:
     def _drop_none(self) -> Content:
         raise NotImplementedError
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         raise NotImplementedError
 
     def _recursively_apply(
         self,
-        action: ActionType,
-        behavior: dict | None,
+        action: ImplementsApplyAction,
         depth: int,
-        depth_context: dict | None,
-        lateral_context: dict | None,
-        options: RecursivelyApplyOptionsType,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
     ) -> Content | None:
         raise NotImplementedError
 

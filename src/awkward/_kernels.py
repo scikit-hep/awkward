@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import ctypes
@@ -113,22 +114,23 @@ class CupyKernel(BaseKernel):
         # TODO should kernels strip nplike wrapper? Probably
         for array in args:
             if self._cupy.is_own_array(array):
-                max_length = max(max_length, len(array))
+                max_length = max(max_length, array.size)
         return max_length
 
     def calc_grid(self, length):
-        if length > 1024:
-            return -(length // -1024), 1, 1
-        return 1, 1, 1
+        # CUDA blocks are limited to 1024 threads per block, so to
+        # have more than one block, we have at least `length // 1024` blocks
+        # of size 1024.
+        return (length // 1024) + 1, 1, 1
 
     def calc_blocks(self, length):
-        if length > 1024:
-            return 1024, 1, 1
-        return length, 1, 1
+        # CUDA blocks are limited to 1024 threads per block
+        # Number of threads are given by `length`
+        return min(length, 1024), 1, 1
 
-    def _cast(self, x, t):
-        if issubclass(t, ctypes._Pointer):
-            # Do we have a NumPy-owned array?
+    def _cast(self, x, type_):
+        if type_:
+            # Do we have a CuPy-owned array?
             if self._cupy.is_own_array(x):
                 assert self._cupy.is_c_contiguous(x)
             return x
@@ -148,9 +150,9 @@ class CupyKernel(BaseKernel):
                 cupy.array(ak_cuda.NO_ERROR),
                 [],
             )
-        assert len(args) == len(self._impl.argtypes)
+        assert len(args) == len(self._impl.is_ptr)
 
-        args = [self._cast(x, t) for x, t in zip(args, self._impl.argtypes)]
+        args = [self._cast(x, t) for x, t in zip(args, self._impl.is_ptr)]
 
         # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
         # The second arg is the error_code.

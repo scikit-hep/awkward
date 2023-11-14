@@ -1,10 +1,14 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("to_rdataframe",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 from collections.abc import Mapping
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
+
+__all__ = ("to_rdataframe",)
 
 cpu = NumpyBackend.instance()
 
@@ -74,7 +78,7 @@ def _impl(
             array,
             allow_record=False,
             allow_unknown=False,
-            allow_none=False,
+            none_policy="error",
             regulararray=True,
             use_from_iter=True,
             primitive_policy="forbid",

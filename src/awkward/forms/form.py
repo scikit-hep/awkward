@@ -1,7 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("from_dict", "from_type", "from_json", "reserved_nominal_parameters", "Form")
+from __future__ import annotations
 
 import itertools
 import json
@@ -26,6 +25,8 @@ from awkward._typing import (
     JSONSerializable,
     Self,
 )
+
+__all__ = ("from_dict", "from_type", "from_json", "reserved_nominal_parameters", "Form")
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
@@ -560,10 +561,18 @@ class Form:
             byteorder=ak._util.native_byteorder,
             highlevel=highlevel,
             behavior=behavior,
+            attrs=None,
             simplify=False,
         )
 
     def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
+        if highlevel:
+            deprecate(
+                "The `highlevel=True` variant of `Form.length_zero_array` is now deprecated. "
+                "Please use `ak.Array(form.length_zero_array(...), behavior=...)` if an `ak.Array` is required.",
+                version="2.3.0",
+            )
+
         # The naive implementation of a length-1 array requires that we have a sufficiently
         # large buffer to be able to build _any_ subtree.
         def max_prefer_unknown(this: ShapeItem, that: ShapeItem) -> ShapeItem:
@@ -661,6 +670,7 @@ class Form:
             byteorder=ak._util.native_byteorder,
             highlevel=highlevel,
             behavior=behavior,
+            attrs=None,
             simplify=False,
         )
 

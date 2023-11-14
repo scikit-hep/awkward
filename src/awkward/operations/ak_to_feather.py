@@ -1,12 +1,13 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-__all__ = ("to_feather",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+from __future__ import annotations
 
 import os
 
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("to_feather",)
 
 metadata = NumpyMetadata.instance()
 
@@ -128,7 +129,7 @@ def _impl(
         array,
         allow_record=True,
         allow_unknown=False,
-        allow_none=False,
+        none_policy="error",
         regulararray=True,
         use_from_iter=True,
         primitive_policy="error",

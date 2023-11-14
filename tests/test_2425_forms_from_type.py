@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import pytest
 
@@ -23,26 +25,16 @@ def test_regular():
 
 
 def test_categorical():
-    with pytest.warns(
-        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
-    ):
-        array = ak.to_categorical(
-            [
-                1,
-                1,
-                2,
-                1,
-                1,
-            ]
-        )
+    pytest.importorskip("pyarrow")
+
+    array = ak.str.to_categorical(["do", "re", "mi", "fa", "so"])
     form_from_type = ak.forms.from_type(array.type.content)
     assert form_from_type == array.layout.form
 
 
 def test_categorical_option():
-    with pytest.warns(
-        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
-    ):
-        array = ak.to_categorical([1, 1, 2, 1, 1, None])
+    pytest.importorskip("pyarrow")
+
+    array = ak.str.to_categorical(["do", "re", "mi", "fa", "so", None])
     form_from_type = ak.forms.from_type(array.type.content)
     assert form_from_type == array.layout.form

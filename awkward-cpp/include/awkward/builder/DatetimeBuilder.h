@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_DATETIMEBUILDER_H_
 #define AWKWARD_DATETIMEBUILDER_H_
@@ -13,7 +13,7 @@ namespace awkward {
   /// @class DatetimeBuilder
   ///
   /// @brief Builder node that accumulates integers (`int64_t`).
-  class LIBAWKWARD_EXPORT_SYMBOL DatetimeBuilder: public Builder {
+  class EXPORT_SYMBOL DatetimeBuilder: public Builder {
   public:
     /// @brief Create an empty DatetimeBuilder.
     /// @param options Configuration options for building an array;

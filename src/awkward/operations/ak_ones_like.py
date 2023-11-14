@@ -1,16 +1,26 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("ones_like",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("ones_like",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
 def ones_like(
-    array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None
+    array,
+    *,
+    dtype=None,
+    including_unknown=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -22,6 +32,8 @@ def ones_like(
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     This is the equivalent of NumPy's `np.ones_like` for Awkward Arrays.
@@ -35,12 +47,12 @@ def ones_like(
     yield (array,)
 
     # Implementation
-    return _impl(array, highlevel, behavior, dtype, including_unknown)
+    return _impl(array, highlevel, behavior, dtype, including_unknown, attrs)
 
 
-def _impl(array, highlevel, behavior, dtype, including_unknown):
+def _impl(array, highlevel, behavior, dtype, including_unknown, attrs):
     return ak.operations.ak_full_like._impl(
-        array, 1, highlevel, behavior, dtype, including_unknown
+        array, 1, highlevel, behavior, dtype, including_unknown, attrs
     )
 
 

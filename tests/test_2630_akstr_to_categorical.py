@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -6,11 +8,6 @@ import pytest
 import awkward as ak
 
 pytest.importorskip("pyarrow")
-
-
-# These tests are copied from `test_0401_add_categorical_type_for_arrow_dictionary.py`
-# Once `ak.to_categorical` is no-longer deprecated, the old tests can be deleted
-# Other tests that check categorical properties (but not to_categorical) should be converted to use `ak.str.to_categorical`
 
 
 def test_to_categorical_nested():

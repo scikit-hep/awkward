@@ -1,5 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("from_dlpack",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 from awkward._connect.dlpack import DLPackDevice
 from awkward._dispatch import high_level_function
@@ -8,10 +9,18 @@ from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike
 
+__all__ = ("from_dlpack",)
+
 
 @high_level_function()
 def from_dlpack(
-    array, *, prefer_cpu=True, regulararray=False, highlevel=True, behavior=None
+    array,
+    *,
+    prefer_cpu=True,
+    regulararray=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -27,6 +36,8 @@ def from_dlpack(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts a DLPack-aware array into an Awkward Array.

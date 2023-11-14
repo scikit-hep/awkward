@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import operator
@@ -283,7 +284,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
                 item,
                 allow_record=False,
                 allow_unknown=False,
-                allow_none=False,
+                none_policy="error",
                 regulararray=False,
                 use_from_iter=False,
                 primitive_policy="error",
@@ -305,7 +306,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
                 item,
                 allow_record=False,
                 allow_unknown=False,
-                allow_none=False,
+                none_policy="error",
                 regulararray=False,
                 use_from_iter=True,
                 primitive_policy="error",

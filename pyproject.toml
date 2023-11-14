@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.4.8"
+version = "2.5.0rc1"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.8"
@@ -40,7 +40,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==25",
+    "awkward_cpp==26",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.18.0",
     "packaging",
@@ -127,13 +127,6 @@ filterwarnings = [
     "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
 ]
 log_cli_level = "info"
-
-[tool.isort]
-profile = "black"
-skip_glob = [
-    "src/awkward/__init__.py",
-    "src/awkward/_nplikes/__init__.py",
-]
 
 [tool.pylint.master]
 py-version = "3.7"
@@ -294,6 +287,7 @@ unfixable = [
 typing-modules = ["awkward._typing"]
 external = []
 mccabe.max-complexity = 100
+isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "dev/*" = ["T20", "TID251"]

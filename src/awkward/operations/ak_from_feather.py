@@ -1,9 +1,11 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("from_feather",)
+from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+
+__all__ = ("from_feather",)
 
 
 @high_level_function()
@@ -16,6 +18,7 @@ def from_feather(
     generate_bitmasks=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -34,6 +37,8 @@ def from_feather(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Reads an Feather file as an Awkward Array (through pyarrow).
 
@@ -45,12 +50,26 @@ def from_feather(
     """
 
     return _impl(
-        path, columns, use_threads, memory_map, generate_bitmasks, highlevel, behavior
+        path,
+        columns,
+        use_threads,
+        memory_map,
+        generate_bitmasks,
+        highlevel,
+        behavior,
+        attrs,
     )
 
 
 def _impl(
-    path, columns, use_threads, memory_map, generate_bitmasks, highlevel, behavior
+    path,
+    columns,
+    use_threads,
+    memory_map,
+    generate_bitmasks,
+    highlevel,
+    behavior,
+    attrs,
 ):
     import pyarrow.feather
 
@@ -61,4 +80,5 @@ def _impl(
         generate_bitmasks,
         highlevel,
         behavior,
+        attrs,
     )

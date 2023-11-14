@@ -1,5 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("from_iter",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 from collections.abc import Iterable
 
 from awkward_cpp.lib import _ext
@@ -7,6 +9,8 @@ from awkward_cpp.lib import _ext
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("from_iter",)
 
 np = NumpyMetadata.instance()
 
@@ -18,6 +22,7 @@ def from_iter(
     allow_record=True,
     highlevel=True,
     behavior=None,
+    attrs=None,
     initial=1024,
     resize=8,
 ):
@@ -30,6 +35,8 @@ def from_iter(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
         initial (int): Initial size (in bytes) of buffers used by the `ak::ArrayBuilder`.
         resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
@@ -60,10 +67,10 @@ def from_iter(
 
     See also #ak.to_list.
     """
-    return _impl(iterable, highlevel, behavior, allow_record, initial, resize)
+    return _impl(iterable, highlevel, behavior, allow_record, initial, resize, attrs)
 
 
-def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
+def _impl(iterable, highlevel, behavior, allow_record, initial, resize, attrs):
     if not isinstance(iterable, Iterable):
         raise TypeError(
             f"cannot produce an array from a non-iterable object ({type(iterable)!r})"
@@ -78,6 +85,7 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
                 False,
                 initial,
                 resize,
+                attrs,
             )[0]
         else:
             raise ValueError(
@@ -104,4 +112,5 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
         highlevel=highlevel,
         behavior=behavior,
         simplify=True,
+        attrs=attrs,
     )[0]

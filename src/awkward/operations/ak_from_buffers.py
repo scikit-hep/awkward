@@ -1,7 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("from_buffers",)
 import math
 
 import awkward as ak
@@ -15,6 +15,8 @@ from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._regularize import is_integer
 from awkward.forms.form import index_to_dtype, regularize_buffer_key
+
+__all__ = ("from_buffers",)
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -32,6 +34,7 @@ def from_buffers(
     allow_noncanonical_form=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -59,6 +62,8 @@ def from_buffers(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Reconstitutes an Awkward Array from a Form, length, and a collection of memory
@@ -104,6 +109,7 @@ def from_buffers(
         byteorder,
         highlevel,
         behavior,
+        attrs,
         allow_noncanonical_form,
     )
 
@@ -117,6 +123,7 @@ def _impl(
     byteorder,
     highlevel,
     behavior,
+    attrs,
     simplify,
 ):
     backend = regularize_backend(backend)
@@ -140,7 +147,8 @@ def _impl(
     getkey = regularize_buffer_key(buffer_key)
 
     out = _reconstitute(form, length, container, getkey, backend, byteorder, simplify)
-    return wrap_layout(out, behavior, highlevel)
+
+    return wrap_layout(out, highlevel=highlevel, attrs=attrs, behavior=behavior)
 
 
 def _from_buffer(

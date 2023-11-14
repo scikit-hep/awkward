@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import builtins
@@ -7,6 +8,7 @@ import threading
 import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
 from functools import wraps
+from weakref import ref as weak_ref
 
 import numpy
 
@@ -17,6 +19,22 @@ np = NumpyMetadata.instance()
 
 
 E = TypeVar("E", bound=Exception)
+T = TypeVar("T")
+S = TypeVar("S")
+P = ParamSpec("P")
+
+
+class WeakMethodProxy:
+    """A proxy for a method of a weakly referenced object"""
+
+    def __init__(self, method):
+        self._this = weak_ref(method.__self__)
+        self._impl = method.__func__
+
+    def __call__(self, *args, **kwargs):
+        this = self._this()
+        method = self._impl.__get__(this, type(this))
+        return method(*args, **kwargs)
 
 
 class PartialFunction:
@@ -66,11 +84,6 @@ class ErrorContext:
             ):
                 self.handle_exception(exception_type, exception_value)
         finally:
-            # `_kwargs` may hold cyclic references, that we really want to avoid
-            # as this can lead to large buffers remaining in memory for longer than absolutely necessary
-            # Let's just clear this, now.
-            self._kwargs.clear()
-
             # Step out of the way so that another ErrorContext can become primary.
             if self.primary() is self:
                 self._slate.__dict__.clear()
@@ -225,8 +238,10 @@ class OperationErrorContext(ErrorContext):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
-            string_args = PartialFunction(self._format_args, args)
-            string_kwargs = PartialFunction(self._format_kwargs, kwargs)
+            string_args = PartialFunction(WeakMethodProxy(self._format_args), args)
+            string_kwargs = PartialFunction(
+                WeakMethodProxy(self._format_kwargs), kwargs
+            )
 
         super().__init__(
             name=name,
@@ -306,7 +321,9 @@ class SlicingErrorContext(ErrorContext):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
-            formatted_array = PartialFunction(self.format_argument, self._width, array)
+            formatted_array = PartialFunction(
+                WeakMethodProxy(self.format_argument), self._width, array
+            )
             formatted_slice = PartialFunction(self.format_slice, where)
         else:
             formatted_array = self.format_argument(self._width, array)
@@ -420,10 +437,6 @@ To raise these warnings as errors (and get stack traces to find out where they'r
 after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
 Issue: {message}."""
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
-
-
-T = TypeVar("T")
-P = ParamSpec("P")
 
 
 def with_operation_context(func: Callable[P, T]) -> Callable[P, T]:

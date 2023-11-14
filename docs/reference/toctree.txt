@@ -232,10 +232,10 @@
 .. toctree::
     :caption: Arrays of categorical data
 
-    generated/ak.to_categorical
     generated/ak.from_categorical
     generated/ak.is_categorical
     generated/ak.categories
+    generated/ak.str.to_categorical
 
 .. toctree::
     :caption: Indexing and grouping

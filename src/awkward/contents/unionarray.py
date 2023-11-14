@@ -1,10 +1,11 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 # pylint: disable=consider-using-enumerate
+
 from __future__ import annotations
 
 import copy
 import ctypes
-from collections.abc import Iterable, MutableMapping, Sequence
+from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -17,9 +18,23 @@ from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.errors import AxisError
 from awkward.forms.form import Form
 from awkward.forms.unionform import UnionForm
@@ -487,7 +502,7 @@ class UnionArray(Content):
         return UnionArray(
             tags.forget_length() if forget_length else tags,
             self._index.to_nplike(tt),
-            [x._to_typetracer(False) for x in self._contents],
+            [x._to_typetracer(forget_length) for x in self._contents],
             parameters=self._parameters,
         )
 
@@ -1430,7 +1445,14 @@ class UnionArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         nptags = self._tags.raw(numpy)
         npindex = self._index.raw(numpy)
         copied_index = False
@@ -1513,7 +1535,9 @@ class UnionArray(Content):
             "Conversion of irreducible unions to backend arrays is not supported."
         )
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         out = []
         for i in range(len(self._contents)):
             index = self._index[self._tags.data == i]
@@ -1525,8 +1549,13 @@ class UnionArray(Content):
         return out
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if options["return_array"]:
             if options["return_simplified"]:
                 make = UnionArray.simplified
@@ -1540,7 +1569,6 @@ class UnionArray(Content):
                     [
                         content._recursively_apply(
                             action,
-                            behavior,
                             depth,
                             copy.copy(depth_context),
                             lateral_context,
@@ -1557,7 +1585,6 @@ class UnionArray(Content):
                 for content in self._contents:
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1570,7 +1597,6 @@ class UnionArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

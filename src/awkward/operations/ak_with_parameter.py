@@ -1,16 +1,20 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("with_parameter",)
-import awkward as ak
-from awkward._behavior import behavior_of
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("with_parameter",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
+def with_parameter(
+    array, parameter, value, *, highlevel=True, behavior=None, attrs=None
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -19,6 +23,8 @@ def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     This function returns a new array with a parameter set on the outermost
@@ -34,15 +40,12 @@ def with_parameter(array, parameter, value, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, parameter, value, highlevel, behavior)
+    return _impl(array, parameter, value, highlevel, behavior, attrs)
 
 
-def _impl(array, parameter, value, highlevel, behavior):
-    behavior = behavior_of(array, behavior=behavior)
-    layout = ak.operations.to_layout(
-        array, allow_record=True, allow_unknown=False, primitive_policy="error"
-    )
+def _impl(array, parameter, value, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
 
     out = layout.with_parameter(parameter, value)
-
-    return wrap_layout(out, behavior_of(array, behavior=behavior), highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

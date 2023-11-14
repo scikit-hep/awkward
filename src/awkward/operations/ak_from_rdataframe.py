@@ -1,8 +1,12 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("from_rdataframe",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("from_rdataframe",)
 
 np = NumpyMetadata.instance()
 
@@ -17,6 +21,7 @@ def from_rdataframe(
     with_name=None,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -33,6 +38,8 @@ def from_rdataframe(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts ROOT RDataFrame columns into an Awkward Array.

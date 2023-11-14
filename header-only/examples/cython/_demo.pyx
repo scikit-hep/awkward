@@ -1,3 +1,5 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from demo_impl cimport ArrayBuffers, create_demo_array as create_demo_array_impl
 from cython.operator cimport dereference as deref
 from cython.view cimport array as cvarray

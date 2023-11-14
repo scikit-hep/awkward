@@ -1,10 +1,17 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import cupy as cp  # noqa: F401
 import numpy as np
 import pytest
 
 import awkward as ak
+
+try:
+    ak.numba.register_and_check()
+except ImportError:
+    pytest.skip(reason="too old Numba version", allow_module_level=True)
 
 
 @pytest.mark.xfail(reason="unimplemented CUDA Kernels (awkward_ByteMaskedArray_numnull")

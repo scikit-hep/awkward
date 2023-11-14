@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/master/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -212,11 +214,10 @@ def test_subranges_equal():
 
 
 def test_categorical():
+    pytest.importorskip("pyarrow")
+
     array = ak.highlevel.Array(["1chchc", "1chchc", "2sss", "3", "4", "5"])
-    with pytest.warns(
-        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
-    ):
-        categorical = ak.operations.ak_to_categorical.to_categorical(array)
+    categorical = ak.str.to_categorical(array)
 
     assert ak.operations.is_valid(categorical) is True
     assert ak._do.is_unique(categorical.layout) is False

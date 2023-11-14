@@ -1,18 +1,21 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("num",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
+from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
 from awkward.errors import AxisError
+
+__all__ = ("num",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def num(array, axis=1, *, highlevel=True, behavior=None):
+def num(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -23,6 +26,8 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an array of integers specifying the number of elements at a
@@ -75,13 +80,13 @@ def num(array, axis=1, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior):
+def _impl(array, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(array)
-    behavior = behavior_of(array, behavior=behavior)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     if not is_integer(axis):
         raise TypeError(f"'axis' must be an integer, not {axis!r}")
@@ -102,6 +107,6 @@ def _impl(array, axis, highlevel, behavior):
         elif layout.is_leaf:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
-    out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
+    out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

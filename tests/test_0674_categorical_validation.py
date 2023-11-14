@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -11,10 +13,7 @@ pyarrow = pytest.importorskip("pyarrow")
 def test_categorical_is_valid():
     # validate a categorical array by its content
     arr = ak.Array([2019, 2020, 2021, 2020, 2019])
-    with pytest.warns(
-        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
-    ):
-        categorical = ak.operations.ak_to_categorical.to_categorical(arr)
+    categorical = ak.str.to_categorical(arr)
     assert ak.operations.is_valid(categorical)
 
 

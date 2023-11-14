@@ -1,4 +1,8 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+import traceback
 
 import cupy as cp
 import numpy as np  # noqa: F401
@@ -6,6 +10,11 @@ import pytest
 
 import awkward as ak
 import awkward._connect.cuda
+
+try:
+    ak.numba.register_and_check()
+except ImportError:
+    pytest.skip(reason="too old Numba version", allow_module_level=True)
 
 
 def test():
@@ -24,12 +33,16 @@ def test():
 
     assert isinstance(err.value, ValueError)
 
-    assert """<Array [1, 2, 3, 4, 5] type='5 * int64'>
-
-with
-
-    (10)
-
-Error details: index out of range in compiled CUDA code (awkward_RegularArray_getitem_next_at)""" in str(
-        err.value
-    )
+    message = "".join(traceback.format_exception(err.value))
+    assert (
+        "ValueError: index out of range in compiled CUDA code "
+        "(awkward_RegularArray_getitem_next_at)\n"
+        "\n"
+        "This error occurred while attempting to slice\n"
+        "\n"
+        "    <Array [1, 2, 3, 4, 5] type='5 * int64'>\n"
+        "\n"
+        "with\n"
+        "\n"
+        "    (10)\n"
+    ) in message

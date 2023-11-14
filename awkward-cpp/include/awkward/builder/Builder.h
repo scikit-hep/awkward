@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_FILLABLE_H_
 #define AWKWARD_FILLABLE_H_
@@ -38,7 +38,7 @@ namespace awkward {
   ///
   /// @brief Abstract base class for nodes within an ArrayBuilder that
   /// cumulatively discover an array's type and fill it.
-  class LIBAWKWARD_EXPORT_SYMBOL Builder: public std::enable_shared_from_this<Builder> {
+  class EXPORT_SYMBOL Builder: public std::enable_shared_from_this<Builder> {
   public:
     /// @brief Virtual destructor acts as a first non-inline virtual function
     /// that determines a specific translation unit in which vtable shall be

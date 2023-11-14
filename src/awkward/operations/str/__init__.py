@@ -1,10 +1,10 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 # This set of string-manipulation routines is strongly inspired by Arrow:
 
-
 # string transforms
 # https://arrow.apache.org/docs/python/api/compute.html#string-transforms
+from __future__ import annotations
 from awkward.operations.str.akstr_capitalize import *
 
 # string padding

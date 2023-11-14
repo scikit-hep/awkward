@@ -1,17 +1,21 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("drop_none",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
+from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
+
+__all__ = ("drop_none",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def drop_none(array, axis=None, highlevel=True, behavior=None):
+def drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Data in which to remove Nones.
@@ -24,6 +28,8 @@ def drop_none(array, axis=None, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Removes missing values (None) from a given array.
@@ -47,21 +53,21 @@ def drop_none(array, axis=None, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior):
+def _drop_none_if_list(layout):
+    if layout.is_list:
+        # only drop nones at list level in the recursion; this way ListArray -> ListOffsetArray with unprojected optiontype -> avoid offset mismatch
+        return layout.drop_none()
+    else:
+        return layout
+
+
+def _impl(array, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
-    )
-
-    def drop_nones(layout, **kwargs):
-        if layout.is_list:
-            # only drop nones at list level in the recursion; this way ListArray -> ListOffsetArray with unprojected optiontype -> avoid offset mismatch
-            return layout.drop_none()
-        else:
-            return layout
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     if axis is None:
         # if the outer layout is_option, drop_nones without affecting offsets
@@ -69,7 +75,7 @@ def _impl(array, axis, highlevel, behavior):
             layout = layout.drop_none()
 
         def action(layout, continuation, **kwargs):
-            return drop_nones(continuation())
+            return _drop_none_if_list(continuation())
 
     else:
         max_axis = layout.branch_depth[1] - 1
@@ -109,9 +115,9 @@ def _impl(array, axis, highlevel, behavior):
                 return layout.drop_none()
 
     options = {"none_indexes": []}
-    out = ak._do.recursively_apply(layout, action, behavior, options)
+    out = ak._do.recursively_apply(layout, action, depth_context=options)
 
     if len(options["none_indexes"]) > 0:
-        out = ak._do.recursively_apply(out, recompute_offsets, behavior, options)
+        out = ak._do.recursively_apply(out, recompute_offsets, depth_context=options)
 
-    return wrap_layout(out, behavior, highlevel, like=behavior)
+    return ctx.wrap(out, highlevel=highlevel)

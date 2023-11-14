@@ -1,5 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("type",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import numbers
 from datetime import datetime, timedelta
 
@@ -9,6 +11,8 @@ import awkward as ak
 from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("type",)
 
 np = NumpyMetadata.instance()
 
@@ -139,5 +143,5 @@ def _impl(array, behavior):
         return ak.types.ScalarType(ak.types.UnknownType(), behavior=behavior)
 
     else:
-        layout = ak.to_layout(array, allow_unknown=False, allow_record=False)
+        layout = ak.to_layout(array, allow_record=False)
         return _impl(layout, behavior)

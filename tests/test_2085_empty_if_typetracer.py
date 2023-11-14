@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -54,6 +56,6 @@ def test_multiplier(regulararray):
     b = ak.from_numpy(a, regulararray=regulararray)
     assert str(b.type) == "2 * 3 * 5 * int64"
 
-    c = b.layout.form.length_one_array()
+    c = ak.Array(b.layout.form.length_one_array(highlevel=False))
     assert str(c.type) == "1 * 3 * 5 * int64"
     assert c.tolist() == [[[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]]

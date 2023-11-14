@@ -1,8 +1,9 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -17,9 +18,23 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.errors import AxisError
 from awkward.forms.form import Form
 from awkward.forms.listoffsetform import ListOffsetForm
@@ -212,7 +227,7 @@ class ListOffsetArray(Content):
         offsets = self._offsets.to_nplike(TypeTracer.instance())
         return ListOffsetArray(
             offsets.forget_length() if forget_length else offsets,
-            self._content._to_typetracer(False),
+            self._content._to_typetracer(forget_length),
             parameters=self._parameters,
         )
 
@@ -400,7 +415,7 @@ class ListOffsetArray(Content):
             next_content = self._content[this_start:]
 
         if index_nplike.known_data and not index_nplike.array_equal(
-            this_zero_offsets, offsets
+            this_zero_offsets, offsets.data
         ):
             raise ValueError("cannot broadcast nested list")
 
@@ -1879,7 +1894,14 @@ class ListOffsetArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         is_string = self.parameter("__array__") == "string"
         is_bytestring = self.parameter("__array__") == "bytestring"
         if is_string:
@@ -2060,7 +2082,9 @@ class ListOffsetArray(Content):
         else:
             return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -2135,8 +2159,13 @@ class ListOffsetArray(Content):
         return ak.contents.ListOffsetArray(new_offsets, new_content)
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if self._backend.nplike.known_data:
             offsetsmin = self._offsets[0]
             offsets = ak.index.Index(
@@ -2154,7 +2183,6 @@ class ListOffsetArray(Content):
                     offsets,
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth + 1,
                         copy.copy(depth_context),
                         lateral_context,
@@ -2168,7 +2196,6 @@ class ListOffsetArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
@@ -2181,7 +2208,6 @@ class ListOffsetArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

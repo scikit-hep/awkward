@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_BOOLBUILDER_H_
 #define AWKWARD_BOOLBUILDER_H_
@@ -16,7 +16,7 @@ namespace awkward {
   /// @class BoolBuilder
   ///
   /// @brief Builder node that accumulates boolean values.
-  class LIBAWKWARD_EXPORT_SYMBOL BoolBuilder: public Builder {
+  class EXPORT_SYMBOL BoolBuilder: public Builder {
   public:
     /// @brief Create an empty BoolBuilder.
     /// @param options Configuration options for building an array;

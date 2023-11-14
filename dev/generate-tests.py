@@ -1,5 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
+from __future__ import annotations
 
 import copy
 import datetime
@@ -654,7 +655,12 @@ def gencudakerneltests(specdict):
                 )
 
                 f.write(
-                    "import cupy\nimport pytest\n\nimport awkward as ak\nimport awkward._connect.cuda as ak_cu\n\ncupy_backend = ak._backends.CupyBackend.instance()\n\n"
+                    "import cupy\n"
+                    "import pytest\n\n"
+                    "import awkward as ak\n"
+                    "import awkward._connect.cuda as ak_cu\n"
+                    "from awkward._backends.cupy import CupyBackend\n\n"
+                    "cupy_backend = CupyBackend.instance()\n\n"
                 )
                 num = 1
                 if spec.tests == []:

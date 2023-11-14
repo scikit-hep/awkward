@@ -1,5 +1,5 @@
 # BSD 3-Clause License; see
-# https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 macro(addtest_nolibs name filename)
   add_executable(${name} ${filename})

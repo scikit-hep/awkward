@@ -1,18 +1,21 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("strings_astype",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("strings_astype",)
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
 @high_level_function()
-def strings_astype(array, to, *, highlevel=True, behavior=None):
+def strings_astype(array, to, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -20,6 +23,8 @@ def strings_astype(array, to, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts all strings in the array to a new type, leaving the structure
@@ -49,12 +54,10 @@ def strings_astype(array, to, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, to, highlevel, behavior)
+    return _impl(array, to, highlevel, behavior, attrs)
 
 
-def _impl(array, to, highlevel, behavior):
-    to_dtype = np.dtype(to)
-
+def _impl(array, to, highlevel, behavior, attrs):
     def action(layout, **kwargs):
         if layout.is_list and (
             layout.parameter("__array__") == "string"
@@ -71,15 +74,13 @@ def _impl(array, to, highlevel, behavior):
                 npstrings[maskedarray.mask] = 0
             npnumbers = numpy.astype(
                 numpy.reshape(npstrings, (-1,)).view("<S" + str(max_length)),
-                dtype=to_dtype,
+                dtype=np.dtype(to),
             )
             return ak.contents.NumpyArray(npnumbers)
         else:
             return None
 
-    layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
-    )
-    behavior = behavior_of(array, behavior=behavior)
-    out = ak._do.recursively_apply(layout, action, behavior)
-    return wrap_layout(out, behavior, highlevel)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+    out = ak._do.recursively_apply(layout, action)
+    return ctx.wrap(out, highlevel=highlevel)

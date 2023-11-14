@@ -1,5 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
+from __future__ import annotations
 
 import datetime
 import os
@@ -383,6 +384,7 @@ def by_signature(cuda_kernel_templates):
                 special = [repr(spec["name"])]
                 [type_to_pytype(x["type"], special) for x in childfunc["args"]]
                 dirlist = [repr(x["dir"]) for x in childfunc["args"]]
+                ispointerlist = [repr("List" in x["type"]) for x in childfunc["args"]]
                 if spec["name"] in cuda_kernels_impl:
                     with open(
                         os.path.join(
@@ -403,10 +405,12 @@ def by_signature(cuda_kernel_templates):
     def f(grid, block, args):
         cuda_kernel_templates.get_function(fetch_specialization([{}]))(grid, block, args)
     f.dir = [{}]
+    f.is_ptr = [{}]
     out[{}] = f
 """.format(
                                     ", ".join(special),
                                     ", ".join(dirlist),
+                                    ", ".join(ispointerlist),
                                     ", ".join(special),
                                 )
                             )
@@ -427,8 +431,13 @@ def by_signature(cuda_kernel_templates):
                             file.write(python_code)
                             file.write(
                                 """    f.dir = [{}]
+    f.is_ptr = [{}]
     out[{}] = f
-""".format(", ".join(dirlist), ", ".join(special))
+""".format(
+                                    ", ".join(dirlist),
+                                    ", ".join(ispointerlist),
+                                    ", ".join(special),
+                                )
                             )
                 else:
                     file.write(

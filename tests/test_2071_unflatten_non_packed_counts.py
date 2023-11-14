@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -36,10 +38,9 @@ def test_option_counts():
 
 
 def test_categorical_counts():
-    with pytest.warns(
-        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
-    ):
-        assert ak.almost_equal(
-            ak.unflatten([1.1, 2.2, 3.3, 4.4, 5.5], ak.to_categorical([3, 0, 2])),
-            [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
-        )
+    pytest.importorskip("pyarrow")
+
+    assert ak.almost_equal(
+        ak.unflatten([1.1, 2.2, 3.3, 4.4, 5.5], ak.str.to_categorical([3, 0, 2])),
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
+    )

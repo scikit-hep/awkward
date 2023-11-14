@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
@@ -34,7 +35,6 @@ def recursively_apply(
     if isinstance(layout, Content):
         return layout._recursively_apply(
             action,
-            behavior,
             1,
             copy.copy(depth_context),
             lateral_context,

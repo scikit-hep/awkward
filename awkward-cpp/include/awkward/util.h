@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_UTIL_H_
 #define AWKWARD_UTIL_H_
@@ -19,7 +19,7 @@ namespace awkward {
     /// @brief NumPy dtypes that can be interpreted within Awkward C++
     /// (only the primitive, fixed-width types). Non-native-endian types
     /// are considered NOT_PRIMITIVE.
-    enum class dtype {
+    enum class EXPORT_SYMBOL dtype {
         NOT_PRIMITIVE,
         boolean,
         int8,
@@ -43,11 +43,11 @@ namespace awkward {
     };
 
     /// @brief Returns the name associated with a given dtype.
-    const std::string
+    EXPORT_SYMBOL const std::string
     dtype_to_name(dtype dt);
 
     /// @brief Convert a dtype enum into a NumPy format string.
-    const std::string
+    EXPORT_SYMBOL const std::string
     dtype_to_format(dtype dt, const std::string& format = "");
 
     /// @brief Puts quotation marks around a string and escapes the appropriate
@@ -59,7 +59,7 @@ namespace awkward {
     ///
     /// @note The implementation does not yet escape characters: it only adds
     /// strings. See issue
-    /// [scikit-hep/awkward-1.0#186](https://github.com/scikit-hep/awkward-1.0/issues/186).
+    /// [scikit-hep/awkward#186](https://github.com/scikit-hep/awkward/issues/186).
     std::string
       quote(const std::string& x);
 
@@ -100,7 +100,7 @@ namespace awkward {
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
     template <typename T>
-    class LIBAWKWARD_EXPORT_SYMBOL array_deleter {
+    class EXPORT_SYMBOL array_deleter {
     public:
       /// @brief Called by `std::shared_ptr` when its reference count reaches
       /// zero.

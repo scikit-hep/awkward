@@ -1,7 +1,11 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("is_categorical",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._dispatch import high_level_function
+
+__all__ = ("is_categorical",)
 
 
 @high_level_function()
@@ -15,7 +19,7 @@ def is_categorical(array):
     `"__array__" = "categorical"`), then this function returns True;
     otherwise, it returns False.
 
-    See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
+    See also #ak.categories, #ak.str.to_categorical, #ak.from_categorical.
     """
     # Dispatch
     yield (array,)
@@ -26,6 +30,6 @@ def is_categorical(array):
 
 def _impl(array):
     layout = ak.operations.to_layout(
-        array, allow_record=False, allow_unknown=False, primitive_policy="error"
+        array, allow_record=False, primitive_policy="error"
     )
     return layout.purelist_parameter("__array__") == "categorical"

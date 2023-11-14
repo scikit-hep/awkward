@@ -1,7 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("EmptyForm",)
+from __future__ import annotations
 
 from collections.abc import Callable
 from inspect import signature
@@ -13,6 +12,8 @@ from awkward._nplikes.shape import ShapeItem
 from awkward._typing import DType, Iterator, JSONSerializable, Self, final
 from awkward._util import UNSET, Sentinel
 from awkward.forms.form import Form, JSONMapping, _SpecifierMatcher
+
+__all__ = ("EmptyForm",)
 
 np = NumpyMetadata.instance()
 

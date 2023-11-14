@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_FORTHMACHINE_H_
 #define AWKWARD_FORTHMACHINE_H_
@@ -19,7 +19,7 @@ namespace awkward {
   ///
   /// THERE
   template <typename T, typename I>
-  class LIBAWKWARD_EXPORT_SYMBOL ForthMachineOf {
+  class EXPORT_SYMBOL ForthMachineOf {
 
     template <typename TYPE> using IndexTypeOf = typename std::vector<TYPE>::size_type;
 

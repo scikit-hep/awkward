@@ -1,10 +1,11 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
 import json
 import math
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
@@ -18,10 +19,24 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
 from awkward.contents.bytemaskedarray import ByteMaskedArray
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.forms.form import Form
 from awkward.index import Index
@@ -312,7 +327,7 @@ class BitMaskedArray(Content):
         tt = TypeTracer.instance()
         return BitMaskedArray(
             self._mask.to_nplike(tt),
-            self._content._to_typetracer(False),
+            self._content._to_typetracer(forget_length),
             self._valid_when,
             unknown_length if forget_length else self.length,
             self._lsb_order,
@@ -676,7 +691,14 @@ class BitMaskedArray(Content):
     def _pad_none(self, target, axis, depth, clip):
         return self.to_ByteMaskedArray()._pad_none(target, axis, depth, clip)
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         return self.to_ByteMaskedArray()._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
@@ -684,7 +706,9 @@ class BitMaskedArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         return self.to_ByteMaskedArray()._to_backend_array(allow_missing, backend)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
             return self.project()._remove_structure(backend, options)
@@ -695,8 +719,13 @@ class BitMaskedArray(Content):
         return self.to_ByteMaskedArray()._drop_none()
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if self._backend.nplike.known_data:
             content = self._content[0 : self._length]
         else:
@@ -713,7 +742,6 @@ class BitMaskedArray(Content):
                     self._mask,
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -730,7 +758,6 @@ class BitMaskedArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
@@ -743,7 +770,6 @@ class BitMaskedArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )

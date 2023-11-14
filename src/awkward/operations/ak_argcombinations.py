@@ -1,10 +1,14 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("argcombinations",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+
+__all__ = ("argcombinations",)
 
 np = NumpyMetadata.instance()
 
@@ -21,6 +25,7 @@ def argcombinations(
     with_name=None,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -46,6 +51,8 @@ def argcombinations(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Computes a Cartesian product (i.e. cross product) of `array` with itself
     that is restricted to combinations sampled without replacement,
@@ -70,11 +77,21 @@ def argcombinations(
         with_name,
         highlevel,
         behavior,
+        attrs,
     )
 
 
 def _impl(
-    array, n, replacement, axis, fields, parameters, with_name, highlevel, behavior
+    array,
+    n,
+    replacement,
+    axis,
+    fields,
+    parameters,
+    with_name,
+    highlevel,
+    behavior,
+    attrs,
 ):
     axis = regularize_axis(axis)
     if parameters is None:
@@ -87,12 +104,11 @@ def _impl(
     if axis < 0:
         raise ValueError("the 'axis' for argcombinations must be non-negative")
     else:
-        layout = ak._do.local_index(
-            ak.operations.to_layout(
-                array, allow_record=False, allow_unknown=False, primitive_policy="error"
-            ),
-            axis,
-        )
+        with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+            layout = ak._do.local_index(
+                ctx.unwrap(array, allow_record=False, primitive_policy="error"),
+                axis,
+            )
         out = ak._do.combinations(
             layout,
             n,
@@ -101,4 +117,4 @@ def _impl(
             fields=fields,
             parameters=parameters,
         )
-        return wrap_layout(out, behavior, highlevel, like=array)
+        return ctx.wrap(out, highlevel=highlevel)

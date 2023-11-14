@@ -1,6 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-import numpy as np
+from __future__ import annotations
+
 import pytest
 
 import awkward as ak
@@ -24,8 +25,8 @@ def test_axis_wrap_if_negative_record_v2():
 
     r = ak.Record(dict_cell_chain_field)
 
-    with pytest.raises(np.AxisError):
-        r = ak.operations.to_regular(r, 0)
+    with pytest.raises(TypeError, match="ak.Record objects are not allowed"):
+        ak.operations.to_regular(r, 0)
 
     list_cell_chain_field = [
         [["TRA", "TRAV1", 15], ["TRB", "TRBV1", 12]],
