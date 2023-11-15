@@ -33,7 +33,7 @@ def test():
 
     assert isinstance(err.value, ValueError)
 
-    message = "".join(traceback.format_exception(err.value))
+    message = "".join(traceback.format_exception(err.type, err.value, err.tb))
     assert (
         "ValueError: index out of range in compiled CUDA code "
         "(awkward_RegularArray_getitem_next_at)\n"
