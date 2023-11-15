@@ -454,7 +454,7 @@ def by_signature(cuda_kernel_templates):
 """
         )
 
-    print("Done with  src/awkward/connect/cuda/_kernel_signatures.py...")
+    print("Done with  src/awkward/_connect/cuda/_kernel_signatures.py...")
 
 
 if __name__ == "__main__":

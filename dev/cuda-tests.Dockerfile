@@ -8,4 +8,5 @@ RUN apt-get update \
   && apt-get install -y /tmp/gh.deb \
   && rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT ["/usr/bin/bash"]
+COPY cuda-tests-entrypoint /app/entrypoint
+ENTRYPOINT ["/app/entrypoint"]
