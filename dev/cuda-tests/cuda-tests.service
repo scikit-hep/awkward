@@ -8,7 +8,8 @@ TimeoutStartSec=0
 Restart=always
 ExecStartPre=-/usr/bin/docker exec %n stop
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/usr/bin/docker pull agoose77/cuda-tests:latest
+# Allow pull to fail if the image is e.g. only local (- prefix to this command)
+ExecStartPre=-/usr/bin/docker pull agoose77/cuda-tests:latest
 ExecStart=/usr/bin/docker run --rm --name %n \
     --runtime=nvidia \
     --gpus all \
