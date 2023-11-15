@@ -22,7 +22,8 @@ This directory containers resources for running the Awkward CUDA tests inside a 
     ```bash
     sudo echo "ghp_..." > /etc/cuda-gh-token
     ```
-5. Run container (if not using systemd)
+5. Install NVIDIA Container Toolkit (see https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+6. Run container (if not using systemd)
     ```bash
     docker run --rm \
     --runtime=nvidia \
