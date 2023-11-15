@@ -5,7 +5,8 @@ Requires=docker.service
 
 [Service]
 TimeoutStartSec=0
-Restart=always
+Restart=never
+Type=oneshot
 ExecStartPre=-/usr/bin/docker exec %n stop
 ExecStartPre=-/usr/bin/docker rm %n
 # Allow pull to fail if the image is e.g. only local (- prefix to this command)
