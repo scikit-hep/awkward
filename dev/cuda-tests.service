@@ -1,0 +1,21 @@
+[Unit]
+Description=Awkward CUDA Tests Service
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker exec %n stop
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull agoose77/cuda-tests:latest
+ExecStart=/usr/bin/docker run --rm --name %n \
+    --runtime=nvidia \
+    --gpus all \
+    -v "${CREDENTIALS_DIRECTORY}:/creds" \
+    -e GH_TOKEN_PATH=/creds/gh-token \
+    agoose77/cuda-tests:latest
+LoadCredential=gh-token:/etc/cuda-gh-token
+
+[Install]
+WantedBy=default.target
