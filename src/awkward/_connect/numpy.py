@@ -11,6 +11,7 @@ from itertools import chain
 import numpy
 
 import awkward as ak
+from awkward._attrs import attrs_of
 from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of, backend_of_obj, common_backend
 from awkward._behavior import (
@@ -353,6 +354,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
         return NotImplemented
 
     behavior = behavior_of(*inputs)
+    attrs = attrs_of(*inputs)
     backend = backend_of(*inputs, coerce_to_common=True)
 
     inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
@@ -458,9 +460,9 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
     )
 
     if len(out) == 1:
-        return wrap_layout(out[0], behavior)
+        return wrap_layout(out[0], behavior=behavior, attrs=attrs)
     else:
-        return tuple(wrap_layout(o, behavior) for o in out)
+        return tuple(wrap_layout(o, behavior=behavior, attrs=attrs) for o in out)
 
 
 def action_for_matmul(inputs):
