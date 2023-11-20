@@ -179,8 +179,10 @@ class NumpyForm(NumpyMeta, Form):
         else:
             return False
 
-    def to_RegularForm(self) -> RegularForm:
-        out = NumpyForm(self._primitive, (), parameters=None, form_key=None)
+    def to_RegularForm(self) -> RegularForm | NumpyForm:
+        out: RegularForm | NumpyForm = NumpyForm(
+            self._primitive, (), parameters=None, form_key=None
+        )
         for x in self._inner_shape[::-1]:
             out = ak.forms.RegularForm(out, x, parameters=None, form_key=None)
         out._parameters = self._parameters

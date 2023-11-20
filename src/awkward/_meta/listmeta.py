@@ -67,4 +67,3 @@ class ListMeta(Meta, Generic[T]):
     @property
     def content(self) -> T:
         return self._content
-
