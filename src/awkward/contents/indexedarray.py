@@ -103,8 +103,6 @@ class IndexedArray(IndexedMeta[Content], Content):
                     raise AssertionError(where)
     """
 
-    _content: Content
-
     def __init__(self, index, content, *, parameters=None):
         if not (
             isinstance(index, Index)

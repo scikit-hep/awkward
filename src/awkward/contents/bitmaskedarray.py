@@ -135,8 +135,6 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                     raise AssertionError(where)
     """
 
-    _content: Content
-
     def __init__(
         self, mask, content, valid_when, length, lsb_order, *, parameters=None
     ):

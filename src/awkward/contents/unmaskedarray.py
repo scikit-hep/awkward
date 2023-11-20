@@ -102,8 +102,6 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         self._content = content
         self._init(parameters, content.backend)
 
-    _content: Content
-
     form_cls: Final = UnmaskedForm
 
     def copy(self, content=UNSET, *, parameters=UNSET):

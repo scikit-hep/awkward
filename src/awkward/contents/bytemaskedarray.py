@@ -110,8 +110,6 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
                     raise AssertionError(where)
     """
 
-    _content: Content
-
     def __init__(self, mask, content, valid_when, *, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise TypeError(

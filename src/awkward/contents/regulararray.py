@@ -120,8 +120,6 @@ class RegularArray(RegularMeta[Content], Content):
                     raise AssertionError(where)
     """
 
-    _content: Content
-
     def __init__(self, content, size, zeros_length=0, *, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(

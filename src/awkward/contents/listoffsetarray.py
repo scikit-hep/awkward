@@ -113,8 +113,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     raise AssertionError(where)
     """
 
-    _content: Content
-
     def __init__(self, offsets, content, *, parameters=None):
         if not isinstance(offsets, Index) and offsets.dtype in (
             np.dtype(np.int32),
