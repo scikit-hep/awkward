@@ -17,6 +17,7 @@ from awkward._backends.dispatch import (
 from awkward._behavior import get_array_class, get_record_class
 from awkward._kernels import KernelError
 from awkward._layout import wrap_layout
+from awkward._meta.meta import Meta
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
@@ -119,17 +120,7 @@ class ToArrowOptions(TypedDict):
     record_is_scalar: bool
 
 
-class Content:
-    is_numpy = False
-    is_unknown = False
-    is_list = False
-    is_regular = False
-    is_option = False
-    is_indexed = False
-    is_record = False
-    is_union = False
-    is_leaf = False
-
+class Content(Meta):
     def _init(self, parameters: dict[str, Any] | None, backend: Backend):
         if parameters is None:
             pass
@@ -194,33 +185,6 @@ class Content:
 
         self._parameters = parameters
         self._backend = backend
-
-    @property
-    def parameters(self) -> dict[str, JSONValueType]:
-        """
-        Free-form parameters associated with every array node as a dict from parameter
-        name to its JSON-like value. Some parameters are special and are used to assign
-        behaviors to the data.
-
-        Note that the dict returned by this property is a *view* of the array node's
-        parameters. *Changing the dict will change the array!*
-
-        See #ak.behavior.
-        """
-        if self._parameters is None:
-            self._parameters = {}
-        return self._parameters
-
-    def parameter(self, key: str) -> JSONValueType | None:
-        """
-        Returns a parameter's value or None.
-
-        (No distinction is ever made between unset parameters and parameters set to None.)
-        """
-        if self._parameters is None:
-            return None
-        else:
-            return self._parameters.get(key)
 
     @property
     def backend(self) -> Backend:

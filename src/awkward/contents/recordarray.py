@@ -12,6 +12,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import find_record_reducer
 from awkward._layout import maybe_posaxis, wrap_layout
+from awkward._meta.recordmeta import RecordMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -59,7 +60,7 @@ def _apply_record_reducer(reducer, layout: Content, mask: bool, behavior) -> Con
 
 
 @final
-class RecordArray(Content):
+class RecordArray(RecordMeta, Content):
     """
     RecordArray represents an array of tuples or records, all with the
     same type. Its `contents` is an ordered list of arrays.
@@ -145,11 +146,7 @@ class RecordArray(Content):
                     raise AssertionError(where)
     """
 
-    is_record = True
-
-    @property
-    def is_leaf(self):
-        return len(self._contents) == 0
+    _contents: Sequence[Content]
 
     def __init__(
         self,
@@ -280,7 +277,7 @@ class RecordArray(Content):
         return self._contents
 
     @property
-    def fields(self):
+    def fields(self) -> list[str]:
         if self._fields is None:
             return [str(i) for i in range(len(self._contents))]
         else:
@@ -328,7 +325,7 @@ class RecordArray(Content):
         return cls(contents, fields, length, parameters=parameters, backend=backend)
 
     @property
-    def is_tuple(self):
+    def is_tuple(self) -> bool:
         return self._fields is None
 
     def to_tuple(self) -> Self:
@@ -420,15 +417,6 @@ class RecordArray(Content):
         out.append(indent + "</RecordArray>")
         out.append(post)
         return "".join(out)
-
-    def index_to_field(self, index: SupportsIndex) -> str:
-        return self.form_cls.index_to_field(self, index)
-
-    def field_to_index(self, field: str) -> SupportsIndex:
-        return self.form_cls.field_to_index(self, field)
-
-    def has_field(self, field: str | SupportsIndex) -> bool:
-        return self.form_cls.has_field(self, field)
 
     def content(self, index_or_field: str | SupportsIndex) -> Content:
         out = self.form_cls.content(self, index_or_field)

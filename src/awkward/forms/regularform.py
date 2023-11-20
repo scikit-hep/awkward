@@ -5,11 +5,12 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 
 import awkward as ak
+from awkward._meta.regularmeta import RegularMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import DType, JSONSerializable, Self, final
+from awkward._typing import DType, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher
 
@@ -19,9 +20,8 @@ np = NumpyMetadata.instance()
 
 
 @final
-class RegularForm(Form):
-    is_list = True
-    is_regular = True
+class RegularForm(RegularMeta, Form):
+    _content: Form
 
     def __init__(self, content, size, *, parameters=None, form_key=None):
         if not isinstance(content, Form):
@@ -93,57 +93,6 @@ class RegularForm(Form):
             )
         else:
             return False
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        if self._parameters is not None:
-            for key in keys:
-                if key in self._parameters:
-                    return self._parameters[key]
-
-        return self._content.purelist_parameters(*keys)
-
-    @property
-    def purelist_isregular(self):
-        return self._content.purelist_isregular
-
-    @property
-    def purelist_depth(self):
-        if self.parameter("__array__") in ("string", "bytestring"):
-            return 1
-        else:
-            return self._content.purelist_depth + 1
-
-    @property
-    def is_identity_like(self):
-        return False
-
-    @property
-    def minmax_depth(self):
-        if self.parameter("__array__") in ("string", "bytestring"):
-            return (1, 1)
-        else:
-            mindepth, maxdepth = self._content.minmax_depth
-            return (mindepth + 1, maxdepth + 1)
-
-    @property
-    def branch_depth(self):
-        if self.parameter("__array__") in ("string", "bytestring"):
-            return (False, 1)
-        else:
-            branch, depth = self._content.branch_depth
-            return (branch, depth + 1)
-
-    @property
-    def fields(self):
-        return self._content.fields
-
-    @property
-    def is_tuple(self):
-        return self._content.is_tuple
-
-    @property
-    def dimension_optiontype(self):
-        return False
 
     def _columns(self, path, output, list_indicator):
         if (

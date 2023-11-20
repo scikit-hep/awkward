@@ -10,6 +10,7 @@ from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.unionmeta import UnionMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -48,7 +49,7 @@ numpy = Numpy.instance()
 
 
 @final
-class UnionArray(Content):
+class UnionArray(UnionMeta, Content):
     """
     UnionArray represents data drawn from an ordered list of `contents`,
     which can have different types, using
@@ -102,7 +103,7 @@ class UnionArray(Content):
                     raise AssertionError(where)
     """
 
-    is_union = True
+    _contents: Sequence[Content]
 
     def __init__(self, tags, index, contents, *, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):

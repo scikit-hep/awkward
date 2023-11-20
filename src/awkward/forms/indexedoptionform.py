@@ -5,9 +5,10 @@ from __future__ import annotations
 from collections.abc import Callable
 
 import awkward as ak
+from awkward._meta.indexedoptionmeta import IndexedOptionMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_union, type_parameters_equal
-from awkward._typing import DType, Iterator, JSONSerializable, Self, final
+from awkward._typing import DType, Iterator, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
 
@@ -17,9 +18,8 @@ np = NumpyMetadata.instance()
 
 
 @final
-class IndexedOptionForm(Form):
-    is_option = True
-    is_indexed = True
+class IndexedOptionForm(IndexedOptionMeta, Form):
+    _content: Form
 
     def __init__(
         self,
@@ -129,46 +129,6 @@ class IndexedOptionForm(Form):
             )
         else:
             return False
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        if self._parameters is not None:
-            for key in keys:
-                if key in self._parameters:
-                    return self._parameters[key]
-
-        return self._content.purelist_parameters(*keys)
-
-    @property
-    def purelist_isregular(self):
-        return self._content.purelist_isregular
-
-    @property
-    def purelist_depth(self):
-        return self._content.purelist_depth
-
-    @property
-    def is_identity_like(self):
-        return self._content.is_identity_like
-
-    @property
-    def minmax_depth(self):
-        return self._content.minmax_depth
-
-    @property
-    def branch_depth(self):
-        return self._content.branch_depth
-
-    @property
-    def fields(self):
-        return self._content.fields
-
-    @property
-    def is_tuple(self):
-        return self._content.is_tuple
-
-    @property
-    def dimension_optiontype(self):
-        return True
 
     def _columns(self, path, output, list_indicator):
         self._content._columns(path, output, list_indicator)

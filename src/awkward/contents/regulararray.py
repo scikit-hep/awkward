@@ -8,6 +8,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.regularmeta import RegularMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -49,7 +50,7 @@ numpy = Numpy.instance()
 
 
 @final
-class RegularArray(Content):
+class RegularArray(RegularMeta, Content):
     """
     RegularArray describes lists that all have the same length, the single
     integer `size`. Its underlying `content` is a flattened view of the data;
@@ -119,8 +120,7 @@ class RegularArray(Content):
                     raise AssertionError(where)
     """
 
-    is_list = True
-    is_regular = True
+    _content: Content
 
     def __init__(self, content, size, zeros_length=0, *, parameters=None):
         if not isinstance(content, Content):

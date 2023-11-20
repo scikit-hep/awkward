@@ -10,6 +10,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.bytemaskedmeta import ByteMaskedMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -52,7 +53,7 @@ numpy = Numpy.instance()
 
 
 @final
-class ByteMaskedArray(Content):
+class ByteMaskedArray(ByteMaskedMeta, Content):
     """
     The ByteMaskedArray implements an #ak.types.OptionType with two aligned
     buffers, a boolean `mask` and `content`. At any element `i` where
@@ -109,7 +110,7 @@ class ByteMaskedArray(Content):
                     raise AssertionError(where)
     """
 
-    is_option = True
+    _content: Content
 
     def __init__(self, mask, content, valid_when, *, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):

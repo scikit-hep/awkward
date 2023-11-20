@@ -8,6 +8,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -48,7 +49,7 @@ numpy = Numpy.instance()
 
 
 @final
-class ListOffsetArray(Content):
+class ListOffsetArray(ListOffsetMeta, Content):
     """
     ListOffsetArray describes unequal-length lists (often called a
     "jagged" or "ragged" array). Like #ak.contents.RegularArray, the
@@ -112,7 +113,7 @@ class ListOffsetArray(Content):
                     raise AssertionError(where)
     """
 
-    is_list = True
+    _content: Content
 
     def __init__(self, offsets, content, *, parameters=None):
         if not isinstance(offsets, Index) and offsets.dtype in (

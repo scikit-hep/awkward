@@ -9,6 +9,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._meta.bitmaskedmeta import BitMaskedMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -50,7 +51,7 @@ numpy = Numpy.instance()
 
 
 @final
-class BitMaskedArray(Content):
+class BitMaskedArray(BitMaskedMeta, Content):
     """
     Like #ak.contents.ByteMaskedArray, BitMaskedArray implements an
     #ak.types.OptionType with two buffers, `mask` and `content`.
@@ -134,7 +135,7 @@ class BitMaskedArray(Content):
                     raise AssertionError(where)
     """
 
-    is_option = True
+    _content: Content
 
     def __init__(
         self, mask, content, valid_when, length, lsb_order, *, parameters=None

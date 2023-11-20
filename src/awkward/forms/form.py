@@ -13,11 +13,11 @@ from glob import escape as escape_glob
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._errors import deprecate
+from awkward._meta.meta import Meta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_union
 from awkward._typing import (
-    ClassVar,
     DType,
     Final,
     Iterator,
@@ -374,16 +374,7 @@ index_to_dtype: Final[dict[str, DType]] = {
 }
 
 
-class Form:
-    is_numpy: ClassVar = False
-    is_unknown: ClassVar = False
-    is_list: ClassVar = False
-    is_regular: ClassVar = False
-    is_option: ClassVar = False
-    is_indexed: ClassVar = False
-    is_record: ClassVar = False
-    is_union: ClassVar = False
-
+class Form(Meta):
     def _init(self, *, parameters: JSONMapping | None, form_key: str | None):
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
@@ -408,7 +399,7 @@ class Form:
         return self._parameters
 
     @property
-    def is_identity_like(self):
+    def is_identity_like(self) -> bool:
         """Return True if the content or its non-list descendents are an identity"""
         raise NotImplementedError
 
@@ -425,27 +416,27 @@ class Form:
         raise NotImplementedError
 
     @property
-    def purelist_isregular(self):
+    def purelist_isregular(self) -> bool:
         raise NotImplementedError
 
     @property
-    def purelist_depth(self):
+    def purelist_depth(self) -> int:
         raise NotImplementedError
 
     @property
-    def minmax_depth(self):
+    def minmax_depth(self) -> tuple[int, int]:
         raise NotImplementedError
 
     @property
-    def branch_depth(self):
+    def branch_depth(self) -> tuple[bool, int]:
         raise NotImplementedError
 
     @property
-    def fields(self):
+    def fields(self) -> list[str]:
         raise NotImplementedError
 
     @property
-    def is_tuple(self):
+    def is_tuple(self) -> bool:
         raise NotImplementedError
 
     @property
