@@ -8,6 +8,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.listmeta import ListMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -47,7 +48,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ListArray(Content):
+class ListArray(ListMeta[Content], Content):
     """
     ListArray generalizes #ak.contents.ListOffsetArray by not
     requiring its `content` to be in increasing order and by allowing it to
@@ -119,8 +120,6 @@ class ListArray(Content):
                     raise AssertionError(where)
     """
 
-    is_list = True
-
     def __init__(self, starts, stops, content, *, parameters=None):
         if not isinstance(starts, Index) and starts.dtype in (
             np.dtype(np.int32),
@@ -179,10 +178,6 @@ class ListArray(Content):
     @property
     def stops(self) -> Index:
         return self._stops
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = ListForm
 

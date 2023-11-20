@@ -10,6 +10,7 @@ from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.unionmeta import UnionMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -48,7 +49,7 @@ numpy = Numpy.instance()
 
 
 @final
-class UnionArray(Content):
+class UnionArray(UnionMeta[Content], Content):
     """
     UnionArray represents data drawn from an ordered list of `contents`,
     which can have different types, using
@@ -101,8 +102,6 @@ class UnionArray(Content):
                 else:
                     raise AssertionError(where)
     """
-
-    is_union = True
 
     def __init__(self, tags, index, contents, *, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
@@ -204,10 +203,6 @@ class UnionArray(Content):
     @property
     def index(self):
         return self._index
-
-    @property
-    def contents(self):
-        return self._contents
 
     form_cls: Final = UnionForm
 
@@ -462,9 +457,6 @@ class UnionArray(Content):
                 contents,
                 parameters=parameters,
             )
-
-    def content(self, index):
-        return self._contents[index]
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> UnionForm:
         form_key = getkey(self)

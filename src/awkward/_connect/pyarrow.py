@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Iterable, Sized
+from functools import lru_cache
 from types import ModuleType
 
 from packaging.version import parse as parse_version
@@ -893,12 +894,21 @@ def to_awkwardarrow_type(
         return storage_type
 
 
+@lru_cache
+def find_first_content_subclass(cls):
+    for base_cls in reversed(cls.mro()):
+        if base_cls is not ak.contents.Content and issubclass(
+            base_cls, ak.contents.Content
+        ):
+            return base_cls
+    raise TypeError
+
+
 def direct_Content_subclass(node):
     if node is None:
         return None
     else:
-        mro = type(node).mro()
-        return mro[mro.index(ak.contents.Content) - 1]
+        return find_first_content_subclass(type(node))
 
 
 def direct_Content_subclass_name(node):

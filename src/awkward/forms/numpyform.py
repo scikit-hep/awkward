@@ -6,14 +6,18 @@ from collections.abc import Callable, Iterable, Iterator
 
 import awkward as ak
 from awkward._errors import deprecate
+from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
-from awkward._typing import DType, JSONMapping, JSONSerializable, Self, final
+from awkward._typing import TYPE_CHECKING, DType, JSONMapping, Self, final
 from awkward._util import UNSET, Sentinel
 from awkward.forms.form import Form, _SpecifierMatcher
 
 __all__ = ("NumpyForm",)
+
+if TYPE_CHECKING:
+    from awkward.forms.regularform import RegularForm
 
 np = NumpyMetadata.instance()
 
@@ -61,9 +65,7 @@ def from_dtype(
 
 
 @final
-class NumpyForm(Form):
-    is_numpy = True
-
+class NumpyForm(NumpyMeta, Form):
     def __init__(
         self,
         primitive,
@@ -177,52 +179,14 @@ class NumpyForm(Form):
         else:
             return False
 
-    def to_RegularForm(self):
-        out = NumpyForm(self._primitive, (), parameters=None, form_key=None)
+    def to_RegularForm(self) -> RegularForm | NumpyForm:
+        out: RegularForm | NumpyForm = NumpyForm(
+            self._primitive, (), parameters=None, form_key=None
+        )
         for x in self._inner_shape[::-1]:
             out = ak.forms.RegularForm(out, x, parameters=None, form_key=None)
         out._parameters = self._parameters
         return out
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        if self._parameters is not None:
-            for key in keys:
-                if key in self._parameters:
-                    return self._parameters[key]
-        return None
-
-    @property
-    def purelist_isregular(self):
-        return True
-
-    @property
-    def purelist_depth(self):
-        return len(self.inner_shape) + 1
-
-    @property
-    def is_identity_like(self):
-        return False
-
-    @property
-    def minmax_depth(self):
-        depth = len(self.inner_shape) + 1
-        return (depth, depth)
-
-    @property
-    def branch_depth(self):
-        return (False, len(self.inner_shape) + 1)
-
-    @property
-    def fields(self):
-        return []
-
-    @property
-    def is_tuple(self):
-        return False
-
-    @property
-    def dimension_optiontype(self):
-        return False
 
     def _columns(self, path, output, list_indicator):
         output.append(".".join(path))

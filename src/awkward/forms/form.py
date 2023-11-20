@@ -13,16 +13,15 @@ from glob import escape as escape_glob
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._errors import deprecate
+from awkward._meta.meta import Meta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import parameters_union
 from awkward._typing import (
-    ClassVar,
     DType,
     Final,
     Iterator,
     JSONMapping,
-    JSONSerializable,
     Self,
 )
 
@@ -374,16 +373,7 @@ index_to_dtype: Final[dict[str, DType]] = {
 }
 
 
-class Form:
-    is_numpy: ClassVar = False
-    is_unknown: ClassVar = False
-    is_list: ClassVar = False
-    is_regular: ClassVar = False
-    is_option: ClassVar = False
-    is_indexed: ClassVar = False
-    is_record: ClassVar = False
-    is_union: ClassVar = False
-
+class Form(Meta):
     def _init(self, *, parameters: JSONMapping | None, form_key: str | None):
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
@@ -400,53 +390,6 @@ class Form:
 
         self._parameters = parameters
         self._form_key = form_key
-
-    @property
-    def parameters(self) -> JSONMapping:
-        if self._parameters is None:
-            self._parameters = {}
-        return self._parameters
-
-    @property
-    def is_identity_like(self):
-        """Return True if the content or its non-list descendents are an identity"""
-        raise NotImplementedError
-
-    def parameter(self, key: str) -> JSONSerializable:
-        if self._parameters is None:
-            return None
-        else:
-            return self._parameters.get(key)
-
-    def purelist_parameter(self, key: str) -> JSONSerializable:
-        return self.purelist_parameters(key)
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        raise NotImplementedError
-
-    @property
-    def purelist_isregular(self):
-        raise NotImplementedError
-
-    @property
-    def purelist_depth(self):
-        raise NotImplementedError
-
-    @property
-    def minmax_depth(self):
-        raise NotImplementedError
-
-    @property
-    def branch_depth(self):
-        raise NotImplementedError
-
-    @property
-    def fields(self):
-        raise NotImplementedError
-
-    @property
-    def is_tuple(self):
-        raise NotImplementedError
 
     @property
     def form_key(self):

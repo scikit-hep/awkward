@@ -8,6 +8,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.indexedmeta import IndexedMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -51,7 +52,7 @@ numpy = Numpy.instance()
 
 
 @final
-class IndexedArray(Content):
+class IndexedArray(IndexedMeta[Content], Content):
     """
     IndexedArray is a general-purpose tool for *lazily* changing the order of
     and/or duplicating some `content` with a
@@ -102,8 +103,6 @@ class IndexedArray(Content):
                     raise AssertionError(where)
     """
 
-    is_indexed = True
-
     def __init__(self, index, content, *, parameters=None):
         if not (
             isinstance(index, Index)
@@ -141,10 +140,6 @@ class IndexedArray(Content):
     @property
     def index(self):
         return self._index
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = IndexedForm
 

@@ -5,13 +5,13 @@ from __future__ import annotations
 from collections.abc import Callable
 
 import awkward as ak
+from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._typing import (
     DType,
     Iterator,
     JSONMapping,
-    JSONSerializable,
     Self,
     final,
 )
@@ -24,8 +24,8 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ListOffsetForm(Form):
-    is_list = True
+class ListOffsetForm(ListOffsetMeta[Form], Form):
+    _content: Form
 
     def __init__(
         self,
@@ -104,57 +104,6 @@ class ListOffsetForm(Form):
             )
         else:
             return False
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        if self._parameters is not None:
-            for key in keys:
-                if key in self._parameters:
-                    return self._parameters[key]
-
-        return self._content.purelist_parameters(*keys)
-
-    @property
-    def purelist_isregular(self):
-        return False
-
-    @property
-    def purelist_depth(self):
-        if self.parameter("__array__") in ("string", "bytestring"):
-            return 1
-        else:
-            return self._content.purelist_depth + 1
-
-    @property
-    def is_identity_like(self):
-        return False
-
-    @property
-    def minmax_depth(self):
-        if self.parameter("__array__") in ("string", "bytestring"):
-            return (1, 1)
-        else:
-            mindepth, maxdepth = self._content.minmax_depth
-            return (mindepth + 1, maxdepth + 1)
-
-    @property
-    def branch_depth(self):
-        if self.parameter("__array__") in ("string", "bytestring"):
-            return (False, 1)
-        else:
-            branch, depth = self._content.branch_depth
-            return (branch, depth + 1)
-
-    @property
-    def fields(self):
-        return self._content.fields
-
-    @property
-    def is_tuple(self):
-        return self._content.is_tuple
-
-    @property
-    def dimension_optiontype(self):
-        return False
 
     def _columns(self, path, output, list_indicator):
         if (
