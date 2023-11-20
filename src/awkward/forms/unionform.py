@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
+from itertools import permutations
 
 import awkward as ak
 from awkward._meta.unionmeta import UnionMeta
@@ -147,7 +148,8 @@ class UnionForm(UnionMeta[Form], Form):
             and len(self._contents) == len(other._contents)
             and type_parameters_equal(self._parameters, other._parameters)
         ):
-            return self._contents == other._contents
+            this_contents = tuple(self._contents)
+            return any(this_contents == c for c in permutations(other._contents))
 
         return False
 

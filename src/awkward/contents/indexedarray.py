@@ -17,7 +17,6 @@ from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
-    type_parameters_equal,
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
@@ -500,11 +499,9 @@ class IndexedArray(IndexedMeta[Content], Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # We can only combine option/indexed types whose array-record parameters agree
+        # Is the other array indexed or optional?
         elif other.is_option or other.is_indexed:
-            return self._content._mergeable_next(
-                other.content, mergebool
-            ) and type_parameters_equal(self._parameters, other._parameters)
+            return self._content._mergeable_next(other.content, mergebool)
         else:
             return self._content._mergeable_next(other, mergebool)
 
@@ -517,32 +514,38 @@ class IndexedArray(IndexedMeta[Content], Content):
         head = [self]
         tail = []
 
-        i = 0
-        while i < len(others):
-            other = others[i]
+        it_others = iter(others)
+        for other in it_others:
             if isinstance(other, ak.contents.UnionArray):
+                tail.append(other)
+                tail.extend(it_others)
                 break
             else:
                 head.append(other)
-            i = i + 1
 
-        while i < len(others):
-            tail.append(others[i])
-            i = i + 1
+        if any(x.backend.nplike.known_data for x in head + tail) and not all(
+            x.backend.nplike.known_data for x in head + tail
+        ):
+            raise RuntimeError
 
-        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
-            head = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in head
-            ]
-            tail = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in tail
-            ]
-
-        return (head, tail)
+        return head, tail
 
     def _reverse_merge(self, other):
+        if isinstance(other, ak.contents.EmptyArray):
+            return self
+
+        # FIXME: support categorical-categorical merging
+        if (
+            other.is_indexed
+            and other.parameter("__array__")
+            == self.parameter("__array__")
+            == "categorical"
+        ):
+            raise NotImplementedError(
+                "merging categorical arrays is currently not defined. "
+                "Use `ak.enforce_type` to drop the categorical type and use general merging."
+            )
+
         theirlength = other.length
         mylength = self.length
         index = ak.index.Index64.empty(
@@ -663,8 +666,23 @@ class IndexedArray(IndexedMeta[Content], Content):
                 contentlength_so_far += array.length
                 length_so_far += array.length
 
+                # Categoricals may only survive if all contents are categorical
+                if (
+                    parameters is not None
+                    and parameters.get("__array__") == "categorical"
+                ):
+                    parameters = {**parameters}
+                    del parameters['__array__']
+
         tail_contents = contents[1:]
         nextcontent = contents[0]._mergemany(tail_contents)
+
+        # FIXME: support categorical merging?
+        if parameters is not None and parameters.get("__array__") == "categorical":
+            raise NotImplementedError(
+                "merging categorical arrays is currently not defined. "
+                "Use `ak.enforce_type` to drop the categorical type and use general merging."
+            )
 
         # Options win out!
         if any(x.is_option for x in head):

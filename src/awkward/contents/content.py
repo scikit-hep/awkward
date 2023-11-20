@@ -23,7 +23,6 @@ from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
     type_parameters_equal,
 )
@@ -761,41 +760,23 @@ class Content(Meta):
 
         head = [self]
         tail = []
-        i = 0
 
-        while i < len(others):
-            other = others[i]
-            if isinstance(
-                other,
-                (
-                    ak.contents.IndexedArray,
-                    ak.contents.IndexedOptionArray,
-                    ak.contents.ByteMaskedArray,
-                    ak.contents.BitMaskedArray,
-                    ak.contents.UnmaskedArray,
-                    ak.contents.UnionArray,
-                ),
-            ):
+        it_others = iter(others)
+
+        for other in it_others:
+            if other.is_indexed or other.is_option or other.is_union:
+                tail.append(other)
+                tail.extend(it_others)
                 break
             else:
                 head.append(other)
-            i = i + 1
 
-        while i < len(others):
-            tail.append(others[i])
-            i = i + 1
+        if any(x.backend.nplike.known_data for x in head + tail) and not all(
+            x.backend.nplike.known_data for x in head + tail
+        ):
+            raise RuntimeError
 
-        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
-            head = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in head
-            ]
-            tail = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in tail
-            ]
-
-        return (head, tail)
+        return head, tail
 
     def _local_index(self, axis: int, depth: int):
         raise NotImplementedError

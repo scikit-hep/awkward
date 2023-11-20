@@ -785,8 +785,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # Check against option contents
-        elif other.is_option or other.is_indexed:
+        # Is the other array indexed or optional?
+        elif other.is_indexed or other.is_option:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
