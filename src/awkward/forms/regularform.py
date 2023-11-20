@@ -20,7 +20,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class RegularForm(RegularMeta, Form):
+class RegularForm(RegularMeta[Form], Form):
     _content: Form
 
     def __init__(self, content, size, *, parameters=None, form_key=None):

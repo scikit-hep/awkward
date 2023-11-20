@@ -51,7 +51,7 @@ numpy = Numpy.instance()
 
 
 @final
-class BitMaskedArray(BitMaskedMeta, Content):
+class BitMaskedArray(BitMaskedMeta[Content], Content):
     """
     Like #ak.contents.ByteMaskedArray, BitMaskedArray implements an
     #ak.types.OptionType with two buffers, `mask` and `content`.
@@ -211,10 +211,6 @@ class BitMaskedArray(BitMaskedMeta, Content):
     @property
     def mask(self):
         return self._mask
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     @property
     def valid_when(self):

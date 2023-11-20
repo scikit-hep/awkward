@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-
 from awkward._meta.meta import Meta
 from awkward._regularize import is_integer
-from awkward._typing import JSONSerializable
+from awkward._typing import Generic, JSONSerializable, TypeVar
 from awkward.errors import FieldNotFoundError
 
+T = TypeVar("T", bound=Meta)
 
-class RecordMeta(Meta):
+
+class RecordMeta(Meta, Generic[T]):
     is_record = True
 
-    _contents: Sequence[Meta]
+    _contents: list[T]
     _fields: list[str] | None
 
     @property
@@ -71,11 +71,11 @@ class RecordMeta(Meta):
         return False
 
     @property
-    def is_leaf(self):
+    def is_leaf(self) -> bool:
         return len(self._contents) == 0
 
     @property
-    def contents(self):
+    def contents(self) -> list[T]:
         return self._contents
 
     @property
@@ -85,7 +85,7 @@ class RecordMeta(Meta):
         else:
             return self._fields
 
-    def index_to_field(self, index):
+    def index_to_field(self, index: int) -> str:
         if 0 <= index < len(self._contents):
             if self._fields is None:
                 return str(index)
@@ -96,7 +96,7 @@ class RecordMeta(Meta):
                 f"no index {index} in record with {len(self._contents)} fields"
             )
 
-    def field_to_index(self, field):
+    def field_to_index(self, field: str) -> int:
         if self._fields is None:
             try:
                 i = int(field)
@@ -116,7 +116,7 @@ class RecordMeta(Meta):
             f"no field {field!r} in record with {len(self._contents)} fields"
         )
 
-    def has_field(self, field):
+    def has_field(self, field: str) -> bool:
         if self._fields is None:
             try:
                 i = int(field)
@@ -127,7 +127,7 @@ class RecordMeta(Meta):
         else:
             return field in self._fields
 
-    def content(self, index_or_field):
+    def content(self, index_or_field: int | str) -> T:
         if is_integer(index_or_field):
             index = index_or_field
         elif isinstance(index_or_field, str):

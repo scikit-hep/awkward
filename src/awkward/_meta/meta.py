@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from awkward._typing import ClassVar, JSONMapping, JSONSerializable, Self
+from awkward._typing import (
+    ClassVar,
+    JSONMapping,
+    JSONSerializable,
+    Self,
+)
 from awkward._util import UNSET
 
 

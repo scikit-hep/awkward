@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator
 
 import awkward as ak
 from awkward._meta.recordmeta import RecordMeta
@@ -18,9 +18,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class RecordForm(RecordMeta, Form):
-    _contents: Sequence[Form]
-
+class RecordForm(RecordMeta[Form], Form):
     def __init__(
         self,
         contents,

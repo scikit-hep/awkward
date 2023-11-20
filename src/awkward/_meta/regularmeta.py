@@ -4,15 +4,17 @@ from __future__ import annotations
 
 from awkward._meta.meta import Meta
 from awkward._nplikes.shape import ShapeItem
-from awkward._typing import JSONSerializable
+from awkward._typing import Generic, JSONSerializable, TypeVar
+
+T = TypeVar("T", bound=Meta)
 
 
-class RegularMeta(Meta):
+class RegularMeta(Meta, Generic[T]):
     is_list = True
     is_regular = True
 
     size: ShapeItem
-    _content: Meta
+    _content: T
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         if self._parameters is not None:
@@ -64,3 +66,8 @@ class RegularMeta(Meta):
     @property
     def dimension_optiontype(self) -> bool:
         return False
+
+    @property
+    def content(self) -> T:
+        return self._content
+

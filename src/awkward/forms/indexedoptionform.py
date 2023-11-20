@@ -18,7 +18,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class IndexedOptionForm(IndexedOptionMeta, Form):
+class IndexedOptionForm(IndexedOptionMeta[Form], Form):
     _content: Form
 
     def __init__(

@@ -50,7 +50,7 @@ numpy = Numpy.instance()
 
 
 @final
-class RegularArray(RegularMeta, Content):
+class RegularArray(RegularMeta[Content], Content):
     """
     RegularArray describes lists that all have the same length, the single
     integer `size`. Its underlying `content` is a flattened view of the data;
@@ -176,10 +176,6 @@ class RegularArray(RegularMeta, Content):
         else:
             self._length = zeros_length
         self._init(parameters, content.backend)
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     @property
     def size(self):

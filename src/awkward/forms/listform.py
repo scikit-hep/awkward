@@ -18,7 +18,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ListForm(ListMeta, Form):
+class ListForm(ListMeta[Form], Form):
     _content: Form
 
     def __init__(

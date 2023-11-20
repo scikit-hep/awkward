@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from awkward._meta.meta import Meta
-from awkward._typing import JSONSerializable
+from awkward._typing import Generic, JSONSerializable, TypeVar
+
+T = TypeVar("T", bound=Meta)
 
 
-class IndexedMeta(Meta):
+class IndexedMeta(Meta, Generic[T]):
     is_indexed = True
 
-    _content: Meta
+    _content: T
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         if self._parameters is not None:
@@ -50,3 +52,8 @@ class IndexedMeta(Meta):
     @property
     def dimension_optiontype(self) -> bool:
         return False
+
+    @property
+    def content(self) -> T:
+        return self._content
+

@@ -10,11 +10,14 @@ from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
-from awkward._typing import DType, JSONMapping, Self, final
+from awkward._typing import TYPE_CHECKING, DType, JSONMapping, Self, final
 from awkward._util import UNSET, Sentinel
 from awkward.forms.form import Form, _SpecifierMatcher
 
 __all__ = ("NumpyForm",)
+
+if TYPE_CHECKING:
+    from awkward.forms.regularform import RegularForm
 
 np = NumpyMetadata.instance()
 
@@ -176,7 +179,7 @@ class NumpyForm(NumpyMeta, Form):
         else:
             return False
 
-    def to_RegularForm(self):
+    def to_RegularForm(self) -> RegularForm:
         out = NumpyForm(self._primitive, (), parameters=None, form_key=None)
         for x in self._inner_shape[::-1]:
             out = ak.forms.RegularForm(out, x, parameters=None, form_key=None)

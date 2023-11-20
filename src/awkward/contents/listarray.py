@@ -48,7 +48,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ListArray(ListMeta, Content):
+class ListArray(ListMeta[Content], Content):
     """
     ListArray generalizes #ak.contents.ListOffsetArray by not
     requiring its `content` to be in increasing order and by allowing it to
@@ -180,10 +180,6 @@ class ListArray(ListMeta, Content):
     @property
     def stops(self) -> Index:
         return self._stops
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = ListForm
 

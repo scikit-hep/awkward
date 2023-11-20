@@ -51,7 +51,7 @@ numpy = Numpy.instance()
 
 
 @final
-class IndexedOptionArray(IndexedOptionMeta, Content):
+class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     """
     IndexedOptionArray is an #ak.contents.IndexedArray for which
     negative values in the index are interpreted as missing. It represents
@@ -137,10 +137,6 @@ class IndexedOptionArray(IndexedOptionMeta, Content):
     @property
     def index(self):
         return self._index
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = IndexedOptionForm
 

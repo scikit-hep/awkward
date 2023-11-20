@@ -49,7 +49,7 @@ numpy = Numpy.instance()
 
 
 @final
-class UnionArray(UnionMeta, Content):
+class UnionArray(UnionMeta[Content], Content):
     """
     UnionArray represents data drawn from an ordered list of `contents`,
     which can have different types, using
@@ -102,8 +102,6 @@ class UnionArray(UnionMeta, Content):
                 else:
                     raise AssertionError(where)
     """
-
-    _contents: Sequence[Content]
 
     def __init__(self, tags, index, contents, *, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
@@ -205,10 +203,6 @@ class UnionArray(UnionMeta, Content):
     @property
     def index(self):
         return self._index
-
-    @property
-    def contents(self):
-        return self._contents
 
     form_cls: Final = UnionForm
 
@@ -463,9 +457,6 @@ class UnionArray(UnionMeta, Content):
                 contents,
                 parameters=parameters,
             )
-
-    def content(self, index):
-        return self._contents[index]
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> UnionForm:
         form_key = getkey(self)

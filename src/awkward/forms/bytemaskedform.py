@@ -18,7 +18,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ByteMaskedForm(ByteMaskedMeta, Form):
+class ByteMaskedForm(ByteMaskedMeta[Form], Form):
     _content: Form
 
     def __init__(

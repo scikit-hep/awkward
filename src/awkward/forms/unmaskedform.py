@@ -18,7 +18,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class UnmaskedForm(UnmaskedMeta, Form):
+class UnmaskedForm(UnmaskedMeta[Form], Form):
     _content: Form
 
     def __init__(

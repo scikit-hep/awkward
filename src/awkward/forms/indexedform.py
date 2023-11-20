@@ -18,7 +18,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class IndexedForm(IndexedMeta, Form):
+class IndexedForm(IndexedMeta[Form], Form):
     _content: Form
 
     def __init__(

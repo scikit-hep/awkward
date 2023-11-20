@@ -53,7 +53,7 @@ numpy = Numpy.instance()
 
 
 @final
-class UnmaskedArray(UnmaskedMeta, Content):
+class UnmaskedArray(UnmaskedMeta[Content], Content):
     """
     UnmaskedArray implements an #ak.types.OptionType for which the values are
     never, in fact, missing. It exists to satisfy systems that formally require this
@@ -103,10 +103,6 @@ class UnmaskedArray(UnmaskedMeta, Content):
         self._init(parameters, content.backend)
 
     _content: Content
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = UnmaskedForm
 

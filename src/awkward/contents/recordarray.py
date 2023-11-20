@@ -60,7 +60,7 @@ def _apply_record_reducer(reducer, layout: Content, mask: bool, behavior) -> Con
 
 
 @final
-class RecordArray(RecordMeta, Content):
+class RecordArray(RecordMeta[Content], Content):
     """
     RecordArray represents an array of tuples or records, all with the
     same type. Its `contents` is an ordered list of arrays.
@@ -145,8 +145,6 @@ class RecordArray(RecordMeta, Content):
                 else:
                     raise AssertionError(where)
     """
-
-    _contents: Sequence[Content]
 
     def __init__(
         self,
@@ -271,10 +269,6 @@ class RecordArray(RecordMeta, Content):
         #       computed version (for typetracer conversions)
         self._length = length
         self._init(parameters, backend)
-
-    @property
-    def contents(self):
-        return self._contents
 
     @property
     def fields(self) -> list[str]:
@@ -419,7 +413,7 @@ class RecordArray(RecordMeta, Content):
         return "".join(out)
 
     def content(self, index_or_field: str | SupportsIndex) -> Content:
-        out = self.form_cls.content(self, index_or_field)
+        out = super().content(index_or_field)
         if (
             self._length is unknown_length
             or out.length is unknown_length

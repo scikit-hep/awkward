@@ -10,8 +10,10 @@ import awkward as ak
 import awkward._prettyprint
 from awkward._behavior import find_record_typestr
 from awkward._parameters import parameters_are_equal, type_parameters_equal
+from awkward._regularize import is_integer
 from awkward._typing import Any, JSONMapping, Self, cast, final
 from awkward._util import UNSET, Sentinel
+from awkward.errors import FieldNotFoundError
 from awkward.types.type import Type
 
 
@@ -225,13 +227,56 @@ class RecordType(Type):
             return False
 
     def index_to_field(self, index: int) -> str:
-        return ak.forms.RecordForm.index_to_field(self, index)  # type: ignore[arg-type]
+        if 0 <= index < len(self._contents):
+            if self._fields is None:
+                return str(index)
+            else:
+                return self._fields[index]
+        else:
+            raise IndexError(
+                f"no index {index} in record with {len(self._contents)} fields"
+            )
 
     def field_to_index(self, field: str) -> int:
-        return ak.forms.RecordForm.field_to_index(self, field)  # type: ignore[arg-type]
+        if self._fields is None:
+            try:
+                i = int(field)
+            except ValueError:
+                pass
+            else:
+                if 0 <= i < len(self._contents):
+                    return i
+        else:
+            try:
+                i = self._fields.index(field)
+            except ValueError:
+                pass
+            else:
+                return i
+        raise FieldNotFoundError(
+            f"no field {field!r} in record with {len(self._contents)} fields"
+        )
 
     def has_field(self, field: str) -> bool:
-        return ak.forms.RecordForm.has_field(self, field)  # type: ignore[arg-type]
+        if self._fields is None:
+            try:
+                i = int(field)
+            except ValueError:
+                return False
+            else:
+                return 0 <= i < len(self._contents)
+        else:
+            return field in self._fields
 
-    def content(self, index_or_field: str | int) -> Type:
-        return ak.forms.RecordForm.content(self, index_or_field)  # type: ignore[arg-type]
+    def content(self, index_or_field: int | str) -> Type:
+        if is_integer(index_or_field):
+            index = int(index_or_field)
+        elif isinstance(index_or_field, str):
+            index = self.field_to_index(index_or_field)
+        else:
+            raise TypeError(
+                "index_or_field must be an integer (index) or string (field), not {}".format(
+                    repr(index_or_field)
+                )
+            )
+        return self._contents[index]

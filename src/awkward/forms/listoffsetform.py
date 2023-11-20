@@ -24,7 +24,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ListOffsetForm(ListOffsetMeta, Form):
+class ListOffsetForm(ListOffsetMeta[Form], Form):
     _content: Form
 
     def __init__(

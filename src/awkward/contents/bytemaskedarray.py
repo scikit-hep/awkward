@@ -53,7 +53,7 @@ numpy = Numpy.instance()
 
 
 @final
-class ByteMaskedArray(ByteMaskedMeta, Content):
+class ByteMaskedArray(ByteMaskedMeta[Content], Content):
     """
     The ByteMaskedArray implements an #ak.types.OptionType with two aligned
     buffers, a boolean `mask` and `content`. At any element `i` where
@@ -159,10 +159,6 @@ class ByteMaskedArray(ByteMaskedMeta, Content):
     @property
     def mask(self):
         return self._mask
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     @property
     def valid_when(self):

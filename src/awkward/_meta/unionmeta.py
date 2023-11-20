@@ -3,16 +3,17 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Sequence
 
 from awkward._meta.meta import Meta
-from awkward._typing import JSONSerializable
+from awkward._typing import Generic, JSONSerializable, TypeVar
+
+T = TypeVar("T", bound=Meta)
 
 
-class UnionMeta(Meta):
+class UnionMeta(Meta, Generic[T]):
     is_union = True
 
-    _contents: Sequence[Meta]
+    _contents: list[T]
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         if self._parameters is not None:
@@ -93,3 +94,10 @@ class UnionMeta(Meta):
             if content.dimension_optiontype:
                 return True
         return False
+
+    def content(self, index: int) -> T:
+        return self._contents[index]
+
+    @property
+    def contents(self) -> list[T]:
+        return self._contents

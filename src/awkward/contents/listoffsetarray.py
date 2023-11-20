@@ -49,7 +49,7 @@ numpy = Numpy.instance()
 
 
 @final
-class ListOffsetArray(ListOffsetMeta, Content):
+class ListOffsetArray(ListOffsetMeta[Content], Content):
     """
     ListOffsetArray describes unequal-length lists (often called a
     "jagged" or "ragged" array). Like #ak.contents.RegularArray, the
@@ -164,10 +164,6 @@ class ListOffsetArray(ListOffsetMeta, Content):
     @property
     def offsets(self) -> Index:
         return self._offsets
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = ListOffsetForm
 

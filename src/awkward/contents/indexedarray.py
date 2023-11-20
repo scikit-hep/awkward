@@ -52,7 +52,7 @@ numpy = Numpy.instance()
 
 
 @final
-class IndexedArray(IndexedMeta, Content):
+class IndexedArray(IndexedMeta[Content], Content):
     """
     IndexedArray is a general-purpose tool for *lazily* changing the order of
     and/or duplicating some `content` with a
@@ -142,10 +142,6 @@ class IndexedArray(IndexedMeta, Content):
     @property
     def index(self):
         return self._index
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = IndexedForm
 

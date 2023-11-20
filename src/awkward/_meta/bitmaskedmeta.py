@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from awkward._meta.meta import Meta
-from awkward._typing import JSONSerializable
+from awkward._typing import Generic, JSONSerializable, TypeVar
+
+T = TypeVar("T", bound=Meta)
 
 
-class BitMaskedMeta(Meta):
-    _content: Meta
+class BitMaskedMeta(Meta, Generic[T]):
+    _content: T
     is_option = True
 
     @property
@@ -49,3 +51,8 @@ class BitMaskedMeta(Meta):
     @property
     def dimension_optiontype(self) -> bool:
         return True
+
+    @property
+    def content(self) -> T:
+        return self._content
+

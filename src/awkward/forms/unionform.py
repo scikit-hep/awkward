@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable
 
 import awkward as ak
 from awkward._meta.unionmeta import UnionMeta
@@ -18,9 +18,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class UnionForm(UnionMeta, Form):
-    _contents: Sequence[Form]
-
+class UnionForm(UnionMeta[Form], Form):
     def __init__(
         self,
         tags,
@@ -109,9 +107,6 @@ class UnionForm(UnionMeta, Form):
             ._union_of_optionarrays(ak.index._form_to_zero_length(index), parameters)
             .form
         )
-
-    def content(self, index):
-        return self._contents[index]
 
     def __repr__(self):
         args = [
