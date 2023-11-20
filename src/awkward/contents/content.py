@@ -966,51 +966,6 @@ class Content(Meta):
     ):
         raise NotImplementedError
 
-    @property
-    def is_identity_like(self) -> bool:
-        return self.form_cls.is_identity_like.__get__(self)
-
-    @property
-    def purelist_isregular(self) -> bool:
-        """
-        Returns True if all dimensions down to the first record or tuple layer have
-        #ak.types.RegularType; False otherwise.
-        """
-        return self.form_cls.purelist_isregular.__get__(self)
-
-    @property
-    def purelist_depth(self) -> int:
-        """
-        Number of dimensions of nested lists, not counting anything deeper than the
-        first record or tuple layer, if any. The depth of a one-dimensional array is
-        `1`.
-
-        If the array contains #ak.types.UnionType data and its contents have
-        equal depths, the return value is that depth. If they do not have equal
-        depths, the return value is `-1`.
-        """
-        return self.form_cls.purelist_depth.__get__(self)
-
-    @property
-    def minmax_depth(self) -> tuple[int, int]:
-        return self.form_cls.minmax_depth.__get__(self)
-
-    @property
-    def branch_depth(self) -> tuple[bool, int]:
-        return self.form_cls.branch_depth.__get__(self)
-
-    @property
-    def fields(self) -> list[str]:
-        return self.form_cls.fields.__get__(self)
-
-    @property
-    def is_tuple(self) -> bool:
-        return self.form_cls.is_tuple.__get__(self)
-
-    @property
-    def dimension_optiontype(self) -> bool:
-        return self.form_cls.dimension_optiontype.__get__(self)
-
     def _pad_none_axis0(self, target: int, clip: bool) -> Content:
         if not clip and (self.length is unknown_length or (target < self.length)):
             index = Index64(

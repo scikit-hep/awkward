@@ -46,6 +46,7 @@ class UnionMeta(Meta, Generic[T]):
                 out = content.purelist_depth
             elif out != content.purelist_depth:
                 return -1
+        assert out is not None
         return out
 
     @property
@@ -66,18 +67,21 @@ class UnionMeta(Meta, Generic[T]):
     @property
     def branch_depth(self) -> tuple[bool, int]:
         if len(self._contents) == 0:
-            return (False, 1)
-        anybranch = False
-        mindepth = None
+            return False, 1
+
+        any_branch = False
+        min_depth = None
         for content in self._contents:
             branch, depth = content.branch_depth
-            if mindepth is None:
-                mindepth = depth
-            if branch or mindepth != depth:
-                anybranch = True
-            if mindepth > depth:
-                mindepth = depth
-        return (anybranch, mindepth)
+            if min_depth is None:
+                min_depth = depth
+            if branch or min_depth != depth:
+                any_branch = True
+            if min_depth > depth:
+                min_depth = depth
+
+        assert min_depth is not None
+        return any_branch, min_depth
 
     @property
     def fields(self) -> list[str]:

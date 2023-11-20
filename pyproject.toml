@@ -226,10 +226,11 @@ module = [
     'awkward._nplikes.*',
     'awkward._behavior.*',
     'awkward._backends.*',
-    'awkward.forms.*',
-    'awkward.types.*',
+    'awkward._meta.*',
     'awkward._errors',
     'awkward._dispatch',
+    'awkward.forms.*',
+    'awkward.types.*',
     'awkward.index',
 ]
 ignore_errors = false

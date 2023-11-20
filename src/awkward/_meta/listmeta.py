@@ -47,10 +47,10 @@ class ListMeta(Meta, Generic[T]):
     @property
     def branch_depth(self) -> tuple[bool, int]:
         if self.parameter("__array__") in ("string", "bytestring"):
-            return (False, 1)
+            return False, 1
         else:
             branch, depth = self._content.branch_depth
-            return (branch, depth + 1)
+            return branch, depth + 1
 
     @property
     def fields(self):

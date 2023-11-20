@@ -8,7 +8,7 @@ from awkward._typing import (
     JSONSerializable,
     Self,
 )
-from awkward._util import UNSET
+from awkward._util import UNSET, Sentinel
 
 
 class Meta:
@@ -116,5 +116,5 @@ class Meta:
     def dimension_optiontype(self) -> bool:
         raise NotImplementedError
 
-    def copy(self, *, parameters: JSONMapping | None = UNSET) -> Self:
+    def copy(self, *, parameters: JSONMapping | None | Sentinel = UNSET) -> Self:
         raise NotImplementedError

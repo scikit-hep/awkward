@@ -22,7 +22,6 @@ from awkward._typing import (
     Final,
     Iterator,
     JSONMapping,
-    JSONSerializable,
     Self,
 )
 
@@ -391,53 +390,6 @@ class Form(Meta):
 
         self._parameters = parameters
         self._form_key = form_key
-
-    @property
-    def parameters(self) -> JSONMapping:
-        if self._parameters is None:
-            self._parameters = {}
-        return self._parameters
-
-    @property
-    def is_identity_like(self) -> bool:
-        """Return True if the content or its non-list descendents are an identity"""
-        raise NotImplementedError
-
-    def parameter(self, key: str) -> JSONSerializable:
-        if self._parameters is None:
-            return None
-        else:
-            return self._parameters.get(key)
-
-    def purelist_parameter(self, key: str) -> JSONSerializable:
-        return self.purelist_parameters(key)
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        raise NotImplementedError
-
-    @property
-    def purelist_isregular(self) -> bool:
-        raise NotImplementedError
-
-    @property
-    def purelist_depth(self) -> int:
-        raise NotImplementedError
-
-    @property
-    def minmax_depth(self) -> tuple[int, int]:
-        raise NotImplementedError
-
-    @property
-    def branch_depth(self) -> tuple[bool, int]:
-        raise NotImplementedError
-
-    @property
-    def fields(self) -> list[str]:
-        raise NotImplementedError
-
-    @property
-    def is_tuple(self) -> bool:
-        raise NotImplementedError
 
     @property
     def form_key(self):
