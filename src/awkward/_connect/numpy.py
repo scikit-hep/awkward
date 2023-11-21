@@ -21,6 +21,7 @@ from awkward._behavior import (
     find_ufunc_generic,
 )
 from awkward._categorical import as_hashable
+from awkward._do.content import reduce as do_reduce
 from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._parameters import parameters_intersect
@@ -316,11 +317,9 @@ def _array_ufunc_string_likes(
     nplike = left.backend.nplike
 
     # first condition: string lengths must be the same
-    left_counts_layout = ak._do.reduce(left, ak._reducers.Count(), axis=-1, mask=False)
+    left_counts_layout = do_reduce(left, ak._reducers.Count(), axis=-1, mask=False)
     assert left_counts_layout.is_numpy
-    right_counts_layout = ak._do.reduce(
-        right, ak._reducers.Count(), axis=-1, mask=False
-    )
+    right_counts_layout = do_reduce(right, ak._reducers.Count(), axis=-1, mask=False)
     assert right_counts_layout.is_numpy
 
     counts1 = nplike.asarray(left_counts_layout.data)

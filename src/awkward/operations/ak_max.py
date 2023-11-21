@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
+from awkward._do.content import reduce as do_reduce
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -147,7 +148,7 @@ def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior, at
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     reducer = ak._reducers.Max(initial)
 
-    out = ak._do.reduce(
+    out = do_reduce(
         layout,
         reducer,
         axis=axis,
