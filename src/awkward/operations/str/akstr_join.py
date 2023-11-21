@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, ensure_same_backend
 
 __all__ = ("join",)
@@ -94,7 +95,7 @@ def _impl(array, separator, highlevel, behavior, attrs):
                 bytestring_to32=True,
             )
 
-        out = ak._do.recursively_apply(layout, apply_unary)
+        out = recursively_apply(layout, apply_unary)
     else:
 
         def apply_binary(layouts, **kwargs):

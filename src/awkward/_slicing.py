@@ -6,6 +6,7 @@ import operator
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._do.content import flatten, local_index
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
@@ -506,10 +507,10 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
     ):
         if item_backend.nplike.known_data:
             item = item.to_ListOffsetArray64(True)
-            localindex = ak._do.local_index(item, axis=1)
+            localindex = local_index(item, axis=1)
 
-            flat_index = ak._do.flatten(localindex, axis=1)
-            flat_mask = ak._do.flatten(item, axis=1)
+            flat_index = flatten(localindex, axis=1)
+            flat_mask = flatten(item, axis=1)
 
             assert flat_index.is_numpy and flat_mask.is_numpy
             nextcontent = flat_index.data[flat_mask.data]
@@ -558,7 +559,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                     safeindex.shape[0], dtype=np.bool_
                 )
 
-            localindex = ak._do.local_index(item, axis=1)
+            localindex = local_index(item, axis=1)
 
             # nextcontent does not include missing values
             expanded[isnegative] = False

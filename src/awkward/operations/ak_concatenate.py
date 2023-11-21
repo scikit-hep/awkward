@@ -6,6 +6,8 @@ import awkward as ak
 from awkward._backends.dispatch import backend_of_obj
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
+from awkward._do.content import mergemany
+from awkward._do.meta import mergeable
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -149,12 +151,12 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
         batches = [[content_or_others[0]]]
         for x in content_or_others[1:]:
             batch = batches[-1]
-            if ak._do.mergeable(batch[-1], x, mergebool=mergebool):
+            if mergeable(batch[-1], x, mergebool=mergebool):
                 batch.append(x)
             else:
                 batches.append([x])
 
-        contents = [ak._do.mergemany(b) for b in batches]
+        contents = [mergemany(b) for b in batches]
         if len(contents) > 1:
             out = _merge_as_union(contents)
         else:

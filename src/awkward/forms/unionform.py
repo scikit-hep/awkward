@@ -8,7 +8,14 @@ from itertools import permutations
 import awkward as ak
 from awkward._meta.unionmeta import UnionMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._typing import Any, DType, Iterator, Self, final
+from awkward._typing import (
+    Any,
+    DType,
+    ImplementsReadOnlyProperty,
+    Iterator,
+    Self,
+    final,
+)
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
 
@@ -18,7 +25,10 @@ np = NumpyMetadata.instance()
 
 
 @final
-class UnionForm(UnionMeta[Form], Form):
+class UnionForm(UnionMeta, Form):
+    _contents: list[Form]  # type: ignore[assignment]
+    contents: ImplementsReadOnlyProperty[list[Form]]  # type: ignore[assignment]
+
     def __init__(
         self,
         tags,
@@ -62,10 +72,6 @@ class UnionForm(UnionMeta[Form], Form):
     @property
     def index(self):
         return self._index
-
-    @property
-    def contents(self):
-        return self._contents
 
     def copy(
         self,

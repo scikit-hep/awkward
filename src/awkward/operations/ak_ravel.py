@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
+from awkward._do.content import mergemany, remove_structure
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -68,12 +69,12 @@ def _impl(array, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
-    out = ak._do.remove_structure(layout, function_name="ak.ravel", drop_nones=False)
+    out = remove_structure(layout, function_name="ak.ravel", drop_nones=False)
     assert isinstance(out, tuple) and all(
         isinstance(x, ak.contents.Content) for x in out
     )
 
-    result = ak._do.mergemany(out)
+    result = mergemany(out)
 
     return ctx.wrap(result, highlevel=highlevel)
 

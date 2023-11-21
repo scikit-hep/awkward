@@ -26,6 +26,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -52,7 +53,7 @@ numpy = Numpy.instance()
 
 
 @final
-class ByteMaskedArray(ByteMaskedMeta[Content], Content):
+class ByteMaskedArray(ByteMaskedMeta, Content):
     """
     The ByteMaskedArray implements an #ak.types.OptionType with two aligned
     buffers, a boolean `mask` and `content`. At any element `i` where
@@ -108,6 +109,9 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(self, mask, content, valid_when, *, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):

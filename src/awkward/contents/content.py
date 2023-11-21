@@ -122,6 +122,8 @@ class ToArrowOptions(TypedDict):
 
 
 class Content(Meta):
+    _mergeable_next: Callable[[Content, bool], bool]
+
     def _init(self, parameters: dict[str, Any] | None, backend: Backend):
         if parameters is None:
             pass

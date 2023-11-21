@@ -7,6 +7,7 @@ import copy
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
@@ -110,7 +111,7 @@ def _impl(base, what, where, highlevel, behavior, attrs):
                 else:
                     return None
 
-            ak._do.recursively_apply(layout, action_is_record, return_array=False)
+            recursively_apply(layout, action_is_record, return_array=False)
             return result
 
         if not purelist_is_record(base):

@@ -22,6 +22,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -48,7 +49,7 @@ numpy = Numpy.instance()
 
 
 @final
-class BitMaskedArray(BitMaskedMeta[Content], Content):
+class BitMaskedArray(BitMaskedMeta, Content):
     """
     Like #ak.contents.ByteMaskedArray, BitMaskedArray implements an
     #ak.types.OptionType with two buffers, `mask` and `content`.
@@ -131,6 +132,9 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(
         self, mask, content, valid_when, length, lsb_order, *, parameters=None

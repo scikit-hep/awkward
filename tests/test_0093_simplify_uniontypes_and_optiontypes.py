@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-
 from __future__ import annotations
 
 import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._do.meta import mergeable
 
 to_list = ak.operations.to_list
 
@@ -419,25 +419,25 @@ def test_recordarray_merge():
     )
     arrayt7 = ak.operations.from_iter([(0,), (1,), (2,)], highlevel=False)
 
-    assert ak._do.mergeable(arrayr1, arrayr2)
-    assert ak._do.mergeable(arrayr2, arrayr1)
-    assert not ak._do.mergeable(arrayr1, arrayr3)
-    assert ak._do.mergeable(arrayr1, arrayr4)
-    assert ak._do.mergeable(arrayr4, arrayr1)
-    assert not ak._do.mergeable(arrayr1, arrayr5)
-    assert not ak._do.mergeable(arrayr1, arrayr6)
-    assert ak._do.mergeable(arrayr5, arrayr6)
-    assert ak._do.mergeable(arrayr6, arrayr5)
-    assert not ak._do.mergeable(arrayr1, arrayr7)
+    assert mergeable(arrayr1, arrayr2)
+    assert mergeable(arrayr2, arrayr1)
+    assert not mergeable(arrayr1, arrayr3)
+    assert mergeable(arrayr1, arrayr4)
+    assert mergeable(arrayr4, arrayr1)
+    assert not mergeable(arrayr1, arrayr5)
+    assert not mergeable(arrayr1, arrayr6)
+    assert mergeable(arrayr5, arrayr6)
+    assert mergeable(arrayr6, arrayr5)
+    assert not mergeable(arrayr1, arrayr7)
 
-    assert ak._do.mergeable(arrayt1, arrayt2)
-    assert ak._do.mergeable(arrayt2, arrayt1)
-    assert not ak._do.mergeable(arrayt1, arrayt3)
-    assert not ak._do.mergeable(arrayt1, arrayt4)
-    assert not ak._do.mergeable(arrayt1, arrayt5)
-    assert not ak._do.mergeable(arrayt1, arrayt6)
-    assert not ak._do.mergeable(arrayt5, arrayt6)
-    assert not ak._do.mergeable(arrayt1, arrayt7)
+    assert mergeable(arrayt1, arrayt2)
+    assert mergeable(arrayt2, arrayt1)
+    assert not mergeable(arrayt1, arrayt3)
+    assert not mergeable(arrayt1, arrayt4)
+    assert not mergeable(arrayt1, arrayt5)
+    assert not mergeable(arrayt1, arrayt6)
+    assert not mergeable(arrayt5, arrayt6)
+    assert not mergeable(arrayt1, arrayt7)
 
     assert to_list(arrayr1._mergemany([arrayr2])) == [
         {"x": 0.0, "y": []},

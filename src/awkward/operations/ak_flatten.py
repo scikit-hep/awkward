@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import flatten as do_flatten
+from awkward._do.content import mergemany, remove_structure
 from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -178,12 +180,12 @@ def _impl(array, axis, highlevel, behavior, attrs):
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     if axis is None:
-        out = ak._do.remove_structure(layout, function_name="ak.flatten")
+        out = remove_structure(layout, function_name="ak.flatten")
         assert isinstance(out, tuple) and all(
             isinstance(x, ak.contents.Content) for x in out
         )
 
-        out = ak._do.mergemany(out)
+        out = mergemany(out)
 
     elif axis == 0 or maybe_posaxis(layout, axis, 1) == 0:
 
@@ -233,5 +235,5 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
         out = apply(layout)
     else:
-        out = ak._do.flatten(layout, axis)
+        out = do_flatten(layout, axis)
     return ctx.wrap(out, highlevel=highlevel)

@@ -6,6 +6,7 @@ from collections.abc import Sequence
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -68,7 +69,7 @@ def _impl(base, where, highlevel, behavior, attrs):
                 for i, content in enumerate(layout.contents):
                     if i == i_field:
                         # Visit this content to remove the next item in `where`
-                        next_content = ak._do.recursively_apply(
+                        next_content = recursively_apply(
                             content,
                             action,
                             depth_context={"where": next_where},
@@ -94,5 +95,5 @@ def _impl(base, where, highlevel, behavior, attrs):
         else:
             return None
 
-    out = ak._do.recursively_apply(base, action, depth_context={"where": where})
+    out = recursively_apply(base, action, depth_context={"where": where})
     return ctx.wrap(out, highlevel=highlevel)

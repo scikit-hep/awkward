@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext
 
 __all__ = ("split_whitespace",)
@@ -77,6 +78,6 @@ def _impl(array, max_splits, reverse, highlevel, behavior, attrs):
         reverse=reverse,
         bytestring_to_string=True,
     )
-    out = ak._do.recursively_apply(layout, action)
+    out = recursively_apply(layout, action)
 
     return ctx.wrap(out, highlevel=highlevel)

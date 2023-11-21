@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
 import awkward as ak
+from awkward._do.content import pad_none
 
 to_list = ak.operations.to_list
 
@@ -66,7 +66,7 @@ def test_list_offset_array_concatenate():
     three = ak.contents.ListOffsetArray(offsets_three, one)
     four = ak.contents.ListOffsetArray(offsets_four, two)
 
-    padded_one = ak._do.pad_none(one, 7, 0)
+    padded_one = pad_none(one, 7, 0)
     assert to_list(padded_one) == [
         [0.0, 1.1, 2.2],
         [],
@@ -117,7 +117,7 @@ def test_list_offset_array_concatenate():
         [],
     ]
 
-    padded = ak._do.pad_none(three, 6, 0)
+    padded = pad_none(three, 6, 0)
 
     assert to_list(ak.operations.concatenate([padded, four], 1)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [0.33], []],

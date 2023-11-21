@@ -7,6 +7,7 @@ from collections.abc import Mapping
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -355,7 +356,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
                         "ak.cartesian does not compute combinations of the "
                         "characters of a string; please split it into lists"
                     )
-                nextlayout = ak._do.recursively_apply(
+                nextlayout = recursively_apply(
                     layout,
                     apply_pad_inner_list,
                     lateral_context={"n": n_inside},
@@ -375,7 +376,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
         axes_to_flatten.reverse()
 
         new_layouts = [
-            ak._do.recursively_apply(
+            recursively_apply(
                 layout,
                 apply_pad_inner_list_at_axis,
                 lateral_context={"i": i},

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import local_index as do_local_index
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -91,5 +91,5 @@ def _impl(array, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
-    out = ak._do.local_index(layout, axis)
+    out = do_local_index(layout, axis)
     return ctx.wrap(out, highlevel=highlevel)

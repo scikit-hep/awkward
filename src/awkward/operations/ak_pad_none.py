@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import pad_none as do_pad_none
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -116,6 +116,6 @@ def _impl(array, target, axis, clip, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
-    out = ak._do.pad_none(layout, target, axis, clip=clip)
+    out = do_pad_none(layout, target, axis, clip=clip)
 
     return ctx.wrap(out, highlevel=highlevel)

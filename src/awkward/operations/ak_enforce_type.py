@@ -7,6 +7,8 @@ from itertools import permutations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import mergemany
+from awkward._do.meta import mergeable
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -942,8 +944,8 @@ def _recurse_union_non_union(
 
         # Merge the results
         for content in next_contents[1:]:
-            assert ak._do.mergeable(next_contents[0], content, mergebool=False)
-        next_content = ak._do.mergemany(next_contents)
+            assert mergeable(next_contents[0], content, mergebool=False)
+        next_content = mergemany(next_contents)
 
         # Index over them
         index = ak.index.Index64(index_data)

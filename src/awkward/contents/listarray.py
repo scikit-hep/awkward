@@ -23,6 +23,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -47,7 +48,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ListArray(ListMeta[Content], Content):
+class ListArray(ListMeta, Content):
     """
     ListArray generalizes #ak.contents.ListOffsetArray by not
     requiring its `content` to be in increasing order and by allowing it to
@@ -118,6 +119,9 @@ class ListArray(ListMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(self, starts, stops, content, *, parameters=None):
         if not isinstance(starts, Index) and starts.dtype in (

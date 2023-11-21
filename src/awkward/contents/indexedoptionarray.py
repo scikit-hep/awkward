@@ -7,6 +7,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._do.content import is_unique
 from awkward._layout import maybe_posaxis
 from awkward._meta.indexedoptionmeta import IndexedOptionMeta
 from awkward._nplikes.array_like import ArrayLike
@@ -25,6 +26,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -50,7 +52,7 @@ numpy = Numpy.instance()
 
 
 @final
-class IndexedOptionArray(IndexedOptionMeta[Content], Content):
+class IndexedOptionArray(IndexedOptionMeta, Content):
     """
     IndexedOptionArray is an #ak.contents.IndexedArray for which
     negative values in the index are interpreted as missing. It represents
@@ -97,6 +99,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(self, index, content, *, parameters=None):
         if not (
@@ -1465,7 +1470,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
     def _validity_error(self, path):
         if self.parameter("__array__") == "categorical":
-            if not ak._do.is_unique(self._content):
+            if not is_unique(self._content):
                 return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
                     path, type(self)
                 )

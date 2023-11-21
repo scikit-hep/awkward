@@ -26,6 +26,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -59,7 +60,7 @@ def _apply_record_reducer(reducer, layout: Content, mask: bool, behavior) -> Con
 
 
 @final
-class RecordArray(RecordMeta[Content], Content):
+class RecordArray(RecordMeta, Content):
     """
     RecordArray represents an array of tuples or records, all with the
     same type. Its `contents` is an ordered list of arrays.
@@ -144,6 +145,9 @@ class RecordArray(RecordMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _contents: list[Content]
+    contents: ImplementsReadOnlyProperty[list[Content]]
 
     def __init__(
         self,

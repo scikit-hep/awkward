@@ -21,6 +21,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -46,7 +47,7 @@ numpy = Numpy.instance()
 
 
 @final
-class ListOffsetArray(ListOffsetMeta[Content], Content):
+class ListOffsetArray(ListOffsetMeta, Content):
     """
     ListOffsetArray describes unequal-length lists (often called a
     "jagged" or "ragged" array). Like #ak.contents.RegularArray, the
@@ -109,6 +110,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(self, offsets, content, *, parameters=None):
         if not isinstance(offsets, Index) and offsets.dtype in (

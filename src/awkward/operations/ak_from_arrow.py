@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -76,6 +77,6 @@ def _impl(array, generate_bitmasks, highlevel, behavior, attrs):
         if hasattr(layout, "__pyarrow_original"):
             del layout.__pyarrow_original
 
-    ak._do.recursively_apply(out, remove_revertable)
+    recursively_apply(out, remove_revertable)
 
     return ctx.wrap(out, highlevel=highlevel)

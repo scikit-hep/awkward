@@ -529,7 +529,7 @@ def _impl(
                     f"transformation must return a Content or None, not {type(out)}\n\n{out!r}"
                 )
 
-        # An exception to the rule of ak._do.recursively_apply, for symmetry with
+        # An exception to the rule of recursively_apply, for symmetry with
         # ak._broadcasting.apply_step, below. ak_transform._impl knows implementation details.
         out = layouts[0]._recursively_apply(
             action,

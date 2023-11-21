@@ -10,6 +10,7 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import (
     Any,
     DType,
+    ImplementsReadOnlyProperty,
     Iterator,
     JSONMapping,
     Self,
@@ -24,8 +25,9 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ListOffsetForm(ListOffsetMeta[Form], Form):
-    _content: Form
+class ListOffsetForm(ListOffsetMeta, Form):
+    _content: Form  # type: ignore[assignment]
+    content: ImplementsReadOnlyProperty[Form]  # type: ignore[assignment]
 
     def __init__(
         self,
@@ -49,10 +51,6 @@ class ListOffsetForm(ListOffsetMeta[Form], Form):
     @property
     def offsets(self):
         return self._offsets
-
-    @property
-    def content(self):
-        return self._content
 
     def copy(
         self,

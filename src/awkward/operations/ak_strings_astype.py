@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -82,5 +83,5 @@ def _impl(array, to, highlevel, behavior, attrs):
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
-    out = ak._do.recursively_apply(layout, action)
+    out = recursively_apply(layout, action)
     return ctx.wrap(out, highlevel=highlevel)

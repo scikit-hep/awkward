@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-
 from __future__ import annotations
 
 import datetime
@@ -8,6 +7,7 @@ import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._do.content import is_unique, unique
 
 to_list = ak.operations.to_list
 
@@ -49,8 +49,8 @@ def test_date_time_sort_argsort_unique():
         datetime.datetime(2020, 7, 27, 10, 41, 11),
     ]
     assert to_list(ak.argsort(array, highlevel=False)) == [1, 2, 0]
-    assert ak._do.is_unique(array) is True
-    assert to_list(ak._do.unique(array)) == [
+    assert is_unique(array) is True
+    assert to_list(unique(array)) == [
         datetime.datetime(2019, 1, 1, 0, 0),
         datetime.datetime(2020, 1, 1, 0, 0),
         datetime.datetime(2020, 7, 27, 10, 41, 11),
@@ -73,8 +73,8 @@ def test_time_delta_sort_argsort_unique():
         datetime.timedelta(days=41),
     ]
     assert to_list(ak.argsort(array, highlevel=False)) == [1, 2, 0]
-    assert ak._do.is_unique(array) is True
-    assert to_list(ak._do.unique(array)) == [
+    assert is_unique(array) is True
+    assert to_list(unique(array)) == [
         datetime.timedelta(days=1),
         datetime.timedelta(days=20),
         datetime.timedelta(days=41),

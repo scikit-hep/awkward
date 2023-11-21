@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -106,7 +107,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior, attrs):
             else:
                 return None
 
-        out = ak._do.recursively_apply(layout, action)
+        out = recursively_apply(layout, action)
 
     else:
 

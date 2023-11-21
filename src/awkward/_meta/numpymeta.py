@@ -2,18 +2,17 @@
 
 from __future__ import annotations
 
+from awkward._do.meta import is_indexed, is_numpy, is_option
 from awkward._meta.meta import Meta
 from awkward._nplikes.shape import ShapeItem
 from awkward._parameters import type_parameters_equal
-from awkward._typing import TYPE_CHECKING, Generic, JSONSerializable, TypeVar
+from awkward._typing import TYPE_CHECKING, JSONSerializable
 
 if TYPE_CHECKING:
     from awkward._meta.regularmeta import RegularMeta
 
-T = TypeVar("T", bound=Meta)
 
-
-class NumpyMeta(Meta, Generic[T]):
+class NumpyMeta(Meta):
     is_numpy = True
     is_leaf = True
     inner_shape: tuple[ShapeItem, ...]
@@ -58,15 +57,15 @@ class NumpyMeta(Meta, Generic[T]):
     def dimension_optiontype(self) -> bool:
         return False
 
-    def _to_regular_primitive(self) -> RegularMeta[T]:
+    def _to_regular_primitive(self) -> RegularMeta | NumpyMeta:
         raise NotImplementedError
 
-    def _mergeable_next(self, other: T, mergebool: bool) -> bool:
+    def _mergeable_next(self, other: Meta, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
         # Check against option contents
-        elif other.is_option or other.is_indexed:
+        elif is_option(other) or is_indexed(other):
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
@@ -77,7 +76,7 @@ class NumpyMeta(Meta, Generic[T]):
                 other, mergebool
             )  # TODO
 
-        elif other.is_numpy:
+        elif is_numpy(other):
             if len(self.inner_shape) != len(other.inner_shape):
                 return False
 

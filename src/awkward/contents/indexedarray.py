@@ -7,6 +7,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._do.content import is_unique
 from awkward._layout import maybe_posaxis
 from awkward._meta.indexedmeta import IndexedMeta
 from awkward._nplikes.array_like import ArrayLike
@@ -25,6 +26,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -51,7 +53,7 @@ numpy = Numpy.instance()
 
 
 @final
-class IndexedArray(IndexedMeta[Content], Content):
+class IndexedArray(IndexedMeta, Content):
     """
     IndexedArray is a general-purpose tool for *lazily* changing the order of
     and/or duplicating some `content` with a
@@ -101,6 +103,9 @@ class IndexedArray(IndexedMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(self, index, content, *, parameters=None):
         if not (
@@ -946,7 +951,7 @@ class IndexedArray(IndexedMeta[Content], Content):
 
     def _validity_error(self, path):
         if self.parameter("__array__") == "categorical":
-            if not ak._do.is_unique(self._content):
+            if not is_unique(self._content):
                 return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
                     path, type(self)
                 )

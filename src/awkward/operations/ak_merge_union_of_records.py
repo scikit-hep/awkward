@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import ArrayLike, NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -265,5 +266,5 @@ def _impl(array, axis, highlevel, behavior, attrs):
                     layout.tags.data, layout.index.data, layout.contents
                 )
 
-    out = ak._do.recursively_apply(layout, apply)
+    out = recursively_apply(layout, apply)
     return ctx.wrap(out, highlevel=highlevel)

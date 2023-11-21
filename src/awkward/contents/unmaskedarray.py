@@ -26,6 +26,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -52,7 +53,7 @@ numpy = Numpy.instance()
 
 
 @final
-class UnmaskedArray(UnmaskedMeta[Content], Content):
+class UnmaskedArray(UnmaskedMeta, Content):
     """
     UnmaskedArray implements an #ak.types.OptionType for which the values are
     never, in fact, missing. It exists to satisfy systems that formally require this
@@ -84,6 +85,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
                 else:
                     return UnmaskedArray(self.content[where])
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(self, content, *, parameters=None):
         if not isinstance(content, Content):

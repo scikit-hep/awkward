@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext
 
 __all__ = ("rpad",)
@@ -58,7 +59,7 @@ def _impl(array, width, padding, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array)
 
-    out = ak._do.recursively_apply(
+    out = recursively_apply(
         layout,
         ak.operations.str._get_ufunc_action(
             pc.utf8_rpad, pc.ascii_rpad, width, padding, bytestring_to_string=True

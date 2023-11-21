@@ -64,7 +64,7 @@ def from_dtype(
 
 
 @final
-class NumpyForm(NumpyMeta[Form], Form):
+class NumpyForm(NumpyMeta, Form):
     def __init__(
         self,
         primitive,
@@ -259,7 +259,7 @@ class NumpyForm(NumpyMeta[Form], Form):
 
         yield (getkey(self, "data"), primitive_to_dtype(self.primitive))
 
-    def _to_regular_primitive(self) -> RegularForm:
+    def _to_regular_primitive(self) -> RegularForm | NumpyForm:
         return self.to_RegularForm()
 
     def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:

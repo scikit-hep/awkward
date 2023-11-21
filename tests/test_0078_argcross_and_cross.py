@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-
 from __future__ import annotations
 
 import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._do.content import local_index
 
 to_list = ak.operations.to_list
 
@@ -313,8 +313,8 @@ def test_localindex():
     array = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    assert to_list(ak._do.local_index(array, 0)) == [0, 1, 2, 3, 4]
-    assert to_list(ak._do.local_index(array, 1)) == [
+    assert to_list(local_index(array, 0)) == [0, 1, 2, 3, 4]
+    assert to_list(local_index(array, 1)) == [
         [0, 1, 2],
         [],
         [0, 1],
@@ -326,9 +326,9 @@ def test_localindex():
         [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[6.6, 7.7, 8.8, 9.9]]],
         highlevel=False,
     )
-    assert to_list(ak._do.local_index(array, 0)) == [0, 1, 2, 3]
-    assert to_list(ak._do.local_index(array, 1)) == [[0, 1, 2], [], [0], [0]]
-    assert to_list(ak._do.local_index(array, 2)) == [
+    assert to_list(local_index(array, 0)) == [0, 1, 2, 3]
+    assert to_list(local_index(array, 1)) == [[0, 1, 2], [], [0], [0]]
+    assert to_list(local_index(array, 2)) == [
         [[0, 1, 2], [], [0, 1]],
         [],
         [[0]],
@@ -338,9 +338,9 @@ def test_localindex():
     array = ak.operations.from_numpy(
         np.arange(2 * 3 * 5).reshape(2, 3, 5), regulararray=True, highlevel=False
     )
-    assert to_list(ak._do.local_index(array, 0)) == [0, 1]
-    assert to_list(ak._do.local_index(array, 1)) == [[0, 1, 2], [0, 1, 2]]
-    assert to_list(ak._do.local_index(array, 2)) == [
+    assert to_list(local_index(array, 0)) == [0, 1]
+    assert to_list(local_index(array, 1)) == [[0, 1, 2], [0, 1, 2]]
+    assert to_list(local_index(array, 2)) == [
         [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4]],
         [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4]],
     ]

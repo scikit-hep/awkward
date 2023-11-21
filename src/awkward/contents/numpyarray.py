@@ -56,7 +56,7 @@ numpy = Numpy.instance()
 
 
 @final
-class NumpyArray(NumpyMeta[Content], Content):
+class NumpyArray(NumpyMeta, Content):
     """
     A NumpyArray describes 1-dimensional or rectilinear data using a NumPy
     `np.ndarray`, a CuPy `cp.ndarray`, etc., depending on the backend.

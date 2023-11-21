@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -115,9 +115,9 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 return layout.drop_none()
 
     options = {"none_indexes": []}
-    out = ak._do.recursively_apply(layout, action, depth_context=options)
+    out = recursively_apply(layout, action, depth_context=options)
 
     if len(options["none_indexes"]) > 0:
-        out = ak._do.recursively_apply(out, recompute_offsets, depth_context=options)
+        out = recursively_apply(out, recompute_offsets, depth_context=options)
 
     return ctx.wrap(out, highlevel=highlevel)

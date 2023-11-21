@@ -24,6 +24,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -49,7 +50,7 @@ numpy = Numpy.instance()
 
 
 @final
-class RegularArray(RegularMeta[Content], Content):
+class RegularArray(RegularMeta, Content):
     """
     RegularArray describes lists that all have the same length, the single
     integer `size`. Its underlying `content` is a flattened view of the data;
@@ -118,6 +119,9 @@ class RegularArray(RegularMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(self, content, size, zeros_length=0, *, parameters=None):
         if not isinstance(content, Content):
