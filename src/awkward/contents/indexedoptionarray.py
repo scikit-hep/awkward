@@ -8,6 +8,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.indexedoptionmeta import IndexedOptionMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -50,7 +51,7 @@ numpy = Numpy.instance()
 
 
 @final
-class IndexedOptionArray(Content):
+class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     """
     IndexedOptionArray is an #ak.contents.IndexedArray for which
     negative values in the index are interpreted as missing. It represents
@@ -98,9 +99,6 @@ class IndexedOptionArray(Content):
                     raise AssertionError(where)
     """
 
-    is_option = True
-    is_indexed = True
-
     def __init__(self, index, content, *, parameters=None):
         if not (
             isinstance(index, Index)
@@ -137,10 +135,6 @@ class IndexedOptionArray(Content):
     @property
     def index(self):
         return self._index
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = IndexedOptionForm
 

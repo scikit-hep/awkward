@@ -7,9 +7,10 @@ from inspect import signature
 
 import awkward as ak
 from awkward._errors import deprecate
+from awkward._meta.emptymeta import EmptyMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
-from awkward._typing import DType, Iterator, JSONSerializable, Self, final
+from awkward._typing import DType, Iterator, Self, final
 from awkward._util import UNSET, Sentinel
 from awkward.forms.form import Form, JSONMapping, _SpecifierMatcher
 
@@ -19,10 +20,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class EmptyForm(Form):
-    is_numpy = True
-    is_unknown = True
-
+class EmptyForm(EmptyMeta, Form):
     def __init__(
         self, *, parameters: JSONMapping | None = None, form_key: str | None = None
     ):
@@ -92,41 +90,6 @@ class EmptyForm(Form):
             f"{type(self).__name__}.to_NumpyForm accepts either the new `primitive` argument as a keyword-only "
             f"argument, or the legacy `dtype` argument as positional or keyword"
         )
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        return None
-
-    @property
-    def purelist_isregular(self) -> bool:
-        return True
-
-    @property
-    def purelist_depth(self) -> int:
-        return 1
-
-    @property
-    def is_identity_like(self) -> bool:
-        return True
-
-    @property
-    def minmax_depth(self) -> tuple[int, int]:
-        return (1, 1)
-
-    @property
-    def branch_depth(self) -> tuple[bool, int]:
-        return (False, 1)
-
-    @property
-    def fields(self) -> list[str]:
-        return []
-
-    @property
-    def is_tuple(self) -> bool:
-        return False
-
-    @property
-    def dimension_optiontype(self) -> bool:
-        return False
 
     def _columns(self, path, output, list_indicator):
         output.append(".".join(path))

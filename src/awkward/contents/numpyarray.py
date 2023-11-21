@@ -12,6 +12,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
+from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes import to_nplike
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.jax import Jax
@@ -56,7 +57,7 @@ numpy = Numpy.instance()
 
 
 @final
-class NumpyArray(Content):
+class NumpyArray(NumpyMeta, Content):
     """
     A NumpyArray describes 1-dimensional or rectilinear data using a NumPy
     `np.ndarray`, a CuPy `cp.ndarray`, etc., depending on the backend.
@@ -110,9 +111,6 @@ class NumpyArray(Content):
                 else:
                     return result
     """
-
-    is_numpy = True
-    is_leaf = True
 
     def __init__(self, data: ArrayLike, *, parameters=None, backend=None):
         if backend is None:

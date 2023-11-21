@@ -10,6 +10,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
+from awkward._meta.emptymeta import EmptyMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -47,7 +48,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class EmptyArray(Content):
+class EmptyArray(EmptyMeta, Content):
     """
     An EmptyArray is used whenever an array's type is not known because it is empty
     (such as data from #ak.ArrayBuilder without enough sample points to resolve the
@@ -81,9 +82,6 @@ class EmptyArray(Content):
                 else:
                     raise AssertionError(where)
     """
-
-    is_unknown = True
-    is_leaf = True
 
     def __init__(self, *, parameters=None, backend=None):
         if not (parameters is None or len(parameters) == 0):

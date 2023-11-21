@@ -9,6 +9,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.unmaskedmeta import UnmaskedMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -52,7 +53,7 @@ numpy = Numpy.instance()
 
 
 @final
-class UnmaskedArray(Content):
+class UnmaskedArray(UnmaskedMeta[Content], Content):
     """
     UnmaskedArray implements an #ak.types.OptionType for which the values are
     never, in fact, missing. It exists to satisfy systems that formally require this
@@ -85,8 +86,6 @@ class UnmaskedArray(Content):
                     return UnmaskedArray(self.content[where])
     """
 
-    is_option = True
-
     def __init__(self, content, *, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
@@ -102,10 +101,6 @@ class UnmaskedArray(Content):
             )
         self._content = content
         self._init(parameters, content.backend)
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = UnmaskedForm
 

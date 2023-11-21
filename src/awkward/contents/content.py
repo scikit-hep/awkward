@@ -17,6 +17,7 @@ from awkward._backends.dispatch import (
 from awkward._behavior import get_array_class, get_record_class
 from awkward._kernels import KernelError
 from awkward._layout import wrap_layout
+from awkward._meta.meta import Meta
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
@@ -119,17 +120,7 @@ class ToArrowOptions(TypedDict):
     record_is_scalar: bool
 
 
-class Content:
-    is_numpy = False
-    is_unknown = False
-    is_list = False
-    is_regular = False
-    is_option = False
-    is_indexed = False
-    is_record = False
-    is_union = False
-    is_leaf = False
-
+class Content(Meta):
     def _init(self, parameters: dict[str, Any] | None, backend: Backend):
         if parameters is None:
             pass
@@ -194,33 +185,6 @@ class Content:
 
         self._parameters = parameters
         self._backend = backend
-
-    @property
-    def parameters(self) -> dict[str, JSONValueType]:
-        """
-        Free-form parameters associated with every array node as a dict from parameter
-        name to its JSON-like value. Some parameters are special and are used to assign
-        behaviors to the data.
-
-        Note that the dict returned by this property is a *view* of the array node's
-        parameters. *Changing the dict will change the array!*
-
-        See #ak.behavior.
-        """
-        if self._parameters is None:
-            self._parameters = {}
-        return self._parameters
-
-    def parameter(self, key: str) -> JSONValueType | None:
-        """
-        Returns a parameter's value or None.
-
-        (No distinction is ever made between unset parameters and parameters set to None.)
-        """
-        if self._parameters is None:
-            return None
-        else:
-            return self._parameters.get(key)
 
     @property
     def backend(self) -> Backend:
@@ -1001,51 +965,6 @@ class Content:
         outlength: int,
     ):
         raise NotImplementedError
-
-    @property
-    def is_identity_like(self) -> bool:
-        return self.form_cls.is_identity_like.__get__(self)
-
-    @property
-    def purelist_isregular(self) -> bool:
-        """
-        Returns True if all dimensions down to the first record or tuple layer have
-        #ak.types.RegularType; False otherwise.
-        """
-        return self.form_cls.purelist_isregular.__get__(self)
-
-    @property
-    def purelist_depth(self) -> int:
-        """
-        Number of dimensions of nested lists, not counting anything deeper than the
-        first record or tuple layer, if any. The depth of a one-dimensional array is
-        `1`.
-
-        If the array contains #ak.types.UnionType data and its contents have
-        equal depths, the return value is that depth. If they do not have equal
-        depths, the return value is `-1`.
-        """
-        return self.form_cls.purelist_depth.__get__(self)
-
-    @property
-    def minmax_depth(self) -> tuple[int, int]:
-        return self.form_cls.minmax_depth.__get__(self)
-
-    @property
-    def branch_depth(self) -> tuple[bool, int]:
-        return self.form_cls.branch_depth.__get__(self)
-
-    @property
-    def fields(self) -> list[str]:
-        return self.form_cls.fields.__get__(self)
-
-    @property
-    def is_tuple(self) -> bool:
-        return self.form_cls.is_tuple.__get__(self)
-
-    @property
-    def dimension_optiontype(self) -> bool:
-        return self.form_cls.dimension_optiontype.__get__(self)
 
     def _pad_none_axis0(self, target: int, clip: bool) -> Content:
         if not clip and (self.length is unknown_length or (target < self.length)):
