@@ -985,9 +985,6 @@ class UnionArray(UnionMeta[Content], Content):
                     ),
                 )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
-        return True
-
     def _merging_strategy(self, others):
         if len(others) == 0:
             raise ValueError(

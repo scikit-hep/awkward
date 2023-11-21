@@ -118,3 +118,6 @@ class Meta:
 
     def copy(self, *, parameters: JSONMapping | None | Sentinel = UNSET) -> Self:
         raise NotImplementedError
+
+    def _mergeable_next(self, other: T, mergebool: bool) -> bool:
+        raise NotImplementedError

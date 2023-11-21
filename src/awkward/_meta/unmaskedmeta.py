@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from awkward._meta.meta import Meta
+from awkward._parameters import type_parameters_equal
 from awkward._typing import Generic, JSONSerializable, TypeVar
 
 T = TypeVar("T", bound=Meta)
@@ -55,3 +56,15 @@ class UnmaskedMeta(Meta, Generic[T]):
     @property
     def content(self) -> T:
         return self._content
+
+    def _mergeable_next(self, other: T, mergebool: bool) -> bool:
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # We can only combine option types whose array-record parameters agree
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(
+                other.content, mergebool
+            ) and type_parameters_equal(self._parameters, other._parameters)
+        else:
+            return self._content._mergeable_next(other, mergebool)

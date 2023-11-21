@@ -269,9 +269,6 @@ class EmptyArray(EmptyMeta, Content):
                 EmptyArray(backend=self._backend),
             )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
-        return True
-
     def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self

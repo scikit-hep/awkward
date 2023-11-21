@@ -19,7 +19,6 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import (
     parameters_intersect,
-    type_parameters_equal,
 )
 from awkward._slicing import NO_HEAD
 from awkward._typing import (
@@ -645,42 +644,6 @@ class RecordArray(RecordMeta[Content], Content):
                     backend=self._backend,
                 ),
             )
-
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
-        # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_union:
-            return True
-        # Check against option contents
-        elif other.is_option or other.is_indexed:
-            return self._mergeable_next(other.content, mergebool)
-        # Otherwise, do the parameters match? If not, we can't merge.
-        elif not type_parameters_equal(self._parameters, other._parameters):
-            return False
-        elif isinstance(other, RecordArray):
-            if self.is_tuple and other.is_tuple:
-                if len(self._contents) == len(other._contents):
-                    for self_cont, other_cont in zip(self._contents, other._contents):
-                        if not self_cont._mergeable_next(other_cont, mergebool):
-                            return False
-
-                    return True
-
-            elif not self.is_tuple and not other.is_tuple:
-                if set(self._fields) != set(other._fields):
-                    return False
-
-                for i, field in enumerate(self._fields):
-                    x = self._contents[i]
-                    y = other._contents[other.field_to_index(field)]
-                    if not x._mergeable_next(y, mergebool):
-                        return False
-                return True
-
-            else:
-                return False
-
-        else:
-            return False
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from awkward._meta.meta import Meta
+from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import Generic, JSONSerializable, TypeVar
 from awkward.errors import FieldNotFoundError
@@ -141,3 +142,39 @@ class RecordMeta(Meta, Generic[T]):
                 )
             )
         return self._contents[index]  # type: ignore[index]
+
+    def _mergeable_next(self, other: T, mergebool: bool) -> bool:
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Check against option contents
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(other.content, mergebool)
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not type_parameters_equal(self._parameters, other._parameters):
+            return False
+        elif other.is_record:
+            if self.is_tuple and other.is_tuple:
+                if len(self.contents) == len(other.contents):
+                    for self_cont, other_cont in zip(self.contents, other.contents):
+                        if not self_cont._mergeable_next(other_cont, mergebool):
+                            return False
+
+                    return True
+
+            elif not self.is_tuple and not other.is_tuple:
+                if set(self._fields) != set(other._fields):
+                    return False
+
+                for i, field in enumerate(self._fields):
+                    x = self._contents[i]
+                    y = other.contents[other.field_to_index(field)]
+                    if not x._mergeable_next(y, mergebool):
+                        return False
+                return True
+
+            else:
+                return False
+
+        else:
+            return False

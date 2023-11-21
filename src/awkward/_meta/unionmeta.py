@@ -105,3 +105,6 @@ class UnionMeta(Meta, Generic[T]):
     @property
     def contents(self) -> list[T]:
         return self._contents
+
+    def _mergeable_next(self, other: T, mergebool: bool) -> bool:
+        return True

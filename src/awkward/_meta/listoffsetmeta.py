@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from awkward._meta.meta import Meta
+from awkward._parameters import type_parameters_equal
 from awkward._typing import Generic, JSONSerializable, TypeVar
 
 T = TypeVar("T", bound=Meta)
@@ -67,3 +68,22 @@ class ListOffsetMeta(Meta, Generic[T]):
     @property
     def content(self) -> T:
         return self._content
+
+    def _mergeable_next(self, other: T, mergebool: bool) -> bool:
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Check against option contents
+        elif other.is_option or other.is_indexed:
+            return self._mergeable_next(other.content, mergebool)
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not type_parameters_equal(self._parameters, other._parameters):
+            return False
+        elif other.is_list:
+            return self._content._mergeable_next(other.content, mergebool)
+        elif other.is_numpy and len(other.inner_shape) > 0:
+            return self._mergeable_next(
+                other._to_regular_primitive(), mergebool
+            )  # TODO
+        else:
+            return False
