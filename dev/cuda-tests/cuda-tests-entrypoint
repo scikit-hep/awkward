@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -o nounset
+set -eu
 
 # Try loading token from path if it's not set
 if [[ ! -v GH_TOKEN ]]; then

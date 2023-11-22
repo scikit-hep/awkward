@@ -2,6 +2,8 @@
 Description=Awkward CUDA Tests Service
 After=docker.service
 Requires=docker.service
+After=network-online.target
+Requires=network-online.target
 
 [Service]
 TimeoutStartSec=0
