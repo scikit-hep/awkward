@@ -7,6 +7,7 @@ from __future__ import annotations
 import sys
 import typing
 from typing import *  # noqa: F403
+from typing import TypeVar
 
 import numpy
 
@@ -70,7 +71,7 @@ JSONMapping: TypeAlias = "dict[str, JSONSerializable]"
 DType: TypeAlias = numpy.dtype
 
 
-AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)  # noqa: F405
+AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
 
 
 T = TypeVar("T")
