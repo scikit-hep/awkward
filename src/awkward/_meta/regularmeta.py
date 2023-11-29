@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from awkward._do.meta import is_indexed, is_list, is_numpy, is_option
-from awkward._meta.meta import Meta
+from awkward._meta.meta import Meta, is_indexed, is_list, is_numpy, is_option
 from awkward._nplikes.shape import ShapeItem
 from awkward._parameters import type_parameters_equal
 from awkward._typing import JSONSerializable

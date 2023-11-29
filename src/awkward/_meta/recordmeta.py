@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from awkward._do.meta import (
+from awkward._meta.meta import (
+    Meta,
     is_indexed,
     is_option,
     is_record,
     is_record_record,
     is_record_tuple,
 )
-from awkward._meta.meta import Meta
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import JSONSerializable
