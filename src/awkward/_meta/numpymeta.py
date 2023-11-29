@@ -78,16 +78,19 @@ class NumpyMeta(Meta):
             return False
         # Simplify *this* branch to be 1D self
         elif len(self.inner_shape) > 0:
-            return self._to_regular_primitive()._mergeable_next(
-                other, mergebool
-            )  # TODO
+            # TODO: `_to_regular_primitive` is a mechanism for re-using our merge
+            #       logic that already handles `RegularArray`. Rather than
+            #       converting the NumpyArray into a contiguous `RegularArray`,
+            #       we return something with arbitrary data (e.g. a broadcasted empty array!)
+            #       N.B. NumpyForm doesn't need to do this, only NumpyArray.
+            return self._to_regular_primitive()._mergeable_next(other, mergebool)
 
         elif is_numpy(other):
             if len(self.inner_shape) != len(other.inner_shape):
                 return False
 
             # Obvious fast-path
-            if self.dtype == other.dtype:  # TODO
+            if self.dtype == other.dtype:
                 return True
 
             # Special-case booleans i.e. {bool, number}
