@@ -32,7 +32,7 @@ jobs:
         import os
         import pathlib
         import subprocess
-        for path in pathlib.Path("build/bin").glob("test_*"):
+        for path in pathlib.Path("build/tests/bin").glob("test_*"):
             if path.is_file():
                 print(f"Running {path.name}", flush=True)
                 print("::group::Test output", flush=True)
