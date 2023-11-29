@@ -44,6 +44,8 @@ def _pickle_complex_array_and_return_form_impl():
     return pickle.loads(pickle.dumps(array)).layout.form
 
 
+# NOTE: custom picklers are disabled in our tests, but the subprocess that is
+#       spawned here doesn't pick up that configuration, thus it can be tested!
 def pickle_complex_array_and_return_form(pickler_source, tmp_path):
     """Create a new (spawned) process, and register the given pickler source
     via entrypoints"""
