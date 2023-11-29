@@ -170,10 +170,10 @@ class RecordMeta(Meta):
                     return False
 
             elif is_record_record(self) and is_record_record(other):
-                if set(self._fields) != set(other._fields):
+                if set(self._fields) != set(other._fields):  # type: ignore[arg-type]
                     return False
 
-                for i, field in enumerate(self._fields):
+                for i, field in enumerate(self._fields):  # type: ignore[arg-type]
                     x = self._contents[i]
                     y = other.contents[other.field_to_index(field)]
                     if not x._mergeable_next(y, mergebool):

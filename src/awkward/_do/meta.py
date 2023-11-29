@@ -55,19 +55,13 @@ def is_indexed(meta: Meta) -> TypeGuard[IndexedOptionMeta, IndexedMeta]:
     return meta.is_indexed
 
 
-class ImplementsTuple(RecordMeta):  # Intersection
-    _fields: None
-
-
-def is_record_tuple(meta: Meta) -> TypeGuard[ImplementsTuple]:
+# FIXME: narrow this to have `is_tuple` be a const True
+def is_record_tuple(meta: Meta) -> TypeGuard[RecordMeta]:
     return meta.is_record and meta.is_tuple
 
 
-class ImplementsRecord(RecordMeta):
-    _fields: list[str]
-
-
-def is_record_record(meta: Meta) -> TypeGuard[ImplementsRecord]:
+# FIXME: narrow this to have `is_tuple` be a const False
+def is_record_record(meta: Meta) -> TypeGuard[RecordMeta]:
     return meta.is_record and not meta.is_tuple
 
 

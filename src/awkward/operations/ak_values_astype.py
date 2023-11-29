@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import numbers_to_type
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -73,5 +74,5 @@ def _impl(array, to, including_unknown, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     to_str = ak.types.numpytype.dtype_to_primitive(np.dtype(to))
-    out = ak._do.numbers_to_type(layout, to_str, including_unknown)
+    out = numbers_to_type(layout, to_str, including_unknown)
     return ctx.wrap(out, highlevel=highlevel)

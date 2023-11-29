@@ -9,13 +9,15 @@ from numbers import Integral
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._typing import Any, AxisMaybeNone, Literal
-from awkward.contents.content import ActionType, Content
+from awkward._typing import TYPE_CHECKING, Any, AxisMaybeNone, Literal
 from awkward.errors import AxisError
 from awkward.forms import form
-from awkward.record import Record
 
 np = NumpyMetadata.instance()
+
+if TYPE_CHECKING:
+    from awkward.contents.content import ActionType, Content
+    from awkward.record import Record
 
 
 def recursively_apply(
@@ -32,6 +34,9 @@ def recursively_apply(
     function_name: str | None = None,
     regular_to_jagged=False,
 ) -> Content | Record | None:
+    from awkward.contents.content import Content
+    from awkward.record import Record
+
     if isinstance(layout, Content):
         return layout._recursively_apply(
             action,
@@ -201,6 +206,8 @@ def remove_structure(
     allow_records: bool = False,
     list_to_regular: bool = False,
 ):
+    from awkward.record import Record
+
     if isinstance(layout, Record):
         return remove_structure(
             layout._array[layout._at : layout._at + 1],

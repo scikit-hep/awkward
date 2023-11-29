@@ -653,11 +653,6 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         assert not isinstance(x, PlaceholderArray)
         return x.astype(dtype, copy=copy)  # type: ignore[attr-defined]
 
-    def can_cast(
-        self, from_: DTypeLike | ArrayLikeT, to: DTypeLike | ArrayLikeT
-    ) -> bool:
-        return self._module.can_cast(from_, to, casting="same_kind")
-
     @classmethod
     def is_own_array(cls, obj) -> bool:
         return cls.is_own_array_type(type(obj))

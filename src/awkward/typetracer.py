@@ -6,7 +6,7 @@ from collections.abc import Callable, Mapping
 
 import awkward.forms
 from awkward._backends.typetracer import TypeTracerBackend
-from awkward._do import touch_data as _touch_data
+from awkward._do.content import touch_data as _touch_data
 from awkward._layout import HighLevelContext, wrap_layout
 from awkward._nplikes.numpy import NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray

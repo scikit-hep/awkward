@@ -1512,11 +1512,6 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         x.touch_data()
         return TypeTracerArray._new(np.dtype(dtype), x.shape)
 
-    def can_cast(
-        self, from_: DTypeLike | TypeTracerArray, to: DTypeLike | TypeTracerArray
-    ) -> bool:
-        return numpy.can_cast(from_, to, casting="same_kind")
-
     @classmethod
     def is_own_array_type(cls, type_: type) -> bool:
         return issubclass(type_, TypeTracerArray)

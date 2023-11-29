@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from awkward._do.meta import is_indexed, is_numpy, is_option
 from awkward._meta.meta import Meta
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._parameters import type_parameters_equal
-from awkward._typing import TYPE_CHECKING, JSONSerializable
+from awkward._typing import TYPE_CHECKING, DType, JSONSerializable
 
+np = NumpyMetadata.instance()
 if TYPE_CHECKING:
     from awkward._meta.regularmeta import RegularMeta
 
@@ -16,6 +18,10 @@ class NumpyMeta(Meta):
     is_numpy = True
     is_leaf = True
     inner_shape: tuple[ShapeItem, ...]
+
+    @property
+    def dtype(self) -> DType:
+        raise NotImplementedError
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         if self._parameters is not None:
@@ -104,9 +110,9 @@ class NumpyMeta(Meta):
 
             # Default merging (can we cast one to the other)
             else:
-                return self.backend.nplike.can_cast(
-                    self.dtype, other.dtype
-                ) or self.backend.nplike.can_cast(other.dtype, self.dtype)
+                return np.can_cast(
+                    self.dtype, other.dtype, casting="same_kind"
+                ) or np.can_cast(other.dtype, self.dtype, casting="same_kind")
 
         else:
             return False
