@@ -7,7 +7,7 @@ from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._nplikes.typetracer import ensure_known_scalar
+from awkward._nplikes.typetracer import is_unknown_scalar
 from awkward.operations.ak_zeros_like import _ZEROS
 
 __all__ = ("full_like",)
@@ -125,12 +125,14 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
         if layout.is_numpy:
             original = nplike.asarray(layout.data)
 
-            if fill_value is _ZEROS or ensure_known_scalar(fill_value == 0, False):
+            if fill_value is _ZEROS or (
+                not is_unknown_scalar(fill_value) and fill_value == 0
+            ):
                 return ak.contents.NumpyArray(
                     nplike.zeros_like(original, dtype=dtype),
                     parameters=layout.parameters,
                 )
-            elif ensure_known_scalar(fill_value == 1, False):
+            elif not is_unknown_scalar(fill_value) and fill_value == 1:
                 return ak.contents.NumpyArray(
                     nplike.ones_like(original, dtype=dtype),
                     parameters=layout.parameters,
