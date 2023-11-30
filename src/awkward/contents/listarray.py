@@ -1145,6 +1145,11 @@ class ListArray(ListMeta[Content], Content):
         length_so_far = 0
 
         for array in head:
+            # We need contiguous content, so let's just convert to RegularArray
+            # immediately.
+            if array.is_numpy:
+                array = array.to_RegularArray()
+
             if isinstance(
                 array,
                 (
@@ -1219,6 +1224,9 @@ class ListArray(ListMeta[Content], Content):
 
             elif isinstance(array, ak.contents.EmptyArray):
                 pass
+
+            else:
+                raise AssertionError
 
         next = ak.contents.ListArray(
             nextstarts, nextstops, nextcontent, parameters=parameters
