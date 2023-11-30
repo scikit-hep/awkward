@@ -542,7 +542,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             == "categorical"
         ):
             raise NotImplementedError(
-                "merging categorical arrays is currently not defined. "
+                "merging categorical arrays is currently not implemented. "
                 "Use `ak.enforce_type` to drop the categorical type and use general merging."
             )
 
@@ -672,7 +672,7 @@ class IndexedArray(IndexedMeta[Content], Content):
                     and parameters.get("__array__") == "categorical"
                 ):
                     parameters = {**parameters}
-                    del parameters['__array__']
+                    del parameters["__array__"]
 
         tail_contents = contents[1:]
         nextcontent = contents[0]._mergemany(tail_contents)
@@ -680,7 +680,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         # FIXME: support categorical merging?
         if parameters is not None and parameters.get("__array__") == "categorical":
             raise NotImplementedError(
-                "merging categorical arrays is currently not defined. "
+                "merging categorical arrays is currently not implemented. "
                 "Use `ak.enforce_type` to drop the categorical type and use general merging."
             )
 

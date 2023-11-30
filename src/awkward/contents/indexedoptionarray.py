@@ -675,7 +675,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             == "categorical"
         ):
             raise NotImplementedError(
-                "merging categorical arrays is currently not defined. "
+                "merging categorical arrays is currently not implemented. "
                 "Use `ak.enforce_type` to drop the categorical type and use general merging."
             )
 
@@ -821,7 +821,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         # FIXME: support categorical merging?
         if parameters is not None and parameters.get("__array__") == "categorical":
             raise NotImplementedError(
-                "merging categorical arrays is currently not defined. "
+                "merging categorical arrays is currently not implemented. "
                 "Use `ak.enforce_type` to drop the categorical type and use general merging."
             )
 
