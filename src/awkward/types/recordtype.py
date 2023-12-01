@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from collections.abc import Iterable, Mapping
-from itertools import permutations
 
 import awkward as ak
 import awkward._prettyprint
@@ -212,16 +211,11 @@ class RecordType(Type):
             if set(self._fields) != set(other._fields):
                 return False
 
-            self_contents = [self.content(f) for f in self._fields]
-            other_contents = [other.content(f) for f in other._fields]
-
-            return any(
-                all(
-                    this._is_equal_to(that, all_parameters)
-                    for this, that in zip(self_contents, contents)
-                )
-                for contents in permutations(other_contents)
+            return all(
+                content._is_equal_to(other.content(field), all_parameters)
+                for field, content in zip(self._fields, self._contents)
             )
+
         # Mixed
         else:
             return False

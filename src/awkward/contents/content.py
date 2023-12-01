@@ -25,6 +25,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
+    parameters_are_equal,
     type_parameters_equal,
 )
 from awkward._regularize import is_integer_like, is_sized_iterable
@@ -1244,8 +1245,19 @@ class Content(Meta):
         raise NotImplementedError
 
     def is_equal_to(
-        self, other: Content, index_dtype: bool = True, numpyarray: bool = True
+        self,
+        other: Content,
+        index_dtype: bool = True,
+        numpyarray: bool = True,
+        *,
+        all_parameters: bool = False,
     ) -> bool:
+        return self._is_equal_to(other, index_dtype, numpyarray, all_parameters)
+
+    def _is_equal_to_generic(self, other: Content, all_parameters: bool) -> bool:
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
         return (
             self.__class__ is other.__class__
             and (
@@ -1253,11 +1265,12 @@ class Content(Meta):
                 or other.length is unknown_length
                 or self.length == other.length
             )
-            and type_parameters_equal(self._parameters, other._parameters)
-            and self._is_equal_to(other, index_dtype, numpyarray)
+            and compare_parameters(self._parameters, other._parameters)
         )
 
-    def _is_equal_to(self, other: Self, index_dtype: bool, numpyarray: bool) -> bool:
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
         raise NotImplementedError
 
     def _repr(self, indent: str, pre: str, post: str) -> str:

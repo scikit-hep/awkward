@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
+from itertools import permutations
 
 import awkward as ak
 from awkward._meta.unionmeta import UnionMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._parameters import type_parameters_equal
-from awkward._typing import DType, Iterator, Self, final
+from awkward._typing import Any, DType, Iterator, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
 
@@ -138,19 +138,6 @@ class UnionForm(UnionMeta[Form], Form):
             parameters=self._parameters,
         )
 
-    def __eq__(self, other):
-        if (
-            isinstance(other, UnionForm)
-            and self._form_key == other._form_key
-            and self._tags == other._tags
-            and self._index == other._index
-            and len(self._contents) == len(other._contents)
-            and type_parameters_equal(self._parameters, other._parameters)
-        ):
-            return self._contents == other._contents
-
-        return False
-
     def _columns(self, path, output, list_indicator):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
@@ -209,3 +196,18 @@ class UnionForm(UnionMeta[Form], Form):
         if recursive:
             for content in self._contents:
                 yield from content._expected_from_buffers(getkey, recursive)
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and self._tags == other.tags
+            and self._index == other.index
+            and len(self._contents) == len(other.contents)
+            and any(
+                all(
+                    x._is_equal_to(y, all_parameters, form_key)
+                    for x, y in zip(self._contents, c)
+                )
+                for c in permutations(other.contents)
+            )
+        )
