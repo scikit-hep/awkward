@@ -7,7 +7,6 @@ from collections.abc import Callable
 import awkward as ak
 from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._parameters import type_parameters_equal
 from awkward._typing import (
     Any,
     DType,

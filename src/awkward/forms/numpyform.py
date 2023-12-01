@@ -9,7 +9,6 @@ from awkward._errors import deprecate
 from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward._parameters import type_parameters_equal
 from awkward._typing import TYPE_CHECKING, Any, DType, JSONMapping, Self, final
 from awkward._util import UNSET, Sentinel
 from awkward.forms.form import Form, _SpecifierMatcher

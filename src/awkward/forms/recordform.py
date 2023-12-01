@@ -7,7 +7,6 @@ from collections.abc import Callable, Iterable, Iterator
 import awkward as ak
 from awkward._meta.recordmeta import RecordMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._parameters import type_parameters_equal
 from awkward._typing import Any, DType, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher

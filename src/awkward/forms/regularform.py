@@ -8,7 +8,6 @@ import awkward as ak
 from awkward._meta.regularmeta import RegularMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
-from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import Any, DType, Self, final
 from awkward._util import UNSET

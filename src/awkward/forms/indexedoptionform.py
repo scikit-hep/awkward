@@ -7,7 +7,6 @@ from collections.abc import Callable
 import awkward as ak
 from awkward._meta.indexedoptionmeta import IndexedOptionMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._parameters import parameters_union, type_parameters_equal
 from awkward._parameters import (
     parameters_union,
 )
