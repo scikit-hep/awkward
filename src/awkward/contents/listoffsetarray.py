@@ -2318,7 +2318,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
                 return content
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return self.offsets.is_equal_to(
-            other.offsets, index_dtype, numpyarray
-        ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters)
+            and self._offsets.is_equal_to(other.offsets, index_dtype, numpyarray)
+            and self._content._is_equal_to(
+                other.content, index_dtype, numpyarray, all_parameters
+            )
+        )

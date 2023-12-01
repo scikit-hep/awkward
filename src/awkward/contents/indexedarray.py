@@ -1155,11 +1155,6 @@ class IndexedArray(IndexedMeta[Content], Content):
         index = self._index.to_nplike(backend.index_nplike)
         return IndexedArray(index, content, parameters=self._parameters)
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return self.index.is_equal_to(
-            other.index, index_dtype, numpyarray
-        ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)
-
     def _push_inside_record_or_project(self) -> Self | ak.contents.RecordArray:
         if self.content.is_record:
             return ak.contents.RecordArray(
@@ -1174,3 +1169,14 @@ class IndexedArray(IndexedMeta[Content], Content):
             )
         else:
             return self.project()
+
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters)
+            and self._index.is_equal_to(other.index, index_dtype, numpyarray)
+            and self._content._is_equal_to(
+                other.content, index_dtype, numpyarray, all_parameters
+            )
+        )

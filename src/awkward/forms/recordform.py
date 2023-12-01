@@ -188,7 +188,7 @@ class RecordForm(RecordMeta[Form], Form):
             and len(self._contents) == len(other._contents)
             and all(f in computed_fields_set for f in other.fields)
             and all(
-                x._is_equal_to(other.content(f), all_parameters, form_key)
-                for f, x in zip(self.fields, self._contents)
+                content._is_equal_to(other.content(field), all_parameters, form_key)
+                for field, content in zip(self.fields, self._contents)
             )
         )
