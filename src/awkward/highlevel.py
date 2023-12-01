@@ -621,7 +621,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #ak.to_list.
         """
         for item in self._layout:
-            yield wrap_layout(prepare_layout(item), self._behavior, allow_other=True)
+            yield wrap_layout(
+                prepare_layout(item),
+                self._behavior,
+                allow_other=True,
+                attrs=self._attrs,
+            )
 
     def __getitem__(self, where):
         """
@@ -1054,7 +1059,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.SlicingErrorContext(self, where):
             return wrap_layout(
-                prepare_layout(self._layout[where]), self._behavior, allow_other=True
+                prepare_layout(self._layout[where]),
+                self._behavior,
+                allow_other=True,
+                attrs=self._attrs,
             )
 
     def __bytes__(self) -> bytes:
@@ -1969,7 +1977,10 @@ class Record(NDArrayOperatorsMixin):
         """
         with ak._errors.SlicingErrorContext(self, where):
             return wrap_layout(
-                prepare_layout(self._layout[where]), self._behavior, allow_other=True
+                prepare_layout(self._layout[where]),
+                self._behavior,
+                allow_other=True,
+                attrs=self._attrs,
             )
 
     def __setitem__(self, where, what):
