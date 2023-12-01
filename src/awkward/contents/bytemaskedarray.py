@@ -1179,9 +1179,14 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
         return (
-            self.valid_when == other.valid_when
-            and self.mask.is_equal_to(other.mask, index_dtype, numpyarray)
-            and self.content.is_equal_to(other.content, index_dtype, numpyarray)
+            self._is_equal_to_generic(other, all_parameters)
+            and self._valid_when == other.valid_when
+            and self._mask.is_equal_to(other.mask, index_dtype, numpyarray)
+            and self._content._is_equal_to(
+                other.content, index_dtype, numpyarray, all_parameters
+            )
         )

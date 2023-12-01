@@ -7,8 +7,7 @@ from collections.abc import Callable, Iterable, Iterator
 import awkward as ak
 from awkward._meta.recordmeta import RecordMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._parameters import type_parameters_equal
-from awkward._typing import DType, Self, final
+from awkward._typing import Any, DType, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher
 
@@ -114,25 +113,6 @@ class RecordForm(RecordMeta[Form], Form):
             parameters=self._parameters,
         )
 
-    def __eq__(self, other):
-        if isinstance(other, RecordForm):
-            if (
-                self._form_key == other._form_key
-                and self.is_tuple == other.is_tuple
-                and len(self._contents) == len(other._contents)
-                and type_parameters_equal(self._parameters, other._parameters)
-            ):
-                if self.is_tuple:
-                    return self._contents == other._contents
-                else:
-                    return dict(zip(self._fields, self._contents)) == dict(
-                        zip(other._fields, other._contents)
-                    )
-            else:
-                return False
-        else:
-            return False
-
     def _columns(self, path, output, list_indicator):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
@@ -197,3 +177,17 @@ class RecordForm(RecordMeta[Form], Form):
         if recursive:
             for content in self._contents:
                 yield from content._expected_from_buffers(getkey, recursive)
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        computed_fields_set = set(self.fields)
+
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and self.is_tuple == other.is_tuple
+            and len(self._contents) == len(other._contents)
+            and all(f in computed_fields_set for f in other.fields)
+            and all(
+                content._is_equal_to(other.content(field), all_parameters, form_key)
+                for field, content in zip(self.fields, self._contents)
+            )
+        )

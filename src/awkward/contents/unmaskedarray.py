@@ -581,5 +581,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         content = self._content.to_backend(backend)
         return UnmaskedArray(content, parameters=self._parameters)
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return self.content.is_equal_to(other.content, index_dtype, numpyarray)
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return self._content._is_equal_to(
+            other.content, index_dtype, numpyarray, all_parameters
+        )

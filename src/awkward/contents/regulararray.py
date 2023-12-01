@@ -1527,7 +1527,17 @@ class RegularArray(RegularMeta[Content], Content):
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return self._size == other.size and self._content.is_equal_to(
-            other._content, index_dtype, numpyarray
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters)
+            and (
+                self._size is unknown_length
+                or other.size is unknown_length
+                or self._size == other.size
+            )
+            and self._content._is_equal_to(
+                other._content, index_dtype, numpyarray, all_parameters
+            )
         )

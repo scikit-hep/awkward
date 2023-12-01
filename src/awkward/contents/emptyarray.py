@@ -448,5 +448,7 @@ class EmptyArray(EmptyMeta, Content):
     def _to_backend(self, backend: Backend) -> Self:
         return EmptyArray(backend=backend)
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return True
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return self._is_equal_to_generic(other, all_parameters)

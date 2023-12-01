@@ -12,7 +12,7 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import DType, Iterator, Self, final
 from awkward._util import UNSET, Sentinel
-from awkward.forms.form import Form, JSONMapping, _SpecifierMatcher
+from awkward.forms.form import Any, Form, JSONMapping, _SpecifierMatcher
 
 __all__ = ("EmptyForm",)
 
@@ -58,9 +58,6 @@ class EmptyForm(EmptyMeta, Form):
     @property
     def type(self):
         return ak.types.UnknownType()
-
-    def __eq__(self, other) -> bool:
-        return isinstance(other, EmptyForm) and self._form_key == other._form_key
 
     def to_NumpyForm(self, *args, **kwargs):
         def legacy_impl(dtype):
@@ -125,3 +122,8 @@ class EmptyForm(EmptyMeta, Form):
         self, getkey: Callable[[Form, str], str], recursive: bool
     ) -> Iterator[tuple[str, DType]]:
         yield from ()
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return isinstance(other, type(self)) and not (
+            form_key and self._form_key != other._form_key
+        )

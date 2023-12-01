@@ -1291,12 +1291,17 @@ class RecordArray(RecordMeta[Content], Content):
             backend=backend,
         )
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
         return (
-            self.fields == other.fields
-            and len(self.contents) == len(other.contents)
+            self._is_equal_to_generic(other, all_parameters)
+            and self.is_tuple == other.is_tuple
+            and set(self.fields) == set(other.fields)
             and all(
-                self.contents[i].is_equal_to(other.contents[i], index_dtype, numpyarray)
-                for i in range(len(self.contents))
+                content._is_equal_to(
+                    other.content(field), index_dtype, numpyarray, all_parameters
+                )
+                for field, content in zip(self.fields, self._contents)
             )
         )

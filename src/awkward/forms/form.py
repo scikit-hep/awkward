@@ -16,8 +16,13 @@ from awkward._errors import deprecate
 from awkward._meta.meta import Meta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._parameters import parameters_union
+from awkward._parameters import (
+    parameters_are_equal,
+    parameters_union,
+    type_parameters_equal,
+)
 from awkward._typing import (
+    Any,
     DType,
     Final,
     Iterator,
@@ -640,3 +645,26 @@ class Form(Meta):
         """
         getkey = regularize_buffer_key(buffer_key)
         return dict(self._expected_from_buffers(getkey, recursive))
+
+    def is_equal_to(
+        self, other: Any, *, all_parameters: bool = False, form_key: bool = False
+    ) -> bool:
+        return self._is_equal_to(other, all_parameters, form_key)
+
+    __eq__ = is_equal_to
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        raise NotImplementedError
+
+    def _is_equal_to_generic(
+        self, other: Any, all_parameters: bool, form_key: bool
+    ) -> bool:
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
+
+        return (
+            isinstance(other, type(self))
+            and not (form_key and self._form_key != other._form_key)
+            and compare_parameters(self._parameters, other._parameters)
+        )

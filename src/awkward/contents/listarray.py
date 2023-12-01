@@ -1617,9 +1617,14 @@ class ListArray(ListMeta[Content], Content):
         stops = self._stops.to_nplike(backend.index_nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
         return (
-            self.starts.is_equal_to(other.starts, index_dtype, numpyarray)
-            and self.stops.is_equal_to(other.stops, index_dtype, numpyarray)
-            and self.content.is_equal_to(other.content, index_dtype, numpyarray)
+            self._is_equal_to_generic(other, all_parameters)
+            and self._starts.is_equal_to(other.starts, index_dtype, numpyarray)
+            and self._stops.is_equal_to(other.stops, index_dtype, numpyarray)
+            and self._content._is_equal_to(
+                other.content, index_dtype, numpyarray, all_parameters
+            )
         )
