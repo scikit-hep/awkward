@@ -18,7 +18,6 @@ from awkward._nplikes.typetracer import MaybeNone
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
-    type_parameters_equal,
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
