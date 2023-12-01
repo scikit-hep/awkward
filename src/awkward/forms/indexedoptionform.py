@@ -8,7 +8,10 @@ import awkward as ak
 from awkward._meta.indexedoptionmeta import IndexedOptionMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_union, type_parameters_equal
-from awkward._typing import DType, Iterator, Self, final
+from awkward._parameters import (
+    parameters_union,
+)
+from awkward._typing import Any, DType, Iterator, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
 
@@ -119,17 +122,6 @@ class IndexedOptionForm(IndexedOptionMeta[Form], Form):
             parameters=parameters,
         ).simplify_option_union()
 
-    def __eq__(self, other):
-        if isinstance(other, IndexedOptionForm):
-            return (
-                self._form_key == other._form_key
-                and self._index == other._index
-                and type_parameters_equal(self._parameters, other._parameters)
-                and self._content == other._content
-            )
-        else:
-            return False
-
     def _columns(self, path, output, list_indicator):
         self._content._columns(path, output, list_indicator)
 
@@ -167,3 +159,10 @@ class IndexedOptionForm(IndexedOptionMeta[Form], Form):
         yield (getkey(self, "index"), index_to_dtype[self._index])
         if recursive:
             yield from self._content._expected_from_buffers(getkey, recursive)
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and self._index == other._index
+            and self._content._is_equal_to(other._content, all_parameters, form_key)
+        )

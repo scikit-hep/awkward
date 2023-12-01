@@ -10,7 +10,7 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import DType, Self, final
+from awkward._typing import Any, DType, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher
 
@@ -83,17 +83,6 @@ class RegularForm(RegularMeta[Form], Form):
             parameters=self._parameters,
         )
 
-    def __eq__(self, other):
-        if isinstance(other, RegularForm):
-            return (
-                self._form_key == other._form_key
-                and self._size == other._size
-                and type_parameters_equal(self._parameters, other._parameters)
-                and self._content == other._content
-            )
-        else:
-            return False
-
     def _columns(self, path, output, list_indicator):
         if (
             self.parameter("__array__") not in ("string", "bytestring")
@@ -138,3 +127,10 @@ class RegularForm(RegularMeta[Form], Form):
     ) -> Iterator[tuple[str, DType]]:
         if recursive:
             yield from self._content._expected_from_buffers(getkey, recursive)
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and (self._size == other._size)
+            and self._content._is_equal_to(other._content, all_parameters, form_key)
+        )

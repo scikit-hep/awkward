@@ -8,7 +8,7 @@ import awkward as ak
 from awkward._meta.listmeta import ListMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import type_parameters_equal
-from awkward._typing import DType, Iterator, Self, final
+from awkward._typing import Any, DType, Iterator, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
 
@@ -122,18 +122,6 @@ class ListForm(ListMeta[Form], Form):
             parameters=self._parameters,
         )
 
-    def __eq__(self, other):
-        if isinstance(other, ListForm):
-            return (
-                self._form_key == other._form_key
-                and self._starts == other._starts
-                and self._stops == other._stops
-                and type_parameters_equal(self._parameters, other._parameters)
-                and self._content == other._content
-            )
-        else:
-            return False
-
     def _columns(self, path, output, list_indicator):
         if (
             self.parameter("__array__") not in ("string", "bytestring")
@@ -182,3 +170,11 @@ class ListForm(ListMeta[Form], Form):
         yield (getkey(self, "stops"), index_to_dtype[self._stops])
         if recursive:
             yield from self._content._expected_from_buffers(getkey, recursive)
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and self._starts == other._starts
+            and self._stops == other._stops
+            and self._content._is_equal_to(other._content, all_parameters, form_key)
+        )

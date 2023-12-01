@@ -10,7 +10,7 @@ from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
-from awkward._typing import TYPE_CHECKING, DType, JSONMapping, Self, final
+from awkward._typing import TYPE_CHECKING, Any, DType, JSONMapping, Self, final
 from awkward._util import UNSET, Sentinel
 from awkward.forms.form import Form, _SpecifierMatcher
 
@@ -168,17 +168,6 @@ class NumpyForm(NumpyMeta, Form):
 
         return out
 
-    def __eq__(self, other):
-        if isinstance(other, NumpyForm):
-            return (
-                self._form_key == other._form_key
-                and self._primitive == other._primitive
-                and self._inner_shape == other._inner_shape
-                and type_parameters_equal(self._parameters, other._parameters)
-            )
-        else:
-            return False
-
     def to_RegularForm(self) -> RegularForm | NumpyForm:
         out: RegularForm | NumpyForm = NumpyForm(
             self._primitive, (), parameters=None, form_key=None
@@ -270,3 +259,8 @@ class NumpyForm(NumpyMeta, Form):
         from awkward.types.numpytype import primitive_to_dtype
 
         yield (getkey(self, "data"), primitive_to_dtype(self.primitive))
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return self._is_equal_to_generic(other, all_parameters, form_key) and (
+            self._primitive == other._primitive
+        )

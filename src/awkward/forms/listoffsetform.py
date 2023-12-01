@@ -9,6 +9,7 @@ from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._typing import (
+    Any,
     DType,
     Iterator,
     JSONMapping,
@@ -89,21 +90,7 @@ class ListOffsetForm(ListOffsetMeta[Form], Form):
 
     @property
     def type(self):
-        return ak.types.ListType(
-            self._content.type,
-            parameters=self._parameters,
-        )
-
-    def __eq__(self, other):
-        if isinstance(other, ListOffsetForm):
-            return (
-                self._form_key == other._form_key
-                and self._offsets == other._offsets
-                and type_parameters_equal(self._parameters, other._parameters)
-                and self._content == other._content
-            )
-        else:
-            return False
+        return ak.types.ListType(self._content.type, parameters=self._parameters)
 
     def _columns(self, path, output, list_indicator):
         if (
@@ -150,3 +137,10 @@ class ListOffsetForm(ListOffsetMeta[Form], Form):
         yield (getkey(self, "offsets"), index_to_dtype[self._offsets])
         if recursive:
             yield from self._content._expected_from_buffers(getkey, recursive)
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and self._offsets == other._offsets
+            and self._content._is_equal_to(other._content, all_parameters, form_key)
+        )
