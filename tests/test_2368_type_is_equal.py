@@ -82,7 +82,7 @@ def test_record_tuple():
     assert record_type != tuple_type
 
 
-def test_record_mixed():
+def test_record_permuted():
     record = ak.types.from_datashape("10 * var * {x: int64, y: int32}")
     permutation = ak.types.from_datashape("10 * var * {y: int64, x: int32}")
-    assert record == permutation
+    assert record != permutation

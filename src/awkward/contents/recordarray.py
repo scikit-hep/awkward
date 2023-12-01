@@ -1296,11 +1296,12 @@ class RecordArray(RecordMeta[Content], Content):
     ) -> bool:
         return (
             self._is_equal_to_generic(other, all_parameters)
-            and set(self._fields) == set(other.fields)
+            and self.is_tuple == other.is_tuple
+            and set(self.fields) == set(other.fields)
             and all(
                 content._is_equal_to(
                     other.content(field), index_dtype, numpyarray, all_parameters
                 )
-                for field, content in zip(self._fields, self._contents)
+                for field, content in zip(self.fields, self._contents)
             )
         )
