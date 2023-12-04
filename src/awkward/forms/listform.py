@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 
 import awkward as ak
 from awkward._meta.listmeta import ListMeta
@@ -11,7 +11,6 @@ from awkward._typing import (
     Any,
     DType,
     ImplementsReadOnlyProperty,
-    Iterator,
     Self,
     final,
 )

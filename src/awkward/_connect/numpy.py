@@ -5,7 +5,7 @@ from __future__ import annotations
 import collections
 import functools
 import inspect
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator, Mapping
 from itertools import chain
 
 import numpy
@@ -26,7 +26,7 @@ from awkward._layout import wrap_layout
 from awkward._nplikes import to_nplike
 from awkward._parameters import parameters_intersect
 from awkward._regularize import is_non_string_like_iterable
-from awkward._typing import Any, Iterator, Mapping
+from awkward._typing import Any
 from awkward._util import Sentinel
 from awkward.contents.numpyarray import NumpyArray
 

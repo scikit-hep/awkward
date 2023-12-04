@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
 from itertools import permutations
 
 import awkward as ak
@@ -12,7 +12,6 @@ from awkward._typing import (
     Any,
     DType,
     ImplementsReadOnlyProperty,
-    Iterator,
     Self,
     final,
 )

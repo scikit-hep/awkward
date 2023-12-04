@@ -13,7 +13,6 @@ from awkward._typing import (
     Any,
     DType,
     ImplementsReadOnlyProperty,
-    Iterator,
     Self,
     final,
 )
