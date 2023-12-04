@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from awkward._meta.meta import Meta
-from awkward._typing import Generic, JSONSerializable, TypeVar
+from awkward._meta.meta import Meta, is_indexed, is_option
+from awkward._parameters import type_parameters_equal
+from awkward._typing import JSONSerializable
 
-T = TypeVar("T", bound=Meta)
 
-
-class IndexedMeta(Meta, Generic[T]):
+class IndexedMeta(Meta):
     is_indexed = True
 
-    _content: T
+    _content: Meta
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         if self._parameters is not None:
@@ -54,5 +53,17 @@ class IndexedMeta(Meta, Generic[T]):
         return False
 
     @property
-    def content(self) -> T:
+    def content(self) -> Meta:
         return self._content
+
+    def _mergeable_next(self, other: Meta, mergebool: bool) -> bool:
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # We can only combine option/indexed types whose array-record parameters agree
+        elif is_option(other) or is_indexed(other):
+            return self._content._mergeable_next(
+                other.content, mergebool
+            ) and type_parameters_equal(self._parameters, other._parameters)
+        else:
+            return self._content._mergeable_next(other, mergebool)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import pad_none, recursively_apply
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -67,7 +68,7 @@ def _impl(array, to, highlevel, behavior, attrs):
                 layout, highlevel=False, behavior=behavior
             )
             max_length = ak.operations.max(ak.operations.num(layout, behavior=behavior))
-            regulararray = ak._do.pad_none(layout, max_length, 1)
+            regulararray = pad_none(layout, max_length, 1)
             maskedarray = ak.operations.to_numpy(regulararray, allow_missing=True)
             npstrings = maskedarray.data
             if maskedarray.mask is not False:
@@ -82,5 +83,5 @@ def _impl(array, to, highlevel, behavior, attrs):
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
-    out = ak._do.recursively_apply(layout, action)
+    out = recursively_apply(layout, action)
     return ctx.wrap(out, highlevel=highlevel)

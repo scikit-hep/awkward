@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, ensure_same_backend
 
 __all__ = ("index_in",)
@@ -82,6 +82,6 @@ def _impl(array, value_set, skip_nones, highlevel, behavior, attrs):
                 generate_bitmasks=True,
             )
 
-    out = ak._do.recursively_apply(layout, apply)
+    out = recursively_apply(layout, apply)
 
     return ctx.wrap(out, highlevel=highlevel)

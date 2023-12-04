@@ -18,7 +18,6 @@ from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._parameters import (
     parameters_intersect,
-    type_parameters_equal,
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
@@ -27,6 +26,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -53,7 +53,7 @@ numpy = Numpy.instance()
 
 
 @final
-class ByteMaskedArray(ByteMaskedMeta[Content], Content):
+class ByteMaskedArray(ByteMaskedMeta, Content):
     """
     The ByteMaskedArray implements an #ak.types.OptionType with two aligned
     buffers, a boolean `mask` and `content`. At any element `i` where
@@ -109,6 +109,9 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(self, mask, content, valid_when, *, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
@@ -716,18 +719,6 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
                     )
                 )
                 return (outoffsets, flattened)
-
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
-        # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_union:
-            return True
-        # We can only combine option types whose array-record parameters agree
-        elif other.is_option or other.is_indexed:
-            return self._content._mergeable_next(
-                other.content, mergebool
-            ) and type_parameters_equal(self._parameters, other._parameters)
-        else:
-            return self._content._mergeable_next(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)

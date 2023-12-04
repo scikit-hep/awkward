@@ -12,6 +12,7 @@ from awkward._backends.dispatch import (
     regularize_backend,
 )
 from awkward._behavior import get_record_class
+from awkward._do.content import validity_error as do_validity_error
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -98,7 +99,7 @@ class Record:
         return "".join(out)
 
     def validity_error(self, path="layout.array"):
-        return ak._do.validity_error(self._array, path)
+        return do_validity_error(self._array, path)
 
     @property
     def parameters(self):

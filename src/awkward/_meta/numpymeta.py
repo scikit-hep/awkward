@@ -2,15 +2,25 @@
 
 from __future__ import annotations
 
-from awkward._meta.meta import Meta
+from awkward._meta.meta import Meta, is_indexed, is_numpy, is_option
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
-from awkward._typing import JSONSerializable
+from awkward._parameters import type_parameters_equal
+from awkward._typing import TYPE_CHECKING, DType, JSONSerializable
+
+np = NumpyMetadata.instance()
+if TYPE_CHECKING:
+    from awkward._meta.regularmeta import RegularMeta
 
 
 class NumpyMeta(Meta):
     is_numpy = True
     is_leaf = True
     inner_shape: tuple[ShapeItem, ...]
+
+    @property
+    def dtype(self) -> DType:
+        raise NotImplementedError
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         if self._parameters is not None:
@@ -51,3 +61,60 @@ class NumpyMeta(Meta):
     @property
     def dimension_optiontype(self) -> bool:
         return False
+
+    def _to_regular_primitive(self) -> RegularMeta | NumpyMeta:
+        raise NotImplementedError
+
+    def _mergeable_next(self, other: Meta, mergebool: bool) -> bool:
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Check against option contents
+        elif is_option(other) or is_indexed(other):
+            return self._mergeable_next(other.content, mergebool)
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not type_parameters_equal(self._parameters, other._parameters):
+            return False
+        # Simplify *this* branch to be 1D self
+        elif len(self.inner_shape) > 0:
+            # TODO: `_to_regular_primitive` is a mechanism for re-using our merge
+            #       logic that already handles `RegularArray`. Rather than
+            #       converting the NumpyArray into a contiguous `RegularArray`,
+            #       we return something with arbitrary data (e.g. a broadcasted empty array!)
+            #       N.B. NumpyForm doesn't need to do this, only NumpyArray.
+            return self._to_regular_primitive()._mergeable_next(other, mergebool)
+
+        elif is_numpy(other):
+            if len(self.inner_shape) != len(other.inner_shape):
+                return False
+
+            # Obvious fast-path
+            if self.dtype == other.dtype:
+                return True
+
+            # Special-case booleans i.e. {bool, number}
+            elif (
+                np.issubdtype(self.dtype, np.bool_)
+                and np.issubdtype(other.dtype, np.number)
+                or np.issubdtype(self.dtype, np.number)
+                and np.issubdtype(other.dtype, np.bool_)
+            ):
+                return mergebool
+
+            # Currently we're less permissive than NumPy on merging datetimes / timedeltas
+            elif (
+                np.issubdtype(self.dtype, np.datetime64)
+                or np.issubdtype(self.dtype, np.timedelta64)
+                or np.issubdtype(other.dtype, np.datetime64)
+                or np.issubdtype(other.dtype, np.timedelta64)
+            ):
+                return False
+
+            # Default merging (can we cast one to the other)
+            else:
+                return np.can_cast(
+                    self.dtype, other.dtype, casting="same_kind"
+                ) or np.can_cast(other.dtype, self.dtype, casting="same_kind")
+
+        else:
+            return False

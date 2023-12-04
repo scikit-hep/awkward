@@ -15,9 +15,6 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
-from awkward._parameters import (
-    type_parameters_equal,
-)
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import (
@@ -25,6 +22,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -51,7 +49,7 @@ numpy = Numpy.instance()
 
 
 @final
-class BitMaskedArray(BitMaskedMeta[Content], Content):
+class BitMaskedArray(BitMaskedMeta, Content):
     """
     Like #ak.contents.ByteMaskedArray, BitMaskedArray implements an
     #ak.types.OptionType with two buffers, `mask` and `content`.
@@ -134,6 +132,9 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(
         self, mask, content, valid_when, length, lsb_order, *, parameters=None
@@ -572,18 +573,6 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
     def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         return self.to_ByteMaskedArray._offsets_and_flattened(axis, depth)
-
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
-        # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_union:
-            return True
-        # We can only combine option types whose array-record parameters agree
-        elif other.is_option or other.is_indexed:
-            return self._content._mergeable_next(
-                other.content, mergebool
-            ) and type_parameters_equal(self._parameters, other._parameters)
-        else:
-            return self._content._mergeable_next(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.to_IndexedOptionArray64()._reverse_merge(other)

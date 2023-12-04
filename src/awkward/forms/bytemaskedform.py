@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 
 import awkward as ak
 from awkward._meta.bytemaskedmeta import ByteMaskedMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._typing import Any, DType, Iterator, Self, final
+from awkward._typing import (
+    Any,
+    DType,
+    ImplementsReadOnlyProperty,
+    Self,
+    final,
+)
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
 
@@ -17,8 +23,9 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ByteMaskedForm(ByteMaskedMeta[Form], Form):
-    _content: Form
+class ByteMaskedForm(ByteMaskedMeta, Form):
+    _content: Form  # type: ignore[assignment]
+    content: ImplementsReadOnlyProperty[Form]  # type: ignore[assignment]
 
     def __init__(
         self,
@@ -54,10 +61,6 @@ class ByteMaskedForm(ByteMaskedMeta[Form], Form):
     @property
     def mask(self):
         return self._mask
-
-    @property
-    def content(self):
-        return self._content
 
     @property
     def valid_when(self):

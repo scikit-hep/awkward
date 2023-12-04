@@ -5,15 +5,13 @@ from __future__ import annotations
 from collections import Counter
 
 from awkward._meta.meta import Meta
-from awkward._typing import Generic, JSONSerializable, TypeVar
-
-T = TypeVar("T", bound=Meta)
+from awkward._typing import JSONSerializable
 
 
-class UnionMeta(Meta, Generic[T]):
+class UnionMeta(Meta):
     is_union = True
 
-    _contents: list[T]
+    _contents: list[Meta]
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         if self._parameters is not None:
@@ -99,9 +97,12 @@ class UnionMeta(Meta, Generic[T]):
                 return True
         return False
 
-    def content(self, index: int) -> T:
+    def content(self, index: int) -> Meta:
         return self._contents[index]
 
     @property
-    def contents(self) -> list[T]:
+    def contents(self) -> list[Meta]:
         return self._contents
+
+    def _mergeable_next(self, other: Meta, mergebool: bool) -> bool:
+        return True

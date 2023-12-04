@@ -85,7 +85,7 @@ from awkward.operations.str.akstr_upper import *
 
 
 def _drop_option_preserving_form(layout, ensure_empty_mask: bool = False):
-    from awkward._do import recursively_apply
+    from awkward._do.content import recursively_apply
     from awkward.contents import UnmaskedArray, IndexedOptionArray, IndexedArray
 
     def action(_, continuation, **kwargs):

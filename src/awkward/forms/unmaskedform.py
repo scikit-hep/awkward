@@ -7,10 +7,14 @@ from collections.abc import Callable, Iterator
 import awkward as ak
 from awkward._meta.unmaskedmeta import UnmaskedMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._parameters import (
-    parameters_union,
+from awkward._parameters import parameters_union
+from awkward._typing import (
+    Any,
+    DType,
+    ImplementsReadOnlyProperty,
+    Self,
+    final,
 )
-from awkward._typing import Any, DType, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher
 
@@ -20,8 +24,9 @@ np = NumpyMetadata.instance()
 
 
 @final
-class UnmaskedForm(UnmaskedMeta[Form], Form):
-    _content: Form
+class UnmaskedForm(UnmaskedMeta, Form):
+    _content: Form  # type: ignore[assignment]
+    content: ImplementsReadOnlyProperty[Form]  # type: ignore[assignment]
 
     def __init__(
         self,
@@ -39,10 +44,6 @@ class UnmaskedForm(UnmaskedMeta[Form], Form):
 
         self._content = content
         self._init(parameters=parameters, form_key=form_key)
-
-    @property
-    def content(self):
-        return self._content
 
     def copy(
         self,

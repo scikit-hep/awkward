@@ -90,7 +90,7 @@ def use_builtin_reducer():
 
 
 def custom_reduce(obj, protocol: int) -> tuple | NotImplemented:
-    if (plugin := get_custom_reducer()) is None or _DISABLE_CUSTOM_REDUCER:
+    if _DISABLE_CUSTOM_REDUCER or (plugin := get_custom_reducer()) is None:
         return NotImplemented
     else:
         return plugin(obj, protocol)

@@ -7,7 +7,13 @@ from collections.abc import Callable, Iterable, Iterator
 import awkward as ak
 from awkward._meta.recordmeta import RecordMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._typing import Any, DType, Self, final
+from awkward._typing import (
+    Any,
+    DType,
+    ImplementsReadOnlyProperty,
+    Self,
+    final,
+)
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher
 
@@ -17,7 +23,10 @@ np = NumpyMetadata.instance()
 
 
 @final
-class RecordForm(RecordMeta[Form], Form):
+class RecordForm(RecordMeta, Form):
+    _contents: list[Form]  # type: ignore[assignment]
+    contents: ImplementsReadOnlyProperty[list[Form]]  # type: ignore[assignment]
+
     def __init__(
         self,
         contents,
@@ -49,17 +58,6 @@ class RecordForm(RecordMeta[Form], Form):
         if fields is not None:
             assert len(self._fields) == len(self._contents)
         self._init(parameters=parameters, form_key=form_key)
-
-    @property
-    def contents(self):
-        return self._contents
-
-    @property
-    def fields(self) -> list[str]:
-        if self._fields is None:
-            return [str(i) for i in range(len(self._contents))]
-        else:
-            return self._fields
 
     def copy(
         self,

@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-from awkward._meta.meta import Meta
+from awkward._meta.meta import Meta, is_indexed, is_list, is_numpy, is_option
 from awkward._nplikes.shape import ShapeItem
-from awkward._typing import Generic, JSONSerializable, TypeVar
+from awkward._parameters import type_parameters_equal
+from awkward._typing import JSONSerializable
 
-T = TypeVar("T", bound=Meta)
 
-
-class RegularMeta(Meta, Generic[T]):
+class RegularMeta(Meta):
     is_list = True
     is_regular = True
 
     size: ShapeItem
-    _content: T
+    _content: Meta
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         if self._parameters is not None:
@@ -68,5 +67,23 @@ class RegularMeta(Meta, Generic[T]):
         return False
 
     @property
-    def content(self) -> T:
+    def content(self) -> Meta:
         return self._content
+
+    def _mergeable_next(self, other: Meta, mergebool: bool) -> bool:
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Check against option contents
+        elif is_option(other) or is_indexed(other):
+            assert hasattr(other, "content")
+            return self._mergeable_next(other.content, mergebool)
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not type_parameters_equal(self._parameters, other._parameters):
+            return False
+        elif is_list(other):
+            return self._content._mergeable_next(other.content, mergebool)
+        elif is_numpy(other) and len(other.inner_shape) > 0:
+            return self._mergeable_next(other._to_regular_primitive(), mergebool)
+        else:
+            return False

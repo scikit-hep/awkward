@@ -9,6 +9,7 @@ from awkward import contents, highlevel, record
 from awkward._backends.backend import Backend
 from awkward._backends.jax import JaxBackend
 from awkward._behavior import behavior_of
+from awkward._do.content import recursively_apply
 from awkward._layout import wrap_layout
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -30,9 +31,7 @@ def find_all_buffers(
         if isinstance(node, ak.contents.NumpyArray):
             data_ptrs.append(node.data)
 
-    ak._do.recursively_apply(
-        layout, action=action, return_array=False, numpy_to_regular=False
-    )
+    recursively_apply(layout, action=action, return_array=False, numpy_to_regular=False)
 
     return data_ptrs
 
@@ -54,7 +53,7 @@ def replace_all_buffers(
                     buffer, parameters=node.parameters, backend=backend
                 )
 
-    return ak._do.recursively_apply(layout, action=action, numpy_to_regular=False)
+    return recursively_apply(layout, action=action, numpy_to_regular=False)
 
 
 T = TypeVar(

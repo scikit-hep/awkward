@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import validity_error as do_validity_error
 
 __all__ = ("validity_error",)
 
@@ -35,7 +36,7 @@ def _impl(array, exception):
     layout = ak.operations.to_layout(
         array, allow_record=False, primitive_policy="error"
     )
-    out = ak._do.validity_error(layout, path="highlevel")
+    out = do_validity_error(layout, path="highlevel")
 
     if out not in (None, "") and exception:
         raise ValueError(out)

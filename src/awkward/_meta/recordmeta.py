@@ -2,18 +2,24 @@
 
 from __future__ import annotations
 
-from awkward._meta.meta import Meta
+from awkward._meta.meta import (
+    Meta,
+    is_indexed,
+    is_option,
+    is_record,
+    is_record_record,
+    is_record_tuple,
+)
+from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import Generic, JSONSerializable, TypeVar
+from awkward._typing import JSONSerializable
 from awkward.errors import FieldNotFoundError
 
-T = TypeVar("T", bound=Meta)
 
-
-class RecordMeta(Meta, Generic[T]):
+class RecordMeta(Meta):
     is_record = True
 
-    _contents: list[T]
+    _contents: list[Meta]
     _fields: list[str] | None
 
     @property
@@ -77,7 +83,7 @@ class RecordMeta(Meta, Generic[T]):
         return len(self._contents) == 0
 
     @property
-    def contents(self) -> list[T]:
+    def contents(self) -> list[Meta]:
         return self._contents
 
     @property
@@ -129,7 +135,7 @@ class RecordMeta(Meta, Generic[T]):
         else:
             return field in self._fields
 
-    def content(self, index_or_field: int | str) -> T:
+    def content(self, index_or_field: int | str) -> Meta:
         if is_integer(index_or_field):
             index = index_or_field
         elif isinstance(index_or_field, str):
@@ -141,3 +147,41 @@ class RecordMeta(Meta, Generic[T]):
                 )
             )
         return self._contents[index]  # type: ignore[index]
+
+    def _mergeable_next(self, other: Meta, mergebool: bool) -> bool:
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_union:
+            return True
+        # Check against option contents
+        elif is_option(other) or is_indexed(other):
+            return self._mergeable_next(other.content, mergebool)
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not type_parameters_equal(self._parameters, other._parameters):
+            return False
+        elif is_record(other):
+            if is_record_tuple(self) and is_record_tuple(other):
+                if len(self.contents) == len(other.contents):
+                    for self_cont, other_cont in zip(self.contents, other.contents):
+                        if not self_cont._mergeable_next(other_cont, mergebool):
+                            return False
+
+                    return True
+                else:
+                    return False
+
+            elif is_record_record(self) and is_record_record(other):
+                if set(self._fields) != set(other._fields):  # type: ignore[arg-type]
+                    return False
+
+                for i, field in enumerate(self._fields):  # type: ignore[arg-type]
+                    x = self._contents[i]
+                    y = other.contents[other.field_to_index(field)]
+                    if not x._mergeable_next(y, mergebool):
+                        return False
+                return True
+
+            else:
+                return False
+
+        else:
+            return False

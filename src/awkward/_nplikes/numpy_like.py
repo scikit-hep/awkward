@@ -83,7 +83,8 @@ class NumpyMetadata(PublicSingleton):
     datetime_data = staticmethod(numpy.datetime_data)
     issubdtype = staticmethod(numpy.issubdtype)
 
-    AxisError = numpy.AxisError
+    AxisError = staticmethod(numpy.AxisError)
+    can_cast = staticmethod(numpy.can_cast)
 
 
 if hasattr(numpy, "float16"):
@@ -535,10 +536,6 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     def astype(
         self, x: ArrayLikeT, dtype: DTypeLike, *, copy: bool | None = True
     ) -> ArrayLikeT:
-        ...
-
-    @abstractmethod
-    def can_cast(self, from_: DType | ArrayLikeT, to: DType | ArrayLikeT) -> bool:
         ...
 
     @abstractmethod

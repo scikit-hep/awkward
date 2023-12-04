@@ -7,6 +7,7 @@ from __future__ import annotations
 import sys
 import typing
 from typing import *  # noqa: F403
+from typing import TypeVar
 
 import numpy
 
@@ -29,9 +30,6 @@ __all__ = list(
         *typing.__all__,
     }
 )
-
-
-AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)  # noqa: F405
 
 if sys.version_info < (3, 11):
     from typing import ClassVar, Final, SupportsIndex, runtime_checkable
@@ -71,3 +69,14 @@ JSONSerializable: TypeAlias = (
 JSONMapping: TypeAlias = "dict[str, JSONSerializable]"
 
 DType: TypeAlias = numpy.dtype
+
+
+AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
+
+
+T = TypeVar("T")
+
+
+class ImplementsReadOnlyProperty(Protocol[T]):
+    def __get__(self, instance, owner=None) -> T:
+        ...

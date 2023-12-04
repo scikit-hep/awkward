@@ -5,6 +5,8 @@ from __future__ import annotations
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
+from awkward._do.content import fill_none as do_fill_none
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -107,7 +109,7 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
 
         def action(layout, continuation, **kwargs):
             if layout.is_option:
-                return ak._do.fill_none(continuation(), value_layout)
+                return do_fill_none(continuation(), value_layout)
 
     else:
 
@@ -115,7 +117,7 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
             posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis is not None and posaxis + 1 == depth:
                 if layout.is_option:
-                    return ak._do.fill_none(layout, value_layout)
+                    return do_fill_none(layout, value_layout)
                 elif layout.is_union or layout.is_record or layout.is_indexed:
                     return None
                 else:
@@ -126,5 +128,5 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
                     f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
-    out = ak._do.recursively_apply(array_layout, action)
+    out = recursively_apply(array_layout, action)
     return ctx.wrap(out, highlevel=highlevel)

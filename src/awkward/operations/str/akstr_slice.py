@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext
 
 __all__ = ("slice",)
@@ -74,6 +74,6 @@ def _impl(array, start, stop, step, highlevel, behavior, attrs):
             primitive_policy="error",
             string_policy="as-characters",
         )
-    out = ak._do.recursively_apply(layout, action)
+    out = recursively_apply(layout, action)
 
     return ctx.wrap(out, highlevel=highlevel)

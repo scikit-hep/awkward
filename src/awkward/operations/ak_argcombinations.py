@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import combinations, local_index
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -105,11 +105,11 @@ def _impl(
         raise ValueError("the 'axis' for argcombinations must be non-negative")
     else:
         with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-            layout = ak._do.local_index(
+            layout = local_index(
                 ctx.unwrap(array, allow_record=False, primitive_policy="error"),
                 axis,
             )
-        out = ak._do.combinations(
+        out = combinations(
             layout,
             n,
             replacement=replacement,

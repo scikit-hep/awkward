@@ -9,7 +9,13 @@ from awkward._meta.regularmeta import RegularMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer
-from awkward._typing import Any, DType, Self, final
+from awkward._typing import (
+    Any,
+    DType,
+    ImplementsReadOnlyProperty,
+    Self,
+    final,
+)
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher
 
@@ -19,8 +25,9 @@ np = NumpyMetadata.instance()
 
 
 @final
-class RegularForm(RegularMeta[Form], Form):
-    _content: Form
+class RegularForm(RegularMeta, Form):
+    _content: Form  # type: ignore[assignment]
+    content: ImplementsReadOnlyProperty[Form]  # type: ignore[assignment]
 
     def __init__(self, content, size, *, parameters=None, form_key=None):
         if not isinstance(content, Form):
@@ -39,10 +46,6 @@ class RegularForm(RegularMeta[Form], Form):
         self._content = content
         self._size = size
         self._init(parameters=parameters, form_key=form_key)
-
-    @property
-    def content(self):
-        return self._content
 
     @property
     def size(self):

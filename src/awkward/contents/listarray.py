@@ -15,7 +15,6 @@ from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
     parameters_intersect,
-    type_parameters_equal,
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
@@ -24,6 +23,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -48,7 +48,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ListArray(ListMeta[Content], Content):
+class ListArray(ListMeta, Content):
     """
     ListArray generalizes #ak.contents.ListOffsetArray by not
     requiring its `content` to be in increasing order and by allowing it to
@@ -119,6 +119,9 @@ class ListArray(ListMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _content: Content
+    content: ImplementsReadOnlyProperty[Content]
 
     def __init__(self, starts, stops, content, *, parameters=None):
         if not isinstance(starts, Index) and starts.dtype in (
@@ -1071,30 +1074,6 @@ class ListArray(ListMeta[Content], Content):
 
     def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
-
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
-        # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_union:
-            return True
-        # Check against option contents
-        elif other.is_option or other.is_indexed:
-            return self._mergeable_next(other.content, mergebool)
-        # Otherwise, do the parameters match? If not, we can't merge.
-        elif not type_parameters_equal(self._parameters, other._parameters):
-            return False
-        elif isinstance(
-            other,
-            (
-                ak.contents.RegularArray,
-                ak.contents.ListArray,
-                ak.contents.ListOffsetArray,
-            ),
-        ):
-            return self._content._mergeable_next(other.content, mergebool)
-        elif isinstance(other, ak.contents.NumpyArray) and len(other.shape) > 1:
-            return self._mergeable_next(other._to_regular_primitive(), mergebool)
-        else:
-            return False
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:

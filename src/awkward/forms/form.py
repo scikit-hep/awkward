@@ -379,6 +379,8 @@ index_to_dtype: Final[dict[str, DType]] = {
 
 
 class Form(Meta):
+    _mergeable_next: Callable[[Form, bool], bool]  # type: ignore[assignment]
+
     def _init(self, *, parameters: JSONMapping | None, form_key: str | None):
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(

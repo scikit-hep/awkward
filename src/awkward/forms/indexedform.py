@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 
 import awkward as ak
 from awkward._meta.indexedmeta import IndexedMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._parameters import (
-    parameters_union,
+from awkward._parameters import parameters_union
+from awkward._typing import (
+    Any,
+    DType,
+    ImplementsReadOnlyProperty,
+    Self,
+    final,
 )
-from awkward._typing import Any, DType, Iterator, Self, final
 from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
 
@@ -20,8 +24,9 @@ np = NumpyMetadata.instance()
 
 
 @final
-class IndexedForm(IndexedMeta[Form], Form):
-    _content: Form
+class IndexedForm(IndexedMeta, Form):
+    _content: Form  # type: ignore[assignment]
+    content: ImplementsReadOnlyProperty[Form]  # type: ignore[assignment]
 
     def __init__(
         self,
@@ -49,10 +54,6 @@ class IndexedForm(IndexedMeta[Form], Form):
     @property
     def index(self):
         return self._index
-
-    @property
-    def content(self):
-        return self._content
 
     def copy(
         self,

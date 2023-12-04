@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -76,7 +76,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
             if layout.is_list:
                 return continuation().to_RegularArray()
 
-        out = ak._do.recursively_apply(layout, action)
+        out = recursively_apply(layout, action)
 
     elif maybe_posaxis(layout, axis, 1) == 0:
         out = layout  # the top-level can only be regular (ArrayType)
@@ -93,6 +93,6 @@ def _impl(array, axis, highlevel, behavior, attrs):
                     f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
-        out = ak._do.recursively_apply(layout, action)
+        out = recursively_apply(layout, action)
 
     return ctx.wrap(out, highlevel=highlevel)

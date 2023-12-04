@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -245,7 +246,7 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
 
                 return ak.contents.ListOffsetArray(ak.index.Index64(positions), content)
 
-        out = ak._do.recursively_apply(layout, apply)
+        out = recursively_apply(layout, apply)
 
     if (
         current_offsets is not None

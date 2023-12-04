@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-
 from __future__ import annotations
 
 import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
+from awkward._do.content import local_index
 
 to_list = ak.operations.to_list
 
@@ -720,30 +720,30 @@ def test_ByteMaskedArray_localindex():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(ak._do.local_index(array, axis=0)) == [0, 1, 2, 3, 4]
-    assert to_list(ak._do.local_index(array, axis=-3)) == [0, 1, 2, 3, 4]
-    assert to_list(ak._do.local_index(array, axis=1)) == [
+    assert to_list(local_index(array, axis=0)) == [0, 1, 2, 3, 4]
+    assert to_list(local_index(array, axis=-3)) == [0, 1, 2, 3, 4]
+    assert to_list(local_index(array, axis=1)) == [
         [0, 1, 2],
         [],
         None,
         None,
         [0, 1],
     ]
-    assert to_list(ak._do.local_index(array, axis=-2)) == [
+    assert to_list(local_index(array, axis=-2)) == [
         [0, 1, 2],
         [],
         None,
         None,
         [0, 1],
     ]
-    assert to_list(ak._do.local_index(array, axis=2)) == [
+    assert to_list(local_index(array, axis=2)) == [
         [[0, 1, 2], [], [0, 1]],
         [],
         None,
         None,
         [[], [0, 1, 2]],
     ]
-    assert to_list(ak._do.local_index(array, axis=-1)) == [
+    assert to_list(local_index(array, axis=-1)) == [
         [[0, 1, 2], [], [0, 1]],
         [],
         None,

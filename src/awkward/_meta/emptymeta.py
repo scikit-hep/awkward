@@ -44,3 +44,6 @@ class EmptyMeta(Meta):
     @property
     def dimension_optiontype(self) -> bool:
         return False
+
+    def _mergeable_next(self, other: Meta, mergebool: bool) -> bool:
+        return True

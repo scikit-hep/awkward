@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -225,5 +226,5 @@ def _impl(array, highlevel, behavior, attrs):
         else:
             return None
 
-    out = ak._do.recursively_apply(layout, action)
+    out = recursively_apply(layout, action)
     return ctx.wrap(out, highlevel=highlevel)

@@ -1,20 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import pickle
+
 import packaging.version
 import pytest
 
 import awkward as ak
-from awkward._pickle import use_builtin_reducer
-
-
-@pytest.fixture
-def array_pickler():
-    import pickle
-
-    with use_builtin_reducer():
-        yield pickle
-
 
 SOME_ATTRS = {"foo": "!SOME"}
 OTHER_ATTRS = {"bar": "!OTHER", "foo": "!OTHER"}
@@ -31,18 +23,18 @@ def test_set_attrs():
         array.attrs = "Hello world!"
 
 
-def test_serialise_with_transient_attrs(array_pickler):
+def test_serialise_with_transient_attrs():
     attrs = {**SOME_ATTRS, "@transient_key": lambda: None}
     array = ak.Array([1, 2, 3], attrs=attrs)
-    result = array_pickler.loads(array_pickler.dumps(array))
+    result = pickle.loads(pickle.dumps(array))
     assert result.attrs == SOME_ATTRS
 
 
-def test_serialise_with_nonserialisable_attrs(array_pickler):
+def test_serialise_with_nonserialisable_attrs():
     attrs = {**SOME_ATTRS, "non_transient_key": lambda: None}
     array = ak.Array([1, 2, 3], attrs=attrs)
     with pytest.raises(AttributeError, match=r"Can't pickle local object"):
-        array_pickler.loads(array_pickler.dumps(array))
+        pickle.loads(pickle.dumps(array))
 
 
 def test_transient_metadata_persists():

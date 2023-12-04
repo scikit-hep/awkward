@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -64,7 +65,7 @@ def _impl(array, highlevel, behavior, attrs):
                         "union of different sets of fields, cannot ak.unzip"
                     )
 
-    ak._do.recursively_apply(layout, check_for_union, return_array=False)
+    recursively_apply(layout, check_for_union, return_array=False)
 
     if len(fields) == 0:
         return (ctx.wrap(layout, highlevel=highlevel, allow_other=True),)

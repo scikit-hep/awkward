@@ -9,6 +9,7 @@ from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._do.meta import mergeable
 from awkward._layout import maybe_posaxis
 from awkward._meta.unionmeta import UnionMeta
 from awkward._nplikes.array_like import ArrayLike
@@ -24,6 +25,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    ImplementsReadOnlyProperty,
     Self,
     SupportsIndex,
     final,
@@ -49,7 +51,7 @@ numpy = Numpy.instance()
 
 
 @final
-class UnionArray(UnionMeta[Content], Content):
+class UnionArray(UnionMeta, Content):
     """
     UnionArray represents data drawn from an ordered list of `contents`,
     which can have different types, using
@@ -102,6 +104,9 @@ class UnionArray(UnionMeta[Content], Content):
                 else:
                     raise AssertionError(where)
     """
+
+    _contents: list[Content]
+    contents: ImplementsReadOnlyProperty[list[Content]]
 
     def __init__(self, tags, index, contents, *, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
@@ -985,9 +990,6 @@ class UnionArray(UnionMeta[Content], Content):
                     ),
                 )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
-        return True
-
     def _merging_strategy(self, others):
         if len(others) == 0:
             raise ValueError(
@@ -1406,7 +1408,7 @@ class UnionArray(UnionMeta[Content], Content):
         for i, content_i in enumerate(self._contents):
             for j in range(i):
                 content_j = self._contents[j]
-                if ak._do.mergeable(content_i, content_j, mergebool=False):
+                if mergeable(content_i, content_j, mergebool=False):
                     return f"at {path}: content({i}) is mergeable with content({j})"
 
         for i, content in enumerate(self._contents):

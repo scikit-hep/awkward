@@ -13,6 +13,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._do.content import recursively_apply
 from awkward._layout import HighLevelContext, wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -419,7 +420,7 @@ def _record_to_complex(layout, complex_record_fields):
                             f"expected record with fields {complex_record_fields[0]!r} and {complex_record_fields[1]!r} to have integer or floating point types, not {str(real.form.type)!r} and {str(imag.form.type)!r}"
                         )
 
-        return ak._do.recursively_apply(layout, action)
+        return recursively_apply(layout, action)
 
     else:
         raise TypeError("complex_record_fields must be None or a pair of strings")
