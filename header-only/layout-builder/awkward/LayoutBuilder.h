@@ -1090,7 +1090,7 @@ namespace awkward {
     /// @brief Builds an IndexedArray which consists of an `index` buffer.
     ///
     /// The index values can be 64-bit signed integers `int64`, 32-bit signed
-    /// integers `int32`.
+    /// integers `int32` or 32-bit unsigned integers `uint32`.
     ///
     /// @tparam PRIMITIVE The type of `index` buffer.
     /// @tparam BUILDER The type of builder content.
