@@ -1126,7 +1126,7 @@ namespace awkward {
       /// @brief Inserts the last valid index in the `index` buffer and
       /// returns the reference to the builder content.
       BUILDER&
-      append() noexcept {
+      append_index() noexcept {
         index_.append(content_.length());
         return content_;
       }
@@ -1136,7 +1136,7 @@ namespace awkward {
       ///
       /// Just an interface; not actually faster than calling append many times.
       BUILDER&
-      extend(size_t size) noexcept {
+      extend_index(size_t size) noexcept {
         size_t start = content_.length();
         size_t stop = start + size;
         for (size_t i = start; i < stop; i++) {
