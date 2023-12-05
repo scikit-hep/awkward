@@ -772,10 +772,9 @@ class Content(Meta):
             else:
                 head.append(other)
 
-        if any(x.backend.nplike.known_data for x in head + tail) and not all(
+        assert not any(x.backend.nplike.known_data for x in head + tail) or all(
             x.backend.nplike.known_data for x in head + tail
-        ):
-            raise RuntimeError
+        )
 
         return head, tail
 
