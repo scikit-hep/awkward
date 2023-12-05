@@ -1188,6 +1188,22 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
+      /// @brief Checks for validity and consistency.
+      bool
+      is_valid(std::string& error) const noexcept {
+        if (content_.length() != index_.length()) {
+          std::stringstream out;
+          out << "Indexed node" << id_ << " has content length "
+              << content_.length() << " but index has length " << index_.length()
+              << "\n";
+          error.append(out.str());
+
+          return false;
+        } else {
+          return content_.is_valid(error);
+        }
+      }
+
       /// @brief Copies and concatenates all the accumulated data in each of the
       /// buffers of the builder and its contents to user-defined pointers.
       ///
