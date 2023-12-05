@@ -26,7 +26,10 @@ def test_numpyarray_merge():
         == ak1._mergemany([ak2]).form
     )
     assert (
-        ak1[1:, :-1, ::-1].to_typetracer()._mergemany([ak2[1:, :-1, ::-1]]).form
+        ak1[1:, :-1, ::-1]
+        .to_typetracer()
+        ._mergemany([ak2[1:, :-1, ::-1].to_typetracer()])
+        .form
         == ak1[1:, :-1, ::-1]._mergemany([ak2[1:, :-1, ::-1]]).form
     )
 

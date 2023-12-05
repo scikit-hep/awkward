@@ -1076,8 +1076,8 @@ class ListArray(ListMeta[Content], Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # Check against option contents
-        elif other.is_option or other.is_indexed:
+        # Is the other array indexed or optional?
+        elif other.is_indexed or other.is_option:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
@@ -1124,6 +1124,8 @@ class ListArray(ListMeta[Content], Content):
                 ),
             ):
                 contents.append(array.content)
+            elif array.is_numpy:
+                contents.append(array.to_RegularArray().content)
             else:
                 raise ValueError(
                     "cannot merge "
@@ -1143,6 +1145,11 @@ class ListArray(ListMeta[Content], Content):
         length_so_far = 0
 
         for array in head:
+            # We need contiguous content, so let's just convert to RegularArray
+            # immediately.
+            if array.is_numpy:
+                array = array.to_RegularArray()
+
             if isinstance(
                 array,
                 (
@@ -1217,6 +1224,9 @@ class ListArray(ListMeta[Content], Content):
 
             elif isinstance(array, ak.contents.EmptyArray):
                 pass
+
+            else:
+                raise AssertionError
 
         next = ak.contents.ListArray(
             nextstarts, nextstops, nextcontent, parameters=parameters

@@ -18,7 +18,6 @@ from awkward._nplikes.typetracer import MaybeNone
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
-    type_parameters_equal,
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
@@ -127,7 +126,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
                 parameters=parameters_union(content._parameters, parameters),
             )
         elif content.is_indexed or content.is_option:
-            return content.copy(
+            return content.to_IndexedOptionArray64().copy(
                 parameters=parameters_union(content._parameters, parameters)
             )
         else:
@@ -340,11 +339,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # We can only combine option types whose array-record parameters agree
+        # Is the other array indexed or optional?
         elif other.is_option or other.is_indexed:
-            return self._mergeable_next(
-                other.content, mergebool
-            ) and type_parameters_equal(self._parameters, other._parameters)
+            return self._content._mergeable_next(other.content, mergebool)
         else:
             return self._content._mergeable_next(other, mergebool)
 

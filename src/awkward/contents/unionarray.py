@@ -994,23 +994,15 @@ class UnionArray(UnionMeta[Content], Content):
                 "to merge this array with 'others', at least one other must be provided"
             )
 
-        head = [self]
+        head = [self, *others]
         tail = []
 
-        for i in range(len(others)):
-            head.append(others[i])
+        if any(x.backend.nplike.known_data for x in head + tail) and not all(
+            x.backend.nplike.known_data for x in head + tail
+        ):
+            raise RuntimeError
 
-        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
-            head = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in head
-            ]
-            tail = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in tail
-            ]
-
-        return (head, tail)
+        return head, tail
 
     def _reverse_merge(self, other):
         theirlength = other.length

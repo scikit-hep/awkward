@@ -2,17 +2,22 @@
 
 from __future__ import annotations
 
+from itertools import permutations
+
 import awkward as ak
 from awkward._backends.dispatch import backend_of_obj
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
+from awkward._do import mergeable
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._parameters import type_parameters_equal
 from awkward._regularize import regularize_axis
 from awkward._typing import Sequence
 from awkward.contents import Content
 from awkward.operations.ak_fill_none import fill_none
+from awkward.types.numpytype import primitive_to_dtype
 
 __all__ = ("concatenate",)
 
@@ -332,3 +337,350 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
         )[0]
 
     return ctx.wrap(out, highlevel=highlevel)
+
+
+def _form_has_type(form, type_):
+    """
+    Args:
+        form: content object
+        type_: low-level type object
+
+    Returns True if the form satisfies the given type; otherwise False.
+    """
+    if not type_parameters_equal(form._parameters, type_._parameters):
+        return False
+
+    if form.is_unknown:
+        return isinstance(type_, ak.types.UnknownType)
+    elif form.is_option:
+        return isinstance(type_, ak.types.OptionType) and _form_has_type(
+            form.content, type_.content
+        )
+    elif form.is_indexed:
+        return _form_has_type(form.content, type_)
+    elif form.is_regular:
+        return (
+            isinstance(type_, ak.types.RegularType)
+            and (
+                form.size is unknown_length
+                or type_.size is unknown_length
+                or form.size == type_.size
+            )
+            and _form_has_type(form.content, type_.content)
+        )
+    elif form.is_list:
+        return isinstance(type_, ak.types.ListType) and _form_has_type(
+            form.content, type_.content
+        )
+    elif form.is_numpy:
+        for _ in range(form.purelist_depth - 1):
+            if not isinstance(type_, ak.types.RegularType):
+                return False
+            type_ = type_.content
+        return (
+            isinstance(type_, ak.types.NumpyType) and form.primitive == type_.primitive
+        )
+    elif form.is_record:
+        if (
+            not isinstance(type_, ak.types.RecordType)
+            or type_.is_tuple != form.is_tuple
+        ):
+            return False
+
+        if form.is_tuple:
+            return all(
+                _form_has_type(c, t) for c, t in zip(form.contents, type_.contents)
+            )
+        else:
+            return (frozenset(form.fields) == frozenset(type_.fields)) and all(
+                _form_has_type(form.content(f), type_.content(f)) for f in type_.fields
+            )
+    elif form.is_union:
+        if len(form.contents) != len(type_.contents):
+            return False
+
+        for contents in permutations(form.contents):
+            if all(
+                _form_has_type(form, type_)
+                for form, type_ in zip(contents, type_.contents)
+            ):
+                return True
+        return False
+    else:
+        raise TypeError(form)
+
+
+# This routine should not try to replicate the merge logic,
+# but we can make use of assumptions w.r.t to what the merge will do.
+# e.g., merging can add new unions, promote to options, change dtypes of NumPy arrays
+def enforce_concatenated_form(layout, form):
+    # Merge invariant (drop known-ness)
+    if not layout.is_unknown and form.is_unknown:
+        raise AssertionError(
+            "merge result should never be of an unknown type unless the layout is unknown"
+        )
+    # Unknowns become canonical forms
+    elif layout.is_unknown and not form.is_unknown:
+        return form.length_zero_array(highlevel=False).to_backend(layout.backend)
+
+    ############## Unions #####################################################
+    # Merge invariant (drop union)
+    elif layout.is_union and not form.is_union:
+        raise AssertionError("merge result should be a union if layout is a union")
+    # Add a union
+    elif not layout.is_union and form.is_union:
+        # Merge invariant (unions are i8-i64)
+        if not (form.tags == "i8" and form.index == "i64"):
+            raise AssertionError(
+                "merge result that forms a union should have i8 tags and i64 index"
+            )
+
+        # Non-categoricals can be merged into union
+        if (
+            layout.is_indexed
+            and not layout.is_option
+            and layout.parameter("__array__") != "categorical"
+        ):
+            index = layout.index.to64()
+            # Take the content and drop the parameters (we're taking parameters from form!)
+            layout_to_merge = layout.content
+        # Otherwise, we move into the contents
+        else:
+            index = ak.index.Index64(
+                layout.backend.index_nplike.arange(layout.length, dtype=np.int64)
+            )
+            layout_to_merge = layout
+
+        type_ = layout_to_merge.form.type
+
+        # First assume this type is exactly represented in the union.
+        # This won't hold true if any (and not all) of the contents are an option
+        # Or if there were mergeable (but non-equal type) pairs in the original
+        # concatenation that formed this union
+        union_has_exact_type = False
+        contents = []
+        for content_form in form.contents:
+            if _form_has_type(content_form, type_):
+                contents.insert(
+                    0, enforce_concatenated_form(layout_to_merge, content_form)
+                )
+                union_has_exact_type = True
+            else:
+                contents.append(
+                    content_form.length_zero_array(highlevel=False).to_backend(
+                        layout.backend
+                    )
+                )
+
+        # Otherwise, find anything we can merge with
+        if not union_has_exact_type:
+            contents.clear()
+
+            for content_form in form.contents:
+                # TODO check forms mergeable
+                content_layout = content_form.length_zero_array(
+                    highlevel=False
+                ).to_backend(layout.backend)
+                if mergeable(content_layout, layout_to_merge):
+                    contents.insert(
+                        0, enforce_concatenated_form(layout_to_merge, content_form)
+                    )
+                else:
+                    contents.append(
+                        content_form.length_zero_array(highlevel=False).to_backend(
+                            layout.backend
+                        )
+                    )
+
+        return ak.contents.UnionArray(
+            ak.index.Index8(
+                layout.backend.index_nplike.zeros(layout.length, dtype=np.int8)
+            ),
+            index,
+            contents,
+            parameters=form._parameters,
+        )
+    # Preserve union
+    elif layout.is_union and form.is_union:
+        # Merge invariant (unions are i8-i64)
+        if not (form.tags == "i8" and form.index == "i64"):
+            raise AssertionError(
+                "merge result that forms a union should have i8 tags and i64 index"
+            )
+        if len(form.contents) < len(layout.contents):
+            raise AssertionError(
+                "merge result should only grow or preserve a union's cardinality"
+            )
+        form_contents = [
+            f.length_zero_array(highlevel=False).to_backend(layout.backend)
+            for f in form.contents
+        ]
+        form_indices = range(len(form_contents))
+        for form_projection_indices in permutations(form_indices, len(layout.contents)):
+            if all(
+                mergeable(c, form_contents[i])
+                for c, i in zip(layout.contents, form_projection_indices)
+            ):
+                break
+        else:
+            raise AssertionError(
+                "merge result should be mergeable against some permutation of the layout"
+            )
+
+        next_contents = [
+            enforce_concatenated_form(c, form.contents[i])
+            for c, i in zip(layout.contents, form_projection_indices)
+        ]
+        next_contents.extend(
+            [
+                form_contents[i]
+                for i in (set(form_indices) - set(form_projection_indices))
+            ]
+        )
+        return ak.contents.UnionArray(
+            ak.index.Index8(
+                layout.backend.index_nplike.astype(layout.tags.data, np.int8)
+            ),
+            layout.index.to64(),
+            next_contents,
+            parameters=form._parameters,
+        )
+
+    ############## Options ####################################################
+    # Merge invariant (drop option)
+    elif layout.is_option and not form.is_option:
+        raise AssertionError("merge result should be an option if layout is an option")
+    # Add option
+    elif not layout.is_option and form.is_option:
+        return enforce_concatenated_form(
+            ak.contents.UnmaskedArray.simplified(layout), form
+        )
+    # Preserve option
+    elif layout.is_option and form.is_option:
+        if isinstance(form, ak.forms.IndexedOptionForm):
+            if form.index != "i64":
+                raise AssertionError(
+                    "IndexedOptionForm should have i64 for merge results"
+                )
+            return layout.to_IndexedOptionArray64().copy(
+                content=enforce_concatenated_form(layout.content, form.content),
+                parameters=form._parameters,
+            )
+        # Non IndexedOptionArray types require all merge candidates to have same form
+        elif isinstance(
+            form,
+            (ak.forms.ByteMaskedForm, ak.forms.BitMaskedForm, ak.forms.UnmaskedForm),
+        ):
+            return layout.copy(
+                content=enforce_concatenated_form(layout.content, form.content),
+                parameters=form._parameters,
+            )
+        else:
+            raise AssertionError
+
+    ############## Indexed ####################################################
+    # Merge invariant (drop indexed)
+    elif layout.is_indexed and not form.is_indexed:
+        raise AssertionError("merge result must be indexed if layout is indexed")
+    # Add index
+    elif not layout.is_indexed and form.is_indexed:
+        return ak.contents.IndexedArray(
+            ak.index.Index64(layout.backend.index_nplike.arange(layout.length)),
+            enforce_concatenated_form(layout, form.content),
+            parameters=form._parameters,
+        )
+    # Preserve index
+    elif layout.is_indexed and form.is_indexed:
+        if form.index != "i64":
+            raise AssertionError("merge result must be i64")
+        return ak.contents.IndexedArray(
+            layout.index.to64(),
+            content=enforce_concatenated_form(layout.content, form.content),
+            parameters=form._parameters,
+        )
+
+    ############## NumPy ######################################################
+    elif layout.is_numpy and form.is_numpy:
+        if layout.inner_shape != form.inner_shape:
+            raise AssertionError("layout must have same inner_shape as merge result")
+
+        return ak.values_astype(
+            # HACK: drop parameters from type so that character arrays are supported
+            layout.copy(parameters=None),
+            to=primitive_to_dtype(form.primitive),
+            highlevel=False,
+        ).copy(parameters=form._parameters)
+
+    ############## Lists ######################################################
+    # Merge invariant (regular to numpy)
+    elif layout.is_regular and form.is_numpy:
+        raise AssertionError("layout cannot be regular for NumpyForm merge result")
+    # Merge invariant (ragged to regular)
+    elif not (layout.is_regular or layout.is_numpy) and form.is_regular:
+        raise AssertionError("merge result should be ragged if any input is ragged")
+    elif layout.is_numpy and form.is_list:
+        if len(layout.inner_shape) == 0:
+            raise AssertionError("layout must be at least 2D if merge result is a list")
+        return enforce_concatenated_form(layout.to_RegularArray(), form)
+    elif layout.is_regular and form.is_regular:
+        # regular → regular requires same size!
+        if layout.size != form.size:
+            raise AssertionError(
+                "RegularForm must have same size as layout for merge result"
+            )
+        return layout.copy(
+            content=enforce_concatenated_form(layout.content, form.content),
+            parameters=form._parameters,
+        )
+    elif layout.is_regular and form.is_list:
+        if isinstance(form, (ak.forms.ListOffsetForm, ak.forms.ListForm)):
+            return enforce_concatenated_form(layout.to_ListOffsetArray64(False), form)
+        else:
+            raise AssertionError
+    elif layout.is_list and form.is_list:
+        if isinstance(form, ak.forms.ListOffsetForm):
+            layout = layout.to_ListOffsetArray64(False)
+            return layout.copy(
+                content=enforce_concatenated_form(layout.content, form.content),
+                parameters=form._parameters,
+            )
+        elif isinstance(form, ak.forms.ListForm):
+            if not (form.starts == "i64" and form.stops == "i64"):
+                raise TypeError("ListForm should have i64 for merge results")
+            return ak.contents.ListArray(
+                layout.starts.to64(),
+                layout.stops.to64(),
+                enforce_concatenated_form(layout.content, form.content),
+                parameters=form._parameters,
+            )
+        else:
+            raise AssertionError
+
+    ############## Records ####################################################
+    # Merge invariant (mix record-tuple)
+    elif layout.is_record and not form.is_record:
+        raise AssertionError("merge result should be a record if layout is a record")
+    # Merge invariant (mix record-tuple)
+    elif not layout.is_record and form.is_record:
+        raise AssertionError(
+            "layout result should be a record if merge result is a record"
+        )
+    elif layout.is_record and form.is_record:
+        if frozenset(layout.fields) != frozenset(form.fields):
+            raise AssertionError("merge result and form must have matching fields")
+        elif layout.is_tuple != form.is_tuple:
+            raise AssertionError(
+                "merge result and form must both be tuple or record-like"
+            )
+        return ak.contents.RecordArray(
+            [
+                enforce_concatenated_form(layout.content(f), form.content(f))
+                for f in layout.fields
+            ],
+            layout._fields,
+            length=layout.length,
+            parameters=form._parameters,
+            backend=layout.backend,
+        )
+    else:
+        raise NotImplementedError
