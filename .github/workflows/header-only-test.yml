@@ -24,7 +24,7 @@ jobs:
 
     - name: Run CMake
       run: |
-        cmake -B build -S header-only -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+        cmake -B build -S header-only -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
         cmake --build build/
 
     - name: Run tests
