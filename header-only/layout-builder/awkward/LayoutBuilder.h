@@ -1088,7 +1088,6 @@ namespace awkward {
     /// @class Indexed
     ///
     /// @brief Builds an IndexedArray which consists of an `index` buffer.
-    /// The negative values in the index are interpreted as missing.
     ///
     /// The index values can be 64-bit signed integers `int64`, 32-bit signed
     /// integers `int32`.
@@ -1102,8 +1101,7 @@ namespace awkward {
       /// buffer, using `AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS` for initializing the buffer.
       Indexed()
           : index_(
-                awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
-            last_valid_(-1) {
+                awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)) {
         size_t id = 0;
         set_id(id);
       }
@@ -1114,8 +1112,7 @@ namespace awkward {
       ///
       /// @param options Initial size configuration of a buffer.
       Indexed(const awkward::BuilderOptions& options)
-          : index_(awkward::GrowableBuffer<PRIMITIVE>(options)),
-            last_valid_(-1) {
+          : index_(awkward::GrowableBuffer<PRIMITIVE>(options)) {
         size_t id = 0;
         set_id(id);
       }
@@ -1129,41 +1126,23 @@ namespace awkward {
       /// @brief Inserts the last valid index in the `index` buffer and
       /// returns the reference to the builder content.
       BUILDER&
-      append_valid() noexcept {
-        last_valid_ = content_.length();
-        index_.append(last_valid_);
+      append() noexcept {
+        index_.append(content_.length());
         return content_;
       }
 
-      /// @brief Inserts `size` number of valid index in the `index` buffer
+      /// @brief Inserts `size` number indices in the `index` buffer
       /// and returns the reference to the builder content.
       ///
       /// Just an interface; not actually faster than calling append many times.
       BUILDER&
-      extend_valid(size_t size) noexcept {
+      extend(size_t size) noexcept {
         size_t start = content_.length();
         size_t stop = start + size;
-        last_valid_ = stop - 1;
         for (size_t i = start; i < stop; i++) {
           index_.append(i);
         }
         return content_;
-      }
-
-      /// @brief Inserts `-1` in the `index` buffer.
-      void
-      append_invalid() noexcept {
-        index_.append(-1);
-      }
-
-      /// @brief Inserts `-1` in the `index` buffer `size` number of times
-      ///
-      /// Just an interface; not actually faster than calling append many times.
-      void
-      extend_invalid(size_t size) noexcept {
-        for (size_t i = 0; i < size; i++) {
-          index_.append(-1);
-        }
       }
 
       /// @brief Parameters for the builder form.
@@ -1187,10 +1166,9 @@ namespace awkward {
       }
 
       /// @brief Discards the accumulated index and clears the content
-      /// of the builder. Also, last valid returns to `-1`.
+      /// of the builder.
       void
       clear() noexcept {
-        last_valid_ = -1;
         index_.clear();
         content_.clear();
       }
@@ -1199,22 +1177,6 @@ namespace awkward {
       size_t
       length() const noexcept {
         return index_.length();
-      }
-
-      /// @brief Checks for validity and consistency.
-      bool
-      is_valid(std::string& error) const noexcept {
-        if (content_.length() != last_valid_ + 1) {
-          std::stringstream out;
-          out << "Indexed node" << id_ << " has content length "
-              << content_.length() << " but last valid index is " << last_valid_
-              << "\n";
-          error.append(out.str());
-
-          return false;
-        } else {
-          return content_.is_valid(error);
-        }
       }
 
       /// @brief Retrieves the names and sizes (in bytes) of the buffers used
@@ -1272,7 +1234,7 @@ namespace awkward {
         } else {
           params = std::string(", \"parameters\": { " + parameters_ + " }");
         }
-        return "{ \"class\": \"IndexedOptionArray\", \"index\": \"" +
+        return "{ \"class\": \"IndexedArray\", \"index\": \"" +
                type_to_numpy_like<PRIMITIVE>() +
                "\", \"content\": " + content_.form() + params +
                ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -1292,9 +1254,6 @@ namespace awkward {
 
       /// @brief Unique form ID.
       size_t id_;
-
-      /// @brief Last valid index.
-      size_t last_valid_;
     };
 
     /// @class IndexedOption
