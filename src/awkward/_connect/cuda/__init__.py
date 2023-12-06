@@ -92,14 +92,22 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_sum_int32_bool_64",
         "awkward_reduce_sum_int64_bool_64",
         "awkward_reduce_sum_bool",
+        "awkward_reduce_sum_bool_complex",
+        "awkward_reduce_sum_complex",
         "awkward_reduce_prod_bool",
+        "awkward_reduce_prod_bool_complex",
         "awkward_reduce_argmax",
         "awkward_reduce_argmax_bool_64",
+        "awkward_reduce_argmax_complex",
         "awkward_reduce_argmin",
         "awkward_reduce_argmin_bool_64",
+        "awkward_reduce_argmin_complex",
         "awkward_reduce_countnonzero",
+        "awkward_reduce_countnonzero_complex",
         "awkward_reduce_max",
+        "awkward_reduce_max_complex",
         "awkward_reduce_min",
+        "awkward_reduce_min_complex",
     ]
     template_specializations = []
     import re
