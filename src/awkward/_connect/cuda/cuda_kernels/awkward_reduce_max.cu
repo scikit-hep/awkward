@@ -2,7 +2,7 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromptr, parents, lenparents,outlength, invocation_index,err_code) = args
+//     (toptr, fromptr, parents, lenparents, outlength, invocation_index,err_code) = args
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_a", toptr.dtype, fromptr.dtype, parents.dtype]))(grid, block, (toptr, fromptr, parents, lenparents,outlength, invocation_index,err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_b", toptr.dtype, fromptr.dtype, parents.dtype]))(grid, block, (toptr, fromptr, parents, lenparents,outlength, invocation_index,err_code))
 // out["awkward_reduce_max_a", {dtype_specializations}] = None

@@ -15,13 +15,13 @@
 template <typename T, typename C, typename U>
 __global__ void
 awkward_reduce_sum_complex_a(T* toptr,
-                     const C* fromptr,
-                     const U* parents,
-                     int64_t lenparents,
-                     int64_t outlength,
-                     uint64_t* atomicAdd_toptr,
-                     uint64_t invocation_index,
-                     uint64_t* err_code) {
+                             const C* fromptr,
+                             const U* parents,
+                             int64_t lenparents,
+                             int64_t outlength,
+                             uint64_t* atomicAdd_toptr,
+                             uint64_t invocation_index,
+                             uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -35,13 +35,13 @@ awkward_reduce_sum_complex_a(T* toptr,
 template <typename T, typename C, typename U>
 __global__ void
 awkward_reduce_sum_complex_b(T* toptr,
-                     const C* fromptr,
-                     const U* parents,
-                     int64_t lenparents,
-                     int64_t outlength,
-                     uint64_t* atomicAdd_toptr,
-                     uint64_t invocation_index,
-                     uint64_t* err_code) {
+                             const C* fromptr,
+                             const U* parents,
+                             int64_t lenparents,
+                             int64_t outlength,
+                             uint64_t* atomicAdd_toptr,
+                             uint64_t invocation_index,
+                             uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -58,13 +58,13 @@ awkward_reduce_sum_complex_b(T* toptr,
 template <typename T, typename C, typename U>
 __global__ void
 awkward_reduce_sum_complex_c(T* toptr,
-                     const C* fromptr,
-                     const U* parents,
-                     int64_t lenparents,
-                     int64_t outlength,
-                     uint64_t* atomicAdd_toptr,
-                     uint64_t invocation_index,
-                     uint64_t* err_code) {
+                             const C* fromptr,
+                             const U* parents,
+                             int64_t lenparents,
+                             int64_t outlength,
+                             uint64_t* atomicAdd_toptr,
+                             uint64_t invocation_index,
+                             uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
