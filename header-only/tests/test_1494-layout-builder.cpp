@@ -1227,7 +1227,7 @@ test_Indexed() {
 
   double data[3] = {3.3, 4.4, 5.5};
 
-  builder.extend_index(1);
+  builder.extend_index(3);
   subbuilder.extend(data, 3);
 
   // [1.1, 2.2, 3.3, 4.4, 5.5]
