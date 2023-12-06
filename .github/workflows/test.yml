@@ -58,7 +58,7 @@ jobs:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
@@ -127,7 +127,7 @@ jobs:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '${{ matrix.python-version }}'
           allow-prereleases: true
@@ -204,7 +204,7 @@ jobs:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '${{ matrix.python-version }}'
           allow-prereleases: true
@@ -339,7 +339,7 @@ jobs:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
