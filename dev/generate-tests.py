@@ -288,26 +288,6 @@ def gettypeval(typename):
     return typeval
 
 
-def getcudakernelslist():
-    cudakernels = []
-    for f in os.listdir(
-        os.path.join(
-            os.path.dirname(CURRENT_DIR),
-            "src",
-            "awkward",
-            "_connect",
-            "cuda",
-            "cuda_kernels",
-        )
-    ):
-        if os.path.isfile(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels", f)):
-            if f.startswith("awkward_") and f.endswith(".cu"):
-                cudakernels.append(f[:-3])
-            elif f.startswith("manual_awkward_") and f.endswith(".cu"):
-                cudakernels.append(f[len("manual_") : -3])
-    return cudakernels
-
-
 def genspectests(specdict):
     print("Generating files for testing specification")
     for spec in specdict.values():
