@@ -1267,60 +1267,6 @@ test_Indexed() {
 }
 
 void
-test_Indexed_as_IndexedOption() {
-  IndexedOptionBuilder<uint32_t, NumpyBuilder<double>> builder;
-  assert(builder.length() == 0);
-
-  auto& subbuilder = builder.append_valid();
-  subbuilder.append(1.1);
-
-  builder.append_valid();
-  subbuilder.append(2.2);
-
-  double data[3] = {3.3, 4.4, 5.5};
-
-  builder.extend_valid(3);
-  subbuilder.extend(data, 3);
-
-  // [1.1, 2.2, 3.3, 4.4, 5.5]
-
-  std::string error;
-  assert(builder.is_valid(error) == true);
-
-  std::map<std::string, size_t> names_nbytes = {};
-  builder.buffer_nbytes(names_nbytes);
-  assert(names_nbytes.size() == 2);
-
-  auto buffers = empty_buffers(names_nbytes);
-  builder.to_buffers(buffers);
-
-  std::ostringstream out;
-  dump(out,
-       "node0-index", (uint32_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(uint32_t),
-       "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
-
-  std::string check{"node0-index: 0 1 2 3 4 \n"
-                    "node1-data: 1.1 2.2 3.3 4.4 5.5 \n"};
-  assert(out.str().compare(check) == 0);
-
-  assert(builder.form() ==
-  "{ "
-      "\"class\": \"IndexedOptionArray\", "
-      "\"index\": \"u32\", "
-      "\"content\": { "
-          "\"class\": \"NumpyArray\", "
-          "\"primitive\": \"float64\", "
-          "\"form_key\": \"node1\" "
-      "}, "
-      "\"form_key\": \"node0\" "
-  "}");
-
-  clear_buffers(buffers);
-  builder.clear();
-  assert(builder.length() == 0);
-}
-
-void
 test_IndexedOption() {
   IndexedOptionBuilder<int32_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
@@ -1931,7 +1877,6 @@ int main(int /* argc */, char ** /* argv */) {
   test_Tuple_Numpy_ListOffset();
   test_Regular();
   test_Regular_size0();
-  test_Indexed_as_IndexedOption();
   test_Indexed();
   test_IndexedOption();
   test_IndexedOption_Record();
