@@ -1217,8 +1217,6 @@ test_Indexed() {
   IndexedBuilder<uint32_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
-  std::cout << "Executing test_Indexed";
-
   auto& subbuilder = builder.append_index();
   subbuilder.append(1.1);
 
