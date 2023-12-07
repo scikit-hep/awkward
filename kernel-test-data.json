@@ -200,35 +200,12 @@
                 "NumpyArray-length": 5
             },
             {
-                "NumpyArray-ptr": [
-                    -1,
-                    2,
-                    4,
-                    0,
-                    -3
-                ],
+                "NumpyArray-ptr": [-1, 2, 4, 0,-3],
                 "NumpyArray-ptr-offset": 1,
                 "NumpyArray-length": 3
             },
             {
-                "NumpyArray-ptr": [
-                    -1,
-                    -3,
-                    2,
-                    1,
-                    -5,
-                    7,
-                    8,
-                    9,
-                    2,
-                    3,
-                    4,
-                    -1,
-                    -5,
-                    -3,
-                    -7,
-                    5
-                ],
+                "NumpyArray-ptr": [-1, -3, 2, 1, -5, 7, 8, 9, 2, 3, 4, -1, -5, -3, -7, 5],
                 "NumpyArray-ptr-offset": 2,
                 "NumpyArray-length": 4
             },
