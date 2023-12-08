@@ -59,6 +59,9 @@ template <unsigned SIZE, class BUILDER>
 using RegularBuilder = awkward::LayoutBuilder::Regular<SIZE, BUILDER>;
 
 template<class PRIMITIVE, class BUILDER>
+using IndexedBuilder = awkward::LayoutBuilder::Indexed<PRIMITIVE, BUILDER>;
+
+template<class PRIMITIVE, class BUILDER>
 using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>;
 
 template<class BUILDER>
@@ -1210,19 +1213,19 @@ test_Regular_size0() {
 }
 
 void
-test_Indexed_as_IndexedOption() {
-  IndexedOptionBuilder<uint32_t, NumpyBuilder<double>> builder;
+test_Indexed() {
+  IndexedBuilder<uint32_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.append_valid();
+  auto& subbuilder = builder.append_index();
   subbuilder.append(1.1);
 
-  builder.append_valid();
+  builder.append_index();
   subbuilder.append(2.2);
 
   double data[3] = {3.3, 4.4, 5.5};
 
-  builder.extend_valid(3);
+  builder.extend_index(3);
   subbuilder.extend(data, 3);
 
   // [1.1, 2.2, 3.3, 4.4, 5.5]
@@ -1248,7 +1251,7 @@ test_Indexed_as_IndexedOption() {
 
   assert(builder.form() ==
   "{ "
-      "\"class\": \"IndexedOptionArray\", "
+      "\"class\": \"IndexedArray\", "
       "\"index\": \"u32\", "
       "\"content\": { "
           "\"class\": \"NumpyArray\", "
@@ -1874,7 +1877,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_Tuple_Numpy_ListOffset();
   test_Regular();
   test_Regular_size0();
-  test_Indexed_as_IndexedOption();
+  test_Indexed();
   test_IndexedOption();
   test_IndexedOption_Record();
   test_Unmasked();
