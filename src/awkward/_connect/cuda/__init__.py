@@ -68,12 +68,14 @@ def fetch_specialization(keys):
 
 
 def fetch_template_specializations(kernel_dict):
-    # These kernels consist of multiple kernels don't have templated specializations of the same name
+    # These cuda kernels consist of multiple kernels that don't have templated
+    # specializations of the same name (e.g. '_a', '_b').
     kernel_exclusions = [
         "awkward_ByteMaskedArray_getitem_nextcarry",
         "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
         "awkward_ByteMaskedArray_reduce_next_64",
         "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
         "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
         "awkward_IndexedArray_flatten_nextcarry",
         "awkward_IndexedArray_getitem_nextcarry",
