@@ -18,7 +18,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
-from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._parameters import (
     parameters_intersect,
@@ -451,8 +451,8 @@ class NumpyArray(NumpyMeta, Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # Check against option contents
-        elif other.is_option or other.is_indexed:
+        # Is the other array indexed or optional?
+        elif other.is_indexed or other.is_option:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
@@ -1375,18 +1375,24 @@ class NumpyArray(NumpyMeta, Content):
             backend=backend,
         )
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        if numpyarray:
-            return (
-                (
-                    not self._backend.nplike.known_data
-                    or self._backend.nplike.array_equal(self.data, other.data)
-                )
-                and self.dtype == other.dtype
-                and self.shape == other.shape
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return self._is_equal_to_generic(other, all_parameters) and (
+            not numpyarray
+            # dtypes agree
+            or self.dtype == other.dtype
+            # Contents agree
+            and (
+                not self._backend.nplike.known_data
+                or self._backend.nplike.array_equal(self.data, other.data)
             )
-        else:
-            return True
+            # Shapes agree
+            and all(
+                x is unknown_length or y is unknown_length or x == y
+                for x, y in zip(self.shape, other.shape)
+            )
+        )
 
     def _to_regular_primitive(self) -> ak.contents.RegularArray:
         # A length-1 slice in each dimension

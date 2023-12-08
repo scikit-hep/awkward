@@ -36,7 +36,7 @@ jobs:
 
     - name: Setup Python
       if: steps.cache-pyodide-python-version.outputs.cache-hit != 'true'
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "${{ env.X86_64_PYTHON_VERSION }}"
 
@@ -68,7 +68,7 @@ jobs:
         submodules: true
 
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "${{ needs.pyodide-python-version.outputs.python-version }}"
 
@@ -98,7 +98,7 @@ jobs:
       working-directory: awkward-cpp
 
     - name: Install EMSDK
-      uses: mymindstorm/setup-emsdk@v12
+      uses: mymindstorm/setup-emsdk@v13
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       with:
         version: ${{ steps.compute-emsdk-version.outputs.emsdk-version }}
@@ -202,7 +202,7 @@ jobs:
         submodules: true
 
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "${{ env.X86_64_PYTHON_VERSION }}"
 
@@ -409,7 +409,7 @@ jobs:
           name: docs
           path: built-docs
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       # Pushes to main trigger latest

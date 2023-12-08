@@ -730,8 +730,8 @@ class RegularArray(RegularMeta[Content], Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # Check against option contents
-        elif other.is_option or other.is_indexed:
+        # Is the other array indexed or optional?
+        elif other.is_indexed or other.is_option:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
@@ -1527,7 +1527,17 @@ class RegularArray(RegularMeta[Content], Content):
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return self._size == other.size and self._content.is_equal_to(
-            other._content, index_dtype, numpyarray
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters)
+            and (
+                self._size is unknown_length
+                or other.size is unknown_length
+                or self._size == other.size
+            )
+            and self._content._is_equal_to(
+                other._content, index_dtype, numpyarray, all_parameters
+            )
         )

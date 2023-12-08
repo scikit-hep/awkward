@@ -994,23 +994,15 @@ class UnionArray(UnionMeta[Content], Content):
                 "to merge this array with 'others', at least one other must be provided"
             )
 
-        head = [self]
+        head = [self, *others]
         tail = []
 
-        for i in range(len(others)):
-            head.append(others[i])
+        if any(x.backend.nplike.known_data for x in head + tail) and not all(
+            x.backend.nplike.known_data for x in head + tail
+        ):
+            raise RuntimeError
 
-        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
-            head = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in head
-            ]
-            tail = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in tail
-            ]
-
-        return (head, tail)
+        return head, tail
 
     def _reverse_merge(self, other):
         theirlength = other.length
@@ -1655,13 +1647,16 @@ class UnionArray(UnionMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
         return (
-            self.tags.is_equal_to(other.tags)
-            and self.index.is_equal_to(other.index, index_dtype, numpyarray)
-            and len(self.contents) == len(other.contents)
+            self._is_equal_to_generic(other, all_parameters)
+            and self._tags.is_equal_to(other.tags)
+            and self._index.is_equal_to(other.index, index_dtype, numpyarray)
+            and len(self._contents) == len(other.contents)
             and all(
-                self.contents[i].is_equal_to(other.contents[i], index_dtype, numpyarray)
-                for i in range(len(self.contents))
+                content.is_equal_to(other.contents[i], index_dtype, numpyarray)
+                for i, content in enumerate(self.contents)
             )
         )

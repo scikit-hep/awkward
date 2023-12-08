@@ -38,9 +38,9 @@ def test_numpyarray():
             .to_typetracer()
             ._mergemany(
                 [
-                    ak.contents.NumpyArray(two),
-                    ak.contents.NumpyArray(three),
-                    ak.contents.NumpyArray(four),
+                    ak.contents.NumpyArray(two).to_typetracer(),
+                    ak.contents.NumpyArray(three).to_typetracer(),
+                    ak.contents.NumpyArray(four).to_typetracer(),
                 ]
             )
             .form
@@ -71,9 +71,9 @@ def test_numpyarray():
             .to_typetracer()
             ._mergemany(
                 [
-                    ak.contents.NumpyArray(two),
-                    ak.contents.EmptyArray(),
-                    ak.contents.NumpyArray(four),
+                    ak.contents.NumpyArray(two).to_typetracer(),
+                    ak.contents.EmptyArray().to_typetracer(),
+                    ak.contents.NumpyArray(four).to_typetracer(),
                 ]
             )
             .form
@@ -115,11 +115,15 @@ def test_lists():
         [4.0, 5.0],
     ]
     assert (
-        one.to_typetracer()._mergemany([two, three, four]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([two, three, four]).form
     )
     assert (
-        four.to_typetracer()._mergemany([three, four, one]).form
+        four.to_typetracer()
+        ._mergemany([three.to_typetracer(), four.to_typetracer(), one.to_typetracer()])
+        .form
         == four._mergemany([three, four, one]).form
     )
 
@@ -147,12 +151,16 @@ def test_lists():
     ]
 
     assert (
-        one.to_typetracer()._mergemany([two, three, four]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([two, three, four]).form
     )
 
     assert (
-        four.to_typetracer()._mergemany([three, four, one]).form
+        four.to_typetracer()
+        ._mergemany([three.to_typetracer(), four.to_typetracer(), one.to_typetracer()])
+        .form
         == four._mergemany([three, four, one]).form
     )
 
@@ -175,7 +183,9 @@ def test_records():
         {"x": 7, "y": [1, 2]},
     ]
     assert (
-        one.to_typetracer()._mergemany([two, three, four]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([two, three, four]).form
     )
 
@@ -190,7 +200,9 @@ def test_records():
         {"x": 7, "y": [1, 2]},
     ]
     assert (
-        one.to_typetracer()._mergemany([two, three, four]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([two, three, four]).form
     )
 
@@ -210,7 +222,9 @@ def test_tuples():
         (7, [1, 2]),
     ]
     assert (
-        one.to_typetracer()._mergemany([two, three, four]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([two, three, four]).form
     )
 
@@ -225,7 +239,9 @@ def test_tuples():
         (7, [1, 2]),
     ]
     assert (
-        one.to_typetracer()._mergemany([two, three, four]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([two, three, four]).form
     )
 
@@ -252,7 +268,9 @@ def test_indexed():
         None,
     ]
     assert (
-        one.to_typetracer()._mergemany([two, three, four]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([two, three, four]).form
     )
 
@@ -263,7 +281,9 @@ def test_reverse_indexed():
     three = ak.highlevel.Array([None, 6, None]).layout
     assert to_list(one._mergemany([two, three])) == [1, 2, 3, 4, 5, None, 6, None]
     assert (
-        one.to_typetracer()._mergemany([two, three]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer()])
+        .form
         == one._mergemany([two, three]).form
     )
 
@@ -284,7 +304,9 @@ def test_reverse_indexed():
         9,
     ]
     assert (
-        one.to_typetracer()._mergemany([two, three, four]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([two, three, four]).form
     )
 
@@ -415,27 +437,39 @@ def test_bytemasked():
     ]
 
     assert (
-        one.to_typetracer()._mergemany([two, three, four]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([two, three, four]).form
     )
     assert (
-        four.to_typetracer()._mergemany([three, two, one]).form
+        four.to_typetracer()
+        ._mergemany([three.to_typetracer(), two.to_typetracer(), one.to_typetracer()])
+        .form
         == four._mergemany([three, two, one]).form
     )
     assert (
-        three.to_typetracer()._mergemany([four, one]).form
+        three.to_typetracer()
+        ._mergemany([four.to_typetracer(), one.to_typetracer()])
+        .form
         == three._mergemany([four, one]).form
     )
     assert (
-        three.to_typetracer()._mergemany([four, one, two]).form
+        three.to_typetracer()
+        ._mergemany([four.to_typetracer(), one.to_typetracer(), two.to_typetracer()])
+        .form
         == three._mergemany([four, one, two]).form
     )
     assert (
-        three.to_typetracer()._mergemany([two, one]).form
+        three.to_typetracer()
+        ._mergemany([two.to_typetracer(), one.to_typetracer()])
+        .form
         == three._mergemany([two, one]).form
     )
     assert (
-        three.to_typetracer()._mergemany([two, one, four]).form
+        three.to_typetracer()
+        ._mergemany([two.to_typetracer(), one.to_typetracer(), four.to_typetracer()])
+        .form
         == three._mergemany([two, one, four]).form
     )
 
@@ -460,15 +494,29 @@ def test_empty():
         == one._mergemany([two]).form
     )
     assert (
-        one.to_typetracer()._mergemany([two, one, two, one, two]).form
+        one.to_typetracer()
+        ._mergemany(
+            [
+                two.to_typetracer(),
+                one.to_typetracer(),
+                two.to_typetracer(),
+                one.to_typetracer(),
+                two.to_typetracer(),
+            ]
+        )
+        .form
         == one._mergemany([two, one, two, one, two]).form
     )
     assert (
-        one.to_typetracer()._mergemany([two, three]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer()])
+        .form
         == one._mergemany([two, three]).form
     )
     assert (
-        one.to_typetracer()._mergemany([two, three, four]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([two, three, four]).form
     )
     assert (
@@ -476,19 +524,27 @@ def test_empty():
         == one._mergemany([three]).form
     )
     assert (
-        one.to_typetracer()._mergemany([three, four]).form
+        one.to_typetracer()
+        ._mergemany([three.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([three, four]).form
     )
     assert (
-        one.to_typetracer()._mergemany([three, two]).form
+        one.to_typetracer()
+        ._mergemany([three.to_typetracer(), two.to_typetracer()])
+        .form
         == one._mergemany([three, two]).form
     )
     assert (
-        one.to_typetracer()._mergemany([three, two, four]).form
+        one.to_typetracer()
+        ._mergemany([three.to_typetracer(), two.to_typetracer(), four.to_typetracer()])
+        .form
         == one._mergemany([three, two, four]).form
     )
     assert (
-        one.to_typetracer()._mergemany([three, four, two]).form
+        one.to_typetracer()
+        ._mergemany([three.to_typetracer(), four.to_typetracer(), two.to_typetracer()])
+        .form
         == one._mergemany([three, four, two]).form
     )
 
@@ -584,27 +640,39 @@ def test_union():
     ]
 
     assert (
-        one.to_typetracer()._mergemany([two, three]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer()])
+        .form
         == one._mergemany([two, three]).form
     )
     assert (
-        one.to_typetracer()._mergemany([three, two]).form
+        one.to_typetracer()
+        ._mergemany([three.to_typetracer(), two.to_typetracer()])
+        .form
         == one._mergemany([three, two]).form
     )
     assert (
-        two.to_typetracer()._mergemany([one, three]).form
+        two.to_typetracer()
+        ._mergemany([one.to_typetracer(), three.to_typetracer()])
+        .form
         == two._mergemany([one, three]).form
     )
     assert (
-        two.to_typetracer()._mergemany([three, one]).form
+        two.to_typetracer()
+        ._mergemany([three.to_typetracer(), one.to_typetracer()])
+        .form
         == two._mergemany([three, one]).form
     )
     assert (
-        three.to_typetracer()._mergemany([one, two]).form
+        three.to_typetracer()
+        ._mergemany([one.to_typetracer(), two.to_typetracer()])
+        .form
         == three._mergemany([one, two]).form
     )
     assert (
-        three.to_typetracer()._mergemany([two, one]).form
+        three.to_typetracer()
+        ._mergemany([two.to_typetracer(), one.to_typetracer()])
+        .form
         == three._mergemany([two, one]).form
     )
 
@@ -700,27 +768,39 @@ def test_union_option():
     ]
 
     assert (
-        one.to_typetracer()._mergemany([two, three]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer()])
+        .form
         == one._mergemany([two, three]).form
     )
     assert (
-        one.to_typetracer()._mergemany([three, two]).form
+        one.to_typetracer()
+        ._mergemany([three.to_typetracer(), two.to_typetracer()])
+        .form
         == one._mergemany([three, two]).form
     )
     assert (
-        two.to_typetracer()._mergemany([one, three]).form
+        two.to_typetracer()
+        ._mergemany([one.to_typetracer(), three.to_typetracer()])
+        .form
         == two._mergemany([one, three]).form
     )
     assert (
-        two.to_typetracer()._mergemany([three, one]).form
+        two.to_typetracer()
+        ._mergemany([three.to_typetracer(), one.to_typetracer()])
+        .form
         == two._mergemany([three, one]).form
     )
     assert (
-        three.to_typetracer()._mergemany([one, two]).form
+        three.to_typetracer()
+        ._mergemany([one.to_typetracer(), two.to_typetracer()])
+        .form
         == three._mergemany([one, two]).form
     )
     assert (
-        three.to_typetracer()._mergemany([two, one]).form
+        three.to_typetracer()
+        ._mergemany([two.to_typetracer(), one.to_typetracer()])
+        .form
         == three._mergemany([two, one]).form
     )
 
@@ -814,27 +894,39 @@ def test_union_option():
     ]
 
     assert (
-        one.to_typetracer()._mergemany([two, three]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer()])
+        .form
         == one._mergemany([two, three]).form
     )
     assert (
-        one.to_typetracer()._mergemany([three, two]).form
+        one.to_typetracer()
+        ._mergemany([three.to_typetracer(), two.to_typetracer()])
+        .form
         == one._mergemany([three, two]).form
     )
     assert (
-        two.to_typetracer()._mergemany([one, three]).form
+        two.to_typetracer()
+        ._mergemany([one.to_typetracer(), three.to_typetracer()])
+        .form
         == two._mergemany([one, three]).form
     )
     assert (
-        two.to_typetracer()._mergemany([three, one]).form
+        two.to_typetracer()
+        ._mergemany([three.to_typetracer(), one.to_typetracer()])
+        .form
         == two._mergemany([three, one]).form
     )
     assert (
-        three.to_typetracer()._mergemany([one, two]).form
+        three.to_typetracer()
+        ._mergemany([one.to_typetracer(), two.to_typetracer()])
+        .form
         == three._mergemany([one, two]).form
     )
     assert (
-        three.to_typetracer()._mergemany([two, one]).form
+        three.to_typetracer()
+        ._mergemany([two.to_typetracer(), one.to_typetracer()])
+        .form
         == three._mergemany([two, one]).form
     )
 
@@ -928,27 +1020,39 @@ def test_union_option():
     ]
 
     assert (
-        one.to_typetracer()._mergemany([two, three]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer()])
+        .form
         == one._mergemany([two, three]).form
     )
     assert (
-        one.to_typetracer()._mergemany([three, two]).form
+        one.to_typetracer()
+        ._mergemany([three.to_typetracer(), two.to_typetracer()])
+        .form
         == one._mergemany([three, two]).form
     )
     assert (
-        two.to_typetracer()._mergemany([one, three]).form
+        two.to_typetracer()
+        ._mergemany([one.to_typetracer(), three.to_typetracer()])
+        .form
         == two._mergemany([one, three]).form
     )
     assert (
-        two.to_typetracer()._mergemany([three, one]).form
+        two.to_typetracer()
+        ._mergemany([three.to_typetracer(), one.to_typetracer()])
+        .form
         == two._mergemany([three, one]).form
     )
     assert (
-        three.to_typetracer()._mergemany([one, two]).form
+        three.to_typetracer()
+        ._mergemany([one.to_typetracer(), two.to_typetracer()])
+        .form
         == three._mergemany([one, two]).form
     )
     assert (
-        three.to_typetracer()._mergemany([two, one]).form
+        three.to_typetracer()
+        ._mergemany([two.to_typetracer(), one.to_typetracer()])
+        .form
         == three._mergemany([two, one]).form
     )
 
@@ -971,7 +1075,9 @@ def test_strings():
     ]
 
     assert (
-        one.to_typetracer()._mergemany([two, three]).form
+        one.to_typetracer()
+        ._mergemany([two.to_typetracer(), three.to_typetracer()])
+        .form
         == one._mergemany([two, three]).form
     )
 

@@ -23,8 +23,8 @@ from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
+    parameters_are_equal,
     type_parameters_equal,
 )
 from awkward._regularize import is_integer_like, is_sized_iterable
@@ -761,41 +761,22 @@ class Content(Meta):
 
         head = [self]
         tail = []
-        i = 0
 
-        while i < len(others):
-            other = others[i]
-            if isinstance(
-                other,
-                (
-                    ak.contents.IndexedArray,
-                    ak.contents.IndexedOptionArray,
-                    ak.contents.ByteMaskedArray,
-                    ak.contents.BitMaskedArray,
-                    ak.contents.UnmaskedArray,
-                    ak.contents.UnionArray,
-                ),
-            ):
+        it_others = iter(others)
+
+        for other in it_others:
+            if other.is_indexed or other.is_option or other.is_union:
+                tail.append(other)
+                tail.extend(it_others)
                 break
             else:
                 head.append(other)
-            i = i + 1
 
-        while i < len(others):
-            tail.append(others[i])
-            i = i + 1
+        assert not any(x.backend.nplike.known_data for x in head + tail) or all(
+            x.backend.nplike.known_data for x in head + tail
+        )
 
-        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
-            head = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in head
-            ]
-            tail = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in tail
-            ]
-
-        return (head, tail)
+        return head, tail
 
     def _local_index(self, axis: int, depth: int):
         raise NotImplementedError
@@ -1244,8 +1225,19 @@ class Content(Meta):
         raise NotImplementedError
 
     def is_equal_to(
-        self, other: Content, index_dtype: bool = True, numpyarray: bool = True
+        self,
+        other: Content,
+        index_dtype: bool = True,
+        numpyarray: bool = True,
+        *,
+        all_parameters: bool = False,
     ) -> bool:
+        return self._is_equal_to(other, index_dtype, numpyarray, all_parameters)
+
+    def _is_equal_to_generic(self, other: Content, all_parameters: bool) -> bool:
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
         return (
             self.__class__ is other.__class__
             and (
@@ -1253,11 +1245,12 @@ class Content(Meta):
                 or other.length is unknown_length
                 or self.length == other.length
             )
-            and type_parameters_equal(self._parameters, other._parameters)
-            and self._is_equal_to(other, index_dtype, numpyarray)
+            and compare_parameters(self._parameters, other._parameters)
         )
 
-    def _is_equal_to(self, other: Self, index_dtype: bool, numpyarray: bool) -> bool:
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
         raise NotImplementedError
 
     def _repr(self, indent: str, pre: str, post: str) -> str:
