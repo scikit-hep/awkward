@@ -210,17 +210,6 @@ def gettypename(spectype):
     return typename
 
 
-def getfuncnames():
-    funcs = {}
-    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
-        indspec = yaml.load(specfile, Loader=yaml.CSafeLoader)["kernels"]
-        for spec in indspec:
-            funcs[spec["name"]] = []
-            for childfunc in spec["specializations"]:
-                funcs[spec["name"]].append(childfunc["name"])
-    return funcs
-
-
 def genpykernels():
     print("Generating Python kernels")
     prefix = """
@@ -286,26 +275,6 @@ def gettypeval(typename):
     else:
         raise ValueError("Unknown type encountered")
     return typeval
-
-
-def getcudakernelslist():
-    cudakernels = []
-    for f in os.listdir(
-        os.path.join(
-            os.path.dirname(CURRENT_DIR),
-            "src",
-            "awkward",
-            "_connect",
-            "cuda",
-            "cuda_kernels",
-        )
-    ):
-        if os.path.isfile(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels", f)):
-            if f.startswith("awkward_") and f.endswith(".cu"):
-                cudakernels.append(f[:-3])
-            elif f.startswith("manual_awkward_") and f.endswith(".cu"):
-                cudakernels.append(f[len("manual_") : -3])
-    return cudakernels
 
 
 def genspectests(specdict):
@@ -383,40 +352,6 @@ def remove_const(typename):
     if "Const[" in typename:
         typename = typename.replace("Const[", "", 1).rstrip("]")
     return typename
-
-
-def getctypelist(arglist):
-    newctypes = []
-    for arg in arglist:
-        typename = remove_const(arg.typename)
-        if "List" in typename:
-            count = typename.count("List")
-            typename = typename.replace("List", "").replace("[", "").replace("]", "")
-            if typename.endswith("_t"):
-                typename = typename[:-2]
-            start = ""
-            end = ")"
-            for i in range(count):
-                if i > 0:
-                    start += "("
-                    end += ")"
-                start += "ctypes.POINTER"
-            start += "(ctypes.c_"
-            newctypes.append(start + typename + end)
-        else:
-            if typename.endswith("_t"):
-                typename = typename[:-2]
-            newctypes.append("ctypes.c_" + typename)
-    count = 0
-    funcCtypes = "("
-    for x in newctypes:
-        if count == 0:
-            funcCtypes += x
-            count += 1
-        else:
-            funcCtypes += ", " + x
-    funcCtypes += ")"
-    return funcCtypes
 
 
 def gencpukerneltests(specdict):
