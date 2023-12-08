@@ -15,6 +15,9 @@ NUMBA_HAS_NEP_50 = packaging.version.parse(
 ) >= packaging.version.Version("0.59.0")
 
 
+ak.numba.register_and_check()
+
+
 @pytest.mark.skipif(not NUMBA_HAS_NEP_50, reason="Numba does not have NEP-50 support")
 def test_numba_ufunc_nep_50():
     raise NotImplementedError
