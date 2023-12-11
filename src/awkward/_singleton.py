@@ -16,7 +16,7 @@ class PrivateSingleton(Protocol):
             )
 
         self = super().__new__(cls)
-        self.__init__()
+        self.__init__()  # pylint: disable=unnecessary-dunder-call
         cls._instance = self
 
         return self

@@ -547,7 +547,7 @@ def _build_assembly(schema, container, instructions):
     if not isinstance(schema, dict):
         raise TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
 
-    if "type" not in schema is None:
+    if "type" not in schema:
         raise TypeError(f"unrecognized JSONSchema: no 'type' in {schema!r}")
 
     tpe = schema["type"]

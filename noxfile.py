@@ -56,7 +56,7 @@ def pylint(session):
     Run the pylint process.
     """
 
-    session.install("pylint==2.12.2")
+    session.install("pylint==3.0.2")
     session.run("pylint", "src", *session.posargs)
 
 

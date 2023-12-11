@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 @register_nplike
-class Cupy(ArrayModuleNumpyLike):
+class Cupy(ArrayModuleNumpyLike):  # pylint: disable=too-many-ancestors
     is_eager: Final = False
     supports_structured_dtypes: Final = False
 
