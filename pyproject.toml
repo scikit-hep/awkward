@@ -130,7 +130,7 @@ filterwarnings = [
 log_cli_level = "info"
 
 [tool.pylint.master]
-py-version = "3.7"
+py-version = "3.8"
 jobs = "0"
 ignore-paths = [
     "src/awkward/_typeparser/generated_parser.py",
