@@ -4,9 +4,9 @@
 // def f(grid, block, args):
 //     (tocarry, mask, length, validwhen, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(length, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_a', tocarry.dtype, mask.dtype]))(grid, block, (tocarry, mask, validwhen, length, scan_in_array, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_a', tocarry.dtype, mask.dtype]))(grid, block, (tocarry, mask, length, validwhen, scan_in_array, invocation_index, err_code))
 //     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_b', tocarry.dtype, mask.dtype]))(grid, block, (tocarry, mask, validwhen, length, scan_in_array, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_b', tocarry.dtype, mask.dtype]))(grid, block, (tocarry, mask, length, validwhen, scan_in_array, invocation_index, err_code))
 // out["awkward_ByteMaskedArray_getitem_nextcarry_a", {dtype_specializations}] = None
 // out["awkward_ByteMaskedArray_getitem_nextcarry_b", {dtype_specializations}] = None
 // END PYTHON
