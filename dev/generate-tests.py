@@ -473,6 +473,8 @@ cuda_kernels_tests = [
     "awkward_UnionArray_fillindex",
     "awkward_UnionArray_fillindex_count",
     "awkward_UnionArray_fillna",
+    "awkward_UnionArray_filltags",
+    "awkward_UnionArray_filltags_const",
     "awkward_localindex",
     "awkward_IndexedArray_reduce_next_fix_offsets_64",
     "awkward_RegularArray_getitem_next_array_advanced",
