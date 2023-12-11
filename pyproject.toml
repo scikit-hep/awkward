@@ -130,7 +130,7 @@ filterwarnings = [
 log_cli_level = "info"
 
 [tool.pylint.master]
-py-version = "3.7"
+py-version = "3.8"
 jobs = "0"
 ignore-paths = [
     "src/awkward/_typeparser/generated_parser.py",
@@ -154,6 +154,7 @@ disable = [
     "consider-using-f-string",
     "consider-using-max-builtin",
     "consider-using-min-builtin",
+    "cyclic-import",
     "duplicate-code",
     "exec-used",
     "fixme",
@@ -174,7 +175,6 @@ disable = [
     "no-else-return",
     "no-member",
     "no-name-in-module",
-    "no-self-use",
     "no-value-for-parameter",
     "property-with-parameters",
     "protected-access",
@@ -255,7 +255,7 @@ extend-exclude = [
 
 [tool.ruff.lint]
 extend-select = [
-    "B", "B904",   # flake8-bugbear
+    "B",           # flake8-bugbear
     "I",           # isort
     "C4",          # flake8-comprehensions
     "ISC",         # flake8-implicit-str-concat

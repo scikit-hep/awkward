@@ -69,7 +69,7 @@ def concatenate(
 def _merge_as_union(
     contents: Sequence[Content], parameters=None
 ) -> ak.contents.UnionArray:
-    length = sum([c.length for c in contents])
+    length = sum(c.length for c in contents)
     first = contents[0]
     tags = ak.index.Index8.empty(length, first.backend.index_nplike)
     index = ak.index.Index64.empty(length, first.backend.index_nplike)

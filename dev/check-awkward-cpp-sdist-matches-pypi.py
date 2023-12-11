@@ -10,7 +10,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-import toml
+import tomli
 
 THIS_FILE = pathlib.Path(__file__)
 
@@ -29,8 +29,8 @@ def main():
 
     awkward_cpp_path = THIS_FILE.parents[1] / "awkward-cpp"
 
-    with open(awkward_cpp_path / "pyproject.toml") as f:
-        metadata = toml.load(f)
+    with open(awkward_cpp_path / "pyproject.toml", "rb") as f:
+        metadata = tomli.load(f)
     project = metadata["project"]
 
     # Load version information from PyPI
