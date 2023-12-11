@@ -115,7 +115,7 @@ def parameters_intersect(
             if result is None:
                 result = {key: left_value}
             else:
-                result[key] = left_value  # pylint: disable-msg=E1137
+                result[key] = left_value
     return result
 
 
@@ -151,7 +151,7 @@ def parameters_union(
         if parameters is None:
             parameters = {key: value}
         else:
-            parameters[key] = value  # pylint: disable-msg=E1137
+            parameters[key] = value
 
     return parameters
 

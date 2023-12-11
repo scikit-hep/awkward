@@ -1055,7 +1055,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             return start, stop, step, self.index_as_shape_item(slice_length)
 
     def broadcast_shapes(self, *shapes: tuple[ShapeItem, ...]) -> tuple[ShapeItem, ...]:
-        ndim = max([len(s) for s in shapes], default=0)
+        ndim = max((len(s) for s in shapes), default=0)
         result: list[ShapeItem] = [1] * ndim
 
         for shape in shapes:
