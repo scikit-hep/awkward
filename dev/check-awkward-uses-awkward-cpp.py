@@ -6,7 +6,7 @@ import pathlib
 
 import packaging.requirements
 import packaging.utils
-import toml
+import tomli
 
 THIS_FILE = pathlib.Path(__file__)
 
@@ -14,13 +14,13 @@ THIS_FILE = pathlib.Path(__file__)
 def main():
     # Get the dependencies of `awkward`
     awkward_path = THIS_FILE.parents[1]
-    with open(awkward_path / "pyproject.toml") as f:
-        awkward_metadata = toml.load(f)
+    with open(awkward_path / "pyproject.toml", "rb") as f:
+        awkward_metadata = tomli.load(f)
 
     # Get the dependencies of `awkward-cpp`
     awkward_cpp_path = THIS_FILE.parents[1] / "awkward-cpp"
-    with open(awkward_cpp_path / "pyproject.toml") as f:
-        awkward_cpp_metadata = toml.load(f)
+    with open(awkward_cpp_path / "pyproject.toml", "rb") as f:
+        awkward_cpp_metadata = tomli.load(f)
 
     # Find the awkward-cpp requirement in awkward's dependencies
     awkward_requirements = [
