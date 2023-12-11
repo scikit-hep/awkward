@@ -11,7 +11,7 @@ from awkward._typing import Final, cast
 
 
 @register_nplike
-class Jax(ArrayModuleNumpyLike):
+class Jax(ArrayModuleNumpyLike):  # pylint: disable=too-many-ancestors
     is_eager: Final = True
     supports_structured_dtypes: Final = False
 
