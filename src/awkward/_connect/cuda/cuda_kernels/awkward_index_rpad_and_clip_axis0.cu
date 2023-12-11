@@ -12,7 +12,7 @@ awkward_index_rpad_and_clip_axis0(T* toindex,
     if (thread_id < length) {
       int64_t shorter = (target < length ? target : length);
       if (thread_id < shorter) {
-        toindex[thread_id] = thread_id
+        toindex[thread_id] = thread_id;
       } else if (thread_id >= shorter && thread_id < target) {
         toindex[thread_id] = -1;
       }
