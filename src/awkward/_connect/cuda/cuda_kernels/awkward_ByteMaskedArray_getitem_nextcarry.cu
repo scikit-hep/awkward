@@ -15,8 +15,8 @@ template <typename T, typename C>
 __global__ void
 awkward_ByteMaskedArray_getitem_nextcarry_a(T* tocarry,
                                             const C* mask,
-                                            bool validwhen,
                                             int64_t length,
+                                            bool validwhen,
                                             int64_t* scan_in_array,
                                             uint64_t invocation_index,
                                             uint64_t* err_code) {
@@ -37,8 +37,8 @@ template <typename T, typename C>
 __global__ void
 awkward_ByteMaskedArray_getitem_nextcarry_b(T* tocarry,
                                             const C* mask,
-                                            bool validwhen,
                                             int64_t length,
+                                            bool validwhen,
                                             int64_t* scan_in_array,
                                             uint64_t invocation_index,
                                             uint64_t* err_code) {
