@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import pyarrow as pa
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
+
+pa = pytest.importorskip("pyarrow")
 
 
 def test_strings():
