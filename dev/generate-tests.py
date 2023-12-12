@@ -588,13 +588,13 @@ def gencudakerneltests(specdict):
                     f.write(
                         "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
                     )
-                    f.write("def test_cpu" + spec.name + "_" + str(num) + "():\n")
+                    f.write("def test_cuda" + spec.name + "_" + str(num) + "():\n")
                     f.write(
                         " " * 4
                         + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
                     )
                 for test in spec.tests:
-                    f.write("def test_cuda_" + spec.name + "_" + str(num) + "():\n")
+                    f.write("def test_cuda" + spec.name + "_" + str(num) + "():\n")
                     num += 1
                     dtypes = []
                     for arg, val in test["inargs"].items():
@@ -622,12 +622,6 @@ def gencudakerneltests(specdict):
                                 dtypes.append("cupy." + typename)
                             elif count == 2:
                                 raise NotImplementedError
-                                # f.write(
-                                #     " " * 4
-                                #     + "{0} = ctypes.pointer(ctypes.cast((ctypes.c_{1}*len({0}[0]))(*{0}[0]),ctypes.POINTER(ctypes.c_{1})))\n".format(
-                                #         arg, typename
-                                #     )
-                                # )
                     cuda_string = (
                         "funcC = cupy_backend['"
                         + spec.templatized_kernel_name
