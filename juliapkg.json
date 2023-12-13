@@ -1,0 +1,9 @@
+{
+    "julia": "1.9",
+    "packages": {
+        "AwkwardArray": {
+            "uuid": "7d259134-7f60-4bf1-aa00-7452e11bde56",
+            "version": "0.1"
+        }
+    }
+}
