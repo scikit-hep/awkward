@@ -48,8 +48,8 @@ jobs:
         python-architecture:
           - x64
 
-        extra-pip-constraints:
-          - "-r requirements-test.txt"
+        dependencies-kind:
+          - "full"
 
         include:
           - python-version: '3.9'
@@ -57,7 +57,7 @@ jobs:
             runs-on: windows-latest
           - python-version: '3.8'
             runs-on: ubuntu-latest
-            extra-pip-constraints: "-r requirements-test-minimal.txt"
+            dependencies-kind: "minimal"
 
     runs-on: ${{ matrix.runs-on }}
 
@@ -99,7 +99,7 @@ jobs:
           python -m pip install
           -v . @(get-childitem -path awkward-cpp/dist/*.whl)
           pytest-github-actions-annotate-failures
-          ${{ matrix.extra-pip-constraints }}
+          -r "requirements-test-${{ matrix.dependencies-kind }}.txt"
 
       - name: Install awkward, awkward-cpp, and dependencies (non-Windows)
         if: matrix.runs-on != 'windows-latest'
