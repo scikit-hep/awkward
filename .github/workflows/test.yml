@@ -29,7 +29,8 @@ env:
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
-  General:
+  run-tests:
+    name: Run Tests
     strategy:
       matrix:
         python-version:
