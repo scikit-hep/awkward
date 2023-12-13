@@ -93,21 +93,12 @@ jobs:
           python -m pip install build
           python -m build -w awkward-cpp
 
-      - name: Install awkward, awkward-cpp, and dependencies (Windows only)
-        if: matrix.runs-on == 'windows-latest'
-        run: >-
-          python -m pip install
-          -v . @(get-childitem -path awkward-cpp/dist/*.whl)
-          pytest-github-actions-annotate-failures
-          -r "requirements-test-${{ matrix.dependencies-kind }}.txt"
-
-      - name: Install awkward, awkward-cpp, and dependencies (non-Windows)
-        if: matrix.runs-on != 'windows-latest'
+      - name: Install awkward, awkward-cpp, and dependencies
         run: >-
           python -m pip install
           -v . ./awkward-cpp/dist/*.whl
           pytest-github-actions-annotate-failures
-          -r requirements-test.txt
+          -r "requirements-test-${{ matrix.dependencies-kind }}.txt"
 
       - name: Print versions
         run: python -m pip list
