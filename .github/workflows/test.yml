@@ -42,7 +42,7 @@ jobs:
         runs-on:
           - windows-latest
           - ubuntu-latest
-          - macos-latest
+          - macos-11
 
         python-architecture:
           - x64
@@ -235,14 +235,12 @@ jobs:
         with:
           image: "docker.io/agoose77/cppyy-wheels:cp311"
           path: "/wheels/."
-          destination: "/tmp/cppyy-wheels"
+          destination: "/wheelhouse"
 
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
-          python -m pip install --only-binary "numpy,pandas,pyarrow,numexpr"
-          -v . ./awkward-cpp/dist/*.whl
-          pytest-github-actions-annotate-failures
-          /tmp/cppyy-wheels/*
+          python -m pip install -v --only-binary "numpy,pandas,pyarrow,numexpr"
+          ./ ./awkward-cpp/dist/*.whl wheelhouse/* pytest-github-actions-annotate-failures
 
       - name: Print versions
         run: python -m pip list
