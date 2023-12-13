@@ -236,12 +236,12 @@ jobs:
         with:
           image: "docker.io/agoose77/cppyy-wheels:cp311"
           path: "/wheels/."
-          destination: "/wheelhouse"
+          destination: "/tmp/wheelhouse"
 
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
           python -m pip install -v --only-binary "numpy,pandas,pyarrow,numexpr"
-          ./ ./awkward-cpp/dist/*.whl wheelhouse/* pytest-github-actions-annotate-failures
+          ./ ./awkward-cpp/dist/*.whl /tmp/wheelhouse/* pytest-github-actions-annotate-failures
 
       - name: Print versions
         run: python -m pip list
