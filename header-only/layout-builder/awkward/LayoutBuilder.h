@@ -392,7 +392,7 @@ namespace awkward {
       template<class PRIMITIVE>
       class String : public ListOffset<PRIMITIVE, Numpy<uint8_t>> {
       public:
-      StringBuilder() : ListOffset<PRIMITIVE, Numpy<uint8_t>>() {
+          String() : ListOffset<PRIMITIVE, Numpy<uint8_t>>() {
       this->set_parameters(R"""("__array__": "string")""");
       this->content().set_parameters(R"""("__array__": "char")""");
   }
