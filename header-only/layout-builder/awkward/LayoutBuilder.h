@@ -388,6 +388,23 @@ namespace awkward {
       size_t id_;
     };
 
+      /// @class String
+      template<class PRIMITIVE>
+      class String : public ListOffset<PRIMITIVE, Numpy<uint8_t>> {
+      public:
+      StringBuilder() : ListOffset<PRIMITIVE, Numpy<uint8_t>>() {
+      this->set_parameters(R"""("__array__": "string")""");
+      this->content().set_parameters(R"""("__array__": "char")""");
+  }
+
+    void append_string(const std::string& value) {
+        this->begin_list();
+        for (const auto c: value) {
+            this->content().append(c);
+        }
+        this->end_list();
+    }
+};
 
     /// @class Empty
     ///
