@@ -399,7 +399,7 @@ namespace awkward {
 
     void append_string(const std::string& value) {
         this->begin_list();
-        for (const auto c: value) {
+        for (const auto& c: value) {
             this->content().append(c);
         }
         this->end_list();
