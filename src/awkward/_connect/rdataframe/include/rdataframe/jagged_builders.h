@@ -1,64 +1,61 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+// BSD 3-Clause License; see
+// https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_RDATAFRAME_JAGGED_BUILDERS_H_
 #define AWKWARD_RDATAFRAME_JAGGED_BUILDERS_H_
 
-#include <map>
-#include <string>
 #include "awkward/GrowableBuffer.h"
 #include "awkward/LayoutBuilder.h"
 #include "awkward/utils.h"
+#include <map>
+#include <string>
 
 namespace awkward {
 
-  class CppBuffers {
-  public:
-    CppBuffers() = default;
+class CppBuffers {
+public:
+  CppBuffers() = default;
 
-    ~CppBuffers() = default;
+  ~CppBuffers() = default;
 
-    template<class BUILDER>
-    const std::map<std::string, size_t>&
-    names_nbytes(BUILDER& builder) {
-      builder.buffer_nbytes(map_names_nbytes_);
-      return map_names_nbytes_;
+  template <class BUILDER>
+  const std::map<std::string, size_t> &names_nbytes(BUILDER &builder) {
+    builder.buffer_nbytes(map_names_nbytes_);
+    return map_names_nbytes_;
+  }
+
+  void append(const std::string &key, uint8_t *ptr) {
+    buffers_uint8_ptr_[key] = ptr;
+  }
+
+  void clear() {
+    map_names_nbytes_.clear();
+    buffers_uint8_ptr_.clear();
+  }
+
+  template <class BUILDER, typename PRIMITIVE>
+  void fill_from(BUILDER &builder,
+                 ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>> &result) const {
+    for (auto const &it : result) {
+      builder.append(it);
     }
+  }
 
-    void
-    append(const std::string& key, uint8_t* ptr) {
-      buffers_uint8_ptr_[key] = ptr;
-    }
+  template <class BUILDER> size_t to_char_buffers(BUILDER &builder) {
+    size_t length = builder.length();
 
-    void clear() {
-      map_names_nbytes_.clear();
-      buffers_uint8_ptr_.clear();
-    }
+    builder.to_char_buffers(buffers_uint8_ptr_);
+    builder.clear();
+    clear();
 
-    template<class BUILDER, typename PRIMITIVE>
-    void
-    fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) const {
-      for (auto const& it : result) {
-        builder.append(it);
-      }
-    }
+    return length;
+  }
 
-    template<class BUILDER>
-    size_t
-    to_char_buffers(BUILDER& builder) {
-      size_t length = builder.length();
+private:
+  std::map<std::string, size_t> map_names_nbytes_;
+  std::map<std::string, uint8_t *> buffers_uint8_ptr_;
+};
 
-      builder.to_char_buffers(buffers_uint8_ptr_);
-      builder.clear();
-      clear();
+} // namespace awkward
 
-      return length;
-    }
-
-  private:
-    std::map<std::string, size_t> map_names_nbytes_;
-    std::map<std::string, uint8_t*> buffers_uint8_ptr_;
-  };
-
-}  // namespace awkward
-
-#endif  // AWKWARD_RDATAFRAME_JAGGED_BUILDERS_H_
+#endif // AWKWARD_RDATAFRAME_JAGGED_BUILDERS_H_

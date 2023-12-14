@@ -37,7 +37,7 @@ awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
   } else {
     // If we didn't fill the list, then `lendistincts==0`
     // This is only true if `outlength==0` or `maxcount==0`
-    for (int64_t k=0; k < outlength; k++) {
+    for (int64_t k = 0; k < outlength; k++) {
       outstarts[k] = 0;
       outstops[k] = 0;
     }

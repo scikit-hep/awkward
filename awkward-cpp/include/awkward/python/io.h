@@ -13,4 +13,4 @@ make_fromjsonobj(py::module& m, const std::string& name);
 void
 make_fromjsonobj_schema(py::module& m, const std::string& name);
 
-#endif // AWKWARDPY_IO_H_
+#endif  // AWKWARDPY_IO_H_

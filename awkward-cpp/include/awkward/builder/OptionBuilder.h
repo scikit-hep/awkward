@@ -15,7 +15,7 @@ namespace awkward {
   /// @class OptionBuilder
   ///
   /// @brief Builder node that accumulates data with missing values (`None`).
-  class EXPORT_SYMBOL OptionBuilder: public Builder {
+  class EXPORT_SYMBOL OptionBuilder : public Builder {
   public:
     /// @brief Create an OptionBuilder from a number of nulls (all missing).
     /// @param options Configuration options for building an array;
@@ -23,9 +23,9 @@ namespace awkward {
     /// @param nullcount Length of the purely missing data to create.
     /// @param content Builder for the non-missing data.
     static const BuilderPtr
-      fromnulls(const BuilderOptions& options,
-                int64_t nullcount,
-                const BuilderPtr& content);
+    fromnulls(const BuilderOptions& options,
+              int64_t nullcount,
+              const BuilderPtr& content);
 
     /// @brief Create an OptionBuilder from an existing builder (all
     /// non-missing).
@@ -33,8 +33,7 @@ namespace awkward {
     /// these are passed to every Builder's constructor.
     /// @param content Builder for the non-missing data.
     static const BuilderPtr
-      fromvalids(const BuilderOptions& options,
-                 const BuilderPtr& content);
+    fromvalids(const BuilderOptions& options, const BuilderPtr& content);
 
     /// @brief Create a OptionBuilder from a full set of parameters.
     ///
@@ -49,85 +48,95 @@ namespace awkward {
 
     /// @brief User-friendly name of this class: `"OptionBuilder"`.
     const std::string
-      classname() const override;
+    classname() const override;
 
     const std::string
-      to_buffers(BuffersContainer& container, int64_t& form_key_id) const override;
+    to_buffers(BuffersContainer& container,
+               int64_t& form_key_id) const override;
 
     int64_t
-      length() const override;
+    length() const override;
 
     void
-      clear() override;
+    clear() override;
 
     /// @copydoc Builder::active()
     ///
     /// An OptionBuilder is active if and only if its `content` is active.
     bool
-      active() const override;
+    active() const override;
 
     const BuilderPtr
-      null() override;
+    null() override;
 
     const BuilderPtr
-      boolean(bool x) override;
+    boolean(bool x) override;
 
     const BuilderPtr
-      integer(int64_t x) override;
+    integer(int64_t x) override;
 
     const BuilderPtr
-      real(double x) override;
+    real(double x) override;
 
     const BuilderPtr
-      complex(std::complex<double> x) override;
+    complex(std::complex<double> x) override;
 
     const BuilderPtr
-      datetime(int64_t x, const std::string& unit) override;
+    datetime(int64_t x, const std::string& unit) override;
 
     const BuilderPtr
-      timedelta(int64_t x, const std::string& unit) override;
+    timedelta(int64_t x, const std::string& unit) override;
 
     const BuilderPtr
-      string(const char* x, int64_t length, const char* encoding) override;
+    string(const char* x, int64_t length, const char* encoding) override;
 
     const BuilderPtr
-      beginlist() override;
+    beginlist() override;
 
     const BuilderPtr
-      endlist() override;
+    endlist() override;
 
     const BuilderPtr
-      begintuple(int64_t numfields) override;
+    begintuple(int64_t numfields) override;
 
     const BuilderPtr
-      index(int64_t index) override;
+    index(int64_t index) override;
 
     const BuilderPtr
-      endtuple() override;
+    endtuple() override;
 
     const BuilderPtr
-      beginrecord(const char* name, bool check) override;
+    beginrecord(const char* name, bool check) override;
 
     void
-      field(const char* key, bool check) override;
+    field(const char* key, bool check) override;
 
     const BuilderPtr
-      endrecord() override;
+    endrecord() override;
 
-    const GrowableBuffer<int64_t>& buffer() const { return index_; }
+    const GrowableBuffer<int64_t>&
+    buffer() const {
+      return index_;
+    }
 
-    const GrowableBuffer<int64_t>& index() { return index_; }
+    const GrowableBuffer<int64_t>&
+    index() {
+      return index_;
+    }
 
-    const BuilderPtr builder() const { return content_; }
+    const BuilderPtr
+    builder() const {
+      return content_;
+    }
 
     void
-      maybeupdate(const BuilderPtr builder);
+    maybeupdate(const BuilderPtr builder);
 
   private:
     GrowableBuffer<int64_t> index_;
     BuilderPtr content_;
   };
 
-}
+}  // namespace awkward
 
-#endif // AWKWARD_OPTIONBUILDER_H_
+#endif  // AWKWARD_OPTIONBUILDER_H_

@@ -15,13 +15,13 @@ namespace awkward {
   /// @class TupleBuilder
   ///
   /// @brief Builder node for accumulated tuples.
-  class EXPORT_SYMBOL TupleBuilder: public Builder {
+  class EXPORT_SYMBOL TupleBuilder : public Builder {
   public:
     /// @brief Create an empty TupleBuilder.
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const BuilderOptions& options);
+    fromempty(const BuilderOptions& options);
 
     /// @brief Create a TupleBuilder from a full set of parameters.
     ///
@@ -40,87 +40,99 @@ namespace awkward {
 
     /// @brief Current number of fields.
     int64_t
-      numfields() const;
+    numfields() const;
 
     /// @brief User-friendly name of this class: `"TupleBuilder"`.
     const std::string
-      classname() const override;
+    classname() const override;
 
     const std::string
-      to_buffers(BuffersContainer& container, int64_t& form_key_id) const override;
+    to_buffers(BuffersContainer& container,
+               int64_t& form_key_id) const override;
 
     int64_t
-      length() const override;
+    length() const override;
 
     void
-      clear() override;
+    clear() override;
 
     /// @copydoc Builder::active()
     ///
     /// Calling #begintuple makes a TupleBuilder active; #endtuple makes it
     /// inactive.
     bool
-      active() const override;
+    active() const override;
 
     const BuilderPtr
-      null() override;
+    null() override;
 
     const BuilderPtr
-      boolean(bool x) override;
+    boolean(bool x) override;
 
     const BuilderPtr
-      integer(int64_t x) override;
+    integer(int64_t x) override;
 
     const BuilderPtr
-      real(double x) override;
+    real(double x) override;
 
     const BuilderPtr
-      complex(std::complex<double> x) override;
+    complex(std::complex<double> x) override;
 
     const BuilderPtr
-      datetime(int64_t x, const std::string& unit) override;
+    datetime(int64_t x, const std::string& unit) override;
 
     const BuilderPtr
-      timedelta(int64_t x, const std::string& unit) override;
+    timedelta(int64_t x, const std::string& unit) override;
 
     const BuilderPtr
-      string(const char* x, int64_t length, const char* encoding) override;
+    string(const char* x, int64_t length, const char* encoding) override;
 
     const BuilderPtr
-      beginlist() override;
+    beginlist() override;
 
     const BuilderPtr
-      endlist() override;
+    endlist() override;
 
     const BuilderPtr
-      begintuple(int64_t numfields) override;
+    begintuple(int64_t numfields) override;
 
     const BuilderPtr
-      index(int64_t index) override;
+    index(int64_t index) override;
 
     const BuilderPtr
-      endtuple() override;
+    endtuple() override;
 
     const BuilderPtr
-      beginrecord(const char* name, bool check) override;
+    beginrecord(const char* name, bool check) override;
 
     void
-      field(const char* key, bool check) override;
+    field(const char* key, bool check) override;
 
     const BuilderPtr
-      endrecord() override;
+    endrecord() override;
 
     const BuilderOptions&
-      options() const { return options_; }
+    options() const {
+      return options_;
+    }
 
-    const std::vector<BuilderPtr>& contents() const { return contents_; }
+    const std::vector<BuilderPtr>&
+    contents() const {
+      return contents_;
+    }
 
-    bool begun() { return begun_; }
+    bool
+    begun() {
+      return begun_;
+    }
 
-    int64_t nextindex() { return nextindex_; }
+    int64_t
+    nextindex() {
+      return nextindex_;
+    }
 
     void
-      maybeupdate(int64_t i, const BuilderPtr builder);
+    maybeupdate(int64_t i, const BuilderPtr builder);
 
   private:
     const BuilderOptions options_;
@@ -129,6 +141,6 @@ namespace awkward {
     bool begun_;
     int64_t nextindex_;
   };
-}
+}  // namespace awkward
 
-#endif // AWKWARD_TUPLEBUILDER_H_
+#endif  // AWKWARD_TUPLEBUILDER_H_

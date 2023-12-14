@@ -1,13 +1,10 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see
+// https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 template <typename T, typename C, typename U>
-__global__ void
-awkward_NumpyArray_reduce_adjust_starts_64(T* toptr,
-                                           int64_t outlength,
-                                           const C* parents,
-                                           const U* starts,
-                                           uint64_t invocation_index,
-                                           uint64_t* err_code) {
+__global__ void awkward_NumpyArray_reduce_adjust_starts_64(
+    T *toptr, int64_t outlength, const C *parents, const U *starts,
+    uint64_t invocation_index, uint64_t *err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < outlength) {

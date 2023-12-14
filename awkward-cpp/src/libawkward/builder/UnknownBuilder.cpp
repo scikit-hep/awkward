@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/UnknownBuilder.cpp", line)
+#define FILENAME(line) \
+  FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/UnknownBuilder.cpp", line)
 
 #include <stdexcept>
 
@@ -25,8 +26,7 @@ namespace awkward {
 
   UnknownBuilder::UnknownBuilder(const BuilderOptions& options,
                                  int64_t nullcount)
-      : options_(options)
-      , nullcount_(nullcount) { }
+      : options_(options), nullcount_(nullcount) {}
 
   const std::string
   UnknownBuilder::classname() const {
@@ -34,26 +34,29 @@ namespace awkward {
   };
 
   const std::string
-  UnknownBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  UnknownBuilder::to_buffers(BuffersContainer& container,
+                             int64_t& form_key_id) const {
     if (nullcount_ == 0) {
       std::stringstream form_key;
       form_key << "node" << (form_key_id++);
 
-      return "{\"class\": \"EmptyArray\", \"form_key\": \""
-             + form_key.str() + "\"}";
-    }
-    else {
+      return "{\"class\": \"EmptyArray\", \"form_key\": \"" + form_key.str() +
+             "\"}";
+    } else {
       std::stringstream outer_form_key;
       std::stringstream inner_form_key;
       outer_form_key << "node" << (form_key_id++);
       inner_form_key << "node" << (form_key_id++);
 
-      container.full_buffer(outer_form_key.str() + "-index", nullcount_, -1, "i8");
+      container.full_buffer(
+          outer_form_key.str() + "-index", nullcount_, -1, "i8");
 
-      return std::string("{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": ")
-             + "{\"class\": \"EmptyArray\", \"form_key\": \""
-             + inner_form_key.str() + "\"}, \"form_key\": \""
-             + outer_form_key.str() + "\"}";
+      return std::string(
+                 "{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", "
+                 "\"content\": ") +
+             "{\"class\": \"EmptyArray\", \"form_key\": \"" +
+             inner_form_key.str() + "\"}, \"form_key\": \"" +
+             outer_form_key.str() + "\"}";
     }
   }
 
@@ -161,8 +164,9 @@ namespace awkward {
   const BuilderPtr
   UnknownBuilder::endlist() {
     throw std::invalid_argument(
-      std::string("called 'end_list' without 'begin_list' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_list' without 'begin_list' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -178,15 +182,17 @@ namespace awkward {
   const BuilderPtr
   UnknownBuilder::index(int64_t /* index */) {
     throw std::invalid_argument(
-      std::string("called 'index' without 'begin_tuple' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'index' without 'begin_tuple' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
   UnknownBuilder::endtuple() {
     throw std::invalid_argument(
-      std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_tuple' without 'begin_tuple' at the same "
+                    "level before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -202,15 +208,17 @@ namespace awkward {
   void
   UnknownBuilder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
-      std::string("called 'field' without 'begin_record' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'field' without 'begin_record' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
   UnknownBuilder::endrecord() {
     throw std::invalid_argument(
-      std::string("called 'end_record' without 'begin_record' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_record' without 'begin_record' at the same "
+                    "level before it") +
+        FILENAME(__LINE__));
   }
 
-}
+}  // namespace awkward

@@ -1,4 +1,5 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+// BSD 3-Clause License; see
+// https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #include "awkward/BuilderOptions.h"
 #include <cassert>

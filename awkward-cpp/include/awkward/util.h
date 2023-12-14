@@ -11,7 +11,7 @@
 #include "awkward/common.h"
 
 #ifndef _MSC_VER
-  #include "dlfcn.h"
+#include "dlfcn.h"
 #endif
 
 namespace awkward {
@@ -20,26 +20,26 @@ namespace awkward {
     /// (only the primitive, fixed-width types). Non-native-endian types
     /// are considered NOT_PRIMITIVE.
     enum class EXPORT_SYMBOL dtype {
-        NOT_PRIMITIVE,
-        boolean,
-        int8,
-        int16,
-        int32,
-        int64,
-        uint8,
-        uint16,
-        uint32,
-        uint64,
-        float16,
-        float32,
-        float64,
-        float128,
-        complex64,
-        complex128,
-        complex256,
-        datetime64,
-        timedelta64,
-        size
+      NOT_PRIMITIVE,
+      boolean,
+      int8,
+      int16,
+      int32,
+      int64,
+      uint8,
+      uint16,
+      uint32,
+      uint64,
+      float16,
+      float32,
+      float64,
+      float128,
+      complex64,
+      complex128,
+      complex256,
+      datetime64,
+      timedelta64,
+      size
     };
 
     /// @brief Returns the name associated with a given dtype.
@@ -61,31 +61,31 @@ namespace awkward {
     /// strings. See issue
     /// [scikit-hep/awkward#186](https://github.com/scikit-hep/awkward/issues/186).
     std::string
-      quote(const std::string& x);
+    quote(const std::string& x);
 
     /// @brief Exhaustive list of runtime errors possible in the ForthMachine.
     enum class ForthError {
-        // execution can continue
-        none,
+      // execution can continue
+      none,
 
-        // execution cannot continue
-        not_ready,
-        is_done,
-        user_halt,
-        recursion_depth_exceeded,
-        stack_underflow,
-        stack_overflow,
-        read_beyond,
-        seek_beyond,
-        skip_beyond,
-        rewind_beyond,
-        division_by_zero,
-        varint_too_big,
-        text_number_missing,
-        quoted_string_missing,
-        enumeration_missing,
+      // execution cannot continue
+      not_ready,
+      is_done,
+      user_halt,
+      recursion_depth_exceeded,
+      stack_underflow,
+      stack_overflow,
+      read_beyond,
+      seek_beyond,
+      skip_beyond,
+      rewind_beyond,
+      division_by_zero,
+      varint_too_big,
+      text_number_missing,
+      quoted_string_missing,
+      enumeration_missing,
 
-        size
+      size
     };
 
     /// @class array_deleter
@@ -107,11 +107,11 @@ namespace awkward {
       void
       operator()(T const* ptr) {
         uint8_t const* in = reinterpret_cast<uint8_t const*>(ptr);
-        delete [] in;
+        delete[] in;
       }
     };
 
-  }
-}
+  }  // namespace util
+}  // namespace awkward
 
-#endif // AWKWARD_UTIL_H_
+#endif  // AWKWARD_UTIL_H_

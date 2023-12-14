@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/ListBuilder.cpp", line)
+#define FILENAME(line) \
+  FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/ListBuilder.cpp", line)
 
 #include <stdexcept>
 
@@ -15,20 +16,18 @@ namespace awkward {
   ListBuilder::fromempty(const BuilderOptions& options) {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
-    return std::make_shared<ListBuilder>(options,
-                                         std::move(offsets),
-                                         UnknownBuilder::fromempty(options),
-                                         false);
+    return std::make_shared<ListBuilder>(
+        options, std::move(offsets), UnknownBuilder::fromempty(options), false);
   }
 
   ListBuilder::ListBuilder(const BuilderOptions& options,
                            GrowableBuffer<int64_t> offsets,
                            const BuilderPtr& content,
                            bool begun)
-      : options_(options)
-      , offsets_(std::move(offsets))
-      , content_(content)
-      , begun_(begun) { }
+      : options_(options),
+        offsets_(std::move(offsets)),
+        content_(content),
+        begun_(begun) {}
 
   const std::string
   ListBuilder::classname() const {
@@ -36,18 +35,21 @@ namespace awkward {
   };
 
   const std::string
-  ListBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  ListBuilder::to_buffers(BuffersContainer& container,
+                          int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    void* ptr = container.empty_buffer(form_key.str() + "-offsets",
-      (int64_t)offsets_.length() * (int64_t)sizeof(int64_t));
+    void* ptr = container.empty_buffer(
+        form_key.str() + "-offsets",
+        (int64_t)offsets_.length() * (int64_t)sizeof(int64_t));
 
     offsets_.concatenate(reinterpret_cast<int64_t*>(ptr));
 
-    return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-           + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""
-           + form_key.str() + "\"}";
+    return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", "
+           "\"content\": " +
+           content_.get()->to_buffers(container, form_key_id) +
+           ", \"form_key\": \"" + form_key.str() + "\"}";
   }
 
   int64_t
@@ -73,8 +75,7 @@ namespace awkward {
       BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
       out.get()->null();
       return out;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->null());
       return nullptr;
     }
@@ -86,8 +87,7 @@ namespace awkward {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->boolean(x);
       return out;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->boolean(x));
       return nullptr;
     }
@@ -99,8 +99,7 @@ namespace awkward {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->integer(x);
       return out;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->integer(x));
       return nullptr;
     }
@@ -112,8 +111,7 @@ namespace awkward {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->real(x);
       return out;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->real(x));
       return nullptr;
     }
@@ -125,8 +123,7 @@ namespace awkward {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->complex(x);
       return out;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->complex(x));
       return nullptr;
     }
@@ -138,8 +135,7 @@ namespace awkward {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->datetime(x, unit);
       return out;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->datetime(x, unit));
       return nullptr;
     }
@@ -151,8 +147,7 @@ namespace awkward {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->timedelta(x, unit);
       return out;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->timedelta(x, unit));
       return nullptr;
     }
@@ -164,8 +159,7 @@ namespace awkward {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->string(x, length, encoding);
       return out;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->string(x, length, encoding));
       return nullptr;
     }
@@ -175,8 +169,7 @@ namespace awkward {
   ListBuilder::beginlist() {
     if (!begun_) {
       begun_ = true;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->beginlist());
     }
     return shared_from_this();
@@ -186,14 +179,13 @@ namespace awkward {
   ListBuilder::endlist() {
     if (!begun_) {
       throw std::invalid_argument(
-        std::string("called 'end_list' without 'begin_list' at the same level before it")
-        + FILENAME(__LINE__));
-    }
-    else if (!content_.get()->active()) {
+          std::string("called 'end_list' without 'begin_list' at the same "
+                      "level before it") +
+          FILENAME(__LINE__));
+    } else if (!content_.get()->active()) {
       offsets_.append(content_.get()->length());
       begun_ = false;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->endlist());
     }
     return shared_from_this();
@@ -205,8 +197,7 @@ namespace awkward {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->begintuple(numfields);
       return out;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->begintuple(numfields));
       return shared_from_this();
     }
@@ -216,10 +207,10 @@ namespace awkward {
   ListBuilder::index(int64_t index) {
     if (!begun_) {
       throw std::invalid_argument(
-        std::string("called 'index' without 'begin_tuple' at the same level before it")
-        + FILENAME(__LINE__));
-    }
-    else {
+          std::string("called 'index' without 'begin_tuple' at the same level "
+                      "before it") +
+          FILENAME(__LINE__));
+    } else {
       content_.get()->index(index);
       return nullptr;
     }
@@ -229,10 +220,10 @@ namespace awkward {
   ListBuilder::endtuple() {
     if (!begun_) {
       throw std::invalid_argument(
-        std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
-        + FILENAME(__LINE__));
-    }
-    else {
+          std::string("called 'end_tuple' without 'begin_tuple' at the same "
+                      "level before it") +
+          FILENAME(__LINE__));
+    } else {
       content_.get()->endtuple();
       return shared_from_this();
     }
@@ -244,8 +235,7 @@ namespace awkward {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->beginrecord(name, check);
       return out;
-    }
-    else {
+    } else {
       maybeupdate(content_.get()->beginrecord(name, check));
       return shared_from_this();
     }
@@ -255,10 +245,10 @@ namespace awkward {
   ListBuilder::field(const char* key, bool check) {
     if (!begun_) {
       throw std::invalid_argument(
-        std::string("called 'field' without 'begin_record' at the same level before it")
-        + FILENAME(__LINE__));
-    }
-    else {
+          std::string("called 'field' without 'begin_record' at the same level "
+                      "before it") +
+          FILENAME(__LINE__));
+    } else {
       content_.get()->field(key, check);
     }
   }
@@ -267,10 +257,11 @@ namespace awkward {
   ListBuilder::endrecord() {
     if (!begun_) {
       throw std::invalid_argument(
-        std::string("called 'end_record' without 'begin_record' at the same level "
-                    "before it") + FILENAME(__LINE__));
-    }
-    else {
+          std::string(
+              "called 'end_record' without 'begin_record' at the same level "
+              "before it") +
+          FILENAME(__LINE__));
+    } else {
       content_.get()->endrecord();
       return shared_from_this();
     }
@@ -278,8 +269,8 @@ namespace awkward {
 
   void
   ListBuilder::maybeupdate(const BuilderPtr tmp) {
-    if (tmp  &&  tmp.get() != content_.get()) {
+    if (tmp && tmp.get() != content_.get()) {
       content_ = std::move(tmp);
     }
   }
-}
+}  // namespace awkward

@@ -1,15 +1,18 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_RecordArray_reduce_local_outoffsets_64.cpp", line)
+#define FILENAME(line)                                                      \
+  FILENAME_FOR_EXCEPTIONS_C(                                                \
+      "src/cpu-kernels/awkward_RecordArray_reduce_local_outoffsets_64.cpp", \
+      line)
 
 #include "awkward/kernels.h"
 
-ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
-  int64_t* outoffsets,
-  int64_t* outcarry,
-  const int64_t* parents,
-  int64_t lenparents,
-  int64_t outlength) {
+ERROR
+awkward_RecordArray_reduce_nonlocal_outoffsets_64(int64_t* outoffsets,
+                                                  int64_t* outcarry,
+                                                  const int64_t* parents,
+                                                  int64_t lenparents,
+                                                  int64_t outlength) {
   int64_t i = 0;
   int64_t j_stop = 0;
   int64_t k_sublist = 0;
@@ -26,10 +29,10 @@ ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
   i = 0;
   for (j_stop = 1; j_stop < lenparents; j_stop++) {
     if (parents[i] != parents[j_stop]) {
-        outoffsets[k_sublist + 1] = j_stop;
-        outcarry[parents[i]] = k_sublist;
-        i = j_stop;
-        k_sublist++;
+      outoffsets[k_sublist + 1] = j_stop;
+      outcarry[parents[i]] = k_sublist;
+      i = j_stop;
+      k_sublist++;
     }
   }
   // Close the last sublist!
@@ -48,7 +51,7 @@ ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
   // Replace unique value with index of appended empty lists
   for (i = 0; i <= outlength; i++) {
     if (outcarry[i] == -1) {
-        outcarry[i] = k_sublist++;
+      outcarry[i] = k_sublist++;
     }
   }
   return success();

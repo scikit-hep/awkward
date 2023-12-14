@@ -17,11 +17,10 @@ namespace awkward {
   /// @class UnionBuilder
   ///
   /// @brief Builder node for accumulated heterogeneous data.
-  class EXPORT_SYMBOL UnionBuilder: public Builder {
+  class EXPORT_SYMBOL UnionBuilder : public Builder {
   public:
     static const BuilderPtr
-      fromsingle(const BuilderOptions& options,
-                 const BuilderPtr& firstcontent);
+    fromsingle(const BuilderOptions& options, const BuilderPtr& firstcontent);
 
     /// @brief Create a UnionBuilder from a full set of parameters.
     ///
@@ -39,85 +38,109 @@ namespace awkward {
 
     /// @brief User-friendly name of this class: `"UnionBuilder"`.
     const std::string
-      classname() const override;
+    classname() const override;
 
     const std::string
-      to_buffers(BuffersContainer& container, int64_t& form_key_id) const override;
+    to_buffers(BuffersContainer& container,
+               int64_t& form_key_id) const override;
 
     int64_t
-      length() const override;
+    length() const override;
 
     void
-      clear() override;
+    clear() override;
 
     /// @copydoc Builder::active()
     ///
     /// A UnionBuilder is active if and only if one of its `contents` is
     /// active.
     bool
-      active() const override;
+    active() const override;
 
     const BuilderPtr
-      null() override;
+    null() override;
 
     const BuilderPtr
-      boolean(bool x) override;
+    boolean(bool x) override;
 
     const BuilderPtr
-      integer(int64_t x) override;
+    integer(int64_t x) override;
 
     const BuilderPtr
-      real(double x) override;
+    real(double x) override;
 
     const BuilderPtr
-      complex(std::complex<double> x) override;
+    complex(std::complex<double> x) override;
 
     const BuilderPtr
-      datetime(int64_t x, const std::string& unit) override;
+    datetime(int64_t x, const std::string& unit) override;
 
     const BuilderPtr
-      timedelta(int64_t x, const std::string& unit) override;
+    timedelta(int64_t x, const std::string& unit) override;
 
     const BuilderPtr
-      string(const char* x, int64_t length, const char* encoding) override;
+    string(const char* x, int64_t length, const char* encoding) override;
 
     const BuilderPtr
-      beginlist() override;
+    beginlist() override;
 
     const BuilderPtr
-      endlist() override;
+    endlist() override;
 
     const BuilderPtr
-      begintuple(int64_t numfields) override;
+    begintuple(int64_t numfields) override;
 
     const BuilderPtr
-      index(int64_t index) override;
+    index(int64_t index) override;
 
     const BuilderPtr
-      endtuple() override;
+    endtuple() override;
 
     const BuilderPtr
-      beginrecord(const char* name, bool check) override;
+    beginrecord(const char* name, bool check) override;
 
     void
-      field(const char* key, bool check) override;
+    field(const char* key, bool check) override;
 
     const BuilderPtr
-      endrecord() override;
+    endrecord() override;
 
     const BuilderOptions&
-      options() const { return options_; }
+    options() const {
+      return options_;
+    }
 
-    const GrowableBuffer<int8_t>& tags() const {  return tags_; }
-    GrowableBuffer<int8_t>& tags_buffer() {  return tags_; }
+    const GrowableBuffer<int8_t>&
+    tags() const {
+      return tags_;
+    }
+    GrowableBuffer<int8_t>&
+    tags_buffer() {
+      return tags_;
+    }
 
-    const GrowableBuffer<int64_t>& index() const { return index_; }
-    GrowableBuffer<int64_t>& index_buffer() { return index_; }
+    const GrowableBuffer<int64_t>&
+    index() const {
+      return index_;
+    }
+    GrowableBuffer<int64_t>&
+    index_buffer() {
+      return index_;
+    }
 
-    const std::vector<BuilderPtr>& contents() const { return contents_; }
-    std::vector<BuilderPtr>& builders() { return contents_; }
+    const std::vector<BuilderPtr>&
+    contents() const {
+      return contents_;
+    }
+    std::vector<BuilderPtr>&
+    builders() {
+      return contents_;
+    }
 
-    int8_t current() { return current_;}
+    int8_t
+    current() {
+      return current_;
+    }
 
   private:
     const BuilderOptions options_;
@@ -126,6 +149,6 @@ namespace awkward {
     std::vector<BuilderPtr> contents_;
     int8_t current_;
   };
-}
+}  // namespace awkward
 
-#endif // AWKWARD_UNIONBUILDER_H_
+#endif  // AWKWARD_UNIONBUILDER_H_

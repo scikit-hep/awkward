@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/StringBuilder.cpp", line)
+#define FILENAME(line) \
+  FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/StringBuilder.cpp", line)
 
 #include <stdexcept>
 
@@ -17,20 +18,18 @@ namespace awkward {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
     GrowableBuffer<uint8_t> content = GrowableBuffer<uint8_t>::empty(options);
-    return std::make_shared<StringBuilder>(options,
-                                           std::move(offsets),
-                                           std::move(content),
-                                           encoding);
+    return std::make_shared<StringBuilder>(
+        options, std::move(offsets), std::move(content), encoding);
   }
 
   StringBuilder::StringBuilder(const BuilderOptions& options,
                                GrowableBuffer<int64_t> offsets,
                                GrowableBuffer<uint8_t> content,
                                const char* encoding)
-      : options_(options)
-      , offsets_(std::move(offsets))
-      , content_(std::move(content))
-      , encoding_(encoding) { }
+      : options_(options),
+        offsets_(std::move(offsets)),
+        content_(std::move(content)),
+        encoding_(encoding) {}
 
   const std::string
   StringBuilder::classname() const {
@@ -43,20 +42,19 @@ namespace awkward {
   }
 
   const std::string
-  StringBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  StringBuilder::to_buffers(BuffersContainer& container,
+                            int64_t& form_key_id) const {
     std::stringstream outer_form_key;
     std::stringstream inner_form_key;
     outer_form_key << "node" << (form_key_id++);
     inner_form_key << "node" << (form_key_id++);
 
-    offsets_.concatenate(
-      reinterpret_cast<int64_t*>(
-        container.empty_buffer(outer_form_key.str() + "-offsets",
+    offsets_.concatenate(reinterpret_cast<int64_t*>(container.empty_buffer(
+        outer_form_key.str() + "-offsets",
         (int64_t)offsets_.length() * (int64_t)sizeof(int64_t))));
 
-    content_.concatenate(
-      reinterpret_cast<uint8_t*>(
-        container.empty_buffer(inner_form_key.str() + "-data",
+    content_.concatenate(reinterpret_cast<uint8_t*>(container.empty_buffer(
+        inner_form_key.str() + "-data",
         (int64_t)content_.length() * (int64_t)sizeof(uint8_t))));
 
     std::string char_parameter;
@@ -64,21 +62,22 @@ namespace awkward {
     if (encoding_ == nullptr) {
       char_parameter = std::string("\"byte\"");
       string_parameter = std::string("\"bytestring\"");
-    }
-    else if (std::string(encoding_) == std::string("utf-8")) {
+    } else if (std::string(encoding_) == std::string("utf-8")) {
       char_parameter = std::string("\"char\"");
       string_parameter = std::string("\"string\"");
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("unsupported encoding: ") + util::quote(encoding_));
+    } else {
+      throw std::invalid_argument(std::string("unsupported encoding: ") +
+                                  util::quote(encoding_));
     }
 
-    return std::string("{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": ")
-           + "{\"class\": \"NumpyArray\", \"primitive\": \"uint8\", \"parameters\": {\"__array__\": "
-           + char_parameter + "}, \"form_key\": \"" + inner_form_key.str() + "\"}"
-           + ", \"parameters\": {\"__array__\": " + string_parameter + "}"
-           + ", \"form_key\": \"" + outer_form_key.str() + "\"}";
+    return std::string(
+               "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", "
+               "\"content\": ") +
+           "{\"class\": \"NumpyArray\", \"primitive\": \"uint8\", "
+           "\"parameters\": {\"__array__\": " +
+           char_parameter + "}, \"form_key\": \"" + inner_form_key.str() +
+           "\"}" + ", \"parameters\": {\"__array__\": " + string_parameter +
+           "}" + ", \"form_key\": \"" + outer_form_key.str() + "\"}";
   }
 
   int64_t
@@ -148,14 +147,15 @@ namespace awkward {
   }
 
   const BuilderPtr
-  StringBuilder::string(const char* x, int64_t length, const char* /* encoding */) {
+  StringBuilder::string(const char* x,
+                        int64_t length,
+                        const char* /* encoding */) {
     if (length < 0) {
-      for (int64_t i = 0;  x[i] != 0;  i++) {
+      for (int64_t i = 0; x[i] != 0; i++) {
         content_.append((uint8_t)x[i]);
       }
-    }
-    else {
-      for (int64_t i = 0;  i < length;  i++) {
+    } else {
+      for (int64_t i = 0; i < length; i++) {
         content_.append((uint8_t)x[i]);
       }
     }
@@ -173,8 +173,9 @@ namespace awkward {
   const BuilderPtr
   StringBuilder::endlist() {
     throw std::invalid_argument(
-      std::string("called 'end_list' without 'begin_list' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_list' without 'begin_list' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -187,15 +188,17 @@ namespace awkward {
   const BuilderPtr
   StringBuilder::index(int64_t /* index */) {
     throw std::invalid_argument(
-      std::string("called 'index' without 'begin_tuple' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'index' without 'begin_tuple' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
   StringBuilder::endtuple() {
     throw std::invalid_argument(
-      std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_tuple' without 'begin_tuple' at the same "
+                    "level before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -208,15 +211,17 @@ namespace awkward {
   void
   StringBuilder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
-      std::string("called 'field' without 'begin_record' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'field' without 'begin_record' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
   StringBuilder::endrecord() {
     throw std::invalid_argument(
-      std::string("called 'end_record' without 'begin_record' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_record' without 'begin_record' at the same "
+                    "level before it") +
+        FILENAME(__LINE__));
   }
 
-}
+}  // namespace awkward

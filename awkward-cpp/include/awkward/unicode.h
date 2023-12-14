@@ -5,7 +5,6 @@
 #ifndef AWKWARD_UNICODE_H_
 #define AWKWARD_UNICODE_H_
 
-
 #define UTF8_ONE_BYTE_MASK 0x80
 #define UTF8_ONE_BYTE_BITS 0
 #define UTF8_TWO_BYTES_MASK 0xE0
@@ -17,7 +16,7 @@
 #define UTF8_CONTINUATION_MASK 0xC0
 #define UTF8_CONTINUATION_BITS 0x80
 
+size_t
+utf8_codepoint_size(const uint8_t byte);
 
-size_t utf8_codepoint_size(const uint8_t byte);
-
-#endif // AWKWARD_UNICODE_H_
+#endif  // AWKWARD_UNICODE_H_

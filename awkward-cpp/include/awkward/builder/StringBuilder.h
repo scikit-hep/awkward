@@ -13,7 +13,7 @@ namespace awkward {
   /// @class StringBuilder
   ///
   /// @brief Builder node that accumulates strings.
-  class EXPORT_SYMBOL StringBuilder: public Builder {
+  class EXPORT_SYMBOL StringBuilder : public Builder {
   public:
     /// @brief Create an empty StringBuilder.
     /// @param options Configuration options for building an array;
@@ -22,7 +22,7 @@ namespace awkward {
     /// if `"utf-8"`, it is encoded with variable-width UTF-8.
     /// Currently, no other encodings have been defined.
     static const BuilderPtr
-      fromempty(const BuilderOptions& options, const char* encoding);
+    fromempty(const BuilderOptions& options, const char* encoding);
 
     /// @brief Create a StringBuilder from a full set of parameters.
     ///
@@ -44,81 +44,90 @@ namespace awkward {
     /// if `"utf-8"`, it is encoded with variable-width UTF-8.
     /// Currently, no other encodings have been defined.
     const char*
-      encoding() const;
+    encoding() const;
 
     /// @brief User-friendly name of this class: `"StringBuilder"`.
     const std::string
-      classname() const override;
+    classname() const override;
 
     const std::string
-      to_buffers(BuffersContainer& container, int64_t& form_key_id) const override;
+    to_buffers(BuffersContainer& container,
+               int64_t& form_key_id) const override;
 
     int64_t
-      length() const override;
+    length() const override;
 
     void
-      clear() override;
+    clear() override;
 
     /// @copydoc Builder::active()
     ///
     /// A StringBuilder is never active.
     bool
-      active() const override;
+    active() const override;
 
     const BuilderPtr
-      null() override;
+    null() override;
 
     const BuilderPtr
-      boolean(bool x) override;
+    boolean(bool x) override;
 
     const BuilderPtr
-      integer(int64_t x) override;
+    integer(int64_t x) override;
 
     const BuilderPtr
-      real(double x) override;
+    real(double x) override;
 
     const BuilderPtr
-      complex(std::complex<double> x) override;
+    complex(std::complex<double> x) override;
 
     const BuilderPtr
-      datetime(int64_t x, const std::string& unit) override;
+    datetime(int64_t x, const std::string& unit) override;
 
     const BuilderPtr
-      timedelta(int64_t x, const std::string& unit) override;
+    timedelta(int64_t x, const std::string& unit) override;
 
     const BuilderPtr
-      string(const char* x, int64_t length, const char* encoding) override;
+    string(const char* x, int64_t length, const char* encoding) override;
 
     const BuilderPtr
-      beginlist() override;
+    beginlist() override;
 
     const BuilderPtr
-      endlist() override;
+    endlist() override;
 
     const BuilderPtr
-      begintuple(int64_t numfields) override;
+    begintuple(int64_t numfields) override;
 
     const BuilderPtr
-      index(int64_t index) override;
+    index(int64_t index) override;
 
     const BuilderPtr
-      endtuple() override;
+    endtuple() override;
 
     const BuilderPtr
-      beginrecord(const char* name, bool check) override;
+    beginrecord(const char* name, bool check) override;
 
     void
-      field(const char* key, bool check) override;
+    field(const char* key, bool check) override;
 
     const BuilderPtr
-      endrecord() override;
+    endrecord() override;
 
     const BuilderOptions&
-      options() const { return options_; }
+    options() const {
+      return options_;
+    }
 
-    const GrowableBuffer<int64_t>& buffer() const { return offsets_; }
+    const GrowableBuffer<int64_t>&
+    buffer() const {
+      return offsets_;
+    }
 
-    const GrowableBuffer<uint8_t>& content() const { return content_; }
+    const GrowableBuffer<uint8_t>&
+    content() const {
+      return content_;
+    }
 
   private:
     const BuilderOptions options_;
@@ -127,6 +136,6 @@ namespace awkward {
     const char* encoding_;
   };
 
-}
+}  // namespace awkward
 
-#endif // AWKWARD_STRINGBUILDER_H_
+#endif  // AWKWARD_STRINGBUILDER_H_

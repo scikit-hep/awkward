@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/Int64Builder.cpp", line)
+#define FILENAME(line) \
+  FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/Int64Builder.cpp", line)
 
 #include <stdexcept>
 
@@ -14,14 +15,13 @@
 namespace awkward {
   const BuilderPtr
   Int64Builder::fromempty(const BuilderOptions& options) {
-    return std::make_shared<Int64Builder>(options,
-                                          GrowableBuffer<int64_t>::empty(options));
+    return std::make_shared<Int64Builder>(
+        options, GrowableBuffer<int64_t>::empty(options));
   }
 
   Int64Builder::Int64Builder(const BuilderOptions& options,
                              GrowableBuffer<int64_t> buffer)
-      : options_(options)
-      , buffer_(std::move(buffer)) { }
+      : options_(options), buffer_(std::move(buffer)) {}
 
   GrowableBuffer<int64_t>
   Int64Builder::buffer() {
@@ -35,17 +35,18 @@ namespace awkward {
   };
 
   const std::string
-  Int64Builder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  Int64Builder::to_buffers(BuffersContainer& container,
+                           int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    buffer_.concatenate(
-      reinterpret_cast<int64_t*>(
-        container.empty_buffer(form_key.str() + "-data",
+    buffer_.concatenate(reinterpret_cast<int64_t*>(container.empty_buffer(
+        form_key.str() + "-data",
         (int64_t)buffer_.length() * (int64_t)sizeof(int64_t))));
 
-    return "{\"class\": \"NumpyArray\", \"primitive\": \"int64\", \"form_key\": \""
-           + form_key.str() + "\"}";
+    return "{\"class\": \"NumpyArray\", \"primitive\": \"int64\", "
+           "\"form_key\": \"" +
+           form_key.str() + "\"}";
   }
 
   int64_t
@@ -128,8 +129,9 @@ namespace awkward {
   const BuilderPtr
   Int64Builder::endlist() {
     throw std::invalid_argument(
-      std::string("called 'end_list' without 'begin_list' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_list' without 'begin_list' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -142,15 +144,17 @@ namespace awkward {
   const BuilderPtr
   Int64Builder::index(int64_t /* index */) {
     throw std::invalid_argument(
-      std::string("called 'index' without 'begin_tuple' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'index' without 'begin_tuple' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
   Int64Builder::endtuple() {
     throw std::invalid_argument(
-      std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_tuple' without 'begin_tuple' at the same "
+                    "level before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -163,15 +167,17 @@ namespace awkward {
   void
   Int64Builder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
-      std::string("called 'field' without 'begin_record' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'field' without 'begin_record' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
   Int64Builder::endrecord() {
     throw std::invalid_argument(
-      std::string("called 'end_record' without 'begin_record' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_record' without 'begin_record' at the same "
+                    "level before it") +
+        FILENAME(__LINE__));
   }
 
-}
+}  // namespace awkward

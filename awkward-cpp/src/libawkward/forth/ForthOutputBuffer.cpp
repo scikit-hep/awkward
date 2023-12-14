@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthOutputBuffer.cpp", line)
+#define FILENAME(line) \
+  FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthOutputBuffer.cpp", line)
 
 #include <cmath>
 #include <sstream>
@@ -11,12 +12,12 @@ namespace awkward {
   ////////// helper functions
 
   template <typename T>
-  void byteswap16(int64_t num_items, T& value) {
+  void
+  byteswap16(int64_t num_items, T& value) {
     T* ptr = &value;
     while (num_items != 0) {
       uint16_t integer = *reinterpret_cast<uint16_t*>(ptr);
-      uint16_t output = ((integer >> 8) & 0x00ff) |
-                        ((integer << 8) & 0xff00);
+      uint16_t output = ((integer >> 8) & 0x00ff) | ((integer << 8) & 0xff00);
       *ptr = *reinterpret_cast<T*>(&output);
       ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 2);
       num_items--;
@@ -24,14 +25,14 @@ namespace awkward {
   }
 
   template <typename T>
-  void byteswap32(int64_t num_items, T& value) {
+  void
+  byteswap32(int64_t num_items, T& value) {
     T* ptr = &value;
     while (num_items != 0) {
       uint32_t integer = *reinterpret_cast<uint32_t*>(ptr);
-      uint32_t output = ((integer >> 24) & 0x000000ff) |
-                        ((integer >>  8) & 0x0000ff00) |
-                        ((integer <<  8) & 0x00ff0000) |
-                        ((integer << 24) & 0xff000000);
+      uint32_t output =
+          ((integer >> 24) & 0x000000ff) | ((integer >> 8) & 0x0000ff00) |
+          ((integer << 8) & 0x00ff0000) | ((integer << 24) & 0xff000000);
       *ptr = *reinterpret_cast<T*>(&output);
       ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 4);
       num_items--;
@@ -39,15 +40,16 @@ namespace awkward {
   }
 
   template <typename T>
-  void byteswap64(int64_t num_items, T& value) {
+  void
+  byteswap64(int64_t num_items, T& value) {
     T* ptr = &value;
     while (num_items != 0) {
       uint64_t integer = *reinterpret_cast<uint64_t*>(ptr);
       uint64_t output = ((integer >> 56) & 0x00000000000000ff) |
                         ((integer >> 40) & 0x000000000000ff00) |
                         ((integer >> 24) & 0x0000000000ff0000) |
-                        ((integer >>  8) & 0x00000000ff000000) |
-                        ((integer <<  8) & 0x000000ff00000000) |
+                        ((integer >> 8) & 0x00000000ff000000) |
+                        ((integer << 8) & 0x000000ff00000000) |
                         ((integer << 24) & 0x0000ff0000000000) |
                         ((integer << 40) & 0x00ff000000000000) |
                         ((integer << 56) & 0xff00000000000000);
@@ -58,28 +60,27 @@ namespace awkward {
   }
 
   template <typename T>
-  void byteswap_intp(int64_t num_items, T& value) {
+  void
+  byteswap_intp(int64_t num_items, T& value) {
     T* ptr = &value;
     if (sizeof(ssize_t) == 4) {
       while (num_items != 0) {
         uint32_t integer = *reinterpret_cast<uint32_t*>(ptr);
-        uint32_t output = ((integer >> 24) & 0x000000ff) |
-                          ((integer >>  8) & 0x0000ff00) |
-                          ((integer <<  8) & 0x00ff0000) |
-                          ((integer << 24) & 0xff000000);
+        uint32_t output =
+            ((integer >> 24) & 0x000000ff) | ((integer >> 8) & 0x0000ff00) |
+            ((integer << 8) & 0x00ff0000) | ((integer << 24) & 0xff000000);
         *ptr = *reinterpret_cast<T*>(&output);
         ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 4);
         num_items--;
       }
-    }
-    else {
+    } else {
       while (num_items != 0) {
         uint64_t integer = *reinterpret_cast<uint64_t*>(ptr);
         uint64_t output = ((integer >> 56) & 0x00000000000000ff) |
                           ((integer >> 40) & 0x000000000000ff00) |
                           ((integer >> 24) & 0x0000000000ff0000) |
-                          ((integer >>  8) & 0x00000000ff000000) |
-                          ((integer <<  8) & 0x000000ff00000000) |
+                          ((integer >> 8) & 0x00000000ff000000) |
+                          ((integer << 8) & 0x000000ff00000000) |
                           ((integer << 24) & 0x0000ff0000000000) |
                           ((integer << 40) & 0x00ff000000000000) |
                           ((integer << 56) & 0xff00000000000000);
@@ -93,9 +94,7 @@ namespace awkward {
   ////////// abstract
 
   ForthOutputBuffer::ForthOutputBuffer(int64_t initial, double resize)
-    : length_(0)
-    , reserved_(initial)
-    , resize_(resize) { }
+      : length_(0), reserved_(initial), resize_(resize) {}
 
   ForthOutputBuffer::~ForthOutputBuffer() = default;
 
@@ -109,8 +108,7 @@ namespace awkward {
     int64_t next = length_ - num_items;
     if (next < 0) {
       err = util::ForthError::rewind_beyond;
-    }
-    else {
+    } else {
       length_ = next;
     }
   }
@@ -124,8 +122,8 @@ namespace awkward {
 
   template <typename OUT>
   ForthOutputBufferOf<OUT>::ForthOutputBufferOf(int64_t initial, double resize)
-    : ForthOutputBuffer(initial, resize)
-    , ptr_(new OUT[(size_t)initial], util::array_deleter<OUT>()) { }
+      : ForthOutputBuffer(initial, resize),
+        ptr_(new OUT[(size_t)initial], util::array_deleter<OUT>()) {}
 
   template <typename OUT>
   const std::shared_ptr<void>
@@ -138,56 +136,44 @@ namespace awkward {
   ForthOutputBufferOf<OUT>::dtype() const {
     if (std::is_same<OUT, bool>::value) {
       return util::dtype::boolean;
-    }
-    else if (std::is_same<OUT, std::int8_t>::value) {
+    } else if (std::is_same<OUT, std::int8_t>::value) {
       return util::dtype::int8;
-    }
-    else if (std::is_same<OUT, std::int16_t>::value) {
+    } else if (std::is_same<OUT, std::int16_t>::value) {
       return util::dtype::int16;
-    }
-    else if (std::is_same<OUT, std::int32_t>::value) {
+    } else if (std::is_same<OUT, std::int32_t>::value) {
       return util::dtype::int32;
-    }
-    else if (std::is_same<OUT, std::int64_t>::value) {
+    } else if (std::is_same<OUT, std::int64_t>::value) {
       return util::dtype::int64;
-    }
-    else if (std::is_same<OUT, std::uint8_t>::value) {
+    } else if (std::is_same<OUT, std::uint8_t>::value) {
       return util::dtype::uint8;
-    }
-    else if (std::is_same<OUT, std::uint16_t>::value) {
+    } else if (std::is_same<OUT, std::uint16_t>::value) {
       return util::dtype::uint16;
-    }
-    else if (std::is_same<OUT, std::uint32_t>::value) {
+    } else if (std::is_same<OUT, std::uint32_t>::value) {
       return util::dtype::uint32;
-    }
-    else if (std::is_same<OUT, std::uint64_t>::value) {
+    } else if (std::is_same<OUT, std::uint64_t>::value) {
       return util::dtype::uint64;
-    }
-    else if (std::is_same<OUT, float>::value) {
+    } else if (std::is_same<OUT, float>::value) {
       return util::dtype::float32;
-    }
-    else if (std::is_same<OUT, double>::value) {
+    } else if (std::is_same<OUT, double>::value) {
       return util::dtype::float64;
-    }
-    else {
+    } else {
       throw std::runtime_error(
-        std::string("unrecognized ForthOutputBuffer specialization: ")
-        + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
-      );
+          std::string("unrecognized ForthOutputBuffer specialization: ") +
+          std::string(typeid(OUT).name()) + FILENAME(__LINE__));
     }
   }
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::dup(int64_t num_times, util::ForthError& err) noexcept {
+  ForthOutputBufferOf<OUT>::dup(int64_t num_times,
+                                util::ForthError& err) noexcept {
     if (length_ == 0) {
       err = util::ForthError::rewind_beyond;
-    }
-    else if (num_times > 0) {
+    } else if (num_times > 0) {
       int64_t next = length_ + num_times;
       maybe_resize(next);
       OUT value = ptr_.get()[length_ - 1];
-      for (int64_t i = 0;  i < num_times;  i++) {
+      for (int64_t i = 0; i < num_times; i++) {
         ptr_.get()[length_ + i] = value;
       }
       length_ = next;
@@ -196,19 +182,22 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_bool(bool value, bool /* byteswap */) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_bool(bool value,
+                                           bool /* byteswap */) noexcept {
     write_one(value);
   }
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_int8(int8_t value, bool /* byteswap */) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_int8(int8_t value,
+                                           bool /* byteswap */) noexcept {
     write_one(value);
   }
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_int16(int16_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_int16(int16_t value,
+                                            bool byteswap) noexcept {
     if (byteswap) {
       byteswap16(1, value);
     }
@@ -217,7 +206,8 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_int32(int32_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_int32(int32_t value,
+                                            bool byteswap) noexcept {
     if (byteswap) {
       byteswap32(1, value);
     }
@@ -226,7 +216,8 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_int64(int64_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_int64(int64_t value,
+                                            bool byteswap) noexcept {
     if (byteswap) {
       byteswap64(1, value);
     }
@@ -235,12 +226,12 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_intp(ssize_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_intp(ssize_t value,
+                                           bool byteswap) noexcept {
     if (byteswap) {
       if (sizeof(ssize_t) == 4) {
         byteswap32(1, value);
-      }
-      else {
+      } else {
         byteswap64(1, value);
       }
     }
@@ -249,13 +240,15 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_uint8(uint8_t value, bool /* byteswap */) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_uint8(uint8_t value,
+                                            bool /* byteswap */) noexcept {
     write_one(value);
   }
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_uint16(uint16_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_uint16(uint16_t value,
+                                             bool byteswap) noexcept {
     if (byteswap) {
       byteswap16(1, value);
     }
@@ -264,7 +257,8 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_uint32(uint32_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_uint32(uint32_t value,
+                                             bool byteswap) noexcept {
     if (byteswap) {
       byteswap32(1, value);
     }
@@ -273,7 +267,8 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_uint64(uint64_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_uint64(uint64_t value,
+                                             bool byteswap) noexcept {
     if (byteswap) {
       byteswap64(1, value);
     }
@@ -282,12 +277,12 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_uintp(size_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_uintp(size_t value,
+                                            bool byteswap) noexcept {
     if (byteswap) {
       if (sizeof(size_t) == 4) {
         byteswap32(1, value);
-      }
-      else {
+      } else {
         byteswap64(1, value);
       }
     }
@@ -296,7 +291,8 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_float32(float value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_float32(float value,
+                                              bool byteswap) noexcept {
     if (byteswap) {
       byteswap32(1, value);
     }
@@ -305,16 +301,18 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_float64(double value, bool byteswap) noexcept {
-     if (byteswap) {
+  ForthOutputBufferOf<OUT>::write_one_float64(double value,
+                                              bool byteswap) noexcept {
+    if (byteswap) {
       byteswap64(1, value);
     }
     write_one(value);
-}
+  }
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_string(char* string_buffer, int64_t length) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_string(char* string_buffer,
+                                             int64_t length) noexcept {
     int64_t next = length_ + length;
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], string_buffer, (size_t)length);
@@ -387,8 +385,7 @@ namespace awkward {
     if (byteswap) {
       if (sizeof(ssize_t) == 4) {
         byteswap32(num_items, *values);
-      }
-      else {
+      } else {
         byteswap64(num_items, *values);
       }
     }
@@ -396,8 +393,7 @@ namespace awkward {
     if (byteswap) {
       if (sizeof(ssize_t) == 4) {
         byteswap32(num_items, *values);
-      }
-      else {
+      } else {
         byteswap64(num_items, *values);
       }
     }
@@ -468,8 +464,7 @@ namespace awkward {
     if (byteswap) {
       if (sizeof(size_t) == 4) {
         byteswap32(num_items, *values);
-      }
-      else {
+      } else {
         byteswap64(num_items, *values);
       }
     }
@@ -477,8 +472,7 @@ namespace awkward {
     if (byteswap) {
       if (sizeof(size_t) == 4) {
         byteswap32(num_items, *values);
-      }
-      else {
+      } else {
         byteswap64(num_items, *values);
       }
     }
@@ -530,7 +524,8 @@ namespace awkward {
                                           bool /* byteswap */) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(int8_t) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(int8_t) * (size_t)num_items);
     length_ = next;
   }
 
@@ -541,7 +536,8 @@ namespace awkward {
                                             bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(int16_t) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(int16_t) * (size_t)num_items);
     if (byteswap) {
       byteswap16(num_items, ptr_.get()[length_]);
     }
@@ -555,7 +551,8 @@ namespace awkward {
                                             bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(int32_t) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(int32_t) * (size_t)num_items);
     if (byteswap) {
       byteswap32(num_items, ptr_.get()[length_]);
     }
@@ -569,7 +566,8 @@ namespace awkward {
                                             bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(int64_t) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(int64_t) * (size_t)num_items);
     if (byteswap) {
       byteswap64(num_items, ptr_.get()[length_]);
     }
@@ -578,11 +576,12 @@ namespace awkward {
 
   template <>
   void
-  ForthOutputBufferOf<uint8_t>::write_const_uint8(int64_t num_items,
-                                                  const uint8_t* values) noexcept {
+  ForthOutputBufferOf<uint8_t>::write_const_uint8(
+      int64_t num_items, const uint8_t* values) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(uint8_t) * (size_t)num_items);
     length_ = next;
   }
 
@@ -593,7 +592,8 @@ namespace awkward {
                                             bool /* byteswap */) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(uint8_t) * (size_t)num_items);
     length_ = next;
   }
 
@@ -604,7 +604,8 @@ namespace awkward {
                                               bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(uint16_t) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(uint16_t) * (size_t)num_items);
     if (byteswap) {
       byteswap16(num_items, ptr_.get()[length_]);
     }
@@ -618,7 +619,8 @@ namespace awkward {
                                               bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(uint32_t) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(uint32_t) * (size_t)num_items);
     if (byteswap) {
       byteswap32(num_items, ptr_.get()[length_]);
     }
@@ -632,7 +634,8 @@ namespace awkward {
                                               bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(uint64_t) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(uint64_t) * (size_t)num_items);
     if (byteswap) {
       byteswap64(num_items, ptr_.get()[length_]);
     }
@@ -646,7 +649,8 @@ namespace awkward {
                                             bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(float) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(float) * (size_t)num_items);
     if (byteswap) {
       byteswap32(num_items, ptr_.get()[length_]);
     }
@@ -660,7 +664,8 @@ namespace awkward {
                                              bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(double) * (size_t)num_items);
+    std::memcpy(
+        &ptr_.get()[length_], values, sizeof(double) * (size_t)num_items);
     if (byteswap) {
       byteswap64(num_items, ptr_.get()[length_]);
     }
@@ -715,25 +720,36 @@ namespace awkward {
       while (next > reservation) {
         reservation = (int64_t)std::ceil((double)reservation * (double)resize_);
       }
-      std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[(size_t)reservation],
-                                                             util::array_deleter<OUT>());
-      std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * (size_t)reserved_);
+      std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(
+          new OUT[(size_t)reservation], util::array_deleter<OUT>());
+      std::memcpy(
+          new_buffer.get(), ptr_.get(), sizeof(OUT) * (size_t)reserved_);
       ptr_ = new_buffer;
       reserved_ = reservation;
     }
   }
 
-  template void byteswap16<int16_t>(int64_t num_items, int16_t& value);
-  template void byteswap16<uint16_t>(int64_t num_items, uint16_t& value);
-  template void byteswap32<int32_t>(int64_t num_items, int32_t& value);
-  template void byteswap32<uint32_t>(int64_t num_items, uint32_t& value);
-  template void byteswap32<float>(int64_t num_items, float& value);
-  template void byteswap64<int64_t>(int64_t num_items, int64_t& value);
-  template void byteswap64<uint64_t>(int64_t num_items, uint64_t& value);
-  template void byteswap64<double>(int64_t num_items, double& value);
+  template void
+  byteswap16<int16_t>(int64_t num_items, int16_t& value);
+  template void
+  byteswap16<uint16_t>(int64_t num_items, uint16_t& value);
+  template void
+  byteswap32<int32_t>(int64_t num_items, int32_t& value);
+  template void
+  byteswap32<uint32_t>(int64_t num_items, uint32_t& value);
+  template void
+  byteswap32<float>(int64_t num_items, float& value);
+  template void
+  byteswap64<int64_t>(int64_t num_items, int64_t& value);
+  template void
+  byteswap64<uint64_t>(int64_t num_items, uint64_t& value);
+  template void
+  byteswap64<double>(int64_t num_items, double& value);
 
-  template void byteswap_intp<size_t>(int64_t num_items, size_t& value);
-  template void byteswap_intp<ssize_t>(int64_t num_items, ssize_t& value);
+  template void
+  byteswap_intp<size_t>(int64_t num_items, size_t& value);
+  template void
+  byteswap_intp<ssize_t>(int64_t num_items, ssize_t& value);
 
   template class EXPORT_TEMPLATE_INST ForthOutputBufferOf<bool>;
   template class EXPORT_TEMPLATE_INST ForthOutputBufferOf<int8_t>;
@@ -747,4 +763,4 @@ namespace awkward {
   template class EXPORT_TEMPLATE_INST ForthOutputBufferOf<float>;
   template class EXPORT_TEMPLATE_INST ForthOutputBufferOf<double>;
 
-}
+}  // namespace awkward

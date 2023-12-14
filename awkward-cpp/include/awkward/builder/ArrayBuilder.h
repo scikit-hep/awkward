@@ -31,105 +31,105 @@ namespace awkward {
     /// @brief Copy the current snapshot into the BuffersContainer and
     /// return a Form as a std::string (JSON).
     const std::string
-      to_buffers(BuffersContainer& container, int64_t& form_key_id) const;
+    to_buffers(BuffersContainer& container, int64_t& form_key_id) const;
 
     /// @brief Current length of the accumulated array.
     int64_t
-      length() const;
+    length() const;
 
     /// @brief Removes all accumulated data without resetting the type
     /// knowledge.
     void
-      clear();
+    clear();
 
     /// @brief Adds a `null` value to the accumulated data.
     void
-      null();
+    null();
 
     /// @brief Adds a boolean value `x` to the accumulated data.
     void
-      boolean(bool x);
+    boolean(bool x);
 
     /// @brief Adds an integer value `x` to the accumulated data.
     void
-      integer(int64_t x);
+    integer(int64_t x);
 
     /// @brief Adds a real value `x` to the accumulated data.
     void
-      real(double x);
+    real(double x);
 
     /// @brief Adds a complex value `x` to the accumulated data.
     void
-      complex(std::complex<double> x);
+    complex(std::complex<double> x);
 
     /// @brief Adds a datetime value `x` to the accumulated data.
     void
-      datetime(int64_t x, const std::string& unit);
+    datetime(int64_t x, const std::string& unit);
 
     /// @brief Adds a timedelta value `x` to the accumulated data.
     void
-      timedelta(int64_t x, const std::string& unit);
+    timedelta(int64_t x, const std::string& unit);
 
     /// @brief Adds an unencoded, null-terminated bytestring value `x` to the
     /// accumulated data.
     void
-      bytestring(const char* x);
+    bytestring(const char* x);
 
     /// @brief Adds an unencoded bytestring value `x` with a given `length`
     /// to the accumulated data.
     ///
     /// The string does not need to be null-terminated.
     void
-      bytestring(const char* x, int64_t length);
+    bytestring(const char* x, int64_t length);
 
     /// @brief Adds an unencoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      bytestring(const std::string& x);
+    bytestring(const std::string& x);
 
     /// @brief Adds a UTF-8 encoded, null-terminated bytestring value `x` to
     /// the accumulated data.
     void
-      string(const char* x);
+    string(const char* x);
 
     /// @brief Adds a UTF-8 encoded bytestring value `x` with a given `length`
     /// to the accumulated data.
     ///
     /// The string does not need to be null-terminated.
     void
-      string(const char* x, int64_t length);
+    string(const char* x, int64_t length);
 
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      string(const std::string& x);
+    string(const std::string& x);
 
     /// @brief Begins building a nested list.
     void
-      beginlist();
+    beginlist();
 
     /// @brief Ends a nested list.
     void
-      endlist();
+    endlist();
 
     /// @brief Begins building a tuple with a fixed number of fields.
     void
-      begintuple(int64_t numfields);
+    begintuple(int64_t numfields);
 
     /// @brief Sets the pointer to a given tuple field index; the next
     /// command will fill that slot.
     void
-      index(int64_t index);
+    index(int64_t index);
 
     /// @brief Ends a tuple.
     void
-      endtuple();
+    endtuple();
 
     /// @brief Begins building a record without a name.
     ///
     /// See #beginrecord_fast and #beginrecord_check.
     void
-      beginrecord();
+    beginrecord();
 
     /// @brief Begins building a record with a name.
     ///
@@ -145,7 +145,7 @@ namespace awkward {
     ///
     /// See #beginrecord and #beginrecord_check.
     void
-      beginrecord_fast(const char* name);
+    beginrecord_fast(const char* name);
 
     /// @brief Begins building a record with a name.
     ///
@@ -161,7 +161,7 @@ namespace awkward {
     ///
     /// See #beginrecord and #beginrecord_fast.
     void
-      beginrecord_check(const char* name);
+    beginrecord_check(const char* name);
 
     /// @brief Begins building a record with a name.
     ///
@@ -177,7 +177,7 @@ namespace awkward {
     ///
     /// See #beginrecord and #beginrecord_fast.
     void
-      beginrecord_check(const std::string& name);
+    beginrecord_check(const std::string& name);
 
     /// @brief Sets the pointer to a given record field `key`; the next
     /// command will fill that slot.
@@ -190,7 +190,7 @@ namespace awkward {
     /// will be achieved by filling them in the same order for each record.
     /// Lookup time for random order scales with the number of fields.
     void
-      field_fast(const char* key);
+    field_fast(const char* key);
 
     /// @brief Sets the pointer to a given record field `key`; the next
     /// command will fill that slot.
@@ -203,7 +203,7 @@ namespace awkward {
     /// will be achieved by filling them in the same order for each record.
     /// Lookup time for random order scales with the number of fields.
     void
-      field_check(const char* key);
+    field_check(const char* key);
 
     /// @brief Sets the pointer to a given record field `key`; the next
     /// command will fill that slot.
@@ -216,23 +216,29 @@ namespace awkward {
     /// will be achieved by filling them in the same order for each record.
     /// Lookup time for random order scales with the number of fields.
     void
-      field_check(const std::string& key);
+    field_check(const std::string& key);
 
     /// @brief Ends a record.
     void
-      endrecord();
+    endrecord();
 
     // @brief Root node of the Builder tree.
-    const BuilderPtr builder() const { return builder_; }
+    const BuilderPtr
+    builder() const {
+      return builder_;
+    }
 
-    void builder_update(BuilderPtr builder) { builder_ = builder; }
+    void
+    builder_update(BuilderPtr builder) {
+      builder_ = builder;
+    }
 
     /// @brief Internal function to replace the root node of the ArrayBuilder's
     /// Builder tree with a new root.
     void
-      maybeupdate(const BuilderPtr builder);
+    maybeupdate(const BuilderPtr builder);
 
-private:
+  private:
     /// @brief Constant equal to `nullptr`.
     static const char* no_encoding;
     /// @brief Constant equal to `"utf-8"`.
@@ -240,136 +246,118 @@ private:
     /// @brief Root node of the Builder tree.
     BuilderPtr builder_;
   };
-}
+}  // namespace awkward
 
 extern "C" {
-  /// @brief C interface to {@link awkward::ArrayBuilder#length ArrayBuilder::length}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_length(void* arraybuilder,
-                                int64_t* result);
-  /// @brief C interface to {@link awkward::ArrayBuilder#clear ArrayBuilder::clear}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_clear(void* arraybuilder);
+/// @brief C interface to {@link awkward::ArrayBuilder#length ArrayBuilder::length}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_length(void* arraybuilder, int64_t* result);
+/// @brief C interface to {@link awkward::ArrayBuilder#clear ArrayBuilder::clear}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_clear(void* arraybuilder);
 
-  /// @brief C interface to {@link awkward::ArrayBuilder#null ArrayBuilder::null}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_null(void* arraybuilder);
+/// @brief C interface to {@link awkward::ArrayBuilder#null ArrayBuilder::null}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_null(void* arraybuilder);
 
-  /// @brief C interface to {@link awkward::ArrayBuilder#boolean ArrayBuilder::boolean}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_boolean(void* arraybuilder,
-                                 bool x);
+/// @brief C interface to {@link awkward::ArrayBuilder#boolean ArrayBuilder::boolean}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_boolean(void* arraybuilder, bool x);
 
-  /// @brief C interface to {@link awkward::ArrayBuilder#integer ArrayBuilder::integer}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_integer(void* arraybuilder,
-                                 int64_t x);
+/// @brief C interface to {@link awkward::ArrayBuilder#integer ArrayBuilder::integer}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_integer(void* arraybuilder, int64_t x);
 
-  /// @brief C interface to {@link awkward::ArrayBuilder#real ArrayBuilder::real}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_real(void* arraybuilder,
-                              double x);
+/// @brief C interface to {@link awkward::ArrayBuilder#real ArrayBuilder::real}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_real(void* arraybuilder, double x);
 
-  /// @brief C interface to {@link awkward::ArrayBuilder#complex ArrayBuilder::complex}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_complex(void* arraybuilder,
-                                 double real,
-                                 double imag);
+/// @brief C interface to {@link awkward::ArrayBuilder#complex ArrayBuilder::complex}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_complex(void* arraybuilder, double real, double imag);
 
-  /// @brief C interface to {@link awkward::ArrayBuilder#datetime ArrayBuilder::datetime}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_datetime(void* arraybuilder,
-                                  int64_t x,
-                                  const char* unit);
+/// @brief C interface to {@link awkward::ArrayBuilder#datetime ArrayBuilder::datetime}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_datetime(void* arraybuilder, int64_t x, const char* unit);
 
-  /// @brief C interface to {@link awkward::ArrayBuilder#timedelta ArrayBuilder::timedelta}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_timedelta(void* arraybuilder,
-                                   int64_t x,
-                                   const char* unit);
+/// @brief C interface to {@link awkward::ArrayBuilder#timedelta ArrayBuilder::timedelta}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_timedelta(void* arraybuilder, int64_t x, const char* unit);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#bytestring ArrayBuilder::bytestring}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_bytestring(void* arraybuilder,
-                                    const char* x);
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#bytestring ArrayBuilder::bytestring}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_bytestring(void* arraybuilder, const char* x);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#bytestring ArrayBuilder::bytestring}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_bytestring_length(void* arraybuilder,
-                                           const char* x,
-                                           int64_t length);
-
-  /// @brief C interface to {@link awkward::ArrayBuilder#string ArrayBuilder::string}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_string(void* arraybuilder,
-                                const char* x);
-
-  /// @brief C interface to {@link awkward::ArrayBuilder#string ArrayBuilder::string}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_string_length(void* arraybuilder,
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#bytestring ArrayBuilder::bytestring}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_bytestring_length(void* arraybuilder,
                                        const char* x,
                                        int64_t length);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#beginlist ArrayBuilder::beginlist}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_beginlist(void* arraybuilder);
+/// @brief C interface to {@link awkward::ArrayBuilder#string ArrayBuilder::string}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_string(void* arraybuilder, const char* x);
 
-  /// @brief C interface to {@link awkward::ArrayBuilder#endlist ArrayBuilder::endlist}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_endlist(void* arraybuilder);
+/// @brief C interface to {@link awkward::ArrayBuilder#string ArrayBuilder::string}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_string_length(void* arraybuilder,
+                                   const char* x,
+                                   int64_t length);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#begintuple ArrayBuilder::begintuple}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_begintuple(void* arraybuilder,
-                                    int64_t numfields);
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#beginlist ArrayBuilder::beginlist}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_beginlist(void* arraybuilder);
 
-  /// @brief C interface to {@link awkward::ArrayBuilder#index ArrayBuilder::index}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_index(void* arraybuilder,
-                               int64_t index);
+/// @brief C interface to {@link awkward::ArrayBuilder#endlist ArrayBuilder::endlist}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_endlist(void* arraybuilder);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#endtuple ArrayBuilder::endtuple}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_endtuple(void* arraybuilder);
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#begintuple ArrayBuilder::begintuple}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_begintuple(void* arraybuilder, int64_t numfields);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#beginrecord ArrayBuilder::beginrecord}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_beginrecord(void* arraybuilder);
+/// @brief C interface to {@link awkward::ArrayBuilder#index ArrayBuilder::index}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_index(void* arraybuilder, int64_t index);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#beginrecord_fast ArrayBuilder::beginrecord_fast}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_beginrecord_fast(void* arraybuilder,
-                                          const char* name);
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#endtuple ArrayBuilder::endtuple}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_endtuple(void* arraybuilder);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#beginrecord_check ArrayBuilder::beginrecord_check}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_beginrecord_check(void* arraybuilder,
-                                           const char* name);
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#beginrecord ArrayBuilder::beginrecord}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_beginrecord(void* arraybuilder);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#field_fast ArrayBuilder::field_fast}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_field_fast(void* arraybuilder,
-                                    const char* key);
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#beginrecord_fast ArrayBuilder::beginrecord_fast}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_beginrecord_fast(void* arraybuilder, const char* name);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#field_check ArrayBuilder::field_check}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_field_check(void* arraybuilder,
-                                     const char* key);
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#beginrecord_check ArrayBuilder::beginrecord_check}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_beginrecord_check(void* arraybuilder, const char* name);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#endrecord ArrayBuilder::endrecord}.
-  EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_endrecord(void* arraybuilder);
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#field_fast ArrayBuilder::field_fast}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_field_fast(void* arraybuilder, const char* key);
+
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#field_check ArrayBuilder::field_check}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_field_check(void* arraybuilder, const char* key);
+
+/// @brief C interface to
+/// {@link awkward::ArrayBuilder#endrecord ArrayBuilder::endrecord}.
+EXPORT_SYMBOL uint8_t
+awkward_ArrayBuilder_endrecord(void* arraybuilder);
 }
 
-#endif // AWKWARD_ARRAYBUILDER_H_
+#endif  // AWKWARD_ARRAYBUILDER_H_

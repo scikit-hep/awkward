@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/io/json.cpp", line)
+#define FILENAME(line) \
+  FILENAME_FOR_EXCEPTIONS("src/libawkward/io/json.cpp", line)
 
 #include <complex>
 
@@ -21,17 +22,17 @@
 namespace rj = rapidjson;
 
 namespace awkward {
-  class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
+  class Handler : public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
   public:
     Handler(ArrayBuilder& builder,
             const char* nan_string,
             const char* posinf_string,
             const char* neginf_string)
-        : builder_(builder)
-        , moved_(false)
-        , nan_string_(nan_string)
-        , posinf_string_(posinf_string)
-        , neginf_string_(neginf_string) { }
+        : builder_(builder),
+          moved_(false),
+          nan_string_(nan_string),
+          posinf_string_(posinf_string),
+          neginf_string_(neginf_string) {}
 
     void
     reset_moved() {
@@ -43,43 +44,50 @@ namespace awkward {
       return moved_;
     }
 
-    bool Null() {
+    bool
+    Null() {
       moved_ = true;
       builder_.null();
       return true;
     }
 
-    bool Bool(bool x) {
+    bool
+    Bool(bool x) {
       moved_ = true;
       builder_.boolean(x);
       return true;
     }
 
-    bool Int(int x) {
+    bool
+    Int(int x) {
       moved_ = true;
       builder_.integer((int64_t)x);
       return true;
     }
 
-    bool Uint(unsigned int x) {
+    bool
+    Uint(unsigned int x) {
       moved_ = true;
       builder_.integer((int64_t)x);
       return true;
     }
 
-    bool Int64(int64_t x) {
+    bool
+    Int64(int64_t x) {
       moved_ = true;
       builder_.integer(x);
       return true;
     }
 
-    bool Uint64(uint64_t x) {
+    bool
+    Uint64(uint64_t x) {
       moved_ = true;
       builder_.integer((int64_t)x);
       return true;
     }
 
-    bool Double(double x) {
+    bool
+    Double(double x) {
       builder_.real(x);
       moved_ = true;
       return true;
@@ -88,19 +96,18 @@ namespace awkward {
     bool
     String(const char* str, rj::SizeType length, bool /* copy */) {
       moved_ = true;
-      if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
+      if (nan_string_ != nullptr && strcmp(str, nan_string_) == 0) {
         builder_.real(std::numeric_limits<double>::quiet_NaN());
         return true;
-      }
-      else if (posinf_string_ != nullptr  &&  strcmp(str, posinf_string_) == 0) {
+      } else if (posinf_string_ != nullptr &&
+                 strcmp(str, posinf_string_) == 0) {
         builder_.real(std::numeric_limits<double>::infinity());
         return true;
-      }
-      else if (neginf_string_ != nullptr  &&  strcmp(str, neginf_string_) == 0) {
+      } else if (neginf_string_ != nullptr &&
+                 strcmp(str, neginf_string_) == 0) {
         builder_.real(-std::numeric_limits<double>::infinity());
         return true;
-      }
-      else {
+      } else {
         builder_.string(str, (int64_t)length);
         return true;
       }
@@ -154,34 +161,36 @@ namespace awkward {
     typedef char Ch;
 
     FileLikeObjectStream(FileLikeObject* source, int64_t buffersize)
-      : source_(source)
-      , buffersize_(buffersize)
-      , bufferlast_(0)
-      , current_(0)
-      , readcount_(0)
-      , count_(0)
-      , eof_(false) {
+        : source_(source),
+          buffersize_(buffersize),
+          bufferlast_(0),
+          current_(0),
+          readcount_(0),
+          count_(0),
+          eof_(false) {
       buffer_ = new char[(size_t)buffersize];
       read();
     }
 
-    ~FileLikeObjectStream() {
-      delete [] buffer_;
-    }
+    ~FileLikeObjectStream() { delete[] buffer_; }
 
-    Ch Peek() const {
+    Ch
+    Peek() const {
       return *current_;
-     }
-    Ch Take() {
+    }
+    Ch
+    Take() {
       Ch c = *current_;
       read();
       return c;
     }
-    size_t Tell() const {
+    size_t
+    Tell() const {
       return (size_t)count_ + static_cast<size_t>(current_ - buffer_);
     }
 
-    std::string error_context() const {
+    std::string
+    error_context() const {
       int64_t current = (int64_t)current_ - (int64_t)buffer_;
       int64_t bufferafter = (int64_t)bufferlast_ - (int64_t)buffer_;
       if (*bufferlast_ != 0) {
@@ -197,7 +206,8 @@ namespace awkward {
         stop = bufferafter;
       }
 
-      std::string context = std::string(buffer_, (size_t)stop).substr((size_t)start);
+      std::string context =
+          std::string(buffer_, (size_t)stop).substr((size_t)start);
       size_t arrow = (size_t)(current - start);
 
       size_t pos;
@@ -229,21 +239,36 @@ namespace awkward {
         }
       }
 
-      return std::string("\nJSON: ") + context + std::string("\n") + std::string(arrow + 6, '-') + "^";
+      return std::string("\nJSON: ") + context + std::string("\n") +
+             std::string(arrow + 6, '-') + "^";
     }
 
     // not implemented
-    void Put(Ch) { assert(false); }
-    void Flush() { assert(false); }
-    Ch* PutBegin() { assert(false); return 0; }
-    size_t PutEnd(Ch*) { assert(false); return 0; }
+    void
+    Put(Ch) {
+      assert(false);
+    }
+    void
+    Flush() {
+      assert(false);
+    }
+    Ch*
+    PutBegin() {
+      assert(false);
+      return 0;
+    }
+    size_t
+    PutEnd(Ch*) {
+      assert(false);
+      return 0;
+    }
 
   private:
-    void read() {
+    void
+    read() {
       if (current_ < bufferlast_) {
         ++current_;
-      }
-      else if (!eof_) {
+      } else if (!eof_) {
         count_ += readcount_;
         readcount_ = source_->read(buffersize_, buffer_);
         bufferlast_ = buffer_ + readcount_ - 1;
@@ -275,89 +300,81 @@ namespace awkward {
                  const char* nan_string,
                  const char* posinf_string,
                  const char* neginf_string) {
-
     rj::Reader reader;
     FileLikeObjectStream stream(source, buffersize);
-    Handler handler(builder,
-                    nan_string,
-                    posinf_string,
-                    neginf_string);
+    Handler handler(builder, nan_string, posinf_string, neginf_string);
 
     if (read_one) {
       bool fully_parsed = reader.Parse(stream, handler);
       if (!fully_parsed) {
-        throw std::invalid_argument(
-          std::string("JSON syntax error at char ")
-          + std::to_string(stream.Tell())
-          + std::string("\n")
-          + stream.error_context()
-          + FILENAME(__LINE__));
+        throw std::invalid_argument(std::string("JSON syntax error at char ") +
+                                    std::to_string(stream.Tell()) +
+                                    std::string("\n") + stream.error_context() +
+                                    FILENAME(__LINE__));
       }
     }
 
     else {
       while (stream.Peek() != 0) {
         handler.reset_moved();
-        bool fully_parsed = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
+        bool fully_parsed =
+            reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
         if (handler.moved()) {
           if (!fully_parsed) {
             if (stream.Peek() == 0) {
               throw std::invalid_argument(
-                  std::string("incomplete JSON object at the end of the stream")
-                  + std::string("\n")
-                  + stream.error_context()
-                  + FILENAME(__LINE__));
-            }
-            else {
+                  std::string(
+                      "incomplete JSON object at the end of the stream") +
+                  std::string("\n") + stream.error_context() +
+                  FILENAME(__LINE__));
+            } else {
               throw std::invalid_argument(
-                std::string("JSON syntax error at char ")
-                + std::to_string(stream.Tell())
-                + std::string("\n")
-                + stream.error_context()
-                + FILENAME(__LINE__));
+                  std::string("JSON syntax error at char ") +
+                  std::to_string(stream.Tell()) + std::string("\n") +
+                  stream.error_context() + FILENAME(__LINE__));
             }
           }
-        }
-        else if (stream.Peek() != 0) {
+        } else if (stream.Peek() != 0) {
           throw std::invalid_argument(
-            std::string("JSON syntax error at char ")
-            + std::to_string(stream.Tell())
-            + std::string("\n")
-            + stream.error_context()
-            + FILENAME(__LINE__));
+              std::string("JSON syntax error at char ") +
+              std::to_string(stream.Tell()) + std::string("\n") +
+              stream.error_context() + FILENAME(__LINE__));
         }
       }
     }
-
   }
 
-  #define TopLevelArray 0           // no arguments
-  #define FillByteMaskedArray 1     // arg1: ByteMaskedArray output
-  #define FillIndexedOptionArray 2  // arg1: IndexedOptionArray output, arg2: counter
-  #define FillBoolean 3             // arg1: boolean output
-  #define FillInteger 4             // arg1: integer output
-  #define FillNumber 5              // arg1: number output
-  #define FillString 6              // arg1: offsets output, arg2: content output
-  #define FillEnumString 7          // arg1: index output, arg2: strings start, arg3: strings stop
-  #define FillNullEnumString 8      // arg1: index output, arg2: strings start, arg3: strings stop
-  #define VarLengthList 9           // arg1: offsets output
-  #define FixedLengthList 10        // arg1: expected length
-  #define KeyTableHeader 11         // arg1: number of items, arg2: record identifier
-  #define KeyTableItem 12           // arg1: string index, arg2: jump to instruction
+#define TopLevelArray 0        // no arguments
+#define FillByteMaskedArray 1  // arg1: ByteMaskedArray output
+#define FillIndexedOptionArray \
+  2                    // arg1: IndexedOptionArray output, arg2: counter
+#define FillBoolean 3  // arg1: boolean output
+#define FillInteger 4  // arg1: integer output
+#define FillNumber 5   // arg1: number output
+#define FillString 6   // arg1: offsets output, arg2: content output
+#define FillEnumString \
+  7  // arg1: index output, arg2: strings start, arg3: strings stop
+#define FillNullEnumString \
+  8  // arg1: index output, arg2: strings start, arg3: strings stop
+#define VarLengthList 9     // arg1: offsets output
+#define FixedLengthList 10  // arg1: expected length
+#define KeyTableHeader 11   // arg1: number of items, arg2: record identifier
+#define KeyTableItem 12     // arg1: string index, arg2: jump to instruction
 
-  class HandlerSchema: public rj::BaseReaderHandler<rj::UTF8<>, HandlerSchema> {
+  class HandlerSchema
+      : public rj::BaseReaderHandler<rj::UTF8<>, HandlerSchema> {
   public:
     HandlerSchema(FromJsonObjectSchema* specializedjson,
                   const char* nan_string,
                   const char* posinf_string,
                   const char* neginf_string)
-      : specializedjson_(specializedjson)
-      , nan_string_(nan_string)
-      , posinf_string_(posinf_string)
-      , neginf_string_(neginf_string)
-      , moved_(false)
-      , schema_okay_(true)
-      , ignore_(0) { }
+        : specializedjson_(specializedjson),
+          nan_string_(nan_string),
+          posinf_string_(posinf_string),
+          neginf_string_(neginf_string),
+          moved_(false),
+          schema_okay_(true),
+          ignore_(0) {}
 
     void
     reset_moved() {
@@ -374,7 +391,8 @@ namespace awkward {
       return !schema_okay_;
     }
 
-    bool Null() {
+    bool
+    Null() {
       moved_ = true;
       // std::cout << "null " << specializedjson_->debug() << std::endl;
 
@@ -398,13 +416,16 @@ namespace awkward {
               specializedjson_->write_int64(specializedjson_->argument1(), 0);
               break;
             case FillNumber:
-              specializedjson_->write_float64(specializedjson_->argument1(), 0.0);
+              specializedjson_->write_float64(specializedjson_->argument1(),
+                                              0.0);
               break;
             case FillString:
-              specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
+              specializedjson_->write_add_int64(specializedjson_->argument1(),
+                                                0);
               break;
             case VarLengthList:
-              specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
+              specializedjson_->write_add_int64(specializedjson_->argument1(),
+                                                0);
               break;
             default:
               return schema_okay_ = false;
@@ -422,7 +443,8 @@ namespace awkward {
       }
     }
 
-    bool Bool(bool x) {
+    bool
+    Bool(bool x) {
       moved_ = true;
       // std::cout << "bool " << x << " " << specializedjson_->debug() << std::endl;
 
@@ -440,10 +462,9 @@ namespace awkward {
           specializedjson_->step_backward();
           return schema_okay_ = out;
         case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
+          specializedjson_->write_int64(specializedjson_->argument1(),
+                                        specializedjson_->get_and_increment(
+                                            specializedjson_->argument2()));
           specializedjson_->step_forward();
           out = Bool(x);
           specializedjson_->step_backward();
@@ -456,7 +477,8 @@ namespace awkward {
       }
     }
 
-    bool Int(int x) {
+    bool
+    Int(int x) {
       moved_ = true;
       // std::cout << "int " << x << " " << specializedjson_->debug() << std::endl;
 
@@ -474,10 +496,9 @@ namespace awkward {
           specializedjson_->step_backward();
           return schema_okay_ = out;
         case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
+          specializedjson_->write_int64(specializedjson_->argument1(),
+                                        specializedjson_->get_and_increment(
+                                            specializedjson_->argument2()));
           specializedjson_->step_forward();
           out = Int(x);
           specializedjson_->step_backward();
@@ -493,7 +514,8 @@ namespace awkward {
       }
     }
 
-    bool Uint(unsigned int x) {
+    bool
+    Uint(unsigned int x) {
       moved_ = true;
       // std::cout << "uint " << x << " " << specializedjson_->debug() << std::endl;
 
@@ -511,10 +533,9 @@ namespace awkward {
           specializedjson_->step_backward();
           return schema_okay_ = out;
         case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
+          specializedjson_->write_int64(specializedjson_->argument1(),
+                                        specializedjson_->get_and_increment(
+                                            specializedjson_->argument2()));
           specializedjson_->step_forward();
           out = Uint(x);
           specializedjson_->step_backward();
@@ -530,7 +551,8 @@ namespace awkward {
       }
     }
 
-    bool Int64(int64_t x) {
+    bool
+    Int64(int64_t x) {
       moved_ = true;
       // std::cout << "int64 " << x << " " << specializedjson_->debug() << std::endl;
 
@@ -548,10 +570,9 @@ namespace awkward {
           specializedjson_->step_backward();
           return schema_okay_ = out;
         case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
+          specializedjson_->write_int64(specializedjson_->argument1(),
+                                        specializedjson_->get_and_increment(
+                                            specializedjson_->argument2()));
           specializedjson_->step_forward();
           out = Int64(x);
           specializedjson_->step_backward();
@@ -560,14 +581,16 @@ namespace awkward {
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
-          specializedjson_->write_float64(specializedjson_->argument1(), (double)x);
+          specializedjson_->write_float64(specializedjson_->argument1(),
+                                          (double)x);
           return true;
         default:
           return schema_okay_ = false;
       }
     }
 
-    bool Uint64(uint64_t x) {
+    bool
+    Uint64(uint64_t x) {
       moved_ = true;
       // std::cout << "uint64 " << x << " " << specializedjson_->debug() << std::endl;
 
@@ -585,26 +608,28 @@ namespace awkward {
           specializedjson_->step_backward();
           return schema_okay_ = out;
         case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
+          specializedjson_->write_int64(specializedjson_->argument1(),
+                                        specializedjson_->get_and_increment(
+                                            specializedjson_->argument2()));
           specializedjson_->step_forward();
           out = Uint64(x);
           specializedjson_->step_backward();
           return schema_okay_ = out;
         case FillInteger:
-          specializedjson_->write_int64(specializedjson_->argument1(), (int64_t)x);
+          specializedjson_->write_int64(specializedjson_->argument1(),
+                                        (int64_t)x);
           return true;
         case FillNumber:
-          specializedjson_->write_float64(specializedjson_->argument1(), (double)x);
+          specializedjson_->write_float64(specializedjson_->argument1(),
+                                          (double)x);
           return true;
         default:
           return schema_okay_ = false;
       }
     }
 
-    bool Double(double x) {
+    bool
+    Double(double x) {
       moved_ = true;
       // std::cout << "double " << x << " " << specializedjson_->debug() << std::endl;
 
@@ -622,10 +647,9 @@ namespace awkward {
           specializedjson_->step_backward();
           return schema_okay_ = out;
         case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
+          specializedjson_->write_int64(specializedjson_->argument1(),
+                                        specializedjson_->get_and_increment(
+                                            specializedjson_->argument2()));
           specializedjson_->step_forward();
           out = Double(x);
           specializedjson_->step_backward();
@@ -660,50 +684,49 @@ namespace awkward {
           specializedjson_->step_backward();
           return schema_okay_ = out;
         case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
+          specializedjson_->write_int64(specializedjson_->argument1(),
+                                        specializedjson_->get_and_increment(
+                                            specializedjson_->argument2()));
           specializedjson_->step_forward();
           out = String(str, length, copy);
           specializedjson_->step_backward();
           return schema_okay_ = out;
         case FillString:
-          specializedjson_->write_add_int64(specializedjson_->argument1(), length);
+          specializedjson_->write_add_int64(specializedjson_->argument1(),
+                                            length);
           specializedjson_->write_many_uint8(
-            specializedjson_->argument2(), length, reinterpret_cast<const uint8_t*>(str)
-          );
+              specializedjson_->argument2(),
+              length,
+              reinterpret_cast<const uint8_t*>(str));
           return true;
         case FillEnumString:
         case FillNullEnumString:
           enumi = specializedjson_->find_enum(str);
           if (enumi == -1) {
             return schema_okay_ = false;
-          }
-          else {
+          } else {
             specializedjson_->write_int64(specializedjson_->argument1(), enumi);
             return true;
           }
         case FillNumber:
-          if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
+          if (nan_string_ != nullptr && strcmp(str, nan_string_) == 0) {
             specializedjson_->write_float64(
-              specializedjson_->argument1(), std::numeric_limits<double>::quiet_NaN()
-            );
+                specializedjson_->argument1(),
+                std::numeric_limits<double>::quiet_NaN());
             return true;
-          }
-          else if (posinf_string_ != nullptr  &&  strcmp(str, posinf_string_) == 0) {
+          } else if (posinf_string_ != nullptr &&
+                     strcmp(str, posinf_string_) == 0) {
             specializedjson_->write_float64(
-              specializedjson_->argument1(), std::numeric_limits<double>::infinity()
-            );
+                specializedjson_->argument1(),
+                std::numeric_limits<double>::infinity());
             return true;
-          }
-          else if (neginf_string_ != nullptr  &&  strcmp(str, neginf_string_) == 0) {
+          } else if (neginf_string_ != nullptr &&
+                     strcmp(str, neginf_string_) == 0) {
             specializedjson_->write_float64(
-              specializedjson_->argument1(), -std::numeric_limits<double>::infinity()
-            );
+                specializedjson_->argument1(),
+                -std::numeric_limits<double>::infinity());
             return true;
-          }
-          else {
+          } else {
             return schema_okay_ = false;
           }
         default:
@@ -724,24 +747,28 @@ namespace awkward {
 
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+          specializedjson_->push_stack(specializedjson_->current_instruction() +
+                                       1);
           return true;
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 1);
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 2);
+          specializedjson_->push_stack(specializedjson_->current_instruction() +
+                                       2);
           return true;
         case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 2);
+          specializedjson_->write_int64(specializedjson_->argument1(),
+                                        specializedjson_->get_and_increment(
+                                            specializedjson_->argument2()));
+          specializedjson_->push_stack(specializedjson_->current_instruction() +
+                                       2);
           return true;
         case VarLengthList:
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+          specializedjson_->push_stack(specializedjson_->current_instruction() +
+                                       1);
           return true;
         case FixedLengthList:
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+          specializedjson_->push_stack(specializedjson_->current_instruction() +
+                                       1);
           return true;
         default:
           return schema_okay_ = false;
@@ -774,7 +801,8 @@ namespace awkward {
           specializedjson_->step_forward();
           switch (specializedjson_->instruction()) {
             case VarLengthList:
-              specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
+              specializedjson_->write_add_int64(specializedjson_->argument1(),
+                                                numfields);
               out = true;
               break;
             case FixedLengthList:
@@ -786,7 +814,8 @@ namespace awkward {
           specializedjson_->step_backward();
           return out;
         case VarLengthList:
-          specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
+          specializedjson_->write_add_int64(specializedjson_->argument1(),
+                                            numfields);
           return true;
         case FixedLengthList:
           return numfields == specializedjson_->argument1();
@@ -808,15 +837,17 @@ namespace awkward {
 
       switch (specializedjson_->instruction()) {
         case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
-          specializedjson_->start_object(specializedjson_->current_instruction() + 1);
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+          specializedjson_->write_int64(specializedjson_->argument1(),
+                                        specializedjson_->get_and_increment(
+                                            specializedjson_->argument2()));
+          specializedjson_->start_object(
+              specializedjson_->current_instruction() + 1);
+          specializedjson_->push_stack(specializedjson_->current_instruction() +
+                                       1);
           return true;
         case KeyTableHeader:
-          specializedjson_->start_object(specializedjson_->current_instruction());
+          specializedjson_->start_object(
+              specializedjson_->current_instruction());
           specializedjson_->push_stack(specializedjson_->current_instruction());
           return true;
         default:
@@ -846,12 +877,14 @@ namespace awkward {
 
       switch (specializedjson_->instruction()) {
         case FillIndexedOptionArray:
-          if (!specializedjson_->end_object(specializedjson_->current_instruction() + 1)) {
+          if (!specializedjson_->end_object(
+                  specializedjson_->current_instruction() + 1)) {
             return nulls_for_optiontype();
           }
           return true;
         case KeyTableHeader:
-          if (!specializedjson_->end_object(specializedjson_->current_instruction())) {
+          if (!specializedjson_->end_object(
+                  specializedjson_->current_instruction())) {
             return nulls_for_optiontype();
           }
           return true;
@@ -864,17 +897,21 @@ namespace awkward {
     nulls_for_optiontype() {
       switch (specializedjson_->instruction()) {
         case FillIndexedOptionArray:
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+          specializedjson_->push_stack(specializedjson_->current_instruction() +
+                                       1);
         case KeyTableHeader:
           specializedjson_->push_stack(specializedjson_->current_instruction());
       }
-      int64_t keytableheader_instruction = specializedjson_->current_instruction();
+      int64_t keytableheader_instruction =
+          specializedjson_->current_instruction();
       int64_t num_fields = specializedjson_->argument1();
       int64_t record_identifier = specializedjson_->argument2();
       specializedjson_->pop_stack();
 
       // for each not-already-filled key, fill it if it's option-type, error otherwise
-      for (int64_t i = keytableheader_instruction + 1;  i <= keytableheader_instruction + num_fields;  i++) {
+      for (int64_t i = keytableheader_instruction + 1;
+           i <= keytableheader_instruction + num_fields;
+           i++) {
         int64_t j = i - (keytableheader_instruction + 1);
         if (!specializedjson_->key_already_filled(record_identifier, j)) {
           int64_t jump_to = specializedjson_->key_instruction_at(i);
@@ -974,15 +1011,13 @@ namespace awkward {
     doc.Parse<rj::kParseDefaultFlags>(jsonassembly);
 
     if (doc.HasParseError()) {
-      throw std::invalid_argument(
-        "failed to parse jsonassembly" + FILENAME(__LINE__)
-      );
+      throw std::invalid_argument("failed to parse jsonassembly" +
+                                  FILENAME(__LINE__));
     }
 
     if (!doc.IsArray()) {
       throw std::invalid_argument(
-        "jsonassembly must be an array of instructions" + FILENAME(__LINE__)
-      );
+          "jsonassembly must be an array of instructions" + FILENAME(__LINE__));
     }
 
     int64_t instruction_stack_max_depth = 0;
@@ -990,18 +1025,17 @@ namespace awkward {
     bool is_record = true;
 
     for (auto& item : doc.GetArray()) {
-      if (!item.IsArray()  ||  item.Size() == 0  ||  !item[0].IsString()) {
+      if (!item.IsArray() || item.Size() == 0 || !item[0].IsString()) {
         throw std::invalid_argument(
-          "each jsonassembly instruction must be an array starting with a string" +
-          FILENAME(__LINE__)
-        );
+            "each jsonassembly instruction must be an array starting with a "
+            "string" +
+            FILENAME(__LINE__));
       }
 
       if (std::string("TopLevelArray") == item[0].GetString()) {
         if (item.Size() != 1) {
-          throw std::invalid_argument(
-            "TopLevelArray arguments: (none!)" + FILENAME(__LINE__)
-          );
+          throw std::invalid_argument("TopLevelArray arguments: (none!)" +
+                                      FILENAME(__LINE__));
         }
         instruction_stack_max_depth++;
         instructions_.push_back(TopLevelArray);
@@ -1013,15 +1047,15 @@ namespace awkward {
       }
 
       else if (std::string("FillByteMaskedArray") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+        if (item.Size() != 3 || !item[1].IsString() || !item[2].IsString()) {
           throw std::invalid_argument(
-            "FillByteMaskedArray arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
+              "FillByteMaskedArray arguments: output:str dtype:str" +
+              FILENAME(__LINE__));
         }
         if (std::string("int8") != item[2].GetString()) {
           throw std::invalid_argument(
-            "FillByteMaskedArray argument 2 (dtype:str) must be 'int8'" + FILENAME(__LINE__)
-          );
+              "FillByteMaskedArray argument 2 (dtype:str) must be 'int8'" +
+              FILENAME(__LINE__));
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int8);
@@ -1035,15 +1069,15 @@ namespace awkward {
       }
 
       else if (std::string("FillIndexedOptionArray") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+        if (item.Size() != 3 || !item[1].IsString() || !item[2].IsString()) {
           throw std::invalid_argument(
-            "FillIndexedOptionArray arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
+              "FillIndexedOptionArray arguments: output:str dtype:str" +
+              FILENAME(__LINE__));
         }
         if (std::string("int64") != item[2].GetString()) {
           throw std::invalid_argument(
-            "FillIndexedOptionArray argument 2 (dtype:str) must be 'int64'" + FILENAME(__LINE__)
-          );
+              "FillIndexedOptionArray argument 2 (dtype:str) must be 'int64'" +
+              FILENAME(__LINE__));
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int64);
@@ -1059,15 +1093,15 @@ namespace awkward {
       }
 
       else if (std::string("FillBoolean") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+        if (item.Size() != 3 || !item[1].IsString() || !item[2].IsString()) {
           throw std::invalid_argument(
-            "FillBoolean arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
+              "FillBoolean arguments: output:str dtype:str" +
+              FILENAME(__LINE__));
         }
         if (std::string("uint8") != item[2].GetString()) {
           throw std::invalid_argument(
-            "FillBoolean argument 2 (dtype:str) must be 'uint8'" + FILENAME(__LINE__)
-          );
+              "FillBoolean argument 2 (dtype:str) must be 'uint8'" +
+              FILENAME(__LINE__));
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::uint8);
@@ -1081,15 +1115,15 @@ namespace awkward {
       }
 
       else if (std::string("FillInteger") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+        if (item.Size() != 3 || !item[1].IsString() || !item[2].IsString()) {
           throw std::invalid_argument(
-            "FillInteger arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
+              "FillInteger arguments: output:str dtype:str" +
+              FILENAME(__LINE__));
         }
         if (std::string("int64") != item[2].GetString()) {
           throw std::invalid_argument(
-            "FillInteger argument 2 (dtype:str) must be 'int64'" + FILENAME(__LINE__)
-          );
+              "FillInteger argument 2 (dtype:str) must be 'int64'" +
+              FILENAME(__LINE__));
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int64);
@@ -1103,15 +1137,15 @@ namespace awkward {
       }
 
       else if (std::string("FillNumber") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+        if (item.Size() != 3 || !item[1].IsString() || !item[2].IsString()) {
           throw std::invalid_argument(
-            "FillNumber arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
+              "FillNumber arguments: output:str dtype:str" +
+              FILENAME(__LINE__));
         }
         if (std::string("float64") != item[2].GetString()) {
           throw std::invalid_argument(
-            "FillNumber argument 2 (dtype:str) must be 'float64'" + FILENAME(__LINE__)
-          );
+              "FillNumber argument 2 (dtype:str) must be 'float64'" +
+              FILENAME(__LINE__));
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::float64);
@@ -1125,15 +1159,17 @@ namespace awkward {
       }
 
       else if (std::string("FillString") == item[0].GetString()) {
-        if (item.Size() != 5  ||  !item[1].IsString()  ||  !item[2].IsString()  ||  !item[3].IsString()  ||  !item[4].IsString()) {
+        if (item.Size() != 5 || !item[1].IsString() || !item[2].IsString() ||
+            !item[3].IsString() || !item[4].IsString()) {
           throw std::invalid_argument(
-            "FillString arguments: offsets:str offsets_dtype:str content:str content_dtype:str" + FILENAME(__LINE__)
-          );
+              "FillString arguments: offsets:str offsets_dtype:str content:str "
+              "content_dtype:str" +
+              FILENAME(__LINE__));
         }
         if (std::string("int64") != item[2].GetString()) {
           throw std::invalid_argument(
-            "FillString argument 2 (dtype:str) must be 'int64'" + FILENAME(__LINE__)
-          );
+              "FillString argument 2 (dtype:str) must be 'int64'" +
+              FILENAME(__LINE__));
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int64);
@@ -1143,8 +1179,8 @@ namespace awkward {
         buffers_int64_[(size_t)offsetsi].append(0);
         if (std::string("uint8") != item[4].GetString()) {
           throw std::invalid_argument(
-            "FillString argument 4 (dtype:str) must be 'uint8'" + FILENAME(__LINE__)
-          );
+              "FillString argument 4 (dtype:str) must be 'uint8'" +
+              FILENAME(__LINE__));
         }
         output_names_.push_back(item[3].GetString());
         output_dtypes_.push_back(util::dtype::uint8);
@@ -1157,18 +1193,20 @@ namespace awkward {
         instructions_.push_back(-1);
       }
 
-      else if (std::string("FillEnumString") == item[0].GetString()  ||
+      else if (std::string("FillEnumString") == item[0].GetString() ||
                std::string("FillNullEnumString") == item[0].GetString()) {
-        if (item.Size() != 4  ||  !item[1].IsString()  ||  !item[2].IsString()  ||  !item[3].IsArray()) {
+        if (item.Size() != 4 || !item[1].IsString() || !item[2].IsString() ||
+            !item[3].IsArray()) {
           throw std::invalid_argument(
-            "FillEnumString/FillNullEnumString arguments: index:str dtype:str [strings]" +
-            FILENAME(__LINE__)
-          );
+              "FillEnumString/FillNullEnumString arguments: index:str "
+              "dtype:str [strings]" +
+              FILENAME(__LINE__));
         }
         if (std::string("int64") != item[2].GetString()) {
           throw std::invalid_argument(
-            "FillEnumString/FillNullEnumString argument 2 (dtype:str) must be 'int64'" + FILENAME(__LINE__)
-          );
+              "FillEnumString/FillNullEnumString argument 2 (dtype:str) must "
+              "be 'int64'" +
+              FILENAME(__LINE__));
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int64);
@@ -1179,17 +1217,16 @@ namespace awkward {
         for (auto& x : item[3].GetArray()) {
           if (!x.IsString()) {
             throw std::invalid_argument(
-              "FillEnumString/FillNullEnumString list of strings (argument 3) must all be strings" +
-              FILENAME(__LINE__)
-            );
+                "FillEnumString/FillNullEnumString list of strings (argument "
+                "3) must all be strings" +
+                FILENAME(__LINE__));
           }
           strings.push_back(x.GetString());
         }
         int64_t stop = (int64_t)strings.size();
         if (std::string("FillEnumString") == item[0].GetString()) {
           instructions_.push_back(FillEnumString);
-        }
-        else {
+        } else {
           instructions_.push_back(FillNullEnumString);
         }
         instructions_.push_back(outi);
@@ -1198,18 +1235,17 @@ namespace awkward {
       }
 
       else if (std::string("VarLengthList") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+        if (item.Size() != 3 || !item[1].IsString() || !item[2].IsString()) {
           throw std::invalid_argument(
-            "VarLengthList arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
+              "VarLengthList arguments: output:str dtype:str" +
+              FILENAME(__LINE__));
         }
         instruction_stack_max_depth++;
 
-
         if (std::string("int64") != item[2].GetString()) {
           throw std::invalid_argument(
-            "VarLengthList argument 2 (dtype:str) must be 'int64'" + FILENAME(__LINE__)
-          );
+              "VarLengthList argument 2 (dtype:str) must be 'int64'" +
+              FILENAME(__LINE__));
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int64);
@@ -1224,10 +1260,9 @@ namespace awkward {
       }
 
       else if (std::string("FixedLengthList") == item[0].GetString()) {
-        if (item.Size() != 2  ||  !item[1].IsInt64()) {
-          throw std::invalid_argument(
-            "FixedLengthList arguments: length:int" + FILENAME(__LINE__)
-          );
+        if (item.Size() != 2 || !item[1].IsInt64()) {
+          throw std::invalid_argument("FixedLengthList arguments: length:int" +
+                                      FILENAME(__LINE__));
         }
         instruction_stack_max_depth++;
         instructions_.push_back(FixedLengthList);
@@ -1237,10 +1272,9 @@ namespace awkward {
       }
 
       else if (std::string("KeyTableHeader") == item[0].GetString()) {
-        if (item.Size() != 2  ||  !item[1].IsInt64()) {
+        if (item.Size() != 2 || !item[1].IsInt64()) {
           throw std::invalid_argument(
-            "KeyTableHeader arguments: num_items:int" + FILENAME(__LINE__)
-          );
+              "KeyTableHeader arguments: num_items:int" + FILENAME(__LINE__));
         }
         int64_t num_items = item[1].GetInt64();
         int64_t num_checklist_chunks = num_items / 64;
@@ -1251,28 +1285,31 @@ namespace awkward {
         instruction_stack_max_depth++;
         instructions_.push_back(KeyTableHeader);
         instructions_.push_back(num_items);
-        instructions_.push_back(record_current_field_.size());  // record identifier
+        instructions_.push_back(
+            record_current_field_.size());  // record identifier
         instructions_.push_back(-1);
 
-        record_current_field_.push_back(-1);  // the first find_key will increase this to zero
+        record_current_field_.push_back(
+            -1);  // the first find_key will increase this to zero
 
         // checklist consists of a 1 bit for each field that has not been seen yet
         std::vector<uint64_t> checklist_init(num_checklist_chunks, 0);
-        for (int64_t j = 0;  j < num_items;  j++) {
-          int64_t  chunki    = j >> 6;                      // j / 64
-          uint64_t chunkmask = (uint64_t)1 << (j & 0x3f);   // j % 64
+        for (int64_t j = 0; j < num_items; j++) {
+          int64_t chunki = j >> 6;                         // j / 64
+          uint64_t chunkmask = (uint64_t)1 << (j & 0x3f);  // j % 64
           checklist_init[chunki] |= chunkmask;
         }
-        std::vector<uint64_t> checklist_copy = checklist_init;   // copied (not shared)
+        std::vector<uint64_t> checklist_copy =
+            checklist_init;  // copied (not shared)
         record_checklist_init_.push_back(checklist_init);
         record_checklist_.push_back(checklist_copy);
       }
 
       else if (std::string("KeyTableItem") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsInt64()) {
+        if (item.Size() != 3 || !item[1].IsString() || !item[2].IsInt64()) {
           throw std::invalid_argument(
-            "KeyTableItem arguments: key:str jump_to:int" + FILENAME(__LINE__)
-          );
+              "KeyTableItem arguments: key:str jump_to:int" +
+              FILENAME(__LINE__));
         }
         int64_t stringi = (int64_t)strings.size();
         strings.push_back(item[1].GetString());
@@ -1284,21 +1321,21 @@ namespace awkward {
 
       else {
         throw std::invalid_argument(
-          std::string("unrecognized jsonassembly instruction: ") + item[0].GetString() +
-          FILENAME(__LINE__)
-        );
+            std::string("unrecognized jsonassembly instruction: ") +
+            item[0].GetString() + FILENAME(__LINE__));
       }
     }
 
     string_offsets_.push_back(0);
     for (auto string : strings) {
-      string_offsets_.push_back(string_offsets_[string_offsets_.size() - 1] + (int64_t)string.length());
+      string_offsets_.push_back(string_offsets_[string_offsets_.size() - 1] +
+                                (int64_t)string.length());
       for (auto c : string) {
         characters_.push_back(c);
       }
     }
 
-    for (int64_t i = 0;  i < instruction_stack_max_depth;  i++) {
+    for (int64_t i = 0; i < instruction_stack_max_depth; i++) {
       instruction_stack_.push_back(-1);
     }
 
@@ -1308,21 +1345,17 @@ namespace awkward {
 
     rj::Reader reader;
     FileLikeObjectStream stream(source, buffersize);
-    HandlerSchema handler(this,
-                          nan_string,
-                          posinf_string,
-                          neginf_string);
+    HandlerSchema handler(this, nan_string, posinf_string, neginf_string);
 
     if (read_one) {
       bool fully_parsed = reader.Parse(stream, handler);
       if (!fully_parsed) {
-        std::string reason(handler.schema_failure() ? "JSON schema mismatch before char " : "JSON syntax error at char ");
-        throw std::invalid_argument(
-          reason
-          + std::to_string(stream.Tell())
-          + std::string("\n")
-          + stream.error_context()
-          + FILENAME(__LINE__));
+        std::string reason(handler.schema_failure()
+                               ? "JSON schema mismatch before char "
+                               : "JSON syntax error at char ");
+        throw std::invalid_argument(reason + std::to_string(stream.Tell()) +
+                                    std::string("\n") + stream.error_context() +
+                                    FILENAME(__LINE__));
       }
       if (is_record) {
         length_ = 1;
@@ -1332,49 +1365,46 @@ namespace awkward {
     else {
       while (stream.Peek() != 0) {
         handler.reset_moved();
-        bool fully_parsed = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
+        bool fully_parsed =
+            reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
         if (handler.moved()) {
           if (!fully_parsed) {
             if (stream.Peek() == 0) {
               throw std::invalid_argument(
-                  std::string("incomplete JSON object at the end of the stream")
-                  + std::string("\n")
-                  + stream.error_context()
-                  + FILENAME(__LINE__));
-            }
-            else {
-              std::string reason(handler.schema_failure() ? "JSON schema mismatch before char " : "JSON syntax error at char ");
+                  std::string(
+                      "incomplete JSON object at the end of the stream") +
+                  std::string("\n") + stream.error_context() +
+                  FILENAME(__LINE__));
+            } else {
+              std::string reason(handler.schema_failure()
+                                     ? "JSON schema mismatch before char "
+                                     : "JSON syntax error at char ");
               throw std::invalid_argument(
-                reason
-                + std::to_string(stream.Tell())
-                + std::string("\n")
-                + stream.error_context()
-                + FILENAME(__LINE__));
+                  reason + std::to_string(stream.Tell()) + std::string("\n") +
+                  stream.error_context() + FILENAME(__LINE__));
             }
           }
           if (is_record) {
             length_++;
           }
-        }
-        else if (stream.Peek() != 0) {
-          std::string reason(handler.schema_failure() ? "JSON schema mismatch before char " : "JSON syntax error at char ");
+        } else if (stream.Peek() != 0) {
+          std::string reason(handler.schema_failure()
+                                 ? "JSON schema mismatch before char "
+                                 : "JSON syntax error at char ");
           throw std::invalid_argument(
-            reason
-            + std::to_string(stream.Tell())
-            + std::string("\n")
-            + stream.error_context()
-            + FILENAME(__LINE__));
+              reason + std::to_string(stream.Tell()) + std::string("\n") +
+              stream.error_context() + FILENAME(__LINE__));
         }
       }
     }
-
   }
 
   std::string
   FromJsonObjectSchema::debug() const noexcept {
     std::stringstream out;
-    out << "at " << current_instruction_ << " | " << instructions_[(size_t)current_instruction_ * 4] << " stack";
-    for (int64_t i = 0;  (size_t)i < instruction_stack_.size();  i++) {
+    out << "at " << current_instruction_ << " | "
+        << instructions_[(size_t)current_instruction_ * 4] << " stack";
+    for (int64_t i = 0; (size_t)i < instruction_stack_.size(); i++) {
       if (i == current_stack_depth_) {
         out << " ;";
       }
@@ -1386,4 +1416,4 @@ namespace awkward {
     return out.str();
   }
 
-}
+}  // namespace awkward

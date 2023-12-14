@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/BoolBuilder.cpp", line)
+#define FILENAME(line) \
+  FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/BoolBuilder.cpp", line)
 
 #include <stdexcept>
 
@@ -12,14 +13,13 @@
 namespace awkward {
   const BuilderPtr
   BoolBuilder::fromempty(const BuilderOptions& options) {
-    return std::make_shared<BoolBuilder>(options,
-                                         std::move(GrowableBuffer<uint8_t>::empty(options)));
+    return std::make_shared<BoolBuilder>(
+        options, std::move(GrowableBuffer<uint8_t>::empty(options)));
   }
 
   BoolBuilder::BoolBuilder(const BuilderOptions& options,
                            GrowableBuffer<uint8_t> buffer)
-      : options_(options)
-      , buffer_(std::move(buffer)) { }
+      : options_(options), buffer_(std::move(buffer)) {}
 
   const std::string
   BoolBuilder::classname() const {
@@ -27,17 +27,18 @@ namespace awkward {
   };
 
   const std::string
-  BoolBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  BoolBuilder::to_buffers(BuffersContainer& container,
+                          int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    buffer_.concatenate(
-      reinterpret_cast<uint8_t*>(
-        container.empty_buffer(form_key.str() + "-data",
+    buffer_.concatenate(reinterpret_cast<uint8_t*>(container.empty_buffer(
+        form_key.str() + "-data",
         (int64_t)buffer_.length() * (int64_t)sizeof(bool))));
 
-    return "{\"class\": \"NumpyArray\", \"primitive\": \"bool\", \"form_key\": \""
-           + form_key.str() + "\"}";
+    return "{\"class\": \"NumpyArray\", \"primitive\": \"bool\", \"form_key\": "
+           "\"" +
+           form_key.str() + "\"}";
   }
 
   int64_t
@@ -120,8 +121,9 @@ namespace awkward {
   const BuilderPtr
   BoolBuilder::endlist() {
     throw std::invalid_argument(
-      std::string("called 'end_list' without 'begin_list' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_list' without 'begin_list' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -134,15 +136,17 @@ namespace awkward {
   const BuilderPtr
   BoolBuilder::index(int64_t /* index */) {
     throw std::invalid_argument(
-      std::string("called 'index' without 'begintuple' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string(
+            "called 'index' without 'begintuple' at the same level before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
   BoolBuilder::endtuple() {
     throw std::invalid_argument(
-      std::string("called 'endtuple' without 'begintuple' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'endtuple' without 'begintuple' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -155,15 +159,17 @@ namespace awkward {
   void
   BoolBuilder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
-      std::string("called 'field' without 'beginrecord' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'field' without 'beginrecord' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
   BoolBuilder::endrecord() {
     throw std::invalid_argument(
-      std::string("called 'endrecord' without 'beginrecord' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'endrecord' without 'beginrecord' at the same "
+                    "level before it") +
+        FILENAME(__LINE__));
   }
 
-}
+}  // namespace awkward

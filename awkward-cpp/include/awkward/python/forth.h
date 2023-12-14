@@ -14,4 +14,4 @@ template <typename T, typename I>
 py::class_<ak::ForthMachineOf<T, I>, std::shared_ptr<ak::ForthMachineOf<T, I>>>
 make_ForthMachineOf(const py::handle& m, const std::string& name);
 
-#endif // AWKWARDPY_FORTH_H_
+#endif  // AWKWARDPY_FORTH_H_

@@ -1,6 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_NumpyArray_sort_asstrings_uint8.cpp", line)
+#define FILENAME(line)       \
+  FILENAME_FOR_EXCEPTIONS_C( \
+      "src/cpu-kernels/awkward_NumpyArray_sort_asstrings_uint8.cpp", line)
 
 #include <algorithm>
 #include <cstring>
@@ -11,25 +13,24 @@
 
 // This function relies on std::sort to do the right
 // thing with std::strings
-ERROR awkward_NumpyArray_sort_asstrings_uint8(
-    uint8_t* toptr,
-    const uint8_t* fromptr,
-    const int64_t* offsets,
-    int64_t offsetslength,
-    int64_t* outoffsets,
-    bool ascending,
-    bool stable) {
-
+ERROR
+awkward_NumpyArray_sort_asstrings_uint8(uint8_t* toptr,
+                                        const uint8_t* fromptr,
+                                        const int64_t* offsets,
+                                        int64_t offsetslength,
+                                        int64_t* outoffsets,
+                                        bool ascending,
+                                        bool stable) {
   // convert array of characters to
   // an std container of strings
   std::vector<std::string> words;
 
-  for (int64_t k = 0;  k < offsetslength - 1;  k++) {
+  for (int64_t k = 0; k < offsetslength - 1; k++) {
     int64_t start = offsets[k];
     int64_t stop = offsets[k + 1];
     int64_t slen = start;
     std::string strvar;
-    for (uint8_t i = (uint8_t)start;  slen < stop;  i++) {
+    for (uint8_t i = (uint8_t)start; slen < stop; i++) {
       slen++;
       strvar += (char)fromptr[i];
     }
@@ -37,16 +38,13 @@ ERROR awkward_NumpyArray_sort_asstrings_uint8(
   }
 
   // sort the container
-  if (ascending  &&  !stable) {
+  if (ascending && !stable) {
     std::sort(words.begin(), words.end(), std::less<std::string>());
-  }
-  else if (!ascending  &&  !stable) {
+  } else if (!ascending && !stable) {
     std::sort(words.begin(), words.end(), std::greater<std::string>());
-  }
-  else if (ascending  &&  stable) {
+  } else if (ascending && stable) {
     std::stable_sort(words.begin(), words.end(), std::less<std::string>());
-  }
-  else if (!ascending  &&  stable) {
+  } else if (!ascending && stable) {
     std::stable_sort(words.begin(), words.end(), std::greater<std::string>());
   }
 

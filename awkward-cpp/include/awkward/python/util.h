@@ -22,21 +22,21 @@
 /// See also
 ///   - array_deleter, which frees array buffers, rather
 ///     than objects.
-template<typename T>
+template <typename T>
 class pyobject_deleter {
 public:
   /// @brief Creates a pyobject_deleter and calls `Py_INCREF(ptr)`.
-  pyobject_deleter(PyObject *pyobj): pyobj_(pyobj) {
-    Py_INCREF(pyobj_);
-  }
+  pyobject_deleter(PyObject* pyobj) : pyobj_(pyobj) { Py_INCREF(pyobj_); }
   /// @brief Called by `std::shared_ptr` when its reference count reaches
   /// zero.
-  void operator()(T const * /* p */) {
+  void
+  operator()(T const* /* p */) {
     Py_DECREF(pyobj_);
   }
+
 private:
   /// @brief The Python object that we hold a reference to.
   PyObject* pyobj_;
 };
 
-#endif // AWKWARDPY_UTIL_H_
+#endif  // AWKWARDPY_UTIL_H_

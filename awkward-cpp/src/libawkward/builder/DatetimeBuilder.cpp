@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/DatetimeBuilder.cpp", line)
+#define FILENAME(line) \
+  FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/DatetimeBuilder.cpp", line)
 
 #include <stdexcept>
 
@@ -14,19 +15,17 @@
 
 namespace awkward {
   const BuilderPtr
-  DatetimeBuilder::fromempty(const BuilderOptions& options, const std::string& units) {
+  DatetimeBuilder::fromempty(const BuilderOptions& options,
+                             const std::string& units) {
     GrowableBuffer<int64_t> content = GrowableBuffer<int64_t>::empty(options);
-    return std::make_shared<DatetimeBuilder>(options,
-                                             std::move(content),
-                                             units);
+    return std::make_shared<DatetimeBuilder>(
+        options, std::move(content), units);
   }
 
   DatetimeBuilder::DatetimeBuilder(const BuilderOptions& options,
                                    GrowableBuffer<int64_t> content,
                                    const std::string& units)
-      : options_(options)
-      , content_(std::move(content))
-      , units_(units) { }
+      : options_(options), content_(std::move(content)), units_(units) {}
 
   const std::string
   DatetimeBuilder::classname() const {
@@ -34,33 +33,28 @@ namespace awkward {
   };
 
   const std::string
-  DatetimeBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  DatetimeBuilder::to_buffers(BuffersContainer& container,
+                              int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    content_.concatenate(
-      reinterpret_cast<int64_t*>(
-        container.empty_buffer(form_key.str() + "-data",
+    content_.concatenate(reinterpret_cast<int64_t*>(container.empty_buffer(
+        form_key.str() + "-data",
         (int64_t)content_.length() * (int64_t)sizeof(int64_t))));
 
     std::string primitive(units_);
 
     if (primitive.find("datetime64") == 0) {
-      return "{\"class\": \"NumpyArray\", \"primitive\": \""
-             + primitive + "\", \"format\": \""
-             + "M8" + primitive.substr(10) + "\", \"form_key\": \""
-             + form_key.str() + "\"}";
-    }
-    else if (primitive.find("timedelta64") == 0) {
-      return "{\"class\": \"NumpyArray\", \"primitive\": \""
-             + primitive + "\", \"format\": \""
-             + "m8" + primitive.substr(11) + "\", \"form_key\": \""
-             + form_key.str() + "\"}";
-    }
-    else {
-      return "{\"class\": \"NumpyArray\", \"primitive\": \""
-             + primitive + "\", \"form_key\": \""
-             + form_key.str() + "\"}";
+      return "{\"class\": \"NumpyArray\", \"primitive\": \"" + primitive +
+             "\", \"format\": \"" + "M8" + primitive.substr(10) +
+             "\", \"form_key\": \"" + form_key.str() + "\"}";
+    } else if (primitive.find("timedelta64") == 0) {
+      return "{\"class\": \"NumpyArray\", \"primitive\": \"" + primitive +
+             "\", \"format\": \"" + "m8" + primitive.substr(11) +
+             "\", \"form_key\": \"" + form_key.str() + "\"}";
+    } else {
+      return "{\"class\": \"NumpyArray\", \"primitive\": \"" + primitive +
+             "\", \"form_key\": \"" + form_key.str() + "\"}";
     }
   }
 
@@ -119,8 +113,7 @@ namespace awkward {
     if (unit == units_) {
       content_.append(x);
       return nullptr;
-    }
-    else {
+    } else {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->datetime(x, unit);
       return out;
@@ -132,8 +125,7 @@ namespace awkward {
     if (unit == units_) {
       content_.append(x);
       return nullptr;
-    }
-    else {
+    } else {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->timedelta(x, unit);
       return out;
@@ -157,8 +149,9 @@ namespace awkward {
   const BuilderPtr
   DatetimeBuilder::endlist() {
     throw std::invalid_argument(
-      std::string("called 'end_list' without 'begin_list' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_list' without 'begin_list' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -171,15 +164,17 @@ namespace awkward {
   const BuilderPtr
   DatetimeBuilder::index(int64_t /* index */) {
     throw std::invalid_argument(
-      std::string("called 'index' without 'begin_tuple' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'index' without 'begin_tuple' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
   DatetimeBuilder::endtuple() {
     throw std::invalid_argument(
-      std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_tuple' without 'begin_tuple' at the same "
+                    "level before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -192,15 +187,17 @@ namespace awkward {
   void
   DatetimeBuilder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
-      std::string("called 'field' without 'begin_record' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'field' without 'begin_record' at the same level "
+                    "before it") +
+        FILENAME(__LINE__));
   }
 
   const BuilderPtr
   DatetimeBuilder::endrecord() {
     throw std::invalid_argument(
-      std::string("called 'end_record' without 'begin_record' at the same level before it")
-      + FILENAME(__LINE__));
+        std::string("called 'end_record' without 'begin_record' at the same "
+                    "level before it") +
+        FILENAME(__LINE__));
   }
 
   const std::string&
@@ -208,4 +205,4 @@ namespace awkward {
     return units_;
   }
 
-}
+}  // namespace awkward

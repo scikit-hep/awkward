@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/ArrayBuilder.cpp", line)
+#define FILENAME(line) \
+  FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/ArrayBuilder.cpp", line)
 
 #include <sstream>
 #include <stdexcept>
@@ -13,10 +14,11 @@
 
 namespace awkward {
   ArrayBuilder::ArrayBuilder(const BuilderOptions& options)
-      : builder_(UnknownBuilder::fromempty(options)) { }
+      : builder_(UnknownBuilder::fromempty(options)) {}
 
   const std::string
-  ArrayBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  ArrayBuilder::to_buffers(BuffersContainer& container,
+                           int64_t& form_key_id) const {
     return builder_.get()->to_buffers(container, form_key_id);
   }
 
@@ -107,8 +109,8 @@ namespace awkward {
     BuilderPtr tmp = builder_.get()->endlist();
     if (tmp.get() == nullptr) {
       throw std::invalid_argument(
-        std::string("endlist doesn't match a corresponding beginlist")
-        + FILENAME(__LINE__));
+          std::string("endlist doesn't match a corresponding beginlist") +
+          FILENAME(__LINE__));
     }
     maybeupdate(tmp);
   }
@@ -170,324 +172,308 @@ namespace awkward {
 
   void
   ArrayBuilder::maybeupdate(const BuilderPtr tmp) {
-    if (tmp  &&  tmp.get() != builder_.get()) {
+    if (tmp && tmp.get() != builder_.get()) {
       builder_ = std::move(tmp);
     }
   }
 
   const char* ArrayBuilder::no_encoding = nullptr;
   const char* ArrayBuilder::utf8_encoding = "utf-8";
-}
+}  // namespace awkward
 
 ////////// extern C interface
 
-uint8_t awkward_ArrayBuilder_length(void* arraybuilder,
-                                    int64_t* result) {
+uint8_t
+awkward_ArrayBuilder_length(void* arraybuilder, int64_t* result) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     *result = obj->length();
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_clear(void* arraybuilder) {
+uint8_t
+awkward_ArrayBuilder_clear(void* arraybuilder) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->clear();
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_null(void* arraybuilder) {
+uint8_t
+awkward_ArrayBuilder_null(void* arraybuilder) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->null();
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_boolean(void* arraybuilder,
-                                     bool x) {
+uint8_t
+awkward_ArrayBuilder_boolean(void* arraybuilder, bool x) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->boolean(x);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_integer(void* arraybuilder,
-                                     int64_t x) {
+uint8_t
+awkward_ArrayBuilder_integer(void* arraybuilder, int64_t x) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->integer(x);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_real(void* arraybuilder,
-                                  double x) {
+uint8_t
+awkward_ArrayBuilder_real(void* arraybuilder, double x) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->real(x);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_complex(void* arraybuilder,
-                                     double real,
-                                     double imag) {
+uint8_t
+awkward_ArrayBuilder_complex(void* arraybuilder, double real, double imag) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->complex(std::complex<double>(real, imag));
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_datetime(void* arraybuilder,
-                                      int64_t x,
-                                      const char* unit) {
+uint8_t
+awkward_ArrayBuilder_datetime(void* arraybuilder, int64_t x, const char* unit) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   std::string unit_str(unit);
   try {
     obj->datetime(x, unit_str);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_timedelta(void* arraybuilder,
-                                       int64_t x,
-                                       const char* unit) {
+uint8_t
+awkward_ArrayBuilder_timedelta(void* arraybuilder,
+                               int64_t x,
+                               const char* unit) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   std::string unit_str(unit);
   try {
     obj->timedelta(x, unit_str);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_bytestring(void* arraybuilder,
-                                        const char* x) {
+uint8_t
+awkward_ArrayBuilder_bytestring(void* arraybuilder, const char* x) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->bytestring(x);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_bytestring_length(void* arraybuilder,
-                                               const char* x,
-                                               int64_t length) {
+uint8_t
+awkward_ArrayBuilder_bytestring_length(void* arraybuilder,
+                                       const char* x,
+                                       int64_t length) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->bytestring(x, length);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_string(void* arraybuilder,
-                                    const char* x) {
+uint8_t
+awkward_ArrayBuilder_string(void* arraybuilder, const char* x) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->string(x);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_string_length(void* arraybuilder,
-                                           const char* x,
-                                           int64_t length) {
+uint8_t
+awkward_ArrayBuilder_string_length(void* arraybuilder,
+                                   const char* x,
+                                   int64_t length) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->string(x, length);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_beginlist(void* arraybuilder) {
+uint8_t
+awkward_ArrayBuilder_beginlist(void* arraybuilder) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->beginlist();
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_endlist(void* arraybuilder) {
+uint8_t
+awkward_ArrayBuilder_endlist(void* arraybuilder) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->endlist();
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_begintuple(void* arraybuilder,
-                                        int64_t numfields) {
+uint8_t
+awkward_ArrayBuilder_begintuple(void* arraybuilder, int64_t numfields) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->begintuple(numfields);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_index(void* arraybuilder,
-                                   int64_t index) {
+uint8_t
+awkward_ArrayBuilder_index(void* arraybuilder, int64_t index) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->index(index);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_endtuple(void* arraybuilder) {
+uint8_t
+awkward_ArrayBuilder_endtuple(void* arraybuilder) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->endtuple();
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_beginrecord(void* arraybuilder) {
+uint8_t
+awkward_ArrayBuilder_beginrecord(void* arraybuilder) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->beginrecord();
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_beginrecord_fast(void* arraybuilder,
-                                              const char* name) {
+uint8_t
+awkward_ArrayBuilder_beginrecord_fast(void* arraybuilder, const char* name) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->beginrecord_fast(name);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_beginrecord_check(void* arraybuilder,
-                                               const char* name) {
+uint8_t
+awkward_ArrayBuilder_beginrecord_check(void* arraybuilder, const char* name) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->beginrecord_check(name);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_field_fast(void* arraybuilder,
-                                        const char* key) {
+uint8_t
+awkward_ArrayBuilder_field_fast(void* arraybuilder, const char* key) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->field_fast(key);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_field_check(void* arraybuilder,
-                                         const char* key) {
+uint8_t
+awkward_ArrayBuilder_field_check(void* arraybuilder, const char* key) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->field_check(key);
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
 }
 
-uint8_t awkward_ArrayBuilder_endrecord(void* arraybuilder) {
+uint8_t
+awkward_ArrayBuilder_endrecord(void* arraybuilder) {
   awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+      reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->endrecord();
-  }
-  catch (...) {
+  } catch (...) {
     return 1;
   }
   return 0;
