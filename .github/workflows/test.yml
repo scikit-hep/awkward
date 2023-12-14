@@ -160,7 +160,7 @@ jobs:
           cache-environment: true
           environment-name: awkward
           create-args: >-
-            python=3.8
+            python=3.9
             numpy
             root
 
@@ -185,7 +185,7 @@ jobs:
           python -m pip install --only-binary "numpy,pandas,pyarrow,numexpr"
           -v . ./awkward-cpp/dist/*.whl
           pytest-github-actions-annotate-failures
-          -r requirements-test.txt
+          -r requirements-test-full.txt
 
       - name: Print versions
         run: python -m pip list
