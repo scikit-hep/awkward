@@ -93,11 +93,16 @@ jobs:
           python -m pip install build
           python -m build -w awkward-cpp
 
+      - name: Find built wheel
+        uses: tj-actions/glob@v17
+        id: find-wheel
+        with:
+          files: |
+            awkward-cpp/dist/*.whl
+
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
-          python -m pip install
-          -v . ./awkward-cpp/dist/*.whl
-          pytest-github-actions-annotate-failures
+          python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
           -r "requirements-test-${{ matrix.dependencies-kind }}.txt"
 
       - name: Print versions
