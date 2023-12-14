@@ -1,5 +1,4 @@
 ---
-Language:        Cpp
 BasedOnStyle:  Google
 ColumnLimit:     80
 NamespaceIndentation: All
