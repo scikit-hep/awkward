@@ -79,6 +79,8 @@ using UnionBuilder8_U32 = awkward::LayoutBuilder::Union<int8_t, uint32_t, BUILDE
 template<class... BUILDERS>
 using UnionBuilder8_64 = awkward::LayoutBuilder::Union<int8_t, int64_t, BUILDERS...>;
 
+template<class PRIMITIVE>
+using StringBuilder = awkward::LayoutBuilder::String<PRIMITIVE>;
 
 void
 test_Numpy_bool() {
@@ -1890,4 +1892,33 @@ int main(int /* argc */, char ** /* argv */) {
   test_categorical_form();
 
   return 0;
+}
+
+void
+test_String() {
+    StringBuilder<int64_t> builder;
+    assert(builder.length() == 0);
+
+    builder.append_string("one");
+    builder.append_string("two");
+    builder.append_string("three");
+
+    assert (builder.length() == 3);
+}
+
+void
+test_ListOffset_String() {
+    ListOffsetBuilder<int64_t, StringBuilder<int64_t>> builder;
+    assert(builder.length() == 0);
+
+    builder.begin_list();
+    builder.content().append_string("one");
+    builder.content().append_string("two");
+    builder.content().append_string("three");
+    builder.end_list();
+
+    builder.begin_list();
+    builder.content().append_string("four");
+    builder.content().append_string("five");
+    builder.end_list();
 }
