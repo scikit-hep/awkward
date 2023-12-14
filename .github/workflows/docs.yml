@@ -214,13 +214,13 @@ jobs:
         destination: "/tmp/wheels/"
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: awkward
         path: /tmp/wheels/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: awkward-cpp-x86-64
         path: /tmp/wheels/
@@ -275,7 +275,7 @@ jobs:
            doxygen
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: awkward
         path: dist
@@ -286,13 +286,13 @@ jobs:
         cp dist/awkward*.whl docs/lite/pypi/
 
     - name: Download & copy awkward-cpp WASM wheel to JupyterLite
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: awkward-cpp-wasm
         path: docs/lite/pypi
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: awkward-cpp-x86-64
         path: dist
@@ -322,7 +322,7 @@ jobs:
         echo "DOCS_VERSION=main" >> $GITHUB_ENV
 
     - name: Download cppyy notebook
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide
@@ -372,7 +372,7 @@ jobs:
         aws-region: eu-west-2
         role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
     - name: Download rendered docs
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: docs
         path: built-docs
@@ -404,7 +404,7 @@ jobs:
           aws-region: eu-west-2
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
       - name: Download rendered docs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: docs
           path: built-docs
