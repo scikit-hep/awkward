@@ -4,8 +4,8 @@
 #include "awkward/LayoutBuilder.h"
 
 template <class NODE, class PRIMITIVE, class LENGTH>
-void dump(std::ostringstream &out, NODE &&node, PRIMITIVE &&ptr,
-          LENGTH &&length) {
+void
+dump(std::ostringstream &out, NODE &&node, PRIMITIVE &&ptr, LENGTH &&length) {
   out << node << ": ";
   for (size_t i = 0; i < length; i++) {
     out << +ptr[i] << " ";
@@ -14,8 +14,12 @@ void dump(std::ostringstream &out, NODE &&node, PRIMITIVE &&ptr,
 }
 
 template <class NODE, class PRIMITIVE, class LENGTH, class... Args>
-void dump(std::ostringstream &out, NODE &&node, PRIMITIVE &&ptr,
-          LENGTH &&length, Args &&...args) {
+void
+dump(std::ostringstream &out,
+     NODE &&node,
+     PRIMITIVE &&ptr,
+     LENGTH &&length,
+     Args &&...args) {
   dump(out, node, ptr, length);
   dump(out, args...);
 }
@@ -30,7 +34,8 @@ empty_buffers(std::map<std::string, size_t> &names_nbytes) {
   return buffers;
 }
 
-void clear_buffers(std::map<std::string, void *> &buffers) {
+void
+clear_buffers(std::map<std::string, void *> &buffers) {
   for (const auto &it : buffers) {
     delete[] (uint8_t *)it.second;
   }
@@ -87,8 +92,8 @@ template <class... BUILDERS>
 using UnionBuilder8_64 =
     awkward::LayoutBuilder::Union<int8_t, int64_t, BUILDERS...>;
 
-void test_Numpy_bool() {
-
+void
+test_Numpy_bool() {
   NumpyBuilder<bool> builder;
   assert(builder.length() == 0);
 
@@ -111,17 +116,20 @@ void test_Numpy_bool() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-data", (bool *)buffers["node0-data"],
+  dump(out,
+       "node0-data",
+       (bool *)buffers["node0-data"],
        names_nbytes["node0-data"] / sizeof(bool));
 
   std::string check{"node0-data: 1 0 1 1 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"bool\", "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"bool\", "
+         "\"form_key\": \"node0\" "
+         "}");
 
   assert(names_nbytes["node0-data"] == sizeof(bool[4]));
   assert(builder.length() == 4);
@@ -131,7 +139,8 @@ void test_Numpy_bool() {
   assert(builder.length() == 0);
 }
 
-void test_Numpy_int() {
+void
+test_Numpy_int() {
   NumpyBuilder<int64_t> builder;
   assert(builder.length() == 0);
 
@@ -154,17 +163,20 @@ void test_Numpy_int() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-data", (int64_t *)buffers["node0-data"],
+  dump(out,
+       "node0-data",
+       (int64_t *)buffers["node0-data"],
        names_nbytes["node0-data"] / sizeof(int64_t));
 
   std::string check{"node0-data: -5 -4 -3 -2 -1 0 1 2 3 4 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int64\", "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int64\", "
+         "\"form_key\": \"node0\" "
+         "}");
 
   assert(names_nbytes["node0-data"] == sizeof(data));
   assert(builder.length() == data_length);
@@ -174,7 +186,8 @@ void test_Numpy_int() {
   assert(builder.length() == 0);
 }
 
-void test_Numpy_char() {
+void
+test_Numpy_char() {
   NumpyBuilder<char> builder;
   assert(builder.length() == 0);
 
@@ -197,24 +210,28 @@ void test_Numpy_char() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-data", (char *)buffers["node0-data"],
+  dump(out,
+       "node0-data",
+       (char *)buffers["node0-data"],
        names_nbytes["node0-data"] / sizeof(char));
 
   std::string check{"node0-data: 97 98 99 100 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"char\", "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"char\", "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Numpy_double() {
+void
+test_Numpy_double() {
   NumpyBuilder<double> builder;
   assert(builder.length() == 0);
 
@@ -242,24 +259,28 @@ void test_Numpy_double() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-data", (double *)buffers["node0-data"],
+  dump(out,
+       "node0-data",
+       (double *)buffers["node0-data"],
        names_nbytes["node0-data"] / sizeof(double));
 
   std::string check{"node0-data: 1.1 2.2 3.3 4.4 5.5 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Numpy_complex() {
+void
+test_Numpy_complex() {
   NumpyBuilder<std::complex<double>> builder;
   assert(builder.length() == 0);
 
@@ -282,25 +303,29 @@ void test_Numpy_complex() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-data", (std::complex<double> *)buffers["node0-data"],
+  dump(out,
+       "node0-data",
+       (std::complex<double> *)buffers["node0-data"],
        names_nbytes["node0-data"] / sizeof(std::complex<double>));
 
   std::string check{
       "node0-data: (1.1,0.1) (2.2,0.2) (3.3,0.3) (4.4,0.4) (5.5,0.5) \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"complex128\", "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"complex128\", "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_ListOffset() {
+void
+test_ListOffset() {
   ListOffsetBuilder<int64_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
@@ -331,35 +356,41 @@ void test_ListOffset() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-offsets", (int64_t *)buffers["node0-offsets"],
-       names_nbytes["node0-offsets"] / sizeof(int64_t), "node1-data",
+  dump(out,
+       "node0-offsets",
+       (int64_t *)buffers["node0-offsets"],
+       names_nbytes["node0-offsets"] / sizeof(int64_t),
+       "node1-data",
        (double *)buffers["node1-data"],
        names_nbytes["node1-data"] / sizeof(double));
 
-  std::string check{"node0-offsets: 0 3 3 5 \n"
-                    "node1-data: 1.1 2.2 3.3 4.4 5.5 \n"};
+  std::string check{
+      "node0-offsets: 0 3 3 5 \n"
+      "node1-data: 1.1 2.2 3.3 4.4 5.5 \n"};
   assert(out.str().compare(check) == 0);
 
   assert(names_nbytes["node0-offsets"] == sizeof(int64_t[4]));
   assert(names_nbytes["node1-data"] == sizeof(double[5]));
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_ListOffset_ListOffset() {
+void
+test_ListOffset_ListOffset() {
   ListOffsetBuilder<int64_t, ListOffsetBuilder<int32_t, NumpyBuilder<double>>>
       builder;
   assert(builder.length() == 0);
@@ -414,40 +445,47 @@ void test_ListOffset_ListOffset() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-offsets", (int64_t *)buffers["node0-offsets"],
-       names_nbytes["node0-offsets"] / sizeof(int64_t), "node1-offsets",
+  dump(out,
+       "node0-offsets",
+       (int64_t *)buffers["node0-offsets"],
+       names_nbytes["node0-offsets"] / sizeof(int64_t),
+       "node1-offsets",
        (int32_t *)buffers["node1-offsets"],
-       names_nbytes["node1-offsets"] / sizeof(int32_t), "node2-data",
+       names_nbytes["node1-offsets"] / sizeof(int32_t),
+       "node2-data",
        (double *)buffers["node2-data"],
        names_nbytes["node2-data"] / sizeof(double));
 
-  std::string check{"node0-offsets: 0 2 3 3 5 \n"
-                    "node1-offsets: 0 3 3 5 6 9 \n"
-                    "node2-data: 1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9 \n"};
+  std::string check{
+      "node0-offsets: 0 2 3 3 5 \n"
+      "node1-offsets: 0 3 3 5 6 9 \n"
+      "node2-data: 1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i32\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node2\" "
-                           "}, "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i32\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node2\" "
+         "}, "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Empty() {
+void
+test_Empty() {
   EmptyBuilder builder;
   assert(builder.length() == 0);
 
@@ -461,16 +499,18 @@ void test_Empty() {
   auto buffers = empty_buffers(names_nbytes);
   builder.to_buffers(buffers);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"EmptyArray\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"EmptyArray\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_ListOffset_Empty() {
+void
+test_ListOffset_Empty() {
   ListOffsetBuilder<int64_t, ListOffsetBuilder<int64_t, EmptyBuilder>> builder;
   assert(builder.length() == 0);
 
@@ -514,35 +554,41 @@ void test_ListOffset_Empty() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-offsets", (int64_t *)buffers["node0-offsets"],
-       names_nbytes["node0-offsets"] / sizeof(int64_t), "node1-offsets",
+  dump(out,
+       "node0-offsets",
+       (int64_t *)buffers["node0-offsets"],
+       names_nbytes["node0-offsets"] / sizeof(int64_t),
+       "node1-offsets",
        (int64_t *)buffers["node1-offsets"],
        names_nbytes["node1-offsets"] / sizeof(int64_t));
 
-  std::string check{"node0-offsets: 0 0 3 5 5 6 \n"
-                    "node1-offsets: 0 0 0 0 0 0 0 \n"};
+  std::string check{
+      "node0-offsets: 0 0 3 5 5 6 \n"
+      "node1-offsets: 0 0 0 0 0 0 0 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"EmptyArray\" "
-                           "}, "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"EmptyArray\" "
+         "}, "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Record() {
+void
+test_Record() {
   enum Field : std::size_t { one, two, three };
 
   UserDefinedMap fields_map(
@@ -576,8 +622,9 @@ void test_Record() {
 
   std::string error;
   assert(builder.is_valid(error) == false);
-  assert(error == "Record node0 has field \"three\" length 1 that differs from "
-                  "the first length 2\n");
+  assert(error ==
+         "Record node0 has field \"three\" length 1 that differs from "
+         "the first length 2\n");
 
   three_builder.append('b');
 
@@ -596,55 +643,63 @@ void test_Record() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node1-data", (double *)buffers["node1-data"],
-       names_nbytes["node1-data"] / sizeof(double), "node2-data",
+  dump(out,
+       "node1-data",
+       (double *)buffers["node1-data"],
+       names_nbytes["node1-data"] / sizeof(double),
+       "node2-data",
        (int64_t *)buffers["node2-data"],
-       names_nbytes["node2-data"] / sizeof(int64_t), "node3-data",
+       names_nbytes["node2-data"] / sizeof(int64_t),
+       "node3-data",
        (char *)buffers["node3-data"],
        names_nbytes["node3-data"] / sizeof(char));
 
-  std::string check{"node1-data: 1.1 3.3 \n"
-                    "node2-data: 2 4 \n"
-                    "node3-data: 97 98 \n"};
+  std::string check{
+      "node1-data: 1.1 3.3 \n"
+      "node2-data: 2 4 \n"
+      "node3-data: 97 98 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"RecordArray\", "
-                           "\"contents\": { "
-                           "\"one\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"two\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int64\", "
-                           "\"form_key\": \"node2\" "
-                           "}, "
-                           "\"three\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"char\", "
-                           "\"form_key\": \"node3\" "
-                           "} "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"RecordArray\", "
+         "\"contents\": { "
+         "\"one\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"two\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int64\", "
+         "\"form_key\": \"node2\" "
+         "}, "
+         "\"three\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"char\", "
+         "\"form_key\": \"node3\" "
+         "} "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_ListOffset_Record() {
+void
+test_ListOffset_Record() {
   enum Field : std::size_t { x, y };
 
   UserDefinedMap fields_map({{Field::x, "x"}, {Field::y, "y"}});
 
   ListOffsetBuilder<
       int64_t,
-      RecordBuilder<RecordField<Field::x, NumpyBuilder<double>>,
-                    RecordField<Field::y, ListOffsetBuilder<
-                                              int64_t, NumpyBuilder<int32_t>>>>>
+      RecordBuilder<
+          RecordField<Field::x, NumpyBuilder<double>>,
+          RecordField<Field::y,
+                      ListOffsetBuilder<int64_t, NumpyBuilder<int32_t>>>>>
       builder;
   assert(builder.length() == 0);
 
@@ -698,54 +753,62 @@ void test_ListOffset_Record() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-offsets", (int64_t *)buffers["node0-offsets"],
-       names_nbytes["node0-offsets"] / sizeof(int64_t), "node2-data",
+  dump(out,
+       "node0-offsets",
+       (int64_t *)buffers["node0-offsets"],
+       names_nbytes["node0-offsets"] / sizeof(int64_t),
+       "node2-data",
        (double *)buffers["node2-data"],
-       names_nbytes["node2-data"] / sizeof(double), "node3-offsets",
+       names_nbytes["node2-data"] / sizeof(double),
+       "node3-offsets",
        (int64_t *)buffers["node3-offsets"],
-       names_nbytes["node3-offsets"] / sizeof(int64_t), "node4-data",
+       names_nbytes["node3-offsets"] / sizeof(int64_t),
+       "node4-data",
        (int32_t *)buffers["node4-data"],
        names_nbytes["node4-data"] / sizeof(int32_t));
 
-  std::string check{"node0-offsets: 0 2 2 3 \n"
-                    "node2-data: 1.1 2.2 3.3 \n"
-                    "node3-offsets: 0 1 3 6 \n"
-                    "node4-data: 1 1 2 1 2 3 \n"};
+  std::string check{
+      "node0-offsets: 0 2 2 3 \n"
+      "node2-data: 1.1 2.2 3.3 \n"
+      "node3-offsets: 0 1 3 6 \n"
+      "node4-data: 1 1 2 1 2 3 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"RecordArray\", "
-                           "\"contents\": { "
-                           "\"x\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node2\" "
-                           "}, "
-                           "\"y\": { "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int32\", "
-                           "\"form_key\": \"node4\" "
-                           "}, "
-                           "\"form_key\": \"node3\" "
-                           "} "
-                           "}, "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"RecordArray\", "
+         "\"contents\": { "
+         "\"x\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node2\" "
+         "}, "
+         "\"y\": { "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int32\", "
+         "\"form_key\": \"node4\" "
+         "}, "
+         "\"form_key\": \"node3\" "
+         "} "
+         "}, "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Record_Record() {
+void
+test_Record_Record() {
   enum Field0 : std::size_t { x, y };
 
   UserDefinedMap fields_map0({{Field0::x, "x"}, {Field0::y, "y"}});
@@ -815,66 +878,74 @@ void test_Record_Record() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node2-data", (double *)buffers["node2-data"],
-       names_nbytes["node2-data"] / sizeof(double), "node3-offsets",
+  dump(out,
+       "node2-data",
+       (double *)buffers["node2-data"],
+       names_nbytes["node2-data"] / sizeof(double),
+       "node3-offsets",
        (int64_t *)buffers["node3-offsets"],
-       names_nbytes["node3-offsets"] / sizeof(int64_t), "node4-data",
+       names_nbytes["node3-offsets"] / sizeof(int64_t),
+       "node4-data",
        (int64_t *)buffers["node4-data"],
-       names_nbytes["node4-data"] / sizeof(int64_t), "node6-data",
+       names_nbytes["node4-data"] / sizeof(int64_t),
+       "node6-data",
        (char *)buffers["node6-data"],
        names_nbytes["node6-data"] / sizeof(char));
 
-  std::string check{"node2-data: 1.1 3.3 \n"
-                    "node3-offsets: 0 3 5 \n"
-                    "node4-data: 1 2 3 4 5 \n"
-                    "node6-data: 97 98 \n"};
+  std::string check{
+      "node2-data: 1.1 3.3 \n"
+      "node3-offsets: 0 3 5 \n"
+      "node4-data: 1 2 3 4 5 \n"
+      "node6-data: 97 98 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"RecordArray\", "
-                           "\"contents\": { "
-                           "\"x\": { "
-                           "\"class\": \"RecordArray\", "
-                           "\"contents\": { "
-                           "\"u\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node2\" "
-                           "}, "
-                           "\"v\": { "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int64\", "
-                           "\"form_key\": \"node4\" "
-                           "}, "
-                           "\"form_key\": \"node3\" "
-                           "} "
-                           "}, "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"y\": { "
-                           "\"class\": \"RecordArray\", "
-                           "\"contents\": { "
-                           "\"w\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"char\", "
-                           "\"form_key\": \"node6\" "
-                           "} "
-                           "}, "
-                           "\"form_key\": \"node5\" "
-                           "} "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"RecordArray\", "
+         "\"contents\": { "
+         "\"x\": { "
+         "\"class\": \"RecordArray\", "
+         "\"contents\": { "
+         "\"u\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node2\" "
+         "}, "
+         "\"v\": { "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int64\", "
+         "\"form_key\": \"node4\" "
+         "}, "
+         "\"form_key\": \"node3\" "
+         "} "
+         "}, "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"y\": { "
+         "\"class\": \"RecordArray\", "
+         "\"contents\": { "
+         "\"w\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"char\", "
+         "\"form_key\": \"node6\" "
+         "} "
+         "}, "
+         "\"form_key\": \"node5\" "
+         "} "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Record_nested() {
+void
+test_Record_nested() {
   enum Field0 : std::size_t { u, v, w };
 
   UserDefinedMap fields_map0(
@@ -889,10 +960,10 @@ void test_Record_nested() {
           Field0::u,
           ListOffsetBuilder<
               int64_t,
-              RecordBuilder<RecordField<Field1::i, NumpyBuilder<double>>,
-                            RecordField<Field1::j,
-                                        ListOffsetBuilder<
-                                            int64_t, NumpyBuilder<int64_t>>>>>>,
+              RecordBuilder<
+                  RecordField<Field1::i, NumpyBuilder<double>>,
+                  RecordField<Field1::j,
+                              ListOffsetBuilder<int64_t, NumpyBuilder<int64_t>>>>>>,
       RecordField<Field0::v, NumpyBuilder<int64_t>>,
       RecordField<Field0::w, NumpyBuilder<double>>>
       builder;
@@ -950,76 +1021,86 @@ void test_Record_nested() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node1-offsets", (int64_t *)buffers["node1-offsets"],
-       names_nbytes["node1-offsets"] / sizeof(int64_t), "node3-data",
+  dump(out,
+       "node1-offsets",
+       (int64_t *)buffers["node1-offsets"],
+       names_nbytes["node1-offsets"] / sizeof(int64_t),
+       "node3-data",
        (double *)buffers["node3-data"],
-       names_nbytes["node3-data"] / sizeof(double), "node4-offsets",
+       names_nbytes["node3-data"] / sizeof(double),
+       "node4-offsets",
        (int64_t *)buffers["node4-offsets"],
-       names_nbytes["node4-offsets"] / sizeof(int64_t), "node5-data",
+       names_nbytes["node4-offsets"] / sizeof(int64_t),
+       "node5-data",
        (int64_t *)buffers["node5-data"],
-       names_nbytes["node5-data"] / sizeof(int64_t), "node6-data",
+       names_nbytes["node5-data"] / sizeof(int64_t),
+       "node6-data",
        (int64_t *)buffers["node6-data"],
-       names_nbytes["node6-data"] / sizeof(int64_t), "node7-data",
+       names_nbytes["node6-data"] / sizeof(int64_t),
+       "node7-data",
        (double *)buffers["node7-data"],
        names_nbytes["node7-data"] / sizeof(double));
 
-  std::string check{"node1-offsets: 0 1 2 \n"
-                    "node3-data: 1.1 2.2 \n"
-                    "node4-offsets: 0 3 5 \n"
-                    "node5-data: 1 2 3 4 5 \n"
-                    "node6-data: -1 -2 \n"
-                    "node7-data: 3.3 4.4 \n"};
+  std::string check{
+      "node1-offsets: 0 1 2 \n"
+      "node3-data: 1.1 2.2 \n"
+      "node4-offsets: 0 3 5 \n"
+      "node5-data: 1 2 3 4 5 \n"
+      "node6-data: -1 -2 \n"
+      "node7-data: 3.3 4.4 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"RecordArray\", "
-                           "\"contents\": { "
-                           "\"u\": { "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"RecordArray\", "
-                           "\"contents\": { "
-                           "\"i\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node3\" "
-                           "}, "
-                           "\"j\": { "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int64\", "
-                           "\"form_key\": \"node5\" "
-                           "}, "
-                           "\"form_key\": \"node4\" "
-                           "} "
-                           "}, "
-                           "\"form_key\": \"node2\" "
-                           "}, "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"v\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int64\", "
-                           "\"form_key\": \"node6\" "
-                           "}, "
-                           "\"w\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node7\" "
-                           "} "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"RecordArray\", "
+         "\"contents\": { "
+         "\"u\": { "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"RecordArray\", "
+         "\"contents\": { "
+         "\"i\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node3\" "
+         "}, "
+         "\"j\": { "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int64\", "
+         "\"form_key\": \"node5\" "
+         "}, "
+         "\"form_key\": \"node4\" "
+         "} "
+         "}, "
+         "\"form_key\": \"node2\" "
+         "}, "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"v\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int64\", "
+         "\"form_key\": \"node6\" "
+         "}, "
+         "\"w\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node7\" "
+         "} "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Tuple_Numpy_ListOffset() {
+void
+test_Tuple_Numpy_ListOffset() {
   TupleBuilder<NumpyBuilder<double>,
                ListOffsetBuilder<int64_t, NumpyBuilder<int32_t>>>
       builder;
@@ -1064,45 +1145,52 @@ void test_Tuple_Numpy_ListOffset() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node1-data", (double *)buffers["node1-data"],
-       names_nbytes["node1-data"] / sizeof(double), "node2-offsets",
+  dump(out,
+       "node1-data",
+       (double *)buffers["node1-data"],
+       names_nbytes["node1-data"] / sizeof(double),
+       "node2-offsets",
        (int64_t *)buffers["node2-offsets"],
-       names_nbytes["node2-offsets"] / sizeof(int64_t), "node3-data",
+       names_nbytes["node2-offsets"] / sizeof(int64_t),
+       "node3-data",
        (int32_t *)buffers["node3-data"],
        names_nbytes["node3-data"] / sizeof(int32_t));
 
-  std::string check{"node1-data: 1.1 2.2 3.3 \n"
-                    "node2-offsets: 0 1 3 6 \n"
-                    "node3-data: 1 1 2 1 2 3 \n"};
+  std::string check{
+      "node1-data: 1.1 2.2 3.3 \n"
+      "node2-offsets: 0 1 3 6 \n"
+      "node3-data: 1 1 2 1 2 3 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"RecordArray\", "
-                           "\"contents\": ["
-                           "{ "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "{ "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int32\", "
-                           "\"form_key\": \"node3\" "
-                           "}, "
-                           "\"form_key\": \"node2\" "
-                           "}], "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"RecordArray\", "
+         "\"contents\": ["
+         "{ "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "{ "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int32\", "
+         "\"form_key\": \"node3\" "
+         "}, "
+         "\"form_key\": \"node2\" "
+         "}], "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Regular() {
+void
+test_Regular() {
   RegularBuilder<3, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
@@ -1131,29 +1219,33 @@ void test_Regular() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node1-data", (double *)buffers["node1-data"],
+  dump(out,
+       "node1-data",
+       (double *)buffers["node1-data"],
        names_nbytes["node1-data"] / sizeof(double));
 
   std::string check{"node1-data: 1.1 2.2 3.3 4.4 5.5 6.6 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"RegularArray\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"size\": 3, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"RegularArray\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"size\": 3, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Regular_size0() {
+void
+test_Regular_size0() {
   RegularBuilder<0, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
@@ -1176,29 +1268,33 @@ void test_Regular_size0() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node1-data", (double *)buffers["node1-data"],
+  dump(out,
+       "node1-data",
+       (double *)buffers["node1-data"],
        names_nbytes["node1-data"] / sizeof(double));
 
   std::string check{"node1-data: \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"RegularArray\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"size\": 0, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"RegularArray\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"size\": 0, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Indexed() {
+void
+test_Indexed() {
   IndexedBuilder<uint32_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
@@ -1226,32 +1322,38 @@ void test_Indexed() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-index", (uint32_t *)buffers["node0-index"],
-       names_nbytes["node0-index"] / sizeof(uint32_t), "node1-data",
+  dump(out,
+       "node0-index",
+       (uint32_t *)buffers["node0-index"],
+       names_nbytes["node0-index"] / sizeof(uint32_t),
+       "node1-data",
        (double *)buffers["node1-data"],
        names_nbytes["node1-data"] / sizeof(double));
 
-  std::string check{"node0-index: 0 1 2 3 4 \n"
-                    "node1-data: 1.1 2.2 3.3 4.4 5.5 \n"};
+  std::string check{
+      "node0-index: 0 1 2 3 4 \n"
+      "node1-data: 1.1 2.2 3.3 4.4 5.5 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"IndexedArray\", "
-                           "\"index\": \"u32\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"IndexedArray\", "
+         "\"index\": \"u32\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_IndexedOption() {
+void
+test_IndexedOption() {
   IndexedOptionBuilder<int32_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
@@ -1280,39 +1382,46 @@ void test_IndexedOption() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-index", (int32_t *)buffers["node0-index"],
-       names_nbytes["node0-index"] / sizeof(int32_t), "node1-data",
+  dump(out,
+       "node0-index",
+       (int32_t *)buffers["node0-index"],
+       names_nbytes["node0-index"] / sizeof(int32_t),
+       "node1-data",
        (double *)buffers["node1-data"],
        names_nbytes["node1-data"] / sizeof(double));
 
-  std::string check{"node0-index: 0 -1 1 2 3 -1 -1 \n"
-                    "node1-data: 1.1 3.3 4.4 5.5 \n"};
+  std::string check{
+      "node0-index: 0 -1 1 2 3 -1 -1 \n"
+      "node1-data: 1.1 3.3 4.4 5.5 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"IndexedOptionArray\", "
-                           "\"index\": \"i32\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"IndexedOptionArray\", "
+         "\"index\": \"i32\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_IndexedOption_Record() {
+void
+test_IndexedOption_Record() {
   enum Field : std::size_t { x, y };
 
   UserDefinedMap fields_map({{Field::x, "x"}, {Field::y, "y"}});
 
   IndexedOptionBuilder<
-      int64_t, RecordBuilder<RecordField<Field::x, NumpyBuilder<double>>,
-                             RecordField<Field::y, NumpyBuilder<int64_t>>>>
+      int64_t,
+      RecordBuilder<RecordField<Field::x, NumpyBuilder<double>>,
+                    RecordField<Field::y, NumpyBuilder<int64_t>>>>
       builder;
   assert(builder.length() == 0);
 
@@ -1348,46 +1457,53 @@ void test_IndexedOption_Record() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-index", (int64_t *)buffers["node0-index"],
-       names_nbytes["node0-index"] / sizeof(int64_t), "node2-data",
+  dump(out,
+       "node0-index",
+       (int64_t *)buffers["node0-index"],
+       names_nbytes["node0-index"] / sizeof(int64_t),
+       "node2-data",
        (double *)buffers["node2-data"],
-       names_nbytes["node2-data"] / sizeof(double), "node3-data",
+       names_nbytes["node2-data"] / sizeof(double),
+       "node3-data",
        (int64_t *)buffers["node3-data"],
        names_nbytes["node3-data"] / sizeof(int64_t));
 
-  std::string check{"node0-index: 0 -1 1 \n"
-                    "node2-data: 1.1 3.3 \n"
-                    "node3-data: 2 4 \n"};
+  std::string check{
+      "node0-index: 0 -1 1 \n"
+      "node2-data: 1.1 3.3 \n"
+      "node3-data: 2 4 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"IndexedOptionArray\", "
-                           "\"index\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"RecordArray\", "
-                           "\"contents\": { "
-                           "\"x\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node2\" "
-                           "}, "
-                           "\"y\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int64\", "
-                           "\"form_key\": \"node3\" "
-                           "} "
-                           "}, "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"IndexedOptionArray\", "
+         "\"index\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"RecordArray\", "
+         "\"contents\": { "
+         "\"x\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node2\" "
+         "}, "
+         "\"y\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int64\", "
+         "\"form_key\": \"node3\" "
+         "} "
+         "}, "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Unmasked() {
+void
+test_Unmasked() {
   UnmaskedBuilder<NumpyBuilder<int64_t>> builder;
   assert(builder.length() == 0);
 
@@ -1411,28 +1527,32 @@ void test_Unmasked() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node1-data", (int64_t *)buffers["node1-data"],
+  dump(out,
+       "node1-data",
+       (int64_t *)buffers["node1-data"],
        names_nbytes["node1-data"] / sizeof(int64_t));
 
   std::string check{"node1-data: 11 22 33 44 55 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"UnmaskedArray\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"UnmaskedArray\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_ByteMasked() {
+void
+test_ByteMasked() {
   ByteMaskedBuilder<true, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
@@ -1440,7 +1560,7 @@ void test_ByteMasked() {
   subbuilder.append(1.1);
 
   builder.append_invalid();
-  subbuilder.append(-1000); // have to supply a "dummy" value
+  subbuilder.append(-1000);  // have to supply a "dummy" value
 
   double data[3] = {3.3, 4.4, 5.5};
 
@@ -1449,7 +1569,7 @@ void test_ByteMasked() {
 
   builder.extend_invalid(2);
   for (size_t i = 0; i < 2; i++) {
-    subbuilder.append(-1000); // have to supply a "dummy" value
+    subbuilder.append(-1000);  // have to supply a "dummy" value
   }
 
   // [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000]
@@ -1465,33 +1585,39 @@ void test_ByteMasked() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-mask", (int8_t *)buffers["node0-mask"],
-       names_nbytes["node0-mask"] / sizeof(int8_t), "node1-data",
+  dump(out,
+       "node0-mask",
+       (int8_t *)buffers["node0-mask"],
+       names_nbytes["node0-mask"] / sizeof(int8_t),
+       "node1-data",
        (double *)buffers["node1-data"],
        names_nbytes["node1-data"] / sizeof(double));
 
-  std::string check{"node0-mask: 1 0 1 1 1 0 0 \n"
-                    "node1-data: 1.1 -1000 3.3 4.4 5.5 -1000 -1000 \n"};
+  std::string check{
+      "node0-mask: 1 0 1 1 1 0 0 \n"
+      "node1-data: 1.1 -1000 3.3 4.4 5.5 -1000 -1000 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"ByteMaskedArray\", "
-                           "\"mask\": \"i8\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"valid_when\": true, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"ByteMaskedArray\", "
+         "\"mask\": \"i8\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"valid_when\": true, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_BitMasked() {
+void
+test_BitMasked() {
   BitMaskedBuilder<true, true, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
@@ -1500,7 +1626,7 @@ void test_BitMasked() {
   assert(builder.length() == 1);
 
   builder.append_invalid();
-  subbuilder.append(-1000); // have to supply a "dummy" value
+  subbuilder.append(-1000);  // have to supply a "dummy" value
   assert(builder.length() == 2);
 
   double data[3] = {3.3, 4.4, 5.5};
@@ -1511,7 +1637,7 @@ void test_BitMasked() {
 
   builder.extend_invalid(2);
   for (size_t i = 0; i < 2; i++) {
-    subbuilder.append(-1000); // have to supply a "dummy" value
+    subbuilder.append(-1000);  // have to supply a "dummy" value
   }
   assert(builder.length() == 7);
 
@@ -1540,34 +1666,40 @@ void test_BitMasked() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-mask", (uint8_t *)buffers["node0-mask"],
-       names_nbytes["node0-mask"] / sizeof(uint8_t), "node1-data",
+  dump(out,
+       "node0-mask",
+       (uint8_t *)buffers["node0-mask"],
+       names_nbytes["node0-mask"] / sizeof(uint8_t),
+       "node1-data",
        (double *)buffers["node1-data"],
        names_nbytes["node1-data"] / sizeof(double));
 
-  std::string check{"node0-mask: 157 3 \n"
-                    "node1-data: 1.1 -1000 3.3 4.4 5.5 -1000 -1000 8 9 10 \n"};
+  std::string check{
+      "node0-mask: 157 3 \n"
+      "node1-data: 1.1 -1000 3.3 4.4 5.5 -1000 -1000 8 9 10 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"BitMaskedArray\", "
-                           "\"mask\": \"u8\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"valid_when\": true, "
-                           "\"lsb_order\": true, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"BitMaskedArray\", "
+         "\"mask\": \"u8\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"valid_when\": true, "
+         "\"lsb_order\": true, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Union8_U32_Numpy_ListOffset() {
+void
+test_Union8_U32_Numpy_ListOffset() {
   UnionBuilder8_U32<NumpyBuilder<double>,
                     ListOffsetBuilder<int64_t, NumpyBuilder<int32_t>>>
       builder;
@@ -1598,53 +1730,62 @@ void test_Union8_U32_Numpy_ListOffset() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-tags", (int8_t *)buffers["node0-tags"],
-       names_nbytes["node0-tags"] / sizeof(int8_t), "node0-index",
+  dump(out,
+       "node0-tags",
+       (int8_t *)buffers["node0-tags"],
+       names_nbytes["node0-tags"] / sizeof(int8_t),
+       "node0-index",
        (uint32_t *)buffers["node0-index"],
-       names_nbytes["node0-index"] / sizeof(uint32_t), "node1-data",
+       names_nbytes["node0-index"] / sizeof(uint32_t),
+       "node1-data",
        (double *)buffers["node1-data"],
-       names_nbytes["node1-data"] / sizeof(double), "node2-offsets",
+       names_nbytes["node1-data"] / sizeof(double),
+       "node2-offsets",
        (int64_t *)buffers["node2-offsets"],
-       names_nbytes["node2-offsets"] / sizeof(int64_t), "node3-data",
+       names_nbytes["node2-offsets"] / sizeof(int64_t),
+       "node3-data",
        (int32_t *)buffers["node3-data"],
        names_nbytes["node3-data"] / sizeof(int32_t));
 
-  std::string check{"node0-tags: 0 1 \n"
-                    "node0-index: 0 0 \n"
-                    "node1-data: 1.1 \n"
-                    "node2-offsets: 0 2 \n"
-                    "node3-data: 1 2 \n"};
+  std::string check{
+      "node0-tags: 0 1 \n"
+      "node0-index: 0 0 \n"
+      "node1-data: 1.1 \n"
+      "node2-offsets: 0 2 \n"
+      "node3-data: 1 2 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"UnionArray\", "
-                           "\"tags\": \"i8\", "
-                           "\"index\": \"u32\", "
-                           "\"contents\": ["
-                           "{ "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "{ "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int32\", "
-                           "\"form_key\": \"node3\" "
-                           "}, "
-                           "\"form_key\": \"node2\" "
-                           "}], "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"UnionArray\", "
+         "\"tags\": \"i8\", "
+         "\"index\": \"u32\", "
+         "\"contents\": ["
+         "{ "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "{ "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int32\", "
+         "\"form_key\": \"node3\" "
+         "}, "
+         "\"form_key\": \"node2\" "
+         "}], "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_Union8_64_ListOffset_Record() {
+void
+test_Union8_64_ListOffset_Record() {
   enum Field : std::size_t { x, y };
 
   UserDefinedMap fields_map({{Field::x, "x"}, {Field::y, "y"}});
@@ -1699,85 +1840,97 @@ void test_Union8_64_ListOffset_Record() {
   builder.to_buffers(buffers);
 
   std::ostringstream out;
-  dump(out, "node0-tags", (int8_t *)buffers["node0-tags"],
-       names_nbytes["node0-tags"] / sizeof(int8_t), "node0-index",
+  dump(out,
+       "node0-tags",
+       (int8_t *)buffers["node0-tags"],
+       names_nbytes["node0-tags"] / sizeof(int8_t),
+       "node0-index",
        (int64_t *)buffers["node0-index"],
-       names_nbytes["node0-index"] / sizeof(int64_t), "node1-offsets",
+       names_nbytes["node0-index"] / sizeof(int64_t),
+       "node1-offsets",
        (int64_t *)buffers["node1-offsets"],
-       names_nbytes["node1-offsets"] / sizeof(int64_t), "node2-data",
+       names_nbytes["node1-offsets"] / sizeof(int64_t),
+       "node2-data",
        (double *)buffers["node2-data"],
-       names_nbytes["node2-data"] / sizeof(double), "node4-data",
+       names_nbytes["node2-data"] / sizeof(double),
+       "node4-data",
        (int64_t *)buffers["node4-data"],
-       names_nbytes["node4-data"] / sizeof(int64_t), "node5-data",
+       names_nbytes["node4-data"] / sizeof(int64_t),
+       "node5-data",
        (char *)buffers["node5-data"],
        names_nbytes["node5-data"] / sizeof(char));
 
-  std::string check{"node0-tags: 0 1 0 1 \n"
-                    "node0-index: 0 0 1 1 \n"
-                    "node1-offsets: 0 2 3 \n"
-                    "node2-data: 1.1 3.3 5.5 \n"
-                    "node4-data: 1 2 \n"
-                    "node5-data: 97 98 \n"};
+  std::string check{
+      "node0-tags: 0 1 0 1 \n"
+      "node0-index: 0 0 1 1 \n"
+      "node1-offsets: 0 2 3 \n"
+      "node2-data: 1.1 3.3 5.5 \n"
+      "node4-data: 1 2 \n"
+      "node5-data: 97 98 \n"};
   assert(out.str().compare(check) == 0);
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"UnionArray\", "
-                           "\"tags\": \"i8\", "
-                           "\"index\": \"i64\", "
-                           "\"contents\": ["
-                           "{ "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"float64\", "
-                           "\"form_key\": \"node2\" "
-                           "}, "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "{ "
-                           "\"class\": \"RecordArray\", "
-                           "\"contents\": { "
-                           "\"x\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int64\", "
-                           "\"form_key\": \"node4\" "
-                           "}, "
-                           "\"y\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"char\", "
-                           "\"form_key\": \"node5\" "
-                           "} "
-                           "}, "
-                           "\"form_key\": \"node3\" "
-                           "}], "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"UnionArray\", "
+         "\"tags\": \"i8\", "
+         "\"index\": \"i64\", "
+         "\"contents\": ["
+         "{ "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"float64\", "
+         "\"form_key\": \"node2\" "
+         "}, "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "{ "
+         "\"class\": \"RecordArray\", "
+         "\"contents\": { "
+         "\"x\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int64\", "
+         "\"form_key\": \"node4\" "
+         "}, "
+         "\"y\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"char\", "
+         "\"form_key\": \"node5\" "
+         "} "
+         "}, "
+         "\"form_key\": \"node3\" "
+         "}], "
+         "\"form_key\": \"node0\" "
+         "}");
 
   clear_buffers(buffers);
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_char_form() {
+void
+test_char_form() {
   NumpyBuilder<uint8_t> builder;
 
   builder.set_parameters("\"__array__\": \"char\"");
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"uint8\", "
-                           "\"parameters\": { "
-                           "\"__array__\": \"char\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"uint8\", "
+         "\"parameters\": { "
+         "\"__array__\": \"char\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_string_form() {
+void
+test_string_form() {
   ListOffsetBuilder<int64_t, NumpyBuilder<uint8_t>> builder;
   assert(builder.length() == 0);
 
@@ -1787,52 +1940,56 @@ void test_string_form() {
 
   subbuilder.set_parameters("\"__array__\": \"char\"");
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"ListOffsetArray\", "
-                           "\"offsets\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"uint8\", "
-                           "\"parameters\": { "
-                           "\"__array__\": \"char\" "
-                           "}, "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"parameters\": { "
-                           "\"__array__\": \"string\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"ListOffsetArray\", "
+         "\"offsets\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"uint8\", "
+         "\"parameters\": { "
+         "\"__array__\": \"char\" "
+         "}, "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"parameters\": { "
+         "\"__array__\": \"string\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   builder.clear();
   assert(builder.length() == 0);
 }
 
-void test_categorical_form() {
+void
+test_categorical_form() {
   IndexedOptionBuilder<int64_t, NumpyBuilder<int64_t>> builder;
   assert(builder.length() == 0);
 
   builder.set_parameters("\"__array__\": \"categorical\"");
 
-  assert(builder.form() == "{ "
-                           "\"class\": \"IndexedOptionArray\", "
-                           "\"index\": \"i64\", "
-                           "\"content\": { "
-                           "\"class\": \"NumpyArray\", "
-                           "\"primitive\": \"int64\", "
-                           "\"form_key\": \"node1\" "
-                           "}, "
-                           "\"parameters\": { "
-                           "\"__array__\": \"categorical\" "
-                           "}, "
-                           "\"form_key\": \"node0\" "
-                           "}");
+  assert(builder.form() ==
+         "{ "
+         "\"class\": \"IndexedOptionArray\", "
+         "\"index\": \"i64\", "
+         "\"content\": { "
+         "\"class\": \"NumpyArray\", "
+         "\"primitive\": \"int64\", "
+         "\"form_key\": \"node1\" "
+         "}, "
+         "\"parameters\": { "
+         "\"__array__\": \"categorical\" "
+         "}, "
+         "\"form_key\": \"node0\" "
+         "}");
 
   builder.clear();
   assert(builder.length() == 0);
 }
 
-int main(int /* argc */, char ** /* argv */) {
+int
+main(int /* argc */, char ** /* argv */) {
   test_Numpy_bool();
   test_Numpy_int();
   test_Numpy_char();

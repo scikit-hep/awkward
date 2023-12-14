@@ -20,9 +20,15 @@
 // {dtype_specializations}] = None END PYTHON
 
 template <typename T, typename C, typename U>
-__global__ void awkward_ByteMaskedArray_getitem_nextcarry_outindex_a(
-    T *tocarry, C *outindex, const U *mask, int64_t length, bool validwhen,
-    int64_t *scan_in_array, uint64_t invocation_index, uint64_t *err_code) {
+__global__ void
+awkward_ByteMaskedArray_getitem_nextcarry_outindex_a(T *tocarry,
+                                                     C *outindex,
+                                                     const U *mask,
+                                                     int64_t length,
+                                                     bool validwhen,
+                                                     int64_t *scan_in_array,
+                                                     uint64_t invocation_index,
+                                                     uint64_t *err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -37,9 +43,15 @@ __global__ void awkward_ByteMaskedArray_getitem_nextcarry_outindex_a(
 }
 
 template <typename T, typename C, typename U>
-__global__ void awkward_ByteMaskedArray_getitem_nextcarry_outindex_b(
-    T *tocarry, C *outindex, const U *mask, int64_t length, bool validwhen,
-    int64_t *scan_in_array, uint64_t invocation_index, uint64_t *err_code) {
+__global__ void
+awkward_ByteMaskedArray_getitem_nextcarry_outindex_b(T *tocarry,
+                                                     C *outindex,
+                                                     const U *mask,
+                                                     int64_t length,
+                                                     bool validwhen,
+                                                     int64_t *scan_in_array,
+                                                     uint64_t invocation_index,
+                                                     uint64_t *err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 

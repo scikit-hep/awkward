@@ -30,7 +30,9 @@ using MyBuilder = RecordBuilder<
  * @param builder builder
  * @return pyobject of Awkward Array
  */
-template <typename T> py::object snapshot_builder(const T &builder) {
+template <typename T>
+py::object
+snapshot_builder(const T &builder) {
   // How much memory to allocate?
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -51,7 +53,6 @@ template <typename T> py::object snapshot_builder(const T &builder) {
   // as Awkward Array calls `frombuffer` to convert to the correct type
   py::dict container;
   for (auto it : buffers) {
-
     py::capsule free_when_done(it.second, [](void *data) {
       uint8_t *dataPtr = reinterpret_cast<uint8_t *>(data);
       delete[] dataPtr;
@@ -68,12 +69,13 @@ template <typename T> py::object snapshot_builder(const T &builder) {
  * Create demo array, and return its snapshot
  * @return pyobject of Awkward Array
  */
-py::object create_demo_array() {
+py::object
+create_demo_array() {
   UserDefinedMap fields_map({{Field::one, "one"}, {Field::two, "two"}});
 
-  RecordBuilder<RecordField<Field::one, NumpyBuilder<double>>,
-                RecordField<Field::two,
-                            ListOffsetBuilder<int64_t, NumpyBuilder<int32_t>>>>
+  RecordBuilder<
+      RecordField<Field::one, NumpyBuilder<double>>,
+      RecordField<Field::two, ListOffsetBuilder<int64_t, NumpyBuilder<int32_t>>>>
       builder(fields_map);
 
   auto &one_builder = builder.content<Field::one>();
@@ -104,7 +106,8 @@ py::object create_demo_array() {
 }
 
 PYBIND11_MODULE(demo, m) {
-  m.doc() = "pybind11 example plugin"; // optional module docstring
-  m.def("create_demo_array", &create_demo_array,
+  m.doc() = "pybind11 example plugin";  // optional module docstring
+  m.def("create_demo_array",
+        &create_demo_array,
         "A function that creates an awkward array");
 }

@@ -11,6 +11,9 @@ struct ArrayBuffers {
   size_t length;
 };
 
-template <typename T> ArrayBuffers snapshot_builder(const T &builder);
+template <typename T>
+ArrayBuffers
+snapshot_builder(const T &builder);
 
-ArrayBuffers create_demo_array();
+ArrayBuffers
+create_demo_array();

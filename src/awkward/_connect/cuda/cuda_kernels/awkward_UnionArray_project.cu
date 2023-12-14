@@ -17,9 +17,14 @@
 
 template <typename T, typename C, typename U, typename V>
 __global__ void
-awkward_UnionArray_project_a(T *lenout, C *tocarry, const U *fromtags,
-                             const V *fromindex, int64_t length, int64_t which,
-                             int64_t *scan_in_array, uint64_t invocation_index,
+awkward_UnionArray_project_a(T *lenout,
+                             C *tocarry,
+                             const U *fromtags,
+                             const V *fromindex,
+                             int64_t length,
+                             int64_t which,
+                             int64_t *scan_in_array,
+                             uint64_t invocation_index,
                              uint64_t *err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -35,9 +40,14 @@ awkward_UnionArray_project_a(T *lenout, C *tocarry, const U *fromtags,
 
 template <typename T, typename C, typename U, typename V>
 __global__ void
-awkward_UnionArray_project_b(T *lenout, C *tocarry, const U *fromtags,
-                             const V *fromindex, int64_t length, int64_t which,
-                             int64_t *scan_in_array, uint64_t invocation_index,
+awkward_UnionArray_project_b(T *lenout,
+                             C *tocarry,
+                             const U *fromtags,
+                             const V *fromindex,
+                             int64_t length,
+                             int64_t which,
+                             int64_t *scan_in_array,
+                             uint64_t invocation_index,
                              uint64_t *err_code) {
   if (err_code[0] == NO_ERROR) {
     lenout[0] = scan_in_array[length - 1];

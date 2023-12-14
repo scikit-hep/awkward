@@ -7,7 +7,8 @@
 #include <cassert>
 #include <complex>
 
-void test_full() {
+void
+test_full() {
   constexpr size_t data_size = 100;
   awkward::BuilderOptions options{25, 1};
 
@@ -25,7 +26,8 @@ void test_full() {
   }
 }
 
-void test_arange() {
+void
+test_arange() {
   constexpr size_t data_size = 25;
   awkward::BuilderOptions options{50, 1};
 
@@ -43,7 +45,8 @@ void test_arange() {
   }
 }
 
-void test_zeros() {
+void
+test_zeros() {
   constexpr size_t data_size = 100;
   awkward::BuilderOptions options{100, 1};
 
@@ -61,12 +64,29 @@ void test_zeros() {
   }
 }
 
-void test_float() {
+void
+test_float() {
   constexpr size_t data_size = 18;
   awkward::BuilderOptions options{4, 1};
 
-  float data[data_size] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
-                           2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9};
+  float data[data_size] = {1.1,
+                           1.2,
+                           1.3,
+                           1.4,
+                           1.5,
+                           1.6,
+                           1.7,
+                           1.8,
+                           1.9,
+                           2.1,
+                           2.2,
+                           2.3,
+                           2.4,
+                           2.5,
+                           2.6,
+                           2.7,
+                           2.8,
+                           2.9};
 
   auto buffer = awkward::GrowableBuffer<float>::empty(options);
   assert(buffer.length() == 0);
@@ -87,7 +107,8 @@ void test_float() {
   }
 }
 
-void test_int64() {
+void
+test_int64() {
   constexpr size_t data_size = 10;
   awkward::BuilderOptions options{8, 1};
 
@@ -111,12 +132,23 @@ void test_int64() {
   }
 }
 
-void test_bool() {
+void
+test_bool() {
   constexpr size_t data_size = 12;
   awkward::BuilderOptions options{5, 1};
 
-  bool data[data_size] = {false, true, false, false, true,  false,
-                          true,  true, false, true,  false, false};
+  bool data[data_size] = {false,
+                          true,
+                          false,
+                          false,
+                          true,
+                          false,
+                          true,
+                          true,
+                          false,
+                          true,
+                          false,
+                          false};
 
   auto buffer = awkward::GrowableBuffer<bool>(options);
 
@@ -136,12 +168,13 @@ void test_bool() {
   }
 }
 
-void test_double() {
+void
+test_double() {
   constexpr size_t data_size = 9;
   awkward::BuilderOptions options{6, 1};
 
-  double data[data_size] = {1.01, 2.02, 3.03, 4.04, 5.05,
-                            6.06, 7.07, 8.08, 9.09};
+  double data[data_size] = {
+      1.01, 2.02, 3.03, 4.04, 5.05, 6.06, 7.07, 8.08, 9.09};
 
   auto buffer = awkward::GrowableBuffer<double>::empty(options);
 
@@ -160,13 +193,21 @@ void test_double() {
   }
 }
 
-void test_complex() {
+void
+test_complex() {
   constexpr size_t data_size = 10;
   awkward::BuilderOptions options{3, 1};
 
-  std::complex<double> data[data_size] = {
-      {0, 0},     {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
-      {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
+  std::complex<double> data[data_size] = {{0, 0},
+                                          {1.1, 0.1},
+                                          {2.2, 0.2},
+                                          {3.3, 0.3},
+                                          {4.4, 0.4},
+                                          {5.5, 0.5},
+                                          {6.6, 0.6},
+                                          {7.7, 0.7},
+                                          {8.8, 0.8},
+                                          {9.9, 0.9}};
 
   auto buffer = awkward::GrowableBuffer<std::complex<double>>::empty(options);
   for (size_t i = 0; i < data_size; i++) {
@@ -184,12 +225,13 @@ void test_complex() {
   }
 }
 
-void test_extend() {
+void
+test_extend() {
   constexpr size_t data_size = 15;
   awkward::BuilderOptions options{5, 1};
 
-  double data[data_size] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8,
-                            1.9, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
+  double data[data_size] = {
+      1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
 
   auto buffer = awkward::GrowableBuffer<double>::empty(options);
 
@@ -206,12 +248,13 @@ void test_extend() {
   }
 }
 
-void test_append_and_get_ref() {
+void
+test_append_and_get_ref() {
   constexpr size_t data_size = 15;
   awkward::BuilderOptions options{5, 1};
 
-  double data[data_size] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8,
-                            1.9, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
+  double data[data_size] = {
+      1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
 
   double val;
   double &ref = val;
@@ -228,13 +271,22 @@ void test_append_and_get_ref() {
   assert(buffer.length() == 0);
 }
 
-template <typename FROM, typename TO> void test_copy_complex_as_complex() {
+template <typename FROM, typename TO>
+void
+test_copy_complex_as_complex() {
   constexpr size_t data_size = 10;
   awkward::BuilderOptions options{5, 1};
 
-  std::complex<FROM> data[data_size] = {
-      {0, 0},     {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
-      {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
+  std::complex<FROM> data[data_size] = {{0, 0},
+                                        {1.1, 0.1},
+                                        {2.2, 0.2},
+                                        {3.3, 0.3},
+                                        {4.4, 0.4},
+                                        {5.5, 0.5},
+                                        {6.6, 0.6},
+                                        {7.7, 0.7},
+                                        {8.8, 0.8},
+                                        {9.9, 0.9}};
 
   auto buffer = awkward::GrowableBuffer<std::complex<FROM>>::empty(options);
   for (size_t i = 0; i < data_size; i++) {
@@ -268,13 +320,22 @@ template <typename FROM, typename TO> void test_copy_complex_as_complex() {
   assert(to_buffer.length() == 0);
 }
 
-template <typename FROM, typename TO> void test_copy_complex_as() {
+template <typename FROM, typename TO>
+void
+test_copy_complex_as() {
   constexpr size_t data_size = 10;
   awkward::BuilderOptions options{5, 1};
 
-  std::complex<FROM> data[data_size] = {
-      {0, 0},     {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
-      {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
+  std::complex<FROM> data[data_size] = {{0, 0},
+                                        {1.1, 0.1},
+                                        {2.2, 0.2},
+                                        {3.3, 0.3},
+                                        {4.4, 0.4},
+                                        {5.5, 0.5},
+                                        {6.6, 0.6},
+                                        {7.7, 0.7},
+                                        {8.8, 0.8},
+                                        {9.9, 0.9}};
 
   auto buffer = awkward::GrowableBuffer<std::complex<FROM>>::empty(options);
   for (size_t i = 0; i < data_size; i++) {
@@ -308,7 +369,8 @@ template <typename FROM, typename TO> void test_copy_complex_as() {
   assert(to_buffer.length() == 0);
 }
 
-int main(int /* argc */, const char ** /* argv */) {
+int
+main(int /* argc */, const char ** /* argv */) {
   test_full();
   test_arange();
   test_zeros();

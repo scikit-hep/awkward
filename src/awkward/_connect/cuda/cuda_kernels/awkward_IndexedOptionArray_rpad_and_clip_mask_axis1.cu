@@ -18,9 +18,13 @@
 // {dtype_specializations}] = None END PYTHON
 
 template <typename T, typename C>
-__global__ void awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_a(
-    T *toindex, const C *frommask, int64_t length, int64_t *scan_in_array,
-    uint64_t invocation_index, uint64_t *err_code) {
+__global__ void
+awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_a(T *toindex,
+                                                      const C *frommask,
+                                                      int64_t length,
+                                                      int64_t *scan_in_array,
+                                                      uint64_t invocation_index,
+                                                      uint64_t *err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -35,9 +39,13 @@ __global__ void awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_a(
 }
 
 template <typename T, typename C>
-__global__ void awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_b(
-    T *toindex, const C *frommask, int64_t length, int64_t *scan_in_array,
-    uint64_t invocation_index, uint64_t *err_code) {
+__global__ void
+awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_b(T *toindex,
+                                                      const C *frommask,
+                                                      int64_t length,
+                                                      int64_t *scan_in_array,
+                                                      uint64_t invocation_index,
+                                                      uint64_t *err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 

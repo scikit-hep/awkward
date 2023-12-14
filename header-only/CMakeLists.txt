@@ -1,5 +1,4 @@
-# BSD 3-Clause License; see
-# https://github.com/scikit-hep/awkward/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 cmake_minimum_required(VERSION 3.15...3.24)
 
@@ -16,8 +15,7 @@ option(BUILD_TESTS OFF)
 # Add aliases for `add_subdirectory`
 set(NAMESPACE "awkward::")
 
-# We want to specify different compile options, so we split the headers into
-# "components"
+# We want to specify different compile options, so we split the headers into "components"
 macro(add_component name)
   add_library(${name} INTERFACE)
   add_library(${NAMESPACE}${name} ALIAS ${name})

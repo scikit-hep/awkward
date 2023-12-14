@@ -29940,7 +29940,8 @@
       ]
     },
     {
-      "name": "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+      "name":
+          "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
       "tests": [
         {
           "error": false,

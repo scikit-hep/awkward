@@ -28,7 +28,9 @@ using MyBuilder = RecordBuilder<
  * @param builder builder
  * @return ArrayBuffers representing Awkward Array
  */
-template <typename T> ArrayBuffers snapshot_builder(const T &builder) {
+template <typename T>
+ArrayBuffers
+snapshot_builder(const T &builder) {
   // How much memory to allocate?
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -49,12 +51,13 @@ template <typename T> ArrayBuffers snapshot_builder(const T &builder) {
  * Create demo array, and return its snapshot
  * @return ArrayBuffers of Awkward Array
  */
-ArrayBuffers create_demo_array() {
+ArrayBuffers
+create_demo_array() {
   UserDefinedMap fields_map({{Field::one, "one"}, {Field::two, "two"}});
 
-  RecordBuilder<RecordField<Field::one, NumpyBuilder<double>>,
-                RecordField<Field::two,
-                            ListOffsetBuilder<int64_t, NumpyBuilder<int32_t>>>>
+  RecordBuilder<
+      RecordField<Field::one, NumpyBuilder<double>>,
+      RecordField<Field::two, ListOffsetBuilder<int64_t, NumpyBuilder<int32_t>>>>
       builder(fields_map);
 
   auto &one_builder = builder.content<Field::one>();

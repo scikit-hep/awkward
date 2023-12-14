@@ -4,8 +4,8 @@
 #include "awkward/BuilderOptions.h"
 #include <cassert>
 
-int main(int /* argc */, char ** /* argv */) {
-
+int
+main(int /* argc */, char** /* argv */) {
   awkward::BuilderOptions options(1024, 1.0);
 
   assert(options.initial() == 1024);
