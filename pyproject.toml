@@ -84,7 +84,8 @@ include = [
     "/CITATION.cff",
     "/CONTRIBUTING.md",
     "/README.md",
-    "/requirements-test.txt"
+    "/requirements-test.txt",
+    "/juliapkg.json"
 ]
 artifacts = [
     "/tests-cuda-kernels"
