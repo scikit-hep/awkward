@@ -1862,6 +1862,33 @@ test_categorical_form() {
 }
 
 
+void test_string_builder() {
+  StringBuilder<int64_t> builder;
+  assert(builder.length() == 0);
+
+  builder.append_string("one");
+  builder.append_string("two");
+  builder.append_string("three");
+
+  assert(builder.length() == 3);
+}
+
+void test_list_string_builder() {
+  ListOffsetBuilder<int64_t, StringBuilder<int64_t>> builder;
+  assert(builder.length() == 0);
+
+  builder.begin_list();
+  builder.content().append_string("one");
+  builder.content().append_string("two");
+  builder.content().append_string("three");
+  builder.end_list();
+
+  builder.begin_list();
+  builder.content().append_string("four");
+  builder.content().append_string("five");
+  builder.end_list();
+}
+
 int main(int /* argc */, char ** /* argv */) {
   test_Numpy_bool();
   test_Numpy_int();
@@ -1890,35 +1917,8 @@ int main(int /* argc */, char ** /* argv */) {
   test_char_form();
   test_string_form();
   test_categorical_form();
-
+  test_string_builder();
+  test_list_string_builder();
   return 0;
 }
 
-void
-test_String() {
-    StringBuilder<int64_t> builder;
-    assert(builder.length() == 0);
-
-    builder.append_string("one");
-    builder.append_string("two");
-    builder.append_string("three");
-
-    assert (builder.length() == 3);
-}
-
-void
-test_ListOffset_String() {
-    ListOffsetBuilder<int64_t, StringBuilder<int64_t>> builder;
-    assert(builder.length() == 0);
-
-    builder.begin_list();
-    builder.content().append_string("one");
-    builder.content().append_string("two");
-    builder.content().append_string("three");
-    builder.end_list();
-
-    builder.begin_list();
-    builder.content().append_string("four");
-    builder.content().append_string("five");
-    builder.end_list();
-}
