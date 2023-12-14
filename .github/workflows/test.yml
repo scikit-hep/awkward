@@ -33,31 +33,29 @@ jobs:
     name: Run Tests
     strategy:
       matrix:
+        runs-on:
+          - windows-latest
+          - ubuntu-latest
+          - macos-11
         python-version:
           - '3.12'
           - '3.11'
           - '3.10'
           - '3.9'
           - '3.8'
-
-        runs-on:
-          - windows-latest
-          - ubuntu-latest
-          - macos-11
-
         python-architecture:
           - x64
-
         dependencies-kind:
-          - "full"
-
+          - full
         include:
           - python-version: '3.9'
             python-architecture: x86
             runs-on: windows-latest
+            dependencies-kind: minimal
           - python-version: '3.8'
+            python-architecture: x64
             runs-on: ubuntu-latest
-            dependencies-kind: "minimal"
+            dependencies-kind: minimal
 
     runs-on: ${{ matrix.runs-on }}
 
