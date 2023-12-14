@@ -1921,4 +1921,3 @@ int main(int /* argc */, char ** /* argv */) {
   test_list_string_builder();
   return 0;
 }
-
