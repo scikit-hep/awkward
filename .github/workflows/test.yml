@@ -157,8 +157,8 @@ jobs:
           # Cache invalidates daily by default
           cache-environment: true
           environment-name: awkward
+          # Need Python 3.8 for the cached wheels
           create-args: >-
-            # Need Python 3.8 for the cached wheels
             python=3.8
             numpy
             root
