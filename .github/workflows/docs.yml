@@ -112,7 +112,7 @@ jobs:
       working-directory: awkward-cpp
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: awkward-cpp-wasm
         path: awkward-cpp/dist/awkward*wasm32.whl
@@ -167,7 +167,7 @@ jobs:
       run: python -m build -w ./awkward-cpp
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: awkward-cpp-x86-64
         path: awkward-cpp/dist/awkward*.whl
@@ -187,7 +187,7 @@ jobs:
       run: pipx run build -w
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: awkward
         path: dist/awkward*.whl
@@ -234,7 +234,7 @@ jobs:
       run: jupyter nbconvert --to notebook --execute --inplace user-guide/how-to-use-in-cpp-cppyy.ipynb
 
     - name: Save executed notebook
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide/how-to-use-in-cpp-cppyy.ipynb
@@ -332,19 +332,19 @@ jobs:
       working-directory: docs
 
     - name: Upload docs artefact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: docs
         path: docs/_build/html
 
     - name: Upload Jupyter Book cache
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: doctrees
         path: docs/_build/doctrees
 
     - name: Upload Jupyter Book cache
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
