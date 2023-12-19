@@ -71,6 +71,9 @@ artifacts = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/awkward"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"./juliapkg.json" = "awkward/juliapkg.json"
+
 [tool.hatch.build.targets.wheel.hooks.version]
 path = "src/awkward/_version.py"
 
@@ -84,7 +87,7 @@ include = [
     "/CITATION.cff",
     "/CONTRIBUTING.md",
     "/README.md",
-    "/juliapkg.json"
+    "/juliapkg.json",
     "/requirements-test-full.txt",
     "/requirements-test-minimal.txt"
 ]
