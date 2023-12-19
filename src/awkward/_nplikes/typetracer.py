@@ -1451,6 +1451,19 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
 
+        if isinstance(axis, tuple):
+            raise NotImplementedError
+        if maybe_out is not None:
+            raise NotImplementedError
+
+        if axis is None:
+            return self.all(
+                cast(TypeTracerArray, self.reshape(x, (-1,))),
+                axis=axis,
+                keepdims=keepdims,
+                maybe_out=maybe_out,
+            )
+
         if axis < 0:
             axis = axis + x.ndim
 
@@ -1495,6 +1508,19 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     ) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
+
+        if isinstance(axis, tuple):
+            raise NotImplementedError
+        if maybe_out is not None:
+            raise NotImplementedError
+
+        if axis is None:
+            return self.min(
+                cast(TypeTracerArray, self.reshape(x, (-1,))),
+                axis=axis,
+                keepdims=keepdims,
+                maybe_out=maybe_out,
+            )
 
         if axis < 0:
             axis = axis + x.ndim
