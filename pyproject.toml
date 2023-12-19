@@ -86,7 +86,7 @@ include = [
     "/requirements-test-minimal.txt"
 ]
 artifacts = [
-    "/tests-cuda-kernels"
+    "/tests-cuda-kernels",
     "/src/awkward/_connect/header-only",
     "/src/awkward/_connect/cuda/_kernel_signatures.py"
 ]
