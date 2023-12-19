@@ -61,7 +61,6 @@ jobs:
 
     env:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
-      PIP_PRE: "1"
 
     steps:
       - uses: actions/checkout@v4
