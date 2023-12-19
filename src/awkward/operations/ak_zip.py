@@ -29,7 +29,7 @@ def zip(
 ):
     """
     Args:
-         arrays (mapping or sequence of arrays): Each value in this mapping or
+        arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
         depth_limit (None or int): If None, attempt to fully broadcast the
             `array` to all levels. If an int, limit the number of dimensions
