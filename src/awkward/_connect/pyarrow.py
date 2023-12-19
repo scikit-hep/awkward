@@ -919,8 +919,15 @@ def direct_Content_subclass_name(node):
         return out.__name__
 
 
+def is_revertable(akarray):
+    return hasattr(akarray, "__pyarrow_original")
+
+
 def remove_optiontype(akarray):
-    return akarray.__pyarrow_original
+    if callable(akarray.__pyarrow_original):
+        return akarray.__pyarrow_original()
+    else:
+        return akarray.__pyarrow_original
 
 
 def form_remove_optiontype(akform):
@@ -944,6 +951,17 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
 
         if len(layouts) == 1:
             return layouts[0]
+        elif any(is_revertable(arr) for arr in layouts):
+            assert all(is_revertable(arr) for arr in layouts)
+            # TODO: the callable argument to revertable is a premature(?) optimisation.
+            #       it would be better to obviate the need to compute both revertable and non revertable branches
+            #       e.g. by requesting a particular layout kind from the next `frombuffers` operation
+            return revertable(
+                ak.operations.concatenate(layouts, highlevel=False),
+                lambda: ak.operations.concatenate(
+                    [remove_optiontype(x) for x in layouts], highlevel=False
+                ),
+            )
         else:
             return ak.operations.concatenate(layouts, highlevel=False)
 
@@ -1044,7 +1062,19 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                 for batch in batches
                 if len(batch) > 0
             ]
-            return ak.operations.concatenate(arrays, highlevel=False)
+            if any(is_revertable(arr) for arr in arrays):
+                assert all(is_revertable(arr) for arr in arrays)
+                # TODO: the callable argument to revertable is a premature(?) optimisation.
+                #       it would be better to obviate the need to compute both revertable and non revertable branches
+                #       e.g. by requesting a particular layout kind from the next `frombuffers` operation
+                return revertable(
+                    ak.operations.concatenate(arrays, highlevel=False),
+                    lambda: ak.operations.concatenate(
+                        [remove_optiontype(x) for x in arrays], highlevel=False
+                    ),
+                )
+            else:
+                return ak.operations.concatenate(arrays, highlevel=False)
 
     elif (
         isinstance(obj, Iterable)
