@@ -238,7 +238,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
 
         return self._content._getitem_at(where)
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self

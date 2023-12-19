@@ -700,7 +700,7 @@ class Content(Meta):
     def _getitem_at(self, where: IndexType):
         raise NotImplementedError
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         raise NotImplementedError
 
     def _getitem_field(
