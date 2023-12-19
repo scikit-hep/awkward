@@ -32,7 +32,7 @@ def cartesian(
 ):
     """
     Args:
-         arrays (mapping or sequence of arrays): Each value in this mapping or
+        arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
