@@ -53,7 +53,7 @@ namespace awkward {
 
     /// @brief Access to all other options.
     template <std::size_t INDEX>
-    const OptionType<INDEX> &
+    const OptionType<INDEX>&
     option() const noexcept {
       return std::get<INDEX>(pars);
     }
