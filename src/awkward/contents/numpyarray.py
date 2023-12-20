@@ -321,7 +321,7 @@ class NumpyArray(NumpyMeta, Content):
         else:
             return out
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         try:
             out = self._data[start:stop]
         except IndexError as err:

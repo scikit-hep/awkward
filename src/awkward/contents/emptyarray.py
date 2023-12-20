@@ -182,7 +182,7 @@ class EmptyArray(EmptyMeta, Content):
     def _getitem_at(self, where: IndexType):
         raise ak._errors.index_error(self, where, "array is empty")
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         return self
 
     def _getitem_field(
