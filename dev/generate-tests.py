@@ -466,8 +466,16 @@ cuda_kernels_tests = [
     "awkward_ListArray_compact_offsets",
     "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_overlay_mask",
+    "awkward_IndexedArray_numnull_unique_64",
+    "awkward_NumpyArray_fill",
+    "awkward_ListArray_fill",
+    "awkward_IndexedArray_fill",
     "awkward_IndexedArray_fill_count",
+    "awkward_UnionArray_fillindex",
+    "awkward_UnionArray_fillindex_count",
     "awkward_UnionArray_fillna",
+    "awkward_UnionArray_filltags",
+    "awkward_UnionArray_filltags_const",
     "awkward_localindex",
     "awkward_IndexedArray_reduce_next_fix_offsets_64",
     "awkward_RegularArray_getitem_next_array_advanced",
@@ -479,6 +487,7 @@ cuda_kernels_tests = [
     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
     "awkward_RegularArray_getitem_carry",
     "awkward_RegularArray_localindex",
+    "awkward_RegularArray_rpad_and_clip_axis1",
     "awkward_RegularArray_getitem_next_range",
     "awkward_RegularArray_getitem_next_range_spreadadvanced",
     "awkward_RegularArray_getitem_next_array",
@@ -494,7 +503,9 @@ cuda_kernels_tests = [
     "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
     "awkward_ByteMaskedArray_reduce_next_64",
     "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+    "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
     "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+    "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
     "awkward_IndexedArray_flatten_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry",
@@ -507,6 +518,8 @@ cuda_kernels_tests = [
     # "awkward_ListOffsetArray_rpad_axis1",
     "awkward_MaskedArray_getitem_next_jagged_project",
     "awkward_UnionArray_project",
+    "awkward_UnionArray_simplify",
+    "awkward_UnionArray_simplify_one",
     "awkward_reduce_argmax",
     "awkward_reduce_argmin",
     "awkward_reduce_count_64",
@@ -575,13 +588,13 @@ def gencudakerneltests(specdict):
                     f.write(
                         "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
                     )
-                    f.write("def test_cpu" + spec.name + "_" + str(num) + "():\n")
+                    f.write("def test_cuda" + spec.name + "_" + str(num) + "():\n")
                     f.write(
                         " " * 4
                         + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
                     )
                 for test in spec.tests:
-                    f.write("def test_cuda_" + spec.name + "_" + str(num) + "():\n")
+                    f.write("def test_cuda" + spec.name + "_" + str(num) + "():\n")
                     num += 1
                     dtypes = []
                     for arg, val in test["inargs"].items():
@@ -609,12 +622,6 @@ def gencudakerneltests(specdict):
                                 dtypes.append("cupy." + typename)
                             elif count == 2:
                                 raise NotImplementedError
-                                # f.write(
-                                #     " " * 4
-                                #     + "{0} = ctypes.pointer(ctypes.cast((ctypes.c_{1}*len({0}[0]))(*{0}[0]),ctypes.POINTER(ctypes.c_{1})))\n".format(
-                                #         arg, typename
-                                #     )
-                                # )
                     cuda_string = (
                         "funcC = cupy_backend['"
                         + spec.templatized_kernel_name
