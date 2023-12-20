@@ -1866,9 +1866,9 @@ void test_string_builder() {
   StringBuilder<int64_t> builder;
   assert(builder.length() == 0);
 
-  builder.append_string("one");
-  builder.append_string("two");
-  builder.append_string("three");
+  builder.append("one");
+  builder.append("two");
+  builder.append("three");
 
   assert(builder.length() == 3);
 }
@@ -1878,14 +1878,14 @@ void test_list_string_builder() {
   assert(builder.length() == 0);
 
   builder.begin_list();
-  builder.content().append_string("one");
-  builder.content().append_string("two");
-  builder.content().append_string("three");
+  builder.content().append("one");
+  builder.content().append("two");
+  builder.content().append("three");
   builder.end_list();
 
   builder.begin_list();
-  builder.content().append_string("four");
-  builder.content().append_string("five");
+  builder.content().append("four");
+  builder.content().append("five");
   builder.end_list();
 }
 
@@ -1919,5 +1919,6 @@ int main(int /* argc */, char ** /* argv */) {
   test_categorical_form();
   test_string_builder();
   test_list_string_builder();
+
   return 0;
 }
