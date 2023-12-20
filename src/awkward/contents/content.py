@@ -525,7 +525,7 @@ class Content(Meta):
         elif isinstance(where, slice) and where.step is None:
             # Ensure that start, stop are non-negative!
             start, stop, _, _ = self._backend.index_nplike.derive_slice_for_length(
-                normalize_slice(where, backend=self._backend), self.length
+                normalize_slice(where, nplike=self._backend.index_nplike), self.length
             )
             return self._getitem_range(start, stop)
 
@@ -700,7 +700,7 @@ class Content(Meta):
     def _getitem_at(self, where: IndexType):
         raise NotImplementedError
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         raise NotImplementedError
 
     def _getitem_field(
