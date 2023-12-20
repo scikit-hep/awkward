@@ -15,7 +15,8 @@ awkward_RegularArray_rpad_and_clip_axis1(T* toindex,
     if (thread_id < length) {
       int64_t shorter = (target < size ? target : size);
       if (thready_id < shorter) {
-        toindex[thread_id*target + thready_id] = thread_id*size + thready_id;
+        toindex[thread_id * target + thready_id] =
+            thread_id * size + thready_id;
       } else if (thready_id >= shorter && thready_id < target) {
         toindex[(thread_id * target) + thready_id] = -1;
       }
