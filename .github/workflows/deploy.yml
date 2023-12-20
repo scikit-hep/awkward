@@ -83,7 +83,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check dist/*
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: distributions
         path: dist/*
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: header-only
         path: header-only
@@ -108,7 +108,7 @@ jobs:
       name: "pypi"
       url: "https://pypi.org/project/awkward/"
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: distributions
         path: dist
@@ -121,7 +121,7 @@ jobs:
     needs: [bundle-headers]
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: header-only
         path: header-only

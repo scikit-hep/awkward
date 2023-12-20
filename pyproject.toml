@@ -62,14 +62,12 @@ init = "awkward.numba:_register"
 "Releases" = "https://github.com/scikit-hep/awkward-1.0/releases"
 "Source Code" = "https://github.com/scikit-hep/awkward-1.0"
 
-[tool.hatch.build]
+[tool.hatch.build.targets.wheel]
+packages = ["src/awkward"]
 artifacts = [
     "/src/awkward/_connect/header-only",
     "/src/awkward/_connect/cuda/_kernel_signatures.py"
 ]
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/awkward"]
 
 [tool.hatch.build.targets.wheel.hooks.version]
 path = "src/awkward/_version.py"
@@ -88,7 +86,9 @@ include = [
     "/requirements-test-minimal.txt"
 ]
 artifacts = [
-    "/tests-cuda-kernels"
+    "/tests-cuda-kernels",
+    "/src/awkward/_connect/header-only",
+    "/src/awkward/_connect/cuda/_kernel_signatures.py"
 ]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
