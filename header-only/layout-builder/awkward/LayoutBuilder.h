@@ -397,7 +397,7 @@ namespace awkward {
       this->content().set_parameters(R"""("__array__": "char")""");
   }
 
-    void append_string(const std::string& value) {
+    void append(const std::string& value) {
         this->begin_list();
         for (const auto& c: value) {
             this->content().append(c);
