@@ -64,7 +64,7 @@ namespace awkward {
       quote(const std::string& x);
 
     /// @brief Exhaustive list of runtime errors possible in the ForthMachine.
-    enum class ForthError {
+    enum class EXPORT_SYMBOL ForthError {
         // execution can continue
         none,
 
