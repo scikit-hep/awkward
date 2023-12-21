@@ -1721,8 +1721,10 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         original_index = self._index.raw(self._backend.nplike)
         is_none = original_index < 0
         num_none = self._backend.index_nplike.count_nonzero(is_none)
-        if self.parameter("__array__") == "categorical" or self._content.length <= (
-            len(original_index) - num_none
+        if (
+            self.parameter("__array__") == "categorical"
+            or not self._backend.index_nplike.known_data
+            or self._content.length <= (len(original_index) - num_none)
         ):
             return ak.contents.IndexedOptionArray(
                 self._index, self._content.to_packed(), parameters=self._parameters
