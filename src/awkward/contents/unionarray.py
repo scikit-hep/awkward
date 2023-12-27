@@ -708,7 +708,7 @@ class UnionArray(UnionMeta[Content], Content):
         nextcarry = ak.index.Index64(
             tmpcarry.data[: lenout[0]], nplike=self._backend.index_nplike
         )
-        return self._contents[index]._carry(nextcarry, False)
+        return self._contents[index]._carry(nextcarry, True)
 
     @staticmethod
     def regular_index(
