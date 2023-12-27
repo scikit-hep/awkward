@@ -947,7 +947,7 @@ def _recurse_union_non_union(
 
         # Index over them
         index = ak.index.Index64(index_data)
-        return ak.contents.IndexedArray(index, next_content)
+        return ak.contents.IndexedArray.simplified(index, next_content)
     else:
         # Find the first content whose type equals the given type
         for tag, content in enumerate(layout.contents):  # noqa: B007
