@@ -29,3 +29,21 @@ def test_indexedarray_merged_kernel():
     z = x._reverse_merge(y)
     cuda_z = ak.to_backend(z, "cuda")
     assert ak.to_list(cuda_z) == ak.to_list(z)
+
+# def test_unionarray_simplify():
+#     one = ak.operations.from_iter([5, 4, 3, 2, 1], highlevel=False)
+#     two = ak.operations.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
+#     three = ak.operations.from_iter([1.1, 2.2, 3.3], highlevel=False)
+
+#     tags2 = ak.index.Index8(np.array([0, 1, 0, 1, 0, 0, 1], dtype=np.int8))
+#     index2 = ak.index.Index32(np.array([0, 0, 1, 1, 2, 3, 2], dtype=np.int32))
+#     inner = ak.contents.UnionArray(tags2, index2, [two, three])
+#     tags1 = ak.index.Index8(
+#         np.array([0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0], dtype=np.int8)
+#     )
+#     index1 = ak.index.Index64(
+#         np.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=np.int64)
+#     )
+#     outer = ak.contents.UnionArray.simplified(tags1, index1, [one, inner])
+#     cuda_outer = ak.to_backend(outer, "cuda")
+#     assert ak.operations.to_list(cuda_outer) == ak.operations.to_list(outer)
