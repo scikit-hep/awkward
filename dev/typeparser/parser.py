@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 # v2: keep this file, but drop the two *_v1 functions
-from __future__ import annotations
 
 import awkward as ak
+
 from awkward._typeparser.generated_parser import Lark_StandAlone, Transformer
 
 
