@@ -300,7 +300,7 @@ class RegularArray(RegularMeta[Content], Content):
         start, stop = where * size_scalar, (where + 1) * size_scalar
         return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         index_nplike = self._backend.index_nplike
         if not index_nplike.known_data:
             self._touch_shape(recursive=False)

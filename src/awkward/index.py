@@ -13,6 +13,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
+from awkward._slicing import normalize_slice
 from awkward._typing import Any, DType, Final, Self, cast
 
 np: Final = NumpyMetadata.instance()
@@ -214,6 +215,9 @@ class Index:
         return _dtype_to_form[self._data.dtype]
 
     def __getitem__(self, where):
+        if isinstance(where, slice):
+            where = normalize_slice(where, nplike=self.nplike)
+
         out = self._data[where]
 
         if hasattr(out, "shape") and len(out.shape) != 0:

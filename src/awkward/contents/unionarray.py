@@ -552,7 +552,7 @@ class UnionArray(UnionMeta[Content], Content):
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -708,7 +708,7 @@ class UnionArray(UnionMeta[Content], Content):
         nextcarry = ak.index.Index64(
             tmpcarry.data[: lenout[0]], nplike=self._backend.index_nplike
         )
-        return self._contents[index]._carry(nextcarry, False)
+        return self._contents[index]._carry(nextcarry, True)
 
     @staticmethod
     def regular_index(
