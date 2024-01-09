@@ -1,3 +1,7 @@
+# flake8: noqa
+# fmt: off
+# pylint: skip-file
+
 # diff dev/typeparser/generated_parser.py src/awkward/types/_awkward_datashape_parser.py
 
 1,2c1,6
