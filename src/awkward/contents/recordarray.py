@@ -1242,12 +1242,10 @@ class RecordArray(RecordMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         return RecordArray(
             [
-                x.to_packed()
-                if x.length == self._length
-                else x[: self._length].to_packed()
+                x[: self._length].to_packed(True) if recursive else x[: self._length]
                 for x in self._contents
             ],
             self._fields,
