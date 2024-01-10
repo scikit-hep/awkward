@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from inspect import signature
 
 import awkward as ak
-from awkward._errors import deprecate
 from awkward._meta.emptymeta import EmptyMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
@@ -59,34 +57,8 @@ class EmptyForm(EmptyMeta, Form):
     def type(self):
         return ak.types.UnknownType()
 
-    def to_NumpyForm(self, *args, **kwargs):
-        def legacy_impl(dtype):
-            deprecate(
-                f"the `dtype` parameter in {type(self).__name__}.to_NumpyForm is deprecated, "
-                f"in favour of a new `primitive` argument. Pass `primitive` by keyword to opt-in to the new behavior.",
-                version="2.4.0",
-            )
-            return ak.forms.numpyform.from_dtype(dtype)
-
-        def new_impl(*, primitive):
-            return ak.forms.numpyform.NumpyForm(primitive)
-
-        dispatch_table = [
-            new_impl,
-            legacy_impl,
-        ]
-        for func in dispatch_table:
-            sig = signature(func)
-            try:
-                bound_arguments = sig.bind(*args, **kwargs)
-            except TypeError:
-                continue
-            else:
-                return func(*bound_arguments.args, **bound_arguments.kwargs)
-        raise AssertionError(
-            f"{type(self).__name__}.to_NumpyForm accepts either the new `primitive` argument as a keyword-only "
-            f"argument, or the legacy `dtype` argument as positional or keyword"
-        )
+    def to_NumpyForm(self, primitive):
+        return ak.forms.numpyform.NumpyForm(primitive)
 
     def _columns(self, path, output, list_indicator):
         output.append(".".join(path))
