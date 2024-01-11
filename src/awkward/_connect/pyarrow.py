@@ -1051,9 +1051,8 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         if len(batches) == 0:
             # create an empty array following the input schema
             return form_handle_arrow(
-                obj.schema,
-                pass_empty_field=pass_empty_field,
-            ).length_zero_array(highlevel=False)
+                obj.schema, pass_empty_field=pass_empty_field
+            ).length_zero_array()
         elif len(batches) == 1:
             return handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
         else:

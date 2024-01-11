@@ -1654,7 +1654,7 @@ def _attach_report(
 def typetracer_with_report(
     form: ak.forms.Form, getkey: Callable[[Form, str], str]
 ) -> tuple[ak.contents.Content, TypeTracerReport]:
-    layout = form.length_zero_array(highlevel=False).to_typetracer(forget_length=True)
+    layout = form.length_zero_array().to_typetracer(forget_length=True)
     report = TypeTracerReport()
     _attach_report(layout, form, report, getkey)
     return layout, report
