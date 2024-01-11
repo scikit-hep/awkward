@@ -290,8 +290,11 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
 
     backend = next((layout.backend for layout in layouts), cpu)
     if posaxis == 0:
+        # Translate nested field names to nested field indices
         if fields is not None:
-            nested = [i for i, name in enumerate(fields) if name in nested]
+            nested_as_index = [i for i, name in enumerate(fields) if name in nested]
+        else:
+            nested_as_index = nested
 
         indexes = [
             ak.index.Index64(backend.index_nplike.reshape(x, (-1,)))
@@ -309,10 +312,15 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
 
         result = ak.contents.RecordArray(outs, fields, parameters=parameters)
         for i in range(len(array_layouts))[::-1]:
-            if i in nested:
+            if i in nested_as_index:
                 result = ak.contents.RegularArray(result, layouts[i + 1].length, 0)
 
     else:
+        # Translate nested field names to nested field indices
+        if fields is not None:
+            nested_as_index = [i for i, name in enumerate(fields) if name in nested]
+        else:
+            nested_as_index = nested
 
         def add_outer_dimensions(
             layout: ak.contents.Content, n: int
@@ -369,7 +377,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
         axes_to_flatten = [
             posaxis + i + 1
             for i, _ in enumerate(array_layouts)
-            if i < len(array_layouts) - 1 and i not in nested
+            if i < len(array_layouts) - 1 and i not in nested_as_index
         ]
         # This list *must* be sorted in reverse order
         axes_to_flatten.reverse()
