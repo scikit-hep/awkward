@@ -97,13 +97,13 @@ class UnionForm(UnionMeta[Form], Form):
         return ak.contents.UnionArray.simplified(
             ak.index._form_to_zero_length(tags),
             ak.index._form_to_zero_length(index),
-            [x.length_zero_array(highlevel=False) for x in contents],
+            [x.length_zero_array() for x in contents],
             parameters=parameters,
         ).form
 
     def _union_of_optionarrays(self, index, parameters):
         return (
-            self.length_zero_array(highlevel=False)
+            self.length_zero_array()
             ._union_of_optionarrays(ak.index._form_to_zero_length(index), parameters)
             .form
         )
