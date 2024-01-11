@@ -312,7 +312,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
 
         result = ak.contents.RecordArray(outs, fields, parameters=parameters)
         for i in range(len(array_layouts))[::-1]:
-            if i in nested:
+            if i in nested_as_index:
                 result = ak.contents.RegularArray(result, layouts[i + 1].length, 0)
 
     else:
