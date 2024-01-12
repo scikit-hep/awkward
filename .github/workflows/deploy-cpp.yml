@@ -48,8 +48,9 @@ jobs:
     - name: Check metadata
       run: pipx run twine check awkward-cpp/dist/*
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
+        name: awkward-sdist
         path: awkward-cpp/dist/*.tar.gz
 
   build_wheels:
@@ -109,8 +110,9 @@ jobs:
         )
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
+        name: awkward-wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.build }}
         path: wheelhouse/*.whl
 
 
@@ -158,8 +160,9 @@ jobs:
         )
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
+        name: awkward-wheels-${{ matrix.arch }}-py${{ matrix.python }}
         path: wheelhouse/*.whl
 
   upload_all:
@@ -172,9 +175,9 @@ jobs:
       name: "pypi"
       url: "https://pypi.org/project/awkward-cpp/"
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: artifact
+        pattern: "awkward*"
         path: dist
 
     - uses: pypa/gh-action-pypi-publish@v1.8.11
