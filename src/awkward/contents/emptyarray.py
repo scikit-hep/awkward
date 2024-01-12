@@ -437,7 +437,7 @@ class EmptyArray(EmptyMeta, Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         return self
 
     def _to_list(self, behavior, json_conversions):
