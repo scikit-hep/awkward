@@ -658,6 +658,37 @@ def gencudakerneltests(specdict):
                                 f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                     f.write("\n")
 
+def gencudaunittests():
+    print("Generating Unit Tests for CUDA kernels")
+
+    unit_tests_cuda_kernels = os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels-explicit")
+    if os.path.exists(unit_tests_cuda_kernels):
+        shutil.rmtree(unit_tests_cuda_kernels)
+    os.mkdir(unit_tests_cuda_kernels)
+    with open(os.path.join(unit_tests_cuda_kernels, "__init__.py"), "w") as f:
+        f.write(
+            f"""# AUTO GENERATED ON {reproducible_datetime()}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+"""
+        )
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
+        data = json.load(f)["unit-tests"]
+    for function in data:
+            num = 0
+            func = "test_cuda" + function["name"] + ".py"
+            with open(
+                os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels-explicit", func),        
+                "w",
+            ) as file:
+                file.write("import pytest\nimport cupy\n\n")
 
 def genunittests():
     print("Generating Unit Tests")
@@ -715,3 +746,4 @@ if __name__ == "__main__":
     gencpukerneltests(specdict)
     genunittests()
     gencudakerneltests(specdict)
+    gencudaunittests()
