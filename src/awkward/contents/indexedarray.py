@@ -1148,13 +1148,13 @@ class IndexedArray(IndexedMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         if self.parameter("__array__") == "categorical":
-            return IndexedArray(
-                self._index, self._content.to_packed(), parameters=self._parameters
-            )
+            content = self._content.to_packed(True) if recursive else self._content
+            return IndexedArray(self._index, content, parameters=self._parameters)
         else:
-            return self.project().to_packed()
+            projected = self.project()
+            return projected.to_packed(True) if recursive else projected
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
