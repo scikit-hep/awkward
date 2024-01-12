@@ -63,21 +63,21 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         arch: [auto64]
-        build: ["cp*", "pp*"]
+        build: ["cp", "pp"]
 
         include:
         - os: macos-latest
           type: "Universal"
           arch: universal2
-          build: "cp*"
+          build: "cp"
 
         - os: windows-latest
           arch: auto64
-          build: "cp*"
+          build: "cp"
 
         - os: windows-latest
           arch: auto32
-          build: "cp{38,39}-*"
+          build: "cp{38,39}-"
 
     steps:
     - uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
 
     - uses: pypa/cibuildwheel@v2.16.2
       env:
-        CIBW_BUILD: ${{ matrix.build }}
+        CIBW_BUILD: "${{ matrix.build }}*"
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
         config-file: cibuildwheel.toml
