@@ -8,7 +8,7 @@ import pytest  # noqa: F401
 import awkward as ak
 
 
-def test_nested_exis_0():
+def test_nested_axis_0():
     arrays = {"x": np.arange(4), "y": ["this", "that", "foo", "bar!"]}
 
     result = ak.cartesian(arrays, nested=True, axis=0)

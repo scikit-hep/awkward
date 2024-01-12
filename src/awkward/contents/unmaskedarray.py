@@ -564,8 +564,11 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
-        return UnmaskedArray(self._content.to_packed(), parameters=self._parameters)
+    def to_packed(self, recursive: bool = True) -> Self:
+        return UnmaskedArray(
+            self._content.to_packed(True) if recursive else self._content,
+            parameters=self._parameters,
+        )
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:

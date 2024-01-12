@@ -12,7 +12,6 @@ from glob import escape as escape_glob
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
-from awkward._errors import deprecate
 from awkward._meta.meta import Meta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -492,14 +491,14 @@ class Form(Meta):
         raise NotImplementedError
 
     def length_zero_array(
-        self, *, backend=numpy_backend, highlevel=True, behavior=None
+        self, *, backend=numpy_backend, highlevel=False, behavior=None
     ):
         if highlevel:
-            deprecate(
-                "The `highlevel=True` variant of `Form.length_zero_array` is now deprecated. "
+            raise ValueError(
+                "The `highlevel=True` variant of `Form.length_zero_array` has been removed. "
                 "Please use `ak.Array(form.length_zero_array(...), behavior=...)` if an `ak.Array` is required.",
-                version="2.3.0",
             )
+
         return ak.operations.ak_from_buffers._impl(
             form=self,
             length=0,
@@ -507,18 +506,19 @@ class Form(Meta):
             buffer_key="",
             backend=backend,
             byteorder=ak._util.native_byteorder,
-            highlevel=highlevel,
+            highlevel=False,
             behavior=behavior,
             attrs=None,
             simplify=False,
         )
 
-    def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
+    def length_one_array(
+        self, *, backend=numpy_backend, highlevel=False, behavior=None
+    ):
         if highlevel:
-            deprecate(
-                "The `highlevel=True` variant of `Form.length_zero_array` is now deprecated. "
-                "Please use `ak.Array(form.length_zero_array(...), behavior=...)` if an `ak.Array` is required.",
-                version="2.3.0",
+            raise ValueError(
+                "The `highlevel=True` variant of `Form.length_one_array` has been removed. "
+                "Please use `ak.Array(form.length_one_array(...), behavior=...)` if an `ak.Array` is required.",
             )
 
         # The naive implementation of a length-1 array requires that we have a sufficiently
@@ -616,7 +616,7 @@ class Form(Meta):
             buffer_key="{form_key}",
             backend=backend,
             byteorder=ak._util.native_byteorder,
-            highlevel=highlevel,
+            highlevel=False,
             behavior=behavior,
             attrs=None,
             simplify=False,

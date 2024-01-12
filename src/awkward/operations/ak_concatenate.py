@@ -421,7 +421,7 @@ def enforce_concatenated_form(layout, form):
         )
     # Unknowns become canonical forms
     elif layout.is_unknown and not form.is_unknown:
-        return form.length_zero_array(highlevel=False).to_backend(layout.backend)
+        return form.length_zero_array().to_backend(layout.backend)
 
     ############## Unions #####################################################
     # Merge invariant (drop union)
@@ -467,9 +467,7 @@ def enforce_concatenated_form(layout, form):
                 union_has_exact_type = True
             else:
                 contents.append(
-                    content_form.length_zero_array(highlevel=False).to_backend(
-                        layout.backend
-                    )
+                    content_form.length_zero_array().to_backend(layout.backend)
                 )
 
         # Otherwise, find anything we can merge with
@@ -478,18 +476,16 @@ def enforce_concatenated_form(layout, form):
 
             for content_form in form.contents:
                 # TODO check forms mergeable
-                content_layout = content_form.length_zero_array(
-                    highlevel=False
-                ).to_backend(layout.backend)
+                content_layout = content_form.length_zero_array().to_backend(
+                    layout.backend
+                )
                 if mergeable(content_layout, layout_to_merge):
                     contents.insert(
                         0, enforce_concatenated_form(layout_to_merge, content_form)
                     )
                 else:
                     contents.append(
-                        content_form.length_zero_array(highlevel=False).to_backend(
-                            layout.backend
-                        )
+                        content_form.length_zero_array().to_backend(layout.backend)
                     )
 
         return ak.contents.UnionArray(
@@ -512,8 +508,7 @@ def enforce_concatenated_form(layout, form):
                 "merge result should only grow or preserve a union's cardinality"
             )
         form_contents = [
-            f.length_zero_array(highlevel=False).to_backend(layout.backend)
-            for f in form.contents
+            f.length_zero_array().to_backend(layout.backend) for f in form.contents
         ]
         form_indices = range(len(form_contents))
         for form_projection_indices in permutations(form_indices, len(layout.contents)):

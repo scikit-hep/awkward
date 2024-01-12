@@ -1079,7 +1079,7 @@ class Content(Meta):
             },
         )
 
-    def to_packed(self) -> Content:
+    def to_packed(self, recursive: bool = True) -> Content:
         raise NotImplementedError
 
     def to_list(self, behavior: dict | None = None) -> list:
