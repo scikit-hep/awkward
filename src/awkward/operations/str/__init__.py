@@ -136,7 +136,7 @@ def _apply_through_arrow(
     if backend is typetracer:
         converted_args = [
             to_arrow(
-                x.form.length_zero_array(highlevel=False),
+                x.form.length_zero_array(),
                 extensionarray=False,
                 string_to32=string_to32,
                 bytestring_to32=bytestring_to32,
@@ -256,7 +256,7 @@ def _get_split_action(
                             parameters={"__array__": "string"},
                         ),
                     )
-                    .length_zero_array(highlevel=False)
+                    .length_zero_array()
                     .to_typetracer(forget_length=True)
                 )
 
@@ -270,7 +270,7 @@ def _get_split_action(
                             parameters={"__array__": "bytestring"},
                         ),
                     )
-                    .length_zero_array(highlevel=False)
+                    .length_zero_array()
                     .to_typetracer(forget_length=True)
                 )
         else:

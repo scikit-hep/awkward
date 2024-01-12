@@ -95,7 +95,7 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout, maybe_counts_layout = ensure_same_backend(
-            ctx.unwrap(array, allow_record=False, primitive_policy="error").to_packed(),
+            ctx.unwrap(array, allow_record=False, primitive_policy="error"),
             ctx.unwrap(
                 counts,
                 allow_record=False,
@@ -208,7 +208,40 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
 
     else:
 
+        def recursively_apply_to_content(
+            action, layout, depth, depth_context, lateral_context, options, **kwargs
+        ):
+            if layout.is_list or layout.is_option:
+                return layout.copy(
+                    content=layout.content._recursively_apply(
+                        action,
+                        depth + 1 if layout.is_list else depth,
+                        depth_context,
+                        lateral_context,
+                        options,
+                    )
+                )
+            elif layout.is_union or layout.is_record:
+                return layout.copy(
+                    contents=[
+                        c._recursively_apply(
+                            action,
+                            depth,
+                            depth_context,
+                            lateral_context,
+                            options,
+                        )
+                        for c in layout.contents
+                    ]
+                )
+            elif layout.is_numpy or layout.is_unknown:
+                return layout
+            else:
+                raise AssertionError
+
         def apply(layout, depth, backend, **kwargs):
+            layout = layout.to_packed(False)
+
             posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
@@ -244,6 +277,8 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
                 positions[0] = 0
 
                 return ak.contents.ListOffsetArray(ak.index.Index64(positions), content)
+            else:
+                return recursively_apply_to_content(apply, layout, depth, **kwargs)
 
         out = ak._do.recursively_apply(layout, apply)
 
