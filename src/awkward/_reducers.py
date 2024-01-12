@@ -129,6 +129,14 @@ class ArgMin(KernelReducer):
     preferred_dtype: Final = np.int64
     needs_position: Final = True
 
+    @classmethod
+    def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
+        dtype = np.dtype(dtype)
+        if dtype == np.bool_:
+            return np.dtype(np.int8)
+        else:
+            return super()._dtype_for_kernel(dtype)
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -182,6 +190,14 @@ class ArgMax(KernelReducer):
     name: Final = "argmax"
     preferred_dtype: Final = np.int64
     needs_position: Final = True
+
+    @classmethod
+    def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
+        dtype = np.dtype(dtype)
+        if dtype == np.bool_:
+            return np.dtype(np.int8)
+        else:
+            return super()._dtype_for_kernel(dtype)
 
     def apply(
         self,
