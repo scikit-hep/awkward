@@ -193,11 +193,11 @@ class Record:
     def _getitem_fields(self, where, only_fields: tuple[str, ...] = ()):
         return self._array._getitem_fields(where)._getitem_at(self._at)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         if self._array.length == 1:
-            return Record(self._array.to_packed(), self._at)
+            return Record(self._array.to_packed(recursive), self._at)
         else:
-            return Record(self._array[self._at : self._at + 1].to_packed(), 0)
+            return Record(self._array[self._at : self._at + 1].to_packed(recursive), 0)
 
     def to_list(self, behavior=None):
         return self._to_list(behavior, None)

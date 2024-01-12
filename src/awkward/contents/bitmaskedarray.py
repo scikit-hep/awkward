@@ -771,13 +771,15 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         if self._content.is_record:
             next = self.to_IndexedOptionArray64()
 
-            content = next._content.to_packed()
-            if content.length > self._length:
-                content = content[: self._length]
+            content = (
+                next._content[: self._length].to_packed(True)
+                if recursive
+                else next._content[: self._length]
+            )
 
             return ak.contents.IndexedOptionArray(
                 next._index, content, parameters=next._parameters
@@ -790,9 +792,11 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             else:
                 mask = self._mask[:excess_length]
 
-            content = self._content.to_packed()
-            if content.length > self._length:
-                content = content[: self._length]
+            content = (
+                self._content[: self._length].to_packed(True)
+                if recursive
+                else self._content[: self._length]
+            )
 
             return BitMaskedArray(
                 mask,
