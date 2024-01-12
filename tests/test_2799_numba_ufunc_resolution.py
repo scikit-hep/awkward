@@ -13,7 +13,9 @@ numba = pytest.importorskip("numba")
 NUMBA_HAS_NEP_50 = packaging.version.parse(
     numba.__version__
 ) >= packaging.version.Version("0.59.0")
-
+NUMBA_OLDER_THAN_58 = packaging.version.parse(
+    numba.__version__
+) < packaging.version.Version("0.58.0")
 
 ak.numba.register_and_check()
 
@@ -22,7 +24,7 @@ ak.numba.register_and_check()
 def test_numba_ufunc_nep_50():
     raise NotImplementedError
 
-    @numba.vectorize
+    @numba.vectorize(nopython=True)
     def add(x, y):
         return x + y
 
@@ -37,8 +39,11 @@ def test_numba_ufunc_nep_50():
 
 
 @pytest.mark.skipif(NUMBA_HAS_NEP_50, reason="Numba has NEP-50 support")
+@pytest.mark.skipif(
+    NUMBA_OLDER_THAN_58, reason="Numba has a known bug with type dispatch for <0.58"
+)
 def test_numba_ufunc_legacy():
-    @numba.vectorize
+    @numba.vectorize(nopython=True)
     def add(x, y):
         return x + y
 

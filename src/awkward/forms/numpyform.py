@@ -5,12 +5,11 @@ from __future__ import annotations
 from collections.abc import Callable, Iterable, Iterator
 
 import awkward as ak
-from awkward._errors import deprecate
 from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._typing import TYPE_CHECKING, Any, DType, JSONMapping, Self, final
-from awkward._util import UNSET, Sentinel
+from awkward._util import UNSET
 from awkward.forms.form import Form, _SpecifierMatcher
 
 __all__ = ("NumpyForm",)
@@ -25,7 +24,7 @@ def from_dtype(
     dtype,
     parameters: JSONMapping | None = None,
     *,
-    time_units_as_parameter: bool | Sentinel = UNSET,
+    time_units_as_parameter: bool = False,
 ):
     if dtype.subdtype is None:
         inner_shape = ()
@@ -33,28 +32,10 @@ def from_dtype(
         inner_shape = dtype.shape
         dtype = dtype.subdtype[0]
 
-    if time_units_as_parameter is UNSET:
-        time_units_as_parameter = True
-
     if time_units_as_parameter:
-        deprecate(
-            "from_dtype conversion of temporal units to generic `datetime64` and `timedelta64` types is deprecated, "
-            "pass `time_units_as_parameter=False` to disable this warning.",
-            version="2.4.0",
+        raise ValueError(
+            "`time_units_as_parameter=True` is no longer supported; NumPy's time units are no longer converted into Awkward parameters"
         )
-
-    if time_units_as_parameter and issubclass(
-        dtype.type, (np.datetime64, np.timedelta64)
-    ):
-        unit, step = np.datetime_data(dtype)
-        if unit != "generic":
-            unitstr = ("" if step == 1 else str(step)) + unit
-            if parameters is None:
-                parameters = {}
-            else:
-                parameters = parameters.copy()
-            parameters["__unit__"] = unitstr
-            dtype = np.dtype(dtype.type)
 
     return NumpyForm(
         primitive=ak.types.numpytype.dtype_to_primitive(dtype),
