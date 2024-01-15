@@ -688,8 +688,6 @@ def gencudaunittests(specdict):
 
 """
         )
-    with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
-        data = json.load(f)["unit-tests"]
 
     for spec in specdict.values():
         if spec.templatized_kernel_name in cuda_kernels_tests and spec.templatized_kernel_name in list(cuda_unit_tests.keys()):
