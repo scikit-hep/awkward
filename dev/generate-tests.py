@@ -658,6 +658,7 @@ def gencudakerneltests(specdict):
                                 f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                     f.write("\n")
 
+
 def cudaunittestmap():
     with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
         data = json.load(f)["unit-tests"]
@@ -666,11 +667,14 @@ def cudaunittestmap():
         cuda_unit_tests_map[function["name"]] = function["tests"]
     return cuda_unit_tests_map
 
+
 def gencudaunittests(specdict):
     print("Generating Unit Tests for CUDA kernels")
 
     cuda_unit_tests = cudaunittestmap()
-    unit_tests_cuda_kernels = os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels-explicit")
+    unit_tests_cuda_kernels = os.path.join(
+        CURRENT_DIR, "..", "tests-cuda-kernels-explicit"
+    )
     if os.path.exists(unit_tests_cuda_kernels):
         shutil.rmtree(unit_tests_cuda_kernels)
     os.mkdir(unit_tests_cuda_kernels)
@@ -690,7 +694,10 @@ def gencudaunittests(specdict):
         )
 
     for spec in specdict.values():
-        if spec.templatized_kernel_name in cuda_kernels_tests and spec.templatized_kernel_name in list(cuda_unit_tests.keys()):
+        if (
+            spec.templatized_kernel_name in cuda_kernels_tests
+            and spec.templatized_kernel_name in list(cuda_unit_tests.keys())
+        ):
             func = "test_cuda" + spec.templatized_kernel_name + ".py"
             num = 0
             with open(
@@ -698,7 +705,7 @@ def gencudaunittests(specdict):
                 "w",
             ) as file:
                 file.write(
-                        f"""# AUTO GENERATED ON {reproducible_datetime()}
+                    f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -721,7 +728,13 @@ def gencudaunittests(specdict):
                 )
                 for test in cuda_unit_tests[spec.templatized_kernel_name]:
                     num += 1
-                    funcName = "def test_" + spec.templatized_kernel_name + "_" + str(num) + "():\n"
+                    funcName = (
+                        "def test_"
+                        + spec.templatized_kernel_name
+                        + "_"
+                        + str(num)
+                        + "():\n"
+                    )
                     file.write(funcName)
                     dtypes = []
                     for arg, val in test["outputs"].items():
@@ -733,7 +746,9 @@ def gencudaunittests(specdict):
                             ).typename
                         )
                         if "List" not in typename:
-                            file.write(" " * 4 + arg + " = " + str([123] * len(val)) + "\n")
+                            file.write(
+                                " " * 4 + arg + " = " + str([123] * len(val)) + "\n"
+                            )
                         if "List" in typename:
                             count = typename.count("List")
                             typename = gettypename(typename)
