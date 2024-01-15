@@ -658,9 +658,18 @@ def gencudakerneltests(specdict):
                                 f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                     f.write("\n")
 
-def gencudaunittests():
+def cudaunittestmap():
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
+        data = json.load(f)["unit-tests"]
+    cuda_unit_tests_map = {}
+    for function in data:
+        cuda_unit_tests_map[function["name"]] = function["tests"]
+    return cuda_unit_tests_map
+
+def gencudaunittests(specdict):
     print("Generating Unit Tests for CUDA kernels")
 
+    cuda_unit_tests = cudaunittestmap()
     unit_tests_cuda_kernels = os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels-explicit")
     if os.path.exists(unit_tests_cuda_kernels):
         shutil.rmtree(unit_tests_cuda_kernels)
@@ -681,14 +690,127 @@ def gencudaunittests():
         )
     with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
         data = json.load(f)["unit-tests"]
-    for function in data:
+
+    for spec in specdict.values():
+        if spec.templatized_kernel_name in cuda_kernels_tests and spec.templatized_kernel_name in list(cuda_unit_tests.keys()):
+            func = "test_cuda" + spec.templatized_kernel_name + ".py"
             num = 0
-            func = "test_cuda" + function["name"] + ".py"
             with open(
-                os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels-explicit", func),        
+                os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels-explicit", func),
                 "w",
             ) as file:
-                file.write("import pytest\nimport cupy\n\n")
+                file.write(
+                        f"""# AUTO GENERATED ON {reproducible_datetime()}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+"""
+                )
+
+                file.write(
+                    "import cupy\n"
+                    "import pytest\n\n"
+                    "import awkward as ak\n"
+                    "import awkward._connect.cuda as ak_cu\n"
+                    "from awkward._backends.cupy import CupyBackend\n\n"
+                    "cupy_backend = CupyBackend.instance()\n\n"
+                )
+                for test in cuda_unit_tests[spec.templatized_kernel_name]:
+                    num += 1
+                    funcName = "def test_" + spec.templatized_kernel_name + "_" + str(num) + "():\n"
+                    file.write(funcName)
+                    dtypes = []
+                    for arg, val in test["outputs"].items():
+                        typename = remove_const(
+                            next(
+                                argument
+                                for argument in spec.args
+                                if argument.name == arg
+                            ).typename
+                        )
+                        if "List" not in typename:
+                            file.write(" " * 4 + arg + " = " + str([123] * len(val)) + "\n")
+                        if "List" in typename:
+                            count = typename.count("List")
+                            typename = gettypename(typename)
+                            if typename == "bool" or typename == "float":
+                                typename = typename + "_"
+                            if count == 1:
+                                file.write(
+                                    " " * 4
+                                    + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                        arg, str([123] * len(val)), typename
+                                    )
+                                )
+                                dtypes.append("cupy." + typename)
+                            elif count == 2:
+                                raise NotImplementedError
+                    for arg, val in test["inputs"].items():
+                        typename = remove_const(
+                            next(
+                                argument
+                                for argument in spec.args
+                                if argument.name == arg
+                            ).typename
+                        )
+                        if "List" not in typename:
+                            file.write(" " * 4 + arg + " = " + str(val) + "\n")
+                        if "List" in typename:
+                            count = typename.count("List")
+                            typename = gettypename(typename)
+                            if typename == "bool" or typename == "float":
+                                typename = typename + "_"
+                            if count == 1:
+                                file.write(
+                                    " " * 4
+                                    + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                        arg, val, typename
+                                    )
+                                )
+                                dtypes.append("cupy." + typename)
+                            elif count == 2:
+                                raise NotImplementedError
+
+                    cuda_string = (
+                        "funcC = cupy_backend['"
+                        + spec.templatized_kernel_name
+                        + "', {}]\n".format(", ".join(dtypes))
+                    )
+                    file.write(" " * 4 + cuda_string)
+                    args = ""
+                    count = 0
+                    for arg in spec.args:
+                        if count == 0:
+                            args += arg.name
+                            count += 1
+                        else:
+                            args += ", " + arg.name
+                    file.write(" " * 4 + "funcC(" + args + ")\n")
+                    file.write(
+                        """
+    try:
+        ak_cu.synchronize_cuda()
+    except:
+        pytest.fail("This test case shouldn't have raised an error")
+"""
+                    )
+                    for arg, val in test["outputs"].items():
+                        file.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
+                        if isinstance(val, list):
+                            file.write(
+                                " " * 4
+                                + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                            )
+                        else:
+                            file.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
+                    file.write("\n")
+
 
 def genunittests():
     print("Generating Unit Tests")
@@ -746,4 +868,4 @@ if __name__ == "__main__":
     gencpukerneltests(specdict)
     genunittests()
     gencudakerneltests(specdict)
-    gencudaunittests()
+    gencudaunittests(specdict)
