@@ -504,8 +504,10 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 def _scalar_type_of(obj) -> DType:
     if is_unknown_scalar(obj):
         return obj.dtype
+    elif isinstance(obj, numpy.generic):
+        return numpy.dtype(obj)
     else:
-        return numpy.obj2sctype(obj)
+        return numpy.array(obj).dtype
 
 
 def try_touch_data(array: Any):
