@@ -32,6 +32,7 @@ jobs:
   run-tests:
     name: Run Tests
     strategy:
+      fail-fast: false
       matrix:
         runs-on:
           - windows-latest
