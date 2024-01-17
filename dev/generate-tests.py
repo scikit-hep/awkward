@@ -698,7 +698,7 @@ def gencudaunittests(specdict):
             spec.templatized_kernel_name in cuda_kernels_tests
             and spec.templatized_kernel_name in list(cuda_unit_tests.keys())
         ):
-            func = "test_cuda" + spec.templatized_kernel_name + ".py"
+            func = "test_cuda" + spec.name + ".py"
             num = 0
             with open(
                 os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels-explicit", func),
@@ -728,42 +728,18 @@ def gencudaunittests(specdict):
                 )
                 for test in cuda_unit_tests[spec.templatized_kernel_name]:
                     num += 1
-                    funcName = (
-                        "def test_"
-                        + spec.templatized_kernel_name
-                        + "_"
-                        + str(num)
-                        + "():\n"
-                    )
-                    file.write(funcName)
+                    funcName = "def test_" + spec.name + "_" + str(num) + "():\n"
                     dtypes = []
-                    for arg, val in test["outputs"].items():
-                        typename = remove_const(
-                            next(
-                                argument
-                                for argument in spec.args
-                                if argument.name == arg
-                            ).typename
-                        )
-                        if "List" not in typename:
-                            file.write(
-                                " " * 4 + arg + " = " + str([123] * len(val)) + "\n"
-                            )
+                    for arg in spec.args:
+                        typename = remove_const(arg.typename)
                         if "List" in typename:
                             count = typename.count("List")
                             typename = gettypename(typename)
                             if typename == "bool" or typename == "float":
                                 typename = typename + "_"
                             if count == 1:
-                                file.write(
-                                    " " * 4
-                                    + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                        arg, str([123] * len(val)), typename
-                                    )
-                                )
                                 dtypes.append("cupy." + typename)
-                            elif count == 2:
-                                raise NotImplementedError
+                    flag = True
                     for arg, val in test["inputs"].items():
                         typename = remove_const(
                             next(
@@ -772,57 +748,104 @@ def gencudaunittests(specdict):
                                 if argument.name == arg
                             ).typename
                         )
-                        if "List" not in typename:
-                            file.write(" " * 4 + arg + " = " + str(val) + "\n")
-                        if "List" in typename:
-                            count = typename.count("List")
-                            typename = gettypename(typename)
-                            if typename == "bool" or typename == "float":
-                                typename = typename + "_"
-                            if count == 1:
+                        if "List[uint" in typename and (any(n < 0 for n in val)):
+                            flag = False
+                            file.write(
+                                "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
+                            )
+                            file.write(funcName)
+                            file.write(
+                                " " * 4
+                                + "raise NotImplementedError('Unable to generate any tests for kernel')\n\n"
+                            )
+                    if flag is True:
+                        file.write(funcName)
+                        for arg, val in test["outputs"].items():
+                            typename = remove_const(
+                                next(
+                                    argument
+                                    for argument in spec.args
+                                    if argument.name == arg
+                                ).typename
+                            )
+                            if "List" not in typename:
                                 file.write(
-                                    " " * 4
-                                    + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                        arg, val, typename
-                                    )
+                                    " " * 4 + arg + " = " + str([123] * len(val)) + "\n"
                                 )
-                                dtypes.append("cupy." + typename)
-                            elif count == 2:
-                                raise NotImplementedError
+                            if "List" in typename:
+                                count = typename.count("List")
+                                typename = gettypename(typename)
+                                if typename == "bool" or typename == "float":
+                                    typename = typename + "_"
+                                if count == 1:
+                                    file.write(
+                                        " " * 4
+                                        + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                            arg, str([123] * len(val)), typename
+                                        )
+                                    )
+                                elif count == 2:
+                                    raise NotImplementedError
+                        for arg, val in test["inputs"].items():
+                            typename = remove_const(
+                                next(
+                                    argument
+                                    for argument in spec.args
+                                    if argument.name == arg
+                                ).typename
+                            )
+                            if "List" not in typename:
+                                file.write(" " * 4 + arg + " = " + str(val) + "\n")
+                            if "List" in typename:
+                                count = typename.count("List")
+                                typename = gettypename(typename)
+                                if typename == "bool" or typename == "float":
+                                    typename = typename + "_"
+                                if count == 1:
+                                    file.write(
+                                        " " * 4
+                                        + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                            arg, val, typename
+                                        )
+                                    )
+                                elif count == 2:
+                                    raise NotImplementedError
 
-                    cuda_string = (
-                        "funcC = cupy_backend['"
-                        + spec.templatized_kernel_name
-                        + "', {}]\n".format(", ".join(dtypes))
-                    )
-                    file.write(" " * 4 + cuda_string)
-                    args = ""
-                    count = 0
-                    for arg in spec.args:
-                        if count == 0:
-                            args += arg.name
-                            count += 1
-                        else:
-                            args += ", " + arg.name
-                    file.write(" " * 4 + "funcC(" + args + ")\n")
-                    file.write(
-                        """
+                        cuda_string = (
+                            "funcC = cupy_backend['"
+                            + spec.templatized_kernel_name
+                            + "', {}]\n".format(", ".join(dtypes))
+                        )
+                        file.write(" " * 4 + cuda_string)
+                        args = ""
+                        count = 0
+                        for arg in spec.args:
+                            if count == 0:
+                                args += arg.name
+                                count += 1
+                            else:
+                                args += ", " + arg.name
+                        file.write(" " * 4 + "funcC(" + args + ")\n")
+                        file.write(
+                            """
     try:
         ak_cu.synchronize_cuda()
     except:
         pytest.fail("This test case shouldn't have raised an error")
 """
-                    )
-                    for arg, val in test["outputs"].items():
-                        file.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
-                        if isinstance(val, list):
+                        )
+                        for arg, val in test["outputs"].items():
                             file.write(
-                                " " * 4
-                                + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                " " * 4 + "pytest_" + arg + " = " + str(val) + "\n"
                             )
-                        else:
-                            file.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
-                    file.write("\n")
+                            if isinstance(val, list):
+                                file.write(
+                                    " " * 4
+                                    + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                )
+                            else:
+                                file.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
+                        file.write("\n")
 
 
 def genunittests():
