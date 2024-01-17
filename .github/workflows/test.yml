@@ -116,15 +116,12 @@ jobs:
         run: pipx run nox -s diagnostics -- --check-spec-sorted
 
       - name: Test specification
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: python -m pytest -vv -rs awkward-cpp/tests-spec
 
       - name: Test specification with explicitly defined values
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
 
       - name: Test CPU kernels
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 
       - name: Test non-kernels
