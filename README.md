@@ -217,6 +217,9 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/zbilodea"><img src="https://avatars.githubusercontent.com/u/70441641?v=4?s=100" width="100px;" alt="Zoë Bilodeau"/><br /><sub><b>Zoë Bilodeau</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=zbilodea" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/raymondEhlers"><img src="https://avatars.githubusercontent.com/u/1571927?v=4?s=100" width="100px;" alt="Raymond Ehlers"/><br /><sub><b>Raymond Ehlers</b></sub></a><br /><a href="#maintenance-raymondEhlers" title="Maintenance">🚧</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.mloning.com/"><img src="https://avatars.githubusercontent.com/u/21020482?v=4?s=100" width="100px;" alt="Markus Löning"/><br /><sub><b>Markus Löning</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=mloning" title="Documentation">📖</a></td>
+    </tr>
   </tbody>
 </table>
 
