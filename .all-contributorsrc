@@ -411,6 +411,15 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "jrueb",
+      "name": "Jonas Rübenach",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30041073?v=4",
+      "profile": "https://github.com/jrueb",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
