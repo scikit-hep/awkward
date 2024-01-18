@@ -374,6 +374,15 @@
       "contributions": [
         "infra"
       ]
+    },
+    {
+      "login": "zbilodea",
+      "name": "Zoë Bilodeau",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70441641?v=4",
+      "profile": "https://github.com/zbilodea",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
