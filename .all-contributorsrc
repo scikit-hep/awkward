@@ -365,6 +365,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "chrisburr",
+      "name": "Chris Burr",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5220533?v=4",
+      "profile": "https://github.com/chrisburr",
+      "contributions": [
+        "infra"
+      ]
     }
   ],
   "contributorsPerLine": 7,
