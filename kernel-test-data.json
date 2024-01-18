@@ -289,6 +289,7 @@
     "unit-tests": [
         {
             "name": "awkward_missing_repeat",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -800,6 +801,7 @@
         },
         {
             "name": "awkward_index_rpad_and_clip_axis0",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -913,6 +915,7 @@
         },
         {
             "name": "awkward_BitMaskedArray_to_ByteMaskedArray",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -951,6 +954,7 @@
         },
         {
             "name": "awkward_ByteMaskedArray_getitem_nextcarry",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -976,6 +980,7 @@
         },
         {
             "name": "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -1010,6 +1015,7 @@
         },
         {
             "name": "awkward_ByteMaskedArray_numnull",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -1185,6 +1191,7 @@
         },
         {
             "name": "awkward_ByteMaskedArray_toIndexedOptionArray",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -1210,6 +1217,7 @@
         },
         {
             "name": "awkward_IndexedArray_flatten_nextcarry",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -1225,6 +1233,7 @@
         },
         {
             "name": "awkward_IndexedArray_getitem_nextcarry",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -1500,6 +1509,7 @@
         },
         {
             "name": "awkward_IndexedArray_getitem_nextcarry_outindex",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -1527,6 +1537,7 @@
         },
         {
             "name": "awkward_IndexedArray_numnull",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -1649,6 +1660,7 @@
         },
         {
             "name": "awkward_ListArray_broadcast_tooffsets",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -2782,6 +2794,7 @@
         },
         {
             "name": "awkward_ListArray_compact_offsets",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -3577,6 +3590,7 @@
         },
         {
             "name": "awkward_RegularArray_localindex",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -3600,6 +3614,7 @@
         },
         {
             "name": "awkward_RegularArray_rpad_and_clip_axis1",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -3675,6 +3690,7 @@
         },
         {
             "name": "awkward_RegularArray_getitem_carry",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -4120,6 +4136,7 @@
         },
         {
             "name": "awkward_RegularArray_getitem_jagged_expand",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -4415,6 +4432,7 @@
         },
         {
             "name": "awkward_RegularArray_getitem_next_array",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -5452,6 +5470,7 @@
         },
         {
             "name": "awkward_RegularArray_getitem_next_array_advanced",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -5639,6 +5658,7 @@
         },
         {
             "name": "awkward_RegularArray_getitem_next_array_regularize",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -6434,6 +6454,7 @@
         },
         {
             "name": "awkward_RegularArray_getitem_next_at",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -6649,6 +6670,7 @@
         },
         {
             "name": "awkward_RegularArray_getitem_next_range",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -7266,6 +7288,7 @@
         },
         {
             "name": "awkward_RegularArray_getitem_next_range_spreadadvanced",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -7291,6 +7314,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_flatten_offsets",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -7604,6 +7628,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_toRegularArray",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -7654,6 +7679,7 @@
         },
         {
             "name": "awkward_MaskedArray_getitem_next_jagged_project",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -7703,6 +7729,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -8005,6 +8032,7 @@
         },
         {
             "name": "awkward_ByteMaskedArray_overlay_mask",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -8021,6 +8049,7 @@
         },
         {
             "name": "awkward_IndexedArray_flatten_none2empty",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -8103,6 +8132,7 @@
         },
         {
             "name": "awkward_IndexedArray_reduce_next_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -8229,6 +8259,7 @@
         },
         {
             "name": "awkward_IndexedArray_simplify",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -8608,6 +8639,7 @@
         },
         {
             "name": "awkward_IndexedArray_validity",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -8993,6 +9025,7 @@
         },
         {
             "name": "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -9007,6 +9040,7 @@
         },
         {
             "name": "awkward_index_rpad_and_clip_axis1",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -9142,6 +9176,7 @@
         },
         {
             "name": "awkward_ListArray_combinations_length",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -9231,6 +9266,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_jagged_carrylen",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -9551,6 +9587,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_jagged_descend",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -9600,6 +9637,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_jagged_expand",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -9631,6 +9669,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_next_array",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -9706,6 +9745,7 @@
         },
         {
             "name": "awkward_ListArray_min_range",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -9751,6 +9791,7 @@
         },
         {
             "name": "awkward_ListArray_rpad_and_clip_length_axis1",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -9877,6 +9918,7 @@
         },
         {
             "name": "awkward_ListArray_validity",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -10440,6 +10482,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_jagged_apply",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -10805,6 +10848,7 @@
         },
         {
             "name": "awkward_UnionArray_regular_index",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -10843,6 +10887,7 @@
         },
         {
             "name": "awkward_UnionArray_regular_index_getsize",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -10875,6 +10920,7 @@
         },
         {
             "name": "awkward_IndexedArray_fill",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -10950,6 +10996,7 @@
         },
         {
             "name": "awkward_ListArray_fill",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -11095,6 +11142,7 @@
         },
         {
             "name": "awkward_UnionArray_fillindex",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -11120,6 +11168,7 @@
         },
         {
             "name": "awkward_UnionArray_validity",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -11185,6 +11234,7 @@
         },
         {
             "name": "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -11200,6 +11250,7 @@
         },
         {
             "name": "awkward_IndexedArray_index_of_nulls",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -11347,6 +11398,7 @@
         },
         {
             "name": "awkward_IndexedArray_reduce_next_fix_offsets_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -11422,6 +11474,7 @@
         },
         {
             "name": "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -11541,6 +11594,7 @@
         },
         {
             "name": "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -11609,6 +11663,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_next_array_advanced",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -12340,6 +12395,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_next_at",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -12907,6 +12963,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_next_range_counts",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -12930,6 +12987,7 @@
         },
         {
             "name": "awkward_ListArray_localindex",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -13023,6 +13081,7 @@
         },
         {
             "name": "awkward_ListArray_rpad_axis1",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -13171,6 +13230,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_reduce_local_outoffsets_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -13365,6 +13425,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -13835,6 +13896,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -14104,6 +14166,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -14362,6 +14425,7 @@
         },
         {
             "name": "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -14682,6 +14746,7 @@
         },
         {
             "name": "awkward_UnionArray_fillna",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -14828,6 +14893,7 @@
         },
         {
             "name": "awkward_UnionArray_filltags",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -14844,6 +14910,7 @@
         },
         {
             "name": "awkward_UnionArray_project",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -14995,6 +15062,7 @@
         },
         {
             "name": "awkward_UnionArray_simplify_one",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -15101,6 +15169,7 @@
         },
         {
             "name": "awkward_localindex",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -15139,6 +15208,7 @@
         },
         {
             "name": "awkward_BitMaskedArray_to_IndexedOptionArray",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -15166,6 +15236,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_jagged_shrink",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -15231,6 +15302,7 @@
         },
         {
             "name": "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -15500,6 +15572,7 @@
         },
         {
             "name": "awkward_reduce_sum_bool",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -15585,6 +15658,7 @@
         },
         {
             "name": "awkward_reduce_prod_bool",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -15800,6 +15874,7 @@
         },
         {
             "name": "awkward_reduce_argmax",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -15915,6 +15990,7 @@
         },
         {
             "name": "awkward_reduce_max",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -16052,6 +16128,7 @@
         },
         {
             "name": "awkward_reduce_countnonzero",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -16117,6 +16194,7 @@
         },
         {
             "name": "awkward_reduce_count_64",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -16392,6 +16470,7 @@
         },
         {
             "name": "awkward_reduce_sum",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -16687,6 +16766,7 @@
         },
         {
             "name": "awkward_reduce_prod",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -17272,6 +17352,7 @@
         },
         {
             "name": "awkward_reduce_min",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -17420,6 +17501,7 @@
         },
         {
             "name": "awkward_reduce_argmin",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -17676,6 +17758,7 @@
         },
         {
             "name": "awkward_UnionArray_fillindex_count",
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -17753,6 +17836,7 @@
         },
         {
             "name": "awkward_UnionArray_simplify",
+            "status": false,
             "tests": [
                 {
                     "error": false,
