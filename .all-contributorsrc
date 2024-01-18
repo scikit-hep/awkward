@@ -383,6 +383,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "raymondEhlers",
+      "name": "Raymond Ehlers",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1571927?v=4",
+      "profile": "https://github.com/raymondEhlers",
+      "contributions": [
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,
