@@ -356,6 +356,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "zonca",
+      "name": "Andrea Zonca",
+      "avatar_url": "https://avatars.githubusercontent.com/u/383090?v=4",
+      "profile": "https://zonca.dev",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -364,5 +373,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true,
-  "commitConvention": "angular"
+  "commitConvention": "angular",
+  "commitType": "docs"
 }
