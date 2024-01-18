@@ -213,6 +213,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/dsavoiu"><img src="https://avatars.githubusercontent.com/u/17005255?v=4?s=100" width="100px;" alt="Daniel Savoiu"/><br /><sub><b>Daniel Savoiu</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=dsavoiu" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://sites.google.com/view/raybellwaves/home"><img src="https://avatars.githubusercontent.com/u/17162724?v=4?s=100" width="100px;" alt="Ray Bell"/><br /><sub><b>Ray Bell</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=raybellwaves" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://zonca.dev"><img src="https://avatars.githubusercontent.com/u/383090?v=4?s=100" width="100px;" alt="Andrea Zonca"/><br /><sub><b>Andrea Zonca</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=zonca" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/chrisburr"><img src="https://avatars.githubusercontent.com/u/5220533?v=4?s=100" width="100px;" alt="Chris Burr"/><br /><sub><b>Chris Burr</b></sub></a><br /><a href="#infra-chrisburr" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     </tr>
   </tbody>
 </table>
