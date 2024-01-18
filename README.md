@@ -215,6 +215,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://zonca.dev"><img src="https://avatars.githubusercontent.com/u/383090?v=4?s=100" width="100px;" alt="Andrea Zonca"/><br /><sub><b>Andrea Zonca</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=zonca" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/chrisburr"><img src="https://avatars.githubusercontent.com/u/5220533?v=4?s=100" width="100px;" alt="Chris Burr"/><br /><sub><b>Chris Burr</b></sub></a><br /><a href="#infra-chrisburr" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/zbilodea"><img src="https://avatars.githubusercontent.com/u/70441641?v=4?s=100" width="100px;" alt="Zoë Bilodeau"/><br /><sub><b>Zoë Bilodeau</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=zbilodea" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/raymondEhlers"><img src="https://avatars.githubusercontent.com/u/1571927?v=4?s=100" width="100px;" alt="Raymond Ehlers"/><br /><sub><b>Raymond Ehlers</b></sub></a><br /><a href="#maintenance-raymondEhlers" title="Maintenance">🚧</a></td>
     </tr>
   </tbody>
 </table>
