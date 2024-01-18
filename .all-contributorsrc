@@ -392,6 +392,15 @@
       "contributions": [
         "maintenance"
       ]
+    },
+    {
+      "login": "mloning",
+      "name": "Markus Löning",
+      "avatar_url": "https://avatars.githubusercontent.com/u/21020482?v=4",
+      "profile": "https://www.mloning.com/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
