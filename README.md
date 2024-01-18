@@ -219,6 +219,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://www.mloning.com/"><img src="https://avatars.githubusercontent.com/u/21020482?v=4?s=100" width="100px;" alt="Markus Löning"/><br /><sub><b>Markus Löning</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=mloning" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/kkothari2001"><img src="https://avatars.githubusercontent.com/u/53650538?v=4?s=100" width="100px;" alt="Kush Kothari"/><br /><sub><b>Kush Kothari</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=kkothari2001" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward/commits?author=kkothari2001" title="Tests">⚠️</a></td>
     </tr>
   </tbody>
 </table>
