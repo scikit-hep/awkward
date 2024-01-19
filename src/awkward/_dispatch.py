@@ -149,6 +149,7 @@ def validate_runtime_dependencies(
 def high_level_function(
     module: str = "ak",
     name: str | None = None,
+    *,
     dependencies: Collection[str] | Mapping[str, Collection[str]] | None = None,
 ) -> Callable[[DispatcherType], HighLevelType]:
     """Decorate a high-level function such that it may be overloaded by third-party array objects"""
