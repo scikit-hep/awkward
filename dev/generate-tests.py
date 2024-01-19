@@ -526,13 +526,13 @@ def gencpuunittests(specdict):
     print("Generating Unit Tests for CPU kernels")
 
     unit_test_map = unittestmap()
-    unit_tests_cuda_kernels = os.path.join(
+    unit_tests_cpu_kernels = os.path.join(
         CURRENT_DIR, "..", "awkward-cpp", "tests-cpu-kernels-explicit"
     )
-    if os.path.exists(unit_tests_cuda_kernels):
-        shutil.rmtree(unit_tests_cuda_kernels)
-    os.mkdir(unit_tests_cuda_kernels)
-    with open(os.path.join(unit_tests_cuda_kernels, "__init__.py"), "w") as f:
+    if os.path.exists(unit_tests_cpu_kernels):
+        shutil.rmtree(unit_tests_cpu_kernels)
+    os.mkdir(unit_tests_cpu_kernels)
+    with open(os.path.join(unit_tests_cpu_kernels, "__init__.py"), "w") as f:
         f.write(
             f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
@@ -551,7 +551,7 @@ def gencpuunittests(specdict):
         if spec.templatized_kernel_name in list(unit_test_map.keys()):
             func = "test_unit_cpu" + spec.name + ".py"
             num = 1
-            with open(os.path.join(unit_tests_cuda_kernels, func), "w") as f:
+            with open(os.path.join(unit_tests_cpu_kernels, func), "w") as f:
                 f.write(
                     f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
