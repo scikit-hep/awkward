@@ -547,7 +547,7 @@ def gencpuunittests(specdict):
 
     for spec in specdict.values():
         if spec.templatized_kernel_name in list(unit_test_map.keys()):
-            func = "test_cpu" + spec.name + ".py"
+            func = "test_unit_cpu" + spec.name + ".py"
             num = 1
             with open(os.path.join(unit_tests_cuda_kernels, func), "w") as f:
                 f.write(
@@ -572,7 +572,9 @@ def gencpuunittests(specdict):
                 unit_test_values = unit_test_map[spec.templatized_kernel_name]
                 tests = unit_test_values["tests"]
                 for test in tests:
-                    funcName = "def test_" + spec.name + "_" + str(num) + "():\n"
+                    funcName = (
+                        "def test_unit_cpu" + spec.name + "_" + str(num) + "():\n"
+                    )
                     unit_tests, num_outputs = getunittests(
                         test["inputs"], test["outputs"]
                     )
@@ -867,7 +869,7 @@ def gencudaunittests(specdict):
             spec.templatized_kernel_name in cuda_kernels_tests
             and spec.templatized_kernel_name in list(unit_test_map.keys())
         ):
-            func = "test_cuda" + spec.name + ".py"
+            func = "test_unit_cuda" + spec.name + ".py"
             num = 1
             with open(
                 os.path.join(unit_tests_cuda_kernels, func),
@@ -899,7 +901,9 @@ def gencudaunittests(specdict):
                 tests = unit_test_values["tests"]
                 status = unit_test_values["status"]
                 for test in tests:
-                    funcName = "def test_" + spec.name + "_" + str(num) + "():\n"
+                    funcName = (
+                        "def test_unit_cuda" + spec.name + "_" + str(num) + "():\n"
+                    )
                     dtypes = getdtypes(spec.args)
                     unit_tests, num_outputs = getunittests(
                         test["inputs"], test["outputs"]
