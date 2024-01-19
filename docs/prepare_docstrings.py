@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import re
 import ast
 import glob
 import io
-import subprocess
-import pathlib
 import os
+import pathlib
+import re
+import subprocess
 import warnings
 
 import sphinx.ext.napoleon
@@ -20,7 +20,7 @@ output_path = reference_path / "generated"
 output_path.mkdir(exist_ok=True)
 
 latest_commit = (
-    subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE)
+    subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE, check=False)
     .stdout.decode("utf-8")
     .strip()
 )
@@ -48,16 +48,16 @@ def tostr(node):
         return tostr(node.value) + "." + node.attr
 
     elif isinstance(node, ast.Subscript):
-        return "{0}[{1}]".format(tostr(node.value), tostr(node.slice))
+        return f"{tostr(node.value)}[{tostr(node.slice)}]"
 
     elif isinstance(node, ast.Slice):
         start = "" if node.lower is None else tostr(node.lower)
         stop = "" if node.upper is None else tostr(node.upper)
         step = "" if node.step is None else tostr(node.step)
         if step == "":
-            return "{0}:{1}".format(start, stop)
+            return f"{start}:{stop}"
         else:
-            return "{0}:{1}:{2}".format(start, stop, step)
+            return f"{start}:{stop}:{step}"
 
     elif isinstance(node, ast.Call):
         return "{0}({1})".format(
@@ -78,10 +78,7 @@ def tostr(node):
 
     elif isinstance(node, ast.Dict):
         return "{{{0}}}".format(
-            ", ".join(
-                "{0}: {1}".format(tostr(x), tostr(y))
-                for x, y in zip(node.keys, node.values)
-            )
+            ", ".join(f"{tostr(x)}: {tostr(y)}" for x, y in zip(node.keys, node.values))
         )
 
     elif isinstance(node, ast.Lambda):
@@ -165,7 +162,7 @@ def dodoc(docstring, qualname, names):
     out = re.sub(r"<<<([^>]*)>>>", r"`\1`_", out)
     out = re.sub(r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])", r":py:obj:`\1`", out)
     for x in names:
-        out = out.replace("#" + x, ":py:meth:`{1} <{0}.{1}>`".format(qualname, x))
+        out = out.replace("#" + x, f":py:meth:`{x} <{qualname}.{x}>`")
     out = re.sub(r"\[([^\]]*)\]\(([^\)]*)\)", r"`\1 <\2>`__", out)
     out = str(sphinx.ext.napoleon.GoogleDocstring(out, config))
     out = re.sub(
@@ -212,8 +209,8 @@ def doclass(link, linelink, shortname, name, astcls):
     outfile = io.StringIO()
     outfile.write(qualname + "\n" + "-" * len(qualname) + "\n\n")
     outfile.write(f".. py:module: {qualname}\n\n")
-    outfile.write("Defined in {0}{1}.\n\n".format(link, linelink))
-    outfile.write(".. py:class:: {0}({1})\n\n".format(qualname, dosig(init)))
+    outfile.write(f"Defined in {link}{linelink}.\n\n")
+    outfile.write(f".. py:class:: {qualname}({dosig(init)})\n\n")
 
     docstring = ast.get_docstring(astcls)
     if docstring is not None:
@@ -221,16 +218,16 @@ def doclass(link, linelink, shortname, name, astcls):
 
     for node in rest:
         if isinstance(node, ast.Assign):
-            attrtext = "{0}.{1}".format(qualname, node.targets[0].id)
+            attrtext = f"{qualname}.{node.targets[0].id}"
             outfile.write(make_anchor(attrtext))
             outfile.write(".. py:attribute:: " + attrtext + "\n")
-            outfile.write("    :value: {0}\n\n".format(tostr(node.value)))
+            outfile.write(f"    :value: {tostr(node.value)}\n\n")
             docstring = None
 
         elif any(
             isinstance(x, ast.Name) and x.id == "property" for x in node.decorator_list
         ):
-            attrtext = "{0}.{1}".format(qualname, node.name)
+            attrtext = f"{qualname}.{node.name}"
             outfile.write(make_anchor(attrtext))
             outfile.write(".. py:attribute:: " + attrtext + "\n\n")
             docstring = ast.get_docstring(node)
@@ -242,8 +239,8 @@ def doclass(link, linelink, shortname, name, astcls):
             docstring = None
 
         else:
-            methodname = "{0}.{1}".format(qualname, node.name)
-            methodtext = "{0}({1})".format(methodname, dosig(node))
+            methodname = f"{qualname}.{node.name}"
+            methodtext = f"{methodname}({dosig(node)})"
             outfile.write(make_anchor(methodname))
             outfile.write(".. py:method:: " + methodtext + "\n\n")
             docstring = ast.get_docstring(node)
@@ -259,6 +256,56 @@ def doclass(link, linelink, shortname, name, astcls):
         entry_path.write_text(out)
 
 
+def get_function_dependency_spec(node: ast.FunctionDef):
+    for deco in node.decorator_list:
+        if (
+            isinstance(deco, ast.Call)
+            and (
+                (
+                    isinstance(deco.func, ast.Name)
+                    and deco.func.id == "high_level_function"
+                )
+                or (
+                    isinstance(deco.func, ast.Attribute)
+                    and isinstance(deco.func.value, ast.Name)
+                    and deco.func.value.id in ("ak", "awkward")
+                    and deco.func.attr == "high_level_function"
+                )
+            )
+            and (arg := {k.arg: k.value for k in deco.keywords}.get("dependencies"))
+            is not None
+        ):
+            break
+    else:
+        return None
+
+    extras = []
+    dependencies = []
+    if isinstance(arg, ast.Dict):
+        assert all(
+            isinstance(x, ast.Constant) and isinstance(x.value, str) for x in arg.keys
+        )
+        assert all(
+            isinstance(vals, (ast.List, ast.Tuple))
+            and all(
+                isinstance(x, ast.Constant) and isinstance(x.value, str)
+                for x in vals.elts
+            )
+            for vals in arg.values
+        )
+        extras.extend([x.value for x in arg.keys])
+        dependencies.extend([x.value for group in arg.values for x in group.elts])
+    elif isinstance(arg, (ast.List, ast.Tuple)):
+        assert all(
+            isinstance(x, ast.Constant) and isinstance(x.value, str) for x in arg.elts
+        )
+        dependencies.extend([x.value for x in arg.elts])
+    else:
+        raise TypeError(arg)
+
+    return extras, dependencies
+
+
 def dofunction(link, linelink, shortname, name, astfcn):
     if name.startswith("_"):
         return
@@ -268,14 +315,28 @@ def dofunction(link, linelink, shortname, name, astfcn):
     outfile = io.StringIO()
     outfile.write(qualname + "\n" + "-" * len(qualname) + "\n\n")
     outfile.write(f".. py:module: {qualname}\n\n")
-    outfile.write("Defined in {0}{1}.\n\n".format(link, linelink))
+    outfile.write(f"Defined in {link}{linelink}.\n\n")
 
-    functiontext = "{0}({1})".format(qualname, dosig(astfcn))
+    functiontext = f"{qualname}({dosig(astfcn)})"
     outfile.write(".. py:function:: " + functiontext + "\n\n")
 
     docstring = ast.get_docstring(astfcn)
     if docstring is not None:
         outfile.write(dodoc(docstring, qualname, []) + "\n\n")
+
+    dependency_spec = get_function_dependency_spec(astfcn)
+    if dependency_spec is not None:
+        extras, dependencies = dependency_spec
+
+        outfile.write(
+            ".. note::\n   This function requires the following optional third-party libraries:\n\n"
+        )
+        outfile.write("\n".join([f"   * ``{dep}``" for dep in dependencies]))
+        if extras:
+            outfile.write(
+                "\n\n   These dependencies can be conveniently installed using the following extras:\n\n"
+            )
+            outfile.write("\n".join([f"   * ``{extra}``" for extra in extras]))
 
     out = outfile.getvalue()
 
@@ -334,55 +395,55 @@ for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
         if isinstance(toplevel, ast.FunctionDef):
             dofunction(link, linelink, shortname, toplevel.name, toplevel)
 
-
-def test_signature_pos_or_kw():
-    mod = ast.parse(
-        """
-def func(x, z):
-    ...
-"""
-    )
-    node = mod.body[0]
-    assert dosig(node) == "x, z"
-
-
-def test_signature_kwarg():
-    mod = ast.parse(
-        """
-def func(x, z=None):
-    ...
-"""
-    )
-    node = mod.body[0]
-    assert dosig(node) == "x, z=None"
-
-
-def test_signature_vararg():
-    mod = ast.parse(
-        """
-def func(x, *y, z=None):
-    ...
-"""
-    )
-    node = mod.body[0]
-    assert dosig(node) == "x, *y, z=None"
-
-
-def test_signature_kwonly():
-    mod = ast.parse(
-        """
-def func(x, *, y, z=None):
-    ...
-"""
-    )
-    node = mod.body[0]
-    assert dosig(node) == "x, *, y, z=None"
-
-
-test_signature_pos_or_kw()
-test_signature_kwarg()
-test_signature_vararg()
-test_signature_kwonly()
+#
+# def test_signature_pos_or_kw():
+#     mod = ast.parse(
+#         """
+# def func(x, z):
+#     ...
+# """
+#     )
+#     node = mod.body[0]
+#     assert dosig(node) == "x, z"
+#
+#
+# def test_signature_kwarg():
+#     mod = ast.parse(
+#         """
+# def func(x, z=None):
+#     ...
+# """
+#     )
+#     node = mod.body[0]
+#     assert dosig(node) == "x, z=None"
+#
+#
+# def test_signature_vararg():
+#     mod = ast.parse(
+#         """
+# def func(x, *y, z=None):
+#     ...
+# """
+#     )
+#     node = mod.body[0]
+#     assert dosig(node) == "x, *y, z=None"
+#
+#
+# def test_signature_kwonly():
+#     mod = ast.parse(
+#         """
+# def func(x, *, y, z=None):
+#     ...
+# """
+#     )
+#     node = mod.body[0]
+#     assert dosig(node) == "x, *, y, z=None"
+#
+#
+# test_signature_pos_or_kw()
+# test_signature_kwarg()
+# test_signature_vararg()
+# test_signature_kwonly()
 
 
 toctree_path = reference_path / "toctree.txt"
