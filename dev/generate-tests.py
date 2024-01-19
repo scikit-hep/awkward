@@ -211,6 +211,8 @@ def getdtypes(args):
         if "List" in typename:
             count = typename.count("List")
             typename = gettypename(typename)
+            if typename == "bool" or typename == "float":
+                typename = typename + "_"
             if count == 1:
                 dtypes.append("cupy." + typename)
     return dtypes
