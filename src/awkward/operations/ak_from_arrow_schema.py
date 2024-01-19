@@ -10,7 +10,7 @@ __all__ = ("from_arrow_schema",)
 np = NumpyMetadata.instance()
 
 
-@high_level_function()
+@high_level_function(dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def from_arrow_schema(schema):
     """
     Args:

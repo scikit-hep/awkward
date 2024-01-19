@@ -14,7 +14,7 @@ __all__ = ("to_parquet",)
 metadata = NumpyMetadata.instance()
 
 
-@high_level_function()
+@high_level_function(dependencies={"arrow": ["pyarrow>=7.0.0", "fsspec"]})
 def to_parquet(
     array,
     destination,

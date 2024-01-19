@@ -12,7 +12,7 @@ __all__ = ("from_arrow",)
 np = NumpyMetadata.instance()
 
 
-@high_level_function()
+@high_level_function(dependencies={"arrow": ["pyarrow>=7.0.0", "fsspec"]})
 def from_arrow(
     array, *, generate_bitmasks=False, highlevel=True, behavior=None, attrs=None
 ):

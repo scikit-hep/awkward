@@ -10,7 +10,7 @@ from awkward._regularize import is_integer
 __all__ = ("from_parquet",)
 
 
-@high_level_function()
+@high_level_function(dependencies={"arrow": ["pyarrow>=7.0.0", "fsspec"]})
 def from_parquet(
     path,
     *,
@@ -84,7 +84,7 @@ def from_parquet(
     )
 
 
-@high_level_function()
+@high_level_function(dependencies={"arrow": ["pyarrow>=7.0.0", "fsspec"]})
 def metadata(
     path,
     storage_options=None,

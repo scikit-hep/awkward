@@ -50,6 +50,14 @@ dynamic = [
     "readme"
 ]
 
+[project.optional-dependencies]
+arrow = [
+    "arrow>=7.0.0",
+    "fsspec"
+]
+
+
+
 [project.entry-points.numba_extensions]
 init = "awkward.numba:_register"
 
