@@ -132,6 +132,7 @@ def clean(session):
             pathlib.Path("awkward-cpp", "tests-spec"),
             pathlib.Path("awkward-cpp", "tests-spec-explicit"),
             pathlib.Path("awkward-cpp", "tests-cpu-kernels"),
+            pathlib.Path("awkward-cpp", "tests-cpu-kernels-explicit"),
             pathlib.Path("tests-cuda-kernels"),
         )
     if args.docs or clean_all:

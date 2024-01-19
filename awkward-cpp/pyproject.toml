@@ -68,5 +68,6 @@ sdist.include = [
     "src/awkward_cpp/_kernel_signatures.py",
     "tests-spec",
     "tests-spec-explicit",
-    "tests-cpu-kernels"
+    "tests-cpu-kernels",
+    "tests-cpu-kernels-explicit"
 ]
