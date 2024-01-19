@@ -8,7 +8,7 @@ from awkward._layout import from_arraylib, wrap_layout
 __all__ = ("from_cupy",)
 
 
-@high_level_function()
+@high_level_function(dependencies=["cupy"])
 def from_cupy(array, *, regulararray=False, highlevel=True, behavior=None, attrs=None):
     """
     Args:
