@@ -9,7 +9,7 @@ from awkward._layout import from_arraylib, wrap_layout
 __all__ = ("from_jax",)
 
 
-@high_level_function()
+@high_level_function(dependencies=["jax", "jaxlib"])
 def from_jax(array, *, regulararray=False, highlevel=True, behavior=None, attrs=None):
     """
     Args:

@@ -9,7 +9,7 @@ from awkward._dispatch import high_level_function
 __all__ = ("to_jax",)
 
 
-@high_level_function()
+@high_level_function(dependencies=["jax", "jaxlib"])
 def to_jax(array):
     """
     Args:
