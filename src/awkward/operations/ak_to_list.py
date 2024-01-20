@@ -7,7 +7,6 @@ from collections.abc import Mapping
 from awkward_cpp.lib import _ext
 
 import awkward as ak
-from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_non_string_like_iterable
 
@@ -16,7 +15,6 @@ __all__ = ("to_list",)
 np = NumpyMetadata.instance()
 
 
-@high_level_function(dependencies={"arrow": ["pyarrow>12.0.0"]})
 def to_list(array):
     """
     Args:
