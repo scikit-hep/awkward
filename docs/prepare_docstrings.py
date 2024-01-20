@@ -329,14 +329,29 @@ def dofunction(link, linelink, shortname, name, astfcn):
         extras, dependencies = dependency_spec
 
         outfile.write(
-            ".. note::\n   This function requires the following optional third-party libraries:\n\n"
+            ".. note::\n"
+            "   This function requires the following optional third-party libraries:\n"
+            "\n"
         )
         outfile.write("\n".join([f"   * ``{dep}``" for dep in dependencies]))
+        install_dependencies_string = " ".join(dependencies)
+        outfile.write(
+            "\n\n"
+            f"    If you use pip, you can install these packages with "
+            f"``python -m pip install {install_dependencies_string}``.\n"
+            "    Otherwise, if you use Conda, install the corresponding packages "
+            "for the correct versions. "
+        )
         if extras:
+            extras_string = ",".join(extras)
             outfile.write(
-                "\n\n   These dependencies can be conveniently installed using the following extras:\n\n"
+                "\n\n   These dependencies can also be conveniently installed using the following extras:\n\n"
             )
             outfile.write("\n".join([f"   * ``{extra}``" for extra in extras]))
+            outfile.write(
+                "\n\n   If you use ``pip`` to install your packages, these extras can be installed by running "
+                f"``python -m pip install awkward[{extras_string}]``."
+            )
 
     out = outfile.getvalue()
 
@@ -444,7 +459,6 @@ test_signature_pos_or_kw()
 test_signature_kwarg()
 test_signature_vararg()
 test_signature_kwonly()
-
 
 toctree_path = reference_path / "toctree.txt"
 toctree_contents = toctree_path.read_text()

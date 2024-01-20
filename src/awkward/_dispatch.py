@@ -118,16 +118,29 @@ def build_runtime_dependency_validation_error(
     ]
     missing_requirement_message = "\n".join(missing_requirement_lines)
 
+    # Install string
+    missing_dependencies_string = " ".join(
+        [str(req) for req, ver in missing_dependencies]
+    )
+    missing_requirements_direct_message = (
+        f"If you use pip, you can install these packages with "
+        f"`python -m pip install {missing_dependencies_string}`.\n"
+        "Otherwise, if you use Conda, install the corresponding packages "
+        "for the correct versions. "
+    )
+
     missing_extras_lines = [f"    * {extra}" for extra in missing_extras]
-    missing_extras_string = "\n".join(missing_extras_lines)
+    missing_extras_list_string = "\n".join(missing_extras_lines)
+    missing_extras_string = ",".join(missing_extras)
     maybe_missing_extras_message = (
         (
-            "You can fix this error by installing these packages directly, or install awkward with "
-            "all of the following extras:\n\n"
-            f"{missing_extras_string}"
+            f"{missing_requirements_direct_message}\n\n"
+            "These dependencies can also be conveniently installed using the following extras:\n\n"
+            f"{missing_extras_list_string}\n\n"
+            f"If you're using `pip`, then you can install these extras with `pip install awkward[{missing_extras_string}]`"
         )
         if missing_extras
-        else ""
+        else missing_requirements_direct_message
     )
     return ImportError(
         f"This function has the following dependency requirements that are not met by your current environment:\n\n"
@@ -161,6 +174,7 @@ def high_level_function(
             captured_name = func.__qualname__
         else:
             captured_name = name
+
         return named_high_level_function(
             func, f"{module}.{captured_name}", dependency_spec
         )
