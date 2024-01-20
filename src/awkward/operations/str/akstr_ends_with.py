@@ -9,7 +9,7 @@ from awkward._layout import HighLevelContext
 __all__ = ("ends_with",)
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def ends_with(
     array, pattern, *, ignore_case=False, highlevel=True, behavior=None, attrs=None
 ):

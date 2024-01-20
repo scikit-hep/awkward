@@ -9,7 +9,7 @@ from awkward._layout import HighLevelContext
 __all__ = ("slice",)
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def slice(
     array, start, stop=None, step=1, *, highlevel=True, behavior=None, attrs=None
 ):

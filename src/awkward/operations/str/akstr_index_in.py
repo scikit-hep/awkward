@@ -12,7 +12,7 @@ __all__ = ("index_in",)
 typetracer = TypeTracerBackend.instance()
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def index_in(
     array, value_set, *, skip_nones=False, highlevel=True, behavior=None, attrs=None
 ):

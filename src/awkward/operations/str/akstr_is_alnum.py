@@ -9,7 +9,7 @@ from awkward._layout import HighLevelContext
 __all__ = ("is_alnum",)
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def is_alnum(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:

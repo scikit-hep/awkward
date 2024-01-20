@@ -16,7 +16,7 @@ typetracer = TypeTracerBackend.instance()
 np = NumpyMetadata.instance()
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def repeat(array, num_repeats, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:

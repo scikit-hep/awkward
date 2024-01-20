@@ -9,7 +9,7 @@ from awkward._layout import HighLevelContext
 __all__ = ("is_alpha",)
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def is_alpha(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:

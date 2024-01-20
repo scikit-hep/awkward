@@ -12,7 +12,7 @@ __all__ = ("join_element_wise",)
 typetracer = TypeTracerBackend.instance()
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def join_element_wise(*arrays, highlevel=True, behavior=None, attrs=None):
     """
     Args:

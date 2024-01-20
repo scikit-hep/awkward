@@ -9,7 +9,7 @@ from awkward._layout import HighLevelContext
 __all__ = ("trim_whitespace",)
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def trim_whitespace(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:

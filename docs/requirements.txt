@@ -11,6 +11,7 @@ lark-parser
 sphinx-copybutton
 sphinx-design
 sphinx-sitemap
+sphinx-togglebutton
 pydata-sphinx-theme
 myst-nb
 sphinx-external-toc

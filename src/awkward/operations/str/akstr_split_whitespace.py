@@ -9,7 +9,7 @@ from awkward._layout import HighLevelContext
 __all__ = ("split_whitespace",)
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def split_whitespace(
     array, *, max_splits=None, reverse=False, highlevel=True, behavior=None, attrs=None
 ):

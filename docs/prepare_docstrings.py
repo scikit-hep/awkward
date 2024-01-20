@@ -330,6 +330,8 @@ def dofunction(link, linelink, shortname, name, astfcn):
 
         outfile.write(
             ".. note::\n"
+            "   :class: dropdown\n"
+            "\n"
             "   This function requires the following optional third-party libraries:\n"
             "\n"
         )
@@ -339,7 +341,7 @@ def dofunction(link, linelink, shortname, name, astfcn):
             "\n\n"
             f"   If you use pip, you can install these packages with "
             f"``python -m pip install {install_dependencies_string}``.\n"
-            "    Otherwise, if you use Conda, install the corresponding packages "
+            "   Otherwise, if you use Conda, install the corresponding packages "
             "for the correct versions. "
         )
         if extras:

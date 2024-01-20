@@ -9,7 +9,7 @@ from awkward._layout import HighLevelContext
 __all__ = ("find_substring",)
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def find_substring(
     array, pattern, *, ignore_case=False, highlevel=True, behavior=None, attrs=None
 ):

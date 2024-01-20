@@ -9,7 +9,7 @@ from awkward._layout import HighLevelContext
 __all__ = ("to_categorical",)
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def to_categorical(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:

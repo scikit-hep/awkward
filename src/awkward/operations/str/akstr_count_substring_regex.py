@@ -9,7 +9,7 @@ from awkward._layout import HighLevelContext
 __all__ = ("count_substring_regex",)
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def count_substring_regex(
     array, pattern, *, ignore_case=False, highlevel=True, behavior=None, attrs=None
 ):

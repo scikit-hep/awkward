@@ -12,7 +12,7 @@ __all__ = ("join",)
 typetracer = TypeTracerBackend.instance()
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def join(array, separator, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:

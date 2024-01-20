@@ -9,7 +9,7 @@ from awkward._layout import HighLevelContext
 __all__ = ("lower",)
 
 
-@high_level_function(module="ak.str")
+@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def lower(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
