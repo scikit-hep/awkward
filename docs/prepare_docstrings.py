@@ -337,7 +337,7 @@ def dofunction(link, linelink, shortname, name, astfcn):
         install_dependencies_string = " ".join(dependencies)
         outfile.write(
             "\n\n"
-            f"    If you use pip, you can install these packages with "
+            f"   If you use pip, you can install these packages with "
             f"``python -m pip install {install_dependencies_string}``.\n"
             "    Otherwise, if you use Conda, install the corresponding packages "
             "for the correct versions. "
