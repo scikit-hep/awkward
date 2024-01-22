@@ -439,11 +439,25 @@ Issue: {message}."""
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
 
 
-def with_operation_context(func: Callable[P, T]) -> Callable[P, T]:
+def with_operation_context(
+    module: str = "ak",
+    name: str | None = None,
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
+    def capture_func(func: Callable[P, T]) -> Callable[P, T]:
+        if name is None:
+            captured_name = func.__qualname__
+        else:
+            captured_name = name
+
+        return with_named_operation_context(func, f"{module}.{captured_name}")
+
+    return capture_func
+
+
+def with_named_operation_context(func: Callable[P, T], name: str) -> Callable[P, T]:
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-        # NOTE: this decorator assumes that the operation is exposed under `ak.`
-        with OperationErrorContext(f"ak.{func.__qualname__}", args, kwargs):
+        with OperationErrorContext(name, args, kwargs):
             return func(*args, **kwargs)
 
     return wrapper

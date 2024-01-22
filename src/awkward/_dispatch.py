@@ -6,9 +6,10 @@ import importlib
 import sys
 import warnings
 from collections.abc import Callable, Collection, Generator, Mapping
-from functools import lru_cache, wraps
-from inspect import isgenerator
+from functools import lru_cache, partial, wraps
+from inspect import isgeneratorfunction
 
+import packaging.version
 from packaging.requirements import Requirement
 from packaging.version import Version
 
@@ -17,12 +18,12 @@ if sys.version_info < (3, 12):
 else:
     import importlib.metadata as importlib_metadata
 
-from awkward._errors import OperationErrorContext
+from awkward._errors import with_named_operation_context
 from awkward._typing import Any, NamedTuple, TypeAlias, TypeVar
 
 T = TypeVar("T")
 DispatcherType: TypeAlias = "Callable[..., Generator[Collection[Any], None, T]]"
-HighLevelType: TypeAlias = "Callable[..., T]"
+DispatchedType: TypeAlias = "Callable[..., T]"
 
 
 class DependencyGroup(NamedTuple):
@@ -53,6 +54,10 @@ def normalize_dependency_specification(
         return DependencySpecification(groups=(), non_groups=tuple(dependencies))
 
 
+def regularize_dunder_version(version: str) -> str:
+    return version.replace("/", ".")
+
+
 def iter_missing_dependencies(dependencies: tuple[str, ...]):
     """Build an iterator over the requirement, version pairs of dependencies that are not
     satisfied by the current environment"""
@@ -63,26 +68,37 @@ def iter_missing_dependencies(dependencies: tuple[str, ...]):
                 "High-level functions must not declare dependencies specifications with extras"
             )
 
+        # Try and find version
         try:
+            # Try and get the version the canonical way
             _version = importlib_metadata.version(requirement.name)
         except importlib_metadata.PackageNotFoundError:
-            version = None
-        else:
-            # If we found the distribution but did not resolve a version
-            if _version is None:
-                # Let's try and import it
-                mod = importlib.import_module(requirement.name)
-                try:
-                    _version = mod.__version__
-                except AttributeError:
-                    warnings.warn(
-                        f"Could not identify the version of installed package {requirement.name}",
-                        stacklevel=2,
-                    )
-                    continue
-            version = Version(_version)
+            # Otherwise, fall back on `__version__` (e.g. for ROOT)
+            mod = importlib.import_module(requirement.name)
+            try:
+                mod_version = mod.__version__
+            except AttributeError:
+                warnings.warn(
+                    f"Could not identify the version of installed package {requirement.name}",
+                    stacklevel=2,
+                )
+                # Don't treat this as an error
+                continue
+            # Packages like ROOT seem to be playing poorly with standards, so we'll apply a simple regularization transform
+            _version = regularize_dunder_version(mod_version)
 
-        if version is None or version not in requirement.specifier:
+        # Try and parse version
+        try:
+            version = Version(_version)
+        except packaging.version.InvalidVersion:
+            warnings.warn(
+                f"Could not parse the version of installed package {requirement.name}: {_version!r}",
+                stacklevel=2,
+            )
+            # Don't treat this as an error
+            continue
+
+        if version not in requirement.specifier:
             yield requirement, version
 
 
@@ -159,73 +175,81 @@ def validate_runtime_dependencies(
         raise exception
 
 
+def on_dispatch_trivial():
+    return
+
+
+def with_type_dispatch(
+    func: DispatcherType, on_dispatch_internal: Callable[[], None] = on_dispatch_trivial
+) -> DispatchedType:
+    if isgeneratorfunction(func):
+
+        @wraps(func)
+        def dispatch(*args, **kwargs):
+            gen_or_result = func(*args, **kwargs)
+            array_likes = next(gen_or_result)
+            assert isinstance(array_likes, Collection)
+
+            # Permit a third-party array object to intercept the invocation
+            for array_like in array_likes:
+                try:
+                    custom_impl = array_like.__awkward_function__
+                except AttributeError:
+                    continue
+                else:
+                    result = custom_impl(dispatch, array_likes, args, kwargs)
+
+                    # Future-proof the implementation by permitting the `__awkward_function__`
+                    # to return `NotImplemented`. This may later be used to signal that another
+                    # overload should be used.
+                    if result is NotImplemented:
+                        raise NotImplementedError
+                    else:
+                        return result
+
+            # Failed to find a custom overload, so resume the original function
+            on_dispatch_internal()
+
+            try:
+                next(gen_or_result)
+            except StopIteration as err:
+                return err.value
+            else:
+                raise AssertionError(
+                    "high-level functions should only implement a single yield statement"
+                )
+    else:
+
+        @wraps(func)
+        def dispatch(*args, **kwargs):
+            on_dispatch_internal()
+            return func(*args, **kwargs)
+
+    return dispatch
+
+
 def high_level_function(
     module: str = "ak",
     name: str | None = None,
     *,
     dependencies: Collection[str] | Mapping[str, Collection[str]] | None = None,
-) -> Callable[[DispatcherType], HighLevelType]:
+) -> Callable[[DispatcherType], DispatchedType]:
     """Decorate a high-level function such that it may be overloaded by third-party array objects"""
 
-    dependency_spec = normalize_dependency_specification(dependencies)
+    # Callback for dispatches that use internal implementation
+    on_dispatch_internal = partial(
+        validate_runtime_dependencies, normalize_dependency_specification(dependencies)
+    )
 
-    def capture_func(func: DispatcherType) -> HighLevelType:
+    def capture_func(func: DispatcherType) -> DispatchedType:
         if name is None:
             captured_name = func.__qualname__
         else:
             captured_name = name
 
-        return named_high_level_function(
-            func, f"{module}.{captured_name}", dependency_spec
+        return with_named_operation_context(
+            with_type_dispatch(func, on_dispatch_internal=on_dispatch_internal),
+            f"{module}.{captured_name}",
         )
 
     return capture_func
-
-
-def named_high_level_function(
-    func: DispatcherType,
-    name: str,
-    dependency_spec: DependencySpecification,
-) -> HighLevelType:
-    """Decorate a named high-level function such that it may be overloaded by third-party array objects"""
-
-    @wraps(func)
-    def dispatch(*args, **kwargs):
-        # NOTE: this decorator assumes that the operation is exposed under `ak.`
-        with OperationErrorContext(name, args, kwargs):
-            gen_or_result = func(*args, **kwargs)
-            if isgenerator(gen_or_result):
-                array_likes = next(gen_or_result)
-                assert isinstance(array_likes, Collection)
-
-                # Permit a third-party array object to intercept the invocation
-                for array_like in array_likes:
-                    try:
-                        custom_impl = array_like.__awkward_function__
-                    except AttributeError:
-                        continue
-                    else:
-                        result = custom_impl(dispatch, array_likes, args, kwargs)
-
-                        # Future-proof the implementation by permitting the `__awkward_function__`
-                        # to return `NotImplemented`. This may later be used to signal that another
-                        # overload should be used.
-                        if result is NotImplemented:
-                            raise NotImplementedError
-                        else:
-                            return result
-
-                # Failed to find a custom overload, so resume the original function
-                validate_runtime_dependencies(dependency_spec)
-                try:
-                    next(gen_or_result)
-                except StopIteration as err:
-                    return err.value
-                else:
-                    raise AssertionError(
-                        "high-level functions should only implement a single yield statement"
-                    )
-
-            return gen_or_result
-
-    return dispatch
