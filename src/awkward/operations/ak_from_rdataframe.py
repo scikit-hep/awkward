@@ -11,7 +11,7 @@ __all__ = ("from_rdataframe",)
 np = NumpyMetadata.instance()
 
 
-@high_level_function()
+@high_level_function(dependencies=["ROOT"])
 def from_rdataframe(
     rdf,
     columns,

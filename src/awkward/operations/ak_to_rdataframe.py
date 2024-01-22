@@ -13,7 +13,7 @@ __all__ = ("to_rdataframe",)
 cpu = NumpyBackend.instance()
 
 
-@high_level_function()
+@high_level_function(dependencies=["ROOT"])
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """
     Args:

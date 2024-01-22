@@ -8,7 +8,7 @@ from awkward._dispatch import high_level_function
 __all__ = ("from_feather",)
 
 
-@high_level_function()
+@high_level_function(dependencies={"arrow": ["pyarrow>=7.0.0"]})
 def from_feather(
     path,
     *,
