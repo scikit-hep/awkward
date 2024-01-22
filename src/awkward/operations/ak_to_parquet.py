@@ -374,7 +374,6 @@ def _impl(
     fs, destination = fsspec.core.url_to_fs(destination, **(storage_options or {}))
     metalist = []
 
-
     with pyarrow_parquet.ParquetWriter(
         destination,
         table.schema,
@@ -396,6 +395,7 @@ def _impl(
     ) as writer:
         if iter:
             from pyarrow import Table
+
             iterator = batch_iterator(
                 layout,
                 list_to32,
@@ -440,7 +440,6 @@ def write_metadata(dir_path, fs, *metas, global_metadata=True):
             md.write_metadata_file(fil)
 
 
-
 def batch_iterator(
     layout,
     list_to32,
@@ -455,9 +454,7 @@ def batch_iterator(
 
     pyarrow = awkward._connect.pyarrow.import_pyarrow("ak.to_parquet")
 
-    if isinstance(
-        ak.operations.type(layout), ak.types.RecordType
-    ):
+    if isinstance(ak.operations.type(layout), ak.types.RecordType):
         names = layout.keys()
         contents = [layout[name] for name in names]
     else:
@@ -481,11 +478,7 @@ def batch_iterator(
         )
         pa_fields.append(
             pyarrow.field(name, pa_arrays[-1].type).with_nullable(
-                isinstance(
-                    ak.operations.type(content), ak.types.OptionType
-                )
+                isinstance(ak.operations.type(content), ak.types.OptionType)
             )
         )
-    yield pyarrow.RecordBatch.from_arrays(
-        pa_arrays, schema=pyarrow.schema(pa_fields)
-    )
+    yield pyarrow.RecordBatch.from_arrays(pa_arrays, schema=pyarrow.schema(pa_fields))

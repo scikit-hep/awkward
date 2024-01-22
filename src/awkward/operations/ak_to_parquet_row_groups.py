@@ -1,14 +1,14 @@
-
 from __future__ import annotations
 
 from awkward import ak_to_parquet
 from awkward._dispatch import high_level_function
+
 __all__ = ("to_parquet",)
 
 
 @high_level_function()
 def to_parquet_row_groups(
-    array_iterator, # good or bad name?
+    array_iterator,  # good or bad name?
     destination,
     *,
     list_to32=False,
@@ -170,9 +170,9 @@ def to_parquet_row_groups(
     # Dispatch
     yield (array_iterator,)
 
-    # If the input is an iterator, then should row-group size still be 
-        # an option? Or should there be a check to determine if it's the same? 
-        # seems like it should be set based on the iterator or something
+    # If the input is an iterator, then should row-group size still be
+    # an option? Or should there be a check to determine if it's the same?
+    # seems like it should be set based on the iterator or something
 
     return ak_to_parquet._impl(
         array_iterator,
@@ -202,16 +202,21 @@ def to_parquet_row_groups(
         iter=True,
     )
 
-import awkward as ak
-from skhep_testdata import data_path
+
 import uproot
+from skhep_testdata import data_path
+
+import awkward as ak
+
 path = "/Users/zobil/Documents/awkward/tests/samples/array.parquet"
 
-iterator = uproot.iterate(uproot.open(data_path("uproot-HZZ.root"))['events'], step_size=10)
+iterator = uproot.iterate(
+    uproot.open(data_path("uproot-HZZ.root"))["events"], step_size=10
+)
 
 # ak.to_parquet(array, "/Users/zobil/Documents/awkward/tests/samples/array.parquet")
 to_parquet_row_groups(iterator, path, row_group_size=10)
 
 test = ak.from_parquet(path)
 
-print(len(test['Jet_Px']))
+print(len(test["Jet_Px"]))
