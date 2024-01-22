@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import operator
-
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._nplikes import to_nplike
@@ -15,7 +13,7 @@ from awkward._regularize import is_array_like, is_integer_like, is_sized_iterabl
 from awkward._typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
-    from awkward._nplikes.numpy_like import ArrayLike
+    from awkward._nplikes.numpy_like import ArrayLike, NumpyLike
     from awkward.contents.content import Content
 
 np = NumpyMetadata.instance()
@@ -24,48 +22,27 @@ np = NumpyMetadata.instance()
 SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Content"
 
 
-def normalize_slice_item(item, *, backend: Backend):
-    if backend.index_nplike.is_own_array(item):
-        if item.ndim != 0:
-            raise ValueError(
-                f"slice items must be 0D arrays or Python integers, not {item!r}"
-            )
-        else:
-            return item
-    else:
-        return operator.index(item)
-
-
-def normalize_slice(slice_: slice, *, backend: Backend) -> slice:
+def normalize_slice(slice_: slice, *, nplike: NumpyLike) -> slice:
     """
     Args:
         slice_: slice object
-        backend: backend of layout
+        nplike: NumpyLike of array
 
     Return a slice of (start, stop, step) for which the slice items have been
     normalized into index types.
     """
-    index_nplike = backend.index_nplike
 
     start = slice_.start
     stop = slice_.stop
     step = slice_.step
 
-    if index_nplike.known_data:
+    if nplike.known_data:
         return slice_
     # Unknown lengths mean that the slice index is unknown
     else:
-        start = (
-            index_nplike.shape_item_as_index(start)
-            if start is unknown_length
-            else start
-        )
-        stop = (
-            index_nplike.shape_item_as_index(stop) if stop is unknown_length else stop
-        )
-        step = (
-            index_nplike.shape_item_as_index(step) if step is unknown_length else step
-        )
+        start = nplike.shape_item_as_index(start) if start is unknown_length else start
+        stop = nplike.shape_item_as_index(stop) if stop is unknown_length else stop
+        step = nplike.shape_item_as_index(step) if step is unknown_length else step
 
         return slice(start, stop, step)
 
@@ -226,7 +203,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
         return normalize_integer_like(item)
 
     elif isinstance(item, slice):
-        return normalize_slice(item, backend=backend)
+        return normalize_slice(item, nplike=backend.index_nplike)
 
     elif isinstance(item, str):
         return item

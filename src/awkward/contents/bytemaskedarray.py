@@ -390,7 +390,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         else:
             return None
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -1133,21 +1133,26 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         if self._content.is_record:
             next = self.to_IndexedOptionArray64()
-            content = next._content.to_packed()
-            if content.length > self._mask.length:
-                content = content[: self._mask.length]
+
+            content = (
+                next._content[: self._mask.length].to_packed(True)
+                if recursive
+                else next._content[: self._mask.length]
+            )
 
             return ak.contents.IndexedOptionArray(
                 next._index, content, parameters=next._parameters
             )
 
         else:
-            content = self._content.to_packed()
-            if content.length > self._mask.length:
-                content = content[: self._mask.length]
+            content = (
+                self._content[: self._mask.length].to_packed(True)
+                if recursive
+                else self._content[: self._mask.length]
+            )
 
             return ByteMaskedArray(
                 self._mask, content, self._valid_when, parameters=self._parameters

@@ -321,7 +321,7 @@ class NumpyArray(NumpyMeta, Content):
         else:
             return out
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         try:
             out = self._data[start:stop]
         except IndexError as err:
@@ -1303,7 +1303,7 @@ class NumpyArray(NumpyMeta, Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         return self.to_contiguous().to_RegularArray()
 
     def _to_list(self, behavior, json_conversions):

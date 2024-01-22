@@ -187,7 +187,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
         if not isinstance(shape, tuple):
             raise TypeError("typetracer shape must be a tuple")
-        if any(is_unknown_scalar(x) for x in shape):
+        if not all(isinstance(x, int) or x is unknown_length for x in shape):
             raise TypeError("typetracer shape must be integers or unknown-length")
         if not isinstance(dtype, np.dtype):
             raise TypeError("typetracer dtype must be an instance of np.dtype")
@@ -945,7 +945,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         elif isinstance(x1, int):
             return x1
         else:
-            raise TypeError(f"expected None or int type, received {x1}")
+            raise TypeError(f"expected unknown_length or int type, received {x1}")
 
     def index_as_shape_item(self, x1: IndexType) -> ShapeItem:
         if is_unknown_scalar(x1) and np.issubdtype(x1.dtype, np.integer):
@@ -1294,10 +1294,24 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         *,
         axis: int = 0,
     ) -> TypeTracerArray:
+        # Ensure all arrays have same ndim
+        ndim = arrays[0].ndim
+        assert all(x.ndim == ndim for x in arrays[1:])
+
+        if axis is None:
+            assert all(x.ndim == 1 for x in arrays)
+        elif axis < 0:
+            axis = ndim + axis
+        if not 0 <= axis < ndim:
+            raise ValueError(axis)
+
         for x in arrays:
             assert isinstance(x, TypeTracerArray)
             try_touch_data(x)
-        raise NotImplementedError
+
+        emptyarrays = [numpy.empty_like((0,) * ndim, dtype=a.dtype) for a in arrays]
+        result = numpy.stack(emptyarrays, axis=axis)
+        return TypeTracerArray._new(result.dtype, result.shape)
 
     def packbits(
         self,
@@ -1436,10 +1450,33 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     ) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
-        if axis is None:
-            return TypeTracerArray._new(np.dtype(np.bool_), shape=())
-        else:
+
+        if isinstance(axis, tuple):
             raise NotImplementedError
+        if maybe_out is not None:
+            raise NotImplementedError
+
+        if axis is None:
+            return self.all(
+                cast(TypeTracerArray, self.reshape(x, (-1,))),
+                axis=axis,
+                keepdims=keepdims,
+                maybe_out=maybe_out,
+            )
+
+        if axis < 0:
+            axis = axis + x.ndim
+
+        assert 0 <= axis < x.ndim
+
+        if keepdims:
+            next_shape = list(x.shape)
+            next_shape[axis] = 1
+            return TypeTracerArray._new(np.dtype(np.bool_), shape=tuple(next_shape))
+        else:
+            next_shape = list(x.shape)
+            del next_shape[axis]
+            return TypeTracerArray._new(np.dtype(np.bool_), shape=tuple(next_shape))
 
     def any(
         self,
@@ -1449,12 +1486,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         keepdims: bool = False,
         maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
-        assert isinstance(x, TypeTracerArray)
-        try_touch_data(x)
-        if axis is None:
-            return TypeTracerArray._new(np.dtype(np.bool_), shape=())
-        else:
-            raise NotImplementedError
+        return self.all(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
 
     def count_nonzero(
         self, x: TypeTracerArray, *, axis: int | tuple[int, ...] | None = None
@@ -1476,7 +1508,33 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     ) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
-        raise NotImplementedError
+
+        if isinstance(axis, tuple):
+            raise NotImplementedError
+        if maybe_out is not None:
+            raise NotImplementedError
+
+        if axis is None:
+            return self.min(
+                cast(TypeTracerArray, self.reshape(x, (-1,))),
+                axis=axis,
+                keepdims=keepdims,
+                maybe_out=maybe_out,
+            )
+
+        if axis < 0:
+            axis = axis + x.ndim
+
+        assert 0 <= axis < x.ndim
+
+        if keepdims:
+            next_shape = list(x.shape)
+            next_shape[axis] = 1
+            return TypeTracerArray._new(x.dtype, shape=tuple(next_shape))
+        else:
+            next_shape = list(x.shape)
+            del next_shape[axis]
+            return TypeTracerArray._new(x.dtype, shape=tuple(next_shape))
 
     def max(
         self,
@@ -1486,12 +1544,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         keepdims: bool = False,
         maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
-        assert isinstance(x, TypeTracerArray)
-        try_touch_data(x)
-        if axis is None:
-            return TypeTracerArray._new(x.dtype, shape=())
-        else:
-            raise NotImplementedError
+        return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
 
     def array_str(
         self,
@@ -1601,7 +1654,7 @@ def _attach_report(
 def typetracer_with_report(
     form: ak.forms.Form, getkey: Callable[[Form, str], str]
 ) -> tuple[ak.contents.Content, TypeTracerReport]:
-    layout = form.length_zero_array(highlevel=False).to_typetracer(forget_length=True)
+    layout = form.length_zero_array().to_typetracer(forget_length=True)
     report = TypeTracerReport()
     _attach_report(layout, form, report, getkey)
     return layout, report

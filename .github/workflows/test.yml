@@ -32,6 +32,7 @@ jobs:
   run-tests:
     name: Run Tests
     strategy:
+      fail-fast: false
       matrix:
         runs-on:
           - windows-latest
@@ -56,6 +57,10 @@ jobs:
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: minimal
+          - python-version: 'pypy3.9'
+            python-architecture: x64
+            runs-on: ubuntu-latest
+            dependencies-kind: pypy
 
     runs-on: ${{ matrix.runs-on }}
 
@@ -91,7 +96,7 @@ jobs:
           python -m build -w awkward-cpp
 
       - name: Find built wheel
-        uses: tj-actions/glob@v17
+        uses: tj-actions/glob@v18
         id: find-wheel
         with:
           files: |
@@ -111,16 +116,16 @@ jobs:
         run: pipx run nox -s diagnostics -- --check-spec-sorted
 
       - name: Test specification
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: python -m pytest -vv -rs awkward-cpp/tests-spec
 
       - name: Test specification with explicitly defined values
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
 
       - name: Test CPU kernels
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
+
+      - name: Test CPU kernels with explicitly defined values
+        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels-explicit
 
       - name: Test non-kernels
         run: >-

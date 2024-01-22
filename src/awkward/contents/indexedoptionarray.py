@@ -278,9 +278,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         carry = ak.index.Index(carry)
 
         if self._content.length is not unknown_length and self._content.length == 0:
-            content = self._content.form.length_one_array(
-                backend=self._backend, highlevel=False
-            )._carry(carry, False)
+            content = self._content.form.length_one_array(backend=self._backend)._carry(
+                carry, False
+            )
         else:
             content = self._content._carry(carry, False)
 
@@ -316,7 +316,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         else:
             return self._content._getitem_at(self._index[where])
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -1717,29 +1717,28 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
-        original_index = self._index.raw(self._backend.nplike)
-        is_none = original_index < 0
-        num_none = self._backend.index_nplike.count_nonzero(is_none)
-        if self.parameter("__array__") == "categorical" or self._content.length <= (
-            len(original_index) - num_none
-        ):
+    def to_packed(self, recursive: bool = True) -> Self:
+        if self.parameter("__array__") == "categorical":
+            content = self._content.to_packed(True) if recursive else self._content
             return ak.contents.IndexedOptionArray(
-                self._index, self._content.to_packed(), parameters=self._parameters
+                self._index, content, parameters=self._parameters
             )
 
         else:
-            new_index = self._backend.index_nplike.empty(
-                len(original_index), dtype=original_index.dtype
-            )
+            index_nplike = self._backend.index_nplike
+            original_index = self._index.data
+            is_none = original_index < 0
+            num_none = index_nplike.count_nonzero(is_none)
+            new_index = index_nplike.empty(self._index.length, dtype=self._index.dtype)
             new_index[is_none] = -1
-            new_index[~is_none] = self._backend.index_nplike.arange(
-                len(original_index) - num_none,
-                dtype=original_index.dtype,
+            new_index[~is_none] = index_nplike.arange(
+                index_nplike.shape_item_as_index(new_index.size - num_none),
+                dtype=self._index.dtype,
             )
+            projected = self.project()
             return ak.contents.IndexedOptionArray(
                 ak.index.Index(new_index, nplike=self._backend.index_nplike),
-                self.project().to_packed(),
+                projected.to_packed(True) if recursive else projected,
                 parameters=self._parameters,
             )
 

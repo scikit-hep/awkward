@@ -320,7 +320,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         start, stop = self._offsets[where], self._offsets[where + 1]
         return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -2214,10 +2214,14 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         next = self.to_ListOffsetArray64(True)
-        next_content = next._content[: next._offsets[-1]].to_packed()
-        return ListOffsetArray(next._offsets, next_content, parameters=next._parameters)
+        next_content = next._content[: next._offsets[-1]]
+        return ListOffsetArray(
+            next._offsets,
+            next_content.to_packed(True) if recursive else next_content,
+            parameters=next._parameters,
+        )
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:

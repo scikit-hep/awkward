@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.5.1"
+version = "2.5.2"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.8"
@@ -40,7 +40,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==27",
+    "awkward_cpp==28",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.18.0",
     "packaging",
@@ -62,14 +62,15 @@ init = "awkward.numba:_register"
 "Releases" = "https://github.com/scikit-hep/awkward-1.0/releases"
 "Source Code" = "https://github.com/scikit-hep/awkward-1.0"
 
-[tool.hatch.build]
+[tool.hatch.build.targets.wheel]
+packages = ["src/awkward"]
 artifacts = [
     "/src/awkward/_connect/header-only",
     "/src/awkward/_connect/cuda/_kernel_signatures.py"
 ]
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/awkward"]
+[tool.hatch.build.targets.wheel.force-include]
+"./juliapkg.json" = "awkward/juliapkg.json"
 
 [tool.hatch.build.targets.wheel.hooks.version]
 path = "src/awkward/_version.py"
@@ -84,11 +85,14 @@ include = [
     "/CITATION.cff",
     "/CONTRIBUTING.md",
     "/README.md",
+    "/juliapkg.json",
     "/requirements-test-full.txt",
     "/requirements-test-minimal.txt"
 ]
 artifacts = [
-    "/tests-cuda-kernels"
+    "/tests-cuda-kernels",
+    "/src/awkward/_connect/header-only",
+    "/src/awkward/_connect/cuda/_kernel_signatures.py"
 ]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]

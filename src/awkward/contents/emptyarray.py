@@ -182,7 +182,7 @@ class EmptyArray(EmptyMeta, Content):
     def _getitem_at(self, where: IndexType):
         raise ak._errors.index_error(self, where, "array is empty")
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         return self
 
     def _getitem_field(
@@ -437,7 +437,7 @@ class EmptyArray(EmptyMeta, Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         return self
 
     def _to_list(self, behavior, json_conversions):

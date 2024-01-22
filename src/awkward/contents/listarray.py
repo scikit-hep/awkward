@@ -320,7 +320,7 @@ class ListArray(ListMeta[Content], Content):
         start, stop = self._starts[where], self._stops[where]
         return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -1602,8 +1602,8 @@ class ListArray(ListMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
-        return self.to_ListOffsetArray64(True).to_packed()
+    def to_packed(self, recursive: bool = True) -> Self:
+        return self.to_ListOffsetArray64(True).to_packed(recursive)
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
