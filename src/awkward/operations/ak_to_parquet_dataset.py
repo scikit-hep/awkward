@@ -3,19 +3,6 @@ from __future__ import annotations
 __all__ = ("to_parquet_dataset",)
 
 
-def write_metadata(dir_path, fs, *metas, global_metadata=True):
-    """Generate metadata file(s) from list of arrow metadata instances"""
-    assert metas
-    md = metas[0]
-    with fs.open("/".join([dir_path, "_common_metadata"]), "wb") as fil:
-        md.write_metadata_file(fil)
-    if global_metadata:
-        for meta in metas[1:]:
-            md.append_row_groups(meta)
-        with fs.open("/".join([dir_path, "_metadata"]), "wb") as fil:
-            md.write_metadata_file(fil)
-
-
 def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet"):
     """
     Args:
@@ -52,7 +39,7 @@ def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet")
         directory = fsdecode(directory)
     except TypeError:
         raise TypeError(
-            f"'directory' argument of 'ak.to_parquet' must be a path-like, not {type(directory).__name__}"
+            f"'directory' argument of 'ak.to_parquet_dataset' must be a path-like, not {type(directory).__name__}"
         ) from None
 
     directory = _regularize_path(directory)
@@ -75,7 +62,7 @@ def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet")
     schema, metadata_collector = _common_parquet_schema(
         pyarrow_parquet, filenames, relpaths
     )
-
+    pyarrow_parquet.write_metadata(schema, path.join(directory, "_common_metadata"))
     pyarrow_parquet.write_metadata(
         schema,
         path.join(directory, "_metadata"),
@@ -90,7 +77,7 @@ def _regularize_path(path):
         path = os.fspath(path)
 
     elif hasattr(path, "__fspath__"):
-        path = path.__fspath__()
+        path = os.fspath(path)
 
     elif path.__class__.__module__ == "pathlib":
         import pathlib
