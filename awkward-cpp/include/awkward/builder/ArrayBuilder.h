@@ -7,9 +7,9 @@
 #include <string>
 #include <vector>
 
-#include "awkward/common.h"
 #include "awkward/builder/Builder.h"
 #include "awkward/BuilderOptions.h"
+#include "awkward/common.h"
 
 namespace awkward {
   class Builder;
