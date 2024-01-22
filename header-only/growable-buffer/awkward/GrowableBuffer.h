@@ -5,16 +5,16 @@
 
 #include "awkward/BuilderOptions.h"
 
-#include <cstring>
-#include <vector>
-#include <memory>
-#include <numeric>
+#include <iostream>
 #include <cmath>
 #include <complex>
-#include <iostream>
-#include <utility>
+#include <cstring>
+#include <memory>
+#include <numeric>
 #include <stdexcept>
 #include <stdint.h>
+#include <utility>
+#include <vector>
 
 namespace awkward {
 
