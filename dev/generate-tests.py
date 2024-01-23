@@ -643,6 +643,7 @@ def gencpuunittests(specdict):
 
 
 cuda_kernels_tests = [
+    "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_compact_offsets",

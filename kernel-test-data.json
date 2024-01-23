@@ -10756,7 +10756,7 @@
         },
         {
             "name": "awkward_ListArray_min_range",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,

@@ -12,6 +12,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 cuda_kernels_impl = [
+    "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_compact_offsets",
