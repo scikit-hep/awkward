@@ -12451,7 +12451,7 @@
         },
         {
             "name": "awkward_IndexedArray_index_of_nulls",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
