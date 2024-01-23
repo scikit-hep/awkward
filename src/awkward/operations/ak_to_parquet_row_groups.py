@@ -173,6 +173,9 @@ def to_parquet_row_groups(
     # If the input is an iterator, then should row-group size still be
     # an option? Or should there be a check to determine if it's the same?
     # seems like it should be set based on the iterator or something
+    # If the input is an iterator, then should row-group size still be
+    # an option? Or should there be a check to determine if it's the same?
+    # seems like it should be set based on the iterator or something
 
     return ak_to_parquet._impl(
         array_iterator,
@@ -204,6 +207,9 @@ def to_parquet_row_groups(
 
 import uproot
 from skhep_testdata import data_path
+
+import awkward as ak
+
 
 import awkward as ak
 
