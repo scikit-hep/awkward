@@ -14,13 +14,13 @@
 template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_IndexedArray_index_of_nulls_a(T* toindex,
-                          const C* fromindex,
-                          int64_t lenindex,
-                          const U* parents,
-                          const V* starts,
-                          int64_t* scan_in_array,
-                          uint64_t invocation_index,
-                          uint64_t* err_code) {
+                                      const C* fromindex,
+                                      int64_t lenindex,
+                                      const U* parents,
+                                      const V* starts,
+                                      int64_t* scan_in_array,
+                                      uint64_t invocation_index,
+                                      uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -37,13 +37,13 @@ awkward_IndexedArray_index_of_nulls_a(T* toindex,
 template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_IndexedArray_index_of_nulls_b(T* toindex,
-                          const C* fromindex,
-                          int64_t lenindex,
-                          const U* parents,
-                          const V* starts,
-                          int64_t* scan_in_array,
-                          uint64_t invocation_index,
-                          uint64_t* err_code) {
+                                      const C* fromindex,
+                                      int64_t lenindex,
+                                      const U* parents,
+                                      const V* starts,
+                                      int64_t* scan_in_array,
+                                      uint64_t invocation_index,
+                                      uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
