@@ -22,15 +22,8 @@ namespace awkward {
 
     using OptionsPack = typename std::tuple<OPTIONS...>;
 
-    // FIXME:
-    // std::tuple_element_t is missing on some of the CI node compilers
-    //
-    // template<std::size_t INDEX>
-    // using OptionType = std::tuple_element_t<INDEX, OptionsPack>;
-
-    template <std::size_t INDEX>
-    using OptionType =
-        typename std::tuple_element<INDEX, decltype(OptionsPack())>::type;
+    template<std::size_t INDEX>
+    using OptionType = std::tuple_element_t<INDEX, OptionsPack>;
 
     /// @brief Creates an Options tuple from a full set of parameters.
     Options(OPTIONS... options) : pars(options...) {}
