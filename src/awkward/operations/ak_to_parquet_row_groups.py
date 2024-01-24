@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from awkward import ak_to_parquet
+import awkward as ak
 from awkward._dispatch import high_level_function
 
 __all__ = ("to_parquet_row_groups",)
@@ -177,7 +177,7 @@ def to_parquet_row_groups(
     # an option? Or should there be a check to determine if it's the same?
     # seems like it should be set based on the iterator or something
 
-    return ak_to_parquet._impl(
+    return ak.ak_to_parquet._impl(
         array_iterator,
         destination,
         list_to32,
@@ -204,29 +204,3 @@ def to_parquet_row_groups(
         storage_options,
         iter=True,
     )
-
-import uproot
-from skhep_testdata import data_path
-
-import awkward as ak
-
-
-import awkward as ak
-
-path = "/Users/zobil/Documents/awkward/tests/samples/array.parquet"
-
-iterator = uproot.iterate(
-    uproot.open(data_path("uproot-HZZ.root"))["events"], step_size=100
-)
-
-# ak.to_parquet(array, "/Users/zobil/Documents/awkward/tests/samples/array.parquet")
-to_parquet_row_groups(iterator, path, row_group_size=100)
-
-test = ak.from_parquet(path)
-
-print(len(test[0]))
-
-print(test[0])
-
-for i in test:
-    print(i)

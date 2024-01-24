@@ -237,11 +237,9 @@ def _impl(
     # Implementation
     import awkward._connect.pyarrow
 
-    data = array
-
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
-
+    data = array
     layout = ak.operations.ak_to_layout._impl(
         data,
         allow_record=True,
@@ -252,16 +250,28 @@ def _impl(
         primitive_policy="error",
         string_policy="as-characters",
     )
-    table = ak.operations.ak_to_arrow_table._impl(
-        layout,
-        list_to32,
-        string_to32,
-        bytestring_to32,
-        emptyarray_to,
-        categorical_as_dictionary,
-        extensionarray,
-        count_nulls,
-    )
+    if iter:
+        table = ak.operations.ak_to_arrow_table._impl(
+            layout[0], # Is this going to cause problems?
+            list_to32,
+            string_to32,
+            bytestring_to32,
+            emptyarray_to,
+            categorical_as_dictionary,
+            extensionarray,
+            count_nulls,
+        )
+    else:
+        table = ak.operations.ak_to_arrow_table._impl(
+            layout,
+            list_to32,
+            string_to32,
+            bytestring_to32,
+            emptyarray_to,
+            categorical_as_dictionary,
+            extensionarray,
+            count_nulls,
+        )
 
     if parquet_compliant_nested:
         list_indicator = "list.element"
@@ -273,7 +283,7 @@ def _impl(
     else:
         column_prefix = ()
 
-    if isinstance(data, ak.Record):
+    if isinstance(array, ak.record.Record):
         form = layout.array.form
     else:
         form = layout.form
@@ -368,12 +378,11 @@ def _impl(
         destination = fsdecode(destination)
     except TypeError:
         raise TypeError(
-            f"'destination' argument of 'ak.to_parquet' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
+            f"'destination' argument of 'ak.to_parquet' and 'ak.to_parquet_row_groups' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
         ) from None
 
     fs, destination = fsspec.core.url_to_fs(destination, **(storage_options or {}))
     metalist = []
-
     with pyarrow_parquet.ParquetWriter(
         destination,
         table.schema,
@@ -394,8 +403,10 @@ def _impl(
         **parquet_extra_options,
     ) as writer:
         if iter:
-            from pyarrow import Table
-
+            if isinstance(layout, ak.record.Record): 
+                # Not sure what this is menat to do ^ awk1 had `ak.layout.Record`
+                # is this supposed to solve the issue I was having that was resolved with layout[0]?
+                layout = layout.array[layout.at : layout.at + 1]
             iterator = batch_iterator(
                 layout,
                 list_to32,
@@ -407,17 +418,19 @@ def _impl(
                 count_nulls,
             )
             first = next(iterator)
-            writer.write_table(Table.from_batches([first]))
-            print(type(first))
+
+            writer.write_table(table.from_batches([first]))
             try:
                 while True:
-                    print("writing")
                     try:
                         record_batch = next(iterator)
                     except StopIteration:
                         break
                     else:
-                        writer.write_table(Table.from_batches([record_batch]))
+                        writer.write_table(
+                            table.from_batches([record_batch]),
+                            row_group_size=row_group_size,
+                        )
             finally:
                 writer.close()
         else:
@@ -453,20 +466,12 @@ def batch_iterator(
     import awkward._connect.pyarrow
 
     pyarrow = awkward._connect.pyarrow.import_pyarrow("ak.to_parquet")
-
-    if isinstance(ak.operations.type(layout), ak.types.RecordType):
-        names = layout.keys()
-        contents = [layout[name] for name in names]
-    else:
-        names = [""]
-        contents = [layout]
-
-    pa_arrays = []
-    pa_fields = []
-    for name, content in zip(names, contents):
-        pa_arrays.append(
-            ak.operations.ak_to_arrow._impl(
-                layout,
+    if isinstance(layout, ak.contents.ListOffsetArray):
+        # Is the above isinstance right? Trying to translate from Awk1's partitioned array
+        # Originally it was: 
+        for batch in layout:
+            yield from batch_iterator(
+                batch,
                 list_to32,
                 string_to32,
                 bytestring_to32,
@@ -475,10 +480,39 @@ def batch_iterator(
                 extensionarray,
                 count_nulls,
             )
-        )
-        pa_fields.append(
-            pyarrow.field(name, pa_arrays[-1].type).with_nullable(
-                isinstance(ak.operations.type(content), ak.types.OptionType)
+    else:
+        if isinstance(layout, ak.contents.RecordArray):
+            names = layout.fields
+            contents = [layout[name] for name in names]
+        else:
+            names = [""]
+            contents = [layout]
+        pa_arrays = []
+        pa_fields = []
+        for name, content in zip(names, contents):
+            if isinstance(layout, ak.record.Record):
+                # Is that right?? ^
+                layout = layout.array[layout.at : layout.at + 1]
+                record_is_scalar = True
+            else:
+                record_is_scalar = False
+            pa_arrays.append(
+                content.to_arrow(
+                    list_to32=list_to32,
+                    string_to32=string_to32,
+                    bytestring_to32=bytestring_to32,
+                    emptyarray_to=emptyarray_to,
+                    categorical_as_dictionary=categorical_as_dictionary,
+                    extensionarray=extensionarray,
+                    count_nulls=count_nulls,
+                    record_is_scalar=record_is_scalar,
+                )
             )
+            pa_fields.append(
+                pyarrow.field(name, pa_arrays[-1].type).with_nullable(
+                    layout.is_option
+                )  # is with_nullable correct?
+            )
+        yield pyarrow.RecordBatch.from_arrays(
+            pa_arrays, schema=pyarrow.schema(pa_fields)
         )
-    yield pyarrow.RecordBatch.from_arrays(pa_arrays, schema=pyarrow.schema(pa_fields))
