@@ -11,9 +11,11 @@ pyarrow = pytest.importorskip("pyarrow")
 uproot = pytest.importorskip("uproot")
 skhep_testdata = pytest.importorskip("skhep_testdata")
 
+
 def HZZ_test(tmp_file, batch_size):
     iterator = uproot.iterate(
-        uproot.open(skhep_testdata.data_path("uproot-HZZ.root"))["events"], step_size=batch_size
+        uproot.open(skhep_testdata.data_path("uproot-HZZ.root"))["events"],
+        step_size=batch_size,
     )
 
     data = uproot.open(skhep_testdata.data_path("uproot-HZZ.root"))["events"].arrays()
