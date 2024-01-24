@@ -237,9 +237,11 @@ def _impl(
     # Implementation
     import awkward._connect.pyarrow
 
+    data = array
+
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
-    data = array
+
     layout = ak.operations.ak_to_layout._impl(
         data,
         allow_record=True,
@@ -283,7 +285,7 @@ def _impl(
     else:
         column_prefix = ()
 
-    if isinstance(array, ak.record.Record):
+    if isinstance(data, ak.Record):
         form = layout.array.form
     else:
         form = layout.form

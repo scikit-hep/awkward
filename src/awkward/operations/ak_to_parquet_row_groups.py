@@ -8,7 +8,7 @@ __all__ = ("to_parquet_row_groups",)
 
 @high_level_function()
 def to_parquet_row_groups(
-    array_iterator,  # good or bad name?
+    iterator,  # good or bad name?
     destination,
     *,
     list_to32=False,
@@ -36,7 +36,7 @@ def to_parquet_row_groups(
 ):
     """
     Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
+        iterator: Generator object that iterates over array-like data (anything #ak.to_layout recognizes).
         destination (path-like): Name of the output file, file path, or
             remote URL passed to [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
             for remote writing.
@@ -140,7 +140,7 @@ def to_parquet_row_groups(
     Returns:
     `pyarrow._parquet.FileMetaData` instance
 
-    Writes an Awkward Array to a Parquet file (through pyarrow).
+    Writes an iterator over an Awkward Array to a Parquet file in batches (through pyarrow).
 
         >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
         >>> ak.to_parquet(array1, "array1.parquet")
@@ -168,7 +168,7 @@ def to_parquet_row_groups(
     See also #ak.to_arrow, which is used as an intermediate step.
     """
     # Dispatch
-    yield (array_iterator,)
+    yield (iterator,)
 
     # If the input is an iterator, then should row-group size still be
     # an option? Or should there be a check to determine if it's the same?
@@ -178,7 +178,7 @@ def to_parquet_row_groups(
     # seems like it should be set based on the iterator or something
 
     return ak.ak_to_parquet._impl(
-        array_iterator,
+        iterator,
         destination,
         list_to32,
         string_to32,
