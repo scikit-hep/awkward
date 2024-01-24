@@ -404,7 +404,7 @@ def _impl(
     ) as writer:
         if iter:
             if isinstance(layout, ak.record.Record):
-                # Not sure what this is menat to do ^ awk1 had `ak.layout.Record`
+                # Not sure what this is meant to do ^ awk1 had `ak.layout.Record`
                 # is this supposed to solve the issue I was having that was resolved with layout[0]?
                 layout = layout.array[layout.at : layout.at + 1]
             iterator = batch_iterator(
