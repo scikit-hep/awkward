@@ -143,7 +143,7 @@ def to_parquet_row_groups(
     Writes an iterator over an Awkward Array to a Parquet file in batches (through pyarrow).
 
         >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
-        >>> ak.to_parquet(array1, "array1.parquet")
+        >>> ak.to_parquet_row_groups((batch for batch in array1), "array1.parquet")
         <pyarrow._parquet.FileMetaData object at 0x7f646c38ff40>
           created_by: parquet-cpp-arrow version 9.0.0
           num_columns: 1
