@@ -8010,6 +8010,45 @@
             ]
         },
         {
+            "name": "awkward_ListArray_getitem_next_range_spreadadvanced",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromadvanced": [0],
+                        "fromoffsets": [0, 3],
+                        "lenstarts": 1
+                    },
+                    "outputs": {
+                        "toadvanced": [0, 0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromadvanced": [0, 1],
+                        "fromoffsets": [0, 3, 6],
+                        "lenstarts": 2
+                    },
+                    "outputs": {
+                        "toadvanced": [0, 0, 0, 1, 1, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromadvanced": [0, 1, 2, 3],
+                        "fromoffsets": [0, 4, 5, 7, 10],
+                        "lenstarts": 4
+                    },
+                    "outputs": {
+                        "toadvanced": [0, 0, 0, 0, 1, 2, 2, 3, 3, 3]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_RegularArray_getitem_next_range_spreadadvanced",
             "status": true,
             "tests": [
