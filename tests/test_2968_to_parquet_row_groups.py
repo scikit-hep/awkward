@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import os
 
-import awkward as ak
-
 import pytest
+
+import awkward as ak
 
 pytest.importorskip("pyarrow.parquet")
 pytest.importorskip("fsspec")
