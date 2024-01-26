@@ -39,7 +39,7 @@ def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet")
         "ak.to_parquet_dataset"
     )
 
-    try:  # Second is probably better...
+    try:
         directory = fsdecode(directory)
     except TypeError:
         raise TypeError(
