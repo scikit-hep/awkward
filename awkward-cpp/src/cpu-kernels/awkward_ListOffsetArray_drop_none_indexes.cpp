@@ -41,7 +41,6 @@ ERROR awkward_ListOffsetArray_drop_none_indexes_64(
     length_offsets,
     length_indexes);
 }
-
 ERROR awkward_ListOffsetArray_drop_none_indexes_32(
   int32_t* tooffsets,
   const int32_t* noneindexes,
