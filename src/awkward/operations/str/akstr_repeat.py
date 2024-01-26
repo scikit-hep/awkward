@@ -16,7 +16,11 @@ typetracer = TypeTracerBackend.instance()
 np = NumpyMetadata.instance()
 
 
-@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
+from awkward._requirements import requires
+
+
+@requires("pyarrow>=7.0.0", group="arrow", module_name="arrow")
+@high_level_function(module="ak.str")
 def repeat(array, num_repeats, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:

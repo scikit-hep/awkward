@@ -17,14 +17,18 @@ from awkward._layout import HighLevelContext, wrap_layout
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer
+from awkward._requirements import import_required_module
 
 __all__ = ("from_json",)
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
+from awkward._requirements import requires
 
-@high_level_function(dependencies=["fsspec"])
+
+@requires("cupy")
+@high_level_function()
 def from_json(
     source,
     *,
@@ -376,9 +380,7 @@ def _get_reader(source):
         if parsed_url.scheme == "" or parsed_url.netloc == "":
             return open(source, "rb")
         else:
-            import fsspec
-
-            return fsspec.open(source, "rb").open()
+            return import_required_module("fsspec").open(source, "rb").open()
 
     else:
         return nullcontext(source)

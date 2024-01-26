@@ -14,6 +14,7 @@ from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._requirements import import_required_module
 
 __all__ = ("to_json",)
 
@@ -21,7 +22,11 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@high_level_function(dependencies=["fsspec"])
+from awkward._requirements import requires
+
+
+@requires("fsspec")
+@high_level_function()
 def to_json(
     array,
     file=None,
@@ -207,7 +212,7 @@ def _impl(
                     return open(file, "w", encoding="utf8")
 
             else:
-                import fsspec
+                fsspec = import_required_module("fsspec")
 
                 def opener():
                     return fsspec.open(file, "w", encoding="utf8").open()

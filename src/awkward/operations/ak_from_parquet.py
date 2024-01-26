@@ -6,11 +6,14 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._regularize import is_integer
+from awkward._requirements import import_required_module, requires
 
 __all__ = ("from_parquet",)
 
 
-@high_level_function(dependencies={"arrow": ["pyarrow>=7.0.0", "fsspec"]})
+@requires("pyarrow>=7.0.0", group="arrow", module_name="arrow")
+@requires("fsspec", group="arrow")
+@high_level_function()
 def from_parquet(
     path,
     *,
@@ -84,7 +87,9 @@ def from_parquet(
     )
 
 
-@high_level_function(dependencies={"arrow": ["pyarrow>=7.0.0", "fsspec"]})
+@requires("pyarrow>=7.0.0", group="arrow", module_name="arrow")
+@requires("fsspec", group="arrow")
+@high_level_function()
 def metadata(
     path,
     storage_options=None,
@@ -93,11 +98,9 @@ def metadata(
     ignore_metadata=False,
     scan_files=True,
 ):
-    import awkward._connect.pyarrow
-
     # early exit if missing deps
-    pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.from_parquet")
-    import fsspec.parquet
+    pyarrow_parquet = import_required_module("pyarrow.parquet")
+    fsspec = import_required_module("fsspec")
 
     if row_groups is not None:
         if not all(is_integer(x) and x >= 0 for x in row_groups):
@@ -248,11 +251,10 @@ def _open_file(
     path, fs, columns, row_groups, max_gap, max_block, footer_sample_size, metadata
 ):
     """Picks between fsspec.parquet and normal fs.open"""
-    import fsspec.parquet
-
     # condition should be if columns and ow_groups are not all the possible ones
     if (columns or row_groups) and getattr(fs, "async_impl", False):
-        return fsspec.parquet.open_parquet_file(
+        fsspec_parquet = import_required_module("fsspec.parquet")
+        return fsspec_parquet.open_parquet_file(
             path,
             fs=fs,
             engine="pyarrow",
@@ -278,7 +280,7 @@ def _read_parquet_file(
     generate_bitmasks,
     metadata=None,
 ):
-    import pyarrow.parquet as pyarrow_parquet
+    pyarrow_parquet = import_required_module("pyarrow.parquet")
 
     with _open_file(
         path,

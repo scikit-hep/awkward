@@ -6,13 +6,15 @@ import awkward as ak
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._requirements import requires
 
 __all__ = ("join_element_wise",)
 
 typetracer = TypeTracerBackend.instance()
 
 
-@high_level_function(module="ak.str", dependencies={"arrow": ["pyarrow>=7.0.0"]})
+@requires("pyarrow>=7.0.0", group="arrow", module_name="arrow")
+@high_level_function(module="ak.str")
 def join_element_wise(*arrays, highlevel=True, behavior=None, attrs=None):
     """
     Args:

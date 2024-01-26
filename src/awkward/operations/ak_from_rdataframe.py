@@ -10,8 +10,11 @@ __all__ = ("from_rdataframe",)
 
 np = NumpyMetadata.instance()
 
+from awkward._requirements import requires
 
-@high_level_function(dependencies=["ROOT"])
+
+@requires("ROOT", is_on_pypi=False, conda_forge_spec="root")
+@high_level_function()
 def from_rdataframe(
     rdf,
     columns,

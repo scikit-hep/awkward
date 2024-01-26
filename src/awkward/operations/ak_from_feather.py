@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._requirements import import_required_module, requires
 
 __all__ = ("from_feather",)
 
 
-@high_level_function(dependencies={"arrow": ["pyarrow>=7.0.0"]})
+@requires("pyarrow>=7.0.0", group="arrow", module_name="arrow")
+@high_level_function()
 def from_feather(
     path,
     *,
@@ -71,9 +73,9 @@ def _impl(
     behavior,
     attrs,
 ):
-    import pyarrow.feather
-
-    arrow_table = pyarrow.feather.read_table(path, columns, use_threads, memory_map)
+    arrow_table = import_required_module("pyarrow.feather").read_table(
+        path, columns, use_threads, memory_map
+    )
 
     return ak.operations.ak_from_arrow._impl(
         arrow_table,

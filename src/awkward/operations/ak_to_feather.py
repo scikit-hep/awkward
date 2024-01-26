@@ -6,13 +6,15 @@ import os
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._requirements import import_required_module, requires
 
 __all__ = ("to_feather",)
 
 metadata = NumpyMetadata.instance()
 
 
-@high_level_function(dependencies={"arrow": ["pyarrow>=7.0.0"]})
+@requires("pyarrow>=7.0.0", group="arrow", module_name="arrow")
+@high_level_function()
 def to_feather(
     array,
     destination,
@@ -123,8 +125,6 @@ def _impl(
     chunksize,
     feather_version,
 ):
-    import pyarrow.feather
-
     layout = ak.operations.ak_to_layout._impl(
         array,
         allow_record=True,
@@ -159,6 +159,6 @@ def _impl(
             f"'destination' argument of 'ak.to_feather' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
         ) from None
 
-    pyarrow.feather.write_feather(
+    import_required_module("pyarrow.feather").write_feather(
         table, destination, compression, compression_level, chunksize, feather_version
     )

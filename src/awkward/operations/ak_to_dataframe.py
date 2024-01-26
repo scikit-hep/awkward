@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._requirements import import_required_module, requires
 
 __all__ = ("to_dataframe",)
 
@@ -17,7 +18,8 @@ def _default_levelname(index: int) -> str:
     return "sub" * index + "entry"
 
 
-@high_level_function(dependencies=["pandas"])
+@requires("pandas")
+@high_level_function()
 def to_dataframe(
     array, *, how="inner", levelname=_default_levelname, anonymous="values"
 ):
@@ -139,18 +141,7 @@ def to_dataframe(
 
 
 def _impl(array, how, levelname, anonymous):
-    try:
-        import pandas
-    except ImportError as err:
-        raise ImportError(
-            """install the 'pandas' package with:
-
-    pip install pandas --upgrade
-
-or
-
-    conda install pandas"""
-        ) from err
+    pandas = import_required_module("pandas")
 
     if how is not None:
         out = None
