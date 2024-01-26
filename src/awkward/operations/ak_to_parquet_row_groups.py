@@ -195,5 +195,5 @@ def to_parquet_row_groups(
         parquet_compliant_nested,  # https://issues.apache.org/jira/browse/ARROW-16348
         parquet_extra_options,
         storage_options,
-        iter=True,
+        write_iteratively=True,
     )

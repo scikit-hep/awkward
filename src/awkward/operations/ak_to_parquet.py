@@ -203,7 +203,7 @@ def to_parquet(
         parquet_compliant_nested,  # https://issues.apache.org/jira/browse/ARROW-16348
         parquet_extra_options,
         storage_options,
-        iter=False,
+        write_iteratively=False,
     )
 
 
@@ -232,7 +232,7 @@ def _impl(
     parquet_compliant_nested,  # https://issues.apache.org/jira/browse/ARROW-16348
     parquet_extra_options,
     storage_options,
-    iter,
+    write_iteratively,
 ):
     # Implementation
     import awkward._connect.pyarrow
@@ -242,19 +242,20 @@ def _impl(
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
 
-    layout = ak.operations.ak_to_layout._impl(
-        data,
-        allow_record=True,
-        allow_unknown=False,
-        none_policy="error",
-        regulararray=True,
-        use_from_iter=True,
-        primitive_policy="error",
-        string_policy="as-characters",
-    )
-    if iter:
+    if not write_iteratively:
+        layout = ak.operations.ak_to_layout._impl(
+            data,
+            allow_record=True,
+            allow_unknown=False,
+            none_policy="error",
+            regulararray=True,
+            use_from_iter=True,
+            primitive_policy="error",
+            string_policy="as-characters",
+        )
+
         table = ak.operations.ak_to_arrow_table._impl(
-            layout[0],
+            layout,
             list_to32,
             string_to32,
             bytestring_to32,
@@ -264,6 +265,17 @@ def _impl(
             count_nulls,
         )
     else:
+        layout = ak.operations.ak_to_layout._impl(
+            next(data),
+            allow_record=True,
+            allow_unknown=False,
+            none_policy="error",
+            regulararray=True,
+            use_from_iter=True,
+            primitive_policy="error",
+            string_policy="as-characters",
+        )
+
         table = ak.operations.ak_to_arrow_table._impl(
             layout,
             list_to32,
@@ -404,31 +416,37 @@ def _impl(
         metadata_collector=metalist,
         **parquet_extra_options,
     ) as writer:
-        if iter:
-            if isinstance(layout, ak.record.Record):
-                layout = layout.array[layout.at : layout.at + 1]
-            iterator = batch_iterator(
-                layout,
-                list_to32,
-                string_to32,
-                bytestring_to32,
-                emptyarray_to,
-                categorical_as_dictionary,
-                extensionarray,
-                count_nulls,
-            )
-            first = next(iterator)
-
-            writer.write_table(table.from_batches([first]))
+        if write_iteratively:
+            writer.write_table(table)
             try:
                 while True:
                     try:
-                        record_batch = next(iterator)
+                        layout = ak.to_layout(  
+                            next(data),
+                            allow_record=True,
+                            allow_unknown=False,
+                            none_policy="error",
+                            regulararray=True,
+                            use_from_iter=True,
+                            primitive_policy="error",
+                            string_policy="as-characters",
+                        )
+
+                        table = ak.operations.ak_to_arrow_table._impl(
+                            layout,
+                            list_to32,
+                            string_to32,
+                            bytestring_to32,
+                            emptyarray_to,
+                            categorical_as_dictionary,
+                            extensionarray,
+                            count_nulls,
+                        )
                     except StopIteration:
                         break
                     else:
                         writer.write_table(
-                            table.from_batches([record_batch]),
+                            table,
                             row_group_size=row_group_size,
                         )
             finally:
@@ -453,61 +471,36 @@ def write_metadata(dir_path, fs, *metas, global_metadata=True):
             md.write_metadata_file(fil)
 
 
-def batch_iterator(
-    layout,
-    list_to32,
-    string_to32,
-    bytestring_to32,
-    emptyarray_to,
-    categorical_as_dictionary,
-    extensionarray,
-    count_nulls,
-):
-    import awkward._connect.pyarrow
+    # import awkward._connect.pyarrow
 
-    pyarrow = awkward._connect.pyarrow.import_pyarrow("ak.to_parquet")
-    if isinstance(layout, ak.contents.ListOffsetArray):
-        for batch in layout:
-            yield from batch_iterator(
-                batch,
-                list_to32,
-                string_to32,
-                bytestring_to32,
-                emptyarray_to,
-                categorical_as_dictionary,
-                extensionarray,
-                count_nulls,
-            )
-    else:
-        if isinstance(layout, ak.contents.RecordArray):
-            names = layout.fields
-            contents = [layout[name] for name in names]
-        else:
-            names = [""]
-            contents = [layout]
-        pa_arrays = []
-        pa_fields = []
-        for name, content in zip(names, contents):
-            if isinstance(layout, ak.record.Record):
-                layout = layout.array[layout.at : layout.at + 1]
-                record_is_scalar = True
-            else:
-                record_is_scalar = False
-            pa_arrays.append(
-                content.to_arrow(
-                    list_to32=list_to32,
-                    string_to32=string_to32,
-                    bytestring_to32=bytestring_to32,
-                    emptyarray_to=emptyarray_to,
-                    categorical_as_dictionary=categorical_as_dictionary,
-                    extensionarray=extensionarray,
-                    count_nulls=count_nulls,
-                    record_is_scalar=record_is_scalar,
-                )
-            )
-            pa_fields.append(
-                pyarrow.field(name, pa_arrays[-1].type).with_nullable(layout.is_option)
-            )
-        yield pyarrow.RecordBatch.from_arrays(
-            pa_arrays, schema=pyarrow.schema(pa_fields)
-        )
+
+    #     if isinstance(layout, ak.contents.RecordArray):
+    #         names = layout.fields
+    #         contents = [layout[name] for name in names]
+    #     else:
+    #         names = [""]
+    #         contents = [layout]
+    #     pa_arrays = []
+    #     pa_fields = []
+    #     for name, content in zip(names, contents):
+    #         if isinstance(layout, ak.record.Record):
+    #             layout = layout.array[layout.at : layout.at + 1]
+    #             record_is_scalar = True
+    #         else:
+    #             record_is_scalar = False
+    #         pa_arrays.append(
+    #             content.to_arrow(
+    #                 list_to32=list_to32,
+    #                 string_to32=string_to32,
+    #                 bytestring_to32=bytestring_to32,
+    #                 emptyarray_to=emptyarray_to,
+    #                 categorical_as_dictionary=categorical_as_dictionary,
+    #                 extensionarray=extensionarray,
+    #                 count_nulls=count_nulls,
+    #                 record_is_scalar=record_is_scalar,
+    #             )
+    #         )
+    #         pa_fields.append(
+    #             pyarrow.field(name, pa_arrays[-1].type).with_nullable(layout.is_option)
+    #         )
+    #     yield 
