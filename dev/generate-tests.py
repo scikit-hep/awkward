@@ -229,22 +229,23 @@ def checkuint(test_args, args):
     return flag
 
 
-def checkintrange(test_args, args):
+def checkintrange(test_args, error, args):
     flag = True
-    for arg, val in test_args:
-        typename = remove_const(
-            next(argument for argument in args if argument.name == arg).typename
-        )
-        if "int" in typename or "uint" in typename:
-            dtype = gettypename(typename)
-            min_val, max_val = np.iinfo(dtype).min, np.iinfo(dtype).max
-            if "List" in typename:
-                for data in val:
-                    if not (min_val <= data <= max_val):
+    if not error:
+        for arg, val in test_args:
+            typename = remove_const(
+                next(argument for argument in args if argument.name == arg).typename
+            )
+            if "int" in typename or "uint" in typename:
+                dtype = gettypename(typename)
+                min_val, max_val = np.iinfo(dtype).min, np.iinfo(dtype).max
+                if "List" in typename:
+                    for data in val:
+                        if not (min_val <= data <= max_val):
+                            flag = False
+                else:
+                    if not (min_val <= val <= max_val):
                         flag = False
-            else:
-                if not (min_val <= val <= max_val):
-                    flag = False
     return flag
 
 
@@ -581,8 +582,8 @@ def gencpuunittests(specdict):
                         test["inputs"], test["outputs"]
                     )
                     flag = checkuint(unit_tests.items(), spec.args)
-                    range = checkintrange(unit_tests.items(), spec.args)
-                    if flag and range:
+                    range = checkintrange(unit_tests.items(), test["error"], spec.args)
+                    if flag and range and not test["error"]:
                         num += 1
                         f.write(funcName)
                         for i, (arg, val) in enumerate(unit_tests.items()):
@@ -915,7 +916,7 @@ def gencudaunittests(specdict):
                         test["inputs"], test["outputs"]
                     )
                     flag = checkuint(unit_tests.items(), spec.args)
-                    range = checkintrange(unit_tests.items(), spec.args)
+                    range = checkintrange(unit_tests.items(), test["error"], spec.args)
                     if flag and range:
                         num += 1
                         if not status:
@@ -973,24 +974,39 @@ def gencudaunittests(specdict):
                             else:
                                 args += ", " + arg.name
                         f.write(" " * 4 + "funcC(" + args + ")\n")
+                        error_message = test["message"]
                         f.write(
                             """
     try:
         ak_cu.synchronize_cuda()
+"""
+                        )
+                        if test["error"]:
+                            f.write(
+                                f"""
+    except ValueError as e:
+        assert str(e) == "{error_message} in compiled CUDA code ({spec.templatized_kernel_name})"
+"""
+                            )
+                        else:
+                            f.write(
+                                """
     except:
         pytest.fail("This test case shouldn't have raised an error")
 """
-                        )
-                        for arg, val in test["outputs"].items():
-                            f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
-                            if isinstance(val, list):
+                            )
+                            for arg, val in test["outputs"].items():
                                 f.write(
-                                    " " * 4
-                                    + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                    " " * 4 + "pytest_" + arg + " = " + str(val) + "\n"
                                 )
-                            else:
-                                f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
-                            f.write("\n")
+                                if isinstance(val, list):
+                                    f.write(
+                                        " " * 4
+                                        + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                    )
+                                else:
+                                    f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
+                        f.write("\n")
 
 
 def genunittests():
