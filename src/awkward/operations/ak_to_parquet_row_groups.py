@@ -8,7 +8,7 @@ __all__ = ("to_parquet_row_groups",)
 
 @high_level_function()
 def to_parquet_row_groups(
-    iterator,  # good or bad name?
+    iterator,
     destination,
     *,
     list_to32=False,
@@ -36,7 +36,7 @@ def to_parquet_row_groups(
 ):
     """
     Args:
-        iterator: Generator object that iterates over array-like data (anything #ak.to_layout recognizes).
+        iterator: Generator object that iterates over awkward arrays.
         destination (path-like): Name of the output file, file path, or
             remote URL passed to [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
             for remote writing.
@@ -78,7 +78,7 @@ def to_parquet_row_groups(
             Compression levels have different meanings for different compression
             algorithms: GZIP ranges from 1 to 9, but ZSTD ranges from -7 to 22, for
             example. Generally, higher numbers provide slower but smaller compression.
-        row_group_size (int or None): Number of entries in each row group (except the last),
+        row_group_size (int or None): Maximum number of entries in each row group (except the last),
             passed to [pyarrow.parquet.ParquetWriter.write_table](https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html#pyarrow.parquet.ParquetWriter.write_table).
             If None, the Parquet default of 64 MiB is used.
         data_page_size (None or int): Number of bytes in each data page, passed to
@@ -169,13 +169,6 @@ def to_parquet_row_groups(
     """
     # Dispatch
     yield (iterator,)
-
-    # If the input is an iterator, then should row-group size still be
-    # an option? Or should there be a check to determine if it's the same?
-    # seems like it should be set based on the iterator or something
-    # If the input is an iterator, then should row-group size still be
-    # an option? Or should there be a check to determine if it's the same?
-    # seems like it should be set based on the iterator or something
 
     return ak.ak_to_parquet._impl(
         iterator,

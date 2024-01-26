@@ -254,7 +254,7 @@ def _impl(
     )
     if iter:
         table = ak.operations.ak_to_arrow_table._impl(
-            layout[0],  # Is this going to cause problems?
+            layout[0],
             list_to32,
             string_to32,
             bytestring_to32,
@@ -406,8 +406,6 @@ def _impl(
     ) as writer:
         if iter:
             if isinstance(layout, ak.record.Record):
-                # Not sure what this is meant to do ^ awk1 had `ak.layout.Record`
-                # is this supposed to solve the issue I was having that was resolved with layout[0]?
                 layout = layout.array[layout.at : layout.at + 1]
             iterator = batch_iterator(
                 layout,
@@ -469,8 +467,6 @@ def batch_iterator(
 
     pyarrow = awkward._connect.pyarrow.import_pyarrow("ak.to_parquet")
     if isinstance(layout, ak.contents.ListOffsetArray):
-        # Is the above isinstance right? Trying to translate from Awk1's partitioned array
-        # Originally it was:
         for batch in layout:
             yield from batch_iterator(
                 batch,
@@ -493,7 +489,6 @@ def batch_iterator(
         pa_fields = []
         for name, content in zip(names, contents):
             if isinstance(layout, ak.record.Record):
-                # Is that right?? ^
                 layout = layout.array[layout.at : layout.at + 1]
                 record_is_scalar = True
             else:
@@ -511,9 +506,7 @@ def batch_iterator(
                 )
             )
             pa_fields.append(
-                pyarrow.field(name, pa_arrays[-1].type).with_nullable(
-                    layout.is_option
-                )  # is with_nullable correct?
+                pyarrow.field(name, pa_arrays[-1].type).with_nullable(layout.is_option)
             )
         yield pyarrow.RecordBatch.from_arrays(
             pa_arrays, schema=pyarrow.schema(pa_fields)

@@ -1,122 +1,243 @@
 from __future__ import annotations
 
-import math
 import os
-
-import pytest
 
 import awkward as ak
 
-pyarrow = pytest.importorskip("pyarrow")
-uproot = pytest.importorskip("uproot")
-skhep_testdata = pytest.importorskip("skhep_testdata")
 
+def simple_test(tmp_path):
+    filename = os.path.join(tmp_path, "whatever.parquet")
 
-def HZZ_test_100(tmp_file):
-    batch_size = 100
-    iterator = uproot.iterate(
-        uproot.open(skhep_testdata.data_path("uproot-HZZ.root"))["events"],
-        step_size=batch_size,
-    )
-
-    data = uproot.open(skhep_testdata.data_path("uproot-HZZ.root"))["events"].arrays()
-
-    metadata = ak.to_parquet_row_groups(iterator, tmp_file)
-    test = ak.from_parquet(tmp_file)
-
-    assert len(test) == len(data)
-
-    for name in test.fields:
-        assert ak.all(test[name] == data[name])
-
-    # Check row_group size with batch_size to see if writing in correct batch
-    # sizes and ending up with right number of row_groups
-    row_groups = metadata.num_row_groups
-    num_rows = metadata.num_rows
-
-    assert int(math.ceil(num_rows / batch_size)) == row_groups
-
-    os.remove(tmp_file)
-
-def HZZ_test_1000(tmp_file):
-    batch_size = 1000
-    iterator = uproot.iterate(
-        uproot.open(skhep_testdata.data_path("uproot-HZZ.root"))["events"],
-        step_size=batch_size,
-    )
-
-    data = uproot.open(skhep_testdata.data_path("uproot-HZZ.root"))["events"].arrays()
-
-    metadata = ak.to_parquet_row_groups(iterator, tmp_file)
-    test = ak.from_parquet(tmp_file)
-
-    assert len(test) == len(data)
-
-    for name in test.fields:
-        assert ak.all(test[name] == data[name])
-
-    # Check row_group size with batch_size to see if writing in correct batch
-    # sizes and ending up with right number of row_groups
-    row_groups = metadata.num_row_groups
-    num_rows = metadata.num_rows
-
-    assert int(math.ceil(num_rows / batch_size)) == row_groups
-
-    os.remove(tmp_file)
-
-def HZZ_test_100_MB(tmp_file):
-    batch_size = "100 MB"
-    iterator = uproot.iterate(
-        uproot.open(skhep_testdata.data_path("uproot-HZZ.root"))["events"],
-        step_size=batch_size,
-    )
-
-    data = uproot.open(skhep_testdata.data_path("uproot-HZZ.root"))["events"].arrays()
-
-    metadata = ak.to_parquet_row_groups(iterator, tmp_file)
-    test = ak.from_parquet(tmp_file)
-
-    assert len(test) == len(data)
-
-    for name in test.fields:
-        assert ak.all(test[name] == data[name])
-
-    # Check row_group size with batch_size to see if writing in correct batch
-    # sizes and ending up with right number of row_groups
-    row_groups = metadata.num_row_groups
-    
-    assert row_groups == 1
-    
-    os.remove(tmp_file)
-
-def simple_test_params(tmp_file):
-    batch_size = 1000
     arr = ak.Array(
         [
-            [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
-            [],
-            [{"x": 4.4, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}],
+            ak.Array(
+                [
+                    {"x": 1.1, "y": [1]},
+                    {"x": 2.2, "y": [1, 2]},
+                    {"x": 3.3, "y": [1, 2, 3]},
+                    {"x": 1.8, "y": [3, 5, 6]},
+                    {"x": 4.4, "y": [1, 2, 3, 4]},
+                    {"x": 5.5, "y": [5, 3, 2, 6]},
+                ]
+            ),
+            ak.Array(
+                [
+                    {"x": 1.1, "y": [1]},
+                    {"x": 2.2, "y": [1, 2]},
+                    {"x": 3.3, "y": [1, 2, 3]},
+                    {"x": 4.4, "y": [1, 2, 3, 4]},
+                    {"x": 1.8, "y": [3, 5, 6]},
+                    {"x": 5.5, "y": [1, 2, 3, 4, 5]},
+                ]
+            ),
+            ak.Array(
+                [
+                    {"x": 1.1, "y": [1]},
+                    {"x": 4.4, "y": [1, 2, 3, 4]},
+                    {"x": 5.5, "y": [1, 2, 3, 4, 5]},
+                    {"x": 2.2, "y": [1, 2]},
+                    {"x": 3.3, "y": [1, 2, 3]},
+                    {"x": 1.8, "y": [3, 5, 6]},
+                ]
+            ),
         ]
     )
+
+    check = ak.Array(
+        [
+            {"x": 1.1, "y": [1]},
+            {"x": 2.2, "y": [1, 2]},
+            {"x": 3.3, "y": [1, 2, 3]},
+            {"x": 1.8, "y": [3, 5, 6]},
+            {"x": 4.4, "y": [1, 2, 3, 4]},
+            {"x": 5.5, "y": [5, 3, 2, 6]},
+            {"x": 1.1, "y": [1]},
+            {"x": 2.2, "y": [1, 2]},
+            {"x": 3.3, "y": [1, 2, 3]},
+            {"x": 4.4, "y": [1, 2, 3, 4]},
+            {"x": 1.8, "y": [3, 5, 6]},
+            {"x": 5.5, "y": [1, 2, 3, 4, 5]},
+            {"x": 1.1, "y": [1]},
+            {"x": 4.4, "y": [1, 2, 3, 4]},
+            {"x": 5.5, "y": [1, 2, 3, 4, 5]},
+            {"x": 2.2, "y": [1, 2]},
+            {"x": 3.3, "y": [1, 2, 3]},
+            {"x": 1.8, "y": [3, 5, 6]},
+        ]
+    )
+
     iterator = (i for i in arr)
 
-    metadata = ak.to_parquet_row_groups(iterator, tmp_file)
-    test = ak.from_parquet(tmp_file)
-    
-    print(len(arr[0]))
-    print(test)
-    assert len(test) == len(arr)
+    metadata = ak.to_parquet_row_groups(iterator, filename)
+    data = ak.from_parquet(filename)
 
-    for name in test.fields:
-        assert ak.all(test[name] == arr[name])
+    for name in data.fields:
+        assert ak.all(data[name] == check[name])
 
-    # Check row_group size with batch_size to see if writing in correct batch
-    # sizes and ending up with right number of row_groups
-    row_groups = metadata.num_row_groups
-    num_rows = metadata.num_rows
+    # Check row group size
+    num_row_groups = metadata.num_row_groups
+    assert len(arr) == num_row_groups
 
-    assert int(math.ceil(num_rows / batch_size)) == row_groups
 
-    os.remove(tmp_file)
+def test_general(tmp_path):
+    filename = os.path.join(tmp_path, "whatever.parquet")
+    iterator = generator(3)
 
-simple_test_params("path.parquet")
+    metadata = ak.to_parquet_row_groups(iterator, filename)
+    data = ak.from_parquet(filename)
+
+    assert len(data) == 9
+
+    assert metadata.num_row_groups == 3
+
+    assert ak.all(data["x"] == [1.1, 2.2, 3.3, 1.1, 2.2, 3.3, 1.1, 4.4, 5.5])
+    assert ak.all(
+        data["y"]
+        == [
+            [1],
+            [1, 2],
+            [1, 2, 3],
+            [1],
+            [1, 2],
+            [1, 2, 3],
+            [1],
+            [1, 2, 3, 4],
+            [1, 2, 3, 4, 5],
+        ]
+    )
+    assert ak.all(
+        data["z"]
+        == [
+            [9, 0, 10],
+            [9, 11, 14],
+            [12, 14],
+            [8],
+            [6, 2, 10],
+            [9, 14],
+            [9, 11, 14],
+            [1, 14],
+            [9],
+        ]
+    )
+
+
+def test_params(tmp_path):
+    filename = os.path.join(tmp_path, "whatever.parquet")
+    iterator = generator(5)
+
+    metadata = ak.to_parquet_row_groups(
+        iterator,
+        filename,
+        extensionarray=False,
+        count_nulls=False,
+        row_group_size=64 * 64 * 64,
+    )
+    data = ak.from_parquet(filename)
+
+    assert len(data) == 15
+
+    assert metadata.num_row_groups == 5
+
+    assert ak.all(
+        data["x"]
+        == [
+            1.1,
+            2.2,
+            3.3,
+            1.1,
+            2.2,
+            3.3,
+            1.1,
+            4.4,
+            5.5,
+            3.3,
+            4.4,
+            5.5,
+            66.0,
+            4.4,
+            5.5,
+        ]
+    )
+    assert ak.all(
+        data["y"]
+        == [
+            [1],
+            [1, 2],
+            [1, 2, 3],
+            [1],
+            [1, 2],
+            [1, 2, 3],
+            [1],
+            [1, 2, 3, 4],
+            [1, 2, 3, 4, 5],
+            [1, 4],
+            [1],
+            [1, 4, 5],
+            [1, 2, 4],
+            [1, 2],
+            [1, 2, 3, 4, 5],
+        ]
+    )
+    assert ak.all(
+        data["z"]
+        == [
+            [9, 0, 10],
+            [9, 11, 14],
+            [12, 14],
+            [8],
+            [6, 2, 10],
+            [9, 14],
+            [9, 11, 14],
+            [1, 14],
+            [9],
+            [9, 11, 14],
+            [1],
+            [9, 10],
+            [9, 11, 14],
+            [1, 14],
+            [9, 2],
+        ]
+    )
+
+
+def generator(n):
+    arr = [
+        ak.Array(
+            [
+                {"x": 1.1, "y": [1], "z": [9, 0, 10]},
+                {"x": 2.2, "y": [1, 2], "z": [9, 11, 14]},
+                {"x": 3.3, "y": [1, 2, 3], "z": [12, 14]},
+            ]
+        ),
+        ak.Array(
+            [
+                {"x": 1.1, "y": [1], "z": [8]},
+                {"x": 2.2, "y": [1, 2], "z": [6, 2, 10]},
+                {"x": 3.3, "y": [1, 2, 3], "z": [9, 14]},
+            ]
+        ),
+        ak.Array(
+            [
+                {"x": 1.1, "y": [1], "z": [9, 11, 14]},
+                {"x": 4.4, "y": [1, 2, 3, 4], "z": [1, 14]},
+                {"x": 5.5, "y": [1, 2, 3, 4, 5], "z": [9]},
+            ]
+        ),
+        ak.Array(
+            [
+                {"x": 3.3, "y": [1, 4], "z": [9, 11, 14]},
+                {"x": 4.4, "y": [1], "z": [1]},
+                {"x": 5.5, "y": [1, 4, 5], "z": [9, 10]},
+            ]
+        ),
+        ak.Array(
+            [
+                {"x": 66.0, "y": [1, 2, 4], "z": [9, 11, 14]},
+                {"x": 4.4, "y": [1, 2], "z": [1, 14]},
+                {"x": 5.5, "y": [1, 2, 3, 4, 5], "z": [9, 2]},
+            ]
+        ),
+    ]
+
+    for _ in range(n):
+        yield arr[_]
