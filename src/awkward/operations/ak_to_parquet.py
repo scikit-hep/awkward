@@ -275,7 +275,6 @@ def _impl(
             primitive_policy="error",
             string_policy="as-characters",
         )
-
         table = ak.operations.ak_to_arrow_table._impl(
             layout,
             list_to32,
@@ -417,11 +416,11 @@ def _impl(
         **parquet_extra_options,
     ) as writer:
         if write_iteratively:
-            writer.write_table(table)
+            writer.write_table(table, row_group_size=row_group_size)
             try:
                 while True:
                     try:
-                        layout = ak.to_layout(  
+                        layout = ak.operations.ak_to_layout._impl(
                             next(data),
                             allow_record=True,
                             allow_unknown=False,
@@ -431,7 +430,6 @@ def _impl(
                             primitive_policy="error",
                             string_policy="as-characters",
                         )
-
                         table = ak.operations.ak_to_arrow_table._impl(
                             layout,
                             list_to32,
@@ -442,13 +440,9 @@ def _impl(
                             extensionarray,
                             count_nulls,
                         )
+                        writer.write_table(table, row_group_size=row_group_size)
                     except StopIteration:
                         break
-                    else:
-                        writer.write_table(
-                            table,
-                            row_group_size=row_group_size,
-                        )
             finally:
                 writer.close()
         else:
@@ -469,38 +463,3 @@ def write_metadata(dir_path, fs, *metas, global_metadata=True):
             md.append_row_groups(meta)
         with fs.open("/".join([dir_path, "_metadata"]), "wb") as fil:
             md.write_metadata_file(fil)
-
-
-    # import awkward._connect.pyarrow
-
-
-    #     if isinstance(layout, ak.contents.RecordArray):
-    #         names = layout.fields
-    #         contents = [layout[name] for name in names]
-    #     else:
-    #         names = [""]
-    #         contents = [layout]
-    #     pa_arrays = []
-    #     pa_fields = []
-    #     for name, content in zip(names, contents):
-    #         if isinstance(layout, ak.record.Record):
-    #             layout = layout.array[layout.at : layout.at + 1]
-    #             record_is_scalar = True
-    #         else:
-    #             record_is_scalar = False
-    #         pa_arrays.append(
-    #             content.to_arrow(
-    #                 list_to32=list_to32,
-    #                 string_to32=string_to32,
-    #                 bytestring_to32=bytestring_to32,
-    #                 emptyarray_to=emptyarray_to,
-    #                 categorical_as_dictionary=categorical_as_dictionary,
-    #                 extensionarray=extensionarray,
-    #                 count_nulls=count_nulls,
-    #                 record_is_scalar=record_is_scalar,
-    #             )
-    #         )
-    #         pa_fields.append(
-    #             pyarrow.field(name, pa_arrays[-1].type).with_nullable(layout.is_option)
-    #         )
-    #     yield 
