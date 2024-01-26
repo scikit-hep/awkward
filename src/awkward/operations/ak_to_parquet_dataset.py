@@ -18,6 +18,10 @@ def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet")
 
     Creates a `_common_metadata` and a `_metadata` in a directory of Parquet files.
 
+        >>> ak.to_parquet(array1, "/directory/arr1.parquet", parquet_compliant_nested=True)
+        >>> ak.to_parquet(array2, "/directory/arr2.parquet", parquet_compliant_nested=True)
+        >>> ak.to_parquet_dataset("/directory")
+
     The `_common_metadata` contains the schema that all files share. (If the files
     have different schemas, this function raises an exception.)
 
