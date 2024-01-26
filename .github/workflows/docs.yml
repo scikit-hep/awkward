@@ -29,7 +29,7 @@ jobs:
 
     - name: Cache python version
       id: cache-pyodide-python-version
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: pyodide-python-version
         key: ${{ runner.os }}-docs-pyodide-python-version-${{ hashFiles('docs/requirements-wasm.txt') }}
@@ -77,7 +77,7 @@ jobs:
 
     - name: Cache wheel
       id: cache-awkward-cpp-wasm-wheel
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-"${{ needs.pyodide-python-version.outputs.python-version }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
@@ -98,7 +98,7 @@ jobs:
       working-directory: awkward-cpp
 
     - name: Install EMSDK
-      uses: mymindstorm/setup-emsdk@v13
+      uses: mymindstorm/setup-emsdk@v14
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       with:
         version: ${{ steps.compute-emsdk-version.outputs.emsdk-version }}
@@ -157,7 +157,7 @@ jobs:
 
     - name: Cache wheel
       id: cache-awkward-cpp-x86-64-wheel
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-${{ env.X86_64_PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}

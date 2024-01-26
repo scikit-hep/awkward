@@ -643,6 +643,7 @@ def gencpuunittests(specdict):
 
 
 cuda_kernels_tests = [
+    "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_compact_offsets",
@@ -676,7 +677,9 @@ cuda_kernels_tests = [
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_next_array",
+    "awkward_ListArray_getitem_next_at",
     "awkward_NumpyArray_reduce_adjust_starts_64",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_RegularArray_getitem_next_at",
@@ -692,6 +695,7 @@ cuda_kernels_tests = [
     "awkward_IndexedArray_flatten_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
+    "awkward_IndexedArray_index_of_nulls",
     "awkward_IndexedArray_reduce_next_64",
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
