@@ -583,7 +583,7 @@ def gencpuunittests(specdict):
                     )
                     flag = checkuint(unit_tests.items(), spec.args)
                     range = checkintrange(unit_tests.items(), test["error"], spec.args)
-                    if flag and range and not test["error"]:
+                    if flag and range:
                         num += 1
                         f.write(funcName)
                         for i, (arg, val) in enumerate(unit_tests.items()):
@@ -629,17 +629,26 @@ def gencpuunittests(specdict):
                                 count += 1
                             else:
                                 args += ", " + arg.name
-                        f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
-                        for arg, val in test["outputs"].items():
-                            f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
-                            if isinstance(val, list):
+                        if not test["error"]:
+                            f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
+                            for arg, val in test["outputs"].items():
                                 f.write(
-                                    " " * 4
-                                    + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
+                                    " " * 4 + "pytest_" + arg + " = " + str(val) + "\n"
                                 )
-                            else:
-                                f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
-                        f.write(" " * 4 + "assert not ret_pass.str\n")
+                                if isinstance(val, list):
+                                    f.write(
+                                        " " * 4
+                                        + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
+                                    )
+                                else:
+                                    f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
+                            f.write(" " * 4 + "assert not ret_pass.str\n")
+                        else:
+                            f.write(" " * 4 + f"print(funcC({args}).str)\n")
+                            f.write(
+                                " " * 4
+                                + f"assert funcC({args}).str.decode('utf-8') == \"{test['message']}\"\n"
+                            )
                         f.write("\n")
 
 
@@ -974,7 +983,6 @@ def gencudaunittests(specdict):
                             else:
                                 args += ", " + arg.name
                         f.write(" " * 4 + "funcC(" + args + ")\n")
-                        error_message = test["message"]
                         f.write(
                             """
     try:
@@ -985,7 +993,7 @@ def gencudaunittests(specdict):
                             f.write(
                                 f"""
     except ValueError as e:
-        assert str(e) == "{error_message} in compiled CUDA code ({spec.templatized_kernel_name})"
+        assert str(e) == "{test['message']} in compiled CUDA code ({spec.templatized_kernel_name})"
 """
                             )
                         else:

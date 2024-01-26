@@ -3344,7 +3344,7 @@
             "tests": [
                 {
                     "error": true,
-                    "message": "start[i] > stop[i]",
+                    "message": "stops[i] < starts[i]",
                     "inputs": {
                         "fromstarts": [2, 2, 6],
                         "fromstops": [2, 3, 5],
@@ -14215,7 +14215,7 @@
                     "message": "index out of range",
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
-                        "fromarray": [0, 1, -10, 1],
+                        "fromarray": [0, 1, -4, 1],
                         "fromstarts": [0, 0, 0, 0],
                         "fromstops": [3, 3, 3, 3],
                         "lenarray": 4,
