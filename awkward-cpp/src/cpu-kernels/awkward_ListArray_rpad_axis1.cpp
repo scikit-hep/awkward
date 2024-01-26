@@ -25,7 +25,7 @@ ERROR awkward_ListArray_rpad_axis1(
     }
     offset = (target > rangeval) ? tostarts[i] + target : tostarts[i] + rangeval;
     tostops[i] = offset;
-   }
+  }
   return success();
 }
 ERROR awkward_ListArray32_rpad_axis1_64(
