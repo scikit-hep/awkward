@@ -4,6 +4,11 @@ import os
 
 import awkward as ak
 
+import pytest
+
+pytest.importorskip("pyarrow.parquet")
+pytest.importorskip("fsspec")
+
 
 def simple_test(tmp_path):
     filename = os.path.join(tmp_path, "whatever.parquet")
