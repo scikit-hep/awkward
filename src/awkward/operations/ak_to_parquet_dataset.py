@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from os import fsdecode, path
+
 __all__ = ("to_parquet_dataset",)
 
 
-def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet"):
+def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet", storage_options=None,):
     """
     Args:
-        directory (str or Path): A local directory in which to write `_common_metadata`
+        directory (str or Path): A directory in which to write `_common_metadata`
             and `_metadata`, making the directory of Parquet files into a dataset.
         filenames (None or list of str or Path): If None, the `directory` will be
             recursively searched for files ending in `filename_extension` and
@@ -29,15 +31,18 @@ def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet")
     within the multi-file dataset.
     """
 
-    # Implementation
+    return _impl(directory, filenames, filename_extension, storage_options)
 
-    from os import fsdecode, path
+
+def _impl(directory, filenames, filename_extension, storage_options):
+    # Implementation
 
     import awkward._connect.pyarrow
 
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet(
         "ak.to_parquet_dataset"
     )
+    fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet_dataset") # The right fsspec?
 
     try:
         directory = fsdecode(directory)
@@ -45,9 +50,11 @@ def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet")
         raise TypeError(
             f"'directory' argument of 'ak.to_parquet_dataset' must be a path-like, not {type(directory).__name__}"
         ) from None
+    
+    fs, directory = fsspec.core.url_to_fs(directory, **(storage_options or {}))
 
     directory = _regularize_path(directory)
-    if not path.isdir(directory):
+    if not fsspec.isdir(directory):
         raise ValueError(
             f"{directory!r} is not a local filesystem directory" + {__file__}
         )
