@@ -54,7 +54,6 @@ def _impl(directory, filenames, filename_extension, storage_options):
     
     fs, directory = fsspec.core.url_to_fs(directory, **(storage_options or {}))
 
-    directory = _regularize_path(directory)
     if not fs.isdir(directory): # ?
         raise ValueError(
             f"{directory!r} is not a local filesystem directory" + {__file__}
@@ -67,17 +66,37 @@ def _impl(directory, filenames, filename_extension, storage_options):
             glob.glob(directory + f"/**/*{filename_extension}", recursive=True)
         )
     else:
-        filenames = [_regularize_path(x) for x in filenames]
-        filenames = [x if path.isabs(x) else path.join(directory, x) for x in filenames]
+        filenames = [x for x in filenames]
+        # filenames = [_regularize_path(x) for x in filenames]
+        # filenames = [x if path.isabs(x) else path.join(directory, x) for x in filenames]
 
-    relpaths = [path.relpath(x, directory) for x in filenames]
+    # relpaths = [path.relpath(x, directory) for x in filenames] # This sure seems to only apply to local...
+
     fs, _, paths = fsspec.get_fs_token_paths(
         path, mode="rb", storage_options=storage_options
     )
     
-    schema, metadata_collector = _common_parquet_schema(
-        pyarrow_parquet, filenames, paths
-    )
+    # schema, metadata_collector = _common_parquet_schema(
+    #     pyarrow_parquet, filenames, paths
+    # )
+
+    assert len(filenames) != 0
+
+    schema = None
+    metadata_collector = []
+    for filename, path in zip(filenames, paths):
+        if schema is None:
+            schema = pyarrow_parquet.ParquetFile(filename).schema_arrow
+            first_filename = filename
+        elif not schema.equals(pyarrow_parquet.ParquetFile(filename).schema_arrow):
+            raise ValueError(
+                "schema in {} differs from the first schema (in {})".format(
+                    repr(filename), repr(first_filename)
+                )
+            )
+        metadata_collector.append(pyarrow_parquet.ParquetFile(filename).metadata)
+        metadata_collector[-1].set_file_path(path)
+
     pyarrow_parquet.write_metadata(schema, path.join(directory, "_common_metadata"))
     pyarrow_parquet.write_metadata(
         schema,
@@ -86,42 +105,27 @@ def _impl(directory, filenames, filename_extension, storage_options):
     )
 
 
-def _regularize_path(path):
-    import os
-
-    if isinstance(path, getattr(os, "PathLike", ())):
-        path = os.fspath(path)
-
-    elif hasattr(path, "__fspath__"):
-        path = os.fspath(path)
-
-    elif path.__class__.__module__ == "pathlib":
-        import pathlib
-
-        if isinstance(path, pathlib.Path):
-            path = str(path)
-
-    if isinstance(path, str):
-        path = os.path.expanduser(path)
-
-    return path
+# def _regularize_path(path):
 
 
-def _common_parquet_schema(pq, filenames, relpaths):
-    assert len(filenames) != 0
+#     return path
 
-    schema = None
-    metadata_collector = []
-    for filename, relpath in zip(filenames, relpaths):
-        if schema is None:
-            schema = pq.ParquetFile(filename).schema_arrow
-            first_filename = filename
-        elif not schema.equals(pq.ParquetFile(filename).schema_arrow):
-            raise ValueError(
-                "schema in {} differs from the first schema (in {})".format(
-                    repr(filename), repr(first_filename)
-                )
-            )
-        metadata_collector.append(pq.read_metadata(filename))
-        metadata_collector[-1].set_file_path(relpath)
-    return schema, metadata_collector
+
+# def _common_parquet_schema(pq, filenames, paths):
+#     assert len(filenames) != 0
+
+#     schema = None
+#     metadata_collector = []
+#     for filename, path in zip(filenames, paths):
+#         if schema is None:
+#             schema = pq.ParquetFile(filename).schema_arrow
+#             first_filename = filename
+#         elif not schema.equals(pq.ParquetFile(filename).schema_arrow):
+#             raise ValueError(
+#                 "schema in {} differs from the first schema (in {})".format(
+#                     repr(filename), repr(first_filename)
+#                 )
+#             )
+#         metadata_collector.append(pyarrow_parquet.ParquetFile(f).metadata)
+#         metadata_collector[-1].set_file_path(path)
+#     return schema, metadata_collector
