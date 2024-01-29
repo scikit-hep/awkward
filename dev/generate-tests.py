@@ -6,6 +6,7 @@ import copy
 import datetime
 import json
 import os
+import re
 import shutil
 import time
 from collections import OrderedDict
@@ -644,7 +645,6 @@ def gencpuunittests(specdict):
                                     f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                             f.write(" " * 4 + "assert not ret_pass.str\n")
                         else:
-                            f.write(" " * 4 + f"print(funcC({args}).str)\n")
                             f.write(
                                 " " * 4
                                 + f"assert funcC({args}).str.decode('utf-8') == \"{test['message']}\"\n"
@@ -983,22 +983,21 @@ def gencudaunittests(specdict):
                             else:
                                 args += ", " + arg.name
                         f.write(" " * 4 + "funcC(" + args + ")\n")
-                        f.write(
-                            """
-    try:
-        ak_cu.synchronize_cuda()
-"""
+                        error_message = re.escape(
+                            f"{test['message']} in compiled CUDA code ({spec.templatized_kernel_name})"
                         )
                         if test["error"]:
                             f.write(
                                 f"""
-    except ValueError as e:
-        assert str(e) == "{test['message']} in compiled CUDA code ({spec.templatized_kernel_name})"
+    with pytest.raises(ValueError, match=rf"{error_message}"):
+        ak_cu.synchronize_cuda()
 """
                             )
                         else:
                             f.write(
                                 """
+    try:
+        ak_cu.synchronize_cuda()
     except:
         pytest.fail("This test case shouldn't have raised an error")
 """
