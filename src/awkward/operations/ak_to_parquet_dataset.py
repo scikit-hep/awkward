@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from os import fsdecode, path
+from awkward import ak_from_parquet
 
 __all__ = ("to_parquet_dataset",)
 
@@ -42,7 +43,7 @@ def _impl(directory, filenames, filename_extension, storage_options):
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet(
         "ak.to_parquet_dataset"
     )
-    fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet_dataset") # The right fsspec?
+    fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
 
     try:
         directory = fsdecode(directory)
@@ -54,7 +55,7 @@ def _impl(directory, filenames, filename_extension, storage_options):
     fs, directory = fsspec.core.url_to_fs(directory, **(storage_options or {}))
 
     directory = _regularize_path(directory)
-    if not fsspec.isdir(directory):
+    if not fs.isdir(directory): # ?
         raise ValueError(
             f"{directory!r} is not a local filesystem directory" + {__file__}
         )
@@ -70,8 +71,12 @@ def _impl(directory, filenames, filename_extension, storage_options):
         filenames = [x if path.isabs(x) else path.join(directory, x) for x in filenames]
 
     relpaths = [path.relpath(x, directory) for x in filenames]
+    fs, _, paths = fsspec.get_fs_token_paths(
+        path, mode="rb", storage_options=storage_options
+    )
+    
     schema, metadata_collector = _common_parquet_schema(
-        pyarrow_parquet, filenames, relpaths
+        pyarrow_parquet, filenames, paths
     )
     pyarrow_parquet.write_metadata(schema, path.join(directory, "_common_metadata"))
     pyarrow_parquet.write_metadata(
