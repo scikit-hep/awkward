@@ -12,12 +12,16 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 cuda_kernels_impl = [
+    "awkward_Index_nones_as_index",
     "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_compact_offsets",
     "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_overlay_mask",
+    "awkward_ByteMaskedArray_numnull",
+    "awkward_IndexedArray_numnull",
+    "awkward_IndexedArray_numnull_parents",
     "awkward_IndexedArray_numnull_unique_64",
     "awkward_NumpyArray_fill",
     "awkward_ListArray_fill",

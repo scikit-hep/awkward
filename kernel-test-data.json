@@ -1138,7 +1138,7 @@
         },
         {
             "name": "awkward_ByteMaskedArray_numnull",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
@@ -1795,11 +1795,51 @@
         },
         {
             "name": "awkward_IndexedArray_numnull",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
                     "message": "",
+                    "inputs": {
+                        "fromindex": [1],
+                        "lenindex": 1
+                    },
+                    "outputs": {
+                        "numnull": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [-1],
+                        "lenindex": 1
+                    },
+                    "outputs": {
+                        "numnull": [1]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [-1, -1, -1, -1],
+                        "lenindex": 4
+                    },
+                    "outputs": {
+                        "numnull": [4]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [0, -1, 2, -1, -1, -1, -1],
+                        "lenindex": 7
+                    },
+                    "outputs": {
+                        "numnull": [5]
+                    }
+                },
+                {
+                    "error": false,
                     "inputs": {
                         "fromindex": [0, 1],
                         "lenindex": 2
@@ -1938,6 +1978,89 @@
                     },
                     "outputs": {
                         "numnull": [0]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_IndexedArray_numnull_parents",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [1],
+                        "lenindex": 1
+                    },
+                    "outputs": {
+                        "numnull": [0],
+                        "tolength": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [-1],
+                        "lenindex": 1
+                    },
+                    "outputs": {
+                        "numnull": [1],
+                        "tolength": [1]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [-1, -1, -1, -1],
+                        "lenindex": 4
+                    },
+                    "outputs": {
+                        "numnull": [1, 1, 1, 1],
+                        "tolength": [4]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [0, -1, 2, -1, -1, -1, -1],
+                        "lenindex": 7
+                    },
+                    "outputs": {
+                        "numnull": [0, 1, 0, 1, 1, 1, 1],
+                        "tolength": [5]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [0, 1],
+                        "lenindex": 2
+                    },
+                    "outputs": {
+                        "numnull": [0, 0],
+                        "tolength": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [0, 1, 2, 3],
+                        "lenindex": 4
+                    },
+                    "outputs": {
+                        "numnull": [0, 0, 0, 0],
+                        "tolength": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [0, 1, -2, 3, -4, 5, -6],
+                        "lenindex": 7
+                    },
+                    "outputs": {
+                        "numnull": [0, 0, 1, 0, 1, 0, 1],
+                        "tolength": [3]
                     }
                 }
             ]
