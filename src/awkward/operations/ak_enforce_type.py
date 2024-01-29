@@ -608,9 +608,7 @@ def _recurse_unknown_any(
     layout: ak.contents.EmptyArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     type_form = ak.forms.from_type(type_)
-    return type_form.length_zero_array(highlevel=False).copy(
-        parameters=type_._parameters
-    )
+    return type_form.length_zero_array().copy(parameters=type_._parameters)
 
 
 def _recurse_any_unknown(layout: ak.contents.Content, type_: ak.types.UnknownType):
@@ -634,7 +632,7 @@ def _recurse_option_any(
             return ak.contents.IndexedOptionArray(
                 ak.index.Index64(layout.backend.index_nplike.full(layout.length, -1)),
                 ak.forms.from_type(type_.content).length_zero_array(
-                    backend=layout.backend, highlevel=False
+                    backend=layout.backend
                 ),
             )
         else:
@@ -699,9 +697,7 @@ def _recurse_any_option(
     if isinstance(type_.content, ak.types.UnknownType):
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(layout.backend.index_nplike.full(layout.length, -1)),
-            ak.forms.from_type(type_.content).length_zero_array(
-                backend=layout.backend, highlevel=False
-            ),
+            ak.forms.from_type(type_.content).length_zero_array(backend=layout.backend),
         )
     else:
         return ak.contents.UnmaskedArray(
@@ -765,9 +761,7 @@ def _recurse_union_union(
         ]
         contents.extend(
             [
-                ak.forms.from_type(t).length_zero_array(
-                    highlevel=False, backend=layout.backend
-                )
+                ak.forms.from_type(t).length_zero_array(backend=layout.backend)
                 for t in missing_types
             ]
         )
@@ -947,7 +941,7 @@ def _recurse_union_non_union(
 
         # Index over them
         index = ak.index.Index64(index_data)
-        return ak.contents.IndexedArray(index, next_content)
+        return ak.contents.IndexedArray.simplified(index, next_content)
     else:
         # Find the first content whose type equals the given type
         for tag, content in enumerate(layout.contents):  # noqa: B007
@@ -990,9 +984,7 @@ def _recurse_any_union(
         index = index_nplike.arange(layout.length, dtype=np.int64)
 
         other_contents = [
-            ak.forms.from_type(t).length_zero_array(
-                backend=layout.backend, highlevel=False
-            )
+            ak.forms.from_type(t).length_zero_array(backend=layout.backend)
             for j, t in enumerate(type_.contents)
             if j != i
         ]
@@ -1136,7 +1128,7 @@ def _recurse_record_any(
                             layout.backend.index_nplike.full(layout.length, -1)
                         ),
                         ak.forms.from_type(next_type.content).length_zero_array(
-                            backend=layout.backend, highlevel=False
+                            backend=layout.backend
                         ),
                     )
                 )
@@ -1181,7 +1173,7 @@ def _recurse_record_any(
                             layout.backend.index_nplike.full(layout.length, -1)
                         ),
                         ak.forms.from_type(field_type.content).length_zero_array(
-                            backend=layout.backend, highlevel=False
+                            backend=layout.backend
                         ),
                     )
                 )

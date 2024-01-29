@@ -188,16 +188,6 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
     weight = ctx.wrap(weight_layout, allow_other=True)
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        xmean = ak.operations.ak_mean._impl(
-            x,
-            weight,
-            axis,
-            keepdims=True,
-            mask_identity=True,
-            highlevel=True,
-            behavior=ctx.behavior,
-            attrs=ctx.attrs,
-        )
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x,
@@ -208,8 +198,17 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
+            sumwx = ak.operations.ak_sum._impl(
+                x,
+                axis,
+                keepdims=True,
+                mask_identity=True,
+                highlevel=True,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
+            )
             sumwxx = ak.operations.ak_sum._impl(
-                (x - xmean) ** 2,
+                x * x,
                 axis,
                 keepdims=True,
                 mask_identity=True,
@@ -227,8 +226,8 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            sumwxx = ak.operations.ak_sum._impl(
-                (x - xmean) ** 2 * weight,
+            sumwx = ak.operations.ak_sum._impl(
+                x * weight,
                 axis,
                 keepdims=True,
                 mask_identity=True,
@@ -236,10 +235,19 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
+            sumwxx = ak.operations.ak_sum._impl(
+                x * x * weight,
+                axis,
+                keepdims=True,
+                mask_identity=True,
+                highlevel=True,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
+            )
+        mean = sumwx / sumw
+        out = sumwxx / sumw - mean * mean
         if ddof != 0:
-            out = (sumwxx / sumw) * (sumw / (sumw - ddof))
-        else:
-            out = sumwxx / sumw
+            out = out * (sumw / (sumw - ddof))
 
         if not mask_identity:
             out = ak.operations.fill_none(

@@ -11,6 +11,7 @@ import time
 from collections import OrderedDict
 from itertools import product
 
+import numpy as np
 import yaml
 from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
@@ -201,6 +202,67 @@ def readspec():
                     not spec["automatic-tests"],
                 )
     return specdict
+
+
+def getdtypes(args):
+    dtypes = []
+    for arg in args:
+        typename = remove_const(arg.typename)
+        if "List" in typename:
+            count = typename.count("List")
+            typename = gettypename(typename)
+            if typename == "bool" or typename == "float":
+                typename = typename + "_"
+            if count == 1:
+                dtypes.append("cupy." + typename)
+    return dtypes
+
+
+def checkuint(test_args, args):
+    flag = True
+    for arg, val in test_args:
+        typename = remove_const(
+            next(argument for argument in args if argument.name == arg).typename
+        )
+        if "List[uint" in typename and (any(n < 0 for n in val)):
+            flag = False
+    return flag
+
+
+def checkintrange(test_args, args):
+    flag = True
+    for arg, val in test_args:
+        typename = remove_const(
+            next(argument for argument in args if argument.name == arg).typename
+        )
+        if "int" in typename or "uint" in typename:
+            dtype = gettypename(typename)
+            min_val, max_val = np.iinfo(dtype).min, np.iinfo(dtype).max
+            if "List" in typename:
+                for data in val:
+                    if not (min_val <= data <= max_val):
+                        flag = False
+            else:
+                if not (min_val <= val <= max_val):
+                    flag = False
+    return flag
+
+
+def unittestmap():
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
+        data = json.load(f)["unit-tests"]
+    unit_tests_map = {}
+    for function in data:
+        tests = function["tests"]
+        status = function["status"]
+        unit_tests_map[function["name"]] = {"tests": tests, "status": status}
+    return unit_tests_map
+
+
+def getunittests(test_inputs, test_outputs):
+    unit_tests = {**test_outputs, **test_inputs}
+    num_outputs = len(test_outputs)
+    return unit_tests, num_outputs
 
 
 def gettypename(spectype):
@@ -460,7 +522,128 @@ def gencpukerneltests(specdict):
                 f.write("\n")
 
 
+def gencpuunittests(specdict):
+    print("Generating Unit Tests for CPU kernels")
+
+    unit_test_map = unittestmap()
+    unit_tests_cpu_kernels = os.path.join(
+        CURRENT_DIR, "..", "awkward-cpp", "tests-cpu-kernels-explicit"
+    )
+    if os.path.exists(unit_tests_cpu_kernels):
+        shutil.rmtree(unit_tests_cpu_kernels)
+    os.mkdir(unit_tests_cpu_kernels)
+    with open(os.path.join(unit_tests_cpu_kernels, "__init__.py"), "w") as f:
+        f.write(
+            f"""# AUTO GENERATED ON {reproducible_datetime()}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+"""
+        )
+
+    for spec in specdict.values():
+        if spec.templatized_kernel_name in list(unit_test_map.keys()):
+            func = "test_unit_cpu" + spec.name + ".py"
+            num = 1
+            with open(os.path.join(unit_tests_cpu_kernels, func), "w") as f:
+                f.write(
+                    f"""# AUTO GENERATED ON {reproducible_datetime()}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+"""
+                )
+
+                f.write(
+                    "import ctypes\n"
+                    "import pytest\n\n"
+                    "from awkward_cpp.cpu_kernels import lib\n\n"
+                )
+                unit_test_values = unit_test_map[spec.templatized_kernel_name]
+                tests = unit_test_values["tests"]
+                for test in tests:
+                    funcName = (
+                        "def test_unit_cpu" + spec.name + "_" + str(num) + "():\n"
+                    )
+                    unit_tests, num_outputs = getunittests(
+                        test["inputs"], test["outputs"]
+                    )
+                    flag = checkuint(unit_tests.items(), spec.args)
+                    range = checkintrange(unit_tests.items(), spec.args)
+                    if flag and range:
+                        num += 1
+                        f.write(funcName)
+                        for i, (arg, val) in enumerate(unit_tests.items()):
+                            typename = remove_const(
+                                next(
+                                    argument
+                                    for argument in spec.args
+                                    if argument.name == arg
+                                ).typename
+                            )
+                            if i < num_outputs:
+                                f.write(
+                                    " " * 4
+                                    + arg
+                                    + " = "
+                                    + str([gettypeval(typename)] * len(val))
+                                    + "\n"
+                                )
+                            else:
+                                f.write(" " * 4 + arg + " = " + str(val) + "\n")
+                            if "List" in typename:
+                                count = typename.count("List")
+                                typename = gettypename(typename)
+                                if count == 1:
+                                    f.write(
+                                        " " * 4
+                                        + f"{arg} = (ctypes.c_{typename}*len({arg}))(*{arg})\n"
+                                    )
+                                elif count == 2:
+                                    f.write(
+                                        " " * 4
+                                        + "{0} = ctypes.pointer(ctypes.cast((ctypes.c_{1}*len({0}[0]))(*{0}[0]),ctypes.POINTER(ctypes.c_{1})))\n".format(
+                                            arg, typename
+                                        )
+                                    )
+
+                        f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
+                        args = ""
+                        count = 0
+                        for arg in spec.args:
+                            if count == 0:
+                                args += arg.name
+                                count += 1
+                            else:
+                                args += ", " + arg.name
+                        f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
+                        for arg, val in test["outputs"].items():
+                            f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
+                            if isinstance(val, list):
+                                f.write(
+                                    " " * 4
+                                    + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
+                                )
+                            else:
+                                f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
+                        f.write(" " * 4 + "assert not ret_pass.str\n")
+                        f.write("\n")
+
+
 cuda_kernels_tests = [
+    "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_compact_offsets",
@@ -494,7 +677,9 @@ cuda_kernels_tests = [
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_next_array",
+    "awkward_ListArray_getitem_next_at",
     "awkward_NumpyArray_reduce_adjust_starts_64",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_RegularArray_getitem_next_at",
@@ -510,6 +695,7 @@ cuda_kernels_tests = [
     "awkward_IndexedArray_flatten_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
+    "awkward_IndexedArray_index_of_nulls",
     "awkward_IndexedArray_reduce_next_64",
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
@@ -659,6 +845,154 @@ def gencudakerneltests(specdict):
                     f.write("\n")
 
 
+def gencudaunittests(specdict):
+    print("Generating Unit Tests for CUDA kernels")
+
+    unit_test_map = unittestmap()
+    unit_tests_cuda_kernels = os.path.join(
+        CURRENT_DIR, "..", "tests-cuda-kernels-explicit"
+    )
+    if os.path.exists(unit_tests_cuda_kernels):
+        shutil.rmtree(unit_tests_cuda_kernels)
+    os.mkdir(unit_tests_cuda_kernels)
+    with open(os.path.join(unit_tests_cuda_kernels, "__init__.py"), "w") as f:
+        f.write(
+            f"""# AUTO GENERATED ON {reproducible_datetime()}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+"""
+        )
+
+    for spec in specdict.values():
+        if (
+            spec.templatized_kernel_name in cuda_kernels_tests
+            and spec.templatized_kernel_name in list(unit_test_map.keys())
+        ):
+            func = "test_unit_cuda" + spec.name + ".py"
+            num = 1
+            with open(
+                os.path.join(unit_tests_cuda_kernels, func),
+                "w",
+            ) as f:
+                f.write(
+                    f"""# AUTO GENERATED ON {reproducible_datetime()}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+"""
+                )
+
+                f.write(
+                    "import cupy\n"
+                    "import pytest\n\n"
+                    "import awkward as ak\n"
+                    "import awkward._connect.cuda as ak_cu\n"
+                    "from awkward._backends.cupy import CupyBackend\n\n"
+                    "cupy_backend = CupyBackend.instance()\n\n"
+                )
+                unit_test_values = unit_test_map[spec.templatized_kernel_name]
+                tests = unit_test_values["tests"]
+                status = unit_test_values["status"]
+                for test in tests:
+                    funcName = (
+                        "def test_unit_cuda" + spec.name + "_" + str(num) + "():\n"
+                    )
+                    dtypes = getdtypes(spec.args)
+                    unit_tests, num_outputs = getunittests(
+                        test["inputs"], test["outputs"]
+                    )
+                    flag = checkuint(unit_tests.items(), spec.args)
+                    range = checkintrange(unit_tests.items(), spec.args)
+                    if flag and range:
+                        num += 1
+                        if not status:
+                            f.write(
+                                "@pytest.mark.skip(reason='Kernel is not implemented properly')\n"
+                            )
+                        f.write(funcName)
+                        for i, (arg, val) in enumerate(unit_tests.items()):
+                            typename = remove_const(
+                                next(
+                                    argument
+                                    for argument in spec.args
+                                    if argument.name == arg
+                                ).typename
+                            )
+                            if "List" not in typename:
+                                f.write(" " * 4 + arg + " = " + str(val) + "\n")
+                            if "List" in typename:
+                                count = typename.count("List")
+                                typename = gettypename(typename)
+                                if typename == "bool" or typename == "float":
+                                    typename = typename + "_"
+                                if count == 1:
+                                    if i < num_outputs:
+                                        f.write(
+                                            " " * 4
+                                            + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                                arg,
+                                                [gettypeval(typename)] * len(val),
+                                                typename,
+                                            )
+                                        )
+                                    else:
+                                        f.write(
+                                            " " * 4
+                                            + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                                arg, val, typename
+                                            )
+                                        )
+                                elif count == 2:
+                                    raise NotImplementedError
+
+                        cuda_string = (
+                            "funcC = cupy_backend['"
+                            + spec.templatized_kernel_name
+                            + "', {}]\n".format(", ".join(dtypes))
+                        )
+                        f.write(" " * 4 + cuda_string)
+                        args = ""
+                        count = 0
+                        for arg in spec.args:
+                            if count == 0:
+                                args += arg.name
+                                count += 1
+                            else:
+                                args += ", " + arg.name
+                        f.write(" " * 4 + "funcC(" + args + ")\n")
+                        f.write(
+                            """
+    try:
+        ak_cu.synchronize_cuda()
+    except:
+        pytest.fail("This test case shouldn't have raised an error")
+"""
+                        )
+                        for arg, val in test["outputs"].items():
+                            f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
+                            if isinstance(val, list):
+                                f.write(
+                                    " " * 4
+                                    + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                )
+                            else:
+                                f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
+                            f.write("\n")
+
+
 def genunittests():
     print("Generating Unit Tests")
     with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
@@ -713,5 +1047,7 @@ if __name__ == "__main__":
     specdict = readspec()
     genspectests(specdict)
     gencpukerneltests(specdict)
+    gencpuunittests(specdict)
     genunittests()
     gencudakerneltests(specdict)
+    gencudaunittests(specdict)

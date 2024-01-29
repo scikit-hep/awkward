@@ -2153,10 +2153,14 @@ def test_nonreducers():
     )
 
     assert ak.operations.mean(y) == np.mean(ak.operations.to_numpy(y))
-    assert ak.operations.var(y) == np.var(ak.operations.to_numpy(y))
-    assert ak.operations.var(y, ddof=1) == np.var(ak.operations.to_numpy(y), ddof=1)
-    assert ak.operations.std(y) == np.std(ak.operations.to_numpy(y))
-    assert ak.operations.std(y, ddof=1) == np.std(ak.operations.to_numpy(y), ddof=1)
+    assert ak.operations.var(y) == pytest.approx(np.var(ak.operations.to_numpy(y)))
+    assert ak.operations.var(y, ddof=1) == pytest.approx(
+        np.var(ak.operations.to_numpy(y), ddof=1)
+    )
+    assert ak.operations.std(y) == pytest.approx(np.std(ak.operations.to_numpy(y)))
+    assert ak.operations.std(y, ddof=1) == pytest.approx(
+        np.std(ak.operations.to_numpy(y), ddof=1)
+    )
 
     assert ak.operations.moment(y, 1) == np.mean(ak.operations.to_numpy(y))
     assert ak.operations.moment(y - ak.operations.mean(y), 2) == np.var(

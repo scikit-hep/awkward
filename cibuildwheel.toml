@@ -3,6 +3,7 @@ test-requires = ["pytest>=6", "."]
 test-command = """
 pytest {project}/tests \
        {package}/tests-cpu-kernels \
+       {package}/tests-cpu-kernels-explicit \
        {package}/tests-spec \
        {package}/tests-spec-explicit
 """

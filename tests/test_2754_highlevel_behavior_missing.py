@@ -17,8 +17,8 @@ behavior = {**behavior_1, **behavior_2}
     ("func", "axis"),
     [
         pytest.param(ak.softmax, 0, marks=pytest.mark.xfail()),
-        pytest.param(ak.std, 0, marks=pytest.mark.xfail()),
-        pytest.param(ak.var, 0, marks=pytest.mark.xfail()),
+        (ak.std, 0),
+        (ak.var, 0),
         (ak.softmax, 1),
         (ak.std, 1),
         (ak.var, 1),

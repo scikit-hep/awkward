@@ -7,9 +7,4 @@ header-only
 include/awkward/kernels.h
 src/awkward_cpp/_kernel_signatures.py
 
-# Kernel tests
-tests-spec
-tests-spec-explicit
-tests-cpu-kernels
-
 dist

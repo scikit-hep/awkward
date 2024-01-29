@@ -50,6 +50,7 @@ jobs:
 
     - uses: actions/upload-artifact@v4
       with:
+        name: awkward-sdist
         path: awkward-cpp/dist/*.tar.gz
 
   build_wheels:
@@ -62,21 +63,21 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         arch: [auto64]
-        build: ["cp*", "pp*"]
+        build: ["cp", "pp"]
 
         include:
         - os: macos-latest
           type: "Universal"
           arch: universal2
-          build: "cp*"
+          build: "cp"
 
         - os: windows-latest
           arch: auto64
-          build: "cp*"
+          build: "cp"
 
         - os: windows-latest
           arch: auto32
-          build: "cp{38,39}-*"
+          build: "cp{38,39}-"
 
     steps:
     - uses: actions/checkout@v4
@@ -93,7 +94,7 @@ jobs:
 
     - uses: pypa/cibuildwheel@v2.16.2
       env:
-        CIBW_BUILD: ${{ matrix.build }}
+        CIBW_BUILD: "${{ matrix.build }}*"
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
         config-file: cibuildwheel.toml
@@ -111,6 +112,7 @@ jobs:
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
+        name: awkward-wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.build }}
         path: wheelhouse/*.whl
 
 
@@ -160,6 +162,7 @@ jobs:
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
+        name: awkward-wheels-${{ matrix.arch }}-py${{ matrix.python }}
         path: wheelhouse/*.whl
 
   upload_all:
@@ -174,7 +177,7 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: artifact
+        pattern: "awkward*"
         path: dist
 
     - uses: pypa/gh-action-pypi-publish@v1.8.11

@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.5.1"
+version = "2.5.2"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.8"
@@ -40,7 +40,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==27",
+    "awkward_cpp==28",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.18.0",
     "packaging",
@@ -69,6 +69,9 @@ artifacts = [
     "/src/awkward/_connect/cuda/_kernel_signatures.py"
 ]
 
+[tool.hatch.build.targets.wheel.force-include]
+"./juliapkg.json" = "awkward/juliapkg.json"
+
 [tool.hatch.build.targets.wheel.hooks.version]
 path = "src/awkward/_version.py"
 
@@ -82,6 +85,7 @@ include = [
     "/CITATION.cff",
     "/CONTRIBUTING.md",
     "/README.md",
+    "/juliapkg.json",
     "/requirements-test-full.txt",
     "/requirements-test-minimal.txt"
 ]

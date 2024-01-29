@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "27"
+version = "28"
 dependencies = [
     "numpy>=1.18.0",
     "importlib_resources;python_version < \"3.9\""
@@ -68,5 +68,6 @@ sdist.include = [
     "src/awkward_cpp/_kernel_signatures.py",
     "tests-spec",
     "tests-spec-explicit",
-    "tests-cpu-kernels"
+    "tests-cpu-kernels",
+    "tests-cpu-kernels-explicit"
 ]

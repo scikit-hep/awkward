@@ -1458,18 +1458,16 @@ class RegularArray(RegularMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         index_nplike = self._backend.index_nplike
         length = self._length * self._size
-        if self._content.length == length:
-            content = self._content.to_packed()
-        else:
-            content = self._content[
-                : index_nplike.shape_item_as_index(length)
-            ].to_packed()
+        content = self._content[: index_nplike.shape_item_as_index(length)]
 
         return RegularArray(
-            content, self._size, self._length, parameters=self._parameters
+            content.to_packed(True) if recursive else content,
+            self._size,
+            self._length,
+            parameters=self._parameters,
         )
 
     def _to_list(self, behavior, json_conversions):

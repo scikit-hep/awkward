@@ -708,7 +708,7 @@ class UnionArray(UnionMeta[Content], Content):
         nextcarry = ak.index.Index64(
             tmpcarry.data[: lenout[0]], nplike=self._backend.index_nplike
         )
-        return self._contents[index]._carry(nextcarry, False)
+        return self._contents[index]._carry(nextcarry, True)
 
     @staticmethod
     def regular_index(
@@ -1592,15 +1592,18 @@ class UnionArray(UnionMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
-        tags = self._tags.raw(self._backend.nplike)
-        original_index = index = self._index.raw(self._backend.nplike)[: tags.shape[0]]
+    def to_packed(self, recursive: bool = True) -> Self:
+        index_nplike = self._backend.index_nplike
+        tags = self._tags.data
+        original_index = index = self._index.data[: tags.shape[0]]
 
         contents = list(self._contents)
 
         for tag in range(len(self._contents)):
             is_tag = tags == tag
-            num_tag = self._backend.index_nplike.count_nonzero(is_tag)
+            num_tag = index_nplike.index_as_shape_item(
+                index_nplike.count_nonzero(is_tag)
+            )
 
             if len(contents[tag]) > num_tag:
                 if original_index is index:
@@ -1610,7 +1613,9 @@ class UnionArray(UnionMeta[Content], Content):
                 )
                 contents[tag] = self.project(tag)
 
-            contents[tag] = contents[tag].to_packed()
+            contents[tag] = (
+                contents[tag].to_packed(True) if recursive else contents[tag]
+            )
 
         return UnionArray(
             ak.index.Index8(tags, nplike=self._backend.index_nplike),
