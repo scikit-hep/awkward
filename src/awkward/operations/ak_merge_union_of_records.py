@@ -164,6 +164,12 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
     def apply(layout, depth, backend, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
+        if posaxis is None:
+            mindepth, maxdepth = layout.minmax_depth
+            raise TypeError(
+                f"cannot merge_union_of_records with axis={axis} if the array has multiple levels of nesting depth; this array has depths from {mindepth} to {maxdepth} (inclusive); try setting axis to a non-negative value"
+            )
+
         if depth < posaxis + 1 and layout.is_leaf:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         elif depth == posaxis + 1 and layout.is_union:
