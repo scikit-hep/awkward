@@ -54,7 +54,7 @@ awkward_IndexedArray_numnull_parents_b(T* numnull,
         numnull[thread_id] = 0;
       }
     }
-    *tolength = scan_in_array[lenindex - 1];
+    *tolength = (T)scan_in_array[lenindex - 1];
   }
 }
 

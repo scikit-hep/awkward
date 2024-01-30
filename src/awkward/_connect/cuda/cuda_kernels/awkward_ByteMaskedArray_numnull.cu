@@ -24,7 +24,6 @@ awkward_ByteMaskedArray_numnull_a(T* numnull,
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < length) {
-      *numnull = 0;
       if ((mask[thread_id] != 0) != validwhen) {
         scan_in_array[thread_id] = 1;
       }
@@ -45,6 +44,6 @@ awkward_ByteMaskedArray_numnull_b(T* numnull,
                                   uint64_t invocation_index,
                                   uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    *numnull = scan_in_array[length - 1];
+    *numnull = (T)scan_in_array[length - 1];
   }
 }
