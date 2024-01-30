@@ -6,7 +6,6 @@ import copy
 import datetime
 import json
 import os
-import re
 import shutil
 import time
 from collections import OrderedDict
@@ -906,6 +905,7 @@ def gencudaunittests(specdict):
                 )
 
                 f.write(
+                    "import re\n"
                     "import cupy\n"
                     "import pytest\n\n"
                     "import awkward as ak\n"
@@ -983,13 +983,14 @@ def gencudaunittests(specdict):
                             else:
                                 args += ", " + arg.name
                         f.write(" " * 4 + "funcC(" + args + ")\n")
-                        error_message = re.escape(
-                            f"{test['message']} in compiled CUDA code ({spec.templatized_kernel_name})"
-                        )
                         if test["error"]:
                             f.write(
                                 f"""
-    with pytest.raises(ValueError, match=rf"{error_message}"):
+    error_message = re.escape("{test['message']} in compiled CUDA code ({spec.templatized_kernel_name})")
+"""
+                            )
+                            f.write(
+                                """    with pytest.raises(ValueError, match=rf"{error_message}"):
         ak_cu.synchronize_cuda()
 """
                             )
