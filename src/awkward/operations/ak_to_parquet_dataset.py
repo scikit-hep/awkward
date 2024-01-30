@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 from os import fsdecode, path
-import awkward as ak
+
 from awkward._dispatch import high_level_function
 
 __all__ = ("to_parquet_dataset",)
 
 
 @high_level_function()
-def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet", storage_options=None,):
+def to_parquet_dataset(
+    directory,
+    filenames=None,
+    filename_extension=".parquet",
+    storage_options=None,
+):
     """
     Args:
         directory (str or Path): A directory in which to write `_common_metadata`
@@ -48,52 +53,45 @@ def _impl(directory, filenames, filename_extension, storage_options):
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
     import fsspec.parquet
 
-    # fsspec.parquet.
     try:
         directory = fsdecode(directory)
     except TypeError:
         raise TypeError(
             f"'directory' argument of 'ak.to_parquet_dataset' must be a path-like, not {type(directory).__name__}"
         ) from None
-    
-    print(directory)
-    fs, directory = fsspec.core.url_to_fs(directory, **(storage_options or {}))
-    # fs, _, path = fsspec.get_fs_token_paths(
-    #     directory, mode="rb", storage_options=storage_options
-    print(directory) #full directory path
-    # )
-    if not fs.isdir(directory): # ?
-        raise ValueError(
-            f"{directory!r} is not a directory" + {__file__}
-        )
 
+    fs, _, paths = fsspec.get_fs_token_paths(
+        directory, mode="rb", storage_options=storage_options
+    )
+    if not fs.isdir(directory):  # ?
+        raise ValueError(f"{directory!r} is not a directory" + {__file__})
 
+# Paths vs filenames??
     if filenames is None:
         import glob
 
         filenames = sorted(
-            glob.glob(path + f"/**/*{filename_extension}", recursive=True)
+            glob.glob(directory + f"/**/*{filename_extension}", recursive=True)
         )
 
-    else:
-        filenames = [x for x in filenames]
-        # filenames = [_regularize_path(x) for x in filenames]
-        # filenames = [x if fs.path.isabs(x) else fs.path.combine(directory, x) for x in filenames] 
-        # Combine ^^ only works if the second path is relative and there are no back references in either path...
+    else:  # Ask about this...
+            # Get paths:
+        filenames = []
+        for x in paths:  # paths should always be a list even if there is just one
+            for f, fdata in fs.find(x, detail=True).items():
+                if f.endswith((".parq", ".parquet")):
+                    if fdata["type"] == "file":
+                        filenames.append(f)
 
-    relpaths = [fs.path.relpath(x, directory) for x in filenames] # This sure seems to only apply to local...
+        if len(filenames) == 0:
+            raise ValueError(f"no *.parquet or *.parq matches for path {directory!r}")
 
-
-    
-    # schema, metadata_collector = _common_parquet_schema(
-    #     pyarrow_parquet, filenames, paths
-    # )
 
     assert len(filenames) != 0
 
     schema = None
     metadata_collector = []
-    for filename, path in zip(filenames, relpaths):
+    for filename in filenames:
         if schema is None:
             schema = pyarrow_parquet.ParquetFile(filename).schema_arrow
             first_filename = filename
@@ -104,12 +102,12 @@ def _impl(directory, filenames, filename_extension, storage_options):
                 )
             )
         metadata_collector.append(pyarrow_parquet.ParquetFile(filename).metadata)
-        metadata_collector[-1].set_file_path(path)
+        metadata_collector[-1].set_file_path(filename)
 
-    pyarrow_parquet.write_metadata(schema, path.join(directory, "_common_metadata"))
+    pyarrow_parquet.write_metadata(schema, "/".join([directory, "_common_metadata"]))
     pyarrow_parquet.write_metadata(
         schema,
-        path.join(directory, "_metadata"),
+        "/".join([directory, "_metadata"]),
         metadata_collector=metadata_collector,
     )
 
@@ -138,4 +136,3 @@ def _impl(directory, filenames, filename_extension, storage_options):
 #         metadata_collector.append(pyarrow_parquet.ParquetFile(f).metadata)
 #         metadata_collector[-1].set_file_path(path)
 #     return schema, metadata_collector
-    
