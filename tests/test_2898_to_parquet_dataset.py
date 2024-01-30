@@ -96,6 +96,7 @@ def complex_test(tmp_path):
         {"x": 5.5, "y": [1, 2, 3, 4, 5]},
     ]
 
+
 def test_filenames(tmp_path):
     array = ak.Array(
         [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
