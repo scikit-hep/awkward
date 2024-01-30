@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import os
 
+import pytest
+
 import awkward as ak
+
+pyarrow = pytest.importorskip("pyarrow")
 
 
 def simple_test(tmp_path):
