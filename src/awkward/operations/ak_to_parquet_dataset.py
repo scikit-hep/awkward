@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from os import fsdecode, path
+from os import fsdecode
 
 from awkward._dispatch import high_level_function
 
@@ -66,7 +66,7 @@ def _impl(directory, filenames, filename_extension, storage_options):
     if not fs.isdir(directory):  # ?
         raise ValueError(f"{directory!r} is not a directory" + {__file__})
 
-# Paths vs filenames??
+    # Paths vs filenames??
     if filenames is None:
         import glob
 
@@ -75,7 +75,7 @@ def _impl(directory, filenames, filename_extension, storage_options):
         )
 
     else:  # Ask about this...
-            # Get paths:
+        # Get paths:
         filenames = []
         for x in paths:  # paths should always be a list even if there is just one
             for f, fdata in fs.find(x, detail=True).items():
@@ -85,7 +85,6 @@ def _impl(directory, filenames, filename_extension, storage_options):
 
         if len(filenames) == 0:
             raise ValueError(f"no *.parquet or *.parq matches for path {directory!r}")
-
 
     assert len(filenames) != 0
 
