@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from os import fsdecode
-
 from awkward._dispatch import high_level_function
 
 __all__ = ("to_parquet_dataset",)
@@ -53,17 +51,10 @@ def _impl(directory, filenames, filename_extension, storage_options):
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
     import fsspec.parquet
 
-    try:
-        directory = fsdecode(directory)
-    except TypeError:
-        raise TypeError(
-            f"'directory' argument of 'ak.to_parquet_dataset' must be a path-like, not {type(directory).__name__}"
-        ) from None
-
     fs, _, paths = fsspec.get_fs_token_paths(
         directory, mode="rb", storage_options=storage_options
     )
-    if not fs.isdir(directory):  # ?
+    if not fs.isdir(directory):
         raise ValueError(f"{directory!r} is not a directory" + {__file__})
 
     # Paths vs filenames??
