@@ -99,3 +99,5 @@ def complex_test(tmp_path):
         {"x": 4.4, "y": [1, 2, 3, 4]},
         {"x": 5.5, "y": [1, 2, 3, 4, 5]},
     ]
+
+complex_test("tests/samples")

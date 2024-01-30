@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from os import fsdecode, path
-from awkward import ak_from_parquet
+import awkward as ak
+from awkward._dispatch import high_level_function
 
 __all__ = ("to_parquet_dataset",)
 
 
+@high_level_function()
 def to_parquet_dataset(directory, filenames=None, filename_extension=".parquet", storage_options=None,):
     """
     Args:
@@ -44,7 +46,9 @@ def _impl(directory, filenames, filename_extension, storage_options):
         "ak.to_parquet_dataset"
     )
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
+    import fsspec.parquet
 
+    # fsspec.parquet.
     try:
         directory = fsdecode(directory)
     except TypeError:
@@ -52,29 +56,34 @@ def _impl(directory, filenames, filename_extension, storage_options):
             f"'directory' argument of 'ak.to_parquet_dataset' must be a path-like, not {type(directory).__name__}"
         ) from None
     
+    print(directory)
     fs, directory = fsspec.core.url_to_fs(directory, **(storage_options or {}))
-
+    # fs, _, path = fsspec.get_fs_token_paths(
+    #     directory, mode="rb", storage_options=storage_options
+    print(directory) #full directory path
+    # )
     if not fs.isdir(directory): # ?
         raise ValueError(
-            f"{directory!r} is not a local filesystem directory" + {__file__}
+            f"{directory!r} is not a directory" + {__file__}
         )
+
 
     if filenames is None:
         import glob
 
         filenames = sorted(
-            glob.glob(directory + f"/**/*{filename_extension}", recursive=True)
+            glob.glob(path + f"/**/*{filename_extension}", recursive=True)
         )
+
     else:
         filenames = [x for x in filenames]
         # filenames = [_regularize_path(x) for x in filenames]
-        # filenames = [x if path.isabs(x) else path.join(directory, x) for x in filenames]
+        # filenames = [x if fs.path.isabs(x) else fs.path.combine(directory, x) for x in filenames] 
+        # Combine ^^ only works if the second path is relative and there are no back references in either path...
 
-    # relpaths = [path.relpath(x, directory) for x in filenames] # This sure seems to only apply to local...
+    relpaths = [fs.path.relpath(x, directory) for x in filenames] # This sure seems to only apply to local...
 
-    fs, _, paths = fsspec.get_fs_token_paths(
-        path, mode="rb", storage_options=storage_options
-    )
+
     
     # schema, metadata_collector = _common_parquet_schema(
     #     pyarrow_parquet, filenames, paths
@@ -84,7 +93,7 @@ def _impl(directory, filenames, filename_extension, storage_options):
 
     schema = None
     metadata_collector = []
-    for filename, path in zip(filenames, paths):
+    for filename, path in zip(filenames, relpaths):
         if schema is None:
             schema = pyarrow_parquet.ParquetFile(filename).schema_arrow
             first_filename = filename
@@ -129,3 +138,4 @@ def _impl(directory, filenames, filename_extension, storage_options):
 #         metadata_collector.append(pyarrow_parquet.ParquetFile(f).metadata)
 #         metadata_collector[-1].set_file_path(path)
 #     return schema, metadata_collector
+    
