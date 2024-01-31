@@ -51,34 +51,24 @@ def _impl(directory, filenames, storage_options):
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
     import fsspec.parquet
 
-    fs, _, paths = fsspec.get_fs_token_paths(
-        directory, mode="rb", storage_options=storage_options
-    )
-    if not fs.isdir(directory):
-        raise ValueError(f"{directory!r} is not a directory" + {__file__})
+    fs, destination = fsspec.core.url_to_fs(directory, **(storage_options or {}))
+
+    if not fs.isdir(destination):
+        raise ValueError(f"{destination!r} is not a directory" + {__file__})
     filepaths = []
 
     if filenames is not None:
-        filenames = [os.path.join(directory, fname) for fname in filenames]
-        for x in paths:  # paths should always be a list even if there is just one
-            for f, fdata in fs.find(x, detail=True).items():
-                if f.endswith((".parq", ".parquet")) and f in filenames:
-                    if fdata["type"] == "file":
-                        filepaths.append(f)
-
+        filepaths = [os.path.join(destination, fname) for fname in filenames]
         if len(filepaths) == 0:
-            raise ValueError(f"no *.parquet or *.parq matches for path {directory!r}")
+            raise ValueError(f"no *.parquet or *.parq matches for path {destination!r}")
 
-    else:  # Ask about this...
-        # Get paths:
-        for x in paths:  # paths should always be a list even if there is just one
-            for f, fdata in fs.find(x, detail=True).items():
-                if f.endswith((".parq", ".parquet")):
-                    if fdata["type"] == "file":
-                        filepaths.append(f)
-
+    else:
+        for f, fdata in fs.find(destination, detail=True).items():
+            if f.endswith((".parq", ".parquet")):
+                if fdata["type"] == "file":
+                    filepaths.append(f)
         if len(filepaths) == 0:
-            raise ValueError(f"no *.parquet or *.parq matches for path {directory!r}")
+            raise ValueError(f"no *.parquet or *.parq matches for path {destination!r}")
 
     assert len(filepaths) != 0
     schema = None
@@ -95,12 +85,12 @@ def _impl(directory, filenames, storage_options):
             )
         metadata_collector.append(pyarrow_parquet.ParquetFile(filepath).metadata)
         metadata_collector[-1].set_file_path(filepath)
-    _common_metadata_path = os.path.join(directory, "_common_metadata")
-    pyarrow_parquet.write_metadata(schema, _common_metadata_path)
-    _metadata_path = os.path.join(directory, "_metadata")
+
+    _common_metadata_path = os.path.join(destination, "_common_metadata")
+    pyarrow_parquet.write_metadata(schema, _common_metadata_path, filesystem=fs)
+
+    _metadata_path = os.path.join(destination, "_metadata")
     pyarrow_parquet.write_metadata(
-        schema,
-        _metadata_path,
-        metadata_collector=metadata_collector,
+        schema, _metadata_path, metadata_collector=metadata_collector, filesystem=fs
     )
     return _common_metadata_path, _metadata_path
