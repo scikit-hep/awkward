@@ -94,6 +94,8 @@ def fetch_template_specializations(kernel_dict):
         "awkward_ListArray_getitem_jagged_carrylen",
         "awkward_ListArray_rpad_and_clip_length_axis1",
         "awkward_MaskedArray_getitem_next_jagged_project",
+        "awkward_RegularArray_reduce_local_nextparents",
+        "awkward_RegularArray_reduce_nonlocal_preparenext",
         "awkward_UnionArray_project",
         "awkward_reduce_count_64",
         "awkward_reduce_sum",
@@ -106,6 +108,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_countnonzero",
         "awkward_reduce_max",
         "awkward_reduce_min",
+        "awkward_sorting_ranges_length",
     ]
     template_specializations = []
     import re

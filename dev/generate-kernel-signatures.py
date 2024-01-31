@@ -47,6 +47,8 @@ cuda_kernels_impl = [
     "awkward_RegularArray_getitem_next_range",
     "awkward_RegularArray_getitem_next_range_spreadadvanced",
     "awkward_RegularArray_getitem_next_array",
+    "awkward_RegularArray_reduce_local_nextparents",
+    "awkward_RegularArray_reduce_nonlocal_preparenext",
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
@@ -93,6 +95,7 @@ cuda_kernels_impl = [
     "awkward_reduce_sum_bool",
     "awkward_reduce_prod_bool",
     "awkward_reduce_countnonzero",
+    "awkward_sorting_ranges_length",
 ]
 
 

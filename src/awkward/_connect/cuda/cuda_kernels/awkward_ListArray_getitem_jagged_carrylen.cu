@@ -5,7 +5,7 @@
 //     (carrylen, slicestarts, slicestops, sliceouterlen, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(sliceouterlen, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_carrylen_a", carrylen.dtype, slicestarts.dtype, slicestops.dtype]))(grid, block, (carrylen, slicestarts, slicestops, sliceouterlen, scan_in_array, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = exclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_carrylen_b", carrylen.dtype, slicestarts.dtype, slicestops.dtype]))(grid, block, (carrylen, slicestarts, slicestops, sliceouterlen, scan_in_array, invocation_index, err_code))
 // out["awkward_ListArray_getitem_jagged_carrylen_a", {dtype_specializations}] = None
 // out["awkward_ListArray_getitem_jagged_carrylen_b", {dtype_specializations}] = None
@@ -24,7 +24,7 @@ awkward_ListArray_getitem_jagged_carrylen_a(T* carrylen,
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < sliceouterlen) {
-        scan_in_array[thread_id] = (T)(slicestops[thread_id] - slicestarts[thread_id]);
+      scan_in_array[thread_id] = (T)(slicestops[thread_id] - slicestarts[thread_id]);
     }
   }
 }
@@ -39,8 +39,6 @@ awkward_ListArray_getitem_jagged_carrylen_b(T* carrylen,
                                             uint64_t invocation_index,
                                             uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-      *carrylen = scan_in_array[sliceouterlen - 1];
+    *carrylen = (T)scan_in_array[sliceouterlen - 1];
   }
 }
-
-// fails for sliceouterlen = 1

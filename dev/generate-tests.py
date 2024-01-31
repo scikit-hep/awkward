@@ -35,6 +35,13 @@ class Argument:
         self.role = role
 
 
+no_role_kernels = [
+    "awkward_NumpyArray_sort_asstrings_uint8",
+    "awkward_argsort",
+    "awkward_sort",
+]
+
+
 class Specification:
     def __init__(self, templatized_kernel_name, spec, testdata, blacklisted):
         self.templatized_kernel_name = templatized_kernel_name
@@ -50,6 +57,8 @@ class Specification:
                 )
             )
         if blacklisted:
+            self.tests = []
+        elif templatized_kernel_name in no_role_kernels:
             self.tests = []
         else:
             self.tests = self.gettests(testdata)
@@ -185,6 +194,7 @@ class Specification:
 
 def readspec():
     specdict = {}
+    specdict_unit = {}
     with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as f:
         loadfile = yaml.load(f, Loader=yaml.CSafeLoader)
 
@@ -193,6 +203,13 @@ def readspec():
         data = json.load(f)["tests"]
 
     for spec in indspec:
+        for childfunc in spec["specializations"]:
+            specdict_unit[childfunc["name"]] = Specification(
+                spec["name"],
+                childfunc,
+                data,
+                not spec["automatic-tests"],
+            )
         if "def " in spec["definition"]:
             for childfunc in spec["specializations"]:
                 specdict[childfunc["name"]] = Specification(
@@ -201,7 +218,7 @@ def readspec():
                     data,
                     not spec["automatic-tests"],
                 )
-    return specdict
+    return specdict, specdict_unit
 
 
 def getdtypes(args):
@@ -214,6 +231,8 @@ def getdtypes(args):
             if typename == "bool" or typename == "float":
                 typename = typename + "_"
             if count == 1:
+                dtypes.append("cupy." + typename)
+            elif count == 2:
                 dtypes.append("cupy." + typename)
     return dtypes
 
@@ -239,7 +258,12 @@ def checkintrange(test_args, error, args):
             if "int" in typename or "uint" in typename:
                 dtype = gettypename(typename)
                 min_val, max_val = np.iinfo(dtype).min, np.iinfo(dtype).max
-                if "List" in typename:
+                if "List[List" in typename:
+                    for row in val:
+                        for data in row:
+                            if not (min_val <= data <= max_val):
+                                flag = False
+                elif "List" in typename:
                     for data in val:
                         if not (min_val <= data <= max_val):
                             flag = False
@@ -687,6 +711,8 @@ cuda_kernels_tests = [
     "awkward_RegularArray_getitem_next_range",
     "awkward_RegularArray_getitem_next_range_spreadadvanced",
     "awkward_RegularArray_getitem_next_array",
+    "awkward_RegularArray_reduce_local_nextparents",
+    "awkward_RegularArray_reduce_nonlocal_preparenext",
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
@@ -733,6 +759,7 @@ cuda_kernels_tests = [
     "awkward_reduce_sum_bool",
     "awkward_reduce_prod_bool",
     "awkward_reduce_countnonzero",
+    "awkward_sorting_ranges_length",
 ]
 
 
@@ -973,8 +1000,12 @@ def gencudaunittests(specdict):
                                             )
                                         )
                                 elif count == 2:
-                                    raise NotImplementedError
-
+                                    f.write(
+                                        " " * 4
+                                        + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                            arg, val, typename
+                                        )
+                                    )
                         cuda_string = (
                             "funcC = cupy_backend['"
                             + spec.templatized_kernel_name
@@ -1075,10 +1106,10 @@ def evalkernels():
 if __name__ == "__main__":
     genpykernels()
     evalkernels()
-    specdict = readspec()
+    specdict, specdict_unit = readspec()
     genspectests(specdict)
     gencpukerneltests(specdict)
-    gencpuunittests(specdict)
+    gencpuunittests(specdict_unit)
     genunittests()
     gencudakerneltests(specdict)
-    gencudaunittests(specdict)
+    gencudaunittests(specdict_unit)

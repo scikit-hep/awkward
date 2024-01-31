@@ -5,7 +5,7 @@
 //     (numnull, tolength, fromindex, lenindex, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(lenindex, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_IndexedArray_numnull_parents_a', numnull.dtype, tolength.dtype, fromindex.dtype]))(grid, block, (numnull, tolength, fromindex, lenindex, scan_in_array, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = exclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_IndexedArray_numnull_parents_b', numnull.dtype, tolength.dtype, fromindex.dtype]))(grid, block, (numnull, tolength, fromindex, lenindex, scan_in_array, invocation_index, err_code))
 // out["awkward_IndexedArray_numnull_parents_a", {dtype_specializations}] = None
 // out["awkward_IndexedArray_numnull_parents_b", {dtype_specializations}] = None
@@ -45,7 +45,9 @@ awkward_IndexedArray_numnull_parents_b(T* numnull,
                                        uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
+    if(thread_id == 0) {
+      *tolength = scan_in_array[lenindex - 1];
+    }
     if (thread_id < lenindex) {
       if (fromindex[thread_id] < 0) {
         numnull[thread_id] = 1;
@@ -54,8 +56,5 @@ awkward_IndexedArray_numnull_parents_b(T* numnull,
         numnull[thread_id] = 0;
       }
     }
-    *tolength = (T)scan_in_array[lenindex - 1];
   }
 }
-
-// fails for [-1]
