@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from awkward._dispatch import high_level_function
 import os
+
+from awkward._dispatch import high_level_function
 
 __all__ = ("to_parquet_dataset",)
 
@@ -56,7 +57,7 @@ def _impl(directory, filenames, storage_options):
     if not fs.isdir(directory):
         raise ValueError(f"{directory!r} is not a directory" + {__file__})
     filepaths = []
-    
+
     if filenames is not None:
         filenames = [os.path.join(directory, fname) for fname in filenames]
         for x in paths:  # paths should always be a list even if there is just one
