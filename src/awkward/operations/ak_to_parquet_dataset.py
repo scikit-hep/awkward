@@ -56,9 +56,9 @@ def _impl(directory, filenames, storage_options):
     if not fs.isdir(directory):
         raise ValueError(f"{directory!r} is not a directory" + {__file__})
     filepaths = []
-    # Paths vs filenames??
+    # Paths vs filenames?
     if filenames is not None:
-        filenames = ["/".join([directory, "" + fname]) for fname in filenames]
+        filenames = ["/".join([str(directory), fname]) for fname in filenames]
         for x in paths:  # paths should always be a list even if there is just one
             for f, fdata in fs.find(x, detail=True).items():
                 if f.endswith((".parq", ".parquet")) and f in filenames:
