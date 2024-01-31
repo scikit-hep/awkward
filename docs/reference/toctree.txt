@@ -43,6 +43,7 @@
     generated/ak.to_packed
     generated/ak.to_parquet
     generated/ak.to_parquet_dataset
+    generated/ak.to_parquet_row_groups
     generated/ak.to_rdataframe
 
 .. toctree::
