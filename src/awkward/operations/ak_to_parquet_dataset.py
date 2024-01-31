@@ -9,7 +9,6 @@ __all__ = ("to_parquet_dataset",)
 def to_parquet_dataset(
     directory,
     filenames=None,
-    filename_extension=".parquet",
     storage_options=None,
 ):
     """
@@ -37,10 +36,10 @@ def to_parquet_dataset(
     within the multi-file dataset.
     """
 
-    return _impl(directory, filenames, filename_extension, storage_options)
+    return _impl(directory, filenames, storage_options)
 
 
-def _impl(directory, filenames, filename_extension, storage_options):
+def _impl(directory, filenames, storage_options):
     # Implementation
 
     import awkward._connect.pyarrow
@@ -59,7 +58,7 @@ def _impl(directory, filenames, filename_extension, storage_options):
     filepaths = []
     # Paths vs filenames??
     if filenames is not None:
-        filenames = [b"/".join([directory, fname]) for fname in filenames]
+        filenames = ["/".join([directory, ""+fname]) for fname in filenames]
         for x in paths:  # paths should always be a list even if there is just one
             for f, fdata in fs.find(x, detail=True).items():
                 if f.endswith((".parq", ".parquet")) and f in filenames:
