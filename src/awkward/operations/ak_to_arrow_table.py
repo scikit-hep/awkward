@@ -7,6 +7,7 @@ import json
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._requirements import requires
 from awkward._typing import Any
 
 __all__ = ("to_arrow_table",)
@@ -14,6 +15,8 @@ __all__ = ("to_arrow_table",)
 np = NumpyMetadata.instance()
 
 
+@requires("pyarrow>=7.0.0", group="arrow", module_name="arrow")
+@requires("fsspec", group="arrow")
 @high_level_function()
 def to_arrow_table(
     array,

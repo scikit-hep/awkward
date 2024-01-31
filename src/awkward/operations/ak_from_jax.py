@@ -5,10 +5,13 @@ from __future__ import annotations
 from awkward import jax
 from awkward._dispatch import high_level_function
 from awkward._layout import from_arraylib, wrap_layout
+from awkward._requirements import requires
 
 __all__ = ("from_jax",)
 
 
+@requires("jax")
+@requires("jaxlib")
 @high_level_function()
 def from_jax(array, *, regulararray=False, highlevel=True, behavior=None, attrs=None):
     """

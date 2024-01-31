@@ -14,6 +14,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_union
+from awkward._requirements import import_required_module
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -21,68 +22,27 @@ numpy = Numpy.instance()
 try:
     import pyarrow
 
-    error_message = None
-
-except ModuleNotFoundError:
-    pyarrow = None
-    error_message = """to use {0}, you must install pyarrow:
-
-    pip install pyarrow
-
-or
-
-    conda install -c conda-forge pyarrow
-"""
-
-else:
     if parse_version(pyarrow.__version__) < parse_version("7.0.0"):
-        pyarrow = None
-        error_message = "pyarrow 7.0.0 or later required for {0}"
+        raise ImportError
+
+except (ModuleNotFoundError, ImportError):
+    pyarrow = None
 
 
 def import_pyarrow(name: str) -> ModuleType:
-    if pyarrow is None:
-        raise ImportError(error_message.format(name))
-    return pyarrow
+    return import_required_module("pyarrow")
 
 
 def import_pyarrow_parquet(name: str) -> ModuleType:
-    if pyarrow is None:
-        raise ImportError(error_message.format(name))
-
-    import pyarrow.parquet as out
-
-    return out
+    return import_required_module("pyarrow.parquet")
 
 
 def import_pyarrow_compute(name: str) -> ModuleType:
-    if pyarrow is None:
-        raise ImportError(error_message.format(name))
-
-    import pyarrow.compute as out
-
-    return out
+    return import_required_module("pyarrow.compute")
 
 
 def import_fsspec(name: str) -> ModuleType:
-    try:
-        import fsspec
-
-    except ModuleNotFoundError as err:
-        raise ImportError(
-            f"""to use {name}, you must install fsspec:
-
-    pip install fsspec
-
-or
-
-    conda install -c conda-forge fsspec
-"""
-        ) from err
-
-    import_pyarrow_parquet(name)
-
-    return fsspec
+    return import_required_module("fsspec")
 
 
 if pyarrow is not None:

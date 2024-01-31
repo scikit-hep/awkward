@@ -5,12 +5,14 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._requirements import requires
 
 __all__ = ("to_arrow",)
 
 np = NumpyMetadata.instance()
 
 
+@requires("pyarrow>=7.0.0", group="arrow", module_name="arrow")
 @high_level_function()
 def to_arrow(
     array,

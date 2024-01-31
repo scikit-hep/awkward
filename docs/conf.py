@@ -42,6 +42,7 @@ run_cuda_notebooks = os.environ.get("DOCS_RUN_CUDA", False)
 extensions = [
     "sphinx_copybutton",
     "sphinx_design",
+    "sphinx_togglebutton",
     "sphinx_external_toc",
     "sphinx.ext.intersphinx",
     "myst_nb",

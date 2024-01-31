@@ -8,9 +8,19 @@ PyYAML
 black
 pycparser
 lark-parser
+
+# Pin this
+sphinxcontrib-applehelp==1.0.0
+sphinxcontrib-devhelp==1.0.0
+sphinxcontrib-htmlhelp==2.0.0
+sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-qthelp==1.0.0
+sphinxcontrib-serializinghtml==1.1.5
+
 sphinx-copybutton
 sphinx-design
 sphinx-sitemap
+sphinx-togglebutton
 pydata-sphinx-theme
 myst-nb
 sphinx-external-toc

@@ -9,9 +9,14 @@ import weakref
 import awkward as ak
 from awkward import highlevel
 from awkward._nplikes.numpy import Numpy
+from awkward._requirements import (
+    build_requirement_context_factory,
+    import_required_module,
+)
 from awkward._typing import TypeVar
 
 numpy = Numpy.instance()
+_requirement_context_factory = build_requirement_context_factory("jax")
 
 
 def assert_never(arg) -> None:
@@ -32,20 +37,8 @@ def register_and_check():
     """
     Register Awkward Array node types with JAX's tree mechanism.
     """
-    try:
-        import jax  # noqa: TID251, F401
-
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError(
-            """install the 'jax' package with:
-
-        python3 -m pip install jax jaxlib
-
-    or
-
-        conda install -c conda-forge jax jaxlib
-    """
-        ) from None
+    with _requirement_context_factory():
+        import_required_module("jax")
 
     _register()
 
@@ -53,7 +46,6 @@ def register_and_check():
 HighLevelType = TypeVar(
     "HighLevelType", bound="type[highlevel.Array | highlevel.Record]"
 )
-
 
 _known_highlevel_classes = weakref.WeakSet([highlevel.Array, highlevel.Record])
 
@@ -135,6 +127,5 @@ def assert_registered():
 def import_jax():
     """Ensure that JAX integration is registered, and return the JAX module. Raise a RuntimeError if not."""
     assert_registered()
-    import jax  # noqa: TID251
-
-    return jax
+    with _requirement_context_factory():
+        return import_required_module("jax")

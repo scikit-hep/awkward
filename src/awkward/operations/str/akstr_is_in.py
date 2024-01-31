@@ -6,12 +6,14 @@ import awkward as ak
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._requirements import requires
 
 __all__ = ("is_in",)
 
 typetracer = TypeTracerBackend.instance()
 
 
+@requires("pyarrow>=7.0.0", group="arrow", module_name="arrow")
 @high_level_function(module="ak.str")
 def is_in(
     array, value_set, *, skip_nones=False, highlevel=True, behavior=None, attrs=None

@@ -6,12 +6,15 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._requirements import requires
 
 __all__ = ("from_arrow",)
 
 np = NumpyMetadata.instance()
 
 
+@requires("pyarrow>=7.0.0", group="arrow", module_name="arrow")
+@requires("fsspec", group="arrow")
 @high_level_function()
 def from_arrow(
     array, *, generate_bitmasks=False, highlevel=True, behavior=None, attrs=None

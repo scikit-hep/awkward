@@ -12,7 +12,10 @@ __all__ = ("to_rdataframe",)
 
 cpu = NumpyBackend.instance()
 
+from awkward._requirements import requires
 
+
+@requires("ROOT", is_on_pypi=False, conda_forge_spec="root")
 @high_level_function()
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """

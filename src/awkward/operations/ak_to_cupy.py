@@ -5,10 +5,12 @@ from __future__ import annotations
 import awkward as ak
 from awkward._backends.cupy import CupyBackend
 from awkward._dispatch import high_level_function
+from awkward._requirements import requires
 
 __all__ = ("to_cupy",)
 
 
+@requires("cupy")
 @high_level_function()
 def to_cupy(array):
     """

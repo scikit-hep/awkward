@@ -2,36 +2,14 @@
 
 from __future__ import annotations
 
-import packaging.version
+from awkward._requirements import (
+    build_requirement_context_factory,
+    import_required_module,
+)
 
-_has_checked_version = False
+_requirement_context_factory = build_requirement_context_factory("cppyy>=3.1.0")
 
 
 def register_and_check():
-    global _has_checked_version
-
-    try:
-        import cppyy
-    except ImportError as err:
-        raise ImportError(
-            """install the 'cppyy' package with:
-
-pip install cppyy
-
-or
-
-conda install -c conda-forge cppyy
-
-Note that this must be in a different venv or conda environment from ROOT, if you have installed ROOT.
-"""
-        ) from err
-
-    if not _has_checked_version:
-        if packaging.version.Version(cppyy.__version__) < packaging.version.Version(
-            "3.1.0"
-        ):
-            raise ImportError(
-                "Awkward Array can only work with cppyy 3.1.0 or later "
-                f"(you have version {cppyy.__version__})"
-            )
-        _has_checked_version = True
+    with _requirement_context_factory():
+        return import_required_module("cppyy")
