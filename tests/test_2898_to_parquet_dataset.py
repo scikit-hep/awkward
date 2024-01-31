@@ -134,6 +134,3 @@ def test_filenames(tmp_path):
         {"x": 4.4, "y": [1, 2, 3, 4]},
         {"x": 5.5, "y": [1, 2, 3, 4, 5]},
     ]
-
-
-test_filenames("/Users/zobil/Documents/samples/parquet_to_dataset")
