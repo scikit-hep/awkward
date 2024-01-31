@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from awkward._dispatch import high_level_function
+import os
 
 __all__ = ("to_parquet_dataset",)
 
@@ -41,7 +42,6 @@ def to_parquet_dataset(
 
 def _impl(directory, filenames, storage_options):
     # Implementation
-
     import awkward._connect.pyarrow
 
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet(
@@ -56,9 +56,9 @@ def _impl(directory, filenames, storage_options):
     if not fs.isdir(directory):
         raise ValueError(f"{directory!r} is not a directory" + {__file__})
     filepaths = []
-    # Paths vs filenames?
+    
     if filenames is not None:
-        filenames = ["/".join([str(directory), fname]) for fname in filenames]
+        filenames = [os.path.join(directory, fname) for fname in filenames]
         for x in paths:  # paths should always be a list even if there is just one
             for f, fdata in fs.find(x, detail=True).items():
                 if f.endswith((".parq", ".parquet")) and f in filenames:
@@ -94,9 +94,9 @@ def _impl(directory, filenames, storage_options):
             )
         metadata_collector.append(pyarrow_parquet.ParquetFile(filepath).metadata)
         metadata_collector[-1].set_file_path(filepath)
-    _common_metadata_path = "/".join([directory, "_common_metadata"])
+    _common_metadata_path = os.path.join(directory, "_common_metadata")
     pyarrow_parquet.write_metadata(schema, _common_metadata_path)
-    _metadata_path = "/".join([directory, "_metadata"])
+    _metadata_path = os.path.join(directory, "_metadata")
     pyarrow_parquet.write_metadata(
         schema,
         _metadata_path,
