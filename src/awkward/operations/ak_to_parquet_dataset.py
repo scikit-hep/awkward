@@ -56,47 +56,51 @@ def _impl(directory, filenames, filename_extension, storage_options):
     )
     if not fs.isdir(directory):
         raise ValueError(f"{directory!r} is not a directory" + {__file__})
-
+    filepaths = []
     # Paths vs filenames??
-    if filenames is None:
-        import glob
+    if filenames is not None:
+        filenames = ["/".join([directory, fname]) for fname in filenames]
+        for x in paths:  # paths should always be a list even if there is just one
+            for f, fdata in fs.find(x, detail=True).items():
+                if f.endswith((".parq", ".parquet")) and f in filenames:
+                    if fdata["type"] == "file":
+                        filepaths.append(f)
 
-        filenames = sorted(
-            glob.glob(directory + f"/**/*{filename_extension}", recursive=True)
-        )
+        if len(filepaths) == 0:
+            raise ValueError(f"no *.parquet or *.parq matches for path {directory!r}")
 
     else:  # Ask about this...
         # Get paths:
-        filenames = []
         for x in paths:  # paths should always be a list even if there is just one
             for f, fdata in fs.find(x, detail=True).items():
                 if f.endswith((".parq", ".parquet")):
                     if fdata["type"] == "file":
-                        filenames.append(f)
+                        filepaths.append(f)
 
-        if len(filenames) == 0:
+        if len(filepaths) == 0:
             raise ValueError(f"no *.parquet or *.parq matches for path {directory!r}")
 
-    assert len(filenames) != 0
-
+    assert len(filepaths) != 0
     schema = None
     metadata_collector = []
-    for filename in filenames:
+    for filepath in filepaths:
         if schema is None:
-            schema = pyarrow_parquet.ParquetFile(filename).schema_arrow
-            first_filename = filename
-        elif not schema.equals(pyarrow_parquet.ParquetFile(filename).schema_arrow):
+            schema = pyarrow_parquet.ParquetFile(filepath).schema_arrow
+            first_filepath = filepath
+        elif not schema.equals(pyarrow_parquet.ParquetFile(filepath).schema_arrow):
             raise ValueError(
                 "schema in {} differs from the first schema (in {})".format(
-                    repr(filename), repr(first_filename)
+                    repr(filepath), repr(first_filepath)
                 )
             )
-        metadata_collector.append(pyarrow_parquet.ParquetFile(filename).metadata)
-        metadata_collector[-1].set_file_path(filename)
-
-    pyarrow_parquet.write_metadata(schema, "/".join([directory, "_common_metadata"]))
+        metadata_collector.append(pyarrow_parquet.ParquetFile(filepath).metadata)
+        metadata_collector[-1].set_file_path(filepath)
+    _common_metadata_path = "/".join([directory, "_common_metadata"])
+    pyarrow_parquet.write_metadata(schema, _common_metadata_path)
+    _metadata_path = "/".join([directory, "_metadata"])
     pyarrow_parquet.write_metadata(
         schema,
-        "/".join([directory, "_metadata"]),
+        _metadata_path,
         metadata_collector=metadata_collector,
     )
+    return _common_metadata_path, _metadata_path

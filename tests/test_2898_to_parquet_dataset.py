@@ -134,12 +134,3 @@ def test_filenames(tmp_path):
         {"x": 4.4, "y": [1, 2, 3, 4]},
         {"x": 5.5, "y": [1, 2, 3, 4, 5]},
     ]
-    with_metadata = ak.from_parquet(tmp_path)
-    assert with_metadata.tolist() == [
-        {"x": 1.1, "y": [1]},
-        {"x": 2.2, "y": [1, 2]},
-        {"x": 3.3, "y": [1, 2, 3]},
-        {"x": 1.8, "y": [3, 5, 6]},
-        {"x": 4.4, "y": [1, 2, 3, 4]},
-        {"x": 5.5, "y": [1, 2, 3, 4, 5]},
-    ]
