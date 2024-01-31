@@ -59,7 +59,7 @@ def _impl(directory, filenames, filename_extension, storage_options):
     filepaths = []
     # Paths vs filenames??
     if filenames is not None:
-        filenames = ["/".join([directory, fname]) for fname in filenames]
+        filenames = [b"/".join([directory, fname]) for fname in filenames]
         for x in paths:  # paths should always be a list even if there is just one
             for f, fdata in fs.find(x, detail=True).items():
                 if f.endswith((".parq", ".parquet")) and f in filenames:
