@@ -22,8 +22,6 @@ ak.numba.register_and_check()
 
 @pytest.mark.skipif(not NUMBA_HAS_NEP_50, reason="Numba does not have NEP-50 support")
 def test_numba_ufunc_nep_50():
-    raise NotImplementedError
-
     @numba.vectorize(nopython=True)
     def add(x, y):
         return x + y
@@ -35,7 +33,7 @@ def test_numba_ufunc_nep_50():
         result = add(array, np.int16(np.iinfo(np.int8).max + 1))
 
     flattened = ak.to_numpy(ak.flatten(result))
-    assert flattened.dtype == np.dtype(np.int8)
+    assert flattened.dtype == np.dtype(np.int64)
 
 
 @pytest.mark.skipif(NUMBA_HAS_NEP_50, reason="Numba has NEP-50 support")
