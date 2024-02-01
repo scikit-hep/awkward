@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from os import fsdecode
 
+import fsspec
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -240,7 +242,6 @@ def _impl(
     data = array
 
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
-    fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
 
     def get_layout_and_table(x):
         layout = ak.operations.ak_to_layout._impl(
