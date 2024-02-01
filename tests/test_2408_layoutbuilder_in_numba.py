@@ -600,6 +600,7 @@ def test_unbox_for_loop():
     with pytest.raises(NumbaTypeError):
         f2(builder)
 
+
 def test_box():
     @numba.njit
     def f3(x):
