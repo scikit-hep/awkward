@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_CPP_HEADERS_UTILS_H_
 #define AWKWARD_CPP_HEADERS_UTILS_H_
@@ -12,7 +12,8 @@
 #include <stdexcept>
 #include <stdint.h>
 #include <typeinfo>
-
+#include <map>
+#include <vector>
 
 namespace awkward {
 
@@ -268,6 +269,44 @@ namespace awkward {
   void
   visit_at(std::tuple<CONTENTs...>& contents, size_t index, FUNCTION fun) {
     visit_impl<sizeof...(CONTENTs)>::visit(contents, index, fun);
+  }
+
+  /// @brief Helper function to retrieve the names of the buffers.
+  ///
+  /// Note: use with caution, beware of a potential mismatch between retrieved values!
+  template<typename LayoutBuilder>
+  std::vector<std::string> buffer_name_helper(const LayoutBuilder* builder) {
+    std::map <std::string, size_t> names_nbytes = {};
+    std::vector<std::string> buffer_name;
+    builder->buffer_nbytes(names_nbytes);
+    for (auto it: names_nbytes) {
+      buffer_name.push_back(it.first);
+    }
+    return buffer_name;
+  }
+
+  /// @brief Helper function to retrieve the sizes (in bytes) of the buffers.
+  ///
+  /// Note: use with caution, beware of a potential mismatch between retrieved values!
+  template<typename LayoutBuilder>
+  std::vector<size_t> buffer_size_helper(const LayoutBuilder* builder) {
+    std::map <std::string, size_t> names_nbytes = {};
+    std::vector<size_t> buffer_size;
+    builder->buffer_nbytes(names_nbytes);
+    for (auto it: names_nbytes) {
+      buffer_size.push_back(it.second);
+    }
+    return buffer_size;
+  }
+
+  /// @brief Helper function to retrieve the number of the buffers.
+  ///
+  /// Note: use with caution, beware of a potential mismatch between retrieved values!
+  template<typename LayoutBuilder>
+  size_t num_buffers_helper(const LayoutBuilder* builder) {
+    std::map <std::string, size_t> names_nbytes = {};
+    builder->buffer_nbytes(names_nbytes);
+    return names_nbytes.size();
   }
 
 }  // namespace awkward

@@ -1,11 +1,12 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import numbers
 import os
 from collections.abc import Iterable, Sequence, Sized
 
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import AxisMaybeNone, SupportsInt
 
 np = NumpyMetadata.instance()

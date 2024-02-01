@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import awkward.operations.str
 from awkward.operations.ak_all import *
@@ -34,6 +36,7 @@ from awkward.operations.ak_from_buffers import *
 from awkward.operations.ak_from_categorical import *
 from awkward.operations.ak_from_cupy import *
 from awkward.operations.ak_from_dlpack import *
+from awkward.operations.ak_from_feather import *
 from awkward.operations.ak_from_iter import *
 from awkward.operations.ak_from_jax import *
 from awkward.operations.ak_from_json import *
@@ -77,9 +80,9 @@ from awkward.operations.ak_to_arrow import *
 from awkward.operations.ak_to_arrow_table import *
 from awkward.operations.ak_to_backend import *
 from awkward.operations.ak_to_buffers import *
-from awkward.operations.ak_to_categorical import *
 from awkward.operations.ak_to_cupy import *
 from awkward.operations.ak_to_dataframe import *
+from awkward.operations.ak_to_feather import *
 from awkward.operations.ak_to_jax import *
 from awkward.operations.ak_to_json import *
 from awkward.operations.ak_to_layout import *
@@ -87,6 +90,7 @@ from awkward.operations.ak_to_list import *
 from awkward.operations.ak_to_numpy import *
 from awkward.operations.ak_to_packed import *
 from awkward.operations.ak_to_parquet import *
+from awkward.operations.ak_to_parquet_row_groups import *
 from awkward.operations.ak_to_rdataframe import *
 from awkward.operations.ak_to_regular import *
 from awkward.operations.ak_transform import *

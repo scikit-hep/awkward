@@ -1,18 +1,36 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("mean",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._layout import (
+    HighLevelContext,
+    ensure_same_backend,
+    maybe_highlevel_to_lowlevel,
+    maybe_posaxis,
+)
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+
+__all__ = ("mean", "nanmean")
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
+def mean(
+    x,
+    weight=None,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
+):
     """
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
@@ -33,6 +51,12 @@ def mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Computes the mean in each group of elements from `x` (many
     types supported, including all Awkward Arrays and Records). The grouping
@@ -79,11 +103,21 @@ def mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     yield x, weight
 
     # Implementation
-    return _impl(x, weight, axis, keepdims, mask_identity)
+    return _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs)
 
 
 @high_level_function()
-def nanmean(x, weight=None, axis=None, *, keepdims=False, mask_identity=True):
+def nanmean(
+    x,
+    weight=None,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=True,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
+):
     """
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
@@ -104,6 +138,12 @@ def nanmean(x, weight=None, axis=None, *, keepdims=False, mask_identity=True):
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Like #ak.mean, but treating NaN ("not a number") values as missing.
 
@@ -119,29 +159,36 @@ def nanmean(x, weight=None, axis=None, *, keepdims=False, mask_identity=True):
     yield x, weight
 
     if weight is not None:
-        weight = ak.operations.ak_nan_to_none._impl(weight, False, None)
+        weight = ak.operations.ak_nan_to_none._impl(weight, True, behavior, attrs)
 
     return _impl(
-        ak.operations.ak_nan_to_none._impl(x, False, None),
+        ak.operations.ak_nan_to_none._impl(x, False, behavior, attrs),
         weight,
         axis,
         keepdims,
         mask_identity,
-    )
-
-
-def _impl(x, weight, axis, keepdims, mask_identity):
-    axis = regularize_axis(axis)
-    behavior = behavior_of(x, weight)
-    x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False),
+        highlevel=highlevel,
         behavior=behavior,
     )
-    if weight is not None:
-        weight = ak.highlevel.Array(
-            ak.operations.to_layout(weight, allow_record=False, allow_other=False),
-            behavior=behavior,
+
+
+def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
+    axis = regularize_axis(axis)
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        x_layout, weight_layout = ensure_same_backend(
+            ctx.unwrap(x, allow_record=False, primitive_policy="error"),
+            ctx.unwrap(
+                weight,
+                allow_record=False,
+                allow_unknown=False,
+                primitive_policy="error",
+                none_policy="pass-through",
+            ),
         )
+
+    x = ctx.wrap(x_layout)
+    weight = ctx.wrap(weight_layout, allow_other=True)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
@@ -151,7 +198,8 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 keepdims=True,
                 mask_identity=True,
                 highlevel=True,
-                behavior=None,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x,
@@ -159,7 +207,8 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 keepdims=True,
                 mask_identity=True,
                 highlevel=True,
-                behavior=None,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
         else:
             sumw = ak.operations.ak_sum._impl(
@@ -168,7 +217,8 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=None,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x * weight,
@@ -176,13 +226,21 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 keepdims=True,
                 mask_identity=True,
                 highlevel=True,
-                behavior=None,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
 
         out = sumwx / sumw
 
         if not mask_identity:
-            out = ak.highlevel.Array(ak.operations.fill_none(out, np.nan, axis=-1))
+            out = ak.operations.fill_none(
+                out,
+                np.nan,
+                axis=-1,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
+                highlevel=True,
+            )
 
         if axis is None:
             if not keepdims:
@@ -192,7 +250,9 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        return out
+        return ctx.wrap(
+            maybe_highlevel_to_lowlevel(out), highlevel=highlevel, allow_other=True
+        )
 
 
 @ak._connect.numpy.implements("mean")

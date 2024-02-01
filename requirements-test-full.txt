@@ -1,0 +1,10 @@
+fsspec;sys_platform != "win32"
+jax[cpu]>=0.2.15;sys_platform != "win32" and python_version < "3.12"
+numba>=0.50.0,!=0.58.0rc1;python_version < "3.12"
+numexpr>=2.7; python_version < "3.12"
+pandas>=0.24.0;sys_platform != "win32" and python_version < "3.12"
+pyarrow>=7.0.0;sys_platform != "win32" and python_version < "3.12"
+pytest>=6
+pytest-cov
+pytest-xdist
+uproot>=5

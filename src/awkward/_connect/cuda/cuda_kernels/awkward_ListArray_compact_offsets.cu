@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 enum class LISTARRAY_COMPACT_OFFSETS_ERRORS {
-  ERROR_START_STOP,  // message: "start[i] > stop[i]"
+  ERROR_START_STOP,  // message: "stops[i] < starts[i]"
 };
 
 // BEGIN PYTHON

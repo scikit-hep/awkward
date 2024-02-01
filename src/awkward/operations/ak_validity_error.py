@@ -1,7 +1,11 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("validity_error",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._dispatch import high_level_function
+
+__all__ = ("validity_error",)
 
 
 @high_level_function()
@@ -28,7 +32,9 @@ def validity_error(array, *, exception=False):
 
 
 def _impl(array, exception):
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(
+        array, allow_record=False, primitive_policy="error"
+    )
     out = ak._do.validity_error(layout, path="highlevel")
 
     if out not in (None, "") and exception:

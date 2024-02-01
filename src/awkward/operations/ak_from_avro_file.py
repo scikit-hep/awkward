@@ -1,18 +1,27 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("from_avro_file",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 from os import PathLike, fsdecode
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("from_avro_file",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
 def from_avro_file(
-    file, limit_entries=None, *, debug_forth=False, highlevel=True, behavior=None
+    file,
+    limit_entries=None,
+    *,
+    debug_forth=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -22,6 +31,8 @@ def from_avro_file(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Reads Avro files as Awkward Arrays.
@@ -37,7 +48,7 @@ def from_avro_file(
             form, length, container = awkward._connect.avro.ReadAvroFT(
                 opened_file, limit_entries, debug_forth
             ).outcontents
-            return _impl(form, length, container, highlevel, behavior)
+            return _impl(form, length, container, highlevel, behavior, attrs)
 
     else:
         if not hasattr(file, "read") or not hasattr(file, "seek"):
@@ -48,10 +59,10 @@ def from_avro_file(
             form, length, container = awkward._connect.avro.ReadAvroFT(
                 file, limit_entries, debug_forth
             ).outarr
-            return _impl(form, length, container, highlevel, behavior)
+            return _impl(form, length, container, highlevel, behavior, attrs)
 
 
-def _impl(form, length, container, highlevel, behavior):
+def _impl(form, length, container, highlevel, behavior, attrs):
     return ak.operations.ak_from_buffers._impl(
         form=form,
         length=length,
@@ -62,4 +73,5 @@ def _impl(form, length, container, highlevel, behavior):
         highlevel=highlevel,
         behavior=behavior,
         simplify=True,
+        attrs=attrs,
     )

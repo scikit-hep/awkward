@@ -13,35 +13,44 @@ env:
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
-  make_sdists:
-    name: "Make SDists"
+  build_awkward_sdist_wheel:
+    name: "Build awkward"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - name: Build awkward SDist
-      run: pipx run build --sdist
-
-    - name: Build awkward-cpp SDist
-      run: pipx run build --sdist awkward-cpp
+    - name: Build awkward SDist & wheel
+      run: pipx run build
 
     - name: Check metadata
       run: pipx run twine check dist/*
 
-    - uses: actions/upload-artifact@v3
+    - name: Build awkward-cpp SDist
+      run: pipx run build --sdist awkward-cpp
+
+    - uses: actions/upload-artifact@v4
       with:
-        path: |
-          dist/*.tar.gz
-          awkward-cpp/dist/*.tar.gz
+        name: awkward-sdist
+        path: dist/*.tar.gz
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: awkward-wheel
+        path: dist/*.whl
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: awkward-cpp-sdist
+        path: awkward-cpp/dist/*.tar.gz
 
 
-  build_wheels:
-    name: "Make Wheel: ${{ matrix.os }}"
+  build_cpp_wheels:
+    name: "Build awkward-cpp: ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -49,14 +58,14 @@ jobs:
         os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v2.15.0
+    - uses: pypa/cibuildwheel@v2.16.5
       env:
         CIBW_ARCHS_MACOS: universal2
         CIBW_BUILD: cp39-win_amd64 cp310-manylinux_x86_64 cp38-macosx_universal2
@@ -64,20 +73,16 @@ jobs:
         config-file: cibuildwheel.toml
         package-dir: awkward-cpp
 
-    - uses: pypa/cibuildwheel@v2.15.0
+    - uses: pypa/cibuildwheel@v2.16.5
       if: matrix.os == 'ubuntu-latest'
       env:
-        CIBW_BUILD: cp311-manylinux_x86_64
+        CIBW_BUILD: cp312-manylinux_x86_64
       with:
         config-file: cibuildwheel.toml
         package-dir: awkward-cpp
 
-    - name: Build awkward wheel
-      run: pipx run build --wheel .
-
     - name: Upload wheels
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        path: |
-          wheelhouse/*.whl
-          dist/*.whl
+        name: awkward-cpp-wheels-${{ matrix.os }}
+        path: wheelhouse/*.whl

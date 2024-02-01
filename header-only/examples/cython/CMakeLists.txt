@@ -1,14 +1,13 @@
+# BSD 3-Clause License; see
+# https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 cmake_minimum_required(VERSION 3.15...3.26)
 
 project(demo LANGUAGES CXX C)
 
-# Set required standards
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 # Download headers
 include(FetchContent)
-set(AWKWARD_VERSION "v2.0.10")
+set(AWKWARD_VERSION "v2.4.3")
 FetchContent_Declare(
   awkward-headers
   URL https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
@@ -22,11 +21,9 @@ if(NOT awkward-headers_POPULATED)
                    EXCLUDE_FROM_ALL)
 endif()
 
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 find_package(Cython REQUIRED)
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
 find_package(PythonExtensions REQUIRED)
-include(UsePythonExtensions)
 
 # Build demo module
 add_cython_target(_demo _demo.pyx PY3 CXX)
@@ -38,6 +35,7 @@ add_python_library(
   demo_impl.cpp
   LINK_LIBRARIES
   awkward::layout-builder
+  Python::NumPy
   INCLUDE_DIRECTORIES
   include)
 python_extension_module(_demo)

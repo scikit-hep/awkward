@@ -1,5 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
+from __future__ import annotations
 
 import datetime
 import os
@@ -11,68 +12,59 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 cuda_kernels_impl = [
+    "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_compact_offsets",
-    "awkward_new_Identities",
-    "awkward_Identities32_to_Identities64",
     "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_overlay_mask",
-    "awkward_IndexedArray_mask",
-    "awkward_ByteMaskedArray_mask",
-    "awkward_zero_mask",
+    "awkward_IndexedArray_numnull_unique_64",
+    "awkward_NumpyArray_fill",
+    "awkward_ListArray_fill",
+    "awkward_IndexedArray_fill",
     "awkward_IndexedArray_fill_count",
+    "awkward_UnionArray_fillindex",
+    "awkward_UnionArray_fillindex_count",
     "awkward_UnionArray_fillna",
+    "awkward_UnionArray_filltags",
+    "awkward_UnionArray_filltags_const",
     "awkward_localindex",
-    "awkward_content_reduce_zeroparents_64",
-    "awkward_ListOffsetArray_reduce_global_startstop_64",
     "awkward_IndexedArray_reduce_next_fix_offsets_64",
-    "awkward_Index_to_Index64",
-    "awkward_carry_arange",
-    "awkward_index_carry_nocheck",
-    "awkward_NumpyArray_contiguous_init",
-    "awkward_NumpyArray_getitem_next_array_advanced",
-    "awkward_NumpyArray_getitem_next_at",
     "awkward_RegularArray_getitem_next_array_advanced",
     "awkward_ByteMaskedArray_toIndexedOptionArray",
-    "awkward_combinations",  # ?
     "awkward_IndexedArray_simplify",
     "awkward_UnionArray_validity",
-    "awkward_index_carry",
-    "awkward_ByteMaskedArray_getitem_carry",
     "awkward_IndexedArray_validity",
     "awkward_ByteMaskedArray_overlay_mask",
     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
     "awkward_RegularArray_getitem_carry",
-    "awkward_NumpyArray_getitem_next_array",
     "awkward_RegularArray_localindex",
-    "awkward_NumpyArray_contiguous_next",
-    "awkward_NumpyArray_getitem_next_range",
-    "awkward_NumpyArray_getitem_next_range_advanced",
+    "awkward_RegularArray_rpad_and_clip_axis1",
     "awkward_RegularArray_getitem_next_range",
     "awkward_RegularArray_getitem_next_range_spreadadvanced",
     "awkward_RegularArray_getitem_next_array",
     "awkward_missing_repeat",
-    "awkward_Identities_getitem_carry",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_next_array",
-    "awkward_NumpyArray_fill_tobool",
+    "awkward_ListArray_getitem_next_at",
     "awkward_NumpyArray_reduce_adjust_starts_64",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
-    "awkward_regularize_arrayslice",
     "awkward_RegularArray_getitem_next_at",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
     "awkward_ByteMaskedArray_getitem_nextcarry",
     "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
     "awkward_ByteMaskedArray_reduce_next_64",
     "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+    "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
     "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+    "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
     "awkward_IndexedArray_flatten_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
-    "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
+    "awkward_IndexedArray_index_of_nulls",
     "awkward_IndexedArray_reduce_next_64",
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
@@ -80,12 +72,11 @@ cuda_kernels_impl = [
     "awkward_ListOffsetArray_rpad_and_clip_axis1",
     # "awkward_ListOffsetArray_rpad_axis1",
     "awkward_MaskedArray_getitem_next_jagged_project",
-    "awkward_NumpyArray_getitem_boolean_nonzero",
     "awkward_UnionArray_project",
+    "awkward_UnionArray_simplify",
+    "awkward_UnionArray_simplify_one",
     "awkward_reduce_argmax",
-    "awkward_reduce_argmax_bool_64",
     "awkward_reduce_argmin",
-    "awkward_reduce_argmin_bool_64",
     "awkward_reduce_count_64",
     "awkward_reduce_max",
     "awkward_reduce_min",
@@ -383,6 +374,7 @@ def by_signature(cuda_kernel_templates):
                 special = [repr(spec["name"])]
                 [type_to_pytype(x["type"], special) for x in childfunc["args"]]
                 dirlist = [repr(x["dir"]) for x in childfunc["args"]]
+                ispointerlist = [repr("List" in x["type"]) for x in childfunc["args"]]
                 if spec["name"] in cuda_kernels_impl:
                     with open(
                         os.path.join(
@@ -403,10 +395,12 @@ def by_signature(cuda_kernel_templates):
     def f(grid, block, args):
         cuda_kernel_templates.get_function(fetch_specialization([{}]))(grid, block, args)
     f.dir = [{}]
+    f.is_ptr = [{}]
     out[{}] = f
 """.format(
                                     ", ".join(special),
                                     ", ".join(dirlist),
+                                    ", ".join(ispointerlist),
                                     ", ".join(special),
                                 )
                             )
@@ -427,9 +421,12 @@ def by_signature(cuda_kernel_templates):
                             file.write(python_code)
                             file.write(
                                 """    f.dir = [{}]
+    f.is_ptr = [{}]
     out[{}] = f
 """.format(
-                                    ", ".join(dirlist), ", ".join(special)
+                                    ", ".join(dirlist),
+                                    ", ".join(ispointerlist),
+                                    ", ".join(special),
                                 )
                             )
                 else:
@@ -447,7 +444,7 @@ def by_signature(cuda_kernel_templates):
 """
         )
 
-    print("Done with  src/awkward/connect/cuda/_kernel_signatures.py...")
+    print("Done with  src/awkward/_connect/cuda/_kernel_signatures.py...")
 
 
 if __name__ == "__main__":

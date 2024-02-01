@@ -1,20 +1,24 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._backends.dispatch import backend_of
+from awkward._backends.dispatch import backend_of_obj
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
+from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
+from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes import to_nplike
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
-from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._parameters import (
     parameters_intersect,
@@ -22,9 +26,23 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.errors import AxisError
 from awkward.forms.form import Form
 from awkward.forms.numpyform import NumpyForm
@@ -39,7 +57,7 @@ numpy = Numpy.instance()
 
 
 @final
-class NumpyArray(Content):
+class NumpyArray(NumpyMeta, Content):
     """
     A NumpyArray describes 1-dimensional or rectilinear data using a NumPy
     `np.ndarray`, a CuPy `cp.ndarray`, etc., depending on the backend.
@@ -94,12 +112,9 @@ class NumpyArray(Content):
                     return result
     """
 
-    is_numpy = True
-    is_leaf = True
-
     def __init__(self, data: ArrayLike, *, parameters=None, backend=None):
         if backend is None:
-            backend = backend_of(data, default=NumpyBackend.instance())
+            backend = backend_of_obj(data, default=NumpyBackend.instance())
 
         self._data = backend.nplike.asarray(data)
 
@@ -150,6 +165,13 @@ class NumpyArray(Content):
             data=copy.deepcopy(self._data, memo),
             parameters=copy.deepcopy(self._parameters, memo),
         )
+
+    def __array__(self, dtype=None):
+        deprecate(
+            f"np.asarray(content) is deprecated for {type(self).__name__}. Use ak.to_numpy(content) instead",
+            version="2.6.0",
+        )
+        return numpy.asarray(self._data, dtype=dtype)
 
     @classmethod
     def simplified(cls, data, *, parameters=None, backend=None):
@@ -273,9 +295,6 @@ class NumpyArray(Content):
     def maybe_to_NumpyArray(self) -> Self:
         return self
 
-    def __array__(self, dtype=None):
-        return self._backend.nplike.asarray(self._data, dtype=dtype)
-
     def __iter__(self):
         return iter(self._data)
 
@@ -302,7 +321,7 @@ class NumpyArray(Content):
         else:
             return out
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         try:
             out = self._data[start:stop]
         except IndexError as err:
@@ -432,8 +451,8 @@ class NumpyArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # Check against option contents
-        elif other.is_option or other.is_indexed:
+        # Is the other array indexed or optional?
+        elif other.is_indexed or other.is_option:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
@@ -1185,7 +1204,14 @@ class NumpyArray(Content):
     def _nbytes_part(self):
         return self.data.nbytes
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         if self._data.ndim != 1:
             return self.to_RegularArray()._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
@@ -1218,7 +1244,9 @@ class NumpyArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         if options["keepdims"]:
             shape = (1,) * (self._data.ndim - 1) + (-1,)
         else:
@@ -1231,11 +1259,16 @@ class NumpyArray(Content):
         ]
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if self._data.ndim != 1 and options["numpy_to_regular"]:
             return self.to_RegularArray()._recursively_apply(
-                action, behavior, depth, depth_context, lateral_context, options
+                action, depth, depth_context, lateral_context, options
             )
 
         if options["return_array"]:
@@ -1259,7 +1292,6 @@ class NumpyArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )
@@ -1271,7 +1303,7 @@ class NumpyArray(Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         return self.to_contiguous().to_RegularArray()
 
     def _to_list(self, behavior, json_conversions):
@@ -1343,18 +1375,24 @@ class NumpyArray(Content):
             backend=backend,
         )
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        if numpyarray:
-            return (
-                (
-                    not self._backend.nplike.known_data
-                    or self._backend.nplike.array_equal(self.data, other.data)
-                )
-                and self.dtype == other.dtype
-                and self.shape == other.shape
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return self._is_equal_to_generic(other, all_parameters) and (
+            not numpyarray
+            # dtypes agree
+            or self.dtype == other.dtype
+            # Contents agree
+            and (
+                not self._backend.nplike.known_data
+                or self._backend.nplike.array_equal(self.data, other.data)
             )
-        else:
-            return True
+            # Shapes agree
+            and all(
+                x is unknown_length or y is unknown_length or x == y
+                for x, y in zip(self.shape, other.shape)
+            )
+        )
 
     def _to_regular_primitive(self) -> ak.contents.RegularArray:
         # A length-1 slice in each dimension

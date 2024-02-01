@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_BUILDEROPTIONS_H_
 #define AWKWARD_BUILDEROPTIONS_H_
@@ -22,15 +22,8 @@ namespace awkward {
 
     using OptionsPack = typename std::tuple<OPTIONS...>;
 
-    // FIXME:
-    // std::tuple_element_t is missing on some of the CI node compilers
-    //
-    // template<std::size_t INDEX>
-    // using OptionType = std::tuple_element_t<INDEX, OptionsPack>;
-
-    template <std::size_t INDEX>
-    using OptionType =
-        typename std::tuple_element<INDEX, decltype(OptionsPack())>::type;
+    template<std::size_t INDEX>
+    using OptionType = std::tuple_element_t<INDEX, OptionsPack>;
 
     /// @brief Creates an Options tuple from a full set of parameters.
     Options(OPTIONS... options) : pars(options...) {}

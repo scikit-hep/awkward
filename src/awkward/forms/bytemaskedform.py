@@ -1,14 +1,24 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+from collections.abc import Callable
+
 import awkward as ak
-from awkward._parameters import type_parameters_equal
-from awkward._typing import JSONSerializable, Self, final
+from awkward._meta.bytemaskedmeta import ByteMaskedMeta
+from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._typing import Any, DType, Iterator, Self, final
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
+
+__all__ = ("ByteMaskedForm",)
+
+np = NumpyMetadata.instance()
 
 
 @final
-class ByteMaskedForm(Form):
-    is_option = True
+class ByteMaskedForm(ByteMaskedMeta[Form], Form):
+    _content: Form
 
     def __init__(
         self,
@@ -94,7 +104,7 @@ class ByteMaskedForm(Form):
             )
 
     @property
-    def is_identity_like(self):
+    def is_identity_like(self) -> bool:
         return False
 
     def __repr__(self):
@@ -123,54 +133,6 @@ class ByteMaskedForm(Form):
             self._content.type, parameters=self._parameters
         ).simplify_option_union()
 
-    def __eq__(self, other):
-        if isinstance(other, ByteMaskedForm):
-            return (
-                self._form_key == other._form_key
-                and self._mask == other._mask
-                and self._valid_when == other._valid_when
-                and type_parameters_equal(self._parameters, other._parameters)
-                and self._content == other._content
-            )
-        else:
-            return False
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        if self._parameters is not None:
-            for key in keys:
-                if key in self._parameters:
-                    return self._parameters[key]
-
-        return self._content.purelist_parameters(*keys)
-
-    @property
-    def purelist_isregular(self):
-        return self._content.purelist_isregular
-
-    @property
-    def purelist_depth(self):
-        return self._content.purelist_depth
-
-    @property
-    def minmax_depth(self):
-        return self._content.minmax_depth
-
-    @property
-    def branch_depth(self):
-        return self._content.branch_depth
-
-    @property
-    def fields(self):
-        return self._content.fields
-
-    @property
-    def is_tuple(self):
-        return self._content.is_tuple
-
-    @property
-    def dimension_optiontype(self):
-        return True
-
     def _columns(self, path, output, list_indicator):
         self._content._columns(path, output, list_indicator)
 
@@ -179,22 +141,10 @@ class ByteMaskedForm(Form):
         if next_content is None:
             return None
         else:
-            return ByteMaskedForm(
-                self._mask,
-                next_content,
-                self._valid_when,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
+            return self.copy(content=next_content)
 
-    def _select_columns(self, match_specifier):
-        return ByteMaskedForm(
-            self._mask,
-            self._content._select_columns(match_specifier),
-            self._valid_when,
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
+        return self.copy(content=self._content._select_columns(match_specifier))
 
     def _column_types(self):
         return self._content._column_types()
@@ -215,3 +165,18 @@ class ByteMaskedForm(Form):
             self.__init__(
                 mask, content, valid_when, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str], recursive: bool
+    ) -> Iterator[tuple[str, DType]]:
+        yield (getkey(self, "mask"), index_to_dtype[self._mask])
+        if recursive:
+            yield from self._content._expected_from_buffers(getkey, recursive)
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and self._mask == other._mask
+            and self._valid_when == other._valid_when
+            and self._content._is_equal_to(other._content, all_parameters, form_key)
+        )

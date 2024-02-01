@@ -1,21 +1,39 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
+from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
+from awkward._meta.emptymeta import EmptyMeta
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.errors import AxisError
 from awkward.forms.emptyform import EmptyForm
 from awkward.forms.form import Form
@@ -24,12 +42,13 @@ from awkward.index import Index
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
 
-np = NumpyMetadata.instance()
 numpy = Numpy.instance()
+
+np = NumpyMetadata.instance()
 
 
 @final
-class EmptyArray(Content):
+class EmptyArray(EmptyMeta, Content):
     """
     An EmptyArray is used whenever an array's type is not known because it is empty
     (such as data from #ak.ArrayBuilder without enough sample points to resolve the
@@ -64,9 +83,6 @@ class EmptyArray(Content):
                     raise AssertionError(where)
     """
 
-    is_unknown = True
-    is_leaf = True
-
     def __init__(self, *, parameters=None, backend=None):
         if not (parameters is None or len(parameters) == 0):
             raise TypeError(f"{type(self).__name__} cannot contain parameters")
@@ -93,6 +109,13 @@ class EmptyArray(Content):
 
     def __deepcopy__(self, memo):
         return self.copy()
+
+    def __array__(self, dtype=None):
+        deprecate(
+            f"np.asarray(content) is deprecated for {type(self).__name__}. Use ak.to_numpy(content) instead",
+            version="2.6.0",
+        )
+        return numpy.empty(0, dtype=dtype)
 
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):
@@ -150,9 +173,6 @@ class EmptyArray(Content):
             backend=backend,
         )
 
-    def __array__(self, **kwargs):
-        return numpy.empty(0, dtype=np.float64)
-
     def __iter__(self):
         return iter([])
 
@@ -162,7 +182,7 @@ class EmptyArray(Content):
     def _getitem_at(self, where: IndexType):
         raise ak._errors.index_error(self, where, "array is empty")
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         return self
 
     def _getitem_field(
@@ -338,7 +358,14 @@ class EmptyArray(Content):
         else:
             return self._pad_none_axis0(target, True)
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         if options["emptyarray_to"] is None:
             return pyarrow.Array.from_buffers(
                 ak._connect.pyarrow.to_awkwardarrow_type(
@@ -367,12 +394,19 @@ class EmptyArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         return backend.nplike.empty(0, dtype=np.float64)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         return [self]
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if options["return_array"]:
 
             def continuation():
@@ -392,7 +426,6 @@ class EmptyArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )
@@ -404,7 +437,7 @@ class EmptyArray(Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         return self
 
     def _to_list(self, behavior, json_conversions):
@@ -415,5 +448,7 @@ class EmptyArray(Content):
     def _to_backend(self, backend: Backend) -> Self:
         return EmptyArray(backend=backend)
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return True
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return self._is_equal_to_generic(other, all_parameters)

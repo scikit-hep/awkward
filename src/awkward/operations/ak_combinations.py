@@ -1,10 +1,14 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("combinations",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._layout import HighLevelContext
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+
+__all__ = ("combinations",)
 
 np = NumpyMetadata.instance()
 
@@ -21,6 +25,7 @@ def combinations(
     with_name=None,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -45,6 +50,8 @@ def combinations(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Computes a Cartesian product (i.e. cross product) of `array` with itself
@@ -191,21 +198,33 @@ def combinations(
         with_name,
         highlevel,
         behavior,
+        attrs,
     )
 
 
 def _impl(
-    array, n, replacement, axis, fields, parameters, with_name, highlevel, behavior
+    array,
+    n,
+    replacement,
+    axis,
+    fields,
+    parameters,
+    with_name,
+    highlevel,
+    behavior,
+    attrs,
 ):
     axis = regularize_axis(axis)
-    if parameters is None:
-        parameters = {}
-    else:
-        parameters = dict(parameters)
-    if with_name is not None:
-        parameters["__record__"] = with_name
 
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    if with_name is None:
+        pass
+    elif parameters is None:
+        parameters = {"__record__": with_name}
+    else:
+        parameters = {**parameters, "__record__": with_name}
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     out = ak._do.combinations(
         layout,
         n,
@@ -214,4 +233,4 @@ def _impl(
         fields=fields,
         parameters=parameters,
     )
-    return wrap_layout(out, behavior, highlevel, like=array)
+    return ctx.wrap(out, highlevel=highlevel)

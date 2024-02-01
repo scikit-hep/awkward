@@ -1,3 +1,5 @@
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include "awkward/LayoutBuilder.h"
@@ -87,8 +89,8 @@ py::object create_demo_array() {
                     NumpyBuilder<int32_t>>>
     > builder(fields_map);
 
-    auto &one_builder = builder.field<Field::one>();
-    auto &two_builder = builder.field<Field::two>();
+    auto &one_builder = builder.content<Field::one>();
+    auto &two_builder = builder.content<Field::two>();
 
     one_builder.append(1.1);
 

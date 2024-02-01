@@ -1,20 +1,25 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("merge_union_of_records",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
-from awkward._nplikes.numpylike import ArrayLike, NumpyMetadata
+from awkward._layout import HighLevelContext, maybe_posaxis
+from awkward._nplikes.numpy_like import ArrayLike, NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
+
+__all__ = ("merge_union_of_records",)
 
 np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
 @high_level_function()
-def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
+def merge_union_of_records(
+    array, axis=-1, *, highlevel=True, behavior=None, attrs=None
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -25,6 +30,8 @@ def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Simplifies unions of records, e.g.
@@ -50,18 +57,18 @@ def merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior):
+def _impl(array, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(array, behavior=behavior)
-    layout = ak.to_layout(array, allow_record=False)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     def invert_record_union(
-        tags: ArrayLike, index: ArrayLike, contents, *, backend
+        tags: ArrayLike, index: ArrayLike, contents
     ) -> ak.contents.RecordArray:
-        index_nplike = backend.index_nplike
+        index_nplike = layout.backend.index_nplike
         # First, create an ordered list containing the union of all fields
         seen_fields = set()
         all_fields = []
@@ -75,8 +82,8 @@ def _impl(array, axis, highlevel, behavior):
         # Build unions for each field
         outer_field_contents = []
         for field in all_fields:
-            field_tags = index_nplike.asarray(tags, copy=True)
-            field_index = index_nplike.asarray(index, copy=True)
+            field_tags = index_nplike.asarray(tags.data, copy=True)
+            field_index = index_nplike.asarray(index.data, copy=True)
 
             # Build contents for union representing current field
             field_contents = [c.content(field) for c in contents if c.has_field(field)]
@@ -97,7 +104,7 @@ def _impl(array, axis, highlevel, behavior):
                 # Make the tagged content an option, growing by one to ensure we
                 # have a known `None` value to index into
                 tagged_content = field_contents[tag_for_missing]
-                indexedoption_index = backend.index_nplike.arange(
+                indexedoption_index = index_nplike.arange(
                     tagged_content.length + 1, dtype=np.int64
                 )
                 indexedoption_index[
@@ -139,17 +146,17 @@ def _impl(array, axis, highlevel, behavior):
                 )
             )
         return ak.contents.RecordArray(
-            outer_field_contents, all_fields, backend=backend
+            outer_field_contents, all_fields, backend=layout.backend
         )
 
-    def compact_option_index(index: ArrayLike, *, backend) -> ArrayLike:
+    def compact_option_index(index: ArrayLike) -> ArrayLike:
         # Find dense (outer) index into non-null items.
         # This is in trivial order: the re-arranging is done by the union (below)
         is_none = index < 0
-        num_none = backend.index_nplike.count_nonzero(is_none)
-        dense_index = backend.index_nplike.empty(index.size, dtype=index.dtype)
+        num_none = layout.backend.index_nplike.count_nonzero(is_none)
+        dense_index = layout.backend.index_nplike.empty(index.size, dtype=index.dtype)
         dense_index[is_none] = -1
-        dense_index[~is_none] = backend.index_nplike.arange(
+        dense_index[~is_none] = layout.backend.index_nplike.arange(
             index.size - num_none,
             dtype=index.dtype,
         )
@@ -157,6 +164,12 @@ def _impl(array, axis, highlevel, behavior):
 
     def apply(layout, depth, backend, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
+        if posaxis is None:
+            mindepth, maxdepth = layout.minmax_depth
+            raise TypeError(
+                f"cannot merge_union_of_records with axis={axis} if the array has multiple levels of nesting depth; this array has depths from {mindepth} to {maxdepth} (inclusive); try setting axis to a non-negative value"
+            )
+
         if depth < posaxis + 1 and layout.is_leaf:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         elif depth == posaxis + 1 and layout.is_union:
@@ -170,17 +183,19 @@ def _impl(array, axis, highlevel, behavior):
                 # We'll rebuild the union to include only the non-null items.
                 inner_union_index_parts = []
                 next_contents = []
-                next_tags_sparse = backend.index_nplike.asarray(layout.tags, copy=True)
+                next_tags_data_sparse = backend.index_nplike.asarray(
+                    layout.tags.data, copy=True
+                )
                 for tag, content in enumerate(layout.contents):
-                    is_this_tag = backend.index_nplike.asarray(layout.tags) == tag
+                    is_this_tag = layout.tags.data == tag
 
                     # Union arrays for this content
-                    tag_index = backend.index_nplike.asarray(layout.index)[is_this_tag]
+                    tag_index_data = layout.index.data[is_this_tag]
 
                     # For unmasked arrays, we can directly take the content
                     if isinstance(content, ak.contents.UnmaskedArray):
                         next_contents.append(content.content)
-                        inner_union_index_parts.append(tag_index)
+                        inner_union_index_parts.append(tag_index_data)
                     # Otherwise, we need to rebuild the index
                     elif content.is_option or content.is_indexed:
                         # Let's work with indexed option types for ease
@@ -188,12 +203,11 @@ def _impl(array, axis, highlevel, behavior):
                             content = content.to_IndexedOptionArray64()
 
                         # First, find the inner index that actually re-arranges the (non-null) items
-                        content_index = backend.index_nplike.asarray(content.index)
-                        merged_index = content_index[tag_index]
+                        merged_index = content.index.data[tag_index_data]
                         is_non_null = merged_index >= 0
                         inner_union_index_parts.append(merged_index[is_non_null])
                         # Mask out tags of items that are missing
-                        next_tags_sparse[is_this_tag] = backend.index_nplike.where(
+                        next_tags_data_sparse[is_this_tag] = backend.index_nplike.where(
                             is_non_null, tag, -1
                         )
 
@@ -202,70 +216,60 @@ def _impl(array, axis, highlevel, behavior):
                     # Non-indexed/option types are trivially included as-is
                     else:
                         next_contents.append(content)
-                        inner_union_index_parts.append(tag_index)
+                        inner_union_index_parts.append(tag_index_data)
 
                 # We'll create an outermost indexed-option type, which re-instates the missing values.
                 # This should have the same length as the original union, and its index should be "dense"
                 # (contiguous, monotonic integers; or -1). Therefore, we can directly compute it from the "sparse"
                 # tags index, which has the same length as the original union, and has only missing items set to -1.
-                outer_option_dense_index = compact_option_index(
-                    next_tags_sparse, backend=backend
-                )
+                outer_option_dense_index = compact_option_index(next_tags_data_sparse)
 
                 # Ignore missing items for inner union, creating a dense array of tags
-                next_tags = next_tags_sparse[next_tags_sparse >= 0]
+                next_tags_data = next_tags_data_sparse[next_tags_data_sparse >= 0]
                 # Build dense index from parts for each tag
-                next_index = backend.index_nplike.empty(next_tags.size, dtype=np.int64)
+                next_index_data = backend.index_nplike.empty(
+                    next_tags_data.size, dtype=np.int64
+                )
                 for tag, content_index in enumerate(inner_union_index_parts):
-                    next_index[next_tags == tag] = content_index
+                    next_index_data[next_tags_data == tag] = content_index
 
                 # Return option around record of unions
                 return ak.contents.IndexedOptionArray(
                     ak.index.Index64(outer_option_dense_index),
-                    invert_record_union(
-                        next_tags, next_index, next_contents, backend=backend
-                    ),
+                    invert_record_union(next_tags_data, next_index_data, next_contents),
                 )
 
             # Any index types need to be re-written
             elif any(x.is_indexed for x in layout.contents):
                 # We'll create an outermost indexed-option type, which re-instates the missing values
-                current_index = backend.index_nplike.asarray(layout.index)
-                next_index = backend.index_nplike.empty(
-                    current_index.size, dtype=np.int64
+                next_index_data = backend.index_nplike.empty(
+                    layout.index.length, dtype=np.int64
                 )
 
                 # We'll rebuild the union to include only the non-null items.
                 next_contents = []
                 for tag, content in enumerate(layout.contents):
-                    is_this_tag = backend.index_nplike.asarray(layout.tags) == tag
+                    is_this_tag = layout.tags.data == tag
 
                     # Rewrite union index of indexed types
                     if content.is_indexed:
-                        content_index = backend.index_nplike.asarray(content.index)
-                        next_index[is_this_tag] = content_index[
-                            current_index[is_this_tag]
+                        next_index_data[is_this_tag] = content.index.data[
+                            content.index.data[is_this_tag]
                         ]
                         next_contents.append(content.content)
 
                     else:
-                        next_index[is_this_tag] = current_index[is_this_tag]
+                        next_index_data[is_this_tag] = content.index.data[is_this_tag]
                         next_contents.append(content)
 
                 return invert_record_union(
-                    backend.index_nplike.asarray(layout.tags),
-                    next_index,
-                    next_contents,
-                    backend=backend,
+                    layout.tags.data, next_index_data, next_contents
                 )
 
             else:
                 return invert_record_union(
-                    backend.index_nplike.asarray(layout.tags),
-                    backend.index_nplike.asarray(layout.index),
-                    layout.contents,
-                    backend=backend,
+                    layout.tags.data, layout.index.data, layout.contents
                 )
 
     out = ak._do.recursively_apply(layout, apply)
-    return wrap_layout(out, highlevel=highlevel, behavior=behavior)
+    return ctx.wrap(out, highlevel=highlevel)

@@ -1,0 +1,25 @@
+[Unit]
+Description=Awkward CUDA Tests Service
+After=docker.service
+Requires=docker.service
+After=network-online.target
+Requires=network-online.target
+
+[Service]
+TimeoutStartSec=0
+Restart=never
+Type=oneshot
+ExecStartPre=-/usr/bin/docker exec %n stop
+ExecStartPre=-/usr/bin/docker rm %n
+# Allow pull to fail if the image is e.g. only local (- prefix to this command)
+ExecStartPre=-/usr/bin/docker pull agoose77/cuda-tests:latest
+ExecStart=/usr/bin/docker run --rm --name %n \
+    --runtime=nvidia \
+    --gpus all \
+    -v "${CREDENTIALS_DIRECTORY}:/creds" \
+    -e GH_TOKEN_PATH=/creds/gh-token \
+    agoose77/cuda-tests:latest
+LoadCredential=gh-token:/etc/cuda-gh-token
+
+[Install]
+WantedBy=default.target

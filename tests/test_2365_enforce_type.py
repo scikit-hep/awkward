@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy
 import pytest
@@ -497,11 +499,8 @@ def test_union():
             [
                 ak.types.NumpyType("int64"),
                 ak.types.ListType(
-                    ak.types.NumpyType(
-                        "uint8", parameters={"__array__": "char"}, typestr="char"
-                    ),
+                    ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
                     parameters={"__array__": "string", "foo": "bar"},
-                    typestr="string",
                 ),
             ]
         ),
@@ -555,11 +554,8 @@ def test_union():
             [
                 ak.types.NumpyType("float32"),
                 ak.types.ListType(
-                    ak.types.NumpyType(
-                        "uint8", parameters={"__array__": "char"}, typestr="char"
-                    ),
+                    ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
                     parameters={"__array__": "string", "foo": "bar"},
-                    typestr="string",
                 ),
             ]
         ),

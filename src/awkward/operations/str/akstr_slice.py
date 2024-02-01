@@ -1,16 +1,18 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+import awkward as ak
+from awkward._dispatch import high_level_function
+from awkward._layout import HighLevelContext
 
 __all__ = ("slice",)
 
 
-import awkward as ak
-from awkward._behavior import behavior_of
-from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
-
-
 @high_level_function(module="ak.str")
-def slice(array, start, stop=None, step=1, *, highlevel=True, behavior=None):
+def slice(
+    array, start, stop=None, step=1, *, highlevel=True, behavior=None, attrs=None
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -21,6 +23,8 @@ def slice(array, start, stop=None, step=1, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Replaces any string or bytestring-valued data with a slice between `start`
@@ -44,30 +48,32 @@ def slice(array, start, stop=None, step=1, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, start, stop, step, highlevel, behavior)
+    return _impl(array, start, stop, step, highlevel, behavior, attrs)
 
 
-def _impl(array, start, stop, step, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
-    from awkward.operations.ak_from_arrow import from_arrow
-    from awkward.operations.ak_to_arrow import to_arrow
+def _impl(array, start, stop, step, highlevel, behavior, attrs):
+    from awkward._connect.pyarrow import import_pyarrow_compute
+    from awkward.operations.str import _apply_through_arrow
 
-    import pyarrow.compute as pc
-
-    behavior = behavior_of(array, behavior=behavior)
+    pc = import_pyarrow_compute("ak.str.slice")
 
     def action(layout, **absorb):
         if layout.is_list and layout.parameter("__array__") == "string":
-            return from_arrow(
-                pc.utf8_slice_codeunits(
-                    to_arrow(layout, extensionarray=False), start, stop, step
-                ),
-                highlevel=False,
+            return _apply_through_arrow(
+                pc.utf8_slice_codeunits, layout, start, stop, step
             )
 
         elif layout.is_list and layout.parameter("__array__") == "bytestring":
             return layout[:, start:stop:step]
 
-    out = ak._do.recursively_apply(ak.operations.to_layout(array), action, behavior)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(
+            array,
+            allow_record=False,
+            allow_unknown=False,
+            primitive_policy="error",
+            string_policy="as-characters",
+        )
+    out = ak._do.recursively_apply(layout, action)
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

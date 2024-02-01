@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
@@ -12,7 +13,7 @@ from awkward._backends.dispatch import (
 )
 from awkward._behavior import get_record_class
 from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer
 from awkward._typing import JSONSerializable, Self
@@ -192,11 +193,11 @@ class Record:
     def _getitem_fields(self, where, only_fields: tuple[str, ...] = ()):
         return self._array._getitem_fields(where)._getitem_at(self._at)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         if self._array.length == 1:
-            return Record(self._array.to_packed(), self._at)
+            return Record(self._array.to_packed(recursive), self._at)
         else:
-            return Record(self._array[self._at : self._at + 1].to_packed(), 0)
+            return Record(self._array[self._at : self._at + 1].to_packed(recursive), 0)
 
     def to_list(self, behavior=None):
         return self._to_list(behavior, None)

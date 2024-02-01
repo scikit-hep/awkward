@@ -4,7 +4,7 @@
 
 [![PyPI version](https://badge.fury.io/py/awkward.svg)](https://pypi.org/project/awkward)
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/awkward)](https://github.com/conda-forge/awkward-feedstock)
-[![Python 3.7‒3.11](https://img.shields.io/badge/python-3.7%E2%80%923.11-blue)](https://www.python.org)
+[![Python 3.8‒3.12](https://img.shields.io/badge/python-3.8%E2%80%923.12-blue)](https://www.python.org)
 [![BSD-3 Clause License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Build Test](https://github.com/scikit-hep/awkward/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/test.yml)
 
@@ -152,7 +152,7 @@ year = {2018}
 
 # Acknowledgements
 
-Support for this work was provided by NSF cooperative agreement [OAC-1836650](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650) (IRIS-HEP), grant [OAC-1450377](https://nsf.gov/awardsearch/showAward?AWD_ID=1450377) (DIANA/HEP), [PHY-2121686](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686) (US-CMS LHC Ops), and [OAC-2103945](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945) (Awkward Array).
+Support for this work was provided by NSF cooperative agreements [OAC-1836650](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650) and [PHY-2323298](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298) (IRIS-HEP), grant [OAC-1450377](https://nsf.gov/awardsearch/showAward?AWD_ID=1450377) (DIANA/HEP), [PHY-2121686](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686) (US-CMS LHC Ops), and [OAC-2103945](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945) (Awkward Array).
 
 We also thank [Erez Shinan](https://github.com/erezsh) and the developers of the [Lark standalone parser](https://github.com/lark-parser/lark), which is used to parse type strings as type objects.
 
@@ -212,6 +212,16 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Laurits7"><img src="https://avatars.githubusercontent.com/u/30724920?v=4?s=100" width="100px;" alt="Laurits Tani"/><br /><sub><b>Laurits Tani</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Laurits7" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/dsavoiu"><img src="https://avatars.githubusercontent.com/u/17005255?v=4?s=100" width="100px;" alt="Daniel Savoiu"/><br /><sub><b>Daniel Savoiu</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=dsavoiu" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://sites.google.com/view/raybellwaves/home"><img src="https://avatars.githubusercontent.com/u/17162724?v=4?s=100" width="100px;" alt="Ray Bell"/><br /><sub><b>Ray Bell</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=raybellwaves" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://zonca.dev"><img src="https://avatars.githubusercontent.com/u/383090?v=4?s=100" width="100px;" alt="Andrea Zonca"/><br /><sub><b>Andrea Zonca</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=zonca" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/chrisburr"><img src="https://avatars.githubusercontent.com/u/5220533?v=4?s=100" width="100px;" alt="Chris Burr"/><br /><sub><b>Chris Burr</b></sub></a><br /><a href="#infra-chrisburr" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/zbilodea"><img src="https://avatars.githubusercontent.com/u/70441641?v=4?s=100" width="100px;" alt="Zoë Bilodeau"/><br /><sub><b>Zoë Bilodeau</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=zbilodea" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/raymondEhlers"><img src="https://avatars.githubusercontent.com/u/1571927?v=4?s=100" width="100px;" alt="Raymond Ehlers"/><br /><sub><b>Raymond Ehlers</b></sub></a><br /><a href="#maintenance-raymondEhlers" title="Maintenance">🚧</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.mloning.com/"><img src="https://avatars.githubusercontent.com/u/21020482?v=4?s=100" width="100px;" alt="Markus Löning"/><br /><sub><b>Markus Löning</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=mloning" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/kkothari2001"><img src="https://avatars.githubusercontent.com/u/53650538?v=4?s=100" width="100px;" alt="Kush Kothari"/><br /><sub><b>Kush Kothari</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=kkothari2001" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward/commits?author=kkothari2001" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jrueb"><img src="https://avatars.githubusercontent.com/u/30041073?v=4?s=100" width="100px;" alt="Jonas Rübenach"/><br /><sub><b>Jonas Rübenach</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=jrueb" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://blog.jling.dev"><img src="https://avatars.githubusercontent.com/u/5306213?v=4?s=100" width="100px;" alt="Jerry Ling"/><br /><sub><b>Jerry Ling</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Moelf" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>

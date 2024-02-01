@@ -1,12 +1,19 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import cupy as cp
 import numpy as np
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
+
+try:
+    ak.numba.register_and_check()
+except ImportError:
+    pytest.skip(reason="too old Numba version", allow_module_level=True)
 
 
 def test_cupy_interop():

@@ -1,14 +1,24 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+from collections.abc import Callable
+
 import awkward as ak
-from awkward._parameters import type_parameters_equal
-from awkward._typing import JSONSerializable, final
+from awkward._meta.listmeta import ListMeta
+from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._typing import Any, DType, Iterator, Self, final
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
+
+__all__ = ("ListForm",)
+
+np = NumpyMetadata.instance()
 
 
 @final
-class ListForm(Form):
-    is_list = True
+class ListForm(ListMeta[Form], Form):
+    _content: Form
 
     def __init__(
         self,
@@ -111,69 +121,6 @@ class ListForm(Form):
             parameters=self._parameters,
         )
 
-    def __eq__(self, other):
-        if isinstance(other, ListForm):
-            return (
-                self._form_key == other._form_key
-                and self._starts == other._starts
-                and self._stops == other._stops
-                and type_parameters_equal(self._parameters, other._parameters)
-                and self._content == other._content
-            )
-        else:
-            return False
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        if self._parameters is not None:
-            for key in keys:
-                if key in self._parameters:
-                    return self._parameters[key]
-
-        return self._content.purelist_parameters(*keys)
-
-    @property
-    def purelist_isregular(self):
-        return False
-
-    @property
-    def purelist_depth(self):
-        if self.parameter("__array__") in ("string", "bytestring"):
-            return 1
-        else:
-            return self._content.purelist_depth + 1
-
-    @property
-    def is_identity_like(self):
-        return False
-
-    @property
-    def minmax_depth(self):
-        if self.parameter("__array__") in ("string", "bytestring"):
-            return (1, 1)
-        else:
-            mindepth, maxdepth = self._content.minmax_depth
-            return (mindepth + 1, maxdepth + 1)
-
-    @property
-    def branch_depth(self):
-        if self.parameter("__array__") in ("string", "bytestring"):
-            return (False, 1)
-        else:
-            branch, depth = self._content.branch_depth
-            return (branch, depth + 1)
-
-    @property
-    def fields(self):
-        return self._content.fields
-
-    @property
-    def is_tuple(self):
-        return self._content.is_tuple
-
-    @property
-    def dimension_optiontype(self):
-        return False
-
     def _columns(self, path, output, list_indicator):
         if (
             self.parameter("__array__") not in ("string", "bytestring")
@@ -182,27 +129,15 @@ class ListForm(Form):
             path = (*path, list_indicator)
         self._content._columns(path, output, list_indicator)
 
-    def _prune_columns(self, is_inside_record_or_union: bool):
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         next_content = self._content._prune_columns(is_inside_record_or_union)
         if next_content is None:
             return None
         else:
-            return ListForm(
-                self._starts,
-                self._stops,
-                next_content,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
+            return self.copy(content=next_content)
 
-    def _select_columns(self, match_specifier):
-        return ListForm(
-            self._starts,
-            self._stops,
-            self._content._select_columns(match_specifier),
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
+        return self.copy(content=self._content._select_columns(match_specifier))
 
     def _column_types(self):
         if self.parameter("__array__") in ("string", "bytestring"):
@@ -226,3 +161,19 @@ class ListForm(Form):
             self.__init__(
                 starts, stops, content, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str], recursive: bool
+    ) -> Iterator[tuple[str, DType]]:
+        yield (getkey(self, "starts"), index_to_dtype[self._starts])
+        yield (getkey(self, "stops"), index_to_dtype[self._stops])
+        if recursive:
+            yield from self._content._expected_from_buffers(getkey, recursive)
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and self._starts == other._starts
+            and self._stops == other._stops
+            and self._content._is_equal_to(other._content, all_parameters, form_key)
+        )

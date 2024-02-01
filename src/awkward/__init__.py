@@ -1,6 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 # Versioning
+from __future__ import annotations
 from awkward._version import __version__
 
 # NumPy-like alternatives
@@ -37,8 +38,6 @@ import awkward._typetracer  # todo: remove this after "deprecation" period
 from awkward.highlevel import *
 
 # behaviors
-import awkward.behaviors.categorical
-import awkward.behaviors.string
 from awkward.behaviors.mixins import *
 
 # exports

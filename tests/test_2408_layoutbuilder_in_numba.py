@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -6,6 +8,8 @@ import pytest
 import awkward as ak
 
 numba = pytest.importorskip("numba")
+
+from numba.core.errors import NumbaTypeError  # noqa: E402
 
 import awkward.numba.layoutbuilder as lb  # noqa: E402
 
@@ -583,7 +587,7 @@ def test_unbox():
 def test_unbox_for_loop():
     @numba.njit
     def f2(x):
-        for i in range(0, 10):
+        for i in range(10):
             x.append(i)
         return
 
@@ -591,11 +595,10 @@ def test_unbox_for_loop():
     f2(builder)
     assert ak.to_list(builder.snapshot()) == list(range(10))
 
-    # builder = lb.Empty()
-    # # Unknown attribute 'append' of type lb.Empty
-    # with pytest.raises(numba.core.errors.TypingError):
-    #     f2(builder)
-
+    builder = lb.Empty()
+    # Unknown attribute 'append' of type lb.Empty
+    with pytest.raises(NumbaTypeError):
+        f2(builder)
 
 def test_box():
     @numba.njit

@@ -1,14 +1,17 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.regularmeta import RegularMeta
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import (
     parameters_intersect,
@@ -17,9 +20,23 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.forms.form import Form
 from awkward.forms.regularform import RegularForm
 from awkward.index import Index
@@ -33,7 +50,7 @@ numpy = Numpy.instance()
 
 
 @final
-class RegularArray(Content):
+class RegularArray(RegularMeta[Content], Content):
     """
     RegularArray describes lists that all have the same length, the single
     integer `size`. Its underlying `content` is a flattened view of the data;
@@ -103,9 +120,6 @@ class RegularArray(Content):
                     raise AssertionError(where)
     """
 
-    is_list = True
-    is_regular = True
-
     def __init__(self, content, size, zeros_length=0, *, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
@@ -120,28 +134,21 @@ class RegularArray(Content):
                         type(self).__name__
                     )
                 )
-        else:
-            if not (is_integer(size) and size >= 0):
-                raise TypeError(
-                    "{} 'size' must be a non-negative integer, not {}".format(
-                        type(self).__name__, size
-                    )
+        elif not (is_integer(size) and size >= 0):
+            raise TypeError(
+                "{} 'size' must be a non-negative integer, not {}".format(
+                    type(self).__name__, size
                 )
+            )
 
-        if zeros_length is unknown_length:
-            if content.backend.index_nplike.known_data:
-                raise TypeError(
-                    "{} 'zeros_length' must be a non-negative integer for backends with known shapes, not None".format(
-                        type(self).__name__
-                    )
+        if zeros_length is not unknown_length and not (
+            is_integer(zeros_length) and zeros_length >= 0
+        ):
+            raise TypeError(
+                "{} 'zeros_length' must be a non-negative integer, not {}".format(
+                    type(self).__name__, zeros_length
                 )
-        else:
-            if not (is_integer(zeros_length) and zeros_length >= 0):
-                raise TypeError(
-                    "{} 'zeros_length' must be a non-negative integer, not {}".format(
-                        type(self).__name__, zeros_length
-                    )
-                )
+            )
 
         if parameters is not None and parameters.get("__array__") == "string":
             if not content.is_numpy or not content.parameter("__array__") == "char":
@@ -167,10 +174,6 @@ class RegularArray(Content):
         else:
             self._length = zeros_length
         self._init(parameters, content.backend)
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     @property
     def size(self):
@@ -297,16 +300,17 @@ class RegularArray(Content):
         start, stop = where * size_scalar, (where + 1) * size_scalar
         return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         index_nplike = self._backend.index_nplike
         if not index_nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
         zeros_length = index_nplike.index_as_shape_item(stop - start)
-        substart, substop = start * index_nplike.shape_item_as_index(
-            self._size
-        ), stop * index_nplike.shape_item_as_index(self._size)
+        substart, substop = (
+            start * index_nplike.shape_item_as_index(self._size),
+            stop * index_nplike.shape_item_as_index(self._size),
+        )
         return RegularArray(
             self._content._getitem_range(substart, substop),
             self._size,
@@ -726,8 +730,8 @@ class RegularArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # Check against option contents
-        elif other.is_option or other.is_indexed:
+        # Is the other array indexed or optional?
+        elif other.is_indexed or other.is_option:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
@@ -1085,7 +1089,7 @@ class RegularArray(Content):
                 )
             )
 
-            if self._size > 0:
+            if self._size is not unknown_length and self._size > 0:
                 nextstarts = ak.index.Index64(
                     index_nplike.arange(0, nextlen, self._size),
                     nplike=index_nplike,
@@ -1151,7 +1155,11 @@ class RegularArray(Content):
                     )
 
                     trimmed = outcontent.content._getitem_range(start, stop)
-                    assert len(trimmed) == self._size * outcontent.length
+                    assert (
+                        trimmed.length is unknown_length
+                        or outcontent.length is unknown_length
+                        or trimmed.length == self._size * outcontent.length
+                    )
 
                     outcontent = ak.contents.RegularArray(
                         trimmed,
@@ -1298,7 +1306,14 @@ class RegularArray(Content):
                 shape,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         assert self._backend.nplike.known_data
 
         if self.parameter("__array__") == "string":
@@ -1355,7 +1370,9 @@ class RegularArray(Content):
                 ),
             )
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -1379,11 +1396,16 @@ class RegularArray(Content):
         return self.to_ListOffsetArray64()._drop_none()
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if options["regular_to_jagged"]:
             return self.to_ListOffsetArray64(False)._recursively_apply(
-                action, behavior, depth, depth_context, lateral_context, options
+                action, depth, depth_context, lateral_context, options
             )
 
         if self._backend.nplike.known_data:
@@ -1398,7 +1420,6 @@ class RegularArray(Content):
                 return RegularArray(
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth + 1,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1414,7 +1435,6 @@ class RegularArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
@@ -1427,7 +1447,6 @@ class RegularArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )
@@ -1439,18 +1458,16 @@ class RegularArray(Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         index_nplike = self._backend.index_nplike
         length = self._length * self._size
-        if self._content.length == length:
-            content = self._content.to_packed()
-        else:
-            content = self._content[
-                : index_nplike.shape_item_as_index(length)
-            ].to_packed()
+        content = self._content[: index_nplike.shape_item_as_index(length)]
 
         return RegularArray(
-            content, self._size, self._length, parameters=self._parameters
+            content.to_packed(True) if recursive else content,
+            self._size,
+            self._length,
+            parameters=self._parameters,
         )
 
     def _to_list(self, behavior, json_conversions):
@@ -1508,7 +1525,17 @@ class RegularArray(Content):
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return self._size == other.size and self._content.is_equal_to(
-            other._content, index_dtype, numpyarray
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters)
+            and (
+                self._size is unknown_length
+                or other.size is unknown_length
+                or self._size == other.size
+            )
+            and self._content._is_equal_to(
+                other._content, index_dtype, numpyarray, all_parameters
+            )
         )

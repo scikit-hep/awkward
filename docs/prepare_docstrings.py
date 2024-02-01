@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import re
@@ -287,7 +288,6 @@ def dofunction(link, linelink, shortname, name, astfcn):
 
 
 for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
-
     modulename = (
         filename.replace("../src/", "")
         .replace("/__init__.py", "")
@@ -311,9 +311,9 @@ for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
         or modulename == "awkward.nplikes"
         or modulename == "awkward.types._awkward_datashape_parser"
     ):
-        continue  # don't show awkward._*, including _v2
+        continue  # don't show awkward._*
 
-    link = "`{0} <https://github.com/scikit-hep/awkward-1.0/blob/" "{1}/{2}>`__".format(
+    link = "`{0} <https://github.com/scikit-hep/awkward/blob/" "{1}/{2}>`__".format(
         modulename, latest_commit, filename.replace("../", "")
     )
 
@@ -322,7 +322,7 @@ for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
     for toplevel in module.body:
         if hasattr(toplevel, "lineno"):
             linelink = (
-                " on `line {0} <https://github.com/scikit-hep/awkward-1.0/blob/"
+                " on `line {0} <https://github.com/scikit-hep/awkward/blob/"
                 "{1}/{2}#L{0}>`__".format(
                     toplevel.lineno, latest_commit, filename.replace("../", "")
                 )

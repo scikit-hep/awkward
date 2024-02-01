@@ -1,30 +1,27 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 import awkward as ak
 from awkward._kernels import KernelError
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
-from awkward._singleton import Singleton
-from awkward._typing import Callable, Protocol, Tuple, TypeAlias, TypeVar, Unpack
+from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
+from awkward._singleton import PublicSingleton
+from awkward._typing import Callable, Tuple, TypeAlias, TypeVar
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
 T_co = TypeVar("T_co", covariant=True)
-KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[np.dtype, ...]]]
+KernelKeyType: TypeAlias = Tuple[Any, ...]
 KernelType: TypeAlias = "Callable[..., KernelError | None]"
 
 
-class UfuncLike(Protocol):
-    def __call__(self, *args: ArrayLike, **kwargs) -> ArrayLike:
-        ...
-
-
-class Backend(Singleton, ABC):
+class Backend(PublicSingleton, ABC):
     name: str
 
     @property
@@ -43,9 +40,6 @@ class Backend(Singleton, ABC):
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
         return reducer
 
-    def prepare_ufunc(self, ufunc: UfuncLike) -> UfuncLike:
-        return ufunc
-
     def format_kernel_error(
         self,
         error: KernelError,
@@ -57,6 +51,7 @@ class Backend(Singleton, ABC):
                 errors="surrogateescape"
             ).lstrip("\n").lstrip("(")
 
+        assert error.str is not None
         message = error.str.decode(errors="surrogateescape")
 
         if error.attempt != ak._util.kSliceNone:

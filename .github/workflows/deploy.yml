@@ -18,7 +18,7 @@ jobs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -50,7 +50,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -70,7 +70,7 @@ jobs:
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -83,7 +83,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check dist/*
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: distributions
         path: dist/*
@@ -92,8 +92,8 @@ jobs:
     name: "Bundle header-only libraries"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/upload-artifact@v3
+    - uses: actions/checkout@v4
+    - uses: actions/upload-artifact@v4
       with:
         name: header-only
         path: header-only
@@ -105,14 +105,15 @@ jobs:
     permissions:
       id-token: write
     environment:
-      name: "deploy-pypi"
+      name: "pypi"
+      url: "https://pypi.org/project/awkward/"
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: distributions
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.10
+    - uses: pypa/gh-action-pypi-publish@v1.8.11
 
   publish-headers:
     name: "Publish header-only libraries alongside release"
@@ -120,7 +121,7 @@ jobs:
     needs: [bundle-headers]
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: header-only
         path: header-only

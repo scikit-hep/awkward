@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_UNKNOWNBUILDER_H_
 #define AWKWARD_UNKNOWNBUILDER_H_
@@ -14,7 +14,7 @@ namespace awkward {
   /// @class UnknownBuilder
   ///
   /// @brief Builder node for accumulated data whose type is not yet known.
-  class LIBAWKWARD_EXPORT_SYMBOL UnknownBuilder: public Builder {
+  class EXPORT_SYMBOL UnknownBuilder: public Builder {
   public:
     /// @brief Create an empty UnknownBuilder.
     /// @param options Configuration options for building an array;

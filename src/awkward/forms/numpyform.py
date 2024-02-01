@@ -1,46 +1,41 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from collections.abc import Iterable
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+from collections.abc import Callable, Iterable, Iterator
 
 import awkward as ak
-from awkward._errors import deprecate
-from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._parameters import type_parameters_equal
-from awkward._typing import JSONSerializable, Self, final
+from awkward._meta.numpymeta import NumpyMeta
+from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
+from awkward._typing import TYPE_CHECKING, Any, DType, JSONMapping, Self, final
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, _SpecifierMatcher
+
+__all__ = ("NumpyForm",)
+
+if TYPE_CHECKING:
+    from awkward.forms.regularform import RegularForm
 
 np = NumpyMetadata.instance()
 
 
-def from_dtype(dtype, parameters=None, *, time_units_as_parameter: bool = UNSET):
+def from_dtype(
+    dtype,
+    parameters: JSONMapping | None = None,
+    *,
+    time_units_as_parameter: bool = False,
+):
     if dtype.subdtype is None:
         inner_shape = ()
     else:
         inner_shape = dtype.shape
         dtype = dtype.subdtype[0]
 
-    if time_units_as_parameter is UNSET:
-        time_units_as_parameter = True
-
     if time_units_as_parameter:
-        deprecate(
-            "from_dtype conversion of temporal units to generic `datetime64` and `timedelta64` types is deprecated, "
-            "pass `time_units_as_parameter=False` to disable this warning.",
-            version="2.4.0",
+        raise ValueError(
+            "`time_units_as_parameter=True` is no longer supported; NumPy's time units are no longer converted into Awkward parameters"
         )
-
-    if time_units_as_parameter and issubclass(
-        dtype.type, (np.datetime64, np.timedelta64)
-    ):
-        unit, step = np.datetime_data(dtype)
-        if unit != "generic":
-            unitstr = ("" if step == 1 else str(step)) + unit
-            if parameters is None:
-                parameters = {}
-            else:
-                parameters = parameters.copy()
-            parameters["__unit__"] = unitstr
-            dtype = np.dtype(dtype.type)
 
     return NumpyForm(
         primitive=ak.types.numpytype.dtype_to_primitive(dtype),
@@ -50,9 +45,7 @@ def from_dtype(dtype, parameters=None, *, time_units_as_parameter: bool = UNSET)
 
 
 @final
-class NumpyForm(Form):
-    is_numpy = True
-
+class NumpyForm(NumpyMeta, Form):
     def __init__(
         self,
         primitive,
@@ -136,7 +129,10 @@ class NumpyForm(Form):
                 "primitive": self._primitive,
             }
             if verbose or len(self._inner_shape) > 0:
-                out["inner_shape"] = list(self._inner_shape)
+                out["inner_shape"] = [
+                    None if item is unknown_length else item
+                    for item in self._inner_shape
+                ]
             return self._to_dict_extra(out, verbose)
 
     @property
@@ -152,67 +148,19 @@ class NumpyForm(Form):
 
         return out
 
-    def __eq__(self, other):
-        if isinstance(other, NumpyForm):
-            return (
-                self._form_key == other._form_key
-                and self._primitive == other._primitive
-                and self._inner_shape == other._inner_shape
-                and type_parameters_equal(self._parameters, other._parameters)
-            )
-        else:
-            return False
-
-    def to_RegularForm(self):
-        out = NumpyForm(self._primitive, (), parameters=None, form_key=None)
+    def to_RegularForm(self) -> RegularForm | NumpyForm:
+        out: RegularForm | NumpyForm = NumpyForm(
+            self._primitive, (), parameters=None, form_key=None
+        )
         for x in self._inner_shape[::-1]:
             out = ak.forms.RegularForm(out, x, parameters=None, form_key=None)
         out._parameters = self._parameters
         return out
 
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        if self._parameters is not None:
-            for key in keys:
-                if key in self._parameters:
-                    return self._parameters[key]
-
-    @property
-    def purelist_isregular(self):
-        return True
-
-    @property
-    def purelist_depth(self):
-        return len(self.inner_shape) + 1
-
-    @property
-    def is_identity_like(self):
-        return False
-
-    @property
-    def minmax_depth(self):
-        depth = len(self.inner_shape) + 1
-        return (depth, depth)
-
-    @property
-    def branch_depth(self):
-        return (False, len(self.inner_shape) + 1)
-
-    @property
-    def fields(self):
-        return []
-
-    @property
-    def is_tuple(self):
-        return False
-
-    @property
-    def dimension_optiontype(self):
-        return False
-
     def _columns(self, path, output, list_indicator):
         output.append(".".join(path))
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         return self
 
     def _prune_columns(self, is_inside_record_or_union: bool) -> Self:
@@ -284,3 +232,15 @@ class NumpyForm(Form):
             self.__init__(
                 primitive, inner_shape, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str], recursive: bool
+    ) -> Iterator[tuple[str, DType]]:
+        from awkward.types.numpytype import primitive_to_dtype
+
+        yield (getkey(self, "data"), primitive_to_dtype(self.primitive))
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return self._is_equal_to_generic(other, all_parameters, form_key) and (
+            self._primitive == other._primitive
+        )

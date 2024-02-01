@@ -1,23 +1,23 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("fill_none",)
-import numbers
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._regularize import is_sized_iterable, regularize_axis
+from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
+from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
+
+__all__ = ("fill_none",)
 
 np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
 @high_level_function()
-def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
+def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -31,6 +31,8 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Replaces missing values (None) with a given `value`.
@@ -65,60 +67,47 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     yield array, value
 
     # Implementation
-    return _impl(array, value, axis, highlevel, behavior)
+    return _impl(array, value, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, value, axis, highlevel, behavior):
+def _impl(array, value, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
-    behavior = behavior_of(array, value, behavior=behavior)
-    backend = backend_of(arraylayout, default=cpu)
 
-    # Convert value type to appropriate layout
-    if (
-        isinstance(value, np.ndarray)
-        and issubclass(value.dtype.type, (np.bool_, np.number))
-        and len(value.shape) != 0
-    ):
-        valuelayout = ak.operations.to_layout(
-            backend.nplike.asarray(value)[np.newaxis],
-            allow_record=False,
-            allow_other=False,
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        array_layout, value_layout = ensure_same_backend(
+            ctx.unwrap(array, allow_record=True, allow_unknown=False),
+            ctx.unwrap(
+                value,
+                allow_record=True,
+                allow_unknown=False,
+                use_from_iter=True,
+                primitive_policy="pass-through",
+                string_policy="pass-through",
+            ),
         )
-    elif isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
-        isinstance(value, np.ndarray)
-        and issubclass(value.dtype.type, (np.bool_, np.number))
-    ):
-        valuelayout = ak.operations.to_layout(
-            backend.nplike.asarray(value), allow_record=False, allow_other=False
-        )
-    elif (
-        is_sized_iterable(value)
-        and not (isinstance(value, (str, bytes)))
-        or isinstance(value, (ak.highlevel.Record, ak.record.Record))
-    ):
-        valuelayout = ak.operations.to_layout(
-            value, allow_record=True, allow_other=False
-        )
-        if isinstance(valuelayout, ak.record.Record):
-            valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
-        elif len(valuelayout) == 0:
-            offsets = ak.index.Index64(
-                backend.index_nplike.asarray([0, 0], dtype=np.int64)
-            )
-            valuelayout = ak.contents.ListOffsetArray(offsets, valuelayout)
-        else:
-            valuelayout = ak.contents.RegularArray(valuelayout, len(valuelayout), 1)
+
+    if isinstance(value_layout, ak.record.Record):
+        value_layout = value_layout.array[value_layout.at : value_layout.at + 1]
+    elif isinstance(value_layout, ak.contents.Content):
+        value_layout = value_layout[np.newaxis, ...]
     else:
-        valuelayout = ak.operations.to_layout(
-            [value], allow_record=False, allow_other=False
-        )
+        # Now that we know `valuelayout` isn't a low-level type, we must have scalars
+        # Thus, we can safely promote these scalars to a layout without
+        # adding a new axis
+        value_layout = ak.operations.to_layout(
+            value,
+            allow_record=True,
+            allow_unknown=False,
+            use_from_iter=True,
+            primitive_policy="promote",
+            string_policy="promote",
+        ).to_backend(array_layout.backend)
 
     if axis is None:
 
         def action(layout, continuation, **kwargs):
             if layout.is_option:
-                return ak._do.fill_none(continuation(), valuelayout)
+                return ak._do.fill_none(continuation(), value_layout)
 
     else:
 
@@ -126,7 +115,7 @@ def _impl(array, value, axis, highlevel, behavior):
             posaxis = maybe_posaxis(layout, axis, depth)
             if posaxis is not None and posaxis + 1 == depth:
                 if layout.is_option:
-                    return ak._do.fill_none(layout, valuelayout)
+                    return ak._do.fill_none(layout, value_layout)
                 elif layout.is_union or layout.is_record or layout.is_indexed:
                     return None
                 else:
@@ -137,5 +126,5 @@ def _impl(array, value, axis, highlevel, behavior):
                     f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
-    out = ak._do.recursively_apply(arraylayout, action, behavior)
-    return wrap_layout(out, behavior, highlevel)
+    out = ak._do.recursively_apply(array_layout, action)
+    return ctx.wrap(out, highlevel=highlevel)

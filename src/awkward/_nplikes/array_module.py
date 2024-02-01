@@ -1,26 +1,48 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import math
+from functools import lru_cache
 
-import numpy
-
-from awkward._nplikes.numpylike import (
+from awkward._nplikes.numpy_like import (
     ArrayLike,
     IndexType,
     NumpyLike,
     NumpyMetadata,
+    UfuncLike,
     UniqueAllResult,
 )
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._typing import Any, Final, Literal
+from awkward._typing import TYPE_CHECKING, Any, DType, Final, Literal, TypeVar, cast
+
+if TYPE_CHECKING:
+    from numpy.typing import DTypeLike
 
 np = NumpyMetadata.instance()
 
 
-class ArrayModuleNumpyLike(NumpyLike):
-    known_data: Final = True
+@lru_cache
+def _nplike_concatenate_has_casting(module: Any) -> bool:
+    x = module.zeros(2)
+    try:
+        module.concatenate((x, x), casting="same_kind")
+    except TypeError:
+        return False
+    else:
+        return True
+
+
+ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
+
+
+class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
+    known_data: Final[bool] = True
+    _module: Any
+
+    def prepare_ufunc(self, ufunc: UfuncLike) -> UfuncLike:
+        return ufunc
 
     ############################ array creation
 
@@ -28,9 +50,9 @@ class ArrayModuleNumpyLike(NumpyLike):
         self,
         obj,
         *,
-        dtype: numpy.dtype | None = None,
+        dtype: DTypeLike | None = None,
         copy: bool | None = None,
-    ) -> ArrayLike:
+    ) -> ArrayLikeT | PlaceholderArray:
         if isinstance(obj, PlaceholderArray):
             assert obj.dtype == dtype or dtype is None
             return obj
@@ -46,55 +68,84 @@ class ArrayModuleNumpyLike(NumpyLike):
             else:
                 return self._module.asarray(obj, dtype=dtype)
 
-    def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
+    def ascontiguousarray(
+        self, x: ArrayLikeT | PlaceholderArray
+    ) -> ArrayLikeT | PlaceholderArray:
         if isinstance(x, PlaceholderArray):
             return x
         else:
             return self._module.ascontiguousarray(x)
 
     def frombuffer(
-        self, buffer, *, dtype: np.dtype | None = None, count: int = -1
-    ) -> ArrayLike:
-        assert not isinstance(buffer, PlaceholderArray)
-        assert not isinstance(count, PlaceholderArray)
+        self, buffer, *, dtype: DTypeLike | None = None, count: ShapeItem = -1
+    ) -> ArrayLikeT:
+        if isinstance(buffer, PlaceholderArray):
+            raise TypeError("placeholder arrays are not supported in `frombuffer`")
         return self._module.frombuffer(buffer, dtype=dtype, count=count)
 
-    def from_dlpack(self, x: Any) -> ArrayLike:
+    def from_dlpack(self, x: Any) -> ArrayLikeT:
         return self._module.from_dlpack(x)
 
     def zeros(
-        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
-    ) -> ArrayLike:
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: DTypeLike | None = None,
+    ) -> ArrayLikeT:
         return self._module.zeros(shape, dtype=dtype)
 
     def ones(
-        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
-    ) -> ArrayLike:
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: DTypeLike | None = None,
+    ) -> ArrayLikeT:
         return self._module.ones(shape, dtype=dtype)
 
     def empty(
-        self, shape: int | tuple[int, ...], *, dtype: np.dtype | None = None
-    ) -> ArrayLike:
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        *,
+        dtype: DTypeLike | None = None,
+    ) -> ArrayLikeT:
         return self._module.empty(shape, dtype=dtype)
 
     def full(
-        self, shape: int | tuple[int, ...], fill_value, *, dtype: np.dtype | None = None
-    ) -> ArrayLike:
+        self,
+        shape: ShapeItem | tuple[ShapeItem, ...],
+        fill_value,
+        *,
+        dtype: DTypeLike | None = None,
+    ) -> ArrayLikeT:
         return self._module.full(shape, fill_value, dtype=dtype)
 
-    def zeros_like(self, x: ArrayLike, *, dtype: np.dtype | None = None) -> ArrayLike:
-        assert not isinstance(x, PlaceholderArray)
-        return self._module.zeros_like(x, dtype=dtype)
+    def zeros_like(
+        self, x: ArrayLikeT | PlaceholderArray, *, dtype: DTypeLike | None = None
+    ) -> ArrayLikeT:
+        if isinstance(x, PlaceholderArray):
+            return self.zeros(x.shape, dtype=dtype or x.dtype)
+        else:
+            return self._module.zeros_like(x, dtype=dtype)
 
-    def ones_like(self, x: ArrayLike, *, dtype: np.dtype | None = None) -> ArrayLike:
-        assert not isinstance(x, PlaceholderArray)
-        return self._module.ones_like(x, dtype=dtype)
+    def ones_like(
+        self, x: ArrayLikeT | PlaceholderArray, *, dtype: DTypeLike | None = None
+    ) -> ArrayLikeT:
+        if isinstance(x, PlaceholderArray):
+            return self.ones(x.shape, dtype=dtype or x.dtype)
+        else:
+            return self._module.ones_like(x, dtype=dtype)
 
     def full_like(
-        self, x: ArrayLike, fill_value, *, dtype: np.dtype | None = None
-    ) -> ArrayLike:
-        assert not isinstance(x, PlaceholderArray)
-        return self._module.full_like(x, fill_value, dtype=dtype)
+        self,
+        x: ArrayLikeT | PlaceholderArray,
+        fill_value,
+        *,
+        dtype: DTypeLike | None = None,
+    ) -> ArrayLikeT:
+        if isinstance(x, PlaceholderArray):
+            return self.full(x.shape, fill_value, dtype=dtype or x.dtype)
+        else:
+            return self._module.full_like(x, fill_value, dtype=dtype)
 
     def arange(
         self,
@@ -102,52 +153,155 @@ class ArrayModuleNumpyLike(NumpyLike):
         stop: float | int | None = None,
         step: float | int = 1,
         *,
-        dtype: np.dtype | None = None,
-    ) -> ArrayLike:
+        dtype: DTypeLike | None = None,
+    ) -> ArrayLikeT:
         assert not isinstance(start, PlaceholderArray)
         assert not isinstance(stop, PlaceholderArray)
         assert not isinstance(step, PlaceholderArray)
         return self._module.arange(start, stop, step, dtype=dtype)
 
     def meshgrid(
-        self, *arrays: ArrayLike, indexing: Literal["xy", "ij"] = "xy"
-    ) -> list[ArrayLike]:
+        self, *arrays: ArrayLikeT, indexing: Literal["xy", "ij"] = "xy"
+    ) -> list[ArrayLikeT]:
         return self._module.meshgrid(*arrays, indexing=indexing)
 
     ############################ testing
 
     def array_equal(
-        self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
-    ) -> ArrayLike:
+        self, x1: ArrayLikeT, x2: ArrayLikeT, *, equal_nan: bool = False
+    ) -> bool:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
-        return self._module.asarray(
-            self._module.array_equal(x1, x2, equal_nan=equal_nan)
-        )
+        if equal_nan:
+            both_nan = self._module.logical_and(x1 == np.nan, x2 == np.nan)
+            both_equal = x1 == x2
+            return self._module.all(self._module.logical_or(both_equal, both_nan))
+        else:
+            return self._module.array_equal(x1, x2)
 
     def searchsorted(
         self,
-        x: ArrayLike,
-        values: ArrayLike,
+        x: ArrayLikeT,
+        values: ArrayLikeT,
         *,
         side: Literal["left", "right"] = "left",
-        sorter: ArrayLike | None = None,
-    ) -> ArrayLike:
+        sorter: ArrayLikeT | None = None,
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         assert not isinstance(values, PlaceholderArray)
         assert not isinstance(sorter, PlaceholderArray)
         return self._module.searchsorted(x, values, side=side, sorter=sorter)
 
     ############################ manipulation
+    def apply_ufunc(
+        self,
+        ufunc: UfuncLike,
+        method: str,
+        args: list[Any],
+        kwargs: dict[str, Any] | None = None,
+    ) -> ArrayLikeT | tuple[ArrayLikeT, ...]:
+        if method != "__call__" or len(args) == 0:
+            raise NotImplementedError
 
-    def broadcast_arrays(self, *arrays: ArrayLike) -> list[ArrayLike]:
+        if hasattr(ufunc, "resolve_dtypes"):
+            return self._apply_ufunc_nep_50(ufunc, method, args, kwargs)
+        else:
+            return self._apply_ufunc_legacy(ufunc, method, args, kwargs)
+
+    def _get_nep_50_dtype(
+        self, obj: Any
+    ) -> DType | type[int] | type[complex] | type[float]:
+        if hasattr(obj, "dtype"):
+            return obj.dtype
+        elif isinstance(obj, bool):
+            return np.dtype(np.bool_)
+        else:
+            assert isinstance(obj, (int, complex, float))
+            return type(obj)
+
+    # Does NumPy support value-less ufunc resolution?
+    def _apply_ufunc_nep_50(
+        self,
+        ufunc: UfuncLike,
+        method: str,
+        args: list[Any],
+        kwargs: dict[str, Any] | None = None,
+    ) -> ArrayLikeT | tuple[ArrayLikeT]:
+        # Determine input argument dtypes
+        input_arg_dtypes = [self._get_nep_50_dtype(obj) for obj in args]
+        # Resolve these for the given ufunc
+        arg_dtypes = tuple(input_arg_dtypes + [None] * ufunc.nout)
+        resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
+        # Interpret the arguments under these dtypes, converting scalars to length-1 arrays
+        resolved_args = [
+            cast("ArrayLikeT", self.asarray(arg, dtype=dtype))
+            for arg, dtype in zip(args, resolved_dtypes)
+        ]
+        # Broadcast to ensure all-scalar or all-nd-array
+        broadcasted_args = self.broadcast_arrays(*resolved_args)
+        # Allow other nplikes to replace implementation
+        impl = self.prepare_ufunc(ufunc)
+        # Compute the result
+        return impl(*broadcasted_args, **(kwargs or {}))
+
+    # Otherwise, perform default NumPy coercion (value-dependent)
+    def _apply_ufunc_legacy(
+        self,
+        ufunc: UfuncLike,
+        method: str,
+        args: list[Any],
+        kwargs: dict[str, Any] | None = None,
+    ) -> ArrayLikeT | tuple[ArrayLikeT]:
+        # Convert np.generic to scalar arrays
+        resolved_args = [
+            cast(
+                "ArrayLikeT",
+                self.asarray(arg, dtype=arg.dtype if hasattr(arg, "dtype") else None),
+            )
+            for arg in args
+        ]
+        broadcasted_args = self.broadcast_arrays(*resolved_args)
+        # Choose the broadcasted argument if it wasn't a Python scalar
+        non_generic_value_promoted_args = [
+            y if hasattr(x, "ndim") else x for x, y in zip(args, broadcasted_args)
+        ]
+        # Allow other nplikes to replace implementation
+        impl = self.prepare_ufunc(ufunc)
+        # Compute the result
+        return impl(*non_generic_value_promoted_args, **(kwargs or {}))
+
+    def broadcast_arrays(self, *arrays: ArrayLikeT) -> list[ArrayLikeT]:
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)
         return self._module.broadcast_arrays(*arrays)
 
+    def _compute_compatible_shape(
+        self, shape: tuple[ShapeItem, ...], existing_shape: tuple[ShapeItem, ...]
+    ) -> tuple[ShapeItem, ...]:
+        next_shape = list(shape)
+        j = None
+        length_factor: ShapeItem = 1
+        for i, item in enumerate(shape):
+            if item != -1:
+                length_factor *= item
+            elif j is not None:
+                raise ValueError("can only have one unknown dimension")
+            else:
+                j = i
+        if j is not None:
+            next_shape[j] = math.prod(existing_shape) // length_factor
+        return tuple(next_shape)
+
     def reshape(
-        self, x: ArrayLike, shape: tuple[ShapeItem, ...], *, copy: bool | None = None
-    ) -> ArrayLike:
-        assert not isinstance(x, PlaceholderArray)
+        self,
+        x: ArrayLikeT | PlaceholderArray,
+        shape: tuple[ShapeItem, ...],
+        *,
+        copy: bool | None = None,
+    ) -> ArrayLikeT | PlaceholderArray:
+        if isinstance(x, PlaceholderArray):
+            next_shape = self._compute_compatible_shape(shape, x.shape)
+            return PlaceholderArray(self, next_shape, x.dtype)
+
         if copy is None:
             return self._module.reshape(x, shape)
         elif copy:
@@ -212,6 +366,8 @@ class ArrayModuleNumpyLike(NumpyLike):
 
         Returns regularized index that is guaranteed to be in-bounds.
         """  # We have known length and index
+        length = cast(int, length)
+
         if index < 0:
             index = index + length
 
@@ -220,17 +376,19 @@ class ArrayModuleNumpyLike(NumpyLike):
         else:
             raise IndexError(f"index value out of bounds (0, {length}): {index}")
 
-    def nonzero(self, x: ArrayLike) -> tuple[ArrayLike, ...]:
+    def nonzero(self, x: ArrayLikeT) -> tuple[ArrayLikeT, ...]:
         assert not isinstance(x, PlaceholderArray)
         return self._module.nonzero(x)
 
-    def where(self, condition: ArrayLike, x1: ArrayLike, x2: ArrayLike) -> ArrayLike:
+    def where(
+        self, condition: ArrayLikeT, x1: ArrayLikeT, x2: ArrayLikeT
+    ) -> ArrayLikeT:
         assert not isinstance(condition, PlaceholderArray)
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         return self._module.where(condition, x1, x2)
 
-    def unique_values(self, x: ArrayLike) -> ArrayLike:
+    def unique_values(self, x: ArrayLikeT) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.unique(
             x,
@@ -240,7 +398,7 @@ class ArrayModuleNumpyLike(NumpyLike):
             equal_nan=False,
         )
 
-    def unique_all(self, x: ArrayLike) -> UniqueAllResult:
+    def unique_all(self, x: ArrayLikeT) -> UniqueAllResult:
         assert not isinstance(x, PlaceholderArray)
         values, indices, inverse_indices, counts = self._module.unique(
             x, return_counts=True, return_index=True, return_inverse=True
@@ -252,12 +410,12 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def sort(
         self,
-        x: ArrayLike,
+        x: ArrayLikeT,
         *,
         axis: int = -1,
         descending: bool = False,
         stable: bool = True,
-    ) -> ArrayLike:
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         # Note: this keyword argument is different, and the default is different.
         kind = "stable" if stable else "quicksort"
@@ -269,102 +427,112 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def concat(
         self,
-        arrays: list[ArrayLike] | tuple[ArrayLike, ...],
+        arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int | None = 0,
-    ) -> ArrayLike:
+    ) -> ArrayLikeT:
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)
-        return self._module.concatenate(arrays, axis=axis, casting="same_kind")
+        if _nplike_concatenate_has_casting(self._module):
+            return self._module.concatenate(arrays, axis=axis, casting="same_kind")
+        else:
+            return self._module.concatenate(arrays, axis=axis)
 
     def repeat(
         self,
-        x: ArrayLike,
-        repeats: ArrayLike | int,
+        x: ArrayLikeT,
+        repeats: ArrayLikeT | int,
         *,
         axis: int | None = None,
-    ) -> ArrayLike:
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         assert not isinstance(repeats, PlaceholderArray)
         return self._module.repeat(x, repeats=repeats, axis=axis)
 
     def stack(
         self,
-        arrays: list[ArrayLike] | tuple[ArrayLike, ...],
+        arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int = 0,
-    ) -> ArrayLike:
+    ) -> ArrayLikeT:
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)
         arrays = list(arrays)
         return self._module.stack(arrays, axis=axis)
 
     def packbits(
         self,
-        x: ArrayLike,
+        x: ArrayLikeT,
         *,
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
-    ) -> ArrayLike:
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.packbits(x, axis=axis, bitorder=bitorder)
 
     def unpackbits(
         self,
-        x: ArrayLike,
+        x: ArrayLikeT,
         *,
         axis: int | None = None,
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
-    ) -> ArrayLike:
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
 
-    def broadcast_to(self, x: ArrayLike, shape: tuple[ShapeItem, ...]) -> ArrayLike:
+    def broadcast_to(self, x: ArrayLikeT, shape: tuple[ShapeItem, ...]) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.broadcast_to(x, shape)
 
-    def strides(self, x: ArrayLike) -> tuple[ShapeItem, ...]:
-        return x.strides
+    def strides(self, x: ArrayLikeT | PlaceholderArray) -> tuple[ShapeItem, ...]:
+        if isinstance(x, PlaceholderArray):
+            # Assume contiguous
+            strides: tuple[ShapeItem, ...] = (x.dtype.itemsize,)
+            for item in x.shape[-1:0:-1]:
+                strides = (item * strides[0], *strides)
+            return strides
+
+        return x.strides  # type: ignore[attr-defined]
 
     ############################ ufuncs
 
     def add(
-        self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
-    ) -> ArrayLike:
+        self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         return self._module.add(x1, x2, out=maybe_out)
 
     def logical_or(
-        self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
-    ) -> ArrayLike:
+        self, x1: ArrayLikeT, x2: ArrayLikeT, *, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         return self._module.logical_or(x1, x2, out=maybe_out)
 
     def logical_and(
-        self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
-    ) -> ArrayLike:
+        self, x1: ArrayLikeT, x2: ArrayLikeT, *, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         return self._module.logical_and(x1, x2, out=maybe_out)
 
     def logical_not(
-        self, x: ArrayLike, maybe_out: ArrayLike | None = None
-    ) -> ArrayLike:
+        self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.logical_not(x, out=maybe_out)
 
-    def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
+    def sqrt(self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.sqrt(x, out=maybe_out)
 
-    def exp(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
+    def exp(self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.exp(x, out=maybe_out)
 
     def divide(
-        self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
-    ) -> ArrayLike:
+        self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         return self._module.divide(x1, x2, out=maybe_out)
@@ -373,13 +541,13 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def nan_to_num(
         self,
-        x: ArrayLike,
+        x: ArrayLikeT,
         *,
         copy: bool = True,
         nan: int | float | None = 0.0,
         posinf: int | float | None = None,
         neginf: int | float | None = None,
-    ) -> ArrayLike:
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.nan_to_num(
             x, copy=copy, nan=nan, posinf=posinf, neginf=neginf
@@ -387,84 +555,85 @@ class ArrayModuleNumpyLike(NumpyLike):
 
     def isclose(
         self,
-        x1: ArrayLike,
-        x2: ArrayLike,
+        x1: ArrayLikeT,
+        x2: ArrayLikeT,
         *,
         rtol: float = 1e-5,
         atol: float = 1e-8,
         equal_nan: bool = False,
-    ) -> ArrayLike:
+    ) -> ArrayLikeT:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         return self._module.isclose(x1, x2, rtol=rtol, atol=atol, equal_nan=equal_nan)
 
-    def isnan(self, x: ArrayLike) -> ArrayLike:
+    def isnan(self, x: ArrayLikeT) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.isnan(x)
 
     def all(
         self,
-        x: ArrayLike,
+        x: ArrayLikeT,
         *,
-        axis: int | tuple[int, ...] | None = None,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
-        maybe_out: ArrayLike | None = None,
-    ) -> ArrayLike:
+        maybe_out: ArrayLikeT | None = None,
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.all(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def any(
         self,
-        x: ArrayLike,
+        x: ArrayLikeT,
         *,
-        axis: int | tuple[int, ...] | None = None,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
-        maybe_out: ArrayLike | None = None,
-    ) -> ArrayLike:
+        maybe_out: ArrayLikeT | None = None,
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.any(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def min(
         self,
-        x: ArrayLike,
+        x: ArrayLikeT,
         *,
-        axis: int | tuple[int, ...] | None = None,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
-        maybe_out: ArrayLike | None = None,
-    ) -> ArrayLike:
+        maybe_out: ArrayLikeT | None = None,
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.min(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def max(
         self,
-        x: ArrayLike,
+        x: ArrayLikeT,
         *,
-        axis: int | tuple[int, ...] | None = None,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
-        maybe_out: ArrayLike | None = None,
-    ) -> ArrayLike:
+        maybe_out: ArrayLikeT | None = None,
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.max(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def count_nonzero(
-        self, x: ArrayLike, *, axis: int | None = None, keepdims: bool = False
-    ) -> ArrayLike:
+        self, x: ArrayLikeT, *, axis: ShapeItem | tuple[ShapeItem, ...] | None = None
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
-        return self._module.count_nonzero(x, axis=axis, keepdims=keepdims)
+        assert isinstance(axis, int) or axis is None
+        return self._module.count_nonzero(x, axis=axis)
 
     def cumsum(
         self,
-        x: ArrayLike,
+        x: ArrayLikeT,
         *,
         axis: int | None = None,
-        maybe_out: ArrayLike | None = None,
-    ) -> ArrayLike:
+        maybe_out: ArrayLikeT | None = None,
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.cumsum(x, axis=axis, out=maybe_out)
 
     def array_str(
         self,
-        x: ArrayLike,
+        x: ArrayLikeT,
         *,
         max_line_width: int | None = None,
         precision: int | None = None,
@@ -479,12 +648,14 @@ class ArrayModuleNumpyLike(NumpyLike):
         )
 
     def astype(
-        self, x: ArrayLike, dtype: numpy.dtype, *, copy: bool | None = True
-    ) -> ArrayLike:
+        self, x: ArrayLikeT, dtype: DTypeLike, *, copy: bool | None = True
+    ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
-        return x.astype(dtype, copy=copy)
+        return x.astype(dtype, copy=copy)  # type: ignore[attr-defined]
 
-    def can_cast(self, from_: np.dtype | ArrayLike, to: np.dtype | ArrayLike) -> bool:
+    def can_cast(
+        self, from_: DTypeLike | ArrayLikeT, to: DTypeLike | ArrayLikeT
+    ) -> bool:
         return self._module.can_cast(from_, to, casting="same_kind")
 
     @classmethod

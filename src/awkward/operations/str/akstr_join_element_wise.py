@@ -1,21 +1,27 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+import awkward as ak
+from awkward._backends.typetracer import TypeTracerBackend
+from awkward._dispatch import high_level_function
+from awkward._layout import HighLevelContext, ensure_same_backend
 
 __all__ = ("join_element_wise",)
 
-import awkward as ak
-from awkward._behavior import behavior_of
-from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+typetracer = TypeTracerBackend.instance()
 
 
 @high_level_function(module="ak.str")
-def join_element_wise(*arrays, highlevel=True, behavior=None):
+def join_element_wise(*arrays, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Broadcasts and concatenates all but the last array of strings in `arrays`;
@@ -38,36 +44,28 @@ def join_element_wise(*arrays, highlevel=True, behavior=None):
     yield arrays
 
     # Implementation
-    return _impl(arrays, highlevel, behavior)
+    return _impl(arrays, highlevel, behavior, attrs)
 
 
-def _impl(arrays, highlevel, behavior):
-    import awkward._connect.pyarrow  # noqa: F401, I001
-    from awkward.operations.ak_from_arrow import from_arrow
-    from awkward.operations.ak_to_arrow import to_arrow
+def _impl(arrays, highlevel, behavior, attrs):
+    from awkward._connect.pyarrow import import_pyarrow_compute
+    from awkward.operations.str import _apply_through_arrow
 
-    import pyarrow.compute as pc
+    pc = import_pyarrow_compute("ak.str.join_element_wise")
 
     if len(arrays) < 1:
         raise TypeError("at least one array is required")
 
-    layouts = [ak.to_layout(x) for x in arrays]
-    behavior = behavior_of(*arrays, behavior=behavior)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layouts = ensure_same_backend(*(ctx.unwrap(x) for x in arrays))
 
     def action(layouts, **kwargs):
         if all(
             x.is_list and x.parameter("__array__") in ("string", "bytestring")
             for x in layouts
         ):
-            return (
-                from_arrow(
-                    pc.binary_join_element_wise(
-                        *[to_arrow(x, extensionarray=False) for x in layouts]
-                    ),
-                    highlevel=False,
-                ),
-            )
+            return (_apply_through_arrow(pc.binary_join_element_wise, *layouts),)
 
-    (out,) = ak._broadcasting.broadcast_and_apply(layouts, action, behavior)
+    (out,) = ak._broadcasting.broadcast_and_apply(layouts, action)
 
-    return wrap_layout(out, highlevel=highlevel, behavior=behavior)
+    return ctx.wrap(out, highlevel=highlevel)

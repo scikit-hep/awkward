@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# Try loading token from path if it's not set
+if [[ ! -v GH_TOKEN ]]; then
+  TOKEN_FROM_FILE="$(cat "${GH_TOKEN_PATH}")"
+  export GH_TOKEN="${TOKEN_FROM_FILE}"
+fi
+
+# Setup
+{
+  cd "$(mktemp -d)";
+
+  # Clone awkward
+  git clone https://github.com/scikit-hep/awkward --depth=1;
+  cd awkward;
+
+  # Generate missing files
+  /usr/bin/nox -s prepare  -- --headers --signatures --tests;
+
+  # Prepare environment
+  python3 -m venv /opt/build-venv;
+  export PATH="/opt/build-venv/bin:$PATH";
+
+  # Prepare build
+  python3 -m pip install wheel build;
+
+  # Install awkward and dependencies
+  python3 -m pip install -v --only-binary "numpy" . ./awkward-cpp cupy-cuda11x pytest>=6;
+} || gh issue create --title "GPU Tests Setup Failed" --body "The test-runner for the GPU tests failed before hitting pytest." -R scikit-hep/awkward;
+
+# Test
+{
+  # Run pytest
+  python3 -m pytest -vv -rs tests-cuda tests-cuda-kernels > test-output.txt;
+} || {
+  # Prepare issue body
+  printf "The GPU tests failed for commit %s with the following pytest output:\n\n\`\`\`\n" "$(git rev-parse HEAD)" > issue-body.txt;
+  tail -c 64000 test-output.txt >> issue-body.txt;
+  printf "\n\`\`\`" >> issue-body.txt;
+  # File report
+  gh issue create --title "GPU Tests Failed" --body-file issue-body.txt -R scikit-hep/awkward;
+}

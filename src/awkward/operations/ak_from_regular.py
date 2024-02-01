@@ -1,18 +1,21 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("from_regular",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._layout import HighLevelContext, maybe_posaxis
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
+
+__all__ = ("from_regular",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def from_regular(array, axis=1, *, highlevel=True, behavior=None):
+def from_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -24,6 +27,8 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts a regular axis into an irregular one.
@@ -44,13 +49,13 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, highlevel, behavior)
+    return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior):
+def _impl(array, axis, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False)
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(array)
-    behavior = behavior_of(array, behavior=behavior)
 
     if axis is None:
 
@@ -58,7 +63,7 @@ def _impl(array, axis, highlevel, behavior):
             if layout.is_regular:
                 return continuation().to_ListOffsetArray64(False)
 
-        out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
+        out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
     elif maybe_posaxis(layout, axis, 1) == 0:
         out = layout  # the top-level is already regular (ArrayType)
@@ -76,6 +81,6 @@ def _impl(array, axis, highlevel, behavior):
                     f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
-        out = ak._do.recursively_apply(layout, action, behavior, numpy_to_regular=True)
+        out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

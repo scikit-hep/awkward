@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_COMMON_H_
 #define AWKWARD_COMMON_H_
@@ -40,10 +40,6 @@
   #define EXPORT_TEMPLATE_INST EXPORT_SYMBOL
 #endif
 
-#ifndef LIBAWKWARD_EXPORT_SYMBOL
-  #define LIBAWKWARD_EXPORT_SYMBOL
-#endif
-
 #include <iostream>
 #include <algorithm>
 #include <map>
@@ -53,7 +49,7 @@
 #include <cstring>
 
 extern "C" {
-  struct LIBAWKWARD_EXPORT_SYMBOL Error {
+  struct EXPORT_SYMBOL Error {
     const char* str;
     const char* filename;
     int64_t identity;

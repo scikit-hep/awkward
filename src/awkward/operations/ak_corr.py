@@ -1,17 +1,36 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("corr",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
+from awkward._layout import (
+    HighLevelContext,
+    ensure_same_backend,
+    maybe_highlevel_to_lowlevel,
+)
 from awkward._nplikes import ufuncs
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+
+__all__ = ("corr",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def corr(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
+def corr(
+    x,
+    y,
+    weight=None,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
+):
     """
     Args:
         x: One coordinate to use in the correlation (anything #ak.to_layout recognizes).
@@ -33,6 +52,12 @@ def corr(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Computes the correlation of `x` and `y` (many types supported, including
     all Awkward Arrays and Records, must be broadcastable to each other).
@@ -55,29 +80,52 @@ def corr(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
     yield x, y, weight
 
     # Implementation
-    return _impl(x, y, weight, axis, keepdims, mask_identity)
+    return _impl(
+        x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs
+    )
 
 
-def _impl(x, y, weight, axis, keepdims, mask_identity):
+def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(x, y, weight)
-    x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False),
-        behavior=behavior,
-    )
-    y = ak.highlevel.Array(
-        ak.operations.to_layout(y, allow_record=False, allow_other=False),
-        behavior=behavior,
-    )
-    if weight is not None:
-        weight = ak.highlevel.Array(
-            ak.operations.to_layout(weight, allow_record=False, allow_other=False),
-            behavior=behavior,
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        x_layout, y_layout, weight_layout = ensure_same_backend(
+            ctx.unwrap(x, allow_record=False, primitive_policy="error"),
+            ctx.unwrap(y, allow_record=False, primitive_policy="error"),
+            ctx.unwrap(
+                weight,
+                allow_record=False,
+                allow_unknown=False,
+                primitive_policy="error",
+                none_policy="pass-through",
+            ),
         )
 
+    x = ctx.wrap(x_layout)
+    y = ctx.wrap(y_layout)
+    weight = ctx.wrap(weight_layout, allow_other=True)
+
     with np.errstate(invalid="ignore", divide="ignore"):
-        xmean = ak.operations.ak_mean._impl(x, weight, axis, False, mask_identity)
-        ymean = ak.operations.ak_mean._impl(y, weight, axis, False, mask_identity)
+        xmean = ak.operations.ak_mean._impl(
+            x,
+            weight,
+            axis,
+            False,
+            mask_identity,
+            highlevel=True,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+        ymean = ak.operations.ak_mean._impl(
+            y,
+            weight,
+            axis,
+            False,
+            mask_identity,
+            highlevel=True,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
         xdiff = x - xmean
         ydiff = y - ymean
         if weight is None:
@@ -87,7 +135,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwyy = ak.operations.ak_sum._impl(
                 ydiff**2,
@@ -95,7 +144,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwxy = ak.operations.ak_sum._impl(
                 xdiff * ydiff,
@@ -103,7 +153,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
         else:
             sumwxx = ak.operations.ak_sum._impl(
@@ -112,7 +163,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwyy = ak.operations.ak_sum._impl(
                 (ydiff**2) * weight,
@@ -120,7 +172,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwxy = ak.operations.ak_sum._impl(
                 (xdiff * ydiff) * weight,
@@ -128,6 +181,11 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
-        return sumwxy / ufuncs.sqrt(sumwxx * sumwyy)
+        return ctx.wrap(
+            maybe_highlevel_to_lowlevel(sumwxy / ufuncs.sqrt(sumwxx * sumwyy)),
+            highlevel=highlevel,
+            allow_other=True,
+        )

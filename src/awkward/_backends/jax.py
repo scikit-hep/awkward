@@ -1,22 +1,23 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import awkward_cpp
 
 import awkward as ak
-from awkward._backends.backend import Backend, KernelKeyType, UfuncLike
+from awkward._backends.backend import Backend, KernelKeyType
 from awkward._backends.dispatch import register_backend
 from awkward._kernels import JaxKernel
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Final
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
-@register_backend(Jax)
+@register_backend(Jax)  # type: ignore[type-abstract]
 class JaxBackend(Backend):
     name: Final[str] = "jax"
 
@@ -43,8 +44,3 @@ class JaxBackend(Backend):
         from awkward._connect.jax import get_jax_reducer
 
         return get_jax_reducer(reducer)
-
-    def prepare_ufunc(self, ufunc: UfuncLike) -> UfuncLike:
-        from awkward._connect.jax import get_jax_ufunc
-
-        return get_jax_ufunc(ufunc)

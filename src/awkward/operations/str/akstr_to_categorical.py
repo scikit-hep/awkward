@@ -1,21 +1,24 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+import awkward as ak
+from awkward._dispatch import high_level_function
+from awkward._layout import HighLevelContext
 
 __all__ = ("to_categorical",)
 
-import awkward as ak
-from awkward._behavior import behavior_of
-from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
-
 
 @high_level_function(module="ak.str")
-def to_categorical(array, *, highlevel=True, behavior=None):
+def to_categorical(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns a dictionary-encoded version of the given array of strings.
@@ -47,33 +50,24 @@ def to_categorical(array, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, highlevel, behavior)
+    return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl(array, highlevel, behavior):
+def _impl(array, highlevel, behavior, attrs):
     from awkward._connect.pyarrow import import_pyarrow_compute
+    from awkward.operations.str import _apply_through_arrow
 
     pc = import_pyarrow_compute("ak.str.to_categorical")
-    behavior = behavior_of(array, behavior=behavior)
 
     def action(layout, **kwargs):
         if layout.is_list and layout.parameter("__array__") in {"string", "bytestring"}:
-            result = ak.from_arrow(
-                pc.dictionary_encode(ak.to_arrow(layout, extensionarray=False)),
-                highlevel=False,
-            )
-            # Arrow _always_ adds an option here, even though we know that
-            # no values are null. Therefore, we can safely replace the indexed
-            # option-type with an indexed type.
-            assert isinstance(result, ak.contents.IndexedOptionArray)
-            return ak.contents.IndexedArray(
-                result.index, result.content, parameters=result._parameters
+            return _apply_through_arrow(
+                pc.dictionary_encode, layout, expect_option_type=False
             )
 
-    out = ak._do.recursively_apply(
-        ak.operations.to_layout(array),
-        action,
-        behavior,
-    )
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array)
 
-    return wrap_layout(out, behavior, highlevel)
+    out = ak._do.recursively_apply(layout, action)
+
+    return ctx.wrap(out, highlevel=highlevel)

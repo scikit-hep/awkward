@@ -1,4 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import ctypes
 import os
 import textwrap
@@ -12,7 +15,7 @@ import awkward._lookup
 from awkward._backends.numpy import NumpyBackend
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward.types.numpytype import primitive_to_dtype
 
 cpp_type_of = {

@@ -1,21 +1,35 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import itertools
 import json
 import re
 from collections import defaultdict
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from fnmatch import fnmatchcase
 from glob import escape as escape_glob
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
-from awkward._errors import deprecate
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._meta.meta import Meta
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._parameters import parameters_union
-from awkward._typing import Final, JSONMapping, JSONSerializable, Self
+from awkward._parameters import (
+    parameters_are_equal,
+    parameters_union,
+    type_parameters_equal,
+)
+from awkward._typing import (
+    Any,
+    DType,
+    Final,
+    Iterator,
+    JSONMapping,
+    Self,
+)
+
+__all__ = ("from_dict", "from_type", "from_json", "reserved_nominal_parameters", "Form")
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
@@ -44,7 +58,10 @@ def from_dict(input: Mapping) -> Form:
 
     if input["class"] == "NumpyArray":
         primitive = input["primitive"]
-        inner_shape = input.get("inner_shape", [])
+        inner_shape = tuple(
+            unknown_length if item is None else item
+            for item in input.get("inner_shape", [])
+        )
         return ak.forms.NumpyForm(
             primitive, inner_shape, parameters=parameters, form_key=form_key
         )
@@ -323,26 +340,45 @@ class _SpecifierMatcher:
                 next_specifiers.extend(self._match_to_next_specifiers[pattern])
 
         if has_matched:
-            return _SpecifierMatcher(
-                next_specifiers, match_if_empty=next_match_if_empty
-            )
+            return type(self)(next_specifiers, match_if_empty=next_match_if_empty)
         elif self.is_empty and self._match_if_empty:
             return self
         else:
-            return
+            return None
 
 
-class Form:
-    is_numpy = False
-    is_unknown = False
-    is_list = False
-    is_regular = False
-    is_option = False
-    is_indexed = False
-    is_record = False
-    is_union = False
+def regularize_buffer_key(buffer_key: str | Callable) -> Callable[[Form, str], str]:
+    if isinstance(buffer_key, str):
 
-    def _init(self, *, parameters, form_key):
+        def getkey(form, attribute):
+            return buffer_key.format(form_key=form.form_key, attribute=attribute)
+
+        return getkey
+
+    elif callable(buffer_key):
+
+        def getkey(form, attribute):
+            return buffer_key(form_key=form.form_key, attribute=attribute, form=form)
+
+        return getkey
+
+    else:
+        raise TypeError(
+            f"buffer_key must be a string or a callable, not {type(buffer_key)}"
+        )
+
+
+index_to_dtype: Final[dict[str, DType]] = {
+    "i8": np.dtype("<i1"),
+    "u8": np.dtype("<u1"),
+    "i32": np.dtype("<i4"),
+    "u32": np.dtype("<u4"),
+    "i64": np.dtype("<i8"),
+}
+
+
+class Form(Meta):
+    def _init(self, *, parameters: JSONMapping | None, form_key: str | None):
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{} 'parameters' must be of type dict or None, not {}".format(
@@ -358,53 +394,6 @@ class Form:
 
         self._parameters = parameters
         self._form_key = form_key
-
-    @property
-    def parameters(self) -> JSONMapping:
-        if self._parameters is None:
-            self._parameters = {}
-        return self._parameters
-
-    @property
-    def is_identity_like(self):
-        """Return True if the content or its non-list descendents are an identity"""
-        raise NotImplementedError
-
-    def parameter(self, key: str) -> JSONSerializable:
-        if self._parameters is None:
-            return None
-        else:
-            return self._parameters.get(key)
-
-    def purelist_parameter(self, key: str) -> JSONSerializable:
-        return self.purelist_parameters(key)
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        raise NotImplementedError
-
-    @property
-    def purelist_isregular(self):
-        raise NotImplementedError
-
-    @property
-    def purelist_depth(self):
-        raise NotImplementedError
-
-    @property
-    def minmax_depth(self):
-        raise NotImplementedError
-
-    @property
-    def branch_depth(self):
-        raise NotImplementedError
-
-    @property
-    def fields(self):
-        raise NotImplementedError
-
-    @property
-    def is_tuple(self):
-        raise NotImplementedError
 
     @property
     def form_key(self):
@@ -444,16 +433,6 @@ class Form:
     def type(self):
         raise NotImplementedError
 
-    def type_from_behavior(self, behavior):
-        deprecate(
-            "low level types produced by forms do not hold references to behaviors. "
-            "Use a high-level type (e.g. ak.types.ArrayType or ak.types.ScalarType) to"
-            "associate a type with behavior information, or simply access the low-level"
-            "type from Form.type",
-            version="2.4.0",
-        )
-        return self.type
-
     def columns(self, list_indicator=None, column_prefix=()):
         output = []
         self._columns(column_prefix, output, list_indicator)
@@ -486,6 +465,8 @@ class Form:
         specifier = [[] if item == "" else item.split(".") for item in set(specifier)]
         match_specifier = _SpecifierMatcher(specifier, match_if_empty=False)
         selection = self._select_columns(match_specifier)
+        assert selection is not None, "top-level selections always return a Form"
+
         if prune_unions_and_records:
             return selection._prune_columns(False)
         else:
@@ -497,10 +478,10 @@ class Form:
     def _columns(self, path, output, list_indicator):
         raise NotImplementedError
 
-    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Form | None:
         raise NotImplementedError
 
-    def _select_columns(self, match_specifier) -> Self | None:
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Form | None:
         raise NotImplementedError
 
     def _column_types(self):
@@ -510,14 +491,14 @@ class Form:
         raise NotImplementedError
 
     def length_zero_array(
-        self, *, backend=numpy_backend, highlevel=True, behavior=None
+        self, *, backend=numpy_backend, highlevel=False, behavior=None
     ):
         if highlevel:
-            deprecate(
-                "The `highlevel=True` variant of `Form.length_zero_array` is now deprecated. "
+            raise ValueError(
+                "The `highlevel=True` variant of `Form.length_zero_array` has been removed. "
                 "Please use `ak.Array(form.length_zero_array(...), behavior=...)` if an `ak.Array` is required.",
-                version="2.3.0",
             )
+
         return ak.operations.ak_from_buffers._impl(
             form=self,
             length=0,
@@ -525,12 +506,21 @@ class Form:
             buffer_key="",
             backend=backend,
             byteorder=ak._util.native_byteorder,
-            highlevel=highlevel,
+            highlevel=False,
             behavior=behavior,
+            attrs=None,
             simplify=False,
         )
 
-    def length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None):
+    def length_one_array(
+        self, *, backend=numpy_backend, highlevel=False, behavior=None
+    ):
+        if highlevel:
+            raise ValueError(
+                "The `highlevel=True` variant of `Form.length_one_array` has been removed. "
+                "Please use `ak.Array(form.length_one_array(...), behavior=...)` if an `ak.Array` is required.",
+            )
+
         # The naive implementation of a length-1 array requires that we have a sufficiently
         # large buffer to be able to build _any_ subtree.
         def max_prefer_unknown(this: ShapeItem, that: ShapeItem) -> ShapeItem:
@@ -626,7 +616,55 @@ class Form:
             buffer_key="{form_key}",
             backend=backend,
             byteorder=ak._util.native_byteorder,
-            highlevel=highlevel,
+            highlevel=False,
             behavior=behavior,
+            attrs=None,
             simplify=False,
+        )
+
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str], recursive: bool
+    ) -> Iterator[tuple[str, DType]]:
+        raise NotImplementedError
+
+    def expected_from_buffers(
+        self, buffer_key="{form_key}-{attribute}", recursive=True
+    ):
+        """
+        Args:
+            buffer_key (str or callable): Python format string containing
+                `"{form_key}"` and/or `"{attribute}"` or a function that takes these
+                as keyword arguments and returns a string to use as a key for a buffer
+                in the `container`.
+            recursive (bool): If True, recurse into subforms; otherwise, yield
+                only the (buffer_key, dtype) pairs for this form object.
+
+        Yield (buffer_key, dtype) pairs describing the expected buffer keys,
+        and their corresponding dtypes, that a call to #ak.from_buffers would
+        be expected to find from the `container` object.
+        """
+        getkey = regularize_buffer_key(buffer_key)
+        return dict(self._expected_from_buffers(getkey, recursive))
+
+    def is_equal_to(
+        self, other: Any, *, all_parameters: bool = False, form_key: bool = False
+    ) -> bool:
+        return self._is_equal_to(other, all_parameters, form_key)
+
+    __eq__ = is_equal_to
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        raise NotImplementedError
+
+    def _is_equal_to_generic(
+        self, other: Any, all_parameters: bool, form_key: bool
+    ) -> bool:
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
+
+        return (
+            isinstance(other, type(self))
+            and not (form_key and self._form_key != other._form_key)
+            and compare_parameters(self._parameters, other._parameters)
         )

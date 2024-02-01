@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
@@ -11,7 +12,7 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import (
     parameters_are_empty,
@@ -411,7 +412,6 @@ def apply_step(
     depth: int,
     depth_context,
     lateral_context,
-    behavior,
     options: BroadcastOptions,
 ):
     # This happens when descending anyway, but setting the option does it before action.
@@ -451,7 +451,6 @@ def apply_step(
                     depth,
                     depth_context,
                     lateral_context,
-                    behavior,
                     options,
                 )
 
@@ -517,7 +516,6 @@ def apply_step(
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
-                    behavior,
                     options,
                 )
             )
@@ -636,7 +634,6 @@ def apply_step(
                 depth + 1,
                 copy.copy(depth_context),
                 lateral_context,
-                behavior,
                 options,
             )
             assert isinstance(outcontent, tuple)
@@ -701,7 +698,6 @@ def apply_step(
                 depth + 1,
                 copy.copy(depth_context),
                 lateral_context,
-                behavior,
                 options,
             )
             assert isinstance(outcontent, tuple)
@@ -758,7 +754,6 @@ def apply_step(
             depth,
             copy.copy(depth_context),
             lateral_context,
-            behavior,
             options,
         )
         assert isinstance(outcontent, tuple)
@@ -778,123 +773,74 @@ def apply_step(
             else:
                 nextparameters.append(NO_PARAMETERS)
 
-        if not backend.nplike.known_data:
-            # assert False
-            union_num_contents = []
-            length = None
-            for x in contents:
-                if x.is_union:
-                    x._touch_data(recursive=False)
-                    union_num_contents.append(len(x.contents))
-                    if length is None:
-                        length = x.length
+        union_tags, union_num_contents, length = [], [], unknown_length
+        for x in contents:
+            if x.is_union:
+                tags = x.tags.raw(backend.index_nplike)
+                union_tags.append(tags)
+                union_num_contents.append(len(x.contents))
 
-            all_combos = list(
-                itertools.product(*[range(x) for x in union_num_contents])
-            )
-
-            tags = backend.index_nplike.empty(length, dtype=np.int8)
-            index = backend.index_nplike.empty(length, dtype=np.int64)
-            numoutputs = None
-            outcontents = []
-            for combo in all_combos:
-                nextinputs = []
-                i = 0
-                for x in inputs:
-                    if isinstance(x, UnionArray):
-                        nextinputs.append(x._contents[combo[i]])
-                        i += 1
-                    else:
-                        nextinputs.append(x)
-                assert len(nextinputs) == len(nextparameters)
-                outcontents.append(
-                    apply_step(
-                        backend,
-                        nextinputs,
-                        action,
-                        depth,
-                        copy.copy(depth_context),
-                        lateral_context,
-                        behavior,
-                        options,
-                    )
-                )
-                assert isinstance(outcontents[-1], tuple)
-                if numoutputs is not None:
-                    assert numoutputs == len(outcontents[-1])
-                numoutputs = len(outcontents[-1])
-
-            assert numoutputs is not None
-
-        else:
-            union_tags, union_num_contents, length = [], [], None
-            for x in contents:
-                if x.is_union:
-                    tags = x.tags.raw(backend.index_nplike)
-                    union_tags.append(tags)
-                    union_num_contents.append(len(x.contents))
-                    if tags.shape[0] is unknown_length:
-                        continue
-
-                    if length is None:
-                        length = tags.shape[0]
-                    elif length != tags.shape[0]:
-                        raise ValueError(
-                            "cannot broadcast UnionArray of length {} "
-                            "with UnionArray of length {}{}".format(
-                                length,
-                                tags.shape[0],
-                                in_function(options),
-                            )
+                if length is unknown_length:
+                    length = tags.shape[0]
+                elif tags.shape[0] is unknown_length:
+                    continue
+                elif length != tags.shape[0]:
+                    raise ValueError(
+                        "cannot broadcast UnionArray of length {} "
+                        "with UnionArray of length {}{}".format(
+                            length,
+                            tags.shape[0],
+                            in_function(options),
                         )
-            assert length is not unknown_length
-
-            # Stack all union tags
-            combos = backend.index_nplike.stack(union_tags, axis=-1)
-            # Build array of indices (c1, c2, c3, ..., cn) of contents in
-            # (union 1, union 2, union 3, ..., union n)
-            all_combos = backend.index_nplike.asarray(
-                list(itertools.product(*[range(x) for x in union_num_contents]))
-            )
-
-            tags = backend.index_nplike.empty(length, dtype=np.int8)
-            index = backend.index_nplike.empty(length, dtype=np.int64)
-            numoutputs, outcontents = None, []
-            for tag, combo in enumerate(all_combos):
-                mask = backend.index_nplike.all(combos == combo, axis=-1)
-                tags[mask] = tag
-                index[mask] = backend.index_nplike.arange(
-                    backend.index_nplike.count_nonzero(mask), dtype=np.int64
-                )
-                nextinputs = []
-                i = 0
-                for x in inputs:
-                    if isinstance(x, UnionArray):
-                        nextinputs.append(x[mask].project(combo[i]))
-                        i += 1
-                    elif isinstance(x, Content):
-                        nextinputs.append(x[mask])
-                    else:
-                        nextinputs.append(x)
-                outcontents.append(
-                    apply_step(
-                        backend,
-                        nextinputs,
-                        action,
-                        depth,
-                        copy.copy(depth_context),
-                        lateral_context,
-                        behavior,
-                        options,
                     )
-                )
-                assert isinstance(outcontents[-1], tuple)
-                if numoutputs is None:
-                    numoutputs = len(outcontents[-1])
-                else:
-                    assert numoutputs == len(outcontents[-1])
 
-            assert numoutputs is not None
+        tags = backend.index_nplike.empty(length, dtype=np.int8)
+        index = backend.index_nplike.empty(length, dtype=np.int64)
+
+        # Stack all union tags
+        combos = backend.index_nplike.stack(union_tags, axis=-1)
+
+        # Build array of indices (c1, c2, c3, ..., cn) of contents in
+        # (union 1, union 2, union 3, ..., union n)
+        all_combos = list(itertools.product(*[range(x) for x in union_num_contents]))
+
+        numoutputs = None
+        outcontents = []
+
+        for tag, j_contents in enumerate(all_combos):
+            combo = backend.index_nplike.asarray(j_contents, dtype=np.int64)
+            mask = backend.index_nplike.all(combos == combo, axis=-1)
+            tags[mask] = tag
+            index[mask] = backend.index_nplike.arange(
+                backend.index_nplike.count_nonzero(mask), dtype=np.int64
+            )
+            nextinputs = []
+            it_j_contents = iter(j_contents)
+            for x in inputs:
+                if isinstance(x, UnionArray):
+                    nextinputs.append(x[mask].project(next(it_j_contents)))
+                elif isinstance(x, Content):
+                    nextinputs.append(x[mask])
+                else:
+                    nextinputs.append(x)
+            outcontents.append(
+                apply_step(
+                    backend,
+                    nextinputs,
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+            )
+            assert isinstance(outcontents[-1], tuple)
+            if numoutputs is None:
+                numoutputs = len(outcontents[-1])
+            else:
+                assert numoutputs == len(outcontents[-1])
+
+        assert numoutputs is not None
 
         parameters = parameters_factory(nextparameters, numoutputs)
 
@@ -923,7 +869,6 @@ def apply_step(
             depth,
             copy.copy(depth_context),
             lateral_context,
-            behavior,
             options,
         )
 
@@ -938,7 +883,6 @@ def apply_step(
             depth,
             copy.copy(depth_context),
             lateral_context,
-            behavior,
             options,
         )
 
@@ -954,7 +898,6 @@ def apply_step(
             depth,
             copy.copy(depth_context),
             lateral_context,
-            behavior,
             options,
         )
 
@@ -1000,12 +943,16 @@ def apply_step(
         depth_context=depth_context,
         lateral_context=lateral_context,
         continuation=continuation,
-        behavior=behavior,
         backend=backend,
         options=options,
     )
 
     if isinstance(result, tuple) and all(isinstance(x, Content) for x in result):
+        if any(content.backend is not backend for content in result):
+            raise ValueError(
+                "broadcasting action returned layouts with different backends: ",
+                ", ".join([content.backend.name for content in result]),
+            )
         return result
     elif result is None:
         return continuation()
@@ -1016,9 +963,9 @@ def apply_step(
 def broadcast_and_apply(
     inputs,
     action,
-    behavior,
-    depth_context=None,
-    lateral_context=None,
+    *,
+    depth_context: dict[str, Any] | None = None,
+    lateral_context: dict[str, Any] | None = None,
     allow_records: bool = True,
     left_broadcast: bool = True,
     right_broadcast: bool = True,
@@ -1027,7 +974,8 @@ def broadcast_and_apply(
     function_name: str | None = None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
-    backend = backend_of(*inputs)
+    # Expect arrays to already have common backend
+    backend = backend_of(*inputs, coerce_to_common=False)
     isscalar = []
     out = apply_step(
         backend,
@@ -1036,7 +984,6 @@ def broadcast_and_apply(
         0,
         depth_context,
         lateral_context,
-        behavior,
         {
             "allow_records": allow_records,
             "left_broadcast": left_broadcast,

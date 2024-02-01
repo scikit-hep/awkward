@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_FORTHINPUTBUFFER_H_
 #define AWKWARD_FORTHINPUTBUFFER_H_
@@ -14,7 +14,7 @@ namespace awkward {
   /// @brief HERE
   ///
   /// THERE
-  class LIBAWKWARD_EXPORT_SYMBOL ForthInputBuffer {
+  class EXPORT_SYMBOL ForthInputBuffer {
   public:
     /// @brief HERE
     ForthInputBuffer(const std::shared_ptr<void> ptr,

@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.3.3"
+version = "2.5.2"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.8"
@@ -31,6 +31,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Scientific/Engineering :: Mathematics",
@@ -39,8 +40,8 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==22",
-    "importlib_resources;python_version < \"3.9\"",
+    "awkward_cpp==29",
+    "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.18.0",
     "packaging",
     "typing_extensions>=4.1.0; python_version < \"3.11\""
@@ -61,13 +62,15 @@ init = "awkward.numba:_register"
 "Releases" = "https://github.com/scikit-hep/awkward-1.0/releases"
 "Source Code" = "https://github.com/scikit-hep/awkward-1.0"
 
-[tool.hatch.build]
-artifacts = [
-    "/src/awkward/_connect/header-only"
-]
-
 [tool.hatch.build.targets.wheel]
 packages = ["src/awkward"]
+artifacts = [
+    "/src/awkward/_connect/header-only",
+    "/src/awkward/_connect/cuda/_kernel_signatures.py"
+]
+
+[tool.hatch.build.targets.wheel.force-include]
+"./juliapkg.json" = "awkward/juliapkg.json"
 
 [tool.hatch.build.targets.wheel.hooks.version]
 path = "src/awkward/_version.py"
@@ -82,10 +85,14 @@ include = [
     "/CITATION.cff",
     "/CONTRIBUTING.md",
     "/README.md",
-    "/requirements-test.txt"
+    "/juliapkg.json",
+    "/requirements-test-full.txt",
+    "/requirements-test-minimal.txt"
 ]
 artifacts = [
     "/tests-cuda-kernels",
+    "/src/awkward/_connect/header-only",
+    "/src/awkward/_connect/cuda/_kernel_signatures.py"
 ]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
@@ -127,15 +134,8 @@ filterwarnings = [
 ]
 log_cli_level = "info"
 
-[tool.isort]
-profile = "black"
-skip_glob = [
-    "src/awkward/__init__.py",
-    "src/awkward/_nplikes/__init__.py",
-]
-
 [tool.pylint.master]
-py-version = "3.7"
+py-version = "3.8"
 jobs = "0"
 ignore-paths = [
     "src/awkward/_typeparser/generated_parser.py",
@@ -159,6 +159,7 @@ disable = [
     "consider-using-f-string",
     "consider-using-max-builtin",
     "consider-using-min-builtin",
+    "cyclic-import",
     "duplicate-code",
     "exec-used",
     "fixme",
@@ -179,7 +180,6 @@ disable = [
     "no-else-return",
     "no-member",
     "no-name-in-module",
-    "no-self-use",
     "no-value-for-parameter",
     "property-with-parameters",
     "protected-access",
@@ -219,43 +219,37 @@ disable = [
 
 [tool.mypy]
 files = ["src/awkward/**/*.py"]
-exclude = ["^src/awkward/[^/]+\\.py$"]
 plugins = [
     "numpy.typing.mypy_plugin"
 ]
 python_version = "3.11"
+ignore_errors = true
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
-    'awkward.__init__',
-    'awkward._connect.*',
-    'awkward._cpu_kernels',
+    'awkward._nplikes.*',
+    'awkward._behavior.*',
+    'awkward._backends.*',
+    'awkward._meta.*',
     'awkward._errors',
-    'awkward._kernel_signatures',
-    'awkward._libawkward',
-    'awkward._util',
-    'awkward.forms',
-    'awkward.forth',
-    'awkward.highlevel',
-    'awkward.nplike',
-    'awkward.numba',
-    'awkward.types',
-    'awkward.types._awkward_datashape_parser',
-    'numba.*',
-    'llvmlite.*',
-    'ROOT.*',
-    'cppyy.*',
-    'jax.*',
-    'pandas.*',
-    'cupy.*',
-    'pyarrow.*',
-    'fsspec.*',
-    'numexpr.*',
+    'awkward._dispatch',
+    'awkward.forms.*',
+    'awkward.types.*',
+    'awkward.index',
+]
+ignore_errors = false
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    'awkward.types._awkward_datashape_parser'
 ]
 ignore_errors = true
 ignore_missing_imports = true
 
 [tool.ruff]
+src = ["src"]
 extend-exclude = [
     "studies",
     "pybind11",
@@ -263,9 +257,10 @@ extend-exclude = [
     "docs-*",
     "src/awkward/_typeparser/generated_parser.py",
 ]
-select = [
-    "E", "F", "W", # flake8
-    "B", "B904",   # flake8-bugbear
+
+[tool.ruff.lint]
+extend-select = [
+    "B",           # flake8-bugbear
     "I",           # isort
     "C4",          # flake8-comprehensions
     "ISC",         # flake8-implicit-str-concat
@@ -281,7 +276,7 @@ select = [
     "NPY",         # NumPy specific rules
     "TID251",      # flake8-tidy-imports
 ]
-extend-ignore = [
+ignore = [
     "E501",    # Line too long
     "UP030",   # {0} -> {}
     "PLR",     # Design related pylint codes
@@ -290,19 +285,21 @@ extend-ignore = [
     "PLW2901", # Outer for loop variable  overwritten by inner assignment target
     "PLW0603", # Using the global statement to update is discouraged
     "PLC1901", # x == "" can be simplified to not x (empty string is falsey)
+    "ISC001",  # Conflicts with the formatter in 0.1.2
 ]
-typing-modules = ["awkward._typing"]
-src = ["src"]
 unfixable = [
     "T20",  # Removes print statements
     "F841", # Removes unused variables
 ]
+typing-modules = ["awkward._typing"]
 external = []
 mccabe.max-complexity = 100
+isort.required-imports = ["from __future__ import annotations"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "dev/*" = ["T20", "TID251"]
 "src/awkward/numba/*" = ["TID251"]
+"src/awkward/_typing.py" = ["TID251"]
 "src/awkward/_errors.py" = ["TID251"]
 "src/awkward/errors.py" = ["TID251"]
 "src/awkward/_connect/*" = ["TID251"]
@@ -314,10 +311,7 @@ mccabe.max-complexity = 100
 "src/awkward/_operators.py" = ["TID251"]
 "tests*/*" = ["T20", "TID251"]
 
-[tool.ruff.flake8-tidy-imports.banned-api]
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
 "numpy".msg = "Use `numpy = ak._nplikes.Numpy.instance()` instead"
 "jax".msg = "Use `jax = ak._nplikes.Jax.instance()` instead"
 "cupy".msg = "Use `cupy = ak._nplikes.Cupy.instance()` instead"
-
-[tool.nbqa.addopts]
-pyupgrade = ["--py38-plus"]

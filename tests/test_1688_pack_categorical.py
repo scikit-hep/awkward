@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import pytest
 
@@ -9,10 +11,9 @@ numpy = Numpy.instance()
 
 
 def test():
-    with pytest.warns(
-        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
-    ):
-        this = ak.to_categorical(["one", "two", "one", "three", "one", "four"])
+    pytest.importorskip("pyarrow")
+
+    this = ak.str.to_categorical(["one", "two", "one", "three", "one", "four"])
     assert ak.is_categorical(this)
     # Ensure packing by itself doesn't change the type
     this_packed = ak.to_packed(this)

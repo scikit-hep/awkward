@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_FLOAT64BUILDER_H_
 #define AWKWARD_FLOAT64BUILDER_H_
@@ -15,7 +15,7 @@ namespace awkward {
   /// @class Float64Builder
   ///
   /// @brief Builder node that accumulates real numbers (`double`).
-  class LIBAWKWARD_EXPORT_SYMBOL Float64Builder: public Builder {
+  class EXPORT_SYMBOL Float64Builder: public Builder {
   public:
     /// @brief Create an empty Float64Builder.
     /// @param options Configuration options for building an array;

@@ -1,27 +1,43 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
 import math
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.unmaskedmeta import UnmaskedMeta
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import MaybeNone
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
-    type_parameters_equal,
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.errors import AxisError
 from awkward.forms.form import Form
 from awkward.forms.unmaskedform import UnmaskedForm
@@ -36,7 +52,7 @@ numpy = Numpy.instance()
 
 
 @final
-class UnmaskedArray(Content):
+class UnmaskedArray(UnmaskedMeta[Content], Content):
     """
     UnmaskedArray implements an #ak.types.OptionType for which the values are
     never, in fact, missing. It exists to satisfy systems that formally require this
@@ -69,8 +85,6 @@ class UnmaskedArray(Content):
                     return UnmaskedArray(self.content[where])
     """
 
-    is_option = True
-
     def __init__(self, content, *, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
@@ -86,10 +100,6 @@ class UnmaskedArray(Content):
             )
         self._content = content
         self._init(parameters, content.backend)
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = UnmaskedForm
 
@@ -116,7 +126,7 @@ class UnmaskedArray(Content):
                 parameters=parameters_union(content._parameters, parameters),
             )
         elif content.is_indexed or content.is_option:
-            return content.copy(
+            return content.to_IndexedOptionArray64().copy(
                 parameters=parameters_union(content._parameters, parameters)
             )
         else:
@@ -210,7 +220,7 @@ class UnmaskedArray(Content):
             parameters=self._parameters,
         )
 
-    def mask_as_bool(self, valid_when=True):
+    def mask_as_bool(self, valid_when: bool = True) -> ArrayLike:
         if valid_when:
             return self._backend.index_nplike.ones(self._content.length, dtype=np.bool_)
         else:
@@ -228,7 +238,7 @@ class UnmaskedArray(Content):
 
         return self._content._getitem_at(where)
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -329,11 +339,9 @@ class UnmaskedArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # We can only combine option types whose array-record parameters agree
+        # Is the other array indexed or optional?
         elif other.is_option or other.is_indexed:
-            return self._mergeable_next(
-                other.content, mergebool
-            ) and type_parameters_equal(self._parameters, other._parameters)
+            return self._content._mergeable_next(other.content, mergebool)
         else:
             return self._content._mergeable_next(other, mergebool)
 
@@ -473,7 +481,14 @@ class UnmaskedArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         return self._content._to_arrow(pyarrow, self, None, length, options)
 
     def _to_backend_array(self, allow_missing, backend):
@@ -483,7 +498,9 @@ class UnmaskedArray(Content):
         else:
             return content
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
             return self.project()._remove_structure(backend, options)
@@ -494,8 +511,13 @@ class UnmaskedArray(Content):
         return self.content
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if options["return_array"]:
             if options["return_simplified"]:
                 make = UnmaskedArray.simplified
@@ -506,7 +528,6 @@ class UnmaskedArray(Content):
                 return make(
                     self._content._recursively_apply(
                         action,
-                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -520,7 +541,6 @@ class UnmaskedArray(Content):
             def continuation():
                 self._content._recursively_apply(
                     action,
-                    behavior,
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
@@ -533,7 +553,6 @@ class UnmaskedArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )
@@ -545,8 +564,11 @@ class UnmaskedArray(Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
-        return UnmaskedArray(self._content.to_packed(), parameters=self._parameters)
+    def to_packed(self, recursive: bool = True) -> Self:
+        return UnmaskedArray(
+            self._content.to_packed(True) if recursive else self._content,
+            parameters=self._parameters,
+        )
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
@@ -562,5 +584,9 @@ class UnmaskedArray(Content):
         content = self._content.to_backend(backend)
         return UnmaskedArray(content, parameters=self._parameters)
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return self.content.is_equal_to(other.content, index_dtype, numpyarray)
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return self._content._is_equal_to(
+            other.content, index_dtype, numpyarray, all_parameters
+        )

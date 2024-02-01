@@ -1,11 +1,12 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 from abc import abstractmethod
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import Any as AnyType
 from awkward._typing import Final, Protocol
@@ -128,6 +129,14 @@ class ArgMin(KernelReducer):
     preferred_dtype: Final = np.int64
     needs_position: Final = True
 
+    @classmethod
+    def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
+        dtype = np.dtype(dtype)
+        if dtype == np.bool_:
+            return np.dtype(np.int8)
+        else:
+            return super()._dtype_for_kernel(dtype)
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -181,6 +190,14 @@ class ArgMax(KernelReducer):
     name: Final = "argmax"
     preferred_dtype: Final = np.int64
     needs_position: Final = True
+
+    @classmethod
+    def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
+        dtype = np.dtype(dtype)
+        if dtype == np.bool_:
+            return np.dtype(np.int8)
+        else:
+            return super()._dtype_for_kernel(dtype)
 
     def apply(
         self,

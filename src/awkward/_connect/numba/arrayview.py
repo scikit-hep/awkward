@@ -1,4 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import operator
 
 import numba
@@ -8,9 +11,10 @@ import numpy
 from numba.core.errors import NumbaTypeError
 
 import awkward as ak
-from awkward._behavior import behavior_of, overlay_behavior
-from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._behavior import overlay_behavior
+from awkward._layout import HighLevelContext, wrap_layout
+from awkward._lookup import Lookup
+from awkward._nplikes.numpy_like import NumpyMetadata
 
 np = NumpyMetadata.instance()
 
@@ -149,7 +153,17 @@ def to_numbatype(form):
 ########## Lookup
 
 
-@numba.extending.typeof_impl.register(ak._lookup.Lookup)
+class NumbaLookup(Lookup):
+    def __init__(self, layout, attrs, generator=None):
+        super().__init__(layout, generator=generator)
+        self._attrs = attrs
+
+    @property
+    def attrs(self):
+        return self._attrs
+
+
+@numba.extending.typeof_impl.register(NumbaLookup)
 def typeof_Lookup(obj, c):
     return LookupType()
 
@@ -189,17 +203,21 @@ def unbox_Lookup(lookuptype, lookupobj, c):
 class ArrayView:
     @classmethod
     def fromarray(cls, array):
-        behavior = behavior_of(array)
-        layout = ak.operations.to_layout(
-            array,
-            allow_record=False,
-            allow_other=False,
-        )
+        with HighLevelContext() as ctx:
+            layout = ctx.unwrap(
+                array,
+                allow_record=False,
+                allow_unknown=False,
+                use_from_iter=False,
+                primitive_policy="error",
+                string_policy="error",
+                none_policy="error",
+            )
 
         return ArrayView(
             to_numbatype(layout.form),
-            behavior,
-            ak._lookup.Lookup(layout),
+            ctx.behavior,
+            NumbaLookup(layout, ctx.attrs),
             0,
             0,
             len(layout),
@@ -218,7 +236,7 @@ class ArrayView:
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         sliced = layout._getitem_range(self.start, self.stop)
-        return wrap_layout(sliced, self.behavior)
+        return wrap_layout(sliced, behavior=self.behavior, attrs=self.lookup.attrs)
 
 
 @numba.extending.typeof_impl.register(ArrayView)
@@ -578,18 +596,28 @@ def lower_iternext(context, builder, sig, args, result):
 class RecordView:
     @classmethod
     def fromrecord(cls, record):
-        behavior = behavior_of(record)
-        layout = ak.operations.to_layout(record, allow_record=True, allow_other=False)
+        with HighLevelContext() as ctx:
+            layout = ctx.unwrap(
+                record,
+                allow_record=True,
+                allow_unknown=False,
+                use_from_iter=False,
+                primitive_policy="error",
+                string_policy="error",
+                none_policy="error",
+            )
+        array_layout = layout.array
+
         assert isinstance(layout, ak.record.Record)
-        arraylayout = layout.array
+
         return RecordView(
             ArrayView(
-                to_numbatype(arraylayout.form),
-                behavior,
-                ak._lookup.Lookup(arraylayout),
+                to_numbatype(array_layout.form),
+                ctx.behavior,
+                NumbaLookup(array_layout, ctx.attrs),
                 0,
                 0,
-                len(arraylayout),
+                len(array_layout),
                 (),
             ),
             layout.at,
@@ -600,9 +628,11 @@ class RecordView:
         self.at = at
 
     def torecord(self):
-        arraylayout = self.arrayview.toarray().layout
+        array = self.arrayview.toarray()
         return wrap_layout(
-            ak.record.Record(arraylayout, self.at), self.arrayview.behavior
+            ak.record.Record(array.layout, self.at),
+            behavior=self.arrayview.behavior,
+            attrs=array.attrs,
         )
 
 
@@ -893,8 +923,8 @@ def overload_contains(obj, element):
             elif arraytype.ndim == 1 and not arraytype.is_recordtype:
                 if arraytype.is_optiontype:
                     statements.append(
-                        indent + "if (element is None and {0} is None) or "
-                        "({0} is not None and element == {0}): return True".format(name)
+                        indent + f"if (element is None and {name} is None) or "
+                        f"({name} is not None and element == {name}): return True"
                     )
                 else:
                     statements.append(indent + f"if element == {name}: return True")
@@ -902,8 +932,8 @@ def overload_contains(obj, element):
             else:
                 if arraytype.is_optiontype:
                     statements.append(
-                        indent + "if (element is None and {0} is None) or "
-                        "({0} is not None and element in {0}): return True".format(name)
+                        indent + f"if (element is None and {name} is None) or "
+                        f"({name} is not None and element in {name}): return True"
                     )
                 else:
                     statements.append(indent + f"if element in {name}: return True")
@@ -917,9 +947,7 @@ def overload_contains(obj, element):
             """
 def contains_impl(obj, element):
     {}
-    return False""".format(
-                "\n    ".join(statements)
-            ),
+    return False""".format("\n    ".join(statements)),
             "contains_impl",
         )
 
@@ -973,7 +1001,7 @@ def overload_np_array(array, dtype=None):
                     "subarray lengths are not regular')".format("    " * i)
                 )
                 specify_shape.append(f"shape{i}")
-                ensure_shape.append("if shape{0} == -1: shape{0} = 0".format(i))
+                ensure_shape.append(f"if shape{i} == -1: shape{i} = 0")
                 array_name = f"x{i}"
 
             fill_array = []

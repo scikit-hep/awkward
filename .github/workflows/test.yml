@@ -29,47 +29,65 @@ env:
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
-  Windows:
+  run-tests:
+    name: Run Tests
     strategy:
+      fail-fast: false
       matrix:
+        runs-on:
+          - windows-latest
+          - ubuntu-latest
+          - macos-11
         python-version:
+          - '3.12'
           - '3.11'
           - '3.10'
           - '3.9'
           - '3.8'
-
         python-architecture:
           - x64
-
+        dependencies-kind:
+          - full
         include:
           - python-version: '3.9'
             python-architecture: x86
+            runs-on: windows-latest
+            dependencies-kind: full
+          - python-version: '3.8'
+            python-architecture: x64
+            runs-on: ubuntu-latest
+            dependencies-kind: minimal
+          - python-version: 'pypy3.9'
+            python-architecture: x64
+            runs-on: ubuntu-latest
+            dependencies-kind: pypy
 
-    runs-on: windows-2019
+    runs-on: ${{ matrix.runs-on }}
 
     env:
-      PIP_ONLY_BINARY: cmake
+      PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
+          allow-prereleases: true
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: awkward-cpp/dist
-          key: ${{ github.job }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ matrix.runs-on }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -77,203 +95,53 @@ jobs:
           python -m pip install build
           python -m build -w awkward-cpp
 
-      - name: Install awkward-cpp
-        run: python -m pip install -v @(get-childitem -path awkward-cpp/dist/*.whl)
+      - name: Find built wheel
+        uses: tj-actions/glob@v19
+        id: find-wheel
+        with:
+          files: |
+            awkward-cpp/dist/*.whl
 
-      - name: Build & install awkward
-        run: python -m pip install -v .
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
+          -r "requirements-test-${{ matrix.dependencies-kind }}.txt"
 
       - name: Print versions
         run: python -m pip list
 
       - name: Check if kernel specification is sorted
+        # We don't need to run this all the time
+        if: (matrix.python-version == '3.12') && (matrix.runs-on == 'ubuntu-latest')
         run: pipx run nox -s diagnostics -- --check-spec-sorted
 
-      - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
-
       - name: Test specification
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: python -m pytest -vv -rs awkward-cpp/tests-spec
 
       - name: Test specification with explicitly defined values
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
 
       - name: Test CPU kernels
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 
-      - name: Test
-        run: python -m pytest -vv -rs tests
+      - name: Test CPU kernels with explicitly defined values
+        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels-explicit
 
-  MacOS:
-    strategy:
-      matrix:
-        python-version:
-          - '3.11'
-          - '3.10'
-          - '3.9'
-          - '3.8'
-
-    runs-on: macOS-11
-
-    env:
-      PIP_ONLY_BINARY: cmake
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-
-      - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v4
-        with:
-          python-version: '${{ matrix.python-version }}'
-
-      - name: Generate build files
-        run: pipx run nox -s prepare -- --headers --signatures --tests
-
-      - name: Cache awkward-cpp wheel
-        id: cache-awkward-cpp-wheel
-        uses: actions/cache@v3
-        with:
-          path: ./awkward-cpp/dist
-          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
-
-      - name: Build awkward-cpp wheel
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: |
-          python -m pip install build
-          python -m build -w ./awkward-cpp
-
-      - name: Install awkward-cpp
-        run: python -m pip install -v ./awkward-cpp/dist/*.whl
-
-      - name: Build & install awkward
-        run: python -m pip install -v .
-
-      - name: Print versions
-        run: python -m pip list
-
-      - name: Check if kernel specification is sorted
-        run: pipx run nox -s diagnostics -- --check-spec-sorted
-
-      - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
-
-      - name: Test specification
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: python -m pytest -vv -rs awkward-cpp/tests-spec
-
-      - name: Test specification with explicitly defined values
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
-
-      - name: Test CPU kernels
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
-
-      - name: Test
-        run: python -m pytest -vv -rs tests
-
-  Linux:
-    strategy:
-      matrix:
-        python-version:
-          - '3.11'
-          - '3.10'
-          - '3.9'
-          - '3.8'
-        numpy-package:
-          - "numpy"
-        pyarrow-package:
-          - "pyarrow"
-        include:
-          - python-version: '3.8'
-            numpy-package: "numpy==1.18.0"
-            pyarrow-package: "pyarrow"
-          - python-version: '3.8'
-            numpy-package: "numpy"
-            pyarrow-package: "pyarrow==7.0.0"
-
-    runs-on: ubuntu-20.04
-
-    env:
-      PIP_ONLY_BINARY: cmake
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-
-      - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v4
-        with:
-          python-version: '${{ matrix.python-version }}'
-
-      - name: Generate build files
-        run: pipx run nox -s prepare -- --headers --signatures --tests
-
-      - name: Cache awkward-cpp wheel
-        id: cache-awkward-cpp-wheel
-        uses: actions/cache@v3
-        with:
-          path: ./awkward-cpp/dist
-          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
-
-      - name: Build awkward-cpp wheel
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: |
-          python -m pip install build
-          python -m build -w ./awkward-cpp
-
-      - name: Install awkward-cpp
-        run: python -m pip install -v ./awkward-cpp/dist/*.whl "${{ matrix.numpy-package }}" "${{ matrix.pyarrow-package }}"
-
-      - name: Build & install awkward
-        run: python -m pip install -v .
-
-      - name: Print versions
-        run: python -m pip list
-
-      - name: Check if kernel specification is sorted
-        run: pipx run nox -s diagnostics -- --check-spec-sorted
-
-      - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
-
-      - name: Test specification
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: python -m pytest -vv -rs awkward-cpp/tests-spec
-
-      - name: Test specification with explicitly defined values
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
-
-      - name: Test CPU kernels
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
-
-      - name: Test
+      - name: Test non-kernels
         run: >-
           python -m pytest -vv -rs tests --cov=awkward --cov-report=term
           --cov-report=xml
 
       - name: Upload Codecov results
+        if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')
         uses: codecov/codecov-action@v3
-        if: matrix.python-version == '3.9'
+
 
   Linux-ROOT:
-    strategy:
-      matrix:
-        python-version:
-          - '3.8'
-
     runs-on: ubuntu-20.04
 
     env:
-      PIP_ONLY_BINARY: cmake
+      PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
 
     timeout-minutes: 30
 
@@ -283,7 +151,7 @@ jobs:
         shell: "bash -l {0}"
 
     steps:
-      - uses: "actions/checkout@v3"
+      - uses: "actions/checkout@v4"
         with:
           submodules: true
 
@@ -293,8 +161,9 @@ jobs:
           # Cache invalidates daily by default
           cache-environment: true
           environment-name: awkward
+          # Need Python 3.8 for the cached wheels
           create-args: >-
-            python=${{ env.PYTHON_VERSION }}
+            python=3.8
             numpy
             root
 
@@ -303,10 +172,10 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./awkward-cpp/dist
-          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -314,17 +183,67 @@ jobs:
           python3 -m pip install build
           python3 -m build -w ./awkward-cpp
 
-      - name: Install awkward-cpp
-        run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
-
-      - name: Build & install awkward
-        run: python3 -m pip install -v .
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install --only-binary "numpy,pandas,pyarrow,numexpr"
+          -v . ./awkward-cpp/dist/*.whl
+          pytest-github-actions-annotate-failures
+          -r requirements-test-full.txt
 
       - name: Print versions
         run: python -m pip list
 
-      - name: Install test requirements
-        run: python -m pip install -v -r requirements-test.txt pytest-github-actions-annotate-failures
-
       - name: Test
         run: python -m pytest -vv -rs tests
+
+  Linux-cppyy:
+    # TODO: remove this part of the workflow
+    # cppyy is not yet released. Let's load some pre-built wheels via docker (as a binary store)
+    runs-on: ubuntu-22.04
+
+    env:
+      PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: 'Python ${{ matrix.python-version }}'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v4
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w ./awkward-cpp
+
+      - name: Extract pre-built manylinux cppyy wheels
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: "docker.io/agoose77/cppyy-wheels:cp311"
+          path: "/wheels/."
+          destination: "/tmp/wheelhouse"
+
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install -v --only-binary "numpy,pandas,pyarrow,numexpr"
+          ./ ./awkward-cpp/dist/*.whl /tmp/wheelhouse/* pytest-github-actions-annotate-failures
+
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Test
+        run: python -m pytest -vv -rs tests -k cppyy

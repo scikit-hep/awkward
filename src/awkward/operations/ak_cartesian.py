@@ -1,16 +1,18 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("cartesian",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 from collections.abc import Mapping
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis, wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
+
+__all__ = ("cartesian",)
 
 np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
@@ -26,11 +28,12 @@ def cartesian(
     with_name=None,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
-        arrays (dict or iterable of arrays): Each value in this dict or iterable
-            can be any array-like data that #ak.to_layout recognizes.
+        arrays (mapping or sequence of arrays): Each value in this mapping or
+            sequence can be any array-like data that #ak.to_layout recognizes.
         axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
@@ -50,6 +53,8 @@ def cartesian(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Computes a Cartesian product (i.e. cross product) of data from a set of
@@ -203,35 +208,32 @@ def cartesian(
         yield arrays
 
     # Implementation
-    return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
+    return _impl(
+        arrays, axis, nested, parameters, with_name, highlevel, behavior, attrs
+    )
 
 
-def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
+def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    if isinstance(arrays, dict):
-        backend = backend_of(*arrays.values(), default=cpu)
-        behavior = behavior_of(*arrays.values(), behavior=behavior)
-        array_layouts = {
-            name: ak.operations.to_layout(
-                layout, allow_record=False, allow_other=False
-            ).to_backend(backend)
-            for name, layout in arrays.items()
-        }
-        layouts = list(array_layouts.values())
-        fields = list(array_layouts.keys())
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        if isinstance(arrays, Mapping):
+            layouts = ensure_same_backend(
+                *(
+                    ctx.unwrap(x, allow_record=False, allow_unknown=False)
+                    for x in arrays.values()
+                )
+            )
+            fields = list(arrays.keys())
+            array_layouts = dict(zip(fields, layouts))
 
-    else:
-        arrays = list(arrays)
-        backend = backend_of(*arrays, default=cpu)
-        behavior = behavior_of(*arrays, behavior=behavior)
-        array_layouts = [
-            ak.operations.to_layout(
-                layout, allow_record=False, allow_other=False
-            ).to_backend(backend)
-            for layout in arrays
-        ]
-        layouts = array_layouts
-        fields = None
+        else:
+            layouts = array_layouts = ensure_same_backend(
+                *(
+                    ctx.unwrap(x, allow_record=False, allow_unknown=False)
+                    for x in arrays
+                )
+            )
+            fields = None
 
     if with_name is not None:
         if parameters is None:
@@ -265,7 +267,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         else:
             nested = list(range(len(layouts))[:-1])
     else:
-        if isinstance(array_layouts, dict):
+        if isinstance(array_layouts, Mapping):
             if any(not (isinstance(x, str) and x in array_layouts) for x in nested):
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
@@ -286,9 +288,13 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                     "[0, len(arrays) - 1) for an iterable of arrays"
                 )
 
+    backend = next((layout.backend for layout in layouts), cpu)
     if posaxis == 0:
+        # Translate nested field names to nested field indices
         if fields is not None:
-            nested = [i for i, name in enumerate(fields) if name in nested]
+            nested_as_index = [i for i, name in enumerate(fields) if name in nested]
+        else:
+            nested_as_index = nested
 
         indexes = [
             ak.index.Index64(backend.index_nplike.reshape(x, (-1,)))
@@ -306,10 +312,15 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
         result = ak.contents.RecordArray(outs, fields, parameters=parameters)
         for i in range(len(array_layouts))[::-1]:
-            if i in nested:
+            if i in nested_as_index:
                 result = ak.contents.RegularArray(result, layouts[i + 1].length, 0)
 
     else:
+        # Translate nested field names to nested field indices
+        if fields is not None:
+            nested_as_index = [i for i, name in enumerate(fields) if name in nested]
+        else:
+            nested_as_index = nested
 
         def add_outer_dimensions(
             layout: ak.contents.Content, n: int
@@ -355,7 +366,6 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 nextlayout = ak._do.recursively_apply(
                     layout,
                     apply_pad_inner_list,
-                    behavior,
                     lateral_context={"n": n_inside},
                 )
                 return add_outer_dimensions(nextlayout, n_outside)
@@ -367,7 +377,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         axes_to_flatten = [
             posaxis + i + 1
             for i, _ in enumerate(array_layouts)
-            if i < len(array_layouts) - 1 and i not in nested
+            if i < len(array_layouts) - 1 and i not in nested_as_index
         ]
         # This list *must* be sorted in reverse order
         axes_to_flatten.reverse()
@@ -376,7 +386,6 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             ak._do.recursively_apply(
                 layout,
                 apply_pad_inner_list_at_axis,
-                behavior,
                 lateral_context={"i": i},
             )
             for i, layout in enumerate(layouts)
@@ -390,7 +399,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 return None
 
         out = ak._broadcasting.broadcast_and_apply(
-            new_layouts, apply_build_record, behavior, right_broadcast=False
+            new_layouts, apply_build_record, right_broadcast=False
         )
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
@@ -401,4 +410,4 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 result, axis=axis_to_flatten, highlevel=False, behavior=behavior
             )
 
-    return wrap_layout(result, behavior, highlevel)
+    return ctx.wrap(result, highlevel=highlevel)

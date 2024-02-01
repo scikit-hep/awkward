@@ -1,13 +1,15 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("to_arrow_table",)
 import json
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Any
+
+__all__ = ("to_arrow_table",)
 
 np = NumpyMetadata.instance()
 
@@ -97,7 +99,7 @@ def _impl(
 ):
     from awkward._connect.pyarrow import direct_Content_subclass, pyarrow
 
-    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=True, primitive_policy="error")
     if isinstance(layout, ak.record.Record):
         layout = layout.array[layout.at : layout.at + 1]
         record_is_scalar = True

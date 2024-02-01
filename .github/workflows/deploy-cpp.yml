@@ -15,7 +15,7 @@ jobs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
@@ -35,7 +35,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -48,8 +48,9 @@ jobs:
     - name: Check metadata
       run: pipx run twine check awkward-cpp/dist/*
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
+        name: awkward-sdist
         path: awkward-cpp/dist/*.tar.gz
 
   build_wheels:
@@ -62,38 +63,38 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         arch: [auto64]
-        build: ["cp{38,39,310,311}-*", "pp*"]
+        build: ["cp", "pp"]
 
         include:
         - os: macos-latest
           type: "Universal"
           arch: universal2
-          build: "cp{38,39,310,311}-*"
+          build: "cp"
 
         - os: windows-latest
           arch: auto64
-          build: "cp{38,39,310,311}-*"
+          build: "cp"
 
         - os: windows-latest
           arch: auto32
-          build: "cp{38,39}-*"
+          build: "cp{38,39}-"
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
-    - name: Python 3.10
-      uses: actions/setup-python@v4
+    - name: Python 3.11
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v2.15.0
+    - uses: pypa/cibuildwheel@v2.16.5
       env:
-        CIBW_BUILD: ${{ matrix.build }}
+        CIBW_BUILD: "${{ matrix.build }}*"
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
         config-file: cibuildwheel.toml
@@ -109,8 +110,9 @@ jobs:
         )
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
+        name: awkward-wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.build }}
         path: wheelhouse/*.whl
 
 
@@ -122,25 +124,25 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     strategy:
       matrix:
-        python: [38, 39, 310, 311]
+        python: [38, 39, 310, 311, 312]
         arch: [aarch64]
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
     - name: Python 3.10
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: docker/setup-qemu-action@v2.2.0
+    - uses: docker/setup-qemu-action@v3.0.0
 
-    - uses: pypa/cibuildwheel@v2.15.0
+    - uses: pypa/cibuildwheel@v2.16.5
       env:
         CIBW_BUILD: cp${{ matrix.python }}-*
         CIBW_ARCHS: ${{ matrix.arch }}
@@ -158,8 +160,9 @@ jobs:
         )
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
+        name: awkward-wheels-${{ matrix.arch }}-py${{ matrix.python }}
         path: wheelhouse/*.whl
 
   upload_all:
@@ -169,11 +172,13 @@ jobs:
     permissions:
       id-token: write
     environment:
-      name: "deploy-cpp-pypi"
+      name: "pypi"
+      url: "https://pypi.org/project/awkward-cpp/"
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: artifact
+        pattern: "awkward*"
         path: dist
+        merge-multiple: true
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.10
+    - uses: pypa/gh-action-pypi-publish@v1.8.11

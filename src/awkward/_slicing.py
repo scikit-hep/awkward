@@ -1,20 +1,19 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-import operator
+from __future__ import annotations
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._nplikes import to_nplike
-from awkward._nplikes.dispatch import nplike_of
+from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_array_like, is_integer_like, is_sized_iterable
 from awkward._typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
-    from awkward._nplikes.numpylike import ArrayLike
+    from awkward._nplikes.numpy_like import ArrayLike, NumpyLike
     from awkward.contents.content import Content
 
 np = NumpyMetadata.instance()
@@ -23,48 +22,27 @@ np = NumpyMetadata.instance()
 SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Content"
 
 
-def normalize_slice_item(item, *, backend: Backend):
-    if backend.index_nplike.is_own_array(item):
-        if item.ndim != 0:
-            raise ValueError(
-                f"slice items must be 0D arrays or Python integers, not {item!r}"
-            )
-        else:
-            return item
-    else:
-        return operator.index(item)
-
-
-def normalize_slice(slice_: slice, *, backend: Backend) -> slice:
+def normalize_slice(slice_: slice, *, nplike: NumpyLike) -> slice:
     """
     Args:
         slice_: slice object
-        backend: backend of layout
+        nplike: NumpyLike of array
 
     Return a slice of (start, stop, step) for which the slice items have been
     normalized into index types.
     """
-    index_nplike = backend.index_nplike
 
     start = slice_.start
     stop = slice_.stop
     step = slice_.step
 
-    if index_nplike.known_data:
+    if nplike.known_data:
         return slice_
     # Unknown lengths mean that the slice index is unknown
     else:
-        start = (
-            index_nplike.shape_item_as_index(start)
-            if start is unknown_length
-            else start
-        )
-        stop = (
-            index_nplike.shape_item_as_index(stop) if stop is unknown_length else stop
-        )
-        step = (
-            index_nplike.shape_item_as_index(step) if step is unknown_length else step
-        )
+        start = nplike.shape_item_as_index(start) if start is unknown_length else start
+        stop = nplike.shape_item_as_index(stop) if stop is unknown_length else stop
+        step = nplike.shape_item_as_index(step) if step is unknown_length else step
 
         return slice(start, stop, step)
 
@@ -137,7 +115,7 @@ def prepare_advanced_indexing(items, backend: Backend):
 
     # Then broadcast the index items
     nplike = backend.index_nplike
-    broadcasted = nplike.broadcast_arrays(*broadcastable)
+    broadcasted = nplike.broadcast_arrays(*[nplike.asarray(x) for x in broadcastable])
 
     # And re-assemble the index with the broadcasted items
     prepared = []
@@ -225,7 +203,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
         return normalize_integer_like(item)
 
     elif isinstance(item, slice):
-        return normalize_slice(item, backend=backend)
+        return normalize_slice(item, nplike=backend.index_nplike)
 
     elif isinstance(item, str):
         return item
@@ -276,19 +254,20 @@ def normalise_item(item, backend: Backend) -> SliceItem:
     # Fallback for sized objects
     elif is_sized_iterable(item):
         # Do we have an array
-        nplike = nplike_of(item, default=None)
+        nplike = nplike_of_obj(item, default=None)
         # We can end up with non-array objects associated with an nplike
         if nplike is not None and nplike.is_own_array(item):
-            # Is it a scalar, not array?
-            if len(item.shape) == 0:
-                raise AssertionError(
-                    "scalar arrays should be handled by integer-like indexing"
-                )
-            else:
-                layout = ak.operations.ak_to_layout._impl(
-                    item, allow_record=False, allow_other=True, regulararray=False
-                )
-                return normalise_item(layout, backend)
+            layout = ak.operations.ak_to_layout._impl(
+                item,
+                allow_record=False,
+                allow_unknown=False,
+                none_policy="error",
+                regulararray=False,
+                use_from_iter=False,
+                primitive_policy="error",
+                string_policy="as-characters",
+            )
+            return normalise_item(layout, backend)
 
         # Empty index array
         elif len(item) == 0:
@@ -301,7 +280,14 @@ def normalise_item(item, backend: Backend) -> SliceItem:
         # Other iterable
         else:
             layout = ak.operations.ak_to_layout._impl(
-                item, allow_record=False, allow_other=True, regulararray=False
+                item,
+                allow_record=False,
+                allow_unknown=False,
+                none_policy="error",
+                regulararray=False,
+                use_from_iter=True,
+                primitive_policy="error",
+                string_policy="as-characters",
             )
             return normalise_item(layout, backend)
 

@@ -1,16 +1,19 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("with_name",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._layout import HighLevelContext
+from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("with_name",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def with_name(array, name, *, highlevel=True, behavior=None):
+def with_name(array, name, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -19,6 +22,8 @@ def with_name(array, name, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an #ak.Array or #ak.Record (or low-level equivalent, if
@@ -37,12 +42,12 @@ def with_name(array, name, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, name, highlevel, behavior)
+    return _impl(array, name, highlevel, behavior, attrs)
 
 
-def _impl(array, name, highlevel, behavior):
-    behavior = behavior_of(array, behavior=behavior)
-    layout = ak.operations.to_layout(array)
+def _impl(array, name, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
 
     def action(layout, **ignore):
         if isinstance(layout, ak.contents.RecordArray):
@@ -55,19 +60,6 @@ def _impl(array, name, highlevel, behavior):
         else:
             return None
 
-    out = ak._do.recursively_apply(layout, action, behavior)
+    out = ak._do.recursively_apply(layout, action)
 
-    def action2(layout, **ignore):
-        if layout.is_union:
-            return ak.contents.UnionArray.simplified(
-                layout._tags,
-                layout._index,
-                layout._contents,
-                parameters=layout._parameters,
-            )
-        else:
-            return None
-
-    out2 = ak._do.recursively_apply(out, action2, behavior)
-
-    return wrap_layout(out2, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

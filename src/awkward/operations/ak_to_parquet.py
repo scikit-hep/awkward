@@ -1,11 +1,15 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("to_parquet",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 from collections.abc import Mapping, Sequence
 from os import fsdecode
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
+
+__all__ = ("to_parquet",)
 
 metadata = NumpyMetadata.instance()
 
@@ -174,6 +178,62 @@ def to_parquet(
     # Dispatch
     yield (array,)
 
+    return _impl(
+        array,
+        destination,
+        list_to32,
+        string_to32,
+        bytestring_to32,
+        emptyarray_to,
+        categorical_as_dictionary,
+        extensionarray,
+        count_nulls,
+        compression,
+        compression_level,
+        row_group_size,
+        data_page_size,
+        parquet_flavor,
+        parquet_version,
+        parquet_page_version,
+        parquet_metadata_statistics,
+        parquet_dictionary_encoding,
+        parquet_byte_stream_split,
+        parquet_coerce_timestamps,
+        parquet_old_int96_timestamps,
+        parquet_compliant_nested,  # https://issues.apache.org/jira/browse/ARROW-16348
+        parquet_extra_options,
+        storage_options,
+        write_iteratively=False,
+    )
+
+
+def _impl(
+    array,
+    destination,
+    list_to32,
+    string_to32,
+    bytestring_to32,
+    emptyarray_to,
+    categorical_as_dictionary,
+    extensionarray,
+    count_nulls,
+    compression,
+    compression_level,
+    row_group_size,
+    data_page_size,
+    parquet_flavor,
+    parquet_version,
+    parquet_page_version,
+    parquet_metadata_statistics,
+    parquet_dictionary_encoding,
+    parquet_byte_stream_split,
+    parquet_coerce_timestamps,
+    parquet_old_int96_timestamps,
+    parquet_compliant_nested,
+    parquet_extra_options,
+    storage_options,
+    write_iteratively,
+):
     # Implementation
     import awkward._connect.pyarrow
 
@@ -182,19 +242,65 @@ def to_parquet(
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
 
-    layout = ak.operations.ak_to_layout._impl(
-        data, allow_record=True, allow_other=False, regulararray=True
-    )
-    table = ak.operations.ak_to_arrow_table._impl(
-        layout,
-        list_to32,
-        string_to32,
-        bytestring_to32,
-        emptyarray_to,
-        categorical_as_dictionary,
-        extensionarray,
-        count_nulls,
-    )
+    def get_layout_and_table(x):
+        layout = ak.operations.ak_to_layout._impl(
+            x,
+            allow_record=True,
+            allow_unknown=False,
+            none_policy="error",
+            regulararray=True,
+            use_from_iter=True,
+            primitive_policy="error",
+            string_policy="as-characters",
+        )
+        table = ak.operations.ak_to_arrow_table._impl(
+            layout,
+            list_to32,
+            string_to32,
+            bytestring_to32,
+            emptyarray_to,
+            categorical_as_dictionary,
+            extensionarray,
+            count_nulls,
+        )
+        return layout, table
+
+    if not write_iteratively:
+        layout, table = get_layout_and_table(data)
+
+    else:
+        if (
+            isinstance(
+                data,
+                (
+                    ak.highlevel.Array,
+                    ak.highlevel.Record,
+                    ak.highlevel.ArrayBuilder,
+                    ak.contents.Content,
+                    ak.record.Record,
+                ),
+            )
+            or hasattr(data, "dtype")
+            or hasattr(data, "shape")
+        ):
+            raise TypeError(
+                "The first argument of ak.to_parquet_row_groups should be an "
+                "iterable collection of arrays to put into separate row groups, "
+                "not a single array. If this was intended, wrap the first argument "
+                "with the `iter` function."
+            )
+
+        data = iter(data)  # necessary for iterables; no-op for iterators
+
+        try:
+            first_array = next(data)
+        except StopIteration:
+            raise ValueError(
+                "The first argument of ak.to_parquet_row_groups must contain at least one array."
+            ) from None
+
+        # if `write_iteratively`, then `layout` and `table` represent the FIRST, not all
+        layout, table = get_layout_and_table(first_array)
 
     if parquet_compliant_nested:
         list_indicator = "list.element"
@@ -301,7 +407,7 @@ def to_parquet(
         destination = fsdecode(destination)
     except TypeError:
         raise TypeError(
-            f"'destination' argument of 'ak.to_parquet' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
+            f"'destination' argument of 'ak.to_parquet' and 'ak.to_parquet_row_groups' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
         ) from None
 
     fs, destination = fsspec.core.url_to_fs(destination, **(storage_options or {}))
@@ -325,7 +431,24 @@ def to_parquet(
         metadata_collector=metalist,
         **parquet_extra_options,
     ) as writer:
-        writer.write_table(table, row_group_size=row_group_size)
+        try:
+            if not write_iteratively:
+                writer.write_table(table, row_group_size=row_group_size)
+
+            else:
+                # this `table` is JUST for the first array
+                writer.write_table(table, row_group_size=row_group_size)
+
+                # this `data` is an iterator (not iterable), starting AFTER the first array
+                # a `for` loop implicitly calls `next` and stops at `StopIteration`
+                for item in data:
+                    layout, table = get_layout_and_table(item)
+                    writer.write_table(table, row_group_size=row_group_size)
+
+        finally:
+            # ensure that the ParquetWriter is closed for iterative and non-iterative cases
+            writer.close()
+
     meta = metalist[0]
     meta.set_file_path(destination.rsplit("/", 1)[-1])
     return meta

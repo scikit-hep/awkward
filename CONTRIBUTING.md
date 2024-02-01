@@ -80,7 +80,7 @@ nox -s prepare -- --tests --docs
 ```
 This can reduce the time taken to perform the preparation step in the event that only the package-building step is needed.
 
-`nox` also lets us re-use the virtualenvs that it creates for each session with the `-R` flag, eliminating the dependency reinstall time:
+`nox` also lets us reuse the virtualenvs that it creates for each session with the `-R` flag, eliminating the dependency reinstall time:
 ```bash
 nox -R -s prepare
 ```
@@ -273,7 +273,7 @@ If you need your merged pull request to be deployed in a release, just ask!
 
 #### `awkward-cpp` releases
 To make an `awkward-cpp` release:
-1. A commit to `main` should increase the version number in `awkward-cpp/pyproject.toml`
+1. A commit to `main` should increase the version number in `awkward-cpp/pyproject.toml` and the corresponding dependency in `pyproject.toml`. This ensures that `awkward-cpp` and `awkward` remain in-sync.
 2. The [Deploy C++](https://github.com/scikit-hep/awkward/actions/workflows/deploy-cpp.yml) GitHub Actions workflow should be manually triggered.
 3. A `git` tag `awkward-cpp-{version}` should be created for the new version epoch.
 

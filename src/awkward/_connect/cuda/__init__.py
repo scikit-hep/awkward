@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import glob
 import math
@@ -66,24 +68,25 @@ def fetch_specialization(keys):
 
 
 def fetch_template_specializations(kernel_dict):
-    # These kernels consist of multiple kernels don't have templated specializations of the same name
+    # These cuda kernels consist of multiple kernels that don't have templated
+    # specializations of the same name (e.g. '_a', '_b').
     kernel_exclusions = [
         "awkward_ByteMaskedArray_getitem_nextcarry",
         "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
         "awkward_ByteMaskedArray_reduce_next_64",
         "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
         "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
         "awkward_IndexedArray_flatten_nextcarry",
         "awkward_IndexedArray_getitem_nextcarry",
         "awkward_IndexedArray_getitem_nextcarry_outindex",
-        "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
-        "awkward_ListArray_compact_offsets",
+        "awkward_IndexedArray_index_of_nulls",
         "awkward_IndexedArray_reduce_next_64",
         "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
         "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
         "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+        "awkward_ListArray_compact_offsets",
         "awkward_MaskedArray_getitem_next_jagged_project",
-        "awkward_NumpyArray_getitem_boolean_nonzero",
         "awkward_UnionArray_project",
         "awkward_reduce_count_64",
         "awkward_reduce_sum",
@@ -92,9 +95,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_sum_bool",
         "awkward_reduce_prod_bool",
         "awkward_reduce_argmax",
-        "awkward_reduce_argmax_bool_64",
         "awkward_reduce_argmin",
-        "awkward_reduce_argmin_bool_64",
         "awkward_reduce_countnonzero",
         "awkward_reduce_max",
         "awkward_reduce_min",
@@ -214,8 +215,14 @@ def synchronize_cuda(stream=None):
             cupy.array(NO_ERROR),
             [],
         )
-        raise invoked_kernel.error_context.decorate_exception(
-            ValueError(
+        if invoked_kernel.error_context is None:
+            raise ValueError(
                 f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
             )
-        )
+        else:
+            raise invoked_kernel.error_context.decorate_exception(
+                ValueError,
+                ValueError(
+                    f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
+                ),
+            )

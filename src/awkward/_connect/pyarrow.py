@@ -1,8 +1,10 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import json
 from collections.abc import Iterable, Sized
+from functools import lru_cache
 from types import ModuleType
 
 from packaging.version import parse as parse_version
@@ -10,7 +12,7 @@ from packaging.version import parse as parse_version
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_union
 
 np = NumpyMetadata.instance()
@@ -892,12 +894,21 @@ def to_awkwardarrow_type(
         return storage_type
 
 
+@lru_cache
+def find_first_content_subclass(cls):
+    for base_cls in reversed(cls.mro()):
+        if base_cls is not ak.contents.Content and issubclass(
+            base_cls, ak.contents.Content
+        ):
+            return base_cls
+    raise TypeError
+
+
 def direct_Content_subclass(node):
     if node is None:
         return None
     else:
-        mro = type(node).mro()
-        return mro[mro.index(ak.contents.Content) - 1]
+        return find_first_content_subclass(type(node))
 
 
 def direct_Content_subclass_name(node):
@@ -908,8 +919,15 @@ def direct_Content_subclass_name(node):
         return out.__name__
 
 
+def is_revertable(akarray):
+    return hasattr(akarray, "__pyarrow_original")
+
+
 def remove_optiontype(akarray):
-    return akarray.__pyarrow_original
+    if callable(akarray.__pyarrow_original):
+        return akarray.__pyarrow_original()
+    else:
+        return akarray.__pyarrow_original
 
 
 def form_remove_optiontype(akform):
@@ -933,6 +951,17 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
 
         if len(layouts) == 1:
             return layouts[0]
+        elif any(is_revertable(arr) for arr in layouts):
+            assert all(is_revertable(arr) for arr in layouts)
+            # TODO: the callable argument to revertable is a premature(?) optimisation.
+            #       it would be better to obviate the need to compute both revertable and non revertable branches
+            #       e.g. by requesting a particular layout kind from the next `frombuffers` operation
+            return revertable(
+                ak.operations.concatenate(layouts, highlevel=False),
+                lambda: ak.operations.concatenate(
+                    [remove_optiontype(x) for x in layouts], highlevel=False
+                ),
+            )
         else:
             return ak.operations.concatenate(layouts, highlevel=False)
 
@@ -1022,9 +1051,8 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         if len(batches) == 0:
             # create an empty array following the input schema
             return form_handle_arrow(
-                obj.schema,
-                pass_empty_field=pass_empty_field,
-            ).length_zero_array(highlevel=False)
+                obj.schema, pass_empty_field=pass_empty_field
+            ).length_zero_array()
         elif len(batches) == 1:
             return handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
         else:
@@ -1033,7 +1061,19 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                 for batch in batches
                 if len(batch) > 0
             ]
-            return ak.operations.concatenate(arrays, highlevel=False)
+            if any(is_revertable(arr) for arr in arrays):
+                assert all(is_revertable(arr) for arr in arrays)
+                # TODO: the callable argument to revertable is a premature(?) optimisation.
+                #       it would be better to obviate the need to compute both revertable and non revertable branches
+                #       e.g. by requesting a particular layout kind from the next `frombuffers` operation
+                return revertable(
+                    ak.operations.concatenate(arrays, highlevel=False),
+                    lambda: ak.operations.concatenate(
+                        [remove_optiontype(x) for x in arrays], highlevel=False
+                    ),
+                )
+            else:
+                return ak.operations.concatenate(arrays, highlevel=False)
 
     elif (
         isinstance(obj, Iterable)

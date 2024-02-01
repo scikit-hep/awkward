@@ -1,24 +1,26 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+# ruff: noqa: B023
+
 from __future__ import annotations
 
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-# ruff: noqa: B023
-__all__ = ("enforce_type",)
 from itertools import permutations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._layout import HighLevelContext
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._typing import NamedTuple
 from awkward.types.numpytype import primitive_to_dtype
 
+__all__ = ("enforce_type",)
+
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def enforce_type(array, type, *, highlevel=True, behavior=None):
+def enforce_type(array, type, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -26,6 +28,8 @@ def enforce_type(array, type, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an array whose structure is modified to match the given type.
@@ -225,40 +229,9 @@ def enforce_type(array, type, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, type, highlevel, behavior)
+    return _impl(array, type, highlevel, behavior, attrs)
 
 
-def _impl(array, type_, highlevel, behavior):
-    layout = ak.to_layout(array, allow_record=True)
-
-    if isinstance(type_, str):
-        type_ = ak.types.from_datashape(type_, highlevel=False)
-
-    if isinstance(type_, (ak.types.ArrayType, ak.types.ScalarType)):
-        raise TypeError(
-            "High-level type objects are not supported by this function. Instead, "
-            "a low-level type object (instance of ak.types.Type) should be used. "
-            "If you are using a high-level type `type` from another array (e.g. using `array.type`), "
-            "then the low-level type object can be found under `type.content`"
-        )
-
-    # Ensure we re-wrap records!
-    if isinstance(layout, ak.record.Record):
-        out = ak.record.Record(
-            _enforce_type(layout.array[layout.at : layout.at + 1], type_), 0
-        )
-    else:
-        out = _enforce_type(layout, type_)
-
-    return wrap_layout(
-        out,
-        like=array,
-        behavior=behavior,
-        highlevel=highlevel,
-    )
-
-
-# TODO: move this if it ends up being useful elsewhere
 def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
     """
     Args:
@@ -329,6 +302,9 @@ def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
         return False
     else:
         raise TypeError(layout)
+
+
+# TODO: move this if it ends up being useful elsewhere
 
 
 # TODO: move this if it ends up being useful elsewhere
@@ -632,9 +608,7 @@ def _recurse_unknown_any(
     layout: ak.contents.EmptyArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     type_form = ak.forms.from_type(type_)
-    return type_form.length_zero_array(highlevel=False).copy(
-        parameters=type_._parameters
-    )
+    return type_form.length_zero_array().copy(parameters=type_._parameters)
 
 
 def _recurse_any_unknown(layout: ak.contents.Content, type_: ak.types.UnknownType):
@@ -658,7 +632,7 @@ def _recurse_option_any(
             return ak.contents.IndexedOptionArray(
                 ak.index.Index64(layout.backend.index_nplike.full(layout.length, -1)),
                 ak.forms.from_type(type_.content).length_zero_array(
-                    backend=layout.backend, highlevel=False
+                    backend=layout.backend
                 ),
             )
         else:
@@ -723,9 +697,7 @@ def _recurse_any_option(
     if isinstance(type_.content, ak.types.UnknownType):
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(layout.backend.index_nplike.full(layout.length, -1)),
-            ak.forms.from_type(type_.content).length_zero_array(
-                backend=layout.backend, highlevel=False
-            ),
+            ak.forms.from_type(type_.content).length_zero_array(backend=layout.backend),
         )
     else:
         return ak.contents.UnmaskedArray(
@@ -789,9 +761,7 @@ def _recurse_union_union(
         ]
         contents.extend(
             [
-                ak.forms.from_type(t).length_zero_array(
-                    highlevel=False, backend=layout.backend
-                )
+                ak.forms.from_type(t).length_zero_array(backend=layout.backend)
                 for t in missing_types
             ]
         )
@@ -971,7 +941,7 @@ def _recurse_union_non_union(
 
         # Index over them
         index = ak.index.Index64(index_data)
-        return ak.contents.IndexedArray(index, next_content)
+        return ak.contents.IndexedArray.simplified(index, next_content)
     else:
         # Find the first content whose type equals the given type
         for tag, content in enumerate(layout.contents):  # noqa: B007
@@ -1014,9 +984,7 @@ def _recurse_any_union(
         index = index_nplike.arange(layout.length, dtype=np.int64)
 
         other_contents = [
-            ak.forms.from_type(t).length_zero_array(
-                backend=layout.backend, highlevel=False
-            )
+            ak.forms.from_type(t).length_zero_array(backend=layout.backend)
             for j, t in enumerate(type_.contents)
             if j != i
         ]
@@ -1160,7 +1128,7 @@ def _recurse_record_any(
                             layout.backend.index_nplike.full(layout.length, -1)
                         ),
                         ak.forms.from_type(next_type.content).length_zero_array(
-                            backend=layout.backend, highlevel=False
+                            backend=layout.backend
                         ),
                     )
                 )
@@ -1205,7 +1173,7 @@ def _recurse_record_any(
                             layout.backend.index_nplike.full(layout.length, -1)
                         ),
                         ak.forms.from_type(field_type.content).length_zero_array(
-                            backend=layout.backend, highlevel=False
+                            backend=layout.backend
                         ),
                     )
                 )
@@ -1277,3 +1245,29 @@ def _enforce_type(
         return _recurse_record_any(layout, type_)
     else:
         raise NotImplementedError(type(layout), type_)
+
+
+def _impl(array, type_, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=True)
+
+    if isinstance(type_, str):
+        type_ = ak.types.from_datashape(type_, highlevel=False)
+
+    if isinstance(type_, (ak.types.ArrayType, ak.types.ScalarType)):
+        raise TypeError(
+            "High-level type objects are not supported by this function. Instead, "
+            "a low-level type object (instance of ak.types.Type) should be used. "
+            "If you are using a high-level type `type` from another array (e.g. using `array.type`), "
+            "then the low-level type object can be found under `type.content`"
+        )
+
+    # Ensure we re-wrap records!
+    if isinstance(layout, ak.record.Record):
+        out = ak.record.Record(
+            _enforce_type(layout.array[layout.at : layout.at + 1], type_), 0
+        )
+    else:
+        out = _enforce_type(layout, type_)
+
+    return ctx.wrap(out, highlevel=highlevel)

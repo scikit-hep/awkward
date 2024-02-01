@@ -1,6 +1,8 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-import awkward as ak
+from __future__ import annotations
+
+import packaging.version
 
 _has_checked_version = False
 
@@ -25,9 +27,11 @@ Note that this must be in a different venv or conda environment from ROOT, if yo
         ) from err
 
     if not _has_checked_version:
-        if ak._util.parse_version(cppyy.__version__) < ak._util.parse_version("3.0.1"):
+        if packaging.version.Version(cppyy.__version__) < packaging.version.Version(
+            "3.1.0"
+        ):
             raise ImportError(
-                "Awkward Array can only work with cppyy 3.0.1 or later "
-                "(you have version {})".format(cppyy.__version__)
+                "Awkward Array can only work with cppyy 3.1.0 or later "
+                f"(you have version {cppyy.__version__})"
             )
         _has_checked_version = True

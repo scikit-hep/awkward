@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -117,18 +119,18 @@ def test_NumpyArray():
 
     assert to_list(
         ak.operations.sort(array2, axis=1, ascending=True, stable=False)
-    ) == to_list(np.sort(np.asarray(array2), axis=1))
+    ) == to_list(np.sort(ak.to_numpy(array2), axis=1))
     assert to_list(
         ak.operations.sort(array2, axis=0, ascending=True, stable=False)
-    ) == to_list(np.sort(np.asarray(array2), axis=0))
+    ) == to_list(np.sort(ak.to_numpy(array2), axis=0))
 
     assert to_list(
         ak.operations.argsort(array2, axis=1, ascending=True, stable=False)
-    ) == to_list(np.argsort(np.asarray(array2), 1))
+    ) == to_list(np.argsort(ak.to_numpy(array2), 1))
 
     assert to_list(
         ak.operations.argsort(array2, axis=0, ascending=True, stable=False)
-    ) == to_list(np.argsort(np.asarray(array2), 0))
+    ) == to_list(np.argsort(ak.to_numpy(array2), 0))
 
     with pytest.raises(ValueError) as err:
         ak.operations.argsort(array2, axis=2, ascending=True, stable=False)
@@ -344,20 +346,20 @@ def test_3d():
     )  # 5
 
     sorted = ak.operations.argsort(array, axis=1, ascending=True, stable=False)
-    assert to_list(sorted) == to_list(np.argsort(np.asarray(array), 1))
+    assert to_list(sorted) == to_list(np.argsort(np.asarray(array.data), 1))
 
     sorted = ak.operations.argsort(array, axis=2, ascending=True, stable=False)
-    assert to_list(sorted) == to_list(np.argsort(np.asarray(array), 2))
+    assert to_list(sorted) == to_list(np.argsort(np.asarray(array.data), 2))
 
     sorted = ak.operations.sort(array, axis=2, ascending=True, stable=False)
-    assert to_list(sorted) == to_list(np.sort(np.asarray(array), 2))
+    assert to_list(sorted) == to_list(np.sort(np.asarray(array.data), 2))
 
     sorted = ak.operations.argsort(array, axis=1, ascending=True, stable=False)
 
-    assert to_list(sorted) == to_list(np.argsort(np.asarray(array), 1))
+    assert to_list(sorted) == to_list(np.argsort(np.asarray(array.data), 1))
 
     sorted = ak.operations.sort(array, axis=1, ascending=True, stable=False)
-    assert to_list(sorted) == to_list(np.sort(np.asarray(array), 1))
+    assert to_list(sorted) == to_list(np.sort(np.asarray(array.data), 1))
 
     sorted = ak.operations.sort(array, axis=1, ascending=False, stable=False)
     assert to_list(sorted) == [
@@ -374,11 +376,11 @@ def test_3d():
     ]
 
     sorted = ak.operations.sort(array, axis=0, ascending=True, stable=False)
-    assert to_list(sorted) == to_list(np.sort(np.asarray(array), 0))
+    assert to_list(sorted) == to_list(np.sort(np.asarray(array.data), 0))
 
     assert to_list(
         ak.operations.argsort(array, axis=0, ascending=True, stable=False)
-    ) == to_list(np.argsort(np.asarray(array), 0))
+    ) == to_list(np.argsort(np.asarray(array.data), 0))
 
 
 def test_ByteMaskedArray():

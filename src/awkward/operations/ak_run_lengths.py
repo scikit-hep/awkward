@@ -1,26 +1,30 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("run_lengths",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._layout import HighLevelContext
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+
+__all__ = ("run_lengths",)
 
 np = NumpyMetadata.instance()
 cpu = NumpyBackend.instance()
 
 
 @high_level_function()
-def run_lengths(array, *, highlevel=True, behavior=None):
+def run_lengths(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Computes the lengths of sequences of identical values at the deepest level
@@ -92,18 +96,20 @@ def run_lengths(array, *, highlevel=True, behavior=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, highlevel, behavior)
+    return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl(array, highlevel, behavior):
-    backend = backend_of(array, default=cpu)
+def _impl(array, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     def lengths_of(data, offsets):
+        backend = layout.backend
+
         if backend.nplike.is_own_array(data):
             size = data.size
         else:
-            layout = ak.to_layout(data)
-            size = layout.length
+            size = ak.to_layout(data).length
 
         if size is not unknown_length and size == 0:
             return backend.index_nplike.empty(0, dtype=np.int64), offsets
@@ -121,7 +127,7 @@ def _impl(array, highlevel, behavior):
                 #                                      boundary diff ^
                 # To consider only the interior boundaries, we ignore the start and end
                 # offset values. These can be repeated with empty sublists, so we mask them out.
-                is_interior = backend.nplike.logical_and(
+                is_interior = backend.index_nplike.logical_and(
                     0 < offsets,
                     offsets < backend.index_nplike.shape_item_as_index(size),
                 )
@@ -156,10 +162,12 @@ def _impl(array, highlevel, behavior):
                 nextcontent, _ = lengths_of(ak.highlevel.Array(layout), None)
                 return ak.contents.NumpyArray(nextcontent)
 
-            if not isinstance(layout, (ak.contents.NumpyArray, ak.contents.EmptyArray)):
+            if layout.is_unknown:
+                layout = layout.to_NumpyArray(np.float64)
+            elif not layout.is_numpy:
                 raise NotImplementedError("run_lengths on " + type(layout).__name__)
 
-            nextcontent, _ = lengths_of(backend.nplike.asarray(layout), None)
+            nextcontent, _ = lengths_of(layout.data, None)
             return ak.contents.NumpyArray(nextcontent)
 
         elif layout.branch_depth == (False, 2):
@@ -176,30 +184,32 @@ def _impl(array, highlevel, behavior):
                 # We also want to trim the _upper_ bound of content,
                 # so we manually convert the list type to zero-based
                 listoffsetarray = layout.to_ListOffsetArray64(False)
-                offsets = backend.index_nplike.asarray(listoffsetarray.offsets)
-                content = listoffsetarray.content[offsets[0] : offsets[-1]]
+                content = listoffsetarray.content[
+                    listoffsetarray.offsets[0] : listoffsetarray.offsets[-1]
+                ]
 
                 if content.is_indexed:
                     content = content.project()
 
+                offsets = listoffsetarray.offsets.data
                 nextcontent, nextoffsets = lengths_of(
                     ak.highlevel.Array(content), offsets - offsets[0]
                 )
                 return ak.contents.ListOffsetArray(
-                    ak.index.Index64(nextoffsets),
-                    ak.contents.NumpyArray(nextcontent),
+                    ak.index.Index64(nextoffsets), ak.contents.NumpyArray(nextcontent)
                 )
 
             listoffsetarray = layout.to_ListOffsetArray64(False)
-            offsets = backend.index_nplike.asarray(listoffsetarray.offsets)
-            content = listoffsetarray.content[offsets[0] : offsets[-1]]
+            content = listoffsetarray.content[
+                listoffsetarray.offsets[0] : listoffsetarray.offsets[-1]
+            ]
 
             if content.is_indexed:
                 content = content.project()
 
-            if not isinstance(
-                content, (ak.contents.NumpyArray, ak.contents.EmptyArray)
-            ):
+            if content.is_unknown:
+                content = content.to_NumpyArray(np.float64)
+            elif not content.is_numpy:
                 raise NotImplementedError(
                     "run_lengths on "
                     + type(layout).__name__
@@ -207,18 +217,13 @@ def _impl(array, highlevel, behavior):
                     + type(content).__name__
                 )
 
-            nextcontent, nextoffsets = lengths_of(
-                backend.nplike.asarray(content), offsets - offsets[0]
-            )
+            offsets = listoffsetarray.offsets.data
+            nextcontent, nextoffsets = lengths_of(content.data, offsets - offsets[0])
             return ak.contents.ListOffsetArray(
-                ak.index.Index64(nextoffsets),
-                ak.contents.NumpyArray(nextcontent),
+                ak.index.Index64(nextoffsets), ak.contents.NumpyArray(nextcontent)
             )
         else:
             return None
 
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    behavior = behavior_of(array, behavior=behavior)
-
-    out = ak._do.recursively_apply(layout, action, behavior)
-    return wrap_layout(out, behavior, highlevel)
+    out = ak._do.recursively_apply(layout, action)
+    return ctx.wrap(out, highlevel=highlevel)

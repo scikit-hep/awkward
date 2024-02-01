@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #include "awkward/LayoutBuilder.h"
 
@@ -59,6 +59,9 @@ template <unsigned SIZE, class BUILDER>
 using RegularBuilder = awkward::LayoutBuilder::Regular<SIZE, BUILDER>;
 
 template<class PRIMITIVE, class BUILDER>
+using IndexedBuilder = awkward::LayoutBuilder::Indexed<PRIMITIVE, BUILDER>;
+
+template<class PRIMITIVE, class BUILDER>
 using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>;
 
 template<class BUILDER>
@@ -76,6 +79,8 @@ using UnionBuilder8_U32 = awkward::LayoutBuilder::Union<int8_t, uint32_t, BUILDE
 template<class... BUILDERS>
 using UnionBuilder8_64 = awkward::LayoutBuilder::Union<int8_t, int64_t, BUILDERS...>;
 
+template<class PRIMITIVE>
+using StringBuilder = awkward::LayoutBuilder::String<PRIMITIVE>;
 
 void
 test_Numpy_bool() {
@@ -1210,19 +1215,19 @@ test_Regular_size0() {
 }
 
 void
-test_Indexed_as_IndexedOption() {
-  IndexedOptionBuilder<uint32_t, NumpyBuilder<double>> builder;
+test_Indexed() {
+  IndexedBuilder<uint32_t, NumpyBuilder<double>> builder;
   assert(builder.length() == 0);
 
-  auto& subbuilder = builder.append_valid();
+  auto& subbuilder = builder.append_index();
   subbuilder.append(1.1);
 
-  builder.append_valid();
+  builder.append_index();
   subbuilder.append(2.2);
 
   double data[3] = {3.3, 4.4, 5.5};
 
-  builder.extend_valid(3);
+  builder.extend_index(3);
   subbuilder.extend(data, 3);
 
   // [1.1, 2.2, 3.3, 4.4, 5.5]
@@ -1248,7 +1253,7 @@ test_Indexed_as_IndexedOption() {
 
   assert(builder.form() ==
   "{ "
-      "\"class\": \"IndexedOptionArray\", "
+      "\"class\": \"IndexedArray\", "
       "\"index\": \"u32\", "
       "\"content\": { "
           "\"class\": \"NumpyArray\", "
@@ -1857,6 +1862,33 @@ test_categorical_form() {
 }
 
 
+void test_string_builder() {
+  StringBuilder<int64_t> builder;
+  assert(builder.length() == 0);
+
+  builder.append("one");
+  builder.append("two");
+  builder.append("three");
+
+  assert(builder.length() == 3);
+}
+
+void test_list_string_builder() {
+  ListOffsetBuilder<int64_t, StringBuilder<int64_t>> builder;
+  assert(builder.length() == 0);
+
+  builder.begin_list();
+  builder.content().append("one");
+  builder.content().append("two");
+  builder.content().append("three");
+  builder.end_list();
+
+  builder.begin_list();
+  builder.content().append("four");
+  builder.content().append("five");
+  builder.end_list();
+}
+
 int main(int /* argc */, char ** /* argv */) {
   test_Numpy_bool();
   test_Numpy_int();
@@ -1874,7 +1906,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_Tuple_Numpy_ListOffset();
   test_Regular();
   test_Regular_size0();
-  test_Indexed_as_IndexedOption();
+  test_Indexed();
   test_IndexedOption();
   test_IndexedOption_Record();
   test_Unmasked();
@@ -1885,6 +1917,8 @@ int main(int /* argc */, char ** /* argv */) {
   test_char_form();
   test_string_form();
   test_categorical_form();
+  test_string_builder();
+  test_list_string_builder();
 
   return 0;
 }

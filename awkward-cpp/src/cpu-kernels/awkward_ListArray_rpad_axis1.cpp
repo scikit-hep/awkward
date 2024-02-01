@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_ListArray_rpad_axis1.cpp", line)
 
@@ -25,7 +25,7 @@ ERROR awkward_ListArray_rpad_axis1(
     }
     offset = (target > rangeval) ? tostarts[i] + target : tostarts[i] + rangeval;
     tostops[i] = offset;
-   }
+  }
   return success();
 }
 ERROR awkward_ListArray32_rpad_axis1_64(

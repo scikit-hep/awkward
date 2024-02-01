@@ -1,3 +1,7 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import argparse
 import os
 import pathlib
@@ -5,7 +9,7 @@ import shutil
 
 import nox
 
-ALL_PYTHONS = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+ALL_PYTHONS = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 nox.options.sessions = ["lint", "tests"]
 
@@ -16,7 +20,7 @@ requirements_dev = [
     "packaging",
     "PyYAML",
     "requests",
-    "toml",
+    "tomli",
 ]
 
 
@@ -33,7 +37,7 @@ def tests(session):
     """
     Run the unit and regular tests.
     """
-    session.install("-r", "requirements-test.txt", "./awkward-cpp", ".")
+    session.install("-r", "requirements-test-full.txt", "./awkward-cpp", ".")
     session.run("pytest", *session.posargs if session.posargs else ["tests"])
 
 
@@ -52,7 +56,7 @@ def pylint(session):
     Run the pylint process.
     """
 
-    session.install("pylint==2.12.2")
+    session.install("pylint==3.0.2")
     session.run("pylint", "src", *session.posargs)
 
 
@@ -61,7 +65,7 @@ def coverage(session):
     """
     Run the unit and regular tests.
     """
-    session.install("-r", "requirements-test.txt", "./awkward-cpp", ".")
+    session.install("-r", "requirements-test-full.txt", "./awkward-cpp", ".")
     session.run(
         "pytest", "tests", "--cov=awkward", "--cov-report=xml", *session.posargs
     )
@@ -128,6 +132,7 @@ def clean(session):
             pathlib.Path("awkward-cpp", "tests-spec"),
             pathlib.Path("awkward-cpp", "tests-spec-explicit"),
             pathlib.Path("awkward-cpp", "tests-cpu-kernels"),
+            pathlib.Path("awkward-cpp", "tests-cpu-kernels-explicit"),
             pathlib.Path("tests-cuda-kernels"),
         )
     if args.docs or clean_all:

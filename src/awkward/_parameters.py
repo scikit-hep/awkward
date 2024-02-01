@@ -1,3 +1,5 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 from collections.abc import Collection
@@ -36,7 +38,7 @@ def type_parameters_equal(
 
 
 def parameters_are_equal(
-    one: JSONMapping, two: JSONMapping, only_array_record=False
+    one: JSONMapping | None, two: JSONMapping | None, only_array_record=False
 ) -> bool:
     if one is None and two is None:
         return True
@@ -113,7 +115,7 @@ def parameters_intersect(
             if result is None:
                 result = {key: left_value}
             else:
-                result[key] = left_value  # pylint: disable-msg=E1137
+                result[key] = left_value
     return result
 
 
@@ -149,7 +151,7 @@ def parameters_union(
         if parameters is None:
             parameters = {key: value}
         else:
-            parameters[key] = value  # pylint: disable-msg=E1137
+            parameters[key] = value
 
     return parameters
 

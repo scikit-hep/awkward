@@ -1,12 +1,22 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("from_numpy",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 from awkward._dispatch import high_level_function
 from awkward._layout import from_arraylib, wrap_layout
+
+__all__ = ("from_numpy",)
 
 
 @high_level_function()
 def from_numpy(
-    array, *, regulararray=False, recordarray=True, highlevel=True, behavior=None
+    array,
+    *,
+    regulararray=False,
+    recordarray=True,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -25,6 +35,8 @@ def from_numpy(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Converts a NumPy array into an Awkward Array.

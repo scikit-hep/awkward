@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest  # noqa: F401
@@ -24,7 +26,10 @@ def test_numpyarray_merge():
         == ak1._mergemany([ak2]).form
     )
     assert (
-        ak1[1:, :-1, ::-1].to_typetracer()._mergemany([ak2[1:, :-1, ::-1]]).form
+        ak1[1:, :-1, ::-1]
+        .to_typetracer()
+        ._mergemany([ak2[1:, :-1, ::-1].to_typetracer()])
+        .form
         == ak1[1:, :-1, ::-1]._mergemany([ak2[1:, :-1, ::-1]]).form
     )
 
@@ -60,11 +65,11 @@ def test_numpyarray_merge():
             one = ak.contents.NumpyArray(np.array([1, 2, 3], dtype=x))
             two = ak.contents.NumpyArray(np.array([4, 5], dtype=y))
             three = one._mergemany([two])
-            assert np.asarray(three).dtype == np.dtype(z), "{} {} {} {}".format(
-                x, y, z, np.asarray(three).dtype.type
+            assert ak.to_numpy(three).dtype == np.dtype(z), "{} {} {} {}".format(
+                x, y, z, ak.to_numpy(three).dtype.type
             )
             assert to_list(three) == to_list(
-                np.concatenate([np.asarray(one), np.asarray(two)])
+                np.concatenate([ak.to_numpy(one), ak.to_numpy(two)])
             )
             assert to_list(one._mergemany([emptyarray])) == to_list(one)
             assert to_list(emptyarray._mergemany([one])) == to_list(one)
@@ -927,7 +932,7 @@ def test_indexedarray_simplify():
     index2 = ak.index.Index64(np.array([2, 2, 1, 6, 5], dtype=np.int64))
 
     array2 = ak.contents.IndexedArray.simplified(index2, array)
-    assert np.asarray(array.index).tolist() == [0, 1, -1, 2, -1, -1, 3, 4]
+    assert np.asarray(array.index.data).tolist() == [0, 1, -1, 2, -1, -1, 3, 4]
     assert to_list(array2) == to_list(array2) == [None, None, "two", "four", None]
 
     assert array2.to_typetracer().form == array2.form

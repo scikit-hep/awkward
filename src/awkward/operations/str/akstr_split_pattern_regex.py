@@ -1,17 +1,24 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+import awkward as ak
+from awkward._dispatch import high_level_function
+from awkward._layout import HighLevelContext
 
 __all__ = ("split_pattern_regex",)
 
 
-import awkward as ak
-from awkward._behavior import behavior_of
-from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
-
-
 @high_level_function(module="ak.str")
 def split_pattern_regex(
-    array, pattern, *, max_splits=None, reverse=False, highlevel=True, behavior=None
+    array,
+    pattern,
+    *,
+    max_splits=None,
+    reverse=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -26,6 +33,8 @@ def split_pattern_regex(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Splits any string or bytestring-valued data into a list of substrings
@@ -43,14 +52,26 @@ def split_pattern_regex(
     yield (array,)
 
     # Implementation
-    return _impl(array, pattern, max_splits, reverse, highlevel, behavior)
+    return _impl(array, pattern, max_splits, reverse, highlevel, behavior, attrs)
 
 
-def _impl(array, pattern, max_splits, reverse, highlevel, behavior):
+def _impl(array, pattern, max_splits, reverse, highlevel, behavior, attrs):
     from awkward._connect.pyarrow import import_pyarrow_compute
 
     pc = import_pyarrow_compute("ak.str.split_pattern_regex")
-    behavior = behavior_of(array, behavior=behavior)
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(
+            array,
+            allow_record=False,
+            allow_unknown=False,
+            primitive_policy="error",
+            string_policy="as-characters",
+        )
+
+    if reverse:
+        raise ValueError("Cannot split in reverse with regex")
+
     action = ak.operations.str._get_split_action(
         pc.split_pattern_regex,
         pc.split_pattern_regex,
@@ -59,6 +80,6 @@ def _impl(array, pattern, max_splits, reverse, highlevel, behavior):
         reverse=reverse,
         bytestring_to_string=False,
     )
-    out = ak._do.recursively_apply(ak.operations.to_layout(array), action, behavior)
+    out = ak._do.recursively_apply(layout, action)
 
-    return wrap_layout(out, behavior, highlevel)
+    return ctx.wrap(out, highlevel=highlevel)

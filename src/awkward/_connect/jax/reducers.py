@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 from abc import abstractmethod
@@ -7,7 +8,7 @@ import jax
 
 import awkward as ak
 from awkward import _reducers
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._reducers import Reducer
 from awkward._typing import Final, Self, TypeVar

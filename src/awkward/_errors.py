@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import builtins
@@ -7,16 +8,33 @@ import threading
 import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
 from functools import wraps
+from weakref import ref as weak_ref
 
 import numpy
 
-from awkward._nplikes.numpylike import NumpyMetadata
-from awkward._typing import Any, TypeVar
+from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._typing import Any, ParamSpec, TypeVar
 
 np = NumpyMetadata.instance()
 
 
 E = TypeVar("E", bound=Exception)
+T = TypeVar("T")
+S = TypeVar("S")
+P = ParamSpec("P")
+
+
+class WeakMethodProxy:
+    """A proxy for a method of a weakly referenced object"""
+
+    def __init__(self, method):
+        self._this = weak_ref(method.__self__)
+        self._impl = method.__func__
+
+    def __call__(self, *args, **kwargs):
+        this = self._this()
+        method = self._impl.__get__(this, type(this))
+        return method(*args, **kwargs)
 
 
 class PartialFunction:
@@ -66,22 +84,17 @@ class ErrorContext:
             ):
                 self.handle_exception(exception_type, exception_value)
         finally:
-            # `_kwargs` may hold cyclic references, that we really want to avoid
-            # as this can lead to large buffers remaining in memory for longer than absolutely necessary
-            # Let's just clear this, now.
-            self._kwargs.clear()
-
             # Step out of the way so that another ErrorContext can become primary.
             if self.primary() is self:
                 self._slate.__dict__.clear()
 
-    def handle_exception(self, cls: type[E], exception: E) -> E:
+    def handle_exception(self, cls: type[E], exception: E):
         if sys.version_info >= (3, 11, 0, "final"):
             self.decorate_exception(cls, exception)
         else:
             raise self.decorate_exception(cls, exception)
 
-    def decorate_exception(self, cls: type[E], exception: E) -> E:
+    def decorate_exception(self, cls: type[E], exception: E) -> Exception:
         if sys.version_info >= (3, 11, 0, "final"):
             if issubclass(cls, (NotImplementedError, AssertionError)):
                 exception.add_note(
@@ -91,6 +104,7 @@ class ErrorContext:
                 exception.add_note(self.note)
             return exception
         else:
+            new_exception: Exception
             if issubclass(cls, (NotImplementedError, AssertionError)):
                 # Raise modified exception
                 new_exception = cls(
@@ -190,10 +204,10 @@ class OperationErrorContext(ErrorContext):
     def any_backend_is_delayed(
         self, iterable: Iterable, *, depth: int = 1, depth_limit: int = 2
     ) -> bool:
-        from awkward._backends.dispatch import backend_of
+        from awkward._backends.dispatch import backend_of_obj
 
         for obj in iterable:
-            backend = backend_of(obj, default=None)
+            backend = backend_of_obj(obj, default=None)
             # Do we not recognise this as an object with a backend?
             if backend is None:
                 # Is this an iterable object, and are we permitted to recurse?
@@ -212,6 +226,8 @@ class OperationErrorContext(ErrorContext):
         return False
 
     def __init__(self, name, args: Iterable[Any], kwargs: Mapping[str, Any]):
+        string_args: list[str] | PartialFunction
+        string_kwargs: dict[str, str] | PartialFunction
         if self.primary() is None and (
             self.any_backend_is_delayed(args)
             or self.any_backend_is_delayed(kwargs.values())
@@ -222,8 +238,10 @@ class OperationErrorContext(ErrorContext):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
-            string_args = PartialFunction(self._format_args, args)
-            string_kwargs = PartialFunction(self._format_kwargs, kwargs)
+            string_args = PartialFunction(WeakMethodProxy(self._format_args), args)
+            string_kwargs = PartialFunction(
+                WeakMethodProxy(self._format_kwargs), kwargs
+            )
 
         super().__init__(
             name=name,
@@ -292,17 +310,20 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
-        from awkward._backends.dispatch import backend_of
+        from awkward._backends.dispatch import backend_of_obj
         from awkward._backends.numpy import NumpyBackend
 
         numpy_backend = NumpyBackend.instance()
         if self.primary() is not None or all(
-            backend_of(x, default=numpy_backend).nplike.is_eager for x in (array, where)
+            backend_of_obj(x, default=numpy_backend).nplike.is_eager
+            for x in (array, where)
         ):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
-            formatted_array = PartialFunction(self.format_argument, self._width, array)
+            formatted_array = PartialFunction(
+                WeakMethodProxy(self.format_argument), self._width, array
+            )
             formatted_slice = PartialFunction(self.format_slice, where)
         else:
             formatted_array = self.format_argument(self._width, array)
@@ -409,23 +430,18 @@ def deprecate(
         date = ""
     else:
         date = " (target date: " + date + ")"
-    warning = """In version {}{}, this will be {}.
+    warning = f"""In version {version}{date}, this will be {will_be}.
 To raise these warnings as errors (and get stack traces to find out where they're called), run
     import warnings
     warnings.filterwarnings("error", module="awkward.*")
 after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
-Issue: {}.""".format(
-        version, date, will_be, message
-    )
+Issue: {message}."""
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
 
 
-T = TypeVar("T", bound=Callable)
-
-
-def with_operation_context(func: T) -> T:
+def with_operation_context(func: Callable[P, T]) -> Callable[P, T]:
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         # NOTE: this decorator assumes that the operation is exposed under `ak.`
         with OperationErrorContext(f"ak.{func.__qualname__}", args, kwargs):
             return func(*args, **kwargs)

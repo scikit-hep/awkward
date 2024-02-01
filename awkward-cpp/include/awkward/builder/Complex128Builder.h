@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_COMPLEX128BUILDER_H_
 #define AWKWARD_COMPLEX128BUILDER_H_
@@ -14,7 +14,7 @@ namespace awkward {
   /// @class Complex128Builder
   ///
   /// @brief Builder node that accumulates real numbers (`double`).
-  class LIBAWKWARD_EXPORT_SYMBOL Complex128Builder: public Builder {
+  class EXPORT_SYMBOL Complex128Builder: public Builder {
   public:
     /// @brief Create an empty Complex128Builder.
     /// @param options Configuration options for building an array;

@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest  # noqa: F401
@@ -80,7 +82,6 @@ def test_string2():
     a = ak.highlevel.Array(listoffsetarray, check_valid=True)
 
     assert isinstance(a, ak.highlevel.Array)
-    assert not isinstance(a, ak.behaviors.string.StringBehavior)
     assert to_list(a) == [[104, 101, 121], [], [116, 104, 101, 114, 101]]
 
     assert str(ak.operations.type(a)) == "3 * var * uint8"

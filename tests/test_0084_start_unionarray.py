@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -70,7 +72,7 @@ def test_getitem():
     assert np.asarray(array.tags).dtype == np.dtype(np.int8)
     assert np.asarray(array.index).tolist() == [0, 1, 0, 1, 2, 2, 4, 3]
     assert np.asarray(array.index).dtype == np.dtype(np.int32)
-    assert type(array.contents) is list
+    assert isinstance(array.contents, list)
     assert [to_list(x) for x in array.contents] == [
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
         ["one", "two", "three", "four", "five"],

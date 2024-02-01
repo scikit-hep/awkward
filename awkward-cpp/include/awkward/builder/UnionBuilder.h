@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_UNIONBUILDER_H_
 #define AWKWARD_UNIONBUILDER_H_
@@ -17,7 +17,7 @@ namespace awkward {
   /// @class UnionBuilder
   ///
   /// @brief Builder node for accumulated heterogeneous data.
-  class LIBAWKWARD_EXPORT_SYMBOL UnionBuilder: public Builder {
+  class EXPORT_SYMBOL UnionBuilder: public Builder {
   public:
     static const BuilderPtr
       fromsingle(const BuilderOptions& options,

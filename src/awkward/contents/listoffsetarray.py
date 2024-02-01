@@ -1,14 +1,17 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.listoffsetmeta import ListOffsetMeta
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer, is_unknown_scalar
 from awkward._parameters import (
@@ -16,9 +19,23 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.errors import AxisError
 from awkward.forms.form import Form
 from awkward.forms.listoffsetform import ListOffsetForm
@@ -32,7 +49,7 @@ numpy = Numpy.instance()
 
 
 @final
-class ListOffsetArray(Content):
+class ListOffsetArray(ListOffsetMeta[Content], Content):
     """
     ListOffsetArray describes unequal-length lists (often called a
     "jagged" or "ragged" array). Like #ak.contents.RegularArray, the
@@ -96,8 +113,6 @@ class ListOffsetArray(Content):
                     raise AssertionError(where)
     """
 
-    is_list = True
-
     def __init__(self, offsets, content, *, parameters=None):
         if not isinstance(offsets, Index) and offsets.dtype in (
             np.dtype(np.int32),
@@ -114,7 +129,11 @@ class ListOffsetArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if offsets.length is not unknown_length and offsets.length == 0:
+        if (
+            content.backend.index_nplike.known_data
+            and offsets.length is not unknown_length
+            and offsets.length == 0
+        ):
             raise ValueError(
                 f"{type(self).__name__} len(offsets) ({offsets.length}) must be >= 1"
             )
@@ -143,10 +162,6 @@ class ListOffsetArray(Content):
     @property
     def offsets(self) -> Index:
         return self._offsets
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = ListOffsetForm
 
@@ -207,7 +222,7 @@ class ListOffsetArray(Content):
         offsets = self._offsets.to_nplike(TypeTracer.instance())
         return ListOffsetArray(
             offsets.forget_length() if forget_length else offsets,
-            self._content._to_typetracer(False),
+            self._content._to_typetracer(forget_length),
             parameters=self._parameters,
         )
 
@@ -305,7 +320,7 @@ class ListOffsetArray(Content):
         start, stop = self._offsets[where], self._offsets[where + 1]
         return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -395,7 +410,7 @@ class ListOffsetArray(Content):
             next_content = self._content[this_start:]
 
         if index_nplike.known_data and not index_nplike.array_equal(
-            this_zero_offsets, offsets
+            this_zero_offsets, offsets.data
         ):
             raise ValueError("cannot broadcast nested list")
 
@@ -770,8 +785,8 @@ class ListOffsetArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # Check against option contents
-        elif other.is_option or other.is_indexed:
+        # Is the other array indexed or optional?
+        elif other.is_indexed or other.is_option:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
@@ -1874,7 +1889,14 @@ class ListOffsetArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         is_string = self.parameter("__array__") == "string"
         is_bytestring = self.parameter("__array__") == "bytestring"
         if is_string:
@@ -2055,7 +2077,9 @@ class ListOffsetArray(Content):
         else:
             return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
@@ -2065,18 +2089,34 @@ class ListOffsetArray(Content):
             content = self._content[self._offsets[0] : self._offsets[-1]]
             contents = content._remove_structure(backend, options)
             if options["keepdims"]:
-                return [
-                    ListOffsetArray(
-                        Index64(
-                            backend.index_nplike.asarray(
-                                [0, backend.index_nplike.shape_item_as_index(c.length)]
-                            )
-                        ),
-                        c,
-                        parameters=self._parameters,
-                    )
-                    for c in contents
-                ]
+                if options["list_to_regular"]:
+                    return [
+                        ak.contents.RegularArray(
+                            c,
+                            size=c.length,
+                            zeros_length=1,
+                            parameters=self._parameters,
+                        )
+                        for c in contents
+                    ]
+                else:
+                    return [
+                        ListOffsetArray(
+                            Index64(
+                                backend.index_nplike.asarray(
+                                    [
+                                        0,
+                                        backend.index_nplike.shape_item_as_index(
+                                            c.length
+                                        ),
+                                    ]
+                                )
+                            ),
+                            c,
+                            parameters=self._parameters,
+                        )
+                        for c in contents
+                    ]
             else:
                 return contents
 
@@ -2114,8 +2154,13 @@ class ListOffsetArray(Content):
         return ak.contents.ListOffsetArray(new_offsets, new_content)
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if self._backend.nplike.known_data:
             offsetsmin = self._offsets[0]
             offsets = ak.index.Index(
@@ -2133,7 +2178,6 @@ class ListOffsetArray(Content):
                     offsets,
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth + 1,
                         copy.copy(depth_context),
                         lateral_context,
@@ -2147,7 +2191,6 @@ class ListOffsetArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
@@ -2160,7 +2203,6 @@ class ListOffsetArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )
@@ -2172,10 +2214,14 @@ class ListOffsetArray(Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         next = self.to_ListOffsetArray64(True)
-        next_content = next._content[: next._offsets[-1]].to_packed()
-        return ListOffsetArray(next._offsets, next_content, parameters=next._parameters)
+        next_content = next._content[: next._offsets[-1]]
+        return ListOffsetArray(
+            next._offsets,
+            next_content.to_packed(True) if recursive else next_content,
+            parameters=next._parameters,
+        )
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
@@ -2276,7 +2322,13 @@ class ListOffsetArray(Content):
 
                 return content
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return self.offsets.is_equal_to(
-            other.offsets, index_dtype, numpyarray
-        ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters)
+            and self._offsets.is_equal_to(other.offsets, index_dtype, numpyarray)
+            and self._content._is_equal_to(
+                other.content, index_dtype, numpyarray, all_parameters
+            )
+        )

@@ -1,5 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
+from __future__ import annotations
 
 import math
 
@@ -313,6 +314,16 @@ def Empty_length(builder):
         return 0
 
     return getter
+
+
+@numba.extending.overload_method(EmptyType, "append")
+def Empty_append(builder, datum):
+    if isinstance(builder, EmptyType):
+
+        def append(builder, datum):
+            raise NumbaTypeError("Empty cannot append data")
+
+        return append
 
 
 ########## ListOffset #########################################################

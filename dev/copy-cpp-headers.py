@@ -1,4 +1,9 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 """Copy the header-only cpp headers into the various package directories that they are required"""
+
+from __future__ import annotations
+
 import pathlib
 import shutil
 
@@ -15,7 +20,7 @@ if __name__ == "__main__":
     if connect_path.exists():
         shutil.rmtree(connect_path)
     connect_path.mkdir(parents=True)
-    for path in header_only_path.rglob("*.h"):
+    for path in header_only_path.rglob("*/awkward/*.h"):
         dest_path = connect_path / path.name
         shutil.copy(path, dest_path)
 

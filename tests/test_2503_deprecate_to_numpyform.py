@@ -1,19 +1,8 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-import numpy as np
-import pytest
+from __future__ import annotations
 
 import awkward as ak
-
-
-def test_dtype_deprecated():
-    form = ak.forms.EmptyForm()
-    with pytest.warns(
-        DeprecationWarning,
-        match=r"the `dtype` parameter in EmptyForm\.to_NumpyForm is deprecated",
-    ):
-        next_form = form.to_NumpyForm(dtype=np.dtype(np.int64))
-    assert next_form.primitive == "int64"
 
 
 def test_primitive():

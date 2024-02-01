@@ -1,26 +1,29 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 from functools import reduce
 from operator import mul
 
-from awkward._nplikes.numpylike import ArrayLike, NumpyLike, NumpyMetadata
+from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._typing import Self
+from awkward._typing import TYPE_CHECKING, Any, DType, Self
 
 np = NumpyMetadata.instance()
 
+if TYPE_CHECKING:
+    from numpy.typing import DTypeLike
+
 
 class PlaceholderArray(ArrayLike):
-    def __init__(
-        self, nplike: NumpyLike, shape: tuple[ShapeItem, ...], dtype: np.dtype
-    ):
+    def __init__(self, nplike: NumpyLike, shape: tuple[ShapeItem, ...], dtype: DType):
         self._nplike = nplike
         self._shape = shape
-        self._dtype = dtype
+        self._dtype = np.dtype(dtype)
 
     @property
-    def dtype(self) -> np.dtype:
+    def dtype(self) -> DType:
         return self._dtype
 
     @property
@@ -36,24 +39,26 @@ class PlaceholderArray(ArrayLike):
         return reduce(mul, self._shape)
 
     @property
+    def nbytes(self) -> int:
+        return 0
+
+    @property
     def strides(self) -> tuple[ShapeItem, ...]:
-        out = (self._dtype.itemsize,)
+        out: tuple[ShapeItem, ...] = (self._dtype.itemsize,)
         for item in reversed(self._shape):
             out = (item * out[0], *out)
         return out
 
     @property
-    def itemsize(self) -> int:
-        return self._dtype.itemsize
-
-    @property
     def T(self):
         return type(self)(self._nplike, self._shape[::-1], self._dtype)
 
-    def view(self, dtype: dtype) -> Self:
+    def view(self, dtype: DTypeLike) -> Self:
         dtype = np.dtype(dtype)
         if len(self._shape) >= 1:
-            last, remainder = divmod(self._shape[-1] * self.itemsize, dtype.itemsize)
+            last, remainder = divmod(
+                self._shape[-1] * self._dtype.itemsize, dtype.itemsize
+            )
             if remainder is not unknown_length and remainder != 0:
                 raise ValueError(
                     "new size of array with larger dtype must be a "
@@ -65,13 +70,29 @@ class PlaceholderArray(ArrayLike):
         return type(self)(self._nplike, shape, dtype)
 
     def __getitem__(self, index):
+        # Typetracers permit slices that don't touch data or shapes
         if isinstance(index, slice):
-            if self._shape[0] is unknown_length:
-                return type(self)(self._nplike, self._shape, self._dtype)
+            length = self._shape[0]
+
+            # Unknown-length placeholders should not be sliced (as their shapes would be touched(
+            if length is unknown_length:
+                raise AssertionError(
+                    "placeholder arrays that are sliced should have known shapes"
+                )
+            # Known-length placeholders *always* need a known shape
+            elif (
+                index.start is unknown_length
+                or index.stop is unknown_length
+                or index.step is unknown_length
+            ):
+                raise AssertionError(
+                    "known-length placeholders should never encounter unknown lengths in slices"
+                )
             else:
-                start, stop, step = index.indices(self._shape[0])
-                new_shape = ((stop - start) // step,)
-                return type(self)(self._nplike, new_shape, self._dtype)
+                start, stop, step = index.indices(length)
+                new_length = (stop - start) // step
+
+            return type(self)(self._nplike, (new_length,), self._dtype)
         else:
             raise TypeError(
                 f"{type(self).__name__} supports only trivial slices, not {type(index).__name__}"
@@ -90,7 +111,7 @@ class PlaceholderArray(ArrayLike):
         raise RuntimeError
 
     def __len__(self) -> int:
-        return self._shape[0]
+        return int(self._shape[0])
 
     def __add__(self, other):
         raise RuntimeError
@@ -131,4 +152,10 @@ class PlaceholderArray(ArrayLike):
     def __truediv__(self, other):
         raise RuntimeError
 
-    __iter__ = None
+    __iter__: None = None
+
+    def __dlpack_device__(self) -> tuple[int, int]:
+        raise RuntimeError
+
+    def __dlpack__(self, stream: Any = None) -> Any:
+        raise RuntimeError

@@ -1,17 +1,18 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable
-from itertools import permutations
+from collections.abc import Iterable, Mapping
 
 import awkward as ak
 import awkward._prettyprint
 from awkward._behavior import find_record_typestr
-from awkward._errors import deprecate
 from awkward._parameters import parameters_are_equal, type_parameters_equal
-from awkward._typing import Self, final
-from awkward._util import UNSET
+from awkward._regularize import is_integer
+from awkward._typing import Any, JSONMapping, Self, cast, final
+from awkward._util import UNSET, Sentinel
+from awkward.errors import FieldNotFoundError
 from awkward.types.type import Type
 
 
@@ -20,27 +21,32 @@ class RecordType(Type):
     def copy(
         self,
         *,
-        contents: list[Type] = UNSET,
-        fields: list[str] | None = UNSET,
-        parameters=UNSET,
-        typestr=UNSET,
+        contents: Iterable[Type] | Sentinel = UNSET,
+        fields: Iterable[str] | Sentinel | None = UNSET,
+        parameters: JSONMapping | Sentinel | None = UNSET,
     ) -> Self:
         return RecordType(
-            self._contents if contents is UNSET else contents,
-            self._fields if fields is UNSET else fields,
-            parameters=self._parameters if parameters is UNSET else parameters,
-            typestr=self._typestr if typestr is UNSET else typestr,
+            self._contents if contents is UNSET else contents,  # type: ignore[arg-type]
+            self._fields if fields is UNSET else fields,  # type: ignore[arg-type]
+            parameters=self._parameters if parameters is UNSET else parameters,  # type: ignore[arg-type]
         )
 
-    def __init__(self, contents, fields, *, parameters=None, typestr=None):
+    def __init__(
+        self,
+        contents: Iterable[Type],
+        fields: Iterable[str],
+        *,
+        parameters: JSONMapping | None = None,
+    ):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{} 'contents' must be iterable, not {}".format(
                     type(self).__name__, repr(contents)
                 )
             )
-        if not isinstance(contents, list):
+        elif not isinstance(contents, list):
             contents = list(contents)
+
         for content in contents:
             if not isinstance(content, Type):
                 raise TypeError(
@@ -48,46 +54,40 @@ class RecordType(Type):
                         type(self).__name__, repr(content)
                     )
                 )
-        if fields is not None and not isinstance(fields, Iterable):
+        if fields is not None:
+            if not isinstance(fields, Iterable):
+                raise TypeError(
+                    f"{type(self).__name__} 'fields' must be iterable, not {contents!r}"
+                )
+            elif not isinstance(fields, list):
+                fields = list(fields)
+
+        if parameters is not None and not isinstance(parameters, Mapping):
             raise TypeError(
-                f"{type(self).__name__} 'fields' must be iterable, not {contents!r}"
-            )
-        if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError(
-                "{} 'parameters' must be of type dict or None, not {}".format(
+                "{} 'parameters' must be of type Mapping or None, not {}".format(
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr is not None and not isinstance(typestr, str):
-            raise TypeError(
-                "{} 'typestr' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(typestr)
-                )
-            )
-        self._contents = contents
-        self._fields = fields
-        self._parameters = parameters
-        self._typestr = typestr
+        self._contents: list[Type] = contents
+        self._fields: list[str] = fields
+        self._parameters: JSONMapping | None = parameters
 
     @property
-    def contents(self):
+    def contents(self) -> list[Type]:
         return self._contents
 
     @property
-    def fields(self):
+    def fields(self) -> list[str]:
         return self._fields
 
     @property
-    def is_tuple(self):
+    def is_tuple(self) -> bool:
         return self._fields is None
 
-    _str_parameters_exclude = ("__categorical__", "__record__")
+    _str_parameters_exclude: tuple[str, ...] = ("__categorical__", "__record__")
 
-    def _str(self, indent, compact, behavior):
-        if self._typestr is not None:
-            deprecate("typestr argument is deprecated", "2.4.0")
-
-        typestr = find_record_typestr(behavior, self._parameters, self._typestr)
+    def _str(self, indent: str, compact: bool, behavior: Mapping | None) -> list[str]:
+        typestr = find_record_typestr(behavior, self._parameters)
         if typestr is not None:
             out = [typestr]
 
@@ -117,7 +117,7 @@ class RecordType(Type):
                 children.append(y)
 
             params = self._str_parameters()
-            name = self.parameter("__record__")
+            name = cast("str | None", self.parameter("__record__"))
 
             if name is not None:
                 if (
@@ -190,7 +190,7 @@ class RecordType(Type):
         args = [repr(self._contents), repr(self._fields), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _is_equal_to(self, other, all_parameters: bool) -> bool:
+    def _is_equal_to(self, other: Any, all_parameters: bool) -> bool:
         if not isinstance(other, type(self)):
             return False
 
@@ -211,28 +211,66 @@ class RecordType(Type):
             if set(self._fields) != set(other._fields):
                 return False
 
-            self_contents = [self.content(f) for f in self._fields]
-            other_contents = [other.content(f) for f in other._fields]
-
-            return any(
-                all(
-                    this._is_equal_to(that, all_parameters)
-                    for this, that in zip(self_contents, contents)
-                )
-                for contents in permutations(other_contents)
+            return all(
+                content._is_equal_to(other.content(field), all_parameters)
+                for field, content in zip(self._fields, self._contents)
             )
+
         # Mixed
         else:
             return False
 
-    def index_to_field(self, index):
-        return ak.forms.RecordForm.index_to_field(self, index)
+    def index_to_field(self, index: int) -> str:
+        if 0 <= index < len(self._contents):
+            if self._fields is None:
+                return str(index)
+            else:
+                return self._fields[index]
+        else:
+            raise IndexError(
+                f"no index {index} in record with {len(self._contents)} fields"
+            )
 
-    def field_to_index(self, field):
-        return ak.forms.RecordForm.field_to_index(self, field)
+    def field_to_index(self, field: str) -> int:
+        if self._fields is None:
+            try:
+                i = int(field)
+            except ValueError:
+                pass
+            else:
+                if 0 <= i < len(self._contents):
+                    return i
+        else:
+            try:
+                i = self._fields.index(field)
+            except ValueError:
+                pass
+            else:
+                return i
+        raise FieldNotFoundError(
+            f"no field {field!r} in record with {len(self._contents)} fields"
+        )
 
-    def has_field(self, field):
-        return ak.forms.RecordForm.has_field(self, field)
+    def has_field(self, field: str) -> bool:
+        if self._fields is None:
+            try:
+                i = int(field)
+            except ValueError:
+                return False
+            else:
+                return 0 <= i < len(self._contents)
+        else:
+            return field in self._fields
 
-    def content(self, index_or_field):
-        return ak.forms.RecordForm.content(self, index_or_field)
+    def content(self, index_or_field: int | str) -> Type:
+        if is_integer(index_or_field):
+            index = int(index_or_field)
+        elif isinstance(index_or_field, str):
+            index = self.field_to_index(index_or_field)
+        else:
+            raise TypeError(
+                "index_or_field must be an integer (index) or string (field), not {}".format(
+                    repr(index_or_field)
+                )
+            )
+        return self._contents[index]

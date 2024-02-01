@@ -29,7 +29,7 @@ It is often the case that one has an array of data that they wish to subdivide i
 First, we should load the data
 
 ```{code-cell} ipython3
-with urlopen("https://data.nasa.gov/resource/y77d-th95.json") as f:
+with open("../data/y77d-th95.json", "rb") as f:
     landing = ak.from_json(f)
 landing.fields
 ```

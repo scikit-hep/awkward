@@ -1,24 +1,24 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("with_field",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import copy
 
 import awkward as ak
-from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
 
+__all__ = ("with_field",)
+
 np = NumpyMetadata.instance()
-
-
 cpu = NumpyBackend.instance()
 
 
 @high_level_function()
-def with_field(array, what, where=None, *, highlevel=True, behavior=None):
+def with_field(array, what, where=None, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -30,6 +30,8 @@ def with_field(array, what, where=None, *, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Returns an #ak.Array or #ak.Record (or low-level equivalent, if
@@ -45,10 +47,10 @@ def with_field(array, what, where=None, *, highlevel=True, behavior=None):
     yield array, what
 
     # Implementation
-    return _impl(array, what, where, highlevel, behavior)
+    return _impl(array, what, where, highlevel, behavior, attrs)
 
 
-def _impl(base, what, where, highlevel, behavior):
+def _impl(base, what, where, highlevel, behavior, attrs):
     if not (
         where is None
         or isinstance(where, str)
@@ -65,31 +67,29 @@ def _impl(base, what, where, highlevel, behavior):
     if is_non_string_like_sequence(where) and len(where) > 1:
         return _impl(
             base,
-            _impl(
-                base[where[0]],
-                what,
-                where[1:],
-                highlevel,
-                behavior,
-            ),
+            _impl(base[where[0]], what, where[1:], highlevel, behavior, attrs),
             where[0],
             highlevel,
             behavior,
+            attrs,
         )
     else:
         # If we have an iterable here, pull out the only ti
         if is_non_string_like_sequence(where):
             where = where[0]
 
-        behavior = behavior_of(base, what, behavior=behavior)
-        backend = backend_of(base, what, default=cpu)
-
-        base = ak.operations.to_layout(
-            base, allow_record=True, allow_other=False
-        ).to_backend(backend)
-        what = ak.operations.to_layout(what, allow_record=True, allow_other=True)
-        if isinstance(what, (ak.contents.Content, ak.record.Record)):
-            what = what.to_backend(backend)
+        with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+            base, what = ensure_same_backend(
+                ctx.unwrap(base, allow_record=True, primitive_policy="error"),
+                ctx.unwrap(
+                    what,
+                    allow_record=True,
+                    allow_unknown=False,
+                    none_policy="pass-through",
+                    primitive_policy="pass-through",
+                    string_policy="promote",
+                ),
+            )
 
         keys = copy.copy(base.fields)
         if where in base.fields:
@@ -158,12 +158,9 @@ def _impl(base, what, where, highlevel, behavior):
                 return None
 
         out = ak._broadcasting.broadcast_and_apply(
-            [base, what],
-            action,
-            behavior,
-            right_broadcast=False,
+            [base, what], action, right_broadcast=False
         )
 
         assert isinstance(out, tuple) and len(out) == 1
 
-        return wrap_layout(out[0], behavior, highlevel)
+        return ctx.wrap(out[0], highlevel=highlevel)

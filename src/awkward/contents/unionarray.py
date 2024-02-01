@@ -1,25 +1,41 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 # pylint: disable=consider-using-enumerate
+
 from __future__ import annotations
 
 import copy
 import ctypes
-from collections.abc import Iterable, MutableMapping, Sequence
+from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
+from awkward._meta.unionmeta import UnionMeta
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
 from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.errors import AxisError
 from awkward.forms.form import Form
 from awkward.forms.unionform import UnionForm
@@ -33,7 +49,7 @@ numpy = Numpy.instance()
 
 
 @final
-class UnionArray(Content):
+class UnionArray(UnionMeta[Content], Content):
     """
     UnionArray represents data drawn from an ordered list of `contents`,
     which can have different types, using
@@ -86,8 +102,6 @@ class UnionArray(Content):
                 else:
                     raise AssertionError(where)
     """
-
-    is_union = True
 
     def __init__(self, tags, index, contents, *, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
@@ -149,16 +163,6 @@ class UnionArray(Content):
                 "try {0}.simplified instead".format(type(self).__name__)
             )
 
-        if (
-            not (tags.length is unknown_length or index.length is unknown_length)
-            and tags.length > index.length
-        ):
-            raise ValueError(
-                "{} len(tags) ({}) must be <= len(index) ({})".format(
-                    type(self).__name__, tags.length, index.length
-                )
-            )
-
         backend = None
         for content in contents:
             if backend is None:
@@ -171,6 +175,18 @@ class UnionArray(Content):
                         type(content.backend).__name__,
                     )
                 )
+
+        if (
+            backend.index_nplike.known_data
+            and tags.length is not unknown_length
+            and index.length is not unknown_length
+            and tags.length > index.length
+        ):
+            raise ValueError(
+                "{} len(tags) ({}) must be <= len(index) ({})".format(
+                    type(self).__name__, tags.length, index.length
+                )
+            )
 
         assert tags.nplike is backend.index_nplike
         assert index.nplike is backend.index_nplike
@@ -187,10 +203,6 @@ class UnionArray(Content):
     @property
     def index(self):
         return self._index
-
-    @property
-    def contents(self):
-        return self._contents
 
     form_cls: Final = UnionForm
 
@@ -228,17 +240,8 @@ class UnionArray(Content):
         contents,
         *,
         parameters=None,
-        merge=UNSET,
         mergebool=False,
     ):
-        if merge is UNSET:
-            merge = True
-        else:
-            deprecate(
-                "The `merge` argument to UnionArray.simplified(...) is deprecated; "
-                "it is no longer possible to construct UnionArrays with mergeable contents.",
-                version="2.4.0",
-            )
         self_index = index
         self_tags = tags
         self_contents = contents
@@ -282,7 +285,7 @@ class UnionArray(Content):
                     # For each "final" outer union content
                     for k in range(len(contents)):
                         # Try and merge inner union content with running outer-union contentca
-                        if merge and contents[k]._mergeable_next(inner_cont, mergebool):
+                        if contents[k]._mergeable_next(inner_cont, mergebool):
                             backend.maybe_kernel_error(
                                 backend[
                                     "awkward_UnionArray_simplify",
@@ -362,7 +365,7 @@ class UnionArray(Content):
                         unmerged = False
                         break
 
-                    elif merge and contents[k]._mergeable_next(self_cont, mergebool):
+                    elif contents[k]._mergeable_next(self_cont, mergebool):
                         backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
@@ -455,9 +458,6 @@ class UnionArray(Content):
                 parameters=parameters,
             )
 
-    def content(self, index):
-        return self._contents[index]
-
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> UnionForm:
         form_key = getkey(self)
         return self.form_cls(
@@ -494,7 +494,7 @@ class UnionArray(Content):
         return UnionArray(
             tags.forget_length() if forget_length else tags,
             self._index.to_nplike(tt),
-            [x._to_typetracer(False) for x in self._contents],
+            [x._to_typetracer(forget_length) for x in self._contents],
             parameters=self._parameters,
         )
 
@@ -552,7 +552,7 @@ class UnionArray(Content):
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -708,7 +708,7 @@ class UnionArray(Content):
         nextcarry = ak.index.Index64(
             tmpcarry.data[: lenout[0]], nplike=self._backend.index_nplike
         )
-        return self._contents[index]._carry(nextcarry, False)
+        return self._contents[index]._carry(nextcarry, True)
 
     @staticmethod
     def regular_index(
@@ -994,23 +994,15 @@ class UnionArray(Content):
                 "to merge this array with 'others', at least one other must be provided"
             )
 
-        head = [self]
+        head = [self, *others]
         tail = []
 
-        for i in range(len(others)):
-            head.append(others[i])
+        if any(x.backend.nplike.known_data for x in head + tail) and not all(
+            x.backend.nplike.known_data for x in head + tail
+        ):
+            raise RuntimeError
 
-        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
-            head = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in head
-            ]
-            tail = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in tail
-            ]
-
-        return (head, tail)
+        return head, tail
 
     def _reverse_merge(self, other):
         theirlength = other.length
@@ -1404,7 +1396,7 @@ class UnionArray(Content):
 
         # Check triangular pairs (i, j) are not mergeable
         for i, content_i in enumerate(self._contents):
-            for j in range(0, i):
+            for j in range(i):
                 content_j = self._contents[j]
                 if ak._do.mergeable(content_i, content_j, mergebool=False):
                     return f"at {path}: content({i}) is mergeable with content({j})"
@@ -1437,7 +1429,14 @@ class UnionArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         nptags = self._tags.raw(numpy)
         npindex = self._index.raw(numpy)
         copied_index = False
@@ -1520,7 +1519,9 @@ class UnionArray(Content):
             "Conversion of irreducible unions to backend arrays is not supported."
         )
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         out = []
         for i in range(len(self._contents)):
             index = self._index[self._tags.data == i]
@@ -1532,8 +1533,13 @@ class UnionArray(Content):
         return out
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if options["return_array"]:
             if options["return_simplified"]:
                 make = UnionArray.simplified
@@ -1547,7 +1553,6 @@ class UnionArray(Content):
                     [
                         content._recursively_apply(
                             action,
-                            behavior,
                             depth,
                             copy.copy(depth_context),
                             lateral_context,
@@ -1564,7 +1569,6 @@ class UnionArray(Content):
                 for content in self._contents:
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1577,7 +1581,6 @@ class UnionArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )
@@ -1589,15 +1592,18 @@ class UnionArray(Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
-        tags = self._tags.raw(self._backend.nplike)
-        original_index = index = self._index.raw(self._backend.nplike)[: tags.shape[0]]
+    def to_packed(self, recursive: bool = True) -> Self:
+        index_nplike = self._backend.index_nplike
+        tags = self._tags.data
+        original_index = index = self._index.data[: tags.shape[0]]
 
         contents = list(self._contents)
 
         for tag in range(len(self._contents)):
             is_tag = tags == tag
-            num_tag = self._backend.index_nplike.count_nonzero(is_tag)
+            num_tag = index_nplike.index_as_shape_item(
+                index_nplike.count_nonzero(is_tag)
+            )
 
             if len(contents[tag]) > num_tag:
                 if original_index is index:
@@ -1607,7 +1613,9 @@ class UnionArray(Content):
                 )
                 contents[tag] = self.project(tag)
 
-            contents[tag] = contents[tag].to_packed()
+            contents[tag] = (
+                contents[tag].to_packed(True) if recursive else contents[tag]
+            )
 
         return UnionArray(
             ak.index.Index8(tags, nplike=self._backend.index_nplike),
@@ -1644,13 +1652,16 @@ class UnionArray(Content):
             parameters=self._parameters,
         )
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
         return (
-            self.tags.is_equal_to(other.tags)
-            and self.index.is_equal_to(other.index, index_dtype, numpyarray)
-            and len(self.contents) == len(other.contents)
+            self._is_equal_to_generic(other, all_parameters)
+            and self._tags.is_equal_to(other.tags)
+            and self._index.is_equal_to(other.index, index_dtype, numpyarray)
+            and len(self._contents) == len(other.contents)
             and all(
-                self.contents[i].is_equal_to(other.contents[i], index_dtype, numpyarray)
-                for i in range(len(self.contents))
+                content.is_equal_to(other.contents[i], index_dtype, numpyarray)
+                for i, content in enumerate(self.contents)
             )
         )

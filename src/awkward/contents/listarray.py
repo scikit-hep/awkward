@@ -1,13 +1,16 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._meta.listmeta import ListMeta
+from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
@@ -16,9 +19,23 @@ from awkward._parameters import (
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.form import Form
 from awkward.forms.listform import ListForm
@@ -31,7 +48,7 @@ np = NumpyMetadata.instance()
 
 
 @final
-class ListArray(Content):
+class ListArray(ListMeta[Content], Content):
     """
     ListArray generalizes #ak.contents.ListOffsetArray by not
     requiring its `content` to be in increasing order and by allowing it to
@@ -103,8 +120,6 @@ class ListArray(Content):
                     raise AssertionError(where)
     """
 
-    is_list = True
-
     def __init__(self, starts, stops, content, *, parameters=None):
         if not isinstance(starts, Index) and starts.dtype in (
             np.dtype(np.int32),
@@ -126,11 +141,7 @@ class ListArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if (
-            starts.nplike.known_data
-            and stops.nplike.known_data
-            and starts.length > stops.length
-        ):
+        if content.backend.index_nplike.known_data and starts.length > stops.length:
             raise ValueError(
                 "{} len(starts) ({}) must be <= len(stops) ({})".format(
                     type(self).__name__, starts.length, stops.length
@@ -167,10 +178,6 @@ class ListArray(Content):
     @property
     def stops(self) -> Index:
         return self._stops
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = ListForm
 
@@ -232,7 +239,7 @@ class ListArray(Content):
         return ListArray(
             starts.forget_length() if forget_length else starts,
             self._stops.to_nplike(tt),
-            self._content._to_typetracer(False),
+            self._content._to_typetracer(forget_length),
             parameters=self._parameters,
         )
 
@@ -313,7 +320,7 @@ class ListArray(Content):
         start, stop = self._starts[where], self._stops[where]
         return self._content._getitem_range(start, stop)
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -1069,8 +1076,8 @@ class ListArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # Check against option contents
-        elif other.is_option or other.is_indexed:
+        # Is the other array indexed or optional?
+        elif other.is_indexed or other.is_option:
             return self._mergeable_next(other.content, mergebool)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
@@ -1117,6 +1124,8 @@ class ListArray(Content):
                 ),
             ):
                 contents.append(array.content)
+            elif array.is_numpy:
+                contents.append(array.to_RegularArray().content)
             else:
                 raise ValueError(
                     "cannot merge "
@@ -1136,6 +1145,11 @@ class ListArray(Content):
         length_so_far = 0
 
         for array in head:
+            # We need contiguous content, so let's just convert to RegularArray
+            # immediately.
+            if array.is_numpy:
+                array = array.to_RegularArray()
+
             if isinstance(
                 array,
                 (
@@ -1210,6 +1224,9 @@ class ListArray(Content):
 
             elif isinstance(array, ak.contents.EmptyArray):
                 pass
+
+            else:
+                raise AssertionError
 
         next = ak.contents.ListArray(
             nextstarts, nextstops, nextcontent, parameters=parameters
@@ -1480,7 +1497,14 @@ class ListArray(Content):
                 target, axis, depth, clip=True
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         return self.to_ListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
@@ -1494,7 +1518,9 @@ class ListArray(Content):
         else:
             return self.to_RegularArray()._to_backend_array(allow_missing, backend)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         return self.to_ListOffsetArray64(False)._remove_structure(backend, options)
 
     def _drop_none(self) -> Content:
@@ -1506,8 +1532,13 @@ class ListArray(Content):
         )
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if (
             self._backend.nplike.known_data
             and self._backend.nplike.known_data
@@ -1535,7 +1566,6 @@ class ListArray(Content):
                     stops,
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth + 1,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1549,7 +1579,6 @@ class ListArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
@@ -1562,7 +1591,6 @@ class ListArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )
@@ -1574,8 +1602,8 @@ class ListArray(Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
-        return self.to_ListOffsetArray64(True).to_packed()
+    def to_packed(self, recursive: bool = True) -> Self:
+        return self.to_ListOffsetArray64(True).to_packed(recursive)
 
     def _to_list(self, behavior, json_conversions):
         if not self._backend.nplike.known_data:
@@ -1589,9 +1617,14 @@ class ListArray(Content):
         stops = self._stops.to_nplike(backend.index_nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
         return (
-            self.starts.is_equal_to(other.starts, index_dtype, numpyarray)
-            and self.stops.is_equal_to(other.stops, index_dtype, numpyarray)
-            and self.content.is_equal_to(other.content, index_dtype, numpyarray)
+            self._is_equal_to_generic(other, all_parameters)
+            and self._starts.is_equal_to(other.starts, index_dtype, numpyarray)
+            and self._stops.is_equal_to(other.stops, index_dtype, numpyarray)
+            and self._content._is_equal_to(
+                other.content, index_dtype, numpyarray, all_parameters
+            )
         )

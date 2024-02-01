@@ -1,19 +1,34 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("linear_fit",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._backends.dispatch import backend_of
-from awkward._behavior import behavior_of
+from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
+from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes import ufuncs
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
+__all__ = ("linear_fit",)
+
+cpu = NumpyBackend.instance()
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False):
+def linear_fit(
+    x,
+    y,
+    weight=None,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
+):
     """
     Args:
         x: One coordinate to use in the linear fit (anything #ak.to_layout recognizes).
@@ -35,6 +50,12 @@ def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=Fa
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Computes the linear fit of `y` with respect to `x` (many types supported,
     including all Awkward Arrays and Records, must be broadcastable to each
@@ -70,28 +91,32 @@ def linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=Fa
     yield x, y, weight
 
     # Implementation
-    return _impl(x, y, weight, axis, keepdims, mask_identity)
+    return _impl(
+        x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs
+    )
 
 
-def _impl(x, y, weight, axis, keepdims, mask_identity):
+def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(x, y, weight)
-    x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False),
-        behavior=behavior,
-    )
-    y = ak.highlevel.Array(
-        ak.operations.to_layout(y, allow_record=False, allow_other=False),
-        behavior=behavior,
-    )
-    if weight is not None:
-        weight = ak.highlevel.Array(
-            ak.operations.to_layout(weight, allow_record=False, allow_other=False),
-            behavior=behavior,
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        x_layout, y_layout, weight_layout = ensure_same_backend(
+            ctx.unwrap(x, allow_record=False, primitive_policy="error"),
+            ctx.unwrap(y, allow_record=False, primitive_policy="error"),
+            ctx.unwrap(
+                weight,
+                allow_record=False,
+                allow_unknown=False,
+                primitive_policy="error",
+                none_policy="pass-through",
+            ),
         )
 
+    x = ctx.wrap(x_layout)
+    y = ctx.wrap(y_layout)
+    weight = ctx.wrap(weight_layout, allow_other=True)
+
     with np.errstate(invalid="ignore", divide="ignore"):
-        backend = backend_of(x, y, weight)
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x,
@@ -99,7 +124,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x,
@@ -107,7 +133,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwy = ak.operations.ak_sum._impl(
                 y,
@@ -115,7 +142,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwxx = ak.operations.ak_sum._impl(
                 x**2,
@@ -123,7 +151,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwxy = ak.operations.ak_sum._impl(
                 x * y,
@@ -131,7 +160,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
         else:
             sumw = ak.operations.ak_sum._impl(
@@ -140,7 +170,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x * weight,
@@ -148,7 +179,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwy = ak.operations.ak_sum._impl(
                 y * weight,
@@ -156,7 +188,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwxx = ak.operations.ak_sum._impl(
                 (x**2) * weight,
@@ -164,7 +197,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
             sumwxy = ak.operations.ak_sum._impl(
                 x * y * weight,
@@ -172,7 +206,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
                 keepdims,
                 mask_identity,
                 highlevel=True,
-                behavior=behavior,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
             )
         delta = (sumw * sumwxx) - (sumwx * sumwx)
         intercept = ((sumwxx * sumwy) - (sumwx * sumwxy)) / delta
@@ -180,63 +215,22 @@ def _impl(x, y, weight, axis, keepdims, mask_identity):
         intercept_error = ufuncs.sqrt(sumwxx / delta)
         slope_error = ufuncs.sqrt(sumw / delta)
 
-        intercept = ak.operations.to_layout(
-            intercept, allow_record=True, allow_other=True
-        )
-        slope = ak.operations.to_layout(slope, allow_record=True, allow_other=True)
-        intercept_error = ak.operations.to_layout(
-            intercept_error, allow_record=True, allow_other=True
-        )
-        slope_error = ak.operations.to_layout(
-            slope_error, allow_record=True, allow_other=True
+        is_scalar = not isinstance(
+            ak.operations.to_layout(intercept, primitive_policy="pass-through"),
+            ak.contents.Content,
         )
 
-        scalar = False
-        if not isinstance(
-            intercept,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            intercept = ak.contents.NumpyArray(backend.nplike.asarray([intercept]))
-            scalar = True
-        if not isinstance(
-            slope,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            slope = ak.contents.NumpyArray(backend.nplike.asarray([slope]))
-            scalar = True
-        if not isinstance(
-            intercept_error,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            intercept_error = ak.contents.NumpyArray(
-                backend.nplike.asarray([intercept_error])
-            )
-            scalar = True
-        if not isinstance(
-            slope_error,
-            (
-                ak.contents.Content,
-                ak.record.Record,
-            ),
-        ):
-            slope_error = ak.contents.NumpyArray(backend.nplike.asarray([slope_error]))
-            scalar = True
+        intercept = ak.operations.to_layout(intercept)
+        slope = ak.operations.to_layout(slope)
+        intercept_error = ak.operations.to_layout(intercept_error)
+        slope_error = ak.operations.to_layout(slope_error)
 
         out = ak.contents.RecordArray(
             [intercept, slope, intercept_error, slope_error],
             ["intercept", "slope", "intercept_error", "slope_error"],
             parameters={"__record__": "LinearFit"},
         )
-        if scalar:
+        if is_scalar:
             out = out[0]
 
-        return wrap_layout(out, highlevel=True, behavior=behavior, allow_other=scalar)
+        return ctx.wrap(out, highlevel=highlevel, allow_other=is_scalar)

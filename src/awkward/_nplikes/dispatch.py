@@ -1,8 +1,11 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-from awkward._nplikes.numpylike import NumpyLike
-from awkward._typing import TypeVar
-from awkward._util import UNSET
+from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.numpy_like import NumpyLike
+from awkward._typing import Any, TypeVar, cast
+from awkward._util import UNSET, Sentinel
 
 D = TypeVar("D")
 
@@ -19,7 +22,12 @@ def register_nplike(cls: N) -> N:
     return cls
 
 
-def nplike_of(obj, *, default: D = UNSET) -> NumpyLike | D:
+ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
+
+
+def nplike_of_obj(
+    obj: Any, *, default: D | Sentinel = UNSET
+) -> NumpyLike[ArrayLikeT] | D:
     """
     Args:
         *arrays: iterable of possible array objects
@@ -44,6 +52,6 @@ def nplike_of(obj, *, default: D = UNSET) -> NumpyLike | D:
             if default is UNSET:
                 raise TypeError(f"cannot find nplike for {cls.__name__}")
             else:
-                return default
+                return cast(D, default)
         _type_to_nplike[cls] = nplike
         return nplike

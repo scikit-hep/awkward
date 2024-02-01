@@ -1,17 +1,33 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("softmax",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._dispatch import high_level_function
+from awkward._layout import (
+    HighLevelContext,
+    maybe_highlevel_to_lowlevel,
+)
 from awkward._nplikes import ufuncs
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+
+__all__ = ("softmax",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
+def softmax(
+    x,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
+):
     """
     Args:
         x: The data on which to compute the softmax (anything #ak.to_layout recognizes).
@@ -28,6 +44,12 @@ def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
             empty lists results in None (an option type); otherwise, the
             calculation is followed through with the reducers' identities,
             usually resulting in floating-point `nan`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Computes the softmax in each group of elements from `x` (many
     types supported, including all Awkward Arrays and Records). The grouping
@@ -48,16 +70,15 @@ def softmax(x, axis=None, *, keepdims=False, mask_identity=False):
     yield (x,)
 
     # Implementation
-    return _impl(x, axis, keepdims, mask_identity)
+    return _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs)
 
 
-def _impl(x, axis, keepdims, mask_identity):
+def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(x)
-    x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False),
-        behavior=behavior,
-    )
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        x_layout = ctx.unwrap(x, allow_record=False, primitive_policy="error")
+    x = ctx.wrap(x_layout)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         expx = ufuncs.exp(x)
@@ -67,6 +88,11 @@ def _impl(x, axis, keepdims, mask_identity):
             keepdims,
             mask_identity,
             highlevel=True,
-            behavior=behavior,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
         )
-        return expx / denom
+        return ctx.wrap(
+            maybe_highlevel_to_lowlevel(expx / denom),
+            highlevel=highlevel,
+            allow_other=True,
+        )

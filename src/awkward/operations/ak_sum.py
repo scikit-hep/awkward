@@ -1,12 +1,15 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("sum",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
-from awkward._layout import wrap_layout
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._layout import HighLevelContext
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+
+__all__ = ("sum", "nansum")
 
 np = NumpyMetadata.instance()
 
@@ -20,6 +23,7 @@ def sum(
     mask_identity=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -39,6 +43,8 @@ def sum(
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
     Sums over `array` (many types supported, including all Awkward Arrays
@@ -201,7 +207,7 @@ def sum(
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior)
+    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs)
 
 
 @high_level_function()
@@ -213,6 +219,7 @@ def nansum(
     mask_identity=False,
     highlevel=True,
     behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -233,6 +240,8 @@ def nansum(
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Like #ak.sum, but treating NaN ("not a number") values as missing.
 
@@ -249,19 +258,20 @@ def nansum(
 
     # Implementation
     return _impl(
-        ak.operations.ak_nan_to_none._impl(array, False, None),
+        ak.operations.ak_nan_to_none._impl(array, True, behavior, attrs),
         axis,
         keepdims,
         mask_identity,
         highlevel,
         behavior,
+        attrs,
     )
 
 
-def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
+def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    behavior = behavior_of(array, behavior=behavior)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     reducer = ak._reducers.Sum()
 
     out = ak._do.reduce(
@@ -270,12 +280,9 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior):
         axis=axis,
         mask=mask_identity,
         keepdims=keepdims,
-        behavior=behavior,
+        behavior=ctx.behavior,
     )
-    if isinstance(out, (ak.contents.Content, ak.record.Record)):
-        return wrap_layout(out, behavior, highlevel=highlevel)
-    else:
-        return out
+    return ctx.wrap(out, highlevel=highlevel, allow_other=True)
 
 
 @ak._connect.numpy.implements("sum")

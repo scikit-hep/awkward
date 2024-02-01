@@ -1,26 +1,42 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.indexedoptionmeta import IndexedOptionMeta
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
-    type_parameters_equal,
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.errors import AxisError
 from awkward.forms.form import Form
 from awkward.forms.indexedoptionform import IndexedOptionForm
@@ -34,7 +50,7 @@ numpy = Numpy.instance()
 
 
 @final
-class IndexedOptionArray(Content):
+class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     """
     IndexedOptionArray is an #ak.contents.IndexedArray for which
     negative values in the index are interpreted as missing. It represents
@@ -82,9 +98,6 @@ class IndexedOptionArray(Content):
                     raise AssertionError(where)
     """
 
-    is_option = True
-    is_indexed = True
-
     def __init__(self, index, content, *, parameters=None):
         if not (
             isinstance(index, Index)
@@ -121,10 +134,6 @@ class IndexedOptionArray(Content):
     @property
     def index(self):
         return self._index
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     form_cls: Final = IndexedOptionForm
 
@@ -213,7 +222,7 @@ class IndexedOptionArray(Content):
         index = self._index.to_nplike(TypeTracer.instance())
         return IndexedOptionArray(
             index.forget_length() if forget_length else index,
-            self._content._to_typetracer(False),
+            self._content._to_typetracer(forget_length),
             parameters=self._parameters,
         )
 
@@ -269,9 +278,9 @@ class IndexedOptionArray(Content):
         carry = ak.index.Index(carry)
 
         if self._content.length is not unknown_length and self._content.length == 0:
-            content = self._content.form.length_one_array(
-                backend=self._backend, highlevel=False
-            )._carry(carry, False)
+            content = self._content.form.length_one_array(backend=self._backend)._carry(
+                carry, False
+            )
         else:
             content = self._content._carry(carry, False)
 
@@ -284,7 +293,7 @@ class IndexedOptionArray(Content):
             valid_when, lsb_order
         )
 
-    def mask_as_bool(self, valid_when=True):
+    def mask_as_bool(self, valid_when: bool = True) -> ArrayLike:
         if valid_when:
             return self._index.raw(self._backend.index_nplike) >= 0
         else:
@@ -307,7 +316,7 @@ class IndexedOptionArray(Content):
         else:
             return self._content._getitem_at(self._index[where])
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -623,11 +632,9 @@ class IndexedOptionArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # We can only combine option/indexed types whose array-record parameters agree
+        # Is the other array indexed or optional?
         elif other.is_option or other.is_indexed:
-            return self._content._mergeable_next(
-                other.content, mergebool
-            ) and type_parameters_equal(self._parameters, other._parameters)
+            return self._content._mergeable_next(other.content, mergebool)
         else:
             return self._content._mergeable_next(other, mergebool)
 
@@ -640,34 +647,37 @@ class IndexedOptionArray(Content):
         head = [self]
         tail = []
 
-        i = 0
-        while i < len(others):
-            other = others[i]
+        it_others = iter(others)
+        for other in it_others:
             if isinstance(other, ak.contents.UnionArray):
+                tail.append(other)
+                tail.extend(it_others)
                 break
             else:
                 head.append(other)
-            i = i + 1
 
-        while i < len(others):
-            tail.append(others[i])
-            i = i + 1
+        if any(x.backend.nplike.known_data for x in head + tail) and not all(
+            x.backend.nplike.known_data for x in head + tail
+        ):
+            raise RuntimeError
 
-        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
-            head = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in head
-            ]
-            tail = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in tail
-            ]
-
-        return (head, tail)
+        return head, tail
 
     def _reverse_merge(self, other):
         if isinstance(other, ak.contents.EmptyArray):
             return self
+
+        # FIXME: support categorical-categorical merging
+        if (
+            other.is_indexed
+            and other.parameter("__array__")
+            == self.parameter("__array__")
+            == "categorical"
+        ):
+            raise NotImplementedError(
+                "merging categorical arrays is currently not implemented. "
+                "Use `ak.enforce_type` to drop the categorical type and use general merging."
+            )
 
         theirlength = other.length
         mylength = self.length
@@ -678,6 +688,7 @@ class IndexedOptionArray(Content):
 
         content = other._mergemany([self._content])
 
+        # Fill index::0→theirlength with arange(theirlength)
         assert index.nplike is self._backend.index_nplike
         self._backend.maybe_kernel_error(
             self._backend["awkward_IndexedArray_fill_count", index.dtype.type](
@@ -687,30 +698,27 @@ class IndexedOptionArray(Content):
                 0,
             )
         )
-        reinterpreted_index = ak.index.Index(
-            self._backend.index_nplike.asarray(self.index.data),
-            nplike=self._backend.index_nplike,
-        )
 
+        # Fill index::theirlength->end with self.index[:mylength]+theirlength
         assert (
             index.nplike is self._backend.index_nplike
-            and reinterpreted_index.nplike is self._backend.index_nplike
+            and self.index.nplike is self._backend.index_nplike
         )
         self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_fill",
                 index.dtype.type,
-                reinterpreted_index.dtype.type,
+                self.index.dtype.type,
             ](
                 index.data,
                 theirlength,
-                reinterpreted_index.data,
+                self.index.data,
                 mylength,
                 theirlength,
             )
         )
-        # We can directly merge with other options, but we must merge parameters
-        if other.is_option:
+        # We can directly merge with other options and indexed types, but we must merge parameters
+        if other.is_option or other.is_indexed:
             parameters = parameters_union(self._parameters, other._parameters)
         # Otherwise, this option parameters win out
         else:
@@ -796,11 +804,26 @@ class IndexedOptionArray(Content):
 
                 length_so_far += array.length
 
+                # Categoricals may only survive if all contents are categorical
+                if (
+                    parameters is not None
+                    and parameters.get("__array__") == "categorical"
+                ):
+                    parameters = {**parameters}
+                    del parameters["__array__"]
+
         tail_contents = contents[1:]
         nextcontent = contents[0]._mergemany(tail_contents)
         next = ak.contents.IndexedOptionArray(
             nextindex, nextcontent, parameters=parameters
         )
+
+        # FIXME: support categorical merging?
+        if parameters is not None and parameters.get("__array__") == "categorical":
+            raise NotImplementedError(
+                "merging categorical arrays is currently not implemented. "
+                "Use `ak.enforce_type` to drop the categorical type and use general merging."
+            )
 
         if len(tail) == 0:
             return next
@@ -1265,10 +1288,15 @@ class IndexedOptionArray(Content):
                     nextoutindex.length,
                 )
             )
-
-        out = ak.contents.IndexedOptionArray.simplified(
-            nextoutindex, out, parameters=self._parameters
-        )
+            # Drop the option type: we have ensured that we don't have any
+            # -1 values in `nextoutindex` now!
+            out = out._carry(nextoutindex, False).copy(
+                parameters=parameters_union(out._parameters, self._parameters)
+            )
+        else:
+            out = ak.contents.IndexedOptionArray.simplified(
+                nextoutindex, out, parameters=self._parameters
+            )
 
         inject_nones = (
             True
@@ -1397,13 +1425,13 @@ class IndexedOptionArray(Content):
                     "reduce_next with unbranching depth > negaxis is only "
                     "expected to return RegularArray or ListOffsetArray or "
                     "IndexedOptionArray; "
-                    "instead, it returned {}".format(type(out).__name__)
+                    f"instead, it returned {type(out).__name__}"
                 )
 
             if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                 raise AssertionError(
                     "reduce_next with unbranching depth > negaxis expects a "
-                    "ListOffsetArray whose offsets start at zero ({})".format(starts[0])
+                    f"ListOffsetArray whose offsets start at zero ({starts[0]})"
                 )
             # In this branch, we're above the axis at which the reduction takes place.
             # `next._reduce_next` is therefore expected to return a list/regular layout
@@ -1517,8 +1545,15 @@ class IndexedOptionArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        index = numpy.asarray(self._index, copy=True)
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
+        index = numpy.asarray(self._index.data, copy=True)
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
 
@@ -1595,7 +1630,9 @@ class IndexedOptionArray(Content):
             else:
                 return content
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
             return self.project()._remove_structure(backend, options)
@@ -1606,8 +1643,13 @@ class IndexedOptionArray(Content):
         return self.project()
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if (
             self._backend.nplike.known_data
             and self._backend.nplike.known_data
@@ -1639,7 +1681,6 @@ class IndexedOptionArray(Content):
                     index,
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1653,7 +1694,6 @@ class IndexedOptionArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
@@ -1666,7 +1706,6 @@ class IndexedOptionArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )
@@ -1678,29 +1717,28 @@ class IndexedOptionArray(Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
-        original_index = self._index.raw(self._backend.nplike)
-        is_none = original_index < 0
-        num_none = self._backend.index_nplike.count_nonzero(is_none)
-        if self.parameter("__array__") == "categorical" or self._content.length <= (
-            len(original_index) - num_none
-        ):
+    def to_packed(self, recursive: bool = True) -> Self:
+        if self.parameter("__array__") == "categorical":
+            content = self._content.to_packed(True) if recursive else self._content
             return ak.contents.IndexedOptionArray(
-                self._index, self._content.to_packed(), parameters=self._parameters
+                self._index, content, parameters=self._parameters
             )
 
         else:
-            new_index = self._backend.index_nplike.empty(
-                len(original_index), dtype=original_index.dtype
-            )
+            index_nplike = self._backend.index_nplike
+            original_index = self._index.data
+            is_none = original_index < 0
+            num_none = index_nplike.count_nonzero(is_none)
+            new_index = index_nplike.empty(self._index.length, dtype=self._index.dtype)
             new_index[is_none] = -1
-            new_index[~is_none] = self._backend.index_nplike.arange(
-                len(original_index) - num_none,
-                dtype=original_index.dtype,
+            new_index[~is_none] = index_nplike.arange(
+                index_nplike.shape_item_as_index(new_index.size - num_none),
+                dtype=self._index.dtype,
             )
+            projected = self.project()
             return ak.contents.IndexedOptionArray(
                 ak.index.Index(new_index, nplike=self._backend.index_nplike),
-                self.project().to_packed(),
+                projected.to_packed(True) if recursive else projected,
                 parameters=self._parameters,
             )
 
@@ -1729,7 +1767,13 @@ class IndexedOptionArray(Content):
         index = self._index.to_nplike(backend.index_nplike)
         return IndexedOptionArray(index, content, parameters=self._parameters)
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
-        return self.index.is_equal_to(
-            other.index, index_dtype, numpyarray
-        ) and self.content.is_equal_to(other.content, index_dtype, numpyarray)
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters)
+            and self._index.is_equal_to(other.index, index_dtype, numpyarray)
+            and self._content._is_equal_to(
+                other.content, index_dtype, numpyarray, all_parameters
+            )
+        )

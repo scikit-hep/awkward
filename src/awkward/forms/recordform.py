@@ -1,19 +1,23 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from collections.abc import Iterable
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+from collections.abc import Callable, Iterable, Iterator
 
 import awkward as ak
-from awkward._parameters import type_parameters_equal
-from awkward._regularize import is_integer
-from awkward._typing import JSONSerializable, final
+from awkward._meta.recordmeta import RecordMeta
+from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._typing import Any, DType, Self, final
 from awkward._util import UNSET
-from awkward.errors import FieldNotFoundError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, _SpecifierMatcher
+
+__all__ = ("RecordForm",)
+
+np = NumpyMetadata.instance()
 
 
 @final
-class RecordForm(Form):
-    is_record = True
-
+class RecordForm(RecordMeta[Form], Form):
     def __init__(
         self,
         contents,
@@ -42,6 +46,8 @@ class RecordForm(Form):
 
         self._fields = None if fields is None else list(fields)
         self._contents = list(contents)
+        if fields is not None:
+            assert len(self._fields) == len(self._contents)
         self._init(parameters=parameters, form_key=form_key)
 
     @property
@@ -49,7 +55,7 @@ class RecordForm(Form):
         return self._contents
 
     @property
-    def fields(self):
+    def fields(self) -> list[str]:
         if self._fields is None:
             return [str(i) for i in range(len(self._contents))]
         else:
@@ -81,68 +87,9 @@ class RecordForm(Form):
     ):
         return cls(contents, fields, parameters=parameters, form_key=form_key)
 
-    @property
-    def is_tuple(self):
-        return self._fields is None
-
     def __repr__(self):
         args = [repr(self._contents), repr(self._fields), *self._repr_args()]
         return "{}({})".format(type(self).__name__, ", ".join(args))
-
-    def index_to_field(self, index):
-        if 0 <= index < len(self._contents):
-            if self._fields is None:
-                return str(index)
-            else:
-                return self._fields[index]
-        else:
-            raise IndexError(
-                f"no index {index} in record with {len(self._contents)} fields"
-            )
-
-    def field_to_index(self, field):
-        if self._fields is None:
-            try:
-                i = int(field)
-            except ValueError:
-                pass
-            else:
-                if 0 <= i < len(self._contents):
-                    return i
-        else:
-            try:
-                i = self._fields.index(field)
-            except ValueError:
-                pass
-            else:
-                return i
-        raise FieldNotFoundError(
-            f"no field {field!r} in record with {len(self._contents)} fields"
-        )
-
-    def has_field(self, field):
-        if self._fields is None:
-            try:
-                i = int(field)
-            except ValueError:
-                return False
-            else:
-                return 0 <= i < len(self._contents)
-        else:
-            return field in self._fields
-
-    def content(self, index_or_field):
-        if is_integer(index_or_field):
-            index = index_or_field
-        elif isinstance(index_or_field, str):
-            index = self.field_to_index(index_or_field)
-        else:
-            raise TypeError(
-                "index_or_field must be an integer (index) or string (field), not {}".format(
-                    repr(index_or_field)
-                )
-            )
-        return self._contents[index]
 
     def _to_dict_part(self, verbose, toplevel):
         out = {"class": "RecordArray"}
@@ -166,79 +113,11 @@ class RecordForm(Form):
             parameters=self._parameters,
         )
 
-    def __eq__(self, other):
-        if isinstance(other, RecordForm):
-            if (
-                self._form_key == other._form_key
-                and self.is_tuple == other.is_tuple
-                and len(self._contents) == len(other._contents)
-                and type_parameters_equal(self._parameters, other._parameters)
-            ):
-                if self.is_tuple:
-                    return self._contents == other._contents
-                else:
-                    return dict(zip(self._fields, self._contents)) == dict(
-                        zip(other._fields, other._contents)
-                    )
-            else:
-                return False
-        else:
-            return False
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        if self._parameters is not None:
-            for key in keys:
-                if key in self._parameters:
-                    return self._parameters[key]
-
-    @property
-    def purelist_isregular(self):
-        return True
-
-    @property
-    def purelist_depth(self):
-        return 1
-
-    @property
-    def is_identity_like(self):
-        return False
-
-    @property
-    def minmax_depth(self):
-        if len(self._contents) == 0:
-            return (1, 1)
-        mins, maxs = [], []
-        for content in self._contents:
-            mindepth, maxdepth = content.minmax_depth
-            mins.append(mindepth)
-            maxs.append(maxdepth)
-        return (min(mins), max(maxs))
-
-    @property
-    def branch_depth(self):
-        if len(self._contents) == 0:
-            return (False, 1)
-        anybranch = False
-        mindepth = None
-        for content in self._contents:
-            branch, depth = content.branch_depth
-            if mindepth is None:
-                mindepth = depth
-            if branch or mindepth != depth:
-                anybranch = True
-            if mindepth > depth:
-                mindepth = depth
-        return (anybranch, mindepth)
-
-    @property
-    def dimension_optiontype(self):
-        return False
-
     def _columns(self, path, output, list_indicator):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _prune_columns(self, is_inside_record_or_union: bool):
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
@@ -248,18 +127,13 @@ class RecordForm(Form):
             contents.append(next_content)
             fields.append(field)
 
-        if fields or not is_inside_record_or_union:
-            return RecordForm(
-                contents,
-                fields,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
         # If all subtrees are pruned (or we have no subtrees!), then we should prune this form too
-        else:
+        if not fields and is_inside_record_or_union:
             return None
+        else:
+            return self.copy(contents=contents, fields=fields)
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
@@ -275,12 +149,7 @@ class RecordForm(Form):
             contents.append(next_content)
             fields.append(field)
 
-        return RecordForm(
-            contents,
-            fields,
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+        return self.copy(contents=contents, fields=fields)
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
@@ -301,3 +170,24 @@ class RecordForm(Form):
             self.__init__(
                 contents, recordlookup, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str], recursive: bool
+    ) -> Iterator[tuple[str, DType]]:
+        if recursive:
+            for content in self._contents:
+                yield from content._expected_from_buffers(getkey, recursive)
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        computed_fields_set = set(self.fields)
+
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and self.is_tuple == other.is_tuple
+            and len(self._contents) == len(other._contents)
+            and all(f in computed_fields_set for f in other.fields)
+            and all(
+                content._is_equal_to(other.content(field), all_parameters, form_key)
+                for field, content in zip(self.fields, self._contents)
+            )
+        )

@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -1411,11 +1413,11 @@ def test_sumprod_types_FIXME():
     depth1 = ak.contents.ListOffsetArray(offsets3, content2)
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
 
 
@@ -1445,11 +1447,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1465,11 +1467,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1485,11 +1487,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1505,11 +1507,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1525,11 +1527,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1545,11 +1547,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1565,11 +1567,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -1585,11 +1587,11 @@ def test_sumprod_types():
 
     assert (
         np.sum(array, axis=-1).dtype
-        == np.asarray(ak.sum(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
     )
     assert (
         np.prod(array, axis=-1).dtype
-        == np.asarray(ak.prod(depth1, axis=-1, highlevel=False)).dtype
+        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
     )
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
@@ -2151,10 +2153,14 @@ def test_nonreducers():
     )
 
     assert ak.operations.mean(y) == np.mean(ak.operations.to_numpy(y))
-    assert ak.operations.var(y) == np.var(ak.operations.to_numpy(y))
-    assert ak.operations.var(y, ddof=1) == np.var(ak.operations.to_numpy(y), ddof=1)
-    assert ak.operations.std(y) == np.std(ak.operations.to_numpy(y))
-    assert ak.operations.std(y, ddof=1) == np.std(ak.operations.to_numpy(y), ddof=1)
+    assert ak.operations.var(y) == pytest.approx(np.var(ak.operations.to_numpy(y)))
+    assert ak.operations.var(y, ddof=1) == pytest.approx(
+        np.var(ak.operations.to_numpy(y), ddof=1)
+    )
+    assert ak.operations.std(y) == pytest.approx(np.std(ak.operations.to_numpy(y)))
+    assert ak.operations.std(y, ddof=1) == pytest.approx(
+        np.std(ak.operations.to_numpy(y), ddof=1)
+    )
 
     assert ak.operations.moment(y, 1) == np.mean(ak.operations.to_numpy(y))
     assert ak.operations.moment(y - ak.operations.mean(y), 2) == np.var(

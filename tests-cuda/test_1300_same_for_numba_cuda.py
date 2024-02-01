@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -7,8 +9,8 @@ import awkward as ak
 
 nb = pytest.importorskip("numba")
 nb_cuda = pytest.importorskip("numba.cuda")
-pytest.importorskip("numba.config")
-config = nb.config
+pytest.importorskip("numba.core.config")
+config = nb.core.config
 
 try:
     ak.numba.register_and_check()

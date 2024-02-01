@@ -1,15 +1,19 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
-__all__ = ("almost_equal",)
-from awkward._backends.dispatch import backend_of
+from awkward._backends.dispatch import backend_of_obj
+from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._dispatch import high_level_function
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
 
+__all__ = ("almost_equal",)
+
 np = NumpyMetadata.instance()
+cpu = NumpyBackend.instance()
 
 
 @high_level_function()
@@ -52,10 +56,15 @@ def almost_equal(
     left_behavior = behavior_of(left)
     right_behavior = behavior_of(right)
 
-    left = to_layout(left, allow_record=False).to_packed()
-    right = to_layout(right, allow_record=False).to_packed()
+    left_backend = backend_of_obj(left, default=cpu)
+    right_backend = backend_of_obj(right, default=cpu)
+    if left_backend is not right_backend:
+        return False
+    backend = left_backend
 
-    backend = backend_of(left, right)
+    left_layout = to_layout(left, allow_record=False).to_packed()
+    right_layout = to_layout(right, allow_record=False).to_packed()
+
     if not backend.nplike.known_data:
         raise NotImplementedError(
             "Awkward Arrays with typetracer backends cannot yet be compared with `ak.almost_equal`."
@@ -210,4 +219,4 @@ def almost_equal(
         else:
             return False
 
-    return visitor(left, right)
+    return visitor(left_layout, right_layout)

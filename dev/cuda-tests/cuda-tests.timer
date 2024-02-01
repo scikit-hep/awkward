@@ -1,0 +1,19 @@
+[Unit]
+Description=Schedule a CUDA test job every day
+# Allow manual starts
+RefuseManualStart=no
+# Allow manual stops
+RefuseManualStop=no
+
+[Timer]
+# Execute job if it missed a run due to machine being off
+Persistent=true
+# Run 120 seconds after boot for the first time
+OnBootSec=240
+# Run every day (doesn't matter when due to persistent)
+OnCalendar=daily
+# File describing job to execute
+Unit=cuda-tests.service
+
+[Install]
+WantedBy=timers.target

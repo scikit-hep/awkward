@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_ListOffsetArray_drop_none_indexes.cpp", line)
 
@@ -41,7 +41,6 @@ ERROR awkward_ListOffsetArray_drop_none_indexes_64(
     length_offsets,
     length_indexes);
 }
-
 ERROR awkward_ListOffsetArray_drop_none_indexes_32(
   int32_t* tooffsets,
   const int32_t* noneindexes,

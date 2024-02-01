@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthMachine.cpp", line)
 
@@ -120,7 +120,7 @@ namespace awkward {
   const std::set<std::string> reserved_words_({
     // comments
     "(", ")", "\\", "\n", "",
-    // defining functinos
+    // defining functions
     ":", ";", "recurse",
     // declaring globals
     "variable", "input", "output",

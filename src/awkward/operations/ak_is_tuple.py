@@ -1,7 +1,11 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("is_tuple",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
 from awkward._dispatch import high_level_function
+
+__all__ = ("is_tuple",)
 
 
 @high_level_function()
@@ -22,7 +26,14 @@ def is_tuple(array):
 
 def _impl(array):
     layout = ak.operations.ak_to_layout._impl(
-        array, allow_record=True, allow_other=False, regulararray=True
+        array,
+        allow_record=True,
+        allow_unknown=False,
+        none_policy="error",
+        regulararray=True,
+        use_from_iter=True,
+        primitive_policy="error",
+        string_policy="as-characters",
     )
 
     return layout.is_tuple

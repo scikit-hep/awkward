@@ -1,27 +1,43 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
 import json
 import math
-from collections.abc import MutableMapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
+from awkward._meta.bytemaskedmeta import ByteMaskedMeta
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import ArrayLike, IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._parameters import (
     parameters_intersect,
-    type_parameters_equal,
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
-from awkward._typing import TYPE_CHECKING, Callable, Final, Self, SupportsIndex, final
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Final,
+    Self,
+    SupportsIndex,
+    final,
+)
 from awkward._util import UNSET
-from awkward.contents.content import Content
+from awkward.contents.content import (
+    ApplyActionOptions,
+    Content,
+    ImplementsApplyAction,
+    RemoveStructureOptions,
+    ToArrowOptions,
+)
 from awkward.errors import AxisError
 from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.forms.form import Form
@@ -36,7 +52,7 @@ numpy = Numpy.instance()
 
 
 @final
-class ByteMaskedArray(Content):
+class ByteMaskedArray(ByteMaskedMeta[Content], Content):
     """
     The ByteMaskedArray implements an #ak.types.OptionType with two aligned
     buffers, a boolean `mask` and `content`. At any element `i` where
@@ -93,8 +109,6 @@ class ByteMaskedArray(Content):
                     raise AssertionError(where)
     """
 
-    is_option = True
-
     def __init__(self, mask, content, valid_when, *, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise TypeError(
@@ -121,7 +135,9 @@ class ByteMaskedArray(Content):
                 )
             )
         if (
-            not (mask.length is unknown_length or content.length is unknown_length)
+            content.backend.index_nplike.known_data
+            and mask.length is not unknown_length
+            and content.length is not unknown_length
             and mask.length > content.length
         ):
             raise ValueError(
@@ -140,10 +156,6 @@ class ByteMaskedArray(Content):
     @property
     def mask(self):
         return self._mask
-
-    @property
-    def content(self) -> Content:
-        return self._content
 
     @property
     def valid_when(self):
@@ -232,7 +244,7 @@ class ByteMaskedArray(Content):
         mask = self._mask.to_nplike(tt)
         return ByteMaskedArray(
             mask.forget_length() if forget_length else mask,
-            self._content._to_typetracer(False),
+            self._content._to_typetracer(forget_length),
             self._valid_when,
             parameters=self._parameters,
         )
@@ -378,7 +390,7 @@ class ByteMaskedArray(Content):
         else:
             return None
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -708,11 +720,9 @@ class ByteMaskedArray(Content):
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
-        # We can only combine option types whose array-record parameters agree
+        # Is the other array indexed or optional?
         elif other.is_option or other.is_indexed:
-            return self._content._mergeable_next(
-                other.content, mergebool
-            ) and type_parameters_equal(self._parameters, other._parameters)
+            return self._content._mergeable_next(other.content, mergebool)
         else:
             return self._content._mergeable_next(other, mergebool)
 
@@ -1029,7 +1039,14 @@ class ByteMaskedArray(Content):
                 parameters=self._parameters,
             )
 
-    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
+        length: int,
+        options: ToArrowOptions,
+    ):
         this_validbytes = self.mask_as_bool(valid_when=True)
 
         return self._content._to_arrow(
@@ -1043,7 +1060,9 @@ class ByteMaskedArray(Content):
     def _to_backend_array(self, allow_missing, backend):
         return self.to_IndexedOptionArray64()._to_backend_array(allow_missing, backend)
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         branch, depth = self.branch_depth
         if branch or options["drop_nones"] or depth > 1:
             return self.project()._remove_structure(backend, options)
@@ -1054,8 +1073,13 @@ class ByteMaskedArray(Content):
         return self.project()
 
     def _recursively_apply(
-        self, action, behavior, depth, depth_context, lateral_context, options
-    ):
+        self,
+        action: ImplementsApplyAction,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
+    ) -> Content | None:
         if self._backend.nplike.known_data:
             content = self._content[0 : self._mask.length]
         else:
@@ -1072,7 +1096,6 @@ class ByteMaskedArray(Content):
                     self._mask,
                     content._recursively_apply(
                         action,
-                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1087,7 +1110,6 @@ class ByteMaskedArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
-                    behavior,
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
@@ -1100,7 +1122,6 @@ class ByteMaskedArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
-            behavior=behavior,
             backend=self._backend,
             options=options,
         )
@@ -1112,21 +1133,26 @@ class ByteMaskedArray(Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self) -> Self:
+    def to_packed(self, recursive: bool = True) -> Self:
         if self._content.is_record:
             next = self.to_IndexedOptionArray64()
-            content = next._content.to_packed()
-            if content.length > self._mask.length:
-                content = content[: self._mask.length]
+
+            content = (
+                next._content[: self._mask.length].to_packed(True)
+                if recursive
+                else next._content[: self._mask.length]
+            )
 
             return ak.contents.IndexedOptionArray(
                 next._index, content, parameters=next._parameters
             )
 
         else:
-            content = self._content.to_packed()
-            if content.length > self._mask.length:
-                content = content[: self._mask.length]
+            content = (
+                self._content[: self._mask.length].to_packed(True)
+                if recursive
+                else self._content[: self._mask.length]
+            )
 
             return ByteMaskedArray(
                 self._mask, content, self._valid_when, parameters=self._parameters
@@ -1158,9 +1184,14 @@ class ByteMaskedArray(Content):
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )
 
-    def _is_equal_to(self, other, index_dtype, numpyarray):
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
         return (
-            self.valid_when == other.valid_when
-            and self.mask.is_equal_to(other.mask, index_dtype, numpyarray)
-            and self.content.is_equal_to(other.content, index_dtype, numpyarray)
+            self._is_equal_to_generic(other, all_parameters)
+            and self._valid_when == other.valid_when
+            and self._mask.is_equal_to(other.mask, index_dtype, numpyarray)
+            and self._content._is_equal_to(
+                other.content, index_dtype, numpyarray, all_parameters
+            )
         )

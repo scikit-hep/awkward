@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import math
 
@@ -32,7 +34,7 @@ conda install numba"""
         if parse_version(numba.__version__) < parse_version("0.50"):
             raise ImportError(
                 "Awkward Array can only work with numba 0.50 or later "
-                "(you have version {})".format(numba.__version__)
+                f"(you have version {numba.__version__})"
             )
         _has_checked_version = True
 

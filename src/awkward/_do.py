@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
@@ -7,7 +8,7 @@ from numbers import Integral
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Any, AxisMaybeNone, Literal
 from awkward.contents.content import ActionType, Content
 from awkward.errors import AxisError
@@ -34,7 +35,6 @@ def recursively_apply(
     if isinstance(layout, Content):
         return layout._recursively_apply(
             action,
-            behavior,
             1,
             copy.copy(depth_context),
             lateral_context,
@@ -162,10 +162,8 @@ def unique(layout: Content, axis=None):
                     )
                 if negaxis > depth:
                     raise AxisError(
-                        "cannot use axis={} on a nested list structure that splits into "
-                        "different depths, the minimum of which is depth={} from the leaves".format(
-                            axis, depth
-                        )
+                        f"cannot use axis={axis} on a nested list structure that splits into "
+                        f"different depths, the minimum of which is depth={depth} from the leaves"
                     )
             else:
                 if negaxis <= 0:
@@ -201,6 +199,7 @@ def remove_structure(
     drop_nones: bool = True,
     keepdims: bool = False,
     allow_records: bool = False,
+    list_to_regular: bool = False,
 ):
     if isinstance(layout, Record):
         return remove_structure(
@@ -224,6 +223,7 @@ def remove_structure(
                 "drop_nones": drop_nones,
                 "keepdims": keepdims,
                 "allow_records": allow_records,
+                "list_to_regular": list_to_regular,
             },
         )
         return tuple(arrays)
@@ -272,6 +272,7 @@ def reduce(
             drop_nones=False,
             keepdims=keepdims,
             allow_records=True,
+            list_to_regular=True,
         )
 
         if len(parts) > 1:
@@ -322,8 +323,8 @@ def reduce(
                 negaxis += depth
             if not 0 < negaxis <= depth:
                 raise ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
+                    f"axis={axis} exceeds the depth of the nested list structure "
+                    f"(which is {depth})"
                 )
 
         starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
@@ -365,18 +366,16 @@ def argsort(
             )
         if negaxis > depth:
             raise ValueError(
-                "cannot use axis={} on a nested list structure that splits into "
-                "different depths, the minimum of which is depth={} from the leaves".format(
-                    axis, depth
-                )
+                f"cannot use axis={axis} on a nested list structure that splits into "
+                f"different depths, the minimum of which is depth={depth} from the leaves"
             )
     else:
         if negaxis <= 0:
             negaxis = negaxis + depth
         if not 0 < negaxis <= depth:
             raise ValueError(
-                "axis={} exceeds the depth of the nested list structure "
-                "(which is {})".format(axis, depth)
+                f"axis={axis} exceeds the depth of the nested list structure "
+                f"(which is {depth})"
             )
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
@@ -406,20 +405,26 @@ def sort(
             )
         if negaxis > depth:
             raise ValueError(
-                "cannot use axis={} on a nested list structure that splits into "
-                "different depths, the minimum of which is depth={} from the leaves".format(
-                    axis, depth
-                )
+                f"cannot use axis={axis} on a nested list structure that splits into "
+                f"different depths, the minimum of which is depth={depth} from the leaves"
             )
     else:
         if negaxis <= 0:
             negaxis = negaxis + depth
         if not 0 < negaxis <= depth:
             raise ValueError(
-                "axis={} exceeds the depth of the nested list structure "
-                "(which is {})".format(axis, depth)
+                f"axis={axis} exceeds the depth of the nested list structure "
+                f"(which is {depth})"
             )
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
     parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
     return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)
+
+
+def touch_data(layout: Content, recursive: bool = True):
+    layout._touch_data(recursive)
+
+
+def touch_shape(layout: Content, recursive: bool = True):
+    layout._touch_shape(recursive)

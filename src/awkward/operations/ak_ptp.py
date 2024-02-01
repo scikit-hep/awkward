@@ -1,18 +1,34 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-__all__ = ("ptp",)
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import awkward as ak
-from awkward._behavior import behavior_of
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._layout import (
+    HighLevelContext,
+    maybe_highlevel_to_lowlevel,
+    maybe_posaxis,
+)
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+
+__all__ = ("ptp",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
+def ptp(
+    array,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=True,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -63,13 +79,13 @@ def ptp(array, axis=None, *, keepdims=False, mask_identity=True):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, keepdims, mask_identity)
+    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, keepdims, mask_identity):
+def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
-    behavior = behavior_of(array)
-    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     with np.errstate(invalid="ignore", divide="ignore"):
         maxi = ak.operations.ak_max._impl(
@@ -79,7 +95,8 @@ def _impl(array, axis, keepdims, mask_identity):
             None,
             mask_identity,
             highlevel=True,
-            behavior=behavior,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
         )
         mini = ak.operations.ak_min._impl(
             layout,
@@ -88,7 +105,8 @@ def _impl(array, axis, keepdims, mask_identity):
             None,
             True,
             highlevel=True,
-            behavior=behavior,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
         )
         out = maxi - mini
 
@@ -96,7 +114,9 @@ def _impl(array, axis, keepdims, mask_identity):
         assert maxi is not None and mini is not None
 
         if not mask_identity:
-            out = ak.highlevel.Array(ak.operations.fill_none(out, 0, axis=-1))
+            out = ak.operations.fill_none(
+                out, 0, axis=-1, behavior=ctx.behavior, attrs=ctx.attrs, highlevel=True
+            )
 
         if axis is None:
             if not keepdims:
@@ -106,7 +126,9 @@ def _impl(array, axis, keepdims, mask_identity):
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        return out
+        return ctx.wrap(
+            maybe_highlevel_to_lowlevel(out), highlevel=highlevel, allow_other=True
+        )
 
 
 @ak._connect.numpy.implements("ptp")

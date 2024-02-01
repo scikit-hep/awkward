@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_RECORDBUILDER_H_
 #define AWKWARD_RECORDBUILDER_H_
@@ -15,7 +15,7 @@ namespace awkward {
   /// @class RecordBuilder
   ///
   /// @brief Builder node for accumulated records.
-  class LIBAWKWARD_EXPORT_SYMBOL RecordBuilder: public Builder {
+  class EXPORT_SYMBOL RecordBuilder: public Builder {
   public:
     /// @brief Create an empty RecordBuilder.
     /// @param options Configuration options for building an array;

@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_IO_JSON_H_
 #define AWKWARD_IO_JSON_H_
@@ -40,7 +40,7 @@ namespace awkward {
   /// representation in JSON format.
   /// @param minus_infinity_string User-defined string for a negative
   /// infinity representation in JSON format.
-  LIBAWKWARD_EXPORT_SYMBOL void
+  EXPORT_SYMBOL void
     fromjsonobject(FileLikeObject* source,
                    ArrayBuilder& builder,
                    int64_t buffersize,
@@ -49,7 +49,7 @@ namespace awkward {
                    const char* posinf_string = nullptr,
                    const char* neginf_string = nullptr);
 
-  class FromJsonObjectSchema {
+  class EXPORT_SYMBOL FromJsonObjectSchema {
   public:
     FromJsonObjectSchema(FileLikeObject* source,
              int64_t buffersize,
@@ -60,6 +60,12 @@ namespace awkward {
              const char* jsonassembly,
              int64_t initial,
              double resize);
+
+    // Delete copy constructor
+    FromJsonObjectSchema(const FromJsonObjectSchema&) = delete;
+
+    // Delete copy-assignment constructor
+    FromJsonObjectSchema& operator=(FromJsonObjectSchema&) = delete;
 
     /// @brief HERE
     inline int64_t current_stack_depth() const noexcept {
@@ -135,18 +141,89 @@ namespace awkward {
     inline int64_t find_key(const char* str) noexcept {
       int64_t* offsets = string_offsets_.data();
       char* chars = characters_.data();
+      int64_t i;
+      int64_t j;
       int64_t stringi;
       int64_t start;
       int64_t stop;
-      for (int64_t i = current_instruction_ + 1;  i <= current_instruction_ + argument1();  i++) {
+      uint64_t chunkmask;
+      // optimistic: fields in data are in the order specified by the schema
+      if (argument1() != 0) {
+        // increment the current (last seen) field with wrap-around
+        record_current_field_[argument2()]++;
+        if (record_current_field_[argument2()] == argument1()) {
+          record_current_field_[argument2()] = 0;
+        }
+        j = record_current_field_[argument2()];
+        // use the record_current_field_ (as j)
+        i = current_instruction_ + 1 + j;
         stringi = instructions_.data()[i * 4 + 1];
         start = offsets[stringi];
         stop = offsets[stringi + 1];
         if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
-          return instructions_.data()[i * 4 + 2];
+          // ensure that the checklist bit is 1
+          chunkmask = (uint64_t)1 << (j & 0x3f);
+          if ((record_checklist_[argument2()][j >> 6] & chunkmask) == 0) {
+            return -1;  // ignore the value of a duplicate key
+          }
+          // set the checklist bit to 0
+          record_checklist_[argument2()][j >> 6] &= ~chunkmask;
+          return key_instruction_at(i);
+        }
+      }
+      // pessimistic: try all field names, starting from the first
+      for (i = current_instruction_ + 1;  i <= current_instruction_ + argument1();  i++) {
+        // not including the one optimistic trial
+        if (i != current_instruction_ + 1 + record_current_field_[argument2()]) {
+          stringi = instructions_.data()[i * 4 + 1];
+          start = offsets[stringi];
+          stop = offsets[stringi + 1];
+          if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
+            // set the record_current_field_
+            j = i - (current_instruction_ + 1);
+            record_current_field_[argument2()] = j;
+            // ensure that the checklist bit is 1
+            chunkmask = (uint64_t)1 << (j & 0x3f);
+            if ((record_checklist_[argument2()][j >> 6] & chunkmask) == 0) {
+              return -1;  // ignore the value of a duplicate key
+            }
+            // set the checklist bit to 0
+            record_checklist_[argument2()][j >> 6] &= ~chunkmask;
+            return key_instruction_at(i);
+          }
         }
       }
       return -1;
+    }
+
+    /// @brief HERE
+    inline bool key_already_filled(int64_t record_identifier, int64_t j) const noexcept {
+      uint64_t chunkmask = (uint64_t)1 << (j & 0x3f);
+      return (record_checklist_[record_identifier][j >> 6] & chunkmask) == 0;
+    }
+
+    /// @brief HERE
+    inline int64_t key_instruction_at(int64_t i) const noexcept {
+      return instructions_.data()[i * 4 + 2];
+    }
+
+    /// @brief HERE
+    inline void start_object(int64_t keytableheader_instruction) noexcept {
+      int64_t record_identifier = instructions_.data()[keytableheader_instruction * 4 + 2];
+      record_checklist_[record_identifier].assign(
+          record_checklist_init_[record_identifier].begin(),
+          record_checklist_init_[record_identifier].end()
+      );
+    }
+
+    /// @brief HERE
+    inline bool end_object(int64_t keytableheader_instruction) const noexcept {
+      int64_t record_identifier = instructions_.data()[keytableheader_instruction * 4 + 2];
+      uint64_t should_be_zero = 0;
+      for (uint64_t chunk : record_checklist_[record_identifier]) {
+        should_be_zero |= chunk;
+      }
+      return should_be_zero == 0;
     }
 
     /// @brief HERE
@@ -276,6 +353,10 @@ namespace awkward {
     std::vector<int64_t> instructions_;
     std::vector<char> characters_;
     std::vector<int64_t> string_offsets_;
+
+    std::vector<int64_t> record_current_field_;
+    std::vector<std::vector<uint64_t>> record_checklist_init_;
+    std::vector<std::vector<uint64_t>> record_checklist_;
 
     std::vector<std::string> output_names_;
     std::vector<util::dtype> output_dtypes_;

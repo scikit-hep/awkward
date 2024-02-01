@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -275,9 +277,9 @@ def test_numpyarray_concatenate_axis0():
         np.concatenate([np1, np2, np1, np2], 0)
     )
     assert to_list(ak.operations.concatenate([ak1, ak2], 0)) == to_list(
-        np.concatenate([np.asarray(ak1), np.asarray(ak2)], 0)
+        np.concatenate([ak.to_numpy(ak1), ak.to_numpy(ak2)], 0)
     )
-    assert to_list(np.concatenate([np.asarray(ak1), np.asarray(ak2)], 0)) == to_list(
+    assert to_list(np.concatenate([ak.to_numpy(ak1), ak.to_numpy(ak2)], 0)) == to_list(
         ak.operations.concatenate([np1, np2], 0)
     )
 

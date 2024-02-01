@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_INT64BUILDER_H_
 #define AWKWARD_INT64BUILDER_H_
@@ -13,7 +13,7 @@ namespace awkward {
   /// @class Int64Builder
   ///
   /// @brief Builder node that accumulates integers (`int64_t`).
-  class LIBAWKWARD_EXPORT_SYMBOL Int64Builder: public Builder {
+  class EXPORT_SYMBOL Int64Builder: public Builder {
   public:
     /// @brief Create an empty Int64Builder.
     /// @param options Configuration options for building an array;

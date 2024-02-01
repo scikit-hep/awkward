@@ -1,0 +1,6 @@
+fsspec;sys_platform != "win32"
+numpy==1.18.0
+pyarrow==7.0.0
+pytest>=6
+pytest-cov
+pytest-xdist

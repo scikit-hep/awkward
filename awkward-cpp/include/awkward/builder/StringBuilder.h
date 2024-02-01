@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_STRINGBUILDER_H_
 #define AWKWARD_STRINGBUILDER_H_
@@ -13,7 +13,7 @@ namespace awkward {
   /// @class StringBuilder
   ///
   /// @brief Builder node that accumulates strings.
-  class LIBAWKWARD_EXPORT_SYMBOL StringBuilder: public Builder {
+  class EXPORT_SYMBOL StringBuilder: public Builder {
   public:
     /// @brief Create an empty StringBuilder.
     /// @param options Configuration options for building an array;

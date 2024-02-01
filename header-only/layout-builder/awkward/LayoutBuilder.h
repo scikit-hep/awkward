@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_LAYOUTBUILDER_H_
 #define AWKWARD_LAYOUTBUILDER_H_
@@ -141,7 +141,17 @@ namespace awkward {
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         data_.concatenate(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-data"]));
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-data")) {
+          data_.concatenate(reinterpret_cast<PRIMITIVE*>(buffer));
         }
+      }
 
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
@@ -322,6 +332,18 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder; otherwise, it searches the builder contents to locate a
+      /// matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-offsets")) {
+          offsets_.concatenate(reinterpret_cast<PRIMITIVE*>(buffer));
+        }
+        content_.to_buffer(buffer, name);
+      }
+
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
@@ -366,6 +388,26 @@ namespace awkward {
       size_t id_;
     };
 
+    /// @class String
+    ///
+    /// @brief Helper for building an array of strings with a similar API as a
+    /// Numpy builder.
+    template<class PRIMITIVE>
+    class String : public ListOffset<PRIMITIVE, Numpy<uint8_t>> {
+      public:
+          String() : ListOffset<PRIMITIVE, Numpy<uint8_t>>() {
+      this->set_parameters(R"""("__array__": "string")""");
+      this->content().set_parameters(R"""("__array__": "char")""");
+    }
+
+      void append(const std::string& value) {
+          this->begin_list();
+          for (const auto& c: value) {
+              this->content().append(c);
+          }
+          this->end_list();
+      }
+    };
 
     /// @class Empty
     ///
@@ -403,6 +445,9 @@ namespace awkward {
 
       void
       to_buffers(std::map<std::string, void*>& /* buffers */) const noexcept {}
+
+      void
+      to_buffer(void* /* buffer */, const char* /* name */) const noexcept {}
 
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
@@ -523,10 +568,11 @@ namespace awkward {
       /// field of the record.
       void
       clear() noexcept {
-        for (size_t i = 0; i < fields_count_; i++)
+        for (size_t i = 0; i < fields_count_; i++) {
           visit_at(contents, i, [](auto& content) {
             content.builder.clear();
           });
+        }
       }
 
       /// @brief Current number of records in first field.
@@ -568,10 +614,11 @@ namespace awkward {
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
-        for (size_t i = 0; i < fields_count_; i++)
+        for (size_t i = 0; i < fields_count_; i++) {
           visit_at(contents, i, [&names_nbytes](auto& content) {
             content.builder.buffer_nbytes(names_nbytes);
           });
+        }
       }
 
       /// @brief Copies and concatenates all the accumulated data in each of the
@@ -581,10 +628,23 @@ namespace awkward {
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        for (size_t i = 0; i < fields_count_; i++)
+        for (size_t i = 0; i < fields_count_; i++) {
           visit_at(contents, i, [&buffers](auto& content) {
             content.builder.to_buffers(buffers);
           });
+        }
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the buffers of the
+      /// builder contents to user-defined pointers if the given node name matches
+      /// with the node associated with that builder.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        for (size_t i = 0; i < fields_count_; i++) {
+          visit_at(contents, i, [&buffer, &name](auto& content) {
+            content.builder.to_buffer(buffer, name);
+          });
+        }
       }
 
       /// @brief Copies and concatenates all the accumulated data in the builder
@@ -593,10 +653,11 @@ namespace awkward {
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
       to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        for (size_t i = 0; i < fields_count_; i++)
+        for (size_t i = 0; i < fields_count_; i++) {
           visit_at(contents, i, [&buffers](auto& content) {
             content.builder.to_char_buffers(buffers);
           });
+        }
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -732,10 +793,11 @@ namespace awkward {
       /// Discards the accumulated data and the contents at each tuple index.
       void
       clear() noexcept {
-        for (size_t i = 0; i < fields_count_; i++)
+        for (size_t i = 0; i < fields_count_; i++) {
           visit_at(contents, i, [](auto& content) {
             content.clear();
           });
+        }
       }
 
       /// @brief Current number of records in the first index of the tuple.
@@ -778,10 +840,11 @@ namespace awkward {
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
-        for (size_t i = 0; i < fields_count_; i++)
+        for (size_t i = 0; i < fields_count_; i++) {
           visit_at(contents, i, [&names_nbytes](auto& content) {
             content.buffer_nbytes(names_nbytes);
           });
+        }
       }
 
       /// @brief Copies and concatenates all the accumulated data in each of the
@@ -791,10 +854,23 @@ namespace awkward {
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        for (size_t i = 0; i < fields_count_; i++)
+        for (size_t i = 0; i < fields_count_; i++) {
           visit_at(contents, i, [&buffers](auto& content) {
             content.to_buffers(buffers);
           });
+        }
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the buffers of the
+      /// builder contents to user-defined pointers if the given node name matches
+      /// with the node associated with that builder.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        for (size_t i = 0; i < fields_count_; i++) {
+          visit_at(contents, i, [&buffer, &name](auto& content) {
+            content.to_buffer(buffer, name);
+          });
+        }
       }
 
       /// @brief Copies and concatenates all the accumulated data in the builder
@@ -803,10 +879,11 @@ namespace awkward {
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
       to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        for (size_t i = 0; i < fields_count_; i++)
+        for (size_t i = 0; i < fields_count_; i++) {
           visit_at(contents, i, [&buffers](auto& content) {
             content.to_char_buffers(buffers);
           });
+        }
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -977,6 +1054,14 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Copies and concatenates the accumulated data in the buffers of the
+      /// builder content to user-defined pointers if the given node name matches
+      /// with the node associated with that builder.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        content_.to_buffer(buffer, name);
+      }
+
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
@@ -1019,6 +1104,193 @@ namespace awkward {
       size_t size_ = SIZE;
     };
 
+
+    /// @class Indexed
+    ///
+    /// @brief Builds an IndexedArray which consists of an `index` buffer.
+    ///
+    /// The index values can be 64-bit signed integers `int64`, 32-bit signed
+    /// integers `int32` or 32-bit unsigned integers `uint32`.
+    ///
+    /// @tparam PRIMITIVE The type of `index` buffer.
+    /// @tparam BUILDER The type of builder content.
+    template <typename PRIMITIVE, typename BUILDER>
+    class Indexed {
+    public:
+      /// @brief Creates a new Indexed layout builder by allocating a new `index`
+      /// buffer, using `AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS` for initializing the buffer.
+      Indexed()
+          : index_(
+                awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)) {
+        size_t id = 0;
+        set_id(id);
+      }
+
+      /// @brief Creates a new Indexed layout builder by allocating a new `index`
+      /// buffer, taking `options` from {@link BuilderOptions BuilderOptions}
+      /// for initializing the buffer.
+      ///
+      /// @param options Initial size configuration of a buffer.
+      Indexed(const awkward::BuilderOptions& options)
+          : index_(awkward::GrowableBuffer<PRIMITIVE>(options)) {
+        size_t id = 0;
+        set_id(id);
+      }
+
+      /// @brief Returns the reference to the builder content.
+      BUILDER&
+      content() noexcept {
+        return content_;
+      }
+
+      /// @brief Inserts the last valid index in the `index` buffer and
+      /// returns the reference to the builder content.
+      BUILDER&
+      append_index() noexcept {
+        index_.append(content_.length());
+        return content_;
+      }
+
+      /// @brief Inserts `size` number indices in the `index` buffer
+      /// and returns the reference to the builder content.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
+      BUILDER&
+      extend_index(size_t size) noexcept {
+        size_t start = content_.length();
+        size_t stop = start + size;
+        for (size_t i = start; i < stop; i++) {
+          index_.append(i);
+        }
+        return content_;
+      }
+
+      /// @brief Parameters for the builder form.
+      const std::string&
+      parameters() const noexcept {
+        return parameters_;
+      }
+
+      /// @brief Sets the form parameters.
+      void
+      set_parameters(std::string parameter) noexcept {
+        parameters_ = parameter;
+      }
+
+      /// @brief Assigns a unique ID to each node.
+      void
+      set_id(size_t& id) noexcept {
+        id_ = id;
+        id++;
+        content_.set_id(id);
+      }
+
+      /// @brief Discards the accumulated index and clears the content
+      /// of the builder.
+      void
+      clear() noexcept {
+        index_.clear();
+        content_.clear();
+      }
+
+      /// @brief Current length of the `index` buffer.
+      size_t
+      length() const noexcept {
+        return index_.length();
+      }
+
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
+      void
+      buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
+          noexcept {
+        names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
+        content_.buffer_nbytes(names_nbytes);
+      }
+
+      /// @brief Checks for validity and consistency.
+      bool
+      is_valid(std::string& error) const noexcept {
+        if (content_.length() != index_.length()) {
+          std::stringstream out;
+          out << "Indexed node" << id_ << " has content length "
+              << content_.length() << " but index has length " << index_.length()
+              << "\n";
+          error.append(out.str());
+
+          return false;
+        } else {
+          return content_.is_valid(error);
+        }
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
+      void
+      to_buffers(std::map<std::string, void*>& buffers) const noexcept {
+        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
+            buffers["node" + std::to_string(id_) + "-index"]));
+        content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder; otherwise, it searches the builder contents to locate a
+      /// matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-index")) {
+          index_.concatenate(reinterpret_cast<PRIMITIVE*>(buffer));
+        }
+        content_.to_buffer(buffer, name);
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
+            buffers["node" + std::to_string(id_) + "-index"]));
+        content_.to_char_buffers(buffers);
+      }
+
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
+      std::string
+      form() const noexcept {
+        std::stringstream form_key;
+        form_key << "node" << id_;
+        std::string params("");
+        if (parameters_ == "") {
+        } else {
+          params = std::string(", \"parameters\": { " + parameters_ + " }");
+        }
+        return "{ \"class\": \"IndexedArray\", \"index\": \"" +
+               type_to_numpy_like<PRIMITIVE>() +
+               "\", \"content\": " + content_.form() + params +
+               ", \"form_key\": \"" + form_key.str() + "\" }";
+      }
+
+    private:
+      /// @brief Buffer of `PRIMITIVE` type.
+      ///
+      /// It specifies the index of each element.
+      GrowableBuffer<PRIMITIVE> index_;
+
+      /// @brief The content of the IndexedOptionArray.
+      BUILDER content_;
+
+      /// @brief Form parameters.
+      std::string parameters_;
+
+      /// @brief Unique form ID.
+      size_t id_;
+    };
 
     /// @class IndexedOption
     ///
@@ -1173,6 +1445,18 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder; otherwise, it searches the builder contents to locate a
+      /// matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-index")) {
+          index_.concatenate(reinterpret_cast<PRIMITIVE*>(buffer));
+        }
+        content_.to_buffer(buffer, name);
+      }
+
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
@@ -1300,6 +1584,14 @@ namespace awkward {
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the buffers of the
+      /// builder content to user-defined pointers if the given node name matches
+      /// with the node associated with that builder.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        content_.to_buffer(buffer, name);
       }
 
       /// @brief Copies and concatenates all the accumulated data in the builder
@@ -1501,6 +1793,18 @@ namespace awkward {
         mask_.concatenate(reinterpret_cast<int8_t*>(
             buffers["node" + std::to_string(id_) + "-mask"]));
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder; otherwise, it searches the builder contents to locate a
+      /// matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-mask")) {
+          mask_.concatenate(reinterpret_cast<int8_t*>(buffer));
+        }
+        content_.to_buffer(buffer, name);
       }
 
       /// @brief Copies and concatenates all the accumulated data in the builder
@@ -1758,6 +2062,19 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Copies and concatenates the accumulated data in the builder buffer to
+      /// a user-defined pointer if the given node name matches with the node associated
+      /// with the builder; otherwise, it searches the builder contents to locate a
+      /// matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-mask")) {
+          mask_.concatenate_from(reinterpret_cast<uint8_t*>(buffer), 0, 1);
+          mask_.append(reinterpret_cast<uint8_t*>(buffer), mask_.length() - 1, 0, 1);
+        }
+        content_.to_buffer(buffer, name);
+      }
+
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
@@ -1883,8 +2200,9 @@ namespace awkward {
             index_(awkward::GrowableBuffer<INDEX>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)) {
         size_t id = 0;
         set_id(id);
-        for (size_t i = 0; i < contents_count_; i++)
+        for (size_t i = 0; i < contents_count_; i++) {
           last_valid_index_[i] = -1;
+        }
       }
 
       /// @brief Creates a new Union layout builder by allocating new tags and index
@@ -1897,8 +2215,9 @@ namespace awkward {
             index_(awkward::GrowableBuffer<INDEX>(options)) {
         size_t id = 0;
         set_id(id);
-        for (size_t i = 0; i < contents_count_; i++)
+        for (size_t i = 0; i < contents_count_; i++) {
           last_valid_index_[i] = -1;
+        }
       }
 
       template <std::size_t I>
@@ -1943,8 +2262,9 @@ namespace awkward {
         auto contents_id = [&id](auto& content) {
           content.set_id(id);
         };
-        for (size_t i = 0; i < contents_count_; i++)
+        for (size_t i = 0; i < contents_count_; i++) {
           visit_at(contents_, i, contents_id);
+        }
       }
 
       /// @brief Discards the accumulated tags and index, and clears
@@ -1953,15 +2273,17 @@ namespace awkward {
       /// Also, resets the last valid index array to `-1`.
       void
       clear() noexcept {
-        for (size_t i = 0; i < contents_count_; i++)
+        for (size_t i = 0; i < contents_count_; i++) {
           last_valid_index_[i] = -1;
+        }
         tags_.clear();
         index_.clear();
         auto clear_contents = [](auto& content) {
           content.clear();
         };
-        for (size_t i = 0; i < contents_count_; i++)
+        for (size_t i = 0; i < contents_count_; i++) {
           visit_at(contents_, i, clear_contents);
+        }
       }
 
       /// @brief Current length of the `tags` buffer.
@@ -2004,10 +2326,11 @@ namespace awkward {
         names_nbytes["node" + std::to_string(id_) + "-tags"] = tags_.nbytes();
         names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
 
-        for (size_t i = 0; i < contents_count_; i++)
+        for (size_t i = 0; i < contents_count_; i++) {
           visit_at(contents_, i, [&names_nbytes](auto& content) {
             content.buffer_nbytes(names_nbytes);
           });
+        }
       }
 
       /// @brief Copies and concatenates all the accumulated data in each of the
@@ -2024,10 +2347,33 @@ namespace awkward {
         index_.concatenate(reinterpret_cast<INDEX*>(
             buffers["node" + std::to_string(id_) + "-index"]));
 
-        for (size_t i = 0; i < contents_count_; i++)
+        for (size_t i = 0; i < contents_count_; i++) {
           visit_at(contents_, i, [&buffers](auto& content) {
             content.to_buffers(buffers);
           });
+        }
+      }
+
+      /// @brief Copies and concatenates the accumulated data in the builder buffers to
+      /// user-defined pointers if the given node name matches with any one of the nodes
+      /// associated with the builder; otherwise, it searches the builder contents to
+      /// locate a matching node.
+      void
+      to_buffer(void* buffer, const char* name) const noexcept {
+        auto index_sequence((std::index_sequence_for<BUILDERS...>()));
+
+        if (std::string(name) == std::string("node" + std::to_string(id_) + "-tags")) {
+          tags_.concatenate(reinterpret_cast<TAGS*>(buffer));
+        }
+        else if (std::string(name) == std::string("node" + std::to_string(id_) + "-index")) {
+          index_.concatenate(reinterpret_cast<INDEX*>(buffer));
+        }
+
+        for (size_t i = 0; i < contents_count_; i++) {
+          visit_at(contents_, i, [&buffer, &name](auto& content) {
+            content.to_buffer(buffer, name);
+          });
+        }
       }
 
       /// @brief Copies and concatenates all the accumulated data in the builder
@@ -2043,10 +2389,11 @@ namespace awkward {
         index_.concatenate(reinterpret_cast<INDEX*>(
             buffers["node" + std::to_string(id_) + "-index"]));
 
-        for (size_t i = 0; i < contents_count_; i++)
+        for (size_t i = 0; i < contents_count_; i++) {
           visit_at(contents_, i, [&buffers](auto& content) {
             content.to_char_buffers(buffers);
           });
+        }
       }
 
       /// @brief Generates a unique description of the builder and its

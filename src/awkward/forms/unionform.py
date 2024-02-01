@@ -1,18 +1,24 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from collections import Counter
-from collections.abc import Iterable
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+from collections.abc import Callable, Iterable
+from itertools import permutations
 
 import awkward as ak
-from awkward._parameters import type_parameters_equal
-from awkward._typing import JSONSerializable, Self, final
+from awkward._meta.unionmeta import UnionMeta
+from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._typing import Any, DType, Iterator, Self, final
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, _SpecifierMatcher, index_to_dtype
+
+__all__ = ("UnionForm",)
+
+np = NumpyMetadata.instance()
 
 
 @final
-class UnionForm(Form):
-    is_union = True
-
+class UnionForm(UnionMeta[Form], Form):
     def __init__(
         self,
         tags,
@@ -91,19 +97,16 @@ class UnionForm(Form):
         return ak.contents.UnionArray.simplified(
             ak.index._form_to_zero_length(tags),
             ak.index._form_to_zero_length(index),
-            [x.length_zero_array(highlevel=False) for x in contents],
+            [x.length_zero_array() for x in contents],
             parameters=parameters,
         ).form
 
     def _union_of_optionarrays(self, index, parameters):
         return (
-            self.length_zero_array(highlevel=False)
+            self.length_zero_array()
             ._union_of_optionarrays(ak.index._form_to_zero_length(index), parameters)
             .form
         )
-
-    def content(self, index):
-        return self._contents[index]
 
     def __repr__(self):
         args = [
@@ -135,102 +138,11 @@ class UnionForm(Form):
             parameters=self._parameters,
         )
 
-    def __eq__(self, other):
-        if (
-            isinstance(other, UnionForm)
-            and self._form_key == other._form_key
-            and self._tags == other._tags
-            and self._index == other._index
-            and len(self._contents) == len(other._contents)
-            and type_parameters_equal(self._parameters, other._parameters)
-        ):
-            return self._contents == other._contents
-
-        return False
-
-    def purelist_parameters(self, *keys: str) -> JSONSerializable:
-        if self._parameters is not None:
-            for key in keys:
-                if key in self._parameters:
-                    return self._parameters[key]
-
-        for key in keys:
-            out = self._contents[0].purelist_parameter(key)
-            for content in self._contents[1:]:
-                tmp = content.purelist_parameter(key)
-                if out != tmp:
-                    return None
-            return out
-
-    @property
-    def purelist_isregular(self):
-        for content in self._contents:
-            if not content.purelist_isregular:
-                return False
-        return True
-
-    @property
-    def purelist_depth(self):
-        out = None
-        for content in self._contents:
-            if out is None:
-                out = content.purelist_depth
-            elif out != content.purelist_depth:
-                return -1
-        return out
-
-    @property
-    def is_identity_like(self):
-        return False
-
-    @property
-    def minmax_depth(self):
-        if len(self._contents) == 0:
-            return (0, 0)
-        mins, maxs = [], []
-        for content in self._contents:
-            mindepth, maxdepth = content.minmax_depth
-            mins.append(mindepth)
-            maxs.append(maxdepth)
-        return (min(mins), max(maxs))
-
-    @property
-    def branch_depth(self):
-        if len(self._contents) == 0:
-            return (False, 1)
-        anybranch = False
-        mindepth = None
-        for content in self._contents:
-            branch, depth = content.branch_depth
-            if mindepth is None:
-                mindepth = depth
-            if branch or mindepth != depth:
-                anybranch = True
-            if mindepth > depth:
-                mindepth = depth
-        return (anybranch, mindepth)
-
-    @property
-    def fields(self):
-        field_counts = Counter([f for c in self._contents for f in c.fields])
-        return [f for f, n in field_counts.items() if n == len(self._contents)]
-
-    @property
-    def is_tuple(self):
-        return all(x.is_tuple for x in self._contents) and (len(self._contents) > 0)
-
-    @property
-    def dimension_optiontype(self):
-        for content in self._contents:
-            if content.dimension_optiontype:
-                return True
-        return False
-
     def _columns(self, path, output, list_indicator):
         for content, field in zip(self._contents, self.fields):
             content._columns((*path, field), output, list_indicator)
 
-    def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
+    def _prune_columns(self, is_inside_record_or_union: bool) -> Form | None:
         contents = []
         for content in self._contents:
             next_content = content._prune_columns(True)
@@ -247,26 +159,14 @@ class UnionForm(Form):
         elif len(contents) == 1:
             return contents[0]
         else:
-            return UnionForm(
-                self._tags,
-                self._index,
-                contents,
-                parameters=self._parameters,
-                form_key=self._form_key,
-            )
+            return self.copy(contents=contents)
 
-    def _select_columns(self, match_specifier):
+    def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         contents = [
             content._select_columns(match_specifier) for content in self._contents
         ]
 
-        return UnionForm(
-            self._tags,
-            self._index,
-            contents,
-            parameters=self._parameters,
-            form_key=self._form_key,
-        )
+        return self.copy(contents=contents)
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
@@ -287,3 +187,27 @@ class UnionForm(Form):
             self.__init__(
                 tags, index, contents, parameters=parameters, form_key=form_key
             )
+
+    def _expected_from_buffers(
+        self, getkey: Callable[[Form, str], str], recursive: bool
+    ) -> Iterator[tuple[str, DType]]:
+        yield (getkey(self, "tags"), index_to_dtype[self._tags])
+        yield (getkey(self, "index"), index_to_dtype[self._index])
+        if recursive:
+            for content in self._contents:
+                yield from content._expected_from_buffers(getkey, recursive)
+
+    def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and self._tags == other.tags
+            and self._index == other.index
+            and len(self._contents) == len(other.contents)
+            and any(
+                all(
+                    x._is_equal_to(y, all_parameters, form_key)
+                    for x, y in zip(self._contents, c)
+                )
+                for c in permutations(other.contents)
+            )
+        )

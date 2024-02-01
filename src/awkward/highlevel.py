@@ -1,7 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import annotations
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-__all__ = ("Array", "ArrayBuilder", "Record")
+from __future__ import annotations
 
 import builtins
 import copy
@@ -11,6 +10,7 @@ import inspect
 import io
 import itertools
 import keyword
+import pickle
 import re
 import sys
 from collections.abc import Iterable, Mapping, Sequence, Sized
@@ -19,16 +19,24 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 import awkward._connect.hist
+from awkward._attrs import attrs_of, without_transient_attrs
 from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
-from awkward._connect.dlpack import get_layout_device, to_dlpack
 from awkward._layout import wrap_layout
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import NumpyMetadata
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
+from awkward._pickle import (
+    custom_reduce,
+    unpickle_array_schema_1,
+    unpickle_record_schema_1,
+)
+from awkward._prettyprint import Formatter
 from awkward._regularize import is_non_string_like_iterable
-from awkward._typing import TypeVar
+from awkward._typing import Any, TypeVar
+
+__all__ = ("Array", "ArrayBuilder", "Record")
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -268,6 +276,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         with_name=None,
         check_valid=False,
         backend=None,
+        attrs=None,
     ):
         self._cpp_type = None
         if isinstance(data, ak.contents.Content):
@@ -276,6 +285,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         elif isinstance(data, Array):
             layout = data._layout
             behavior = behavior_of(data, behavior=behavior)
+            attrs = attrs_of(data, attrs=attrs)
 
         elif isinstance(data, dict):
             fields = []
@@ -289,7 +299,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 elif length != contents[-1].length:
                     raise ValueError(
                         "dict of arrays in ak.Array constructor must have arrays "
-                        "of equal length ({} vs {})".format(length, contents[-1].length)
+                        f"of equal length ({length} vs {contents[-1].length})"
                     )
             layout = ak.contents.RecordArray(contents, fields)
 
@@ -298,7 +308,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         else:
             layout = ak.operations.to_layout(
-                data, allow_record=False, regulararray=False
+                data, allow_record=False, regulararray=False, primitive_policy="error"
             )
 
         if not isinstance(layout, ak.contents.Content):
@@ -306,18 +316,27 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         if with_name is not None:
             layout = ak.operations.with_name(
-                layout, with_name, highlevel=False, behavior=behavior
+                layout, with_name, highlevel=False, behavior=behavior, attrs=attrs
             )
 
-        if backend is not None and backend != ak.operations.backend(layout):
+        if not (backend is None or backend == layout.backend.name):
             layout = ak.operations.to_backend(layout, backend, highlevel=False)
 
-        self.layout = layout
-        self.behavior = behavior
+        if behavior is not None and not isinstance(behavior, Mapping):
+            raise TypeError("behavior must be None or a mapping")
+
+        if attrs is not None and not isinstance(attrs, Mapping):
+            raise TypeError("attrs must be None or a mapping")
+
+        self._layout = layout
+        self._behavior = behavior
+        self._attrs = attrs
 
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
             self.__doc__ = docstr
+
+        self._update_class()
 
         if check_valid:
             ak.operations.validity_error(self, exception=True)
@@ -328,6 +347,31 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         ak.jax.register_behavior_class(cls)
 
     _histogram_module_ = awkward._connect.hist
+
+    def _update_class(self):
+        self._numbaview = None
+        self.__class__ = get_array_class(self._layout, self._behavior)
+
+    @property
+    def attrs(self) -> Mapping[str, Any]:
+        """
+        The mutable mapping containing top-level metadata, which is serialised
+        with the array during pickling.
+
+        Keys prefixed with `@` are identified as "transient" attributes
+        which are discarded prior to pickling, permitting the storage of
+        non-pickleable types.
+        """
+        if self._attrs is None:
+            self._attrs = {}
+        return self._attrs
+
+    @attrs.setter
+    def attrs(self, value: Mapping[str, Any]):
+        if isinstance(value, Mapping):
+            self._attrs = value
+        else:
+            raise TypeError("attrs must be a mapping")
 
     @property
     def layout(self):
@@ -376,7 +420,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def layout(self, layout):
         if isinstance(layout, ak.contents.Content):
             self._layout = layout
-            self._numbaview = None
+            self._update_class()
         else:
             raise TypeError("layout must be a subclass of ak.contents.Content")
 
@@ -402,8 +446,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
-            self.__class__ = get_array_class(self._layout, behavior)
             self._behavior = behavior
+            self._update_class()
         else:
             raise TypeError("behavior must be None or a dict")
 
@@ -577,7 +621,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #ak.to_list.
         """
         for item in self._layout:
-            yield wrap_layout(prepare_layout(item), self._behavior, allow_other=True)
+            yield wrap_layout(
+                prepare_layout(item),
+                self._behavior,
+                allow_other=True,
+                attrs=self._attrs,
+            )
 
     def __getitem__(self, where):
         """
@@ -1010,7 +1059,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.SlicingErrorContext(self, where):
             return wrap_layout(
-                prepare_layout(self._layout[where]), self._behavior, allow_other=True
+                prepare_layout(self._layout[where]),
+                self._behavior,
+                allow_other=True,
+                attrs=self._attrs,
             )
 
     def __bytes__(self) -> bytes:
@@ -1088,7 +1140,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 raise TypeError("only fields may be assigned in-place (by field name)")
 
             self._layout = ak.operations.with_field(
-                self._layout, what, where, highlevel=False
+                self._layout,
+                what,
+                where,
+                highlevel=False,
+                attrs=self._attrs,
+                behavior=self._behavior,
             )
             self._numbaview = None
 
@@ -1120,7 +1177,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 raise TypeError("only fields may be removed in-place (by field name)")
 
             self._layout = ak.operations.ak_without_field._impl(
-                self._layout, where, highlevel=False, behavior=self._behavior
+                self._layout,
+                where,
+                highlevel=False,
+                behavior=self._behavior,
+                attrs=self._attrs,
             )
             self._numbaview = None
 
@@ -1168,8 +1229,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                        "while trying to get field {}, an exception "
-                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
+                        f"while trying to get field {where!r}, an exception "
+                        f"occurred:\n{type(err)}: {err!s}"
                     ) from err
             else:
                 raise AttributeError(f"no field named {where!r}")
@@ -1268,7 +1329,16 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return f"<{pytype}{valuestr} type={typestr}>"
 
-    def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
+    def show(
+        self,
+        limit_rows=20,
+        limit_cols=80,
+        type=False,
+        stream=sys.stdout,
+        *,
+        formatter=None,
+        precision=3,
+    ):
         """
         Args:
             limit_rows (int): Maximum number of rows (lines) to use in the output.
@@ -1278,12 +1348,25 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
 
+            formatter (Mapping or None): Mapping of types/type-classes to string formatters.
+                If None, use the default formatter.
+
         Display the contents of the array within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
+
+        The `formatter` argument controls the formatting of individual values, c.f.
+        https://numpy.org/doc/stable/reference/generated/numpy.set_printoptions.html
+        As Awkward Array does not implement strings as a NumPy dtype, the `numpystr`
+        key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
+        string values, falling back upon `"str_kind"`.
         """
         import awkward._prettyprint
 
-        valuestr = awkward._prettyprint.valuestr(self, limit_rows, limit_cols)
+        formatter_impl = Formatter(formatter, precision=precision)
+
+        valuestr = awkward._prettyprint.valuestr(
+            self, limit_rows, limit_cols, formatter=formatter_impl
+        )
         if type:
             tmp = io.StringIO()
             self.type.show(stream=tmp)
@@ -1318,30 +1401,37 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             "text/plain": repr(self),
         }
 
-    @non_inspectable_property
-    def __cuda_array_interface__(self):
-        with ak._errors.OperationErrorContext(
-            f"{type(self).__name__}.__cuda_array_interface__", (self,), {}
-        ):
-            array = ak.operations.to_cupy(self)
-            return array.__cuda_array_interface__
+    def __array__(self, dtype=None):
+        """
+        Intercepts attempts to convert this Array into a NumPy array and
+        either performs a zero-copy conversion or raises an error.
 
-    @non_inspectable_property
-    def __array_interface__(self):
-        with ak._errors.OperationErrorContext(
-            f"{type(self).__name__}.__array_interface__", (self,), {}
-        ):
-            array = ak.operations.to_numpy(self)
-            return array.__array_interface__
+        This function is also called by the
+        [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
+        family of functions, which have `copy=False` by default.
 
-    def __dlpack_device__(self):
-        with ak._errors.OperationErrorContext(
-            f"{type(self).__name__}.__dlpack_device__", (self,), {}
-        ):
-            return get_layout_device(self._layout)
+            >>> np.asarray(ak.Array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+            array([[1.1, 2.2, 3.3],
+                   [4.4, 5.5, 6.6]])
 
-    def __dlpack__(self, stream=None):
-        return to_dlpack(self._layout, stream)
+        If the data are numerical and regular (nested lists have equal lengths
+        in each dimension, as described by the #type), they can be losslessly
+        converted to a NumPy array and this function returns without an error.
+
+        Otherwise, the function raises an error. It does not create a NumPy
+        array with dtype `"O"` for `np.object_` (see the
+        [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
+        since silent conversions to dtype `"O"` arrays would not only be a
+        significant performance hit, but would also break functionality, since
+        nested lists in a NumPy `"O"` array are severed from the array and
+        cannot be sliced as dimensions.
+        """
+        with ak._errors.OperationErrorContext(
+            "numpy.asarray", (self,), {"dtype": dtype}
+        ):
+            from awkward._connect.numpy import convert_to_array
+
+            return convert_to_array(self._layout, dtype=dtype)
 
     def __arrow_array__(self, type=None):
         with ak._errors.OperationErrorContext(
@@ -1435,7 +1525,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #__array_ufunc__.
         """
         return ak._connect.numpy.array_function(
-            func, types, args, kwargs, behavior=self._behavior
+            func, types, args, kwargs, behavior=self._behavior, attrs=self._attrs
         )
 
     @non_inspectable_property
@@ -1456,19 +1546,40 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return numba.typeof(self._numbaview)
 
-    def __reduce__(self):
-        packed = ak.operations.to_packed(self._layout, highlevel=False)
+    def __reduce_ex__(self, protocol: int) -> tuple:
+        result = custom_reduce(self, protocol)
+        if result is not NotImplemented:
+            return result
+
+        packed_layout = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed,
+            packed_layout,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
             byteorder="<",
         )
+
+        # For pickle >= 5, we can avoid copying the buffers
+        if protocol >= 5:
+            container = {k: pickle.PickleBuffer(v) for k, v in container.items()}
+
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return object.__new__, (Array,), (form.to_dict(), length, container, behavior)
+
+        if self._attrs is None:
+            attrs = self._attrs
+        else:
+            attrs = without_transient_attrs(self._attrs)
+
+        return unpickle_array_schema_1, (
+            form.to_dict(),
+            length,
+            container,
+            behavior,
+            attrs,
+        )
 
     def __setstate__(self, state):
         form, length, container, behavior, *_ = state
@@ -1499,16 +1610,20 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 buffer_key="{form_key}-{attribute}",
                 byteorder="<",
             )
-        self.layout = layout
-        self.behavior = behavior
+        self._layout = layout
+        self._behavior = behavior
+        self._attrs = None
+
+        self._update_class()
 
     def __copy__(self):
-        return Array(self._layout, behavior=self._behavior)
+        return Array(self._layout, behavior=self._behavior, attrs=self._attrs)
 
     def __deepcopy__(self, memo):
         return Array(
             copy.deepcopy(self._layout, memo),
             behavior=copy.deepcopy(self._behavior, memo),
+            attrs=copy.deepcopy(self._attrs, memo),
         )
 
     def __bool__(self):
@@ -1531,15 +1646,17 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See [cppyy documentation](https://cppyy.readthedocs.io/en/latest/index.html)
         on types and signatures.
         """
-        ak.cppyy.register_and_check()
+        ak.cppyy.register_and_check()  # noqa: F823
 
         import cppyy
 
+        import awkward._connect.cling  # noqa: F401
+
         if self._cpp_type is None:
             self._generator = ak._connect.cling.togenerator(
-                self.layout.form, flatlist_as_rvec=False
+                self._layout.form, flatlist_as_rvec=False
             )
-            self._lookup = ak._lookup.Lookup(self.layout)
+            self._lookup = ak._lookup.Lookup(self._layout)
             self._generator.generate(cppyy.cppdef)
             self._cpp_type = f"awkward::{self._generator.class_type()}"
 
@@ -1600,13 +1717,15 @@ class Record(NDArrayOperatorsMixin):
         behavior=None,
         with_name=None,
         check_valid=False,
-        library=None,
+        backend=None,
+        attrs=None,
     ):
         if isinstance(data, ak.record.Record):
             layout = data
 
         elif isinstance(data, Record):
             layout = data._layout
+            attrs = data.attrs
 
         elif isinstance(data, str):
             layout = ak.operations.from_json(data, highlevel=False)
@@ -1637,15 +1756,21 @@ class Record(NDArrayOperatorsMixin):
         if with_name is not None:
             layout = ak.operations.with_name(layout, with_name, highlevel=False)
 
-        if library is not None and library != ak.operations.library(layout):
-            layout = ak.operations.to_library(layout, library, highlevel=False)
+        if not (backend is None or backend == layout.backend.name):
+            layout = ak.operations.to_backend(layout, backend, highlevel=False)
 
-        self.layout = layout
-        self.behavior = behavior
+        if behavior is not None and not isinstance(behavior, Mapping):
+            raise TypeError("behavior must be None or mapping")
+
+        self._layout = layout
+        self._behavior = behavior
+        self._attrs = attrs
 
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
             self.__doc__ = docstr
+
+        self._update_class()
 
         if check_valid:
             ak.operations.validity_error(self, exception=True)
@@ -1654,6 +1779,31 @@ class Record(NDArrayOperatorsMixin):
         super().__init_subclass__(**kwargs)
 
         ak.jax.register_behavior_class(cls)
+
+    def _update_class(self):
+        self._numbaview = None
+        self.__class__ = get_record_class(self._layout, self._behavior)
+
+    @property
+    def attrs(self) -> Mapping[str, Any]:
+        """
+        The mapping containing top-level metadata, which is serialised
+        with the record during pickling.
+
+        Keys prefixed with `@` are identified as "transient" attributes
+        which are discarded prior to pickling, permitting the storage of
+        non-pickleable types.
+        """
+        if self._attrs is None:
+            self._attrs = {}
+        return self._attrs
+
+    @attrs.setter
+    def attrs(self, value: Mapping[str, Any]):
+        if isinstance(value, Mapping):
+            self._attrs = value
+        else:
+            raise TypeError("attrs must be a mapping")
 
     @property
     def layout(self):
@@ -1696,7 +1846,7 @@ class Record(NDArrayOperatorsMixin):
     def layout(self, layout):
         if isinstance(layout, ak.record.Record):
             self._layout = layout
-            self._numbaview = None
+            self._update_class()
         else:
             raise TypeError("layout must be a subclass of ak.record.Record")
 
@@ -1722,8 +1872,8 @@ class Record(NDArrayOperatorsMixin):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
-            self.__class__ = get_record_class(self._layout, behavior)
             self._behavior = behavior
+            self._update_class()
         else:
             raise TypeError("behavior must be None or a dict")
 
@@ -1827,7 +1977,10 @@ class Record(NDArrayOperatorsMixin):
         """
         with ak._errors.SlicingErrorContext(self, where):
             return wrap_layout(
-                prepare_layout(self._layout[where]), self._behavior, allow_other=True
+                prepare_layout(self._layout[where]),
+                self._behavior,
+                allow_other=True,
+                attrs=self._attrs,
             )
 
     def __setitem__(self, where, what):
@@ -1862,7 +2015,12 @@ class Record(NDArrayOperatorsMixin):
                 raise TypeError("only fields may be assigned in-place (by field name)")
 
             self._layout = ak.operations.ak_with_field._impl(
-                self._layout, what, where, highlevel=False, behavior=self._behavior
+                self._layout,
+                what,
+                where,
+                highlevel=False,
+                behavior=self._behavior,
+                attrs=self._attrs,
             )
             self._numbaview = None
 
@@ -1895,7 +2053,11 @@ class Record(NDArrayOperatorsMixin):
                 raise TypeError("only fields may be removed in-place (by field name)")
 
             self._layout = ak.operations.ak_without_field._impl(
-                self._layout, where, highlevel=False, behavior=self._behavior
+                self._layout,
+                where,
+                highlevel=False,
+                behavior=self._behavior,
+                attrs=self._attrs,
             )
             self._numbaview = None
 
@@ -1935,8 +2097,8 @@ class Record(NDArrayOperatorsMixin):
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                        "while trying to get field {}, an exception "
-                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
+                        f"while trying to get field {where!r}, an exception "
+                        f"occurred:\n{type(err)}: {err!s}"
                     ) from err
             else:
                 raise AttributeError(f"no field named {where!r}")
@@ -2032,7 +2194,16 @@ class Record(NDArrayOperatorsMixin):
 
         return f"<{pytype}{valuestr} type={typestr}>"
 
-    def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
+    def show(
+        self,
+        limit_rows=20,
+        limit_cols=80,
+        type=False,
+        stream=sys.stdout,
+        *,
+        formatter=None,
+        precision=3,
+    ):
         """
         Args:
             limit_rows (int): Maximum number of rows (lines) to use in the output.
@@ -2041,13 +2212,24 @@ class Record(NDArrayOperatorsMixin):
                 of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
+            formatter (Mapping or None): Mapping of types/type-classes to string formatters.
+                If None, use the default formatter.
 
-        Display the contents of the record within `limit_rows` and `limit_cols`, using
+        Display the contents of the array within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
+
+        The `formatter` argument controls the formatting of individual values, c.f.
+        https://numpy.org/doc/stable/reference/generated/numpy.set_printoptions.html
+        As Awkward Array does not implement strings as a NumPy dtype, the `numpystr`
+        key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
+        string values, falling back upon `"str_kind"`.
         """
         import awkward._prettyprint
 
-        valuestr = awkward._prettyprint.valuestr(self, limit_rows, limit_cols)
+        formatter_impl = Formatter(formatter, precision=precision)
+        valuestr = awkward._prettyprint.valuestr(
+            self, limit_rows, limit_cols, formatter=formatter_impl
+        )
         if type:
             tmp = io.StringIO()
             self.type.show(stream=tmp)
@@ -2118,22 +2300,41 @@ class Record(NDArrayOperatorsMixin):
 
         return numba.typeof(self._numbaview)
 
-    def __reduce__(self):
-        packed = ak.operations.to_packed(self._layout, highlevel=False)
+    def __reduce_ex__(self, protocol: int) -> tuple:
+        # Allow third-party libraries to customise pickling
+        result = custom_reduce(self, protocol)
+        if result is not NotImplemented:
+            return result
+
+        packed_layout = ak.operations.to_packed(self._layout, highlevel=False)
         form, length, container = ak.operations.to_buffers(
-            packed.array,
+            packed_layout.array,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
             byteorder="<",
         )
+
+        # For pickle >= 5, we can avoid copying the buffers
+        if protocol >= 5:
+            container = {k: pickle.PickleBuffer(v) for k, v in container.items()}
+
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return (
-            object.__new__,
-            (Record,),
-            (form.to_dict(), length, container, behavior, packed.at),
+
+        if self._attrs is None:
+            attrs = self._attrs
+        else:
+            attrs = without_transient_attrs(self._attrs)
+
+        return unpickle_record_schema_1, (
+            form.to_dict(),
+            length,
+            container,
+            behavior,
+            attrs,
+            packed_layout.at,
         )
 
     def __setstate__(self, state):
@@ -2148,16 +2349,20 @@ class Record(NDArrayOperatorsMixin):
             byteorder="<",
         )
         layout = ak.record.Record(layout, at)
-        self.layout = layout
-        self.behavior = behavior
+        self._layout = layout
+        self._behavior = behavior
+        self._attrs = None
+
+        self._update_class()
 
     def __copy__(self):
-        return Record(self._layout, behavior=self._behavior)
+        return Record(self._layout, behavior=self._behavior, attrs=self._attrs)
 
     def __deepcopy__(self, memo):
         return Record(
             copy.deepcopy(self._layout, memo),
             behavior=copy.deepcopy(self._behavior, memo),
+            attrs=copy.deepcopy(self._attrs, memo),
         )
 
     def __bool__(self):
@@ -2299,12 +2504,16 @@ class ArrayBuilder(Sized):
     be considered the "least effort" approach.
     """
 
-    def __init__(self, *, behavior=None, initial=1024, resize=8):
+    def __init__(self, *, behavior=None, attrs=None, initial=1024, resize=8):
+        if behavior is not None and not isinstance(behavior, Mapping):
+            raise TypeError("behavior must be None or mapping")
+
         self._layout = _ext.ArrayBuilder(initial=initial, resize=resize)
-        self.behavior = behavior
+        self._behavior = behavior
+        self._attrs = attrs
 
     @classmethod
-    def _wrap(cls, layout, behavior=None):
+    def _wrap(cls, layout, behavior=None, attrs=None):
         """
         Args:
             layout (`ak._ext.ArrayBuilder`): Low-level builder to wrap.
@@ -2321,8 +2530,30 @@ class ArrayBuilder(Sized):
         assert isinstance(layout, _ext.ArrayBuilder)
         out = cls.__new__(cls)
         out._layout = layout
-        out.behavior = behavior
+        out._behavior = behavior
+        out._attrs = attrs
         return out
+
+    @property
+    def attrs(self) -> Mapping[str, Any]:
+        """
+        The mapping containing top-level metadata, which is serialised
+        with the array during pickling.
+
+        Keys prefixed with `@` are identified as "transient" attributes
+        which are discarded prior to pickling, permitting the storage of
+        non-pickleable types.
+        """
+        if self._attrs is None:
+            self._attrs = {}
+        return self._attrs
+
+    @attrs.setter
+    def attrs(self, value: Mapping[str, Any]):
+        if isinstance(value, Mapping):
+            self._attrs = value
+        else:
+            raise TypeError("attrs must be a mapping")
 
     @property
     def behavior(self):
@@ -2412,7 +2643,16 @@ class ArrayBuilder(Sized):
 
         return f"<ArrayBuilder type={typestr}>"
 
-    def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
+    def show(
+        self,
+        limit_rows=20,
+        limit_cols=80,
+        type=False,
+        stream=sys.stdout,
+        *,
+        formatter=None,
+        precision=3,
+    ):
         """
         Args:
             limit_rows (int): Maximum number of rows (lines) to use in the output.
@@ -2421,38 +2661,44 @@ class ArrayBuilder(Sized):
                 of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
+            formatter (Mapping or None): Mapping of types/type-classes to string formatters.
+                If None, use the default formatter.
 
         Display the contents of the array within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
 
+        The `formatter` argument controls the formatting of individual values, c.f.
+        https://numpy.org/doc/stable/reference/generated/numpy.set_printoptions.html
+        As Awkward Array does not implement strings as a NumPy dtype, the `numpystr`
+        key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
+        string values, falling back upon `"str_kind"`.
+
         This method takes a snapshot of the data and calls show on it, and a snapshot
         copies data.
         """
+        formatter_impl = Formatter(formatter, precision=precision)
         return self.snapshot().show(
-            limit_rows=limit_rows, limit_cols=limit_cols, type=type, stream=stream
+            limit_rows=limit_rows,
+            limit_cols=limit_cols,
+            type=type,
+            stream=stream,
+            formatter=formatter_impl,
         )
 
-    @property
-    def __cuda_array_interface__(self):
-        with ak._errors.OperationErrorContext(
-            f"{type(self).__name__}.__cuda_array_interface__", (self,), {}
-        ):
-            array = ak.operations.to_cupy(self)
-            return array.__cuda_array_interface__
+    def __array__(self, dtype=None):
+        """
+        Intercepts attempts to convert a #snapshot of this array into a
+        NumPy array and either performs a zero-copy conversion or raises
+        an error.
 
-    @property
-    def __array_interface__(self):
+        See #ak.Array.__array__ for a more complete description.
+        """
         with ak._errors.OperationErrorContext(
-            f"{type(self).__name__}.__array_interface__", (self,), {}
+            "numpy.asarray", (self,), {"dtype": dtype}
         ):
-            array = ak.operations.to_numpy(self)
-            return array.__array_interface__
+            from awkward._connect.numpy import convert_to_array
 
-    def __dlpack_device__(self):
-        with ak._errors.OperationErrorContext(
-            f"{type(self).__name__}.__dlpack_device__", (self,), {}
-        ):
-            return get_layout_device(self.snapshot())
+            return convert_to_array(self.snapshot(), dtype=dtype)
 
     def __arrow_array__(self, type=None):
         with ak._errors.OperationErrorContext(
@@ -2491,10 +2737,9 @@ class ArrayBuilder(Sized):
 
         The currently accumulated data are *copied* into the new array.
         """
-        formstr, length, container = self._layout.to_buffers()
-        form = ak.forms.from_json(formstr)
-
         with ak._errors.OperationErrorContext("ak.ArrayBuilder.snapshot", [], {}):
+            formstr, length, container = self._layout.to_buffers()
+            form = ak.forms.from_json(formstr)
             return ak.operations.ak_from_buffers._impl(
                 form,
                 length,
@@ -2502,9 +2747,10 @@ class ArrayBuilder(Sized):
                 buffer_key="{form_key}-{attribute}",
                 backend="cpu",
                 byteorder=ak._util.native_byteorder,
+                simplify=True,
                 highlevel=True,
                 behavior=self._behavior,
-                simplify=True,
+                attrs=self._attrs,
             )
 
     def null(self):

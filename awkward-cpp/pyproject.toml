@@ -7,9 +7,10 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "22"
+version = "29"
 dependencies = [
-    "numpy>=1.18.0"
+    "numpy>=1.18.0",
+    "importlib_resources;python_version < \"3.9\""
 ]
 readme = "README.md"
 description = "CPU kernels and compiled extensions for Awkward Array"
@@ -36,6 +37,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Scientific/Engineering :: Mathematics",
@@ -66,5 +68,6 @@ sdist.include = [
     "src/awkward_cpp/_kernel_signatures.py",
     "tests-spec",
     "tests-spec-explicit",
-    "tests-cpu-kernels"
+    "tests-cpu-kernels",
+    "tests-cpu-kernels-explicit"
 ]

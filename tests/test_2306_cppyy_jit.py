@@ -1,8 +1,9 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
+from __future__ import annotations
 
+import packaging.version
 import pytest
-import setuptools
 
 import awkward as ak
 import awkward._connect.cling
@@ -46,8 +47,7 @@ def test_array_as_generated_dataset():
 
 
 @pytest.mark.skipif(
-    setuptools.extern.packaging.version.parse(cppyy.__version__)
-    < setuptools.extern.packaging.version.parse("3.0.1"),
+    packaging.version.Version(cppyy.__version__) < packaging.version.Version("3.0.1"),
     reason="Awkward Array can only work with cppyy 3.0.1 or later.",
 )
 def test_array_as_type():
@@ -82,8 +82,7 @@ def test_array_as_type():
 
 
 @pytest.mark.skipif(
-    setuptools.extern.packaging.version.parse(cppyy.__version__)
-    < setuptools.extern.packaging.version.parse("3.0.1"),
+    packaging.version.Version(cppyy.__version__) < packaging.version.Version("3.0.1"),
     reason="Awkward Array can only work with cppyy 3.0.1 or later.",
 )
 def test_array_as_templated_type():

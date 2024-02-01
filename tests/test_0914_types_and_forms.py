@@ -1,6 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from typing import Optional
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -9,7 +9,7 @@ import awkward as ak
 
 
 def assert_overrides_typestr(
-    type_, typestr: str = "override", expected: Optional[str] = None
+    type_, typestr: str = "override", expected: str | None = None
 ):
     # Assume typestr is expected result
     if expected is None:
@@ -1369,149 +1369,124 @@ def test_NumpyForm():
         "parameters": {"__unit__": "s", "x": 123},
     }
 
-    with pytest.warns(DeprecationWarning):
-        assert ak.forms.numpyform.from_dtype(np.dtype("bool")).to_dict(
+    assert ak.forms.numpyform.from_dtype(np.dtype("bool")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "bool",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("int8")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "int8",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint8")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "uint8",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("int16")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "int16",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint16")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "uint16",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("int32")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "int32",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint32")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "uint32",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("int64")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "int64",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint64")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "uint64",
+    }
+    if hasattr(np, "float16"):
+        assert ak.forms.numpyform.from_dtype(np.dtype("float16")).to_dict(
             verbose=False
         ) == {
             "class": "NumpyArray",
-            "primitive": "bool",
+            "primitive": "float16",
         }
-        assert ak.forms.numpyform.from_dtype(np.dtype("int8")).to_dict(
+    assert ak.forms.numpyform.from_dtype(np.dtype("float32")).to_dict(
+        verbose=False
+    ) == {
+        "class": "NumpyArray",
+        "primitive": "float32",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("float64")).to_dict(
+        verbose=False
+    ) == {
+        "class": "NumpyArray",
+        "primitive": "float64",
+    }
+    if hasattr(np, "float128"):
+        assert ak.forms.numpyform.from_dtype(np.dtype("float128")).to_dict(
             verbose=False
         ) == {
             "class": "NumpyArray",
-            "primitive": "int8",
+            "primitive": "float128",
         }
-        assert ak.forms.numpyform.from_dtype(np.dtype("uint8")).to_dict(
+    assert ak.forms.numpyform.from_dtype(np.dtype("complex64")).to_dict(
+        verbose=False
+    ) == {
+        "class": "NumpyArray",
+        "primitive": "complex64",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("complex128")).to_dict(
+        verbose=False
+    ) == {
+        "class": "NumpyArray",
+        "primitive": "complex128",
+    }
+    if hasattr(np, "complex256"):
+        assert ak.forms.numpyform.from_dtype(np.dtype("complex256")).to_dict(
             verbose=False
         ) == {
             "class": "NumpyArray",
-            "primitive": "uint8",
+            "primitive": "complex256",
         }
-        assert ak.forms.numpyform.from_dtype(np.dtype("int16")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "int16",
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype("uint16")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "uint16",
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype("int32")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "int32",
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype("uint32")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "uint32",
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype("int64")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "int64",
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype("uint64")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "uint64",
-        }
-        if hasattr(np, "float16"):
-            assert ak.forms.numpyform.from_dtype(np.dtype("float16")).to_dict(
-                verbose=False
-            ) == {
-                "class": "NumpyArray",
-                "primitive": "float16",
-            }
-        assert ak.forms.numpyform.from_dtype(np.dtype("float32")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "float32",
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype("float64")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "float64",
-        }
-        if hasattr(np, "float128"):
-            assert ak.forms.numpyform.from_dtype(np.dtype("float128")).to_dict(
-                verbose=False
-            ) == {
-                "class": "NumpyArray",
-                "primitive": "float128",
-            }
-        assert ak.forms.numpyform.from_dtype(np.dtype("complex64")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "complex64",
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype("complex128")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "complex128",
-        }
-        if hasattr(np, "complex256"):
-            assert ak.forms.numpyform.from_dtype(np.dtype("complex256")).to_dict(
-                verbose=False
-            ) == {
-                "class": "NumpyArray",
-                "primitive": "complex256",
-            }
-        assert ak.forms.numpyform.from_dtype(np.dtype("M8")).to_dict(verbose=False) == {
-            "class": "NumpyArray",
-            "primitive": "datetime64",
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype("M8[s]")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "datetime64",
-            "parameters": {"__unit__": "s"},
-        }
-        assert ak.forms.numpyform.from_dtype(
-            np.dtype("M8[s]"), parameters={"x": 123}
-        ).to_dict(verbose=False) == {
-            "class": "NumpyArray",
-            "primitive": "datetime64",
-            "parameters": {"__unit__": "s", "x": 123},
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype("m8")).to_dict(verbose=False) == {
-            "class": "NumpyArray",
-            "primitive": "timedelta64",
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype("m8[s]")).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "timedelta64",
-            "parameters": {"__unit__": "s"},
-        }
-        assert ak.forms.numpyform.from_dtype(
-            np.dtype("m8[s]"), parameters={"x": 123}
-        ).to_dict(verbose=False) == {
-            "class": "NumpyArray",
-            "primitive": "timedelta64",
-            "parameters": {"__unit__": "s", "x": 123},
-        }
-        assert ak.forms.numpyform.from_dtype(np.dtype(("bool", (1, 2, 3)))).to_dict(
-            verbose=False
-        ) == {
-            "class": "NumpyArray",
-            "primitive": "bool",
-            "inner_shape": [1, 2, 3],
-        }
+    assert ak.forms.numpyform.from_dtype(np.dtype("M8")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "datetime64",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("M8[s]")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "datetime64[s]",
+    }
+    assert ak.forms.numpyform.from_dtype(
+        np.dtype("M8[s]"), parameters={"x": 123}
+    ).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "datetime64[s]",
+        "parameters": {"x": 123},
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("m8")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "timedelta64",
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype("m8[s]")).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "timedelta64[s]",
+    }
+    assert ak.forms.numpyform.from_dtype(
+        np.dtype("m8[s]"), parameters={"x": 123}
+    ).to_dict(verbose=False) == {
+        "class": "NumpyArray",
+        "primitive": "timedelta64[s]",
+        "parameters": {"x": 123},
+    }
+    assert ak.forms.numpyform.from_dtype(np.dtype(("bool", (1, 2, 3)))).to_dict(
+        verbose=False
+    ) == {
+        "class": "NumpyArray",
+        "primitive": "bool",
+        "inner_shape": [1, 2, 3],
+    }
 
     assert ak.forms.numpyform.from_dtype(
         np.dtype("M8"), time_units_as_parameter=False
@@ -1634,24 +1609,22 @@ def test_NumpyForm():
     assert ak.forms.from_dict(
         {
             "class": "NumpyArray",
-            "primitive": "datetime64",
-            "parameters": {"__unit__": "s"},
+            "primitive": "datetime64[s]",
         }
     ).to_dict(verbose=False) == {
         "class": "NumpyArray",
-        "primitive": "datetime64",
-        "parameters": {"__unit__": "s"},
+        "primitive": "datetime64[s]",
     }
     assert ak.forms.from_dict(
         {
             "class": "NumpyArray",
-            "primitive": "datetime64",
-            "parameters": {"__unit__": "s", "x": 123},
+            "primitive": "datetime64[s]",
+            "parameters": {"x": 123},
         }
     ).to_dict(verbose=False) == {
         "class": "NumpyArray",
-        "primitive": "datetime64",
-        "parameters": {"__unit__": "s", "x": 123},
+        "primitive": "datetime64[s]",
+        "parameters": {"x": 123},
     }
     assert ak.forms.from_dict("timedelta64").to_dict(verbose=False) == {
         "class": "NumpyArray",
@@ -1660,24 +1633,22 @@ def test_NumpyForm():
     assert ak.forms.from_dict(
         {
             "class": "NumpyArray",
-            "primitive": "timedelta64",
-            "parameters": {"__unit__": "s"},
+            "primitive": "timedelta64[s]",
         }
     ).to_dict(verbose=False) == {
         "class": "NumpyArray",
-        "primitive": "timedelta64",
-        "parameters": {"__unit__": "s"},
+        "primitive": "timedelta64[s]",
     }
     assert ak.forms.from_dict(
         {
             "class": "NumpyArray",
-            "primitive": "timedelta64",
-            "parameters": {"__unit__": "s", "x": 123},
+            "primitive": "timedelta64[s]",
+            "parameters": {"x": 123},
         }
     ).to_dict(verbose=False) == {
         "class": "NumpyArray",
-        "primitive": "timedelta64",
-        "parameters": {"__unit__": "s", "x": 123},
+        "primitive": "timedelta64[s]",
+        "parameters": {"x": 123},
     }
 
     assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "bool"}).to_dict(

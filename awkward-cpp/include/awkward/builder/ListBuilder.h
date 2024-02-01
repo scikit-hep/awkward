@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #ifndef AWKWARD_LISTBUILDER_H_
 #define AWKWARD_LISTBUILDER_H_
@@ -15,7 +15,7 @@ namespace awkward {
   /// @class ListBuilder
   ///
   /// @brief Builder node that accumulates lists.
-  class LIBAWKWARD_EXPORT_SYMBOL ListBuilder: public Builder {
+  class EXPORT_SYMBOL ListBuilder: public Builder {
   public:
     /// @brief Create an empty ListBuilder.
     /// @param options Configuration options for building an array;

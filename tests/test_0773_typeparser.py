@@ -1,4 +1,6 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
 
 import pytest
 
@@ -235,28 +237,22 @@ def test_arraytype_bytestring():
 
 
 def test_arraytype_categorical_1():
-    with pytest.warns(
-        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
-    ):
-        text = str(
-            ak.operations.ak_to_categorical.to_categorical(
-                ak.Array(["one", "one", "two", "three", "one", "three"])
-            ).type
-        )
+    pytest.importorskip("pyarrow")
+
+    text = str(
+        ak.str.to_categorical(
+            ak.Array(["one", "one", "two", "three", "one", "three"])
+        ).type
+    )
     parsedtype = ak.types.from_datashape(text, highlevel=True)
     assert isinstance(parsedtype, ak.types.ArrayType)
     assert str(parsedtype) == text
 
 
 def test_arraytype_categorical_2():
-    with pytest.warns(
-        DeprecationWarning, match=r"has been replaced by.*ak\.str\.to_categorical"
-    ):
-        text = str(
-            ak.operations.ak_to_categorical.to_categorical(
-                ak.Array([1.1, 1.1, 2.2, 3.3, 1.1, 3.3])
-            ).type
-        )
+    pytest.importorskip("pyarrow")
+
+    text = str(ak.str.to_categorical(ak.Array([1.1, 1.1, 2.2, 3.3, 1.1, 3.3])).type)
     parsedtype = ak.types.from_datashape(text, highlevel=True)
     assert isinstance(parsedtype, ak.types.ArrayType)
     assert str(parsedtype) == text

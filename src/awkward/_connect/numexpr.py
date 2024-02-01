@@ -1,4 +1,7 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
 import sys
 import warnings
 
@@ -30,7 +33,7 @@ or
             if parse_version(numexpr.__version__) < parse_version("2.7.1"):
                 warnings.warn(
                     "Awkward Array is only known to work with numexpr 2.7.1 or later"
-                    "(you have version {})".format(numexpr.__version__),
+                    f"(you have version {numexpr.__version__})",
                     RuntimeWarning,
                     stacklevel=1,
                 )
@@ -80,10 +83,7 @@ def evaluate(
     names, ex_uses_vml = numexpr.necompiler._names_cache[expr_key]
     arguments = getArguments(names, local_dict, global_dict)
 
-    arrays = [
-        ak.operations.to_layout(x, allow_record=True, allow_other=True)
-        for x in arguments
-    ]
+    arrays = [ak.operations.to_layout(x, allow_unknown=True) for x in arguments]
 
     def action(inputs, **ignore):
         if all(
@@ -91,11 +91,14 @@ def evaluate(
             or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
+            input_primitives = [
+                x.data if isinstance(x, ak.contents.NumpyArray) else x for x in inputs
+            ]
             return (
                 ak.contents.NumpyArray(
                     numexpr.evaluate(
                         expression,
-                        dict(zip(names, inputs)),
+                        dict(zip(names, input_primitives)),
                         {},
                         order=order,
                         casting=casting,
@@ -107,9 +110,7 @@ def evaluate(
             return None
 
     behavior = behavior_of(*arrays)
-    out = ak._broadcasting.broadcast_and_apply(
-        arrays, action, behavior, allow_records=False
-    )
+    out = ak._broadcasting.broadcast_and_apply(arrays, action, allow_records=False)
     assert isinstance(out, tuple) and len(out) == 1
     return wrap_layout(out[0], behavior)
 
@@ -127,10 +128,7 @@ def re_evaluate(local_dict=None):
     names = numexpr.necompiler._numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
 
-    arrays = [
-        ak.operations.to_layout(x, allow_record=True, allow_other=True)
-        for x in arguments
-    ]
+    arrays = [ak.operations.to_layout(x, allow_unknown=True) for x in arguments]
 
     def action(inputs, **ignore):
         if all(
@@ -138,15 +136,18 @@ def re_evaluate(local_dict=None):
             or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
+            input_primitives = [
+                x.data if isinstance(x, ak.contents.NumpyArray) else x for x in inputs
+            ]
             return (
-                ak.contents.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),
+                ak.contents.NumpyArray(
+                    numexpr.re_evaluate(dict(zip(names, input_primitives)))
+                ),
             )
         else:
             return None
 
     behavior = behavior_of(*arrays)
-    out = ak._broadcasting.broadcast_and_apply(
-        arrays, action, behavior, allow_records=False
-    )
+    out = ak._broadcasting.broadcast_and_apply(arrays, action, allow_records=False)
     assert isinstance(out, tuple) and len(out) == 1
     return wrap_layout(out[0], behavior)

@@ -1,4 +1,5 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import copy
@@ -16,13 +17,14 @@ from awkward._backends.dispatch import (
 from awkward._behavior import get_array_class, get_record_class
 from awkward._kernels import KernelError
 from awkward._layout import wrap_layout
+from awkward._meta.meta import Meta
 from awkward._nplikes import to_nplike
-from awkward._nplikes.dispatch import nplike_of
+from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpylike import IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
+    parameters_are_equal,
     type_parameters_equal,
 )
 from awkward._regularize import is_integer_like, is_sized_iterable
@@ -33,6 +35,7 @@ from awkward._typing import (
     AxisMaybeNone,
     JSONMapping,
     Literal,
+    Protocol,
     Self,
     SupportsIndex,
     TypeAlias,
@@ -71,7 +74,23 @@ float | int | str | list[JSONValueType] | dict[str, JSONValueType]
 """
 
 
-class RecursivelyApplyOptionsType(TypedDict):
+class ImplementsApplyAction(Protocol):
+    def __call__(
+        self,
+        layout: Content,
+        *,
+        depth: int,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        continuation: Callable[[], Content],
+        behavior: Mapping | None,
+        backend: Backend,
+        options: ApplyActionOptions,
+    ) -> Content | None:
+        ...
+
+
+class ApplyActionOptions(TypedDict):
     allow_records: bool
     keep_parameters: bool
     numpy_to_regular: bool
@@ -81,17 +100,27 @@ class RecursivelyApplyOptionsType(TypedDict):
     function_name: str | None
 
 
-class Content:
-    is_numpy = False
-    is_unknown = False
-    is_list = False
-    is_regular = False
-    is_option = False
-    is_indexed = False
-    is_record = False
-    is_union = False
-    is_leaf = False
+class RemoveStructureOptions(TypedDict):
+    flatten_records: bool
+    function_name: str
+    drop_nones: bool
+    keepdims: bool
+    allow_records: bool
+    list_to_regular: bool
 
+
+class ToArrowOptions(TypedDict):
+    list_to32: bool
+    string_to32: bool
+    bytestring_to32: bool
+    emptyarray_to: np.dtype | None
+    categorical_as_dictionary: bool
+    extensionarray: bool
+    count_nulls: bool
+    record_is_scalar: bool
+
+
+class Content(Meta):
     def _init(self, parameters: dict[str, Any] | None, backend: Backend):
         if parameters is None:
             pass
@@ -156,33 +185,6 @@ class Content:
 
         self._parameters = parameters
         self._backend = backend
-
-    @property
-    def parameters(self) -> dict[str, JSONValueType]:
-        """
-        Free-form parameters associated with every array node as a dict from parameter
-        name to its JSON-like value. Some parameters are special and are used to assign
-        behaviors to the data.
-
-        Note that the dict returned by this property is a *view* of the array node's
-        parameters. *Changing the dict will change the array!*
-
-        See #ak.behavior.
-        """
-        if self._parameters is None:
-            self._parameters = {}
-        return self._parameters
-
-    def parameter(self, key: str) -> JSONValueType | None:
-        """
-        Returns a parameter's value or None.
-
-        (No distinction is ever made between unset parameters and parameters set to None.)
-        """
-        if self._parameters is None:
-            return None
-        else:
-            return self._parameters.get(key)
 
     @property
     def backend(self) -> Backend:
@@ -289,7 +291,7 @@ class Content:
             "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak.highlevel.Array"
         )
 
-    def __array__(self, **kwargs):
+    def __array__(self, dtype=None):
         raise TypeError(
             "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak.highlevel.Array"
         )
@@ -498,9 +500,7 @@ class Content:
                     )
                 else:
                     raise NotImplementedError(
-                        "FIXME: unhandled case of SliceMissing with RecordArray containing {}".format(
-                            content
-                        )
+                        f"FIXME: unhandled case of SliceMissing with RecordArray containing {content}"
                     )
 
             return ak.contents.RecordArray(
@@ -525,7 +525,7 @@ class Content:
         elif isinstance(where, slice) and where.step is None:
             # Ensure that start, stop are non-negative!
             start, stop, _, _ = self._backend.index_nplike.derive_slice_for_length(
-                normalize_slice(where, backend=self._backend), self.length
+                normalize_slice(where, nplike=self._backend.index_nplike), self.length
             )
             return self._getitem_range(start, stop)
 
@@ -546,7 +546,7 @@ class Content:
                 return self
 
             # Backend may change if index contains typetracers
-            backend = backend_of(self, *where)
+            backend = backend_of(self, *where, coerce_to_common=True)
             this = self.to_backend(backend)
 
             # Normalise valid indices onto well-defined basis
@@ -576,7 +576,7 @@ class Content:
             isinstance(where, ak.contents.Content)
             and where.backend is not self._backend
         ):
-            backend = backend_of(self, where)
+            backend = backend_of(self, where, coerce_to_common=True)
             return self.to_backend(backend)._getitem(where.to_backend(backend))
 
         elif isinstance(where, ak.contents.NumpyArray):
@@ -648,19 +648,20 @@ class Content:
 
         elif is_sized_iterable(where):
             # Do we have an array
-            nplike = nplike_of(where, default=None)
+            nplike = nplike_of_obj(where, default=None)
             # We can end up with non-array objects associated with an nplike
             if nplike is not None and nplike.is_own_array(where):
-                # Is it a scalar, not array?
-                if len(where.shape) == 0:
-                    raise AssertionError(
-                        "scalar arrays should be handled by integer-like indexing"
-                    )
-                else:
-                    layout = ak.operations.ak_to_layout._impl(
-                        where, allow_record=False, allow_other=False, regulararray=False
-                    )
-                    return self._getitem(layout)
+                layout = ak.operations.ak_to_layout._impl(
+                    where,
+                    allow_record=False,
+                    allow_unknown=False,
+                    none_policy="error",
+                    regulararray=False,
+                    use_from_iter=False,
+                    primitive_policy="error",
+                    string_policy="as-characters",
+                )
+                return self._getitem(layout)
 
             elif len(where) == 0:
                 return self._carry(
@@ -676,7 +677,14 @@ class Content:
 
             else:
                 layout = ak.operations.ak_to_layout._impl(
-                    where, allow_record=False, allow_other=False, regulararray=False
+                    where,
+                    allow_record=False,
+                    allow_unknown=False,
+                    none_policy="error",
+                    regulararray=False,
+                    use_from_iter=True,
+                    primitive_policy="error",
+                    string_policy="as-characters",
                 )
                 return self._getitem(layout)
 
@@ -692,7 +700,7 @@ class Content:
     def _getitem_at(self, where: IndexType):
         raise NotImplementedError
 
-    def _getitem_range(self, start: SupportsIndex, stop: IndexType) -> Content:
+    def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         raise NotImplementedError
 
     def _getitem_field(
@@ -753,41 +761,22 @@ class Content:
 
         head = [self]
         tail = []
-        i = 0
 
-        while i < len(others):
-            other = others[i]
-            if isinstance(
-                other,
-                (
-                    ak.contents.IndexedArray,
-                    ak.contents.IndexedOptionArray,
-                    ak.contents.ByteMaskedArray,
-                    ak.contents.BitMaskedArray,
-                    ak.contents.UnmaskedArray,
-                    ak.contents.UnionArray,
-                ),
-            ):
+        it_others = iter(others)
+
+        for other in it_others:
+            if other.is_indexed or other.is_option or other.is_union:
+                tail.append(other)
+                tail.extend(it_others)
                 break
             else:
                 head.append(other)
-            i = i + 1
 
-        while i < len(others):
-            tail.append(others[i])
-            i = i + 1
+        assert not any(x.backend.nplike.known_data for x in head + tail) or all(
+            x.backend.nplike.known_data for x in head + tail
+        )
 
-        if any(isinstance(x.backend.nplike, TypeTracer) for x in head + tail):
-            head = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in head
-            ]
-            tail = [
-                x if isinstance(x.backend.nplike, TypeTracer) else x.to_typetracer()
-                for x in tail
-            ]
-
-        return (head, tail)
+        return head, tail
 
     def _local_index(self, axis: int, depth: int):
         raise NotImplementedError
@@ -958,51 +947,6 @@ class Content:
     ):
         raise NotImplementedError
 
-    @property
-    def is_identity_like(self) -> bool:
-        return self.form_cls.is_identity_like.__get__(self)
-
-    @property
-    def purelist_isregular(self) -> bool:
-        """
-        Returns True if all dimensions down to the first record or tuple layer have
-        #ak.types.RegularType; False otherwise.
-        """
-        return self.form_cls.purelist_isregular.__get__(self)
-
-    @property
-    def purelist_depth(self) -> int:
-        """
-        Number of dimensions of nested lists, not counting anything deeper than the
-        first record or tuple layer, if any. The depth of a one-dimensional array is
-        `1`.
-
-        If the array contains #ak.types.UnionType data and its contents have
-        equal depths, the return value is that depth. If they do not have equal
-        depths, the return value is `-1`.
-        """
-        return self.form_cls.purelist_depth.__get__(self)
-
-    @property
-    def minmax_depth(self) -> tuple[int, int]:
-        return self.form_cls.minmax_depth.__get__(self)
-
-    @property
-    def branch_depth(self) -> tuple[bool, int]:
-        return self.form_cls.branch_depth.__get__(self)
-
-    @property
-    def fields(self) -> list[str]:
-        return self.form_cls.fields.__get__(self)
-
-    @property
-    def is_tuple(self) -> bool:
-        return self.form_cls.is_tuple.__get__(self)
-
-    @property
-    def dimension_optiontype(self) -> bool:
-        return self.form_cls.dimension_optiontype.__get__(self)
-
     def _pad_none_axis0(self, target: int, clip: bool) -> Content:
         if not clip and (self.length is unknown_length or (target < self.length)):
             index = Index64(
@@ -1060,10 +1004,10 @@ class Content:
     def _to_arrow(
         self,
         pyarrow: Any,
-        mask_node: Any,
-        validbytes: Any,
+        mask_node: Content | None,
+        validbytes: Content | None,
         length: int,
-        options: dict[str, Any],
+        options: ToArrowOptions,
     ):
         raise NotImplementedError
 
@@ -1085,17 +1029,18 @@ class Content:
     def _drop_none(self) -> Content:
         raise NotImplementedError
 
-    def _remove_structure(self, backend, options):
+    def _remove_structure(
+        self, backend: Backend, options: RemoveStructureOptions
+    ) -> list[Content]:
         raise NotImplementedError
 
     def _recursively_apply(
         self,
-        action: ActionType,
-        behavior: dict | None,
+        action: ImplementsApplyAction,
         depth: int,
-        depth_context: dict | None,
-        lateral_context: dict | None,
-        options: RecursivelyApplyOptionsType,
+        depth_context: Mapping[str, Any] | None,
+        lateral_context: Mapping[str, Any] | None,
+        options: ApplyActionOptions,
     ) -> Content | None:
         raise NotImplementedError
 
@@ -1134,7 +1079,7 @@ class Content:
             },
         )
 
-    def to_packed(self) -> Content:
+    def to_packed(self, recursive: bool = True) -> Content:
         raise NotImplementedError
 
     def to_list(self, behavior: dict | None = None) -> list:
@@ -1280,8 +1225,19 @@ class Content:
         raise NotImplementedError
 
     def is_equal_to(
-        self, other: Content, index_dtype: bool = True, numpyarray: bool = True
+        self,
+        other: Content,
+        index_dtype: bool = True,
+        numpyarray: bool = True,
+        *,
+        all_parameters: bool = False,
     ) -> bool:
+        return self._is_equal_to(other, index_dtype, numpyarray, all_parameters)
+
+    def _is_equal_to_generic(self, other: Content, all_parameters: bool) -> bool:
+        compare_parameters = (
+            parameters_are_equal if all_parameters else type_parameters_equal
+        )
         return (
             self.__class__ is other.__class__
             and (
@@ -1289,11 +1245,12 @@ class Content:
                 or other.length is unknown_length
                 or self.length == other.length
             )
-            and type_parameters_equal(self._parameters, other._parameters)
-            and self._is_equal_to(other, index_dtype, numpyarray)
+            and compare_parameters(self._parameters, other._parameters)
         )
 
-    def _is_equal_to(self, other: Self, index_dtype: bool, numpyarray: bool) -> bool:
+    def _is_equal_to(
+        self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
+    ) -> bool:
         raise NotImplementedError
 
     def _repr(self, indent: str, pre: str, post: str) -> str:
