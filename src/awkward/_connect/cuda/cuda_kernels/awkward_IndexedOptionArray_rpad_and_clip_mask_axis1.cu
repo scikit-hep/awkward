@@ -5,7 +5,7 @@
 //     (toindex, frommask, length, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_a", toindex.dtype, frommask.dtype]))(grid, block, (toindex, frommask, length, scan_in_array, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_b", toindex.dtype, frommask.dtype]))(grid, block, (toindex, frommask, length, scan_in_array, invocation_index, err_code))
 // out["awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_a", {dtype_specializations}] = None
 // out["awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_b", {dtype_specializations}] = None

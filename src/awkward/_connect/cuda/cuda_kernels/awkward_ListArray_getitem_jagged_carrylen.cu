@@ -5,7 +5,7 @@
 //     (carrylen, slicestarts, slicestops, sliceouterlen, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(sliceouterlen, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_carrylen_a", carrylen.dtype, slicestarts.dtype, slicestops.dtype]))(grid, block, (carrylen, slicestarts, slicestops, sliceouterlen, scan_in_array, invocation_index, err_code))
-//     scan_in_array = exclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_carrylen_b", carrylen.dtype, slicestarts.dtype, slicestops.dtype]))(grid, block, (carrylen, slicestarts, slicestops, sliceouterlen, scan_in_array, invocation_index, err_code))
 // out["awkward_ListArray_getitem_jagged_carrylen_a", {dtype_specializations}] = None
 // out["awkward_ListArray_getitem_jagged_carrylen_b", {dtype_specializations}] = None

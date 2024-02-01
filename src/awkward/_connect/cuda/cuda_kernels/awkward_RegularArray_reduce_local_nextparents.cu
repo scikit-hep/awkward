@@ -5,7 +5,7 @@
 //     (nextparents, size, length, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(length * size, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_RegularArray_reduce_local_nextparents_a', nextparents.dtype]))(grid, block, (nextparents, size, length, scan_in_array, invocation_index, err_code))
-//     scan_in_array = exclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_RegularArray_reduce_local_nextparents_b', nextparents.dtype]))(grid, block, (nextparents, size, length, scan_in_array, invocation_index, err_code))
 // out["awkward_RegularArray_reduce_local_nextparents_a", {dtype_specializations}] = None
 // out["awkward_RegularArray_reduce_local_nextparents_b", {dtype_specializations}] = None

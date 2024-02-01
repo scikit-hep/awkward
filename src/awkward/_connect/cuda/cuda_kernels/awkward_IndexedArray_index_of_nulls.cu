@@ -5,7 +5,7 @@
 //     (toindex, fromindex, lenindex, parents, starts, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(lenindex, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_index_of_nulls_a", toindex.dtype, fromindex.dtype, parents.dtype, starts.dtype]))(grid, block, (toindex, fromindex, lenindex, parents, starts, scan_in_array, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_index_of_nulls_b", toindex.dtype, fromindex.dtype, parents.dtype, starts.dtype]))(grid, block, (toindex, fromindex, lenindex, parents, starts, scan_in_array, invocation_index, err_code))
 // out["awkward_IndexedArray_index_of_nulls_a", {dtype_specializations}] = None
 // out["awkward_IndexedArray_index_of_nulls_b", {dtype_specializations}] = None

@@ -9,7 +9,7 @@ enum class INDEXEDARRAY_GETITEM_NEXTCARRY_OUTINDEX_ERRORS {
 //     (tocarry, toindex, fromindex, lenindex, lencontent, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(lenindex, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_getitem_nextcarry_outindex_a", tocarry.dtype, toindex.dtype, fromindex.dtype]))(grid, block, (tocarry, toindex, fromindex, lenindex, lencontent, scan_in_array, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_getitem_nextcarry_outindex_b", tocarry.dtype, toindex.dtype, fromindex.dtype]))(grid, block, (tocarry, toindex, fromindex, lenindex, lencontent, scan_in_array, invocation_index, err_code))
 // out["awkward_IndexedArray_getitem_nextcarry_outindex_a", {dtype_specializations}] = None
 // out["awkward_IndexedArray_getitem_nextcarry_outindex_b", {dtype_specializations}] = None

@@ -5,7 +5,7 @@
 //     (tolength, parents, parentslength, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(parentslength, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_sorting_ranges_length_a', tolength.dtype, parents.dtype]))(grid, block, (tolength, parents, parentslength, scan_in_array, invocation_index, err_code))
-//     scan_in_array = exclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_sorting_ranges_length_b', tolength.dtype, parents.dtype]))(grid, block, (tolength, parents, parentslength, scan_in_array, invocation_index, err_code))
 // out["awkward_sorting_ranges_length_a", {dtype_specializations}] = None
 // out["awkward_sorting_ranges_length_b", {dtype_specializations}] = None

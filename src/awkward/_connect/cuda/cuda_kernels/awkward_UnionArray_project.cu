@@ -3,7 +3,7 @@
 //     (lenout, tocarry, fromtags, fromindex, length, which, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_UnionArray_project_a", lenout.dtype, tocarry.dtype, fromtags.dtype, fromindex.dtype]))(grid, block, (lenout, tocarry, fromtags, fromindex, length, which, scan_in_array, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_UnionArray_project_b", lenout.dtype, tocarry.dtype, fromtags.dtype, fromindex.dtype]))(grid, block, (lenout, tocarry, fromtags, fromindex, length, which, scan_in_array, invocation_index, err_code))
 // out["awkward_UnionArray_project_a", {dtype_specializations}] = None
 // out["awkward_UnionArray_project_b", {dtype_specializations}] = None

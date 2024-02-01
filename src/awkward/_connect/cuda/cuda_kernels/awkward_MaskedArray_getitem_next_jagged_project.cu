@@ -5,7 +5,7 @@
 //     (index, starts_in, stops_in, starts_out, stops_out, length, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_MaskedArray_getitem_next_jagged_project_a", index.dtype, starts_in.dtype, stops_in.dtype, starts_out.dtype, stops_out.dtype]))(grid, block, (index, starts_in, stops_in, starts_out, stops_out, length, scan_in_array, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_MaskedArray_getitem_next_jagged_project_b", index.dtype, starts_in.dtype, stops_in.dtype, starts_out.dtype, stops_out.dtype]))(grid, block, (index, starts_in, stops_in, starts_out, stops_out, length, scan_in_array, invocation_index, err_code))
 // out["awkward_MaskedArray_getitem_next_jagged_project_a", {dtype_specializations}] = None
 // out["awkward_MaskedArray_getitem_next_jagged_project_b", {dtype_specializations}] = None

@@ -9,7 +9,7 @@ enum class INDEXEDARRAY_FLATTEN_NEXTCARRY_ERRORS {
 //     (tocarry, fromindex, lenindex, lencontent, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(lenindex, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_flatten_nextcarry_a", tocarry.dtype, fromindex.dtype]))(grid, block, (tocarry, fromindex, lenindex, lencontent, scan_in_array, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_flatten_nextcarry_b", tocarry.dtype, fromindex.dtype]))(grid, block, (tocarry, fromindex, lenindex, lencontent, scan_in_array, invocation_index, err_code))
 // out["awkward_IndexedArray_flatten_nextcarry_a", {dtype_specializations}] = None
 // out["awkward_IndexedArray_flatten_nextcarry_b", {dtype_specializations}] = None

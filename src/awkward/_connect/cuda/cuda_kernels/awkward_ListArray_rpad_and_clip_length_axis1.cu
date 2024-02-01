@@ -5,7 +5,7 @@
 //     (tomin, fromstarts, fromstops, target, lenstarts, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(lenstarts, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_rpad_and_clip_length_axis1_a", tomin.dtype, fromstarts.dtype, fromstops.dtype]))(grid, block, (tomin, fromstarts, fromstops, target, lenstarts, scan_in_array, invocation_index, err_code))
-//     scan_in_array = exclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_rpad_and_clip_length_axis1_b", tomin.dtype, fromstarts.dtype, fromstops.dtype]))(grid, block, (tomin, fromstarts, fromstops, target, lenstarts, scan_in_array, invocation_index, err_code))
 // out["awkward_ListArray_rpad_and_clip_length_axis1_a", {dtype_specializations}] = None
 // out["awkward_ListArray_rpad_and_clip_length_axis1_b", {dtype_specializations}] = None

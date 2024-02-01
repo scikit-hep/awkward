@@ -5,7 +5,7 @@
 //     (index_in, offsets_in, mask_out, starts_out, stops_out, length, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_Content_getitem_next_missing_jagged_getmaskstartstop_a", index_in.dtype, offsets_in.dtype, mask_out.dtype, starts_out.dtype, stops_out.dtype]))(grid, block, (index_in, offsets_in, mask_out, starts_out, stops_out, length, scan_in_array, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_Content_getitem_next_missing_jagged_getmaskstartstop_b", index_in.dtype, offsets_in.dtype, mask_out.dtype, starts_out.dtype, stops_out.dtype]))(grid, block, (index_in, offsets_in, mask_out, starts_out, stops_out, length, scan_in_array, invocation_index, err_code))
 // out["awkward_Content_getitem_next_missing_jagged_getmaskstartstop_a", {dtype_specializations}] = None
 // out["awkward_Content_getitem_next_missing_jagged_getmaskstartstop_b", {dtype_specializations}] = None

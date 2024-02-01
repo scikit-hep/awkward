@@ -6,8 +6,8 @@
 //     scan_in_array = cupy.empty(length, dtype=cupy.int64)
 //     scan_in_array_n_non_null = cupy.empty(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_Index_nones_as_index_a", toindex.dtype]))(grid, block, (toindex, length, scan_in_array, scan_in_array_n_non_null, invocation_index, err_code))
-//     scan_in_array = exclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
-//     scan_in_array_n_non_null = exclusive_scan(grid, block, (scan_in_array_n_non_null, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
+//     scan_in_array_n_non_null = cupy.cumsum(scan_in_array_n_non_null)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_Index_nones_as_index_b", toindex.dtype]))(grid, block, (toindex, length, scan_in_array, scan_in_array_n_non_null, invocation_index, err_code))
 // out["awkward_Index_nones_as_index_a", {dtype_specializations}] = None
 // out["awkward_Index_nones_as_index_b", {dtype_specializations}] = None
@@ -52,5 +52,3 @@ awkward_Index_nones_as_index_b(T* toindex,
     }
   }
 }
-
-// fails for [-1]
