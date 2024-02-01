@@ -51,7 +51,7 @@ def _impl(directory, filenames, storage_options):
     fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
     import fsspec.parquet
 
-    fs, destination = fsspec.core.url_to_fs(directory, **(storage_options or {}))
+    fs, destination = fsspec.core.url_to_fs(str(directory), **(storage_options or {}))
 
     if not fs.isdir(destination):
         raise ValueError(f"{destination!r} is not a directory" + {__file__})
