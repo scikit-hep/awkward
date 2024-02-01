@@ -284,7 +284,6 @@ def test_tocuda_unimplementedkernels14():
     assert ak.to_list(copyback_bytemaskedarray) == ak.to_list(bytemaskedarray)
 
 
-@pytest.mark.xfail(reason="awkward_ListArray_broadcast_tooffsets is not implemented")
 def test_tocuda_unimplementedkernels15():
     ioa = ak.contents.IndexedOptionArray(
         ak.index.Index32([-30, 19, 6, 7, -3, 21, 13, 22, 17, 9, -12, 16]),
