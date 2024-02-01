@@ -44,9 +44,8 @@ awkward_UnionArray_project_b(T* lenout,
                              uint64_t invocation_index,
                              uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    lenout[0] = scan_in_array[length - 1];
+    *lenout = length > 0 ? scan_in_array[length - 1] : 0;
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
     if (thread_id < length) {
       if (fromtags[thread_id] == which) {
         tocarry[scan_in_array[thread_id] - 1] = fromindex[thread_id];

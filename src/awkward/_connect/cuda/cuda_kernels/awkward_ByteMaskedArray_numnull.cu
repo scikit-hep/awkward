@@ -44,6 +44,6 @@ awkward_ByteMaskedArray_numnull_b(T* numnull,
                                   uint64_t invocation_index,
                                   uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    *numnull = scan_in_array[length - 1];
+    *numnull = length > 0 ? scan_in_array[length - 1] : 0;
   }
 }

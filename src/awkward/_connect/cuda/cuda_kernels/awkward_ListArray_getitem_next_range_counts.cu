@@ -37,6 +37,6 @@ awkward_ListArray_getitem_next_range_counts_b(T* total,
                                               uint64_t invocation_total,
                                               uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    *total = scan_in_array[lenstarts - 1];
+    *total = lenstarts > 0 ? scan_in_array[lenstarts - 1] : 0;
   }
 }

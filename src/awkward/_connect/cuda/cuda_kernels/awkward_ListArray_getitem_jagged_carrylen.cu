@@ -24,7 +24,7 @@ awkward_ListArray_getitem_jagged_carrylen_a(T* carrylen,
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < sliceouterlen) {
-      scan_in_array[thread_id] = (T)(slicestops[thread_id] - slicestarts[thread_id]);
+      scan_in_array[thread_id] = (int64_t)(slicestops[thread_id] - slicestarts[thread_id]);
     }
   }
 }
@@ -39,6 +39,6 @@ awkward_ListArray_getitem_jagged_carrylen_b(T* carrylen,
                                             uint64_t invocation_index,
                                             uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    *carrylen = (T)scan_in_array[sliceouterlen - 1];
+    *carrylen = sliceouterlen > 0 ? scan_in_array[sliceouterlen - 1] : 0;
   }
 }

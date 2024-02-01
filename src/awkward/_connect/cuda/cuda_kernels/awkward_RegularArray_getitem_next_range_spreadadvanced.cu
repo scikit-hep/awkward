@@ -15,6 +15,5 @@ awkward_RegularArray_getitem_next_range_spreadadvanced(T* toadvanced,
     if (thread_id < length) {
       toadvanced[(thread_id * nextsize) + thready_id] = fromadvanced[thread_id];
     }
-    toadvanced[(thread_id * nextsize) + thready_id] = fromadvanced[thread_id];
   }
 }

@@ -22,7 +22,7 @@ cuda_kernels_impl = [
     "awkward_ByteMaskedArray_numnull",
     "awkward_IndexedArray_numnull",
     "awkward_IndexedArray_numnull_parents",
-    "awkward_IndexedArray_numnull_unique_64",
+    "awkward_IndexedArray_numnull_unique",
     "awkward_NumpyArray_fill",
     "awkward_ListArray_fill",
     "awkward_IndexedArray_fill",

@@ -42,6 +42,6 @@ awkward_ListArray_rpad_and_clip_length_axis1_b(T* tomin,
                                                uint64_t invocation_index,
                                                uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    *tomin = scan_in_array[lenstarts - 1];
+    *tomin = lenstarts > 0 ? scan_in_array[lenstarts - 1] : 0;
   }
 }
