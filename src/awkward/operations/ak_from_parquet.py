@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import fsspec.parquet
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
@@ -97,7 +99,6 @@ def metadata(
 
     # early exit if missing deps
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.from_parquet")
-    import fsspec.parquet
 
     if row_groups is not None:
         if not all(is_integer(x) and x >= 0 for x in row_groups):
@@ -248,8 +249,6 @@ def _open_file(
     path, fs, columns, row_groups, max_gap, max_block, footer_sample_size, metadata
 ):
     """Picks between fsspec.parquet and normal fs.open"""
-    import fsspec.parquet
-
     # condition should be if columns and ow_groups are not all the possible ones
     if (columns or row_groups) and getattr(fs, "async_impl", False):
         return fsspec.parquet.open_parquet_file(

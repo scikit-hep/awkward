@@ -7,6 +7,7 @@ from numbers import Number
 from os import PathLike, fsdecode
 from urllib.parse import urlparse
 
+import fsspec
 from awkward_cpp.lib import _ext
 
 import awkward as ak
@@ -207,7 +208,6 @@ def _impl(
                     return open(file, "w", encoding="utf8")
 
             else:
-                import fsspec
 
                 def opener():
                     return fsspec.open(file, "w", encoding="utf8").open()
