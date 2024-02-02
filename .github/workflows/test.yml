@@ -51,7 +51,7 @@ jobs:
         include:
           - python-version: '3.9'
             python-architecture: x86
-            runs-on: windows-2019
+            runs-on: windows-latest
             dependencies-kind: full
           - python-version: '3.8'
             python-architecture: x64
