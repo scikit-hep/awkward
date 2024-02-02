@@ -12578,7 +12578,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_jagged_expand",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": true,

@@ -18,20 +18,22 @@ awkward_ListArray_getitem_jagged_expand(T* multistarts,
                                         uint64_t invocation_index,
                                         uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) % length;
+    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / jaggedsize;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % jaggedsize;
-    W start = fromstarts[thread_id];
-    X stop = fromstops[thread_id];
-    if (stop < start) {
-      RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_EXPAND_ERRORS::STOPS_LT_START)
+    if (thread_id < length && thready_id < jaggedsize) {
+      W start = fromstarts[thread_id];
+      X stop = fromstops[thread_id];
+      if (stop < start) {
+        RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_EXPAND_ERRORS::STOPS_LT_START)
+      }
+      if ((stop - start) != jaggedsize) {
+        RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_EXPAND_ERRORS::FIT_ERR)
+      }
+      multistarts[(thread_id * jaggedsize) + thready_id] =
+          singleoffsets[thready_id];
+      multistops[(thread_id * jaggedsize) + thready_id] =
+          singleoffsets[(thready_id + 1)];
+      tocarry[(thread_id * jaggedsize) + thready_id] = (start + thready_id);
     }
-    if ((stop - start) != jaggedsize) {
-      RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_EXPAND_ERRORS::FIT_ERR)
-    }
-    multistarts[(thread_id * jaggedsize) + thready_id] =
-        singleoffsets[thready_id];
-    multistops[(thread_id * jaggedsize) + thready_id] =
-        singleoffsets[(thready_id + 1)];
-    tocarry[(thread_id * jaggedsize) + thready_id] = (start + thready_id);
   }
 }
