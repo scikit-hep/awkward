@@ -6,6 +6,6 @@
 The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click here to go to the C++ API reference
 :::
 
-:::{eval-rst}
+```{eval-rst}
 .. include:: toctree.txt
-:::
+```
