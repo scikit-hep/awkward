@@ -14,8 +14,8 @@
 template <typename T, typename C, typename U>
 __global__ void
 awkward_IndexedArray_numnull_parents_a(T* numnull,
-                                       U* tolength,
-                                       const C* fromindex,
+                                       C* tolength,
+                                       const U* fromindex,
                                        int64_t lenindex,
                                        int64_t* scan_in_array,
                                        uint64_t invocation_index,
@@ -25,9 +25,11 @@ awkward_IndexedArray_numnull_parents_a(T* numnull,
 
     if (thread_id < lenindex) {
       if (fromindex[thread_id] < 0) {
+        numnull[thread_id] = 1;
         scan_in_array[thread_id] = 1;
       }
       else {
+        numnull[thread_id] = 0;
         scan_in_array[thread_id] = 0;
       }
     }
@@ -37,22 +39,13 @@ awkward_IndexedArray_numnull_parents_a(T* numnull,
 template <typename T, typename C, typename U>
 __global__ void
 awkward_IndexedArray_numnull_parents_b(T* numnull,
-                                       U* tolength,
-                                       const C* fromindex,
+                                       C* tolength,
+                                       const U* fromindex,
                                        int64_t lenindex,
                                        int64_t* scan_in_array,
                                        uint64_t invocation_index,
                                        uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     *tolength = lenindex > 0 ? scan_in_array[lenindex - 1] : 0;
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (thread_id < lenindex) {
-      if (fromindex[thread_id] < 0) {
-        numnull[thread_id] = 1;
-      }
-      else {
-        numnull[thread_id] = 0;
-      }
-    }
   }
 }
