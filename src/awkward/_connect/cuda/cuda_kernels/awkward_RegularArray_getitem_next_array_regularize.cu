@@ -16,13 +16,14 @@ enum class REGULARARRAY_GETITEM_NEXT_ARRAY_REGULARIZE_ERRORS {
 
 template <typename T, typename C>
 __global__ void
-awkward_RegularArray_getitem_next_array_regularize_a(T* toarray,
-                                                     const C* fromarray,
-                                                     int64_t lenarray,
-                                                     int64_t size,
-                                                     int64_t* scan_in_array,
-                                                     uint64_t invocation_index,
-                                                     uint64_t* err_code) {
+awkward_RegularArray_getitem_next_array_regularize_a(
+    T* toarray,
+    const C* fromarray,
+    int64_t lenarray,
+    int64_t size,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -40,13 +41,14 @@ awkward_RegularArray_getitem_next_array_regularize_a(T* toarray,
 
 template <typename T, typename C>
 __global__ void
-awkward_RegularArray_getitem_next_array_regularize_b(T* toarray,
-                                                     const C* fromarray,
-                                                     int64_t lenarray,
-                                                     int64_t size,
-                                                     int64_t* scan_in_array,
-                                                     uint64_t invocation_index,
-                                                     uint64_t* err_code) {
+awkward_RegularArray_getitem_next_array_regularize_b(
+    T* toarray,
+    const C* fromarray,
+    int64_t lenarray,
+    int64_t size,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 

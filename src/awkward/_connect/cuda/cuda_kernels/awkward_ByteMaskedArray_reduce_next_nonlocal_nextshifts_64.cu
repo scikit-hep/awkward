@@ -15,14 +15,15 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64_a(T* nextshifts,
-                                                             const C* mask,
-                                                             int64_t length,
-                                                             bool valid_when,
-                                                             int64_t* scan_in_array_k,
-                                                             int64_t* scan_in_array_nullsum,
-                                                             uint64_t invocation_index,
-                                                             uint64_t* err_code) {
+awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64_a(
+    T* nextshifts,
+    const C* mask,
+    int64_t length,
+    bool valid_when,
+    int64_t* scan_in_array_k,
+    int64_t* scan_in_array_nullsum,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -40,14 +41,15 @@ awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64_a(T* nextshifts,
 
 template <typename T, typename C>
 __global__ void
-awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64_b(T* nextshifts,
-                                                             const C* mask,
-                                                             int64_t length,
-                                                             bool valid_when,
-                                                             int64_t* scan_in_array_k,
-                                                             int64_t* scan_in_array_nullsum,
-                                                             uint64_t invocation_index,
-                                                             uint64_t* err_code) {
+awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64_b(
+    T* nextshifts,
+    const C* mask,
+    int64_t length,
+    bool valid_when,
+    int64_t* scan_in_array_k,
+    int64_t* scan_in_array_nullsum,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 

@@ -13,12 +13,13 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_IndexedArray_numnull_a(T* numnull,
-                               const C* fromindex,
-                               int64_t lenindex,
-                               int64_t* scan_in_array,
-                               uint64_t invocation_index,
-                               uint64_t* err_code) {
+awkward_IndexedArray_numnull_a(
+    T* numnull,
+    const C* fromindex,
+    int64_t lenindex,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -35,12 +36,13 @@ awkward_IndexedArray_numnull_a(T* numnull,
 
 template <typename T, typename C>
 __global__ void
-awkward_IndexedArray_numnull_b(T* numnull,
-                               const C* fromindex,
-                               int64_t lenindex,
-                               int64_t* scan_in_array,
-                               uint64_t invocation_index,
-                               uint64_t* err_code) {
+awkward_IndexedArray_numnull_b(
+    T* numnull,
+    const C* fromindex,
+    int64_t lenindex,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     *numnull = lenindex > 0 ? scan_in_array[lenindex - 1] : 0;
   }

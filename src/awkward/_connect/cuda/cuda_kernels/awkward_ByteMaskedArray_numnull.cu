@@ -13,13 +13,14 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_ByteMaskedArray_numnull_a(T* numnull,
-                                  const C* mask,
-                                  int64_t length,
-                                  bool validwhen,
-                                  int64_t* scan_in_array,
-                                  uint64_t invocation_index,
-                                  uint64_t* err_code) {
+awkward_ByteMaskedArray_numnull_a(
+    T* numnull,
+    const C* mask,
+    int64_t length,
+    bool validwhen,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -36,13 +37,14 @@ awkward_ByteMaskedArray_numnull_a(T* numnull,
 
 template <typename T, typename C>
 __global__ void
-awkward_ByteMaskedArray_numnull_b(T* numnull,
-                                  const C* mask,
-                                  int64_t length,
-                                  bool validwhen,
-                                  int64_t* scan_in_array,
-                                  uint64_t invocation_index,
-                                  uint64_t* err_code) {
+awkward_ByteMaskedArray_numnull_b(
+    T* numnull,
+    const C* mask,
+    int64_t length,
+    bool validwhen,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     *numnull = length > 0 ? scan_in_array[length - 1] : 0;
   }

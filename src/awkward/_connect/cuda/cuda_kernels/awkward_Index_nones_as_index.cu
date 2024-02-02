@@ -15,12 +15,13 @@
 
 template <typename T>
 __global__ void
-awkward_Index_nones_as_index_a(T* toindex,
-                               int64_t length,
-                               int64_t* scan_in_array,
-                               int64_t* scan_in_array_n_non_null,
-                               uint64_t invocation_index,
-                               uint64_t* err_code) {
+awkward_Index_nones_as_index_a(
+    T* toindex,
+    int64_t length,
+    int64_t* scan_in_array,
+    int64_t* scan_in_array_n_non_null,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < length) {
@@ -38,12 +39,13 @@ awkward_Index_nones_as_index_a(T* toindex,
 
 template <typename T>
 __global__ void
-awkward_Index_nones_as_index_b(T* toindex,
-                               int64_t length,
-                               int64_t* scan_in_array,
-                               int64_t* scan_in_array_n_non_null,
-                               uint64_t invocation_index,
-                               uint64_t* err_code) {
+awkward_Index_nones_as_index_b(
+    T* toindex,
+    int64_t length,
+    int64_t* scan_in_array,
+    int64_t* scan_in_array_n_non_null,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t n_non_null = scan_in_array[length - 1];
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;

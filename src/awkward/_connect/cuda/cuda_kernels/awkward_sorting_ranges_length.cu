@@ -13,12 +13,13 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_sorting_ranges_length_a(T* tolength,
-                                const C* parents,
-                                int64_t parentslength,
-                                int64_t* scan_in_array,
-                                uint64_t invocation_index,
-                                uint64_t* err_code) {
+awkward_sorting_ranges_length_a(
+    T* tolength,
+    const C* parents,
+    int64_t parentslength,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id == 0 ) {
@@ -37,12 +38,13 @@ awkward_sorting_ranges_length_a(T* tolength,
 
 template <typename T, typename C>
 __global__ void
-awkward_sorting_ranges_length_b(T* tolength,
-                                const C* parents,
-                                int64_t parentslength,
-                                int64_t* scan_in_array,
-                                uint64_t invocation_index,
-                                uint64_t* err_code) {
+awkward_sorting_ranges_length_b(
+    T* tolength,
+    const C* parents,
+    int64_t parentslength,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     *tolength = parentslength > 0 ? scan_in_array[parentslength - 1] : scan_in_array[0];
   }

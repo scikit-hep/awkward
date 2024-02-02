@@ -12,12 +12,13 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64_a(T* nextstarts,
-                                                        const C* nextparents,
-                                                        int64_t nextlen,
-                                                        int64_t* scan_in_array,
-                                                        uint64_t invocation_index,
-                                                        uint64_t* err_code) {
+awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64_a(
+    T* nextstarts,
+    const C* nextparents,
+    int64_t nextlen,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -32,12 +33,13 @@ awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64_a(T* nextstarts,
 
 template <typename T, typename C>
 __global__ void
-awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64_b(T* nextstarts,
-                                                        const C* nextparents,
-                                                        int64_t nextlen,
-                                                        int64_t* scan_in_array,
-                                                        uint64_t invocation_index,
-                                                        uint64_t* err_code) {
+awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64_b(
+    T* nextstarts,
+    const C* nextparents,
+    int64_t nextlen,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 

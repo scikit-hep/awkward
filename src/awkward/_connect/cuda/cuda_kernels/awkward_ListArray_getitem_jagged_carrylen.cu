@@ -13,13 +13,14 @@
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_ListArray_getitem_jagged_carrylen_a(T* carrylen,
-                                            const C* slicestarts,
-                                            const U* slicestops,
-                                            int64_t sliceouterlen,
-                                            int64_t* scan_in_array,
-                                            uint64_t invocation_index,
-                                            uint64_t* err_code) {
+awkward_ListArray_getitem_jagged_carrylen_a(
+    T* carrylen,
+    const C* slicestarts,
+    const U* slicestops,
+    int64_t sliceouterlen,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -31,13 +32,14 @@ awkward_ListArray_getitem_jagged_carrylen_a(T* carrylen,
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_ListArray_getitem_jagged_carrylen_b(T* carrylen,
-                                            const C* slicestarts,
-                                            const U* slicestops,
-                                            int64_t sliceouterlen,
-                                            int64_t* scan_in_array,
-                                            uint64_t invocation_index,
-                                            uint64_t* err_code) {
+awkward_ListArray_getitem_jagged_carrylen_b(
+    T* carrylen,
+    const C* slicestarts,
+    const U* slicestops,
+    int64_t sliceouterlen,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     *carrylen = sliceouterlen > 0 ? scan_in_array[sliceouterlen - 1] : 0;
   }

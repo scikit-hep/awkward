@@ -13,13 +13,14 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_ByteMaskedArray_getitem_nextcarry_a(T* tocarry,
-                                            const C* mask,
-                                            int64_t length,
-                                            bool validwhen,
-                                            int64_t* scan_in_array,
-                                            uint64_t invocation_index,
-                                            uint64_t* err_code) {
+awkward_ByteMaskedArray_getitem_nextcarry_a(
+    T* tocarry,
+    const C* mask,
+    int64_t length,
+    bool validwhen,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -35,13 +36,14 @@ awkward_ByteMaskedArray_getitem_nextcarry_a(T* tocarry,
 
 template <typename T, typename C>
 __global__ void
-awkward_ByteMaskedArray_getitem_nextcarry_b(T* tocarry,
-                                            const C* mask,
-                                            int64_t length,
-                                            bool validwhen,
-                                            int64_t* scan_in_array,
-                                            uint64_t invocation_index,
-                                            uint64_t* err_code) {
+awkward_ByteMaskedArray_getitem_nextcarry_b(
+  T* tocarry,
+  const C* mask,
+  int64_t length,
+  bool validwhen,
+  int64_t* scan_in_array,
+  uint64_t invocation_index,
+  uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 

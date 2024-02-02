@@ -13,12 +13,13 @@
 
 template <typename T>
 __global__ void
-awkward_RegularArray_reduce_local_nextparents_a(T* nextparents,
-                                                int64_t size,
-                                                int64_t length,
-                                                int64_t* scan_in_array,
-                                                uint64_t invocation_index,
-                                                uint64_t* err_code) {
+awkward_RegularArray_reduce_local_nextparents_a(
+    T* nextparents,
+    int64_t size,
+    int64_t length,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     int64_t len = length * size;
@@ -30,12 +31,13 @@ awkward_RegularArray_reduce_local_nextparents_a(T* nextparents,
 
 template <typename T>
 __global__ void
-awkward_RegularArray_reduce_local_nextparents_b(T* nextparents,
-                                                int64_t size,
-                                                int64_t length,
-                                                int64_t* scan_in_array,
-                                                uint64_t invocation_index,
-                                                uint64_t* err_code) {
+awkward_RegularArray_reduce_local_nextparents_b(
+    T* nextparents,
+    int64_t size,
+    int64_t length,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / size;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % size;

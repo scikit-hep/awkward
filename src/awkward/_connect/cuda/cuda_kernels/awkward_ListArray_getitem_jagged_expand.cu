@@ -7,16 +7,17 @@ enum class LISTARRAY_GETITEM_JAGGED_EXPAND_ERRORS {
 
 template <typename T, typename C, typename U, typename V, typename W, typename X>
 __global__ void
-awkward_ListArray_getitem_jagged_expand(T* multistarts,
-                                        C* multistops,
-                                        const U* singleoffsets,
-                                        V* tocarry,
-                                        const W* fromstarts,
-                                        const X* fromstops,
-                                        int64_t jaggedsize,
-                                        int64_t length,
-                                        uint64_t invocation_index,
-                                        uint64_t* err_code) {
+awkward_ListArray_getitem_jagged_expand(
+    T* multistarts,
+    C* multistops,
+    const U* singleoffsets,
+    V* tocarry,
+    const W* fromstarts,
+    const X* fromstops,
+    int64_t jaggedsize,
+    int64_t length,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / jaggedsize;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % jaggedsize;

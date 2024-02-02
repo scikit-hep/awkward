@@ -6,19 +6,20 @@ enum class LISTARRAY_VALIDITY_ERRORS {
   ERROR_STOP_CONTENT  // message: "stop[i] > len(content)"
 };
 
-template <typename C, typename T>
+template <typename T, typename C>
 __global__ void
-awkward_ListArray_validity(const C* starts,
-                           const T* stops,
-                           int64_t length,
-                           int64_t lencontent,
-                           uint64_t invocation_index,
-                           uint64_t* err_code) {
+awkward_ListArray_validity(
+    const T* starts,
+    const C* stops,
+    int64_t length,
+    int64_t lencontent,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < length) {
-      C start = starts[thread_id];
-      T stop = stops[thread_id];
+      T start = starts[thread_id];
+      C stop = stops[thread_id];
       if (start != stop) {
         if (start > stop) {
           RAISE_ERROR(LISTARRAY_VALIDITY_ERRORS::ERROR_START_STOP)

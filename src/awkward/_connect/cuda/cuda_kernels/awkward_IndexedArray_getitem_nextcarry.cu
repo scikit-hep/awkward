@@ -17,13 +17,14 @@ enum class INDEXEDARRAY_GETITEM_NEXTCARRY_ERRORS {
 
 template <typename T, typename C>
 __global__ void
-awkward_IndexedArray_getitem_nextcarry_a(T* tocarry,
-                                         const C* fromindex,
-                                         int64_t lenindex,
-                                         int64_t lencontent,
-                                         int64_t* scan_in_array,
-                                         uint64_t invocation_index,
-                                         uint64_t* err_code) {
+awkward_IndexedArray_getitem_nextcarry_a(
+    T* tocarry,
+    const C* fromindex,
+    int64_t lenindex,
+    int64_t lencontent,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < lenindex) {
@@ -41,13 +42,14 @@ awkward_IndexedArray_getitem_nextcarry_a(T* tocarry,
 
 template <typename T, typename C>
 __global__ void
-awkward_IndexedArray_getitem_nextcarry_b(T* tocarry,
-                                         const C* fromindex,
-                                         int64_t lenindex,
-                                         int64_t lencontent,
-                                         int64_t* scan_in_array,
-                                         uint64_t invocation_index,
-                                         uint64_t* err_code) {
+awkward_IndexedArray_getitem_nextcarry_b(
+    T* tocarry,
+    const C* fromindex,
+    int64_t lenindex,
+    int64_t lencontent,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 

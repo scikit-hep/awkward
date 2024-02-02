@@ -13,14 +13,15 @@
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_ListArray_rpad_and_clip_length_axis1_a(T* tomin,
-                                               const C* fromstarts,
-                                               const U* fromstops,
-                                               int64_t target,
-                                               int64_t lenstarts,
-                                               int64_t* scan_in_array,
-                                               uint64_t invocation_index,
-                                               uint64_t* err_code) {
+awkward_ListArray_rpad_and_clip_length_axis1_a(
+    T* tomin,
+    const C* fromstarts,
+    const U* fromstops,
+    int64_t target,
+    int64_t lenstarts,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -33,14 +34,15 @@ awkward_ListArray_rpad_and_clip_length_axis1_a(T* tomin,
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_ListArray_rpad_and_clip_length_axis1_b(T* tomin,
-                                               const C* fromstarts,
-                                               const U* fromstops,
-                                               int64_t target,
-                                               int64_t lenstarts,
-                                               int64_t* scan_in_array,
-                                               uint64_t invocation_index,
-                                               uint64_t* err_code) {
+awkward_ListArray_rpad_and_clip_length_axis1_b(
+    T* tomin,
+    const C* fromstarts,
+    const U* fromstops,
+    int64_t target,
+    int64_t lenstarts,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     *tomin = lenstarts > 0 ? scan_in_array[lenstarts - 1] : 0;
   }
