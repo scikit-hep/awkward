@@ -7398,8 +7398,20 @@
         },
         {
             "name": "awkward_RegularArray_getitem_next_array_regularize",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromarray": [],
+                        "lenarray": 0,
+                        "size": 2
+                    },
+                    "outputs": {
+                        "toarray": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -18249,8 +18261,19 @@
         },
         {
             "name": "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "nextlen": 0,
+                        "nextparents": []
+                    },
+                    "outputs": {
+                        "nextstarts": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
