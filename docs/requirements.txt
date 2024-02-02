@@ -3,7 +3,7 @@ jupyterlite-pyodide-kernel==0.1.0
 jupyterlite[piplite]==0.1.0
 jupyterlite-sphinx==0.8.0
 
-sphinx>=4.5.0,<5.0.0
+sphinx~=7.0
 PyYAML
 black
 pycparser
@@ -12,7 +12,8 @@ sphinx-copybutton
 sphinx-design
 sphinx-sitemap
 pydata-sphinx-theme
-myst-nb
+myst-nb~=1.0
+myst-parser~=2.0
 sphinx-external-toc
 ipyleaflet
 
@@ -27,6 +28,5 @@ h5py
 matplotlib
 awkward
 uproot
-uproot3
 jax>=0.2.7;python_version>="3.6" and sys_platform != "win32"
 jaxlib>=0.1.57;python_version>="3.6" and sys_platform != "win32"
