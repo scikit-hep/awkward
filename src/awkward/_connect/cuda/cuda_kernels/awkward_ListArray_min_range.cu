@@ -46,6 +46,8 @@ awkward_ListArray_min_range_b(T* tomin,
                               uint64_t invocation_index,
                               uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    *tomin = lenstarts > 0 ? scan_in_array[0] : 0;
+    if (lenstarts > 0) {
+      *tomin = scan_in_array[0];
+    }
   }
 }
