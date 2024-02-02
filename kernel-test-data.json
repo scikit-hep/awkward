@@ -900,7 +900,7 @@
                     "message": "",
                     "inputs": {
                         "length": 0,
-                        "target": 2
+                        "target": 0
                     },
                     "outputs": {
                         "toindex": []
@@ -2235,7 +2235,7 @@
             ]
         },
         {
-            "name": "awkward_IndexedArray_numnull_unique",
+            "name": "awkward_IndexedArray_numnull_unique_64",
             "status": true,
             "tests": [
                 {
@@ -10428,7 +10428,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "length": 3,
+                        "length": 2,
                         "mymask": [1, 0],
                         "theirmask": [0, 1],
                         "validwhen": false
@@ -10441,7 +10441,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "length": 3,
+                        "length": 2,
                         "mymask": [0, 0],
                         "theirmask": [0, 1],
                         "validwhen": false
@@ -10454,7 +10454,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "length": 3,
+                        "length": 2,
                         "mymask": [1, 0],
                         "theirmask": [0, 0],
                         "validwhen": false

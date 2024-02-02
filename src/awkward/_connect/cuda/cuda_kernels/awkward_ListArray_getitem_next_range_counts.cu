@@ -23,7 +23,7 @@ awkward_ListArray_getitem_next_range_counts_a(T* total,
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < lenstarts) {
-      scan_in_array[thread_id] = (T)(fromoffsets[thread_id + 1] - fromoffsets[thread_id]);
+      scan_in_array[thread_id] = (int64_t)fromoffsets[thread_id + 1] - fromoffsets[thread_id];
     }
   }
 }
