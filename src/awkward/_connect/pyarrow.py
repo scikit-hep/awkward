@@ -64,27 +64,6 @@ def import_pyarrow_compute(name: str) -> ModuleType:
     return out
 
 
-def import_fsspec(name: str) -> ModuleType:
-    try:
-        import fsspec
-
-    except ModuleNotFoundError as err:
-        raise ImportError(
-            f"""to use {name}, you must install fsspec:
-
-    pip install fsspec
-
-or
-
-    conda install -c conda-forge fsspec
-"""
-        ) from err
-
-    import_pyarrow_parquet(name)
-
-    return fsspec
-
-
 if pyarrow is not None:
 
     class AwkwardArrowArray(pyarrow.ExtensionArray):

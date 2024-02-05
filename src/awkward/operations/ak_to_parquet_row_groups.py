@@ -1,24 +1,14 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-
 from __future__ import annotations
-
-from collections.abc import Mapping, Sequence
-from os import fsdecode
-
-import fsspec
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._nplikes.numpy_like import NumpyMetadata
 
-__all__ = ("to_parquet",)
-
-metadata = NumpyMetadata.instance()
+__all__ = ("to_parquet_row_groups",)
 
 
 @high_level_function()
-def to_parquet(
-    array,
+def to_parquet_row_groups(
+    iterator,
     destination,
     *,
     list_to32=False,
@@ -46,7 +36,7 @@ def to_parquet(
 ):
     """
     Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
+        iterator: Generator object that iterates over awkward arrays.
         destination (path-like): Name of the output file, file path, or
             remote URL passed to [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
             for remote writing.
@@ -88,7 +78,7 @@ def to_parquet(
             Compression levels have different meanings for different compression
             algorithms: GZIP ranges from 1 to 9, but ZSTD ranges from -7 to 22, for
             example. Generally, higher numbers provide slower but smaller compression.
-        row_group_size (int or None): Number of entries in each row group (except the last),
+        row_group_size (int or None): Maximum number of entries in each row group (except the last),
             passed to [pyarrow.parquet.ParquetWriter.write_table](https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html#pyarrow.parquet.ParquetWriter.write_table).
             If None, the Parquet default of 64 MiB is used.
         data_page_size (None or int): Number of bytes in each data page, passed to
@@ -150,10 +140,10 @@ def to_parquet(
     Returns:
     `pyarrow._parquet.FileMetaData` instance
 
-    Writes an Awkward Array to a Parquet file (through pyarrow).
+    Writes an iterator over an Awkward Array to a Parquet file in batches (through pyarrow).
 
         >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
-        >>> ak.to_parquet(array1, "array1.parquet")
+        >>> ak.to_parquet_row_groups((batch for batch in array1), "array1.parquet")
         <pyarrow._parquet.FileMetaData object at 0x7f646c38ff40>
           created_by: parquet-cpp-arrow version 9.0.0
           num_columns: 1
@@ -178,10 +168,10 @@ def to_parquet(
     See also #ak.to_arrow, which is used as an intermediate step.
     """
     # Dispatch
-    yield (array,)
+    yield (iterator,)
 
-    return _impl(
-        array,
+    return ak.ak_to_parquet._impl(
+        iterator,
         destination,
         list_to32,
         string_to32,
@@ -205,264 +195,5 @@ def to_parquet(
         parquet_compliant_nested,  # https://issues.apache.org/jira/browse/ARROW-16348
         parquet_extra_options,
         storage_options,
-        write_iteratively=False,
+        write_iteratively=True,
     )
-
-
-def _impl(
-    array,
-    destination,
-    list_to32,
-    string_to32,
-    bytestring_to32,
-    emptyarray_to,
-    categorical_as_dictionary,
-    extensionarray,
-    count_nulls,
-    compression,
-    compression_level,
-    row_group_size,
-    data_page_size,
-    parquet_flavor,
-    parquet_version,
-    parquet_page_version,
-    parquet_metadata_statistics,
-    parquet_dictionary_encoding,
-    parquet_byte_stream_split,
-    parquet_coerce_timestamps,
-    parquet_old_int96_timestamps,
-    parquet_compliant_nested,
-    parquet_extra_options,
-    storage_options,
-    write_iteratively,
-):
-    # Implementation
-    import awkward._connect.pyarrow
-
-    data = array
-
-    pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
-
-    def get_layout_and_table(x):
-        layout = ak.operations.ak_to_layout._impl(
-            x,
-            allow_record=True,
-            allow_unknown=False,
-            none_policy="error",
-            regulararray=True,
-            use_from_iter=True,
-            primitive_policy="error",
-            string_policy="as-characters",
-        )
-        table = ak.operations.ak_to_arrow_table._impl(
-            layout,
-            list_to32,
-            string_to32,
-            bytestring_to32,
-            emptyarray_to,
-            categorical_as_dictionary,
-            extensionarray,
-            count_nulls,
-        )
-        return layout, table
-
-    if not write_iteratively:
-        layout, table = get_layout_and_table(data)
-
-    else:
-        if (
-            isinstance(
-                data,
-                (
-                    ak.highlevel.Array,
-                    ak.highlevel.Record,
-                    ak.highlevel.ArrayBuilder,
-                    ak.contents.Content,
-                    ak.record.Record,
-                ),
-            )
-            or hasattr(data, "dtype")
-            or hasattr(data, "shape")
-        ):
-            raise TypeError(
-                "The first argument of ak.to_parquet_row_groups should be an "
-                "iterable collection of arrays to put into separate row groups, "
-                "not a single array. If this was intended, wrap the first argument "
-                "with the `iter` function."
-            )
-
-        data = iter(data)  # necessary for iterables; no-op for iterators
-
-        try:
-            first_array = next(data)
-        except StopIteration:
-            raise ValueError(
-                "The first argument of ak.to_parquet_row_groups must contain at least one array."
-            ) from None
-
-        # if `write_iteratively`, then `layout` and `table` represent the FIRST, not all
-        layout, table = get_layout_and_table(first_array)
-
-    if parquet_compliant_nested:
-        list_indicator = "list.element"
-    else:
-        list_indicator = "list.item"
-
-    if table.column_names == [""]:
-        column_prefix = ("",)
-    else:
-        column_prefix = ()
-
-    if isinstance(data, ak.Record):
-        form = layout.array.form
-    else:
-        form = layout.form
-
-    def parquet_columns(specifier, only=None):
-        if specifier is None:
-            selected_form = form
-        else:
-            selected_form = form.select_columns(specifier)
-
-        parquet_column_names = selected_form.columns(
-            list_indicator=list_indicator, column_prefix=column_prefix
-        )
-        if only is not None:
-            column_types = selected_form.column_types()
-            assert len(parquet_column_names) == len(column_types)
-            if only == "string":
-                return [
-                    x
-                    for x, y in zip(parquet_column_names, column_types)
-                    if y == "string"
-                ]
-            elif only == "floating":
-                return [
-                    x
-                    for x, y in zip(parquet_column_names, column_types)
-                    if isinstance(y, metadata.dtype)
-                    and issubclass(y.type, metadata.floating)
-                ]
-        else:
-            return parquet_column_names
-
-    if compression is True:
-        compression = "zstd"
-    elif compression is False or compression is None:
-        compression = "none"
-    elif isinstance(compression, Mapping):
-        replacement = {}
-        for specifier, value in compression.items():
-            replacement.update({x: value for x in parquet_columns(specifier)})
-        compression = replacement
-
-    if isinstance(compression_level, Mapping):
-        replacement = {}
-        for specifier, value in compression_level.items():
-            replacement.update({x: value for x in parquet_columns(specifier)})
-        compression_level = replacement
-
-    if parquet_metadata_statistics is True:
-        parquet_metadata_statistics = True
-    elif parquet_metadata_statistics is False or parquet_metadata_statistics is None:
-        parquet_metadata_statistics = False
-    elif isinstance(parquet_metadata_statistics, Mapping):
-        replacement = {}
-        for specifier, value in parquet_metadata_statistics.items():
-            replacement.update({x: value for x in parquet_columns(specifier)})
-        parquet_metadata_statistics = [x for x, value in replacement.items() if value]
-    elif isinstance(parquet_metadata_statistics, Sequence):
-        replacement = []
-        for specifier in parquet_metadata_statistics:
-            replacement.extend(list(parquet_columns(specifier)))
-        parquet_metadata_statistics = replacement
-
-    if parquet_dictionary_encoding is True:
-        parquet_dictionary_encoding = parquet_columns(None, only="string")
-    elif parquet_dictionary_encoding is False or parquet_dictionary_encoding is None:
-        parquet_dictionary_encoding = False
-    elif isinstance(parquet_dictionary_encoding, Mapping):
-        replacement = {}
-        for specifier, value in parquet_dictionary_encoding.items():
-            replacement.update(
-                {x: value for x in parquet_columns(specifier, only="string")}
-            )
-        parquet_dictionary_encoding = [x for x, value in replacement.items() if value]
-
-    if parquet_byte_stream_split is True:
-        parquet_byte_stream_split = parquet_columns(None, only="floating")
-    elif parquet_byte_stream_split is False or parquet_byte_stream_split is None:
-        parquet_byte_stream_split = False
-    elif isinstance(parquet_byte_stream_split, Mapping):
-        replacement = {}
-        for specifier, value in parquet_byte_stream_split.items():
-            replacement.update(
-                {x: value for x in parquet_columns(specifier, only="floating")}
-            )
-        parquet_byte_stream_split = [x for x, value in replacement.items() if value]
-
-    if parquet_extra_options is None:
-        parquet_extra_options = {}
-
-    try:
-        destination = fsdecode(destination)
-    except TypeError:
-        raise TypeError(
-            f"'destination' argument of 'ak.to_parquet' and 'ak.to_parquet_row_groups' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
-        ) from None
-
-    fs, destination = fsspec.core.url_to_fs(destination, **(storage_options or {}))
-    metalist = []
-    with pyarrow_parquet.ParquetWriter(
-        destination,
-        table.schema,
-        filesystem=fs,
-        flavor=parquet_flavor,
-        version=parquet_version,
-        use_dictionary=parquet_dictionary_encoding,
-        compression=compression,
-        write_statistics=parquet_metadata_statistics,
-        use_deprecated_int96_timestamps=parquet_old_int96_timestamps,
-        compression_level=compression_level,
-        use_byte_stream_split=parquet_byte_stream_split,
-        data_page_version=parquet_page_version,
-        use_compliant_nested_type=parquet_compliant_nested,
-        data_page_size=data_page_size,
-        coerce_timestamps=parquet_coerce_timestamps,
-        metadata_collector=metalist,
-        **parquet_extra_options,
-    ) as writer:
-        try:
-            if not write_iteratively:
-                writer.write_table(table, row_group_size=row_group_size)
-
-            else:
-                # this `table` is JUST for the first array
-                writer.write_table(table, row_group_size=row_group_size)
-
-                # this `data` is an iterator (not iterable), starting AFTER the first array
-                # a `for` loop implicitly calls `next` and stops at `StopIteration`
-                for item in data:
-                    layout, table = get_layout_and_table(item)
-                    writer.write_table(table, row_group_size=row_group_size)
-
-        finally:
-            # ensure that the ParquetWriter is closed for iterative and non-iterative cases
-            writer.close()
-
-    meta = metalist[0]
-    meta.set_file_path(destination.rsplit("/", 1)[-1])
-    return meta
-
-
-def write_metadata(dir_path, fs, *metas, global_metadata=True):
-    """Generate metadata file(s) from list of arrow metadata instances"""
-    assert metas
-    md = metas[0]
-    with fs.open("/".join([dir_path, "_common_metadata"]), "wb") as fil:
-        md.write_metadata_file(fil)
-    if global_metadata:
-        for meta in metas[1:]:
-            md.append_row_groups(meta)
-        with fs.open("/".join([dir_path, "_metadata"]), "wb") as fil:
-            md.write_metadata_file(fil)
