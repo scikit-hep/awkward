@@ -86,6 +86,8 @@ def fetch_template_specializations(kernel_dict):
         "awkward_IndexedArray_getitem_nextcarry_outindex",
         "awkward_ListArray_getitem_next_range_counts",
         "awkward_IndexedArray_index_of_nulls",
+        "awkward_IndexedArray_ranges_next_64",
+        "awkward_IndexedArray_ranges_carry_next_64",
         "awkward_IndexedArray_reduce_next_64",
         "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
         "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
