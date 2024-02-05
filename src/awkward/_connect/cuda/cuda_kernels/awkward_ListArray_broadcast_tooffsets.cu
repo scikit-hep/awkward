@@ -39,7 +39,7 @@ awkward_ListArray_broadcast_tooffsets_a(
     if (thread_id < offsetslength - 1) {
       int64_t start = (int64_t)fromstarts[thread_id];
       int64_t stop = (int64_t)fromstops[thread_id];
-  
+
       if (start != stop  &&  stop > lencontent) {
         RAISE_ERROR(LISTARRAY_BROADCAST_TOOFFSETS_ERRORS::STOP_GET_LEN)
       }
@@ -75,7 +75,7 @@ awkward_ListArray_broadcast_tooffsets_b(
     if (thread_id < offsetslength - 1) {
       int64_t start = (int64_t)fromstarts[thread_id];
       int64_t stop = (int64_t)fromstops[thread_id];
-  
+
       if (start != stop  &&  stop > lencontent) {
         RAISE_ERROR(LISTARRAY_BROADCAST_TOOFFSETS_ERRORS::STOP_GET_LEN)
       }
