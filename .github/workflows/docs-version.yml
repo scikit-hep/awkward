@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - docs/switcher.json
+  workflow_dispatch:
 
 concurrency:
   group: 'docs-version-${{ github.head_ref || github.run_id }}'
