@@ -59,22 +59,12 @@ def _impl(directory, filenames, storage_options):
     fs, destination = fsspec.core.url_to_fs(directory, **(storage_options or {}))
     if not fs.isdir(destination):
         raise ValueError(f"{destination!r} is not a directory" + {__file__})
-    filepaths = []
-    if filenames is not None:
-        for filename in filenames:
-            for f in fs.glob(path.join(destination, filename)):
-                if f.endswith((".parq", ".parquet")):
-                    filepaths.append(f)
 
-    else:
-        for f, fdata in fs.find(destination, detail=True).items():
-            if f.endswith((".parq", ".parquet")):
-                if fdata["type"] == "file":
-                    filepaths.append(f)
+    filepaths = get_filepaths(filenames, fs, destination)
+
     if len(filepaths) == 0:
         raise ValueError(f"no *.parquet or *.parq matches for path {destination!r}")
 
-    assert len(filepaths) != 0
     schema = None
     metadata_collector = []
     for filepath in filepaths:
@@ -102,3 +92,23 @@ def _impl(directory, filenames, storage_options):
         schema, _metadata_path, metadata_collector=metadata_collector, filesystem=fs
     )
     return _common_metadata_path, _metadata_path
+
+
+def get_filepaths(filenames, fs, destination):
+    filepaths = []
+    if filenames is not None:
+        if isinstance(filenames, str):
+            for f in fs.glob(path.join(destination, filenames)):
+                if f.endswith((".parq", ".parquet")):
+                    filepaths.append(f)
+        else:
+            for filename in filenames:
+                for f in fs.glob(path.join(destination, filename)):
+                    if f.endswith((".parq", ".parquet")):
+                        filepaths.append(f)
+    else:
+        for f, fdata in fs.find(destination, detail=True).items():
+            if f.endswith((".parq", ".parquet")):
+                if fdata["type"] == "file":
+                    filepaths.append(f)
+    return filepaths

@@ -23,7 +23,7 @@ def simple_test(tmp_path):
         array2, os.path.join(tmp_path, "arr3.parquet"), parquet_compliant_nested=True
     )
 
-    ak.to_parquet_dataset(tmp_path)
+    ak.to_parquet_dataset(tmp_path, filenames="arr[1-3].parquet")
     assert os.path.exists(os.path.join(tmp_path, "_common_metadata"))
     assert os.path.exists(os.path.join(tmp_path, "_metadata"))
 
@@ -157,7 +157,7 @@ def test_wildcard_s3(tmp_path):
         array2, os.path.join(tmp_path, "arr3.parquet"), parquet_compliant_nested=True
     )
 
-    ak.to_parquet_dataset(tmp_path, filenames="arr*.parquet")
+    ak.to_parquet_dataset(tmp_path, filenames="arr?.parquet")
 
     with_metadata = ak.from_parquet(tmp_path)
     assert with_metadata.tolist() == [
