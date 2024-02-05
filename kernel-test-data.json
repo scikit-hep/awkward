@@ -2530,8 +2530,78 @@
         },
         {
             "name": "awkward_ListArray_broadcast_tooffsets",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [],
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "lencontent": 0,
+                        "offsetslength": 0
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 1],
+                        "fromstarts": [0],
+                        "fromstops": [1],
+                        "lencontent": 1,
+                        "offsetslength": 2
+                    },
+                    "outputs": {
+                        "tocarry": [0]
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "stops[i] > len(content)",
+                    "inputs": {
+                        "fromoffsets": [0, 1],
+                        "fromstarts": [0],
+                        "fromstops": [2],
+                        "lencontent": 1,
+                        "offsetslength": 2
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "broadcast's offsets must be monotonically increasing",
+                    "inputs": {
+                        "fromoffsets": [2, 1],
+                        "fromstarts": [0],
+                        "fromstops": [1],
+                        "lencontent": 1,
+                        "offsetslength": 2
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "cannot broadcast nested list",
+                    "inputs": {
+                        "fromoffsets": [0, 2],
+                        "fromstarts": [0],
+                        "fromstops": [1],
+                        "lencontent": 1,
+                        "offsetslength": 2
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
