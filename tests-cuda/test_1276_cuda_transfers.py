@@ -115,7 +115,6 @@ def test_tocuda_unimplementedkernels5():
     assert ak.to_list(copyback_regulararray) == ak.to_list(regulararray)
 
 
-@pytest.mark.xfail(reason="awkward_ListArray_broadcast_tooffsets is not implemented")
 def test_tocuda_unimplementedkernels6():
     content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
@@ -155,7 +154,6 @@ def test_tocuda_unimplementedkernels7():
     assert ak.to_list(copyback_recordarray) == ak.to_list(recordarray)
 
 
-@pytest.mark.xfail(reason="awkward_ListArray_broadcast_tooffsets is not implemented")
 def test_tocuda_unimplementedkernels8():
     content0 = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     content1 = ak.Array(
@@ -201,7 +199,6 @@ def test_tocuda_unimplementedkernels10():
     assert ak.to_list(copyback_bytemaskedarray) == ak.to_list(bytemaskedarray)
 
 
-@pytest.mark.xfail(reason="awkward_ListArray_broadcast_tooffsets is not implemented")
 def test_tocuda_unimplementedkernels11():
     content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
