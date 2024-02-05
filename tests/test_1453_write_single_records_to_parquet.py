@@ -11,7 +11,6 @@ import awkward as ak
 
 pytest.importorskip("pyarrow")
 pytest.importorskip("pyarrow.parquet")
-pytest.importorskip("fsspec")
 
 
 def test(tmp_path):

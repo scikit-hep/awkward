@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os.path
 
+import fsspec
 import numpy as np
 import pytest
 from packaging.version import parse as parse_version
@@ -11,7 +12,6 @@ from packaging.version import parse as parse_version
 import awkward as ak
 
 pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
-fsspec = pytest.importorskip("fsspec")
 
 
 def through_arrow(

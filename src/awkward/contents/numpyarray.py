@@ -10,7 +10,6 @@ from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of_obj
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
-from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
 from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes import to_nplike
@@ -165,13 +164,6 @@ class NumpyArray(NumpyMeta, Content):
             data=copy.deepcopy(self._data, memo),
             parameters=copy.deepcopy(self._parameters, memo),
         )
-
-    def __array__(self, dtype=None):
-        deprecate(
-            f"np.asarray(content) is deprecated for {type(self).__name__}. Use ak.to_numpy(content) instead",
-            version="2.6.0",
-        )
-        return numpy.asarray(self._data, dtype=dtype)
 
     @classmethod
     def simplified(cls, data, *, parameters=None, backend=None):

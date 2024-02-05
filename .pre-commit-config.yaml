@@ -76,6 +76,6 @@ repos:
         - numpy>=1.24
 
 - repo: https://github.com/abravalheri/validate-pyproject
-  rev: v0.15
+  rev: v0.16
   hooks:
     - id: validate-pyproject
