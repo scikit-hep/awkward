@@ -48,7 +48,8 @@ dependencies = [
     "fsspec>=2022.11.0"
 ]
 dynamic = [
-    "readme"
+    "readme",
+    "version"
 ]
 
 [project.entry-points.numba_extensions]
