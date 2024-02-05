@@ -23,24 +23,9 @@ def simple_test(tmp_path):
         array2, os.path.join(tmp_path, "arr3.parquet"), parquet_compliant_nested=True
     )
 
-    ak.to_parquet_dataset(tmp_path, ["arr1.parquet", "arr2.parquet", "arr3.parquet"])
-
+    ak.to_parquet_dataset(tmp_path)
     assert os.path.exists(os.path.join(tmp_path, "_common_metadata"))
     assert os.path.exists(os.path.join(tmp_path, "_metadata"))
-
-    with_metadata = ak.from_parquet(tmp_path)
-    assert with_metadata.tolist() == [
-        [1.1, 2.2, 3.3],
-        [],
-        [4.4, 5.5],
-        [1.1, 2.2, 3.3, 4.4],
-        [4.0],
-        [4.4, 5.5],
-        [1.0, 3.0, 3.3, 4.4],
-        [4.0],
-        [4.4, 10.0],
-        [11.11],
-    ]
 
     with_metadata = ak.from_parquet(tmp_path)
     assert with_metadata.tolist() == [
@@ -90,15 +75,6 @@ def complex_test(tmp_path):
         {"x": 4.4, "y": [1, 2, 3, 4]},
         {"x": 5.5, "y": [1, 2, 3, 4, 5]},
     ]
-    with_metadata = ak.from_parquet(tmp_path)
-    assert with_metadata.tolist() == [
-        {"x": 1.1, "y": [1]},
-        {"x": 2.2, "y": [1, 2]},
-        {"x": 3.3, "y": [1, 2, 3]},
-        {"x": 1.8, "y": [3, 5, 6]},
-        {"x": 4.4, "y": [1, 2, 3, 4]},
-        {"x": 5.5, "y": [1, 2, 3, 4, 5]},
-    ]
 
 
 def test_filenames(tmp_path):
@@ -133,4 +109,22 @@ def test_filenames(tmp_path):
         {"x": 1.8, "y": [3, 5, 6]},
         {"x": 4.4, "y": [1, 2, 3, 4]},
         {"x": 5.5, "y": [1, 2, 3, 4, 5]},
+    ]
+
+
+def test_s3(tmp_path):
+    ak.to_parquet_dataset(tmp_path)
+
+    with_metadata = ak.from_parquet(tmp_path)
+    assert with_metadata.tolist() == [
+        [1.1, 2.2, 3.3],
+        [],
+        [4.4, 5.5],
+        [1.1, 2.2, 3.3, 4.4],
+        [4.0],
+        [4.4, 5.5],
+        [1.0, 3.0, 3.3, 4.4],
+        [4.0],
+        [4.4, 10.0],
+        [11.11],
     ]

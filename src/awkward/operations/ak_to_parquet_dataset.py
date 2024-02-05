@@ -52,11 +52,9 @@ def _impl(directory, filenames, storage_options):
     import fsspec.parquet
 
     fs, destination = fsspec.core.url_to_fs(str(directory), **(storage_options or {}))
-
     if not fs.isdir(destination):
         raise ValueError(f"{destination!r} is not a directory" + {__file__})
     filepaths = []
-
     if filenames is not None:
         filepaths = [os.path.join(destination, fname) for fname in filenames]
         if len(filepaths) == 0:
@@ -75,15 +73,19 @@ def _impl(directory, filenames, storage_options):
     metadata_collector = []
     for filepath in filepaths:
         if schema is None:
-            schema = pyarrow_parquet.ParquetFile(filepath).schema_arrow
+            schema = pyarrow_parquet.ParquetFile(filepath, filesystem=fs).schema_arrow
             first_filepath = filepath
-        elif not schema.equals(pyarrow_parquet.ParquetFile(filepath).schema_arrow):
+        elif not schema.equals(
+            pyarrow_parquet.ParquetFile(filepath, filesystem=fs).schema_arrow
+        ):
             raise ValueError(
                 "schema in {} differs from the first schema (in {})".format(
                     repr(filepath), repr(first_filepath)
                 )
             )
-        metadata_collector.append(pyarrow_parquet.ParquetFile(filepath).metadata)
+        metadata_collector.append(
+            pyarrow_parquet.ParquetFile(filepath, filesystem=fs).metadata
+        )
         metadata_collector[-1].set_file_path(filepath)
 
     _common_metadata_path = os.path.join(destination, "_common_metadata")
