@@ -128,3 +128,22 @@ def test_s3(tmp_path):
         [4.4, 10.0],
         [11.11],
     ]
+
+
+def test_wildcard_s3(tmp_path):
+    ak.to_parquet_dataset(tmp_path, filenames="arr*.parquet")
+
+    with_metadata = ak.from_parquet(tmp_path)
+    print(with_metadata)
+    assert with_metadata.tolist() == [
+        [1.1, 2.2, 3.3],
+        [],
+        [4.4, 5.5],
+        [1.1, 2.2, 3.3, 4.4],
+        [4.0],
+        [4.4, 5.5],
+        [1.0, 3.0, 3.3, 4.4],
+        [4.0],
+        [4.4, 10.0],
+        [11.11],
+    ]

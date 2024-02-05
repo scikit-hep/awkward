@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import os
+from os import fsdecode, path
 
 from awkward._dispatch import high_level_function
 
@@ -48,25 +48,31 @@ def _impl(directory, filenames, storage_options):
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet(
         "ak.to_parquet_dataset"
     )
-    fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
     import fsspec.parquet
 
-    fs, destination = fsspec.core.url_to_fs(str(directory), **(storage_options or {}))
+    try:
+        directory = fsdecode(directory)
+    except TypeError:
+        raise TypeError(
+            f"'directory' argument of 'ak.to_parquet_dataset' must be a path-like, not {type(directory).__name__} ('array' argument is first; 'destination' second)"
+        ) from None
+    fs, destination = fsspec.core.url_to_fs(directory, **(storage_options or {}))
     if not fs.isdir(destination):
         raise ValueError(f"{destination!r} is not a directory" + {__file__})
     filepaths = []
     if filenames is not None:
-        filepaths = [os.path.join(destination, fname) for fname in filenames]
-        if len(filepaths) == 0:
-            raise ValueError(f"no *.parquet or *.parq matches for path {destination!r}")
+        for filename in filenames:
+            for f in fs.glob(path.join(destination, filename)):
+                if f.endswith((".parq", ".parquet")):
+                    filepaths.append(f)
 
     else:
         for f, fdata in fs.find(destination, detail=True).items():
             if f.endswith((".parq", ".parquet")):
                 if fdata["type"] == "file":
                     filepaths.append(f)
-        if len(filepaths) == 0:
-            raise ValueError(f"no *.parquet or *.parq matches for path {destination!r}")
+    if len(filepaths) == 0:
+        raise ValueError(f"no *.parquet or *.parq matches for path {destination!r}")
 
     assert len(filepaths) != 0
     schema = None
@@ -88,10 +94,10 @@ def _impl(directory, filenames, storage_options):
         )
         metadata_collector[-1].set_file_path(filepath)
 
-    _common_metadata_path = os.path.join(destination, "_common_metadata")
+    _common_metadata_path = path.join(destination, "_common_metadata")
     pyarrow_parquet.write_metadata(schema, _common_metadata_path, filesystem=fs)
 
-    _metadata_path = os.path.join(destination, "_metadata")
+    _metadata_path = path.join(destination, "_metadata")
     pyarrow_parquet.write_metadata(
         schema, _metadata_path, metadata_collector=metadata_collector, filesystem=fs
     )
