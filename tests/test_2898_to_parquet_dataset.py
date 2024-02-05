@@ -113,6 +113,19 @@ def test_filenames(tmp_path):
 
 
 def test_s3(tmp_path):
+    array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array1 = ak.Array([[1.1, 2.2, 3.3, 4.4], [4.0], [4.4, 5.5]])
+    array2 = ak.Array([[1.0, 3.0, 3.3, 4.4], [4.0], [4.4, 10.0], [11.11]])
+    ak.to_parquet(
+        array, os.path.join(tmp_path, "arr1.parquet"), parquet_compliant_nested=True
+    )
+    ak.to_parquet(
+        array1, os.path.join(tmp_path, "arr2.parquet"), parquet_compliant_nested=True
+    )
+    ak.to_parquet(
+        array2, os.path.join(tmp_path, "arr3.parquet"), parquet_compliant_nested=True
+    )
+
     ak.to_parquet_dataset(tmp_path)
 
     with_metadata = ak.from_parquet(tmp_path)
@@ -131,10 +144,22 @@ def test_s3(tmp_path):
 
 
 def test_wildcard_s3(tmp_path):
+    array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array1 = ak.Array([[1.1, 2.2, 3.3, 4.4], [4.0], [4.4, 5.5]])
+    array2 = ak.Array([[1.0, 3.0, 3.3, 4.4], [4.0], [4.4, 10.0], [11.11]])
+    ak.to_parquet(
+        array, os.path.join(tmp_path, "arr1.parquet"), parquet_compliant_nested=True
+    )
+    ak.to_parquet(
+        array1, os.path.join(tmp_path, "arr2.parquet"), parquet_compliant_nested=True
+    )
+    ak.to_parquet(
+        array2, os.path.join(tmp_path, "arr3.parquet"), parquet_compliant_nested=True
+    )
+
     ak.to_parquet_dataset(tmp_path, filenames="arr*.parquet")
 
     with_metadata = ak.from_parquet(tmp_path)
-    print(with_metadata)
     assert with_metadata.tolist() == [
         [1.1, 2.2, 3.3],
         [],
