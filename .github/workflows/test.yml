@@ -96,7 +96,7 @@ jobs:
           python -m build -w awkward-cpp
 
       - name: Find built wheel
-        uses: tj-actions/glob@v19
+        uses: tj-actions/glob@v20
         id: find-wheel
         with:
           files: |
@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload Codecov results
         if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
 
 
   Linux-ROOT:
