@@ -3922,8 +3922,32 @@
         },
         {
             "name": "awkward_ListArray_compact_offsets",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "length": 0
+                    },
+                    "outputs": {
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [1],
+                        "fromstops": [1],
+                        "length": 1
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 0]
+                    }
+                },
                 {
                     "error": true,
                     "message": "stops[i] < starts[i]",
