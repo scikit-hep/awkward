@@ -1001,10 +1001,10 @@ kernels:
               stride = fromstops[i] - fromstarts[i]
               tostarts[i] = k
               for j in range(stride):
-                  if index[fromstarts[i] + j] > 0:
+                  if index[fromstarts[i] + j] >= 0:
                       k = k + 1
               tostops[i] = k
-          tolength = k
+          tolength[0] = k
     automatic-tests: false
 
 
@@ -1040,7 +1040,7 @@ kernels:
           for i in range(length):
               stride = fromstops[i] - fromstarts[i]
               for j in range(stride):
-                  if index[fromstarts[i] + j] > 0:
+                  if index[fromstarts[i] + j] >= 0:
                       tocarry[k] = index[fromstarts[i] + j]
                       k = k + 1
     automatic-tests: false
