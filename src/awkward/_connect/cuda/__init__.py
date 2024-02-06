@@ -100,6 +100,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_ListArray_min_range",
         "awkward_ListArray_rpad_and_clip_length_axis1",
         "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+        "awkward_ListOffsetArray_rpad_length_axis1",
         "awkward_MaskedArray_getitem_next_jagged_project",
         "awkward_RegularArray_getitem_next_array_regularize",
         "awkward_RegularArray_reduce_local_nextparents",

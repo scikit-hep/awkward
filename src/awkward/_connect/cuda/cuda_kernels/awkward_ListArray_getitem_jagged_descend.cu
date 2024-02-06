@@ -45,34 +45,34 @@ awkward_ListArray_getitem_jagged_descend_a(
 template <typename T, typename C, typename U, typename V, typename W>
 __global__ void
 awkward_ListArray_getitem_jagged_descend_b(
-  T* tooffsets,
-  const C* slicestarts,
-  const U* slicestops,
-  int64_t sliceouterlen,
-  const V* fromstarts,
-  const W* fromstops,
-  int64_t* scan_in_array,
-  uint64_t invocation_index,
-  uint64_t* err_code) {
-if (err_code[0] == NO_ERROR) {
-  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+    T* tooffsets,
+    const C* slicestarts,
+    const U* slicestops,
+    int64_t sliceouterlen,
+    const V* fromstarts,
+    const W* fromstops,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
+  if (err_code[0] == NO_ERROR) {
+    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
-  if (sliceouterlen == 0) {
-    tooffsets[0] = 0;
-  }
-  else {
-    tooffsets[0] = slicestarts[0];
-  }
-
-  if (thread_id < sliceouterlen) {
-    int64_t slicecount = (int64_t)(slicestops[thread_id] -
-                                  slicestarts[thread_id]);
-    int64_t count = (int64_t)(fromstops[thread_id] -
-                              fromstarts[thread_id]);
-    if (slicecount != count) {
-      RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_DESCEND_ERRORS::INN_LEN_ERR)
+    if (sliceouterlen == 0) {
+      tooffsets[0] = 0;
     }
-    tooffsets[thread_id + 1] = tooffsets[0] + scan_in_array[thread_id];
+    else {
+      tooffsets[0] = slicestarts[0];
+    }
+
+    if (thread_id < sliceouterlen) {
+      int64_t slicecount = (int64_t)(slicestops[thread_id] -
+                                    slicestarts[thread_id]);
+      int64_t count = (int64_t)(fromstops[thread_id] -
+                                fromstarts[thread_id]);
+      if (slicecount != count) {
+        RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_DESCEND_ERRORS::INN_LEN_ERR)
+      }
+      tooffsets[thread_id + 1] = tooffsets[0] + scan_in_array[thread_id];
+    }
   }
-}
 }

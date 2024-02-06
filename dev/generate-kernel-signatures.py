@@ -87,6 +87,7 @@ cuda_kernels_impl = [
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
     "awkward_ListOffsetArray_rpad_and_clip_axis1",
+    "awkward_ListOffsetArray_rpad_length_axis1",
     # "awkward_ListOffsetArray_rpad_axis1",
     "awkward_MaskedArray_getitem_next_jagged_project",
     "awkward_UnionArray_project",
