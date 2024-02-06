@@ -1515,7 +1515,8 @@ kernels:
                   if slicestop > missinglength:
                       raise ValueError("jagged slice's offsets extend beyond its content")
                   for j in range(slicestart, slicestop):
-                      numvalid[0] = numvalid[0] + 1 if missing[j] >= 0 else 0
+                    if  missing[j] >= 0:
+                      numvalid[0] = numvalid[0] + 1
     automatic-tests: false
 
   - name: awkward_ListArray_getitem_jagged_shrink

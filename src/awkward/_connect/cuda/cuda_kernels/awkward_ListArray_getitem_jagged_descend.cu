@@ -11,7 +11,7 @@
 // out["awkward_ListArray_getitem_jagged_descend_b", {dtype_specializations}] = None
 // END PYTHON
 
-enum class LISTARRAY_GETITEM_JAGGED_DESCEND {
+enum class LISTARRAY_GETITEM_JAGGED_DESCEND_ERRORS {
   INN_LEN_ERR,  // message: "jagged slice inner length differs from array inner length"
 };
 
@@ -35,7 +35,7 @@ awkward_ListArray_getitem_jagged_descend_a(
       int64_t count = (int64_t)(fromstops[thread_id] -
                                 fromstarts[thread_id]);
       if (slicecount != count) {
-        RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_DESCEND::INN_LEN_ERR)
+        RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_DESCEND_ERRORS::INN_LEN_ERR)
       }
       scan_in_array[thread_id] = (T)count;
     }
@@ -70,7 +70,7 @@ if (err_code[0] == NO_ERROR) {
     int64_t count = (int64_t)(fromstops[thread_id] -
                               fromstarts[thread_id]);
     if (slicecount != count) {
-      RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_DESCEND::INN_LEN_ERR)
+      RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_DESCEND_ERRORS::INN_LEN_ERR)
     }
     tooffsets[thread_id + 1] = tooffsets[0] + scan_in_array[thread_id];
   }

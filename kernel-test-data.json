@@ -20434,6 +20434,96 @@
             ]
         },
         {
+            "name": "awkward_ListArray_getitem_jagged_numvalid",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "missing": [],
+                        "missinglength": 0,
+                        "slicestarts": [],
+                        "slicestops": []
+                    },
+                    "outputs": {
+                        "numvalid": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 4,
+                        "missing": [0, 0, 0, 0],
+                        "missinglength": 4,
+                        "slicestarts": [0, 2, 3, 3],
+                        "slicestops": [2, 3, 3, 4]
+                    },
+                    "outputs": {
+                        "numvalid": [4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 4,
+                        "missing": [0, -1, 0, -1, 0, -1, 0],
+                        "missinglength": 7,
+                        "slicestarts": [0, 2, 3, 5],
+                        "slicestops": [2, 3, 5, 7]
+                    },
+                    "outputs": {
+                        "numvalid": [4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 4,
+                        "missing": [-1, -1, -1, -1],
+                        "missinglength": 4,
+                        "slicestarts": [0, 2, 3, 3],
+                        "slicestops": [2, 3, 3, 4]
+                    },
+                    "outputs": {
+                        "numvalid": [0]
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "jagged slice's stops[i] < starts[i]",
+                    "inputs": {
+                        "length": 2,
+                        "missing": [0, 0],
+                        "missinglength": 2,
+                        "slicestarts": [4, 2],
+                        "slicestops": [2, 4]
+                    },
+                    "outputs": {
+                        "numvalid": []
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "jagged slice's offsets extend beyond its content",
+                    "inputs": {
+                        "length": 2,
+                        "missing": [0],
+                        "missinglength": 1,
+                        "slicestarts": [0, 2],
+                        "slicestops": [2, 3]
+                    },
+                    "outputs": {
+                        "numvalid": []
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_ListArray_getitem_jagged_shrink",
             "status": false,
             "tests": [
