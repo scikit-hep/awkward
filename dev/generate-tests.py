@@ -717,6 +717,7 @@ cuda_kernels_tests = [
     "awkward_RegularArray_reduce_nonlocal_preparenext",
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_jagged_descend",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_carrylen",
     "awkward_ListArray_getitem_next_array_advanced",

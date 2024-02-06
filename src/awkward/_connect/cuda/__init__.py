@@ -95,6 +95,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_ListArray_broadcast_tooffsets",
         "awkward_ListArray_compact_offsets",
         "awkward_ListArray_getitem_jagged_carrylen",
+        "awkward_ListArray_getitem_jagged_descend",
         "awkward_ListArray_min_range",
         "awkward_ListArray_rpad_and_clip_length_axis1",
         "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",

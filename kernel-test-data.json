@@ -12818,8 +12818,50 @@
         },
         {
             "name": "awkward_ListArray_getitem_jagged_descend",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "sliceouterlen": 0,
+                        "slicestarts": [],
+                        "slicestops": []
+                    },
+                    "outputs": {
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0],
+                        "fromstops": [2],
+                        "sliceouterlen": 1,
+                        "slicestarts": [0],
+                        "slicestops": [2]
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 2]
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "jagged slice inner length differs from array inner length",
+                    "inputs": {
+                        "fromstarts": [0, 2],
+                        "fromstops": [2, 4],
+                        "sliceouterlen": 2,
+                        "slicestarts": [0, 2],
+                        "slicestops": [3, 4]
+                    },
+                    "outputs": {
+                        "tooffsets": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
