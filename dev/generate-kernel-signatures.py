@@ -63,6 +63,7 @@ cuda_kernels_impl = [
     "awkward_ListArray_getitem_next_range_counts",
     "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+    "awkward_ListArray_getitem_next_range_spreadadvanced",
     "awkward_NumpyArray_reduce_adjust_starts_64",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_RegularArray_getitem_next_at",

@@ -9675,7 +9675,7 @@
                     "message": "",
                     "inputs": {
                         "fromadvanced": [],
-                        "fromoffsets": [0],
+                        "fromoffsets": [],
                         "lenstarts": 0
                     },
                     "outputs": {
