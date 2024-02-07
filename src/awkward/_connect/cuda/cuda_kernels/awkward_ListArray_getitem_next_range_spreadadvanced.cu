@@ -13,8 +13,7 @@ awkward_ListArray_getitem_next_range_spreadadvanced(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < lenstarts) {
       C count = fromoffsets[thread_id + 1] - fromoffsets[thread_id];
-      int64_t j = threadIdx.x;
-      for (j = 0;  j < count;  j++) {
+      for (int64_t j = 0;  j < count;  j++) {
         toadvanced[fromoffsets[thread_id] + j] = fromadvanced[thread_id];
       }
     }

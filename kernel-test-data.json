@@ -17565,8 +17565,19 @@
         },
         {
             "name": "awkward_ListArray_localindex",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "offsets": [0]
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
