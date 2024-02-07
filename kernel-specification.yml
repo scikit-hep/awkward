@@ -1960,11 +1960,12 @@ kernels:
     description: null
     definition: |
       def awkward_ListArray_min_range(tomin, fromstarts, fromstops, lenstarts):
-          shorter = fromstops[0] - fromstarts[0]
-          for i in range(1, lenstarts):
-              rangeval = fromstops[i] - fromstarts[i]
-              shorter = shorter if shorter < rangeval else rangeval
-          tomin[0] = shorter
+          if lenstarts > 0:
+            shorter = fromstops[0] - fromstarts[0]
+            for i in range(1, lenstarts):
+                rangeval = fromstops[i] - fromstarts[i]
+                shorter = shorter if shorter < rangeval else rangeval
+            tomin[0] = shorter
     automatic-tests: true
 
   - name: awkward_ListArray_rpad_and_clip_length_axis1
@@ -5917,5 +5918,9 @@ kernels:
           - {name: parentslength, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_sorting_ranges_length(tolength, parents, parentslength):
+          tolength[0] = 2
+          for i in range(1, parentslength):
+              if parents[i - 1] != parents[i]:
+                  tolength[0] = tolength[0] + 1
     automatic-tests: false

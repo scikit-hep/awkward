@@ -2,12 +2,13 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_RegularArray_getitem_carry(T* tocarry,
-                                   const C* fromcarry,
-                                   int64_t lencarry,
-                                   int64_t size,
-                                   uint64_t invocation_index,
-                                   uint64_t* err_code) {
+awkward_RegularArray_getitem_carry(
+    T* tocarry,
+    const C* fromcarry,
+    int64_t lencarry,
+    int64_t size,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / size;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % size;

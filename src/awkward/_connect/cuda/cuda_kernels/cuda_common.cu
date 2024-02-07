@@ -46,6 +46,17 @@ typedef unsigned long long uintmax_t;
 //         stride = stride * 2
 //     return d_final
 // out['inclusive_scan_kernel', cupy.int64] = inclusive_scan
+
+// def exclusive_scan(grid, block, args):
+//     print(args)
+//     (d_in, invocation_index, err_code) = args
+//     import math
+//     d_out = cupy.empty(len(d_in), dtype=cupy.int64)
+//     cuda_kernel_templates.get_function(fetch_specialization(['exclusive_scan_kernel', cupy.int64]))(grid, block, (d_in, d_out, len(d_in), invocation_index, err_code))
+//     print(d_out)
+//     print("\n")
+//     return d_out
+// out['exclusive_scan_kernel', cupy.int64] = exclusive_scan
 // END PYTHON
 
 template <typename T>
@@ -84,6 +95,52 @@ inclusive_scan_kernel(T* d_in,
       if (curr_step == total_steps) {
         d_final[thread_id] = in_out_flag ? d_out[thread_id] : d_in[thread_id];
       }
+    }
+  }
+}
+
+
+template <typename T>
+__global__ void
+exclusive_scan_kernel(T* input,
+                      T* output,
+                      int64_t n,
+                      uint64_t* invocation_index,
+                      uint64_t* err_code) {
+  if (err_code[0] == NO_ERROR) {
+    extern __shared__ int temp[1024*2];
+    int tid = threadIdx.x;
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < n) {
+        temp[tid] = input[idx];
+    } else {
+        temp[tid] = 0;
+    }
+    __syncthreads();
+
+    for (int stride = 1; stride <= 1024; stride *= 2) {
+        int index = (tid + 1) * stride * 2 - 1;
+        if (index < 2 * 1024) {
+            temp[index] += temp[index - stride];
+        }
+        __syncthreads();
+    }
+
+    if (tid == 0) {
+        temp[2 * 1024 - 1] = 0;
+    }
+    __syncthreads();
+
+    for (int stride = 1024; stride > 0; stride /= 2) {
+        int index = (tid + 1) * stride * 2 - 1;
+        if (index + stride < 2 * 1024) {
+            temp[index + stride] += temp[index];
+        }
+        __syncthreads();
+    }
+
+    if (idx < n) {
+      output[idx] = temp[tid];
     }
   }
 }

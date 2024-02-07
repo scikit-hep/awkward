@@ -5,10 +5,10 @@
 //     (nextshifts, mask, length, valid_when, shifts, invocation_index, err_code) = args
 //     scan_in_array_k = cupy.empty(length, dtype=cupy.int64)
 //     scan_in_array_nullsum = cupy.empty(length, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64_a", nextshifts.dtype, mask.dtype]))(grid, block, (nextshifts, mask, length, valid_when, scan_in_array_k, scan_in_array_nullsum, invocation_index, err_code))
-//     scan_in_array_k = inclusive_scan(grid, block, (scan_in_array_k, invocation_index, err_code))
-//     scan_in_array_nullsum = inclusive_scan(grid, block, (scan_in_array_nullsum, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64_a", nextshifts.dtype, mask.dtype]))(grid, block, (nextshifts, mask, length, valid_when, scan_in_array_k, scan_in_array_nullsum, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64_a", nextshifts.dtype, mask.dtype, shifts.dtype]))(grid, block, (nextshifts, mask, length, valid_when, shifts, scan_in_array_k, scan_in_array_nullsum, invocation_index, err_code))
+//     scan_in_array_k = cupy.cumsum(scan_in_array_k)
+//     scan_in_array_nullsum = cupy.cumsum(scan_in_array_nullsum)
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64_b", nextshifts.dtype, mask.dtype, shifts.dtype]))(grid, block, (nextshifts, mask, length, valid_when, shifts, scan_in_array_k, scan_in_array_nullsum, invocation_index, err_code))
 // out["awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64_a", {dtype_specializations}] = None
 // out["awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64_b", {dtype_specializations}] = None
 // END PYTHON
@@ -57,8 +57,7 @@ awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64_b(
 
     if (thread_id < length) {
       if ((mask[thread_id] != 0) == (valid_when != 0)) {
-        nextshifts[scan_in_array_k[thread_id] - 1] =
-            shifts[thread_id] + (scan_in_array_nullsum[thread_id] - 1);
+        nextshifts[scan_in_array_k[thread_id] - 1] = shifts[thread_id] + scan_in_array_nullsum[thread_id];
       }
     }
   }

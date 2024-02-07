@@ -14,7 +14,6 @@ except ImportError:
     pytest.skip(reason="too old Numba version", allow_module_level=True)
 
 
-@pytest.mark.xfail(reason="unimplemented CUDA Kernels (awkward_ByteMaskedArray_numnull")
 def test_num_1():
     content = ak.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
@@ -25,11 +24,8 @@ def test_num_1():
     )
     cuda_array = ak.to_backend(array, "cuda")
     assert ak.num(cuda_array, 0) == ak.num(array, 0)
-    with pytest.raises(NotImplementedError):
-        ak.num(cuda_array, 1)
 
 
-@pytest.mark.xfail(reason="unimplemented CUDA Kernels (awkward_ByteMaskedArray_numnull")
 def test_num_2():
     content = ak.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
@@ -40,8 +36,6 @@ def test_num_2():
     )
     cuda_array = ak.to_backend(array, "cuda")
     assert ak.num(cuda_array, 0) == ak.num(array, 0)
-    with pytest.raises(NotImplementedError):
-        ak.num(cuda_array, 1)
 
 
 def test_num_3():

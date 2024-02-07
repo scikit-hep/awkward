@@ -12,12 +12,16 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 cuda_kernels_impl = [
+    "awkward_Index_nones_as_index",
     "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_compact_offsets",
     "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_overlay_mask",
+    "awkward_ByteMaskedArray_numnull",
+    "awkward_IndexedArray_numnull",
+    "awkward_IndexedArray_numnull_parents",
     "awkward_IndexedArray_numnull_unique_64",
     "awkward_NumpyArray_fill",
     "awkward_ListArray_fill",
@@ -43,12 +47,19 @@ cuda_kernels_impl = [
     "awkward_RegularArray_getitem_next_range",
     "awkward_RegularArray_getitem_next_range_spreadadvanced",
     "awkward_RegularArray_getitem_next_array",
+    "awkward_RegularArray_getitem_next_array_regularize",
+    "awkward_RegularArray_reduce_local_nextparents",
+    "awkward_RegularArray_reduce_nonlocal_preparenext",
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_jagged_carrylen",
     "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_next_array",
     "awkward_ListArray_getitem_next_at",
+    "awkward_ListArray_getitem_next_range_counts",
+    "awkward_ListArray_rpad_and_clip_length_axis1",
+    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     "awkward_NumpyArray_reduce_adjust_starts_64",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_RegularArray_getitem_next_at",
@@ -86,6 +97,7 @@ cuda_kernels_impl = [
     "awkward_reduce_sum_bool",
     "awkward_reduce_prod_bool",
     "awkward_reduce_countnonzero",
+    "awkward_sorting_ranges_length",
 ]
 
 
