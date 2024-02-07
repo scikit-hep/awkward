@@ -630,7 +630,9 @@ def _recurse_option_any(
         # Converting to an unknown inside an option!
         if isinstance(type_.content, ak.types.UnknownType):
             return ak.contents.IndexedOptionArray(
-                ak.index.Index64(layout.backend.index_nplike.full(layout.length, -1)),
+                ak.index.Index64(
+                    layout.backend.index_nplike.full(layout.length, -1, dtype=np.int64)
+                ),
                 ak.forms.from_type(type_.content).length_zero_array(
                     backend=layout.backend
                 ),
@@ -696,7 +698,9 @@ def _recurse_any_option(
     # Converting to an unknown inside an option!
     if isinstance(type_.content, ak.types.UnknownType):
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(layout.backend.index_nplike.full(layout.length, -1)),
+            ak.index.Index64(
+                layout.backend.index_nplike.full(layout.length, -1, dtype=np.int64)
+            ),
             ak.forms.from_type(type_.content).length_zero_array(backend=layout.backend),
         )
     else:
@@ -1125,7 +1129,9 @@ def _recurse_record_any(
                 next_contents.append(
                     ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            layout.backend.index_nplike.full(layout.length, -1)
+                            layout.backend.index_nplike.full(
+                                layout.length, -1, dtype=np.int64
+                            )
                         ),
                         ak.forms.from_type(next_type.content).length_zero_array(
                             backend=layout.backend
@@ -1170,7 +1176,9 @@ def _recurse_record_any(
                 next_contents.append(
                     ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            layout.backend.index_nplike.full(layout.length, -1)
+                            layout.backend.index_nplike.full(
+                                layout.length, -1, dtype=np.int64
+                            )
                         ),
                         ak.forms.from_type(field_type.content).length_zero_array(
                             backend=layout.backend

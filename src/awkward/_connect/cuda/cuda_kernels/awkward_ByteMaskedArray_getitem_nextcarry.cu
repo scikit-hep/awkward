@@ -5,7 +5,7 @@
 //     (tocarry, mask, length, validwhen, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_a', tocarry.dtype, mask.dtype]))(grid, block, (tocarry, mask, length, validwhen, scan_in_array, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_b', tocarry.dtype, mask.dtype]))(grid, block, (tocarry, mask, length, validwhen, scan_in_array, invocation_index, err_code))
 // out["awkward_ByteMaskedArray_getitem_nextcarry_a", {dtype_specializations}] = None
 // out["awkward_ByteMaskedArray_getitem_nextcarry_b", {dtype_specializations}] = None
@@ -13,13 +13,14 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_ByteMaskedArray_getitem_nextcarry_a(T* tocarry,
-                                            const C* mask,
-                                            int64_t length,
-                                            bool validwhen,
-                                            int64_t* scan_in_array,
-                                            uint64_t invocation_index,
-                                            uint64_t* err_code) {
+awkward_ByteMaskedArray_getitem_nextcarry_a(
+    T* tocarry,
+    const C* mask,
+    int64_t length,
+    bool validwhen,
+    int64_t* scan_in_array,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -35,13 +36,14 @@ awkward_ByteMaskedArray_getitem_nextcarry_a(T* tocarry,
 
 template <typename T, typename C>
 __global__ void
-awkward_ByteMaskedArray_getitem_nextcarry_b(T* tocarry,
-                                            const C* mask,
-                                            int64_t length,
-                                            bool validwhen,
-                                            int64_t* scan_in_array,
-                                            uint64_t invocation_index,
-                                            uint64_t* err_code) {
+awkward_ByteMaskedArray_getitem_nextcarry_b(
+  T* tocarry,
+  const C* mask,
+  int64_t length,
+  bool validwhen,
+  int64_t* scan_in_array,
+  uint64_t invocation_index,
+  uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 

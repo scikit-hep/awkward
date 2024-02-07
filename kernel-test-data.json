@@ -899,6 +899,17 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "length": 0,
+                        "target": 0
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "length": 2,
                         "target": 2
                     },
@@ -1037,6 +1048,19 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "bitmasklength": 0,
+                        "frombitmask": [],
+                        "lsb_order": false,
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "tobytemask": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "bitmasklength": 2,
                         "frombitmask": [58, 59],
                         "lsb_order": false,
@@ -1082,6 +1106,18 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "length": 0,
+                        "mask": [],
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "length": 2,
                         "mask": [0, 0],
                         "validwhen": false
@@ -1112,6 +1148,19 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "length": 0,
+                        "mask": [],
+                        "validwhen": true
+                    },
+                    "outputs": {
+                        "outindex": [],
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "length": 1,
                         "mask": [0],
                         "validwhen": true
@@ -1138,8 +1187,20 @@
         },
         {
             "name": "awkward_ByteMaskedArray_numnull",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "mask": [],
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "numnull": [0]
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -1354,6 +1415,18 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "length": 0,
+                        "mask": [],
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "length": 2,
                         "mask": [0, 0],
                         "validwhen": false
@@ -1380,6 +1453,30 @@
             "name": "awkward_IndexedArray_flatten_nextcarry",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [],
+                        "lencontent": 0,
+                        "lenindex": 0
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "index out of range",
+                    "inputs": {
+                        "fromindex": [0, 1],
+                        "lencontent": 0,
+                        "lenindex": 2
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
                 {
                     "error": true,
                     "message": "index out of range",
@@ -1408,8 +1505,32 @@
         },
         {
             "name": "awkward_IndexedArray_getitem_nextcarry",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [],
+                        "lencontent": 0,
+                        "lenindex": 0
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "index out of range",
+                    "inputs": {
+                        "fromindex": [0, 1],
+                        "lencontent": 0,
+                        "lenindex": 2
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
                 {
                     "error": true,
                     "message": "index out of range",
@@ -1750,8 +1871,34 @@
         },
         {
             "name": "awkward_IndexedArray_getitem_nextcarry_outindex",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [],
+                        "lencontent": 0,
+                        "lenindex": 0
+                    },
+                    "outputs": {
+                        "tocarry": [],
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "index out of range",
+                    "inputs": {
+                        "fromindex": [0, 1, 2, 4],
+                        "lencontent": 0,
+                        "lenindex": 4
+                    },
+                    "outputs": {
+                        "tocarry": [],
+                        "toindex": []
+                    }
+                },
                 {
                     "error": true,
                     "message": "index out of range",
@@ -1795,11 +1942,62 @@
         },
         {
             "name": "awkward_IndexedArray_numnull",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
                     "message": "",
+                    "inputs": {
+                        "fromindex": [],
+                        "lenindex": 0
+                    },
+                    "outputs": {
+                        "numnull": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [1],
+                        "lenindex": 1
+                    },
+                    "outputs": {
+                        "numnull": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [-1],
+                        "lenindex": 1
+                    },
+                    "outputs": {
+                        "numnull": [1]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [-1, -1, -1, -1],
+                        "lenindex": 4
+                    },
+                    "outputs": {
+                        "numnull": [4]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [0, -1, 2, -1, -1, -1, -1],
+                        "lenindex": 7
+                    },
+                    "outputs": {
+                        "numnull": [5]
+                    }
+                },
+                {
+                    "error": false,
                     "inputs": {
                         "fromindex": [0, 1],
                         "lenindex": 2
@@ -1943,6 +2141,100 @@
             ]
         },
         {
+            "name": "awkward_IndexedArray_numnull_parents",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [],
+                        "lenindex": 0
+                    },
+                    "outputs": {
+                        "numnull": [],
+                        "tolength": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [1],
+                        "lenindex": 1
+                    },
+                    "outputs": {
+                        "numnull": [0],
+                        "tolength": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [-1],
+                        "lenindex": 1
+                    },
+                    "outputs": {
+                        "numnull": [1],
+                        "tolength": [1]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [-1, -1, -1, -1],
+                        "lenindex": 4
+                    },
+                    "outputs": {
+                        "numnull": [1, 1, 1, 1],
+                        "tolength": [4]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [0, -1, 2, -1, -1, -1, -1],
+                        "lenindex": 7
+                    },
+                    "outputs": {
+                        "numnull": [0, 1, 0, 1, 1, 1, 1],
+                        "tolength": [5]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [0, 1],
+                        "lenindex": 2
+                    },
+                    "outputs": {
+                        "numnull": [0, 0],
+                        "tolength": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [0, 1, 2, 3],
+                        "lenindex": 4
+                    },
+                    "outputs": {
+                        "numnull": [0, 0, 0, 0],
+                        "tolength": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "inputs": {
+                        "fromindex": [0, 1, -2, 3, -4, 5, -6],
+                        "lenindex": 7
+                    },
+                    "outputs": {
+                        "numnull": [0, 0, 1, 0, 1, 0, 1],
+                        "tolength": [3]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_IndexedArray_numnull_unique_64",
             "status": true,
             "tests": [
@@ -2002,6 +2294,18 @@
             "name": "awkward_IndexedArray_overlay_mask",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [],
+                        "length": 0,
+                        "mask": []
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -4305,9 +4609,187 @@
             ]
         },
         {
+            "name": "awkward_RegularArray_reduce_local_nextparents",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "size": 3,
+                        "length": 0
+                    },
+                    "outputs": {
+                        "nextparents": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "size": 0,
+                        "length": 0
+                    },
+                    "outputs": {
+                        "nextparents": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "size": 0,
+                        "length": 2
+                    },
+                    "outputs": {
+                        "nextparents": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "size": 3,
+                        "length": 2
+                    },
+                    "outputs": {
+                        "nextparents": [0, 0, 0, 1, 1, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "size": 1,
+                        "length": 1
+                    },
+                    "outputs": {
+                        "nextparents": [0]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_RegularArray_reduce_nonlocal_preparenext",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [],
+                        "size": 3,
+                        "length": 0
+                    },
+                    "outputs": {
+                        "nextcarry": [],
+                        "nextparents": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [],
+                        "size": 0,
+                        "length": 0
+                    },
+                    "outputs": {
+                        "nextcarry": [],
+                        "nextparents": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [0, 1],
+                        "size": 0,
+                        "length": 2
+                    },
+                    "outputs": {
+                        "nextcarry": [],
+                        "nextparents": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [0, 1],
+                        "size": 3,
+                        "length": 2
+                    },
+                    "outputs": {
+                        "nextcarry": [0, 3, 1, 4, 2, 5],
+                        "nextparents": [0, 3, 1, 4, 2, 5]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [2, 4, 6],
+                        "size": 3,
+                        "length": 3
+                    },
+                    "outputs": {
+                        "nextcarry": [0, 3, 6, 1, 4, 7, 2, 5, 8],
+                        "nextparents": [6, 12, 18, 7, 13, 19, 8, 14, 20]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [0],
+                        "size": 1,
+                        "length": 1
+                    },
+                    "outputs": {
+                        "nextcarry": [0],
+                        "nextparents": [0]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_RegularArray_localindex",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "size": 3
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "size": 0
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 2,
+                        "size": 0
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -4336,6 +4818,54 @@
             "name": "awkward_RegularArray_rpad_and_clip_axis1",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 3,
+                        "size": 0,
+                        "target": 2
+                    },
+                    "outputs": {
+                        "toindex": [-1, -1, -1, -1, -1, -1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "size": 0,
+                        "target": 0
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "size": 0,
+                        "target": 2
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "size": 2,
+                        "target": 2
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -4426,6 +4956,42 @@
             "name": "awkward_RegularArray_getitem_carry",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromcarry": [0, 0],
+                        "lencarry": 2,
+                        "size": 0
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromcarry": [],
+                        "lencarry": 0,
+                        "size": 1
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromcarry": [],
+                        "lencarry": 0,
+                        "size": 0
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -4960,6 +5526,71 @@
             "name": "awkward_RegularArray_getitem_jagged_expand",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "regularlength": 0,
+                        "regularsize": 0,
+                        "singleoffsets": [0]
+                    },
+                    "outputs": {
+                        "multistarts": [],
+                        "multistops": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "regularlength": 1,
+                        "regularsize": 0,
+                        "singleoffsets": [1]
+                    },
+                    "outputs": {
+                        "multistarts": [],
+                        "multistops": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "regularlength": 0,
+                        "regularsize": 0,
+                        "singleoffsets": [0]
+                    },
+                    "outputs": {
+                        "multistarts": [],
+                        "multistops": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "regularlength": 1,
+                        "regularsize": 1,
+                        "singleoffsets": [0, 2]
+                    },
+                    "outputs": {
+                        "multistarts": [0],
+                        "multistops": [2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "regularlength": 2,
+                        "regularsize": 1,
+                        "singleoffsets": [0, 2]
+                    },
+                    "outputs": {
+                        "multistarts": [0, 0],
+                        "multistops": [2, 2]
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -6767,8 +7398,20 @@
         },
         {
             "name": "awkward_RegularArray_getitem_next_array_regularize",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromarray": [],
+                        "lenarray": 0,
+                        "size": 2
+                    },
+                    "outputs": {
+                        "toarray": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -8729,6 +9372,18 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "fromadvanced": [],
+                        "fromoffsets": [0],
+                        "lenstarts": 0
+                    },
+                    "outputs": {
+                        "toadvanced": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "fromadvanced": [0],
                         "fromoffsets": [0, 3],
                         "lenstarts": 1
@@ -8771,6 +9426,42 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "fromadvanced": [],
+                        "length": 0,
+                        "nextsize": 2
+                    },
+                    "outputs": {
+                        "toadvanced": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromadvanced": [],
+                        "length": 1,
+                        "nextsize": 0
+                    },
+                    "outputs": {
+                        "toadvanced": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromadvanced": [],
+                        "length": 0,
+                        "nextsize": 0
+                    },
+                    "outputs": {
+                        "toadvanced": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "fromadvanced": [0],
                         "length": 1,
                         "nextsize": 2
@@ -8803,11 +9494,11 @@
                     "inputs": {
                         "inneroffsets": [0],
                         "inneroffsetslen": 1,
-                        "outeroffsets": [0, 0, 0, 0, 0],
-                        "outeroffsetslen": 5
+                        "outeroffsets": [],
+                        "outeroffsetslen": 0
                     },
                     "outputs": {
-                        "tooffsets": [0, 0, 0, 0, 0]
+                        "tooffsets": []
                     }
                 },
                 {
@@ -9228,6 +9919,20 @@
             "name": "awkward_MaskedArray_getitem_next_jagged_project",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "index": [],
+                        "length": 0,
+                        "starts_in": [],
+                        "stops_in": []
+                    },
+                    "outputs": {
+                        "starts_out": [],
+                        "stops_out": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -9696,6 +10401,19 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "length": 0,
+                        "mymask": [],
+                        "theirmask": [],
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "tomask": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "length": 2,
                         "mymask": [0, 0],
                         "theirmask": [0, 0],
@@ -9703,6 +10421,58 @@
                     },
                     "outputs": {
                         "tomask": [0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 2,
+                        "mymask": [0, 0],
+                        "theirmask": [0, 0],
+                        "validwhen": true
+                    },
+                    "outputs": {
+                        "tomask": [1, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 2,
+                        "mymask": [1, 0],
+                        "theirmask": [0, 1],
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "tomask": [1, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 2,
+                        "mymask": [0, 0],
+                        "theirmask": [0, 1],
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "tomask": [0, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 2,
+                        "mymask": [1, 0],
+                        "theirmask": [0, 0],
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "tomask": [1, 0]
                     }
                 }
             ]
@@ -9806,8 +10576,22 @@
         },
         {
             "name": "awkward_IndexedArray_reduce_next_64",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "index": [],
+                        "length": 0,
+                        "parents": []
+                    },
+                    "outputs": {
+                        "nextcarry": [],
+                        "nextparents": [],
+                        "outindex": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -9968,6 +10752,45 @@
             "name": "awkward_IndexedArray_simplify",
             "status": true,
             "tests": [
+                {
+                    "error": true,
+                    "message": "index out of range",
+                    "inputs": {
+                        "innerindex": [],
+                        "innerlength": 0,
+                        "outerindex": [0, 3],
+                        "outerlength": 2
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "innerindex": [],
+                        "innerlength": 0,
+                        "outerindex": [],
+                        "outerlength": 0
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "innerindex": [0, 1],
+                        "innerlength": 2,
+                        "outerindex": [],
+                        "outerlength": 0
+                    },
+                    "outputs": {
+                        "toindex": [123, 123]
+                    }
+                },
                 {
                     "error": true,
                     "message": "index out of range",
@@ -10430,6 +11253,39 @@
             "status": true,
             "tests": [
                 {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "index": [],
+                        "isoption": true,
+                        "lencontent": 3,
+                        "length": 0
+                    },
+                    "outputs": {}
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "index": [],
+                        "isoption": true,
+                        "lencontent": 0,
+                        "length": 0
+                    },
+                    "outputs": {}
+                },
+                {
+                    "error": true,
+                    "message": "index[i] >= len(content)",
+                    "inputs": {
+                        "index": [0, 1, 1, 1, 1, 3],
+                        "isoption": true,
+                        "lencontent": 0,
+                        "length": 6
+                    },
+                    "outputs": {}
+                },
+                {
                     "error": true,
                     "message": "index[i] >= len(content)",
                     "inputs": {
@@ -10879,6 +11735,17 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "frommask": [],
+                        "length": 0
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "frommask": [0, 0, 0, 0],
                         "length": 4
                     },
@@ -10892,6 +11759,18 @@
             "name": "awkward_index_rpad_and_clip_axis1",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "target": 1
+                    },
+                    "outputs": {
+                        "tostarts": [],
+                        "tostops": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -11163,8 +12042,56 @@
         },
         {
             "name": "awkward_ListArray_getitem_jagged_carrylen",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "slicestarts": [],
+                        "slicestops": [],
+                        "sliceouterlen": 0
+                    },
+                    "outputs": {
+                        "carrylen": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "slicestarts": [0, 2],
+                        "slicestops": [0, 2],
+                        "sliceouterlen": 2
+                    },
+                    "outputs": {
+                        "carrylen": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "slicestarts": [2],
+                        "slicestops": [4],
+                        "sliceouterlen": 1
+                    },
+                    "outputs": {
+                        "carrylen": [2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "slicestarts": [1],
+                        "slicestops": [1],
+                        "sliceouterlen": 1
+                    },
+                    "outputs": {
+                        "carrylen": [0]
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -11651,7 +12578,7 @@
         },
         {
             "name": "awkward_ListArray_getitem_jagged_expand",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": true,
@@ -11861,6 +12788,18 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "lenstarts": 0
+                    },
+                    "outputs": {
+                        "tomin": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "fromstarts": [0, 3, 4, 5, 8],
                         "fromstops": [3, 3, 6, 8, 9],
                         "lenstarts": 5
@@ -11911,6 +12850,19 @@
             "name": "awkward_ListArray_rpad_and_clip_length_axis1",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "lenstarts": 0,
+                        "target": 1
+                    },
+                    "outputs": {
+                        "tomin": [0]
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -12060,6 +13012,39 @@
             "name": "awkward_ListArray_validity",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "lencontent": 0,
+                        "length": 0,
+                        "starts": [],
+                        "stops": []
+                    },
+                    "outputs": {}
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "lencontent": 2,
+                        "length": 0,
+                        "starts": [],
+                        "stops": []
+                    },
+                    "outputs": {}
+                },
+                {
+                    "error": true,
+                    "message": "stop[i] > len(content)",
+                    "inputs": {
+                        "lencontent": 0,
+                        "length": 3,
+                        "starts": [0, 0, 1],
+                        "stops": [0, 1, 5]
+                    },
+                    "outputs": {}
+                },
                 {
                     "error": true,
                     "message": "start[i] > stop[i]",
@@ -13308,6 +14293,19 @@
                     "message": "",
                     "inputs": {
                         "base": 0,
+                        "fromindex": [],
+                        "length": 0,
+                        "toindexoffset": 0
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "base": 0,
                         "fromindex": [0, 1, -1, -1, 4],
                         "length": 5,
                         "toindexoffset": 0
@@ -13379,6 +14377,18 @@
                     "message": "",
                     "inputs": {
                         "base": 0,
+                        "length": 0,
+                        "toindexoffset": 0
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "base": 0,
                         "length": 5,
                         "toindexoffset": 0
                     },
@@ -13428,6 +14438,22 @@
             "name": "awkward_ListArray_fill",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "base": 0,
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "length": 0,
+                        "tostartsoffset": 0,
+                        "tostopsoffset": 0
+                    },
+                    "outputs": {
+                        "tostarts": [],
+                        "tostops": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -13610,6 +14636,18 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "fromindex": [],
+                        "length": 0,
+                        "toindexoffset": 0
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "fromindex": [0, 1, 2, 0, 1, 2],
                         "length": 6,
                         "toindexoffset": 0
@@ -13621,9 +14659,40 @@
             ]
         },
         {
+            "name": "awkward_UnionArray_flatten_length",
+            "status": false,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromtags": [0, 0, 0, 0],
+                        "fromindex": [0, 1, 2, 3],
+                        "length": 4,
+                        "offsetsraws": [[0, 1, 3, 5, 7], [1, 3, 5, 7, 9]]
+                    },
+                    "outputs": {
+                        "total_length": [7]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_UnionArray_validity",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "index": [],
+                        "lencontents": [],
+                        "length": 0,
+                        "numcontents": 2,
+                        "tags": []
+                    },
+                    "outputs": {}
+                },
                 {
                     "error": true,
                     "message": "tags[i] < 0",
@@ -13747,9 +14816,118 @@
             ]
         },
         {
-            "name": "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
-            "status": false,
+            "name": "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "mask": [],
+                        "valid_when": false,
+                        "shifts": []
+                    },
+                    "outputs": {
+                        "nextshifts": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 7,
+                        "mask": [0, 0, 0, 1, 1, 0, 0],
+                        "valid_when": false,
+                        "shifts": [0, 1, 1, 0, 1, 1, 0]
+                    },
+                    "outputs": {
+                        "nextshifts": [0, 1, 1, 3, 2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 1,
+                        "mask": [0],
+                        "valid_when": false,
+                        "shifts": [0]
+                    },
+                    "outputs": {
+                        "nextshifts": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 1,
+                        "mask": [0],
+                        "valid_when": false,
+                        "shifts": [1]
+                    },
+                    "outputs": {
+                        "nextshifts": [1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 1,
+                        "mask": [0],
+                        "valid_when": true,
+                        "shifts": [1]
+                    },
+                    "outputs": {
+                        "nextshifts": [123]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 7,
+                        "mask": [0, 0, 0, 1, 1, 0, 0],
+                        "valid_when": true,
+                        "shifts": [0, 1, 1, 0, 1, 1, 0]
+                    },
+                    "outputs": {
+                        "nextshifts": [3, 4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 5,
+                        "mask": [0, 1, 0, 1, 1],
+                        "valid_when": true,
+                        "shifts": [0, 0, 1, 0, 0]
+                    },
+                    "outputs": {
+                        "nextshifts": [1, 2, 2]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "mask": [],
+                        "valid_when": false
+                    },
+                    "outputs": {
+                        "nextshifts": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -13761,6 +14939,135 @@
                     "outputs": {
                         "nextshifts": [0, 0, 0, 2, 2]
                     }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 1,
+                        "mask": [0],
+                        "valid_when": false
+                    },
+                    "outputs": {
+                        "nextshifts": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 1,
+                        "mask": [0],
+                        "valid_when": true
+                    },
+                    "outputs": {
+                        "nextshifts": [123]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 7,
+                        "mask": [0, 0, 0, 1, 1, 0, 0],
+                        "valid_when": true
+                    },
+                    "outputs": {
+                        "nextshifts": [3, 3]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 5,
+                        "mask": [0, 1, 0, 1, 1],
+                        "valid_when": true
+                    },
+                    "outputs": {
+                        "nextshifts": [1, 2, 2]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_ByteMaskedArray_reduce_next_64",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "mask": [],
+                        "parents": [],
+                        "length": 0,
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "nextcarry": [],
+                        "nextparents": [],
+                        "outindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "mask": [0, 0, 0, 1, 1, 0, 0],
+                        "parents": [0, 0, 1, 1, 2, 2, 2],
+                        "length": 7,
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "nextcarry": [0, 1, 2, 5, 6],
+                        "nextparents": [0, 0, 1, 2, 2],
+                        "outindex": [0, 1, 2, -1, -1, 3, 4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "mask": [0],
+                        "parents": [2],
+                        "length": 1,
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "nextcarry": [0],
+                        "nextparents": [2],
+                        "outindex": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "mask": [1],
+                        "parents": [1],
+                        "length": 1,
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "nextcarry": [123],
+                        "nextparents": [123],
+                        "outindex": [-1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "mask": [0, 1, 0, 1, 1],
+                        "parents": [0, 0, 1, 1, 1],
+                        "length": 5,
+                        "validwhen": true
+                    },
+                    "outputs": {
+                        "nextcarry": [1, 3, 4],
+                        "nextparents": [0, 1, 1],
+                        "outindex": [-1, 0, -1, 1, 2]
+                    }
                 }
             ]
         },
@@ -13768,6 +15075,19 @@
             "name": "awkward_IndexedArray_index_of_nulls",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [],
+                        "lenindex": 0,
+                        "parents": [],
+                        "starts": []
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -13992,8 +15312,19 @@
         },
         {
             "name": "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "index": [],
+                        "length": 0
+                    },
+                    "outputs": {
+                        "nextshifts": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -14108,8 +15439,20 @@
         },
         {
             "name": "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "index": [],
+                        "length": 0,
+                        "shifts": []
+                    },
+                    "outputs": {
+                        "nextshifts": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -14999,6 +16342,19 @@
             "status": true,
             "tests": [
                 {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "at": -2,
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "lenstarts": 0
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
                     "error": true,
                     "message": "index out of range",
                     "inputs": {
@@ -15691,8 +17047,19 @@
         },
         {
             "name": "awkward_ListArray_getitem_next_range_counts",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [],
+                        "lenstarts": 0
+                    },
+                    "outputs": {
+                        "total": [0]
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -15713,6 +17080,28 @@
                     },
                     "outputs": {
                         "total": [9]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 0, 0, 0],
+                        "lenstarts": 3
+                    },
+                    "outputs": {
+                        "total": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 3],
+                        "lenstarts": 1
+                    },
+                    "outputs": {
+                        "total": [3]
                     }
                 }
             ]
@@ -15848,6 +17237,51 @@
             "name": "awkward_ListArray_rpad_axis1",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "length": 0,
+                        "target": 4
+                    },
+                    "outputs": {
+                        "toindex": [],
+                        "tostarts": [],
+                        "tostops": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "length": 0,
+                        "target": 0
+                    },
+                    "outputs": {
+                        "toindex": [],
+                        "tostarts": [],
+                        "tostops": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 3, 4, 5, 8],
+                        "fromstops": [3, 3, 6, 8, 9],
+                        "length": 5,
+                        "target": 0
+                    },
+                    "outputs": {
+                        "toindex": [0, 1, 2, 4, 5, 5, 6, 7, 8, 123, 123],
+                        "tostarts": [0, 3, 3, 5, 8],
+                        "tostops": [3, 3, 5, 8, 9]
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -16839,8 +18273,19 @@
         },
         {
             "name": "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "nextlen": 0,
+                        "nextparents": []
+                    },
+                    "outputs": {
+                        "nextstarts": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -17532,6 +18977,18 @@
                     "message": "",
                     "inputs": {
                         "tooffset": 0,
+                        "fromptr": [],
+                        "length": 0
+                    },
+                    "outputs": {
+                        "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "tooffset": 0,
                         "fromptr": [1, 3, 3, 5],
                         "length": 4
                     },
@@ -17999,6 +19456,17 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "fromindex": [],
+                        "length": 0
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "fromindex": [-1, -1, -1, -1, -1],
                         "length": 5
                     },
@@ -18149,6 +19617,19 @@
                     "message": "",
                     "inputs": {
                         "base": 0,
+                        "fromtags": [],
+                        "length": 0,
+                        "totagsoffset": 0
+                    },
+                    "outputs": {
+                        "totags": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "base": 0,
                         "fromtags": [0, 0, 0, 1, 1, 1],
                         "length": 6,
                         "totagsoffset": 0
@@ -18163,6 +19644,18 @@
             "name": "awkward_UnionArray_filltags_const",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "base": 0,
+                        "length": 0,
+                        "totagsoffset": 0
+                    },
+                    "outputs": {
+                        "totags": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -18215,7 +19708,7 @@
         },
         {
             "name": "awkward_UnionArray_project",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
@@ -18572,6 +20065,19 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "bitmasklength": 0,
+                        "frombitmask": [],
+                        "lsb_order": false,
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "bitmasklength": 2,
                         "frombitmask": [58, 59],
                         "lsb_order": true,
@@ -18666,7 +20172,7 @@
         },
         {
             "name": "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
@@ -18680,6 +20186,20 @@
                         "mask_out": [0, -1],
                         "starts_out": [0, 1],
                         "stops_out": [1, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "index_in": [],
+                        "length": 0,
+                        "offsets_in": []
+                    },
+                    "outputs": {
+                        "mask_out": [],
+                        "starts_out": [],
+                        "stops_out": []
                     }
                 },
                 {
@@ -21907,6 +23427,25 @@
                     "message": "",
                     "inputs": {
                         "base": 0,
+                        "innerindex": [],
+                        "innertags": [],
+                        "innerwhich": 0,
+                        "length": 0,
+                        "outerindex": [],
+                        "outertags": [],
+                        "outerwhich": 1,
+                        "towhich": 1
+                    },
+                    "outputs": {
+                        "toindex": [],
+                        "totags": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "base": 0,
                         "innerindex": [0, 0, 1, 1, 2, 3, 2],
                         "innertags": [0, 1, 0, 1, 0, 0, 1],
                         "innerwhich": 0,
@@ -21938,6 +23477,67 @@
                     "outputs": {
                         "toindex": [123, 123, 123, 5, 123, 123, 6, 123, 123, 123, 7, 123],
                         "totags": [123, 123, 123, 0, 123, 123, 0, 123, 123, 123, 0, 123]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_sorting_ranges_length",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [],
+                        "parentslength": 0
+                    },
+                    "outputs": {
+                        "tolength": [2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [0, 1],
+                        "parentslength": 2
+                    },
+                    "outputs": {
+                        "tolength": [3]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [0, 3, 6, 9],
+                        "parentslength": 4
+                    },
+                    "outputs": {
+                        "tolength": [5]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [3, 3, 3, 3],
+                        "parentslength": 4
+                    },
+                    "outputs": {
+                        "tolength": [2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [2, 4, 4],
+                        "parentslength": 3
+                    },
+                    "outputs": {
+                        "tolength": [3]
                     }
                 }
             ]

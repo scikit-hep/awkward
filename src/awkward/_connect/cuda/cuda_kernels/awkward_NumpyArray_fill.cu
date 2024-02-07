@@ -2,12 +2,13 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_NumpyArray_fill(T* toptr,
-                        int64_t tooffset,
-                        const C* fromptr,
-                        int64_t length,
-                        uint64_t invocation_index,
-                        uint64_t* err_code) {
+awkward_NumpyArray_fill(
+    T* toptr,
+    int64_t tooffset,
+    const C* fromptr,
+    int64_t length,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < length) {
