@@ -10158,8 +10158,63 @@
         },
         {
             "name": "awkward_ListOffsetArray_toRegularArray",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [],
+                        "offsetslength": 0
+                    },
+                    "outputs": {
+                        "size": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0],
+                        "offsetslength": 1
+                    },
+                    "outputs": {
+                        "size": [0]
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "offsets must be monotonically increasing",
+                    "inputs": {
+                        "fromoffsets": [0, -1, -2],
+                        "offsetslength": 3
+                    },
+                    "outputs": {
+                        "size": [-1]
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "cannot convert to RegularArray because subarray lengths are not regular",
+                    "inputs": {
+                        "fromoffsets": [0, 2, 5],
+                        "offsetslength": 3
+                    },
+                    "outputs": {
+                        "size": [-1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 0, 0, 0],
+                        "offsetslength": 4
+                    },
+                    "outputs": {
+                        "size": [0]
+                    }
+                },
                 {
                     "error": false,
                     "message": "",

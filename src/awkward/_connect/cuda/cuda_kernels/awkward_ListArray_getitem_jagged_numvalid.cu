@@ -12,8 +12,8 @@
 // END PYTHON
 
 enum class LISTARRAY_GETITEM_JAGGED_NUMVALID_ERRORS {
-  STOP_LT_START,      // message: "jagged slice's stops[i] < starts[i]"
-  OFF_GET_CON,  // message: "jagged slice's offsets extend beyond its content"
+  STOP_LT_START,  // message: "jagged slice's stops[i] < starts[i]"
+  OFF_GET_CON,    // message: "jagged slice's offsets extend beyond its content"
 };
 
 template <typename T, typename C, typename U, typename V>
