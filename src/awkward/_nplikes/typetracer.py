@@ -505,7 +505,7 @@ def _scalar_type_of(obj) -> DType:
     if is_unknown_scalar(obj):
         return obj.dtype
     else:
-        return numpy.array([obj]).dtype
+        return numpy.array(obj).dtype
 
 
 def try_touch_data(array: Any):
