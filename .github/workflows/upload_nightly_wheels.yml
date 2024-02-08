@@ -41,8 +41,8 @@ jobs:
             jq --compact-output \
               '[
                 .[] |
-                # Filter on "schedule" events to main (nightly build) ...
-                select(.event == "schedule") |
+                # Filter on "schedule" and "workflow_dispatch" events to main (nightly build) ...
+                select(.event == "schedule" or .event == "workflow_dispatch") |
                 # that have completed successfully ...
                 select(.status == "completed" and .conclusion == "success")
                ] |
