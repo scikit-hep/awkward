@@ -1,10 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 from __future__ import annotations
 
-import jax
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
+
+jax = pytest.importorskip("jax")
 
 
 def test():
