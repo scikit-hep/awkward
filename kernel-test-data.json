@@ -10408,8 +10408,32 @@
         },
         {
             "name": "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "offsets": [0]
+                    },
+                    "outputs": {
+                        "maxcount": [0],
+                        "offsetscopy": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 1,
+                        "offsets": [0, 2]
+                    },
+                    "outputs": {
+                        "maxcount": [2],
+                        "offsetscopy": [0, 2]
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -18748,7 +18772,7 @@
                     "message": "",
                     "inputs": {
                         "length": 0,
-                        "offsets": []
+                        "offsets": [0]
                     },
                     "outputs": {
                         "nextparents": []
