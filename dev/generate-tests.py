@@ -228,8 +228,10 @@ def getdtypes(args):
         if "List" in typename:
             count = typename.count("List")
             typename = gettypename(typename)
-            if typename == "bool" or typename == "float":
+            if typename == "bool":
                 typename = typename + "_"
+            if typename == "float":
+                typename = typename + "32"
             if count == 1:
                 dtypes.append("cupy." + typename)
             elif count == 2:
@@ -757,6 +759,7 @@ cuda_kernels_tests = [
     # "awkward_ListOffsetArray_rpad_axis1",
     "awkward_MaskedArray_getitem_next_jagged_project",
     "awkward_UnionArray_project",
+    "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_UnionArray_simplify",
     "awkward_UnionArray_simplify_one",
     "awkward_reduce_argmax",
@@ -850,8 +853,10 @@ def gencudakerneltests(specdict):
                         if "List" in typename:
                             count = typename.count("List")
                             typename = gettypename(typename)
-                            if typename == "bool" or typename == "float":
+                            if typename == "bool":
                                 typename = typename + "_"
+                            if typename == "float":
+                                typename = typename + "32"
                             if count == 1:
                                 f.write(
                                     " " * 4
@@ -991,8 +996,10 @@ def gencudaunittests(specdict):
                             if "List" in typename:
                                 count = typename.count("List")
                                 typename = gettypename(typename)
-                                if typename == "bool" or typename == "float":
+                                if typename == "bool":
                                     typename = typename + "_"
+                                if typename == "float":
+                                    typename = typename + "32"
                                 if count == 1:
                                     if i < num_outputs:
                                         f.write(
