@@ -78,7 +78,7 @@ jobs:
       run: pipx run nox -s prepare
 
     - name: Build distributions
-      run: pipx run build --sdist --wheel
+      run: pipx run build
 
     - name: Check metadata
       run: pipx run twine check dist/*
