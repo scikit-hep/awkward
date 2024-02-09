@@ -1041,6 +1041,89 @@
             ]
         },
         {
+            "name": "awkward_Index_nones_as_index",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "toindex": []
+                    },
+                    "outputs": {
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 1,
+                        "toindex": [0]
+                    },
+                    "outputs": {
+                        "toindex": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 1,
+                        "toindex": [-1]
+                    },
+                    "outputs": {
+                        "toindex": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 3,
+                        "toindex": [-1, -1, -1]
+                    },
+                    "outputs": {
+                        "toindex": [0, 1, 2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 5,
+                        "toindex": [0, 1, 2, 3, 4]
+                    },
+                    "outputs": {
+                        "toindex": [0, 1, 2, 3, 4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 5,
+                        "toindex": [0, -1, -1, 1, -1]
+                    },
+                    "outputs": {
+                        "toindex": [0, 2, 3, 1, 4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 7,
+                        "toindex": [-1, 0, -1, -1, 1, -1, 2]
+                    },
+                    "outputs": {
+                        "toindex": [3, 0, 4, 5, 1, 6, 2]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_BitMaskedArray_to_ByteMaskedArray",
             "status": true,
             "tests": [
@@ -22377,7 +22460,7 @@
         },
         {
             "name": "awkward_reduce_sum",
-            "status": true,
+            "status": false,
             "tests": [
                 {
                     "error": false,

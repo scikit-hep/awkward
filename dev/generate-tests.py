@@ -288,8 +288,7 @@ def unittestmap():
 
 def getunittests(test_inputs, test_outputs):
     unit_tests = {**test_outputs, **test_inputs}
-    num_outputs = len(test_outputs)
-    return unit_tests, num_outputs
+    return unit_tests
 
 
 def gettypename(spectype):
@@ -604,15 +603,13 @@ def gencpuunittests(specdict):
                     funcName = (
                         "def test_unit_cpu" + spec.name + "_" + str(num) + "():\n"
                     )
-                    unit_tests, num_outputs = getunittests(
-                        test["inputs"], test["outputs"]
-                    )
+                    unit_tests = getunittests(test["inputs"], test["outputs"])
                     flag = checkuint(unit_tests.items(), spec.args)
                     range = checkintrange(unit_tests.items(), test["error"], spec.args)
                     if flag and range:
                         num += 1
                         f.write(funcName)
-                        for i, (arg, val) in enumerate(unit_tests.items()):
+                        for arg, val in test["outputs"].items():
                             typename = remove_const(
                                 next(
                                     argument
@@ -620,16 +617,38 @@ def gencpuunittests(specdict):
                                     if argument.name == arg
                                 ).typename
                             )
-                            if i < num_outputs:
-                                f.write(
-                                    " " * 4
-                                    + arg
-                                    + " = "
-                                    + str([gettypeval(typename)] * len(val))
-                                    + "\n"
-                                )
-                            else:
-                                f.write(" " * 4 + arg + " = " + str(val) + "\n")
+                            f.write(
+                                " " * 4
+                                + arg
+                                + " = "
+                                + str([gettypeval(typename)] * len(val))
+                                + "\n"
+                            )
+                            if "List" in typename:
+                                count = typename.count("List")
+                                typename = gettypename(typename)
+                                if count == 1:
+                                    f.write(
+                                        " " * 4
+                                        + f"{arg} = (ctypes.c_{typename}*len({arg}))(*{arg})\n"
+                                    )
+                                elif count == 2:
+                                    f.write(
+                                        " " * 4
+                                        + "{0} = ctypes.pointer(ctypes.cast((ctypes.c_{1}*len({0}[0]))(*{0}[0]),ctypes.POINTER(ctypes.c_{1})))\n".format(
+                                            arg, typename
+                                        )
+                                    )
+                        for arg, val in test["inputs"].items():
+                            typename = remove_const(
+                                next(
+                                    argument
+                                    for argument in spec.args
+                                    if argument.name == arg
+                                ).typename
+                            )
+
+                            f.write(" " * 4 + arg + " = " + str(val) + "\n")
                             if "List" in typename:
                                 count = typename.count("List")
                                 typename = gettypename(typename)
@@ -973,9 +992,7 @@ def gencudaunittests(specdict):
                         "def test_unit_cuda" + spec.name + "_" + str(num) + "():\n"
                     )
                     dtypes = getdtypes(spec.args)
-                    unit_tests, num_outputs = getunittests(
-                        test["inputs"], test["outputs"]
-                    )
+                    unit_tests = getunittests(test["inputs"], test["outputs"])
                     flag = checkuint(unit_tests.items(), spec.args)
                     range = checkintrange(unit_tests.items(), test["error"], spec.args)
                     if flag and range:
@@ -985,7 +1002,7 @@ def gencudaunittests(specdict):
                                 "@pytest.mark.skip(reason='Kernel is not implemented properly')\n"
                             )
                         f.write(funcName)
-                        for i, (arg, val) in enumerate(unit_tests.items()):
+                        for arg, val in test["outputs"].items():
                             typename = remove_const(
                                 next(
                                     argument
@@ -1003,22 +1020,45 @@ def gencudaunittests(specdict):
                                 if typename == "float":
                                     typename = typename + "32"
                                 if count == 1:
-                                    if i < num_outputs:
-                                        f.write(
-                                            " " * 4
-                                            + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                                arg,
-                                                [gettypeval(typename)] * len(val),
-                                                typename,
-                                            )
+                                    f.write(
+                                        " " * 4
+                                        + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                            arg,
+                                            [gettypeval(typename)] * len(val),
+                                            typename,
                                         )
-                                    else:
-                                        f.write(
-                                            " " * 4
-                                            + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                                arg, val, typename
-                                            )
+                                    )
+                                elif count == 2:
+                                    f.write(
+                                        " " * 4
+                                        + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                            arg, val, typename
                                         )
+                                    )
+                        for arg, val in test["inputs"].items():
+                            typename = remove_const(
+                                next(
+                                    argument
+                                    for argument in spec.args
+                                    if argument.name == arg
+                                ).typename
+                            )
+                            if "List" not in typename:
+                                f.write(" " * 4 + arg + " = " + str(val) + "\n")
+                            if "List" in typename:
+                                count = typename.count("List")
+                                typename = gettypename(typename)
+                                if typename == "bool":
+                                    typename = typename + "_"
+                                if typename == "float":
+                                    typename = typename + "32"
+                                if count == 1:
+                                    f.write(
+                                        " " * 4
+                                        + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                            arg, val, typename
+                                        )
+                                    )
                                 elif count == 2:
                                     f.write(
                                         " " * 4
@@ -1101,7 +1141,8 @@ def genunittests():
                 for key in test["outputs"]:
                     line += key + " = " + key + ","
                 for key in test["inputs"]:
-                    line += key + " = " + key + ","
+                    if key not in test["outputs"]:
+                        line += key + " = " + key + ","
                 line = line[0 : len(line) - 1]
                 line += ")\n"
                 if test["error"]:
