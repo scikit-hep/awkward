@@ -761,6 +761,7 @@ cuda_kernels_tests = [
     "awkward_UnionArray_project",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+    "awkward_UnionArray_regular_index_getsize",
     "awkward_UnionArray_simplify",
     "awkward_UnionArray_simplify_one",
     "awkward_reduce_argmax",

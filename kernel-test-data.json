@@ -14728,8 +14728,41 @@
         },
         {
             "name": "awkward_UnionArray_regular_index_getsize",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromtags": [],
+                        "length": 0
+                    },
+                    "outputs": {
+                        "size": [1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromtags": [0],
+                        "length": 1
+                    },
+                    "outputs": {
+                        "size": [1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromtags": [-1],
+                        "length": 1
+                    },
+                    "outputs": {
+                        "size": [1]
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
