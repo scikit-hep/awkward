@@ -9870,6 +9870,90 @@
             ]
         },
         {
+            "name": "awkward_ListOffsetArray_drop_none_indexes",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "noneindexes": [],
+                        "length_indexes": 0,
+                        "fromoffsets": [],
+                        "length_offsets": 0
+                    },
+                    "outputs": {
+                        "tooffsets": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "noneindexes": [0],
+                        "length_indexes": 1,
+                        "fromoffsets": [],
+                        "length_offsets": 0
+                    },
+                    "outputs": {
+                        "tooffsets": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "noneindexes": [],
+                        "length_indexes": 0,
+                        "fromoffsets": [0],
+                        "length_offsets": 1
+                    },
+                    "outputs": {
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "noneindexes": [-1, -1, -1, -1, -1, -1, -1],
+                        "length_indexes": 7,
+                        "fromoffsets": [0, 2, 3, 5, 7],
+                        "length_offsets": 5
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 0, 0, 0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "noneindexes": [-1, 0, -1, 0, 0, -1, 0],
+                        "length_indexes": 7,
+                        "fromoffsets": [0, 2, 3, 5, 7],
+                        "length_offsets": 5
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 1, 1, 3, 4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "noneindexes": [0, 0, 0, 0, 0, 0],
+                        "length_indexes": 6,
+                        "fromoffsets": [0, 2, 3, 5, 6],
+                        "length_offsets": 5
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 2, 3, 5, 6]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_ListOffsetArray_flatten_offsets",
             "status": true,
             "tests": [
