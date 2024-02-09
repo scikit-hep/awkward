@@ -33,14 +33,15 @@ awkward_reduce_count_64_a(
 
 template <typename T, typename U>
 __global__ void
-awkward_reduce_count_64_b(T* toptr,
-                          const bool* fromptr,
-                          const U* parents,
-                          int64_t lenparents,
-                          int64_t outlength,
-                          uint64_t* atomicAdd_toptr,
-                          uint64_t invocation_index,
-                          uint64_t* err_code) {
+awkward_reduce_count_64_b(
+    T* toptr,
+    const bool* fromptr,
+    const U* parents,
+    int64_t lenparents,
+    int64_t outlength,
+    uint64_t* atomicAdd_toptr,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < lenparents) {
