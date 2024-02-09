@@ -69,7 +69,7 @@ awkward_ListOffsetArray_drop_none_indexes_b(
         int64_t offset1 = fromoffsets[thread_id - 1];
       }
       int64_t offset2 = fromoffsets[thread_id];
-      int64_t nr_of_nones = offset2 - offset1 > 0 ? scan_in_array[fromoffsets[thread_id] - 1] : 0;
+      int64_t nr_of_nones = thread_id > 0 ? scan_in_array[fromoffsets[thread_id] - 1] : 0;
       tooffsets[thread_id] = fromoffsets[thread_id] - nr_of_nones;
     }
   }

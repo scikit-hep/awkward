@@ -9950,6 +9950,45 @@
                     "outputs": {
                         "tooffsets": [0, 2, 3, 5, 6]
                     }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "noneindexes": [0, 0, 0, 0, 0, 0],
+                        "length_indexes": 6,
+                        "fromoffsets": [0, 0, 0, 0, 0],
+                        "length_offsets": 5
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 0, 0, 0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "noneindexes": [0, 0, 0, 0, 0, 0],
+                        "length_indexes": 6,
+                        "fromoffsets": [0, 2, 3, 3, 6],
+                        "length_offsets": 5
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 2, 3, 3, 6]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "noneindexes": [-1, -1, -1, -1, -1, -1],
+                        "length_indexes": 6,
+                        "fromoffsets": [0, 2, 3, 3, 6],
+                        "length_offsets": 5
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 0, 0, 0, 0]
+                    }
                 }
             ]
         },
