@@ -5,13 +5,13 @@
 //     (size, fromtags, length, invocation_index, err_code) = args
 //     if length > 0:
 //         size[0] = cupy.max(fromtags)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_UnionArray_regular_index_getsize_a", size.dtype, fromtags.dtype]))(grid, block, (size, fromtags, length, invocation_index, err_code))
-// out["awkward_UnionArray_regular_index_getsize_a", {dtype_specializations}] = None
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_UnionArray_regular_index_getsize", size.dtype, fromtags.dtype]))(grid, block, (size, fromtags, length, invocation_index, err_code))
+// out["awkward_UnionArray_regular_index_getsize", {dtype_specializations}] = None
 // END PYTHON
 
 template <typename T, typename C>
 __global__ void
-awkward_UnionArray_regular_index_getsize_a(
+awkward_UnionArray_regular_index_getsize(
     T* size,
     const C* fromtags,
     int64_t length,

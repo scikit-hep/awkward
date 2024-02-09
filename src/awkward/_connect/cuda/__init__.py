@@ -107,7 +107,6 @@ def fetch_template_specializations(kernel_dict):
         "awkward_RegularArray_reduce_local_nextparents",
         "awkward_RegularArray_reduce_nonlocal_preparenext",
         "awkward_UnionArray_project",
-        "awkward_UnionArray_regular_index_getsize",
         "awkward_reduce_count_64",
         "awkward_reduce_sum",
         "awkward_reduce_sum_int32_bool_64",
