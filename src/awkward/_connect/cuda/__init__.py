@@ -82,6 +82,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
         "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
         "awkward_IndexedArray_flatten_nextcarry",
+        "awkward_IndexedArray_flatten_none2empty",
         "awkward_IndexedArray_getitem_nextcarry",
         "awkward_IndexedArray_getitem_nextcarry_outindex",
         "awkward_ListArray_getitem_next_range_counts",

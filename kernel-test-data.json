@@ -11124,8 +11124,34 @@
         },
         {
             "name": "awkward_IndexedArray_flatten_none2empty",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "offsets": [0],
+                        "offsetslength": 1,
+                        "outindex": [],
+                        "outindexlength": 0
+                    },
+                    "outputs": {
+                        "outoffsets": [0]
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "flattening offset out of range",
+                    "inputs": {
+                        "offsets": [],
+                        "offsetslength": 0,
+                        "outindex": [0],
+                        "outindexlength": 1
+                    },
+                    "outputs": {
+                        "outoffsets": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -11133,6 +11159,32 @@
                         "offsets": [0, 1, 1, 6],
                         "offsetslength": 4,
                         "outindex": [0, 1, 2, 1],
+                        "outindexlength": 4
+                    },
+                    "outputs": {
+                        "outoffsets": [0, 1, 1, 6, 6]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "offsets": [0, 1, 1, 6],
+                        "offsetslength": 4,
+                        "outindex": [0, 1, 2, 1],
+                        "outindexlength": 4
+                    },
+                    "outputs": {
+                        "outoffsets": [0, 1, 1, 6, 6]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "offsets": [0, 1, 1, 6],
+                        "offsetslength": 4,
+                        "outindex": [0, -1, 2, -1],
                         "outindexlength": 4
                     },
                     "outputs": {
@@ -11156,9 +11208,35 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "offsets": [0, 3, 3, 5],
+                        "offsetslength": 4,
+                        "outindex": [0, -1, 1, -1, 2],
+                        "outindexlength": 5
+                    },
+                    "outputs": {
+                        "outoffsets": [0, 3, 3, 3, 3, 5]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "offsets": [0, 3, 3, 4, 7],
                         "offsetslength": 5,
                         "outindex": [0, 1, 2, 1, 3],
+                        "outindexlength": 5
+                    },
+                    "outputs": {
+                        "outoffsets": [0, 3, 3, 4, 4, 7]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "offsets": [0, 3, 3, 4, 7],
+                        "offsetslength": 5,
+                        "outindex": [0, -1, 2, -1, 3],
                         "outindexlength": 5
                     },
                     "outputs": {

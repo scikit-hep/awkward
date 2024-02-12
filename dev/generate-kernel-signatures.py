@@ -78,6 +78,7 @@ cuda_kernels_impl = [
     "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
     "awkward_IndexedArray_flatten_nextcarry",
+    "awkward_IndexedArray_flatten_none2empty",
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
     "awkward_IndexedArray_index_of_nulls",
