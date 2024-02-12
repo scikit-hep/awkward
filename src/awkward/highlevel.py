@@ -349,7 +349,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     _histogram_module_ = awkward._connect.hist
 
     def __dask_tokenize__(self):
-        return self.layout.form.to_json(), self.behavior, self.attrs
+        return id(self)
 
     def _update_class(self):
         self._numbaview = None
