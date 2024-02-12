@@ -183,9 +183,16 @@ class Index:
         out.append(" len=")
         out.append(repr(str(self._data.shape[0])))
 
-        arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
-            "\n"
-        )
+        if isinstance(
+            self._data,
+            (ak._nplikes.typetracer.TypeTracerArray, ak._nplikes.placeholder.PlaceholderArray)
+        ):
+            arraystr_lines = ["[## ... ##]"]
+        else:
+            arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
+                "\n"
+            )
+
         if len(arraystr_lines) > 1 or self._metadata is not None:
             arraystr_lines = self._nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
