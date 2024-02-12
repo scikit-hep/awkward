@@ -19,7 +19,7 @@ ERROR awkward_ListOffsetArray_toRegularArray(
       *size = count;
     }
     else if (*size != count) {
-      return failure("cannot convert to RegularArray because subarray lengths are not " "regular", i, kSliceNone, FILENAME(__LINE__));
+      return failure("cannot convert to RegularArray because subarray lengths are not regular", i, kSliceNone, FILENAME(__LINE__));
     }
   }
   if (*size == -1) {
