@@ -305,6 +305,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
 
+    def _is_getitem_at_placeholder(self) -> bool:
+        return isinstance(self._offsets, ak._nplikes.placeholder.PlaceholderArray)
+
     def _getitem_at(self, where: IndexType):
         # Wrap `where` by length
         if not is_unknown_scalar(where) and where < 0:

@@ -298,6 +298,9 @@ class NumpyArray(NumpyMeta, Content):
             backend=self._backend,
         )
 
+    def _is_getitem_at_placeholder(self) -> bool:
+        return isinstance(self._data, ak._nplikes.placeholder.PlaceholderArray)
+
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             self._touch_data(recursive=False)

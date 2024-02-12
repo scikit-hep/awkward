@@ -540,6 +540,17 @@ class UnionArray(UnionMeta[Content], Content):
     def _getitem_nothing(self):
         return self._getitem_range(0, 0)
 
+    def _is_getitem_at_placeholder(self) -> bool:
+        if (
+            isinstance(self._tags, ak._nplikes.placeholder.PlaceholderArray)
+            or isinstance(self._index, ak._nplikes.placeholder.PlaceholderArray)
+        ):
+            return False
+        for content in self._contents:
+            if content._is_getitem_at_placeholder():
+                return False
+        return True
+
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
