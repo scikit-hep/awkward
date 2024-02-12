@@ -12,6 +12,7 @@ from awkward._meta.indexedmeta import IndexedMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
@@ -282,7 +283,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._index, ak._nplikes.placeholder.PlaceholderArray):
+        if isinstance(self._index, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
 

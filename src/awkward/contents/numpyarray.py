@@ -17,6 +17,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._parameters import (
@@ -246,9 +247,7 @@ class NumpyArray(NumpyMeta, Content):
 
         extra = self._repr_extra(indent + "    ")
 
-        if isinstance(
-            self._data, (TypeTracerArray, ak._nplikes.placeholder.PlaceholderArray)
-        ):
+        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)):
             arraystr_lines = ["[## ... ##]"]
         else:
             arraystr_lines = self._backend.nplike.array_str(
@@ -305,7 +304,7 @@ class NumpyArray(NumpyMeta, Content):
         )
 
     def _is_getitem_at_placeholder(self) -> bool:
-        return isinstance(self._data, ak._nplikes.placeholder.PlaceholderArray)
+        return isinstance(self._data, PlaceholderArray)
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
