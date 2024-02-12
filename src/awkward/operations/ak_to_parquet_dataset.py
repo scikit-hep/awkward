@@ -68,21 +68,18 @@ def _impl(directory, filenames, storage_options):
     schema = None
     metadata_collector = []
     for filepath in filepaths:
-        if schema is None:
-            schema = pyarrow_parquet.ParquetFile(filepath, filesystem=fs).schema_arrow
-            first_filepath = filepath
-        elif not schema.equals(
-            pyarrow_parquet.ParquetFile(filepath, filesystem=fs).schema_arrow
-        ):
-            raise ValueError(
-                "schema in {} differs from the first schema (in {})".format(
-                    repr(filepath), repr(first_filepath)
+        with fs.open(filepath, mode="rb") as f:
+            if schema is None:
+                schema = pyarrow_parquet.ParquetFile(f).schema_arrow
+                first_filepath = filepath
+            elif not schema.equals(pyarrow_parquet.ParquetFile(f).schema_arrow):
+                raise ValueError(
+                    "schema in {} differs from the first schema (in {})".format(
+                        repr(filepath), repr(first_filepath)
+                    )
                 )
-            )
-        metadata_collector.append(
-            pyarrow_parquet.ParquetFile(filepath, filesystem=fs).metadata
-        )
-        metadata_collector[-1].set_file_path(filepath)
+            metadata_collector.append(pyarrow_parquet.ParquetFile(f).metadata)
+            metadata_collector[-1].set_file_path(filepath)
 
     _common_metadata_path = path.join(destination, "_common_metadata")
     pyarrow_parquet.write_metadata(schema, _common_metadata_path, filesystem=fs)
