@@ -344,7 +344,6 @@ def valuestr(
     if isinstance(data, (ak.highlevel.Array, ak.highlevel.Record)) and (
         not data.layout.backend.nplike.known_data
     ):
-        data.layout._touch_data(recursive=True)
         if isinstance(data, ak.highlevel.Array):
             return "[...]"
 
