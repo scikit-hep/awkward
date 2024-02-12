@@ -14536,6 +14536,114 @@
                     "message": "",
                     "inputs": {
                         "contentlen": 0,
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "sliceindex": [],
+                        "sliceinnerlen": 0,
+                        "sliceouterlen": 0,
+                        "slicestarts": [],
+                        "slicestops": []
+                    },
+                    "outputs": {
+                        "tocarry": [],
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "jagged slice's stops[i] < starts[i]",
+                    "inputs": {
+                        "contentlen": 0,
+                        "fromstarts": [0, 0, 0, 0],
+                        "fromstops": [0, 0, 0, 0],
+                        "sliceindex": [],
+                        "sliceinnerlen": 0,
+                        "sliceouterlen": 4,
+                        "slicestarts": [1, 1, 1, 1],
+                        "slicestops": [0, 0, 0, 0]
+                    },
+                    "outputs": {
+                        "tocarry": [],
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "jagged slice's offsets extend beyond its content",
+                    "inputs": {
+                        "contentlen": 0,
+                        "fromstarts": [0, 0, 0, 0],
+                        "fromstops": [0, 0, 0, 0],
+                        "sliceindex": [],
+                        "sliceinnerlen": 0,
+                        "sliceouterlen": 4,
+                        "slicestarts": [0, 0, 0, 0],
+                        "slicestops": [0, 0, 0, 1]
+                    },
+                    "outputs": {
+                        "tocarry": [],
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "stops[i] < starts[i]",
+                    "inputs": {
+                        "contentlen": 0,
+                        "fromstarts": [0, 0, 0, 1],
+                        "fromstops": [0, 0, 0, 0],
+                        "sliceindex": [],
+                        "sliceinnerlen": 1,
+                        "sliceouterlen": 4,
+                        "slicestarts": [0, 0, 0, 0],
+                        "slicestops": [0, 0, 0, 1]
+                    },
+                    "outputs": {
+                        "tocarry": [],
+                        "tooffsets": []
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "stops[i] > len(content)",
+                    "inputs": {
+                        "contentlen": 0,
+                        "fromstarts": [0, 0, 0, 0],
+                        "fromstops": [0, 0, 0, 1],
+                        "sliceindex": [],
+                        "sliceinnerlen": 1,
+                        "sliceouterlen": 4,
+                        "slicestarts": [0, 0, 0, 0],
+                        "slicestops": [0, 0, 0, 1]
+                    },
+                    "outputs": {
+                        "tocarry": [],
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": true,
+                    "message": "index out of range",
+                    "inputs": {
+                        "contentlen": 0,
+                        "fromstarts": [0, 0, 0, 0],
+                        "fromstops": [0, 0, 0, 0],
+                        "sliceindex": [2],
+                        "sliceinnerlen": 1,
+                        "sliceouterlen": 4,
+                        "slicestarts": [0, 0, 0, 0],
+                        "slicestops": [0, 0, 0, 1]
+                    },
+                    "outputs": {
+                        "tocarry": [],
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "contentlen": 0,
                         "fromstarts": [0, 0, 0, 0],
                         "fromstops": [0, 0, 0, 0],
                         "sliceindex": [],

@@ -25,13 +25,9 @@ awkward_ListOffsetArray_drop_none_indexes_a(
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     int64_t offset1 = 0;
-    int64_t offset2 = 0;
 
     if (thread_id < length_offsets) {
-      if (thread_id == 0) {
-        int64_t offset1 = 0;
-      }
-      else {
+      if (thread_id > 0) {
         int64_t offset1 = fromoffsets[thread_id - 1];
       }
       int64_t offset2 = fromoffsets[thread_id];
@@ -59,16 +55,8 @@ awkward_ListOffsetArray_drop_none_indexes_b(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    int64_t offset1 = 0;
 
     if (thread_id < length_offsets) {
-      if (thread_id == 0) {
-        int64_t offset1 = 0;
-      }
-      else {
-        int64_t offset1 = fromoffsets[thread_id - 1];
-      }
-      int64_t offset2 = fromoffsets[thread_id];
       int64_t nr_of_nones = thread_id > 0 ? scan_in_array[fromoffsets[thread_id] - 1] : 0;
       tooffsets[thread_id] = fromoffsets[thread_id] - nr_of_nones;
     }
