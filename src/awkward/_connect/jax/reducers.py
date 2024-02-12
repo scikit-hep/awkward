@@ -111,7 +111,16 @@ class Count(JAXReducer):
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        raise RuntimeError("Cannot differentiate through count_zero")
+        assert isinstance(array, ak.contents.NumpyArray)
+        result = jax.numpy.ones_like(array.data, dtype=array.dtype)
+        result = jax.ops.segment_sum(result, parents.data)
+
+        if array.dtype.type in (np.complex128, np.complex64):
+            return ak.contents.NumpyArray(
+                result.view(array.dtype), backend=array.backend
+            )
+        else:
+            return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 @overloads(_reducers.CountNonzero)
