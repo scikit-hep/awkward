@@ -11237,13 +11237,13 @@
                     "error": true,
                     "message": "flattening offset out of range",
                     "inputs": {
-                        "offsets": [],
+                        "offsets": [0],
                         "offsetslength": 0,
                         "outindex": [0],
                         "outindexlength": 1
                     },
                     "outputs": {
-                        "outoffsets": []
+                        "outoffsets": [0]
                     }
                 },
                 {
