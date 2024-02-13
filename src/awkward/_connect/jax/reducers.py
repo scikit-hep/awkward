@@ -115,7 +115,7 @@ class Count(JAXReducer):
         result = jax.numpy.ones_like(array.data, dtype=array.dtype)
         result = jax.ops.segment_sum(result, parents.data)
 
-        if array.dtype.type in (np.complex128, np.complex64):
+        if np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
                 result.view(array.dtype), backend=array.backend
             )
