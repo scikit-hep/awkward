@@ -9870,6 +9870,100 @@
             ]
         },
         {
+            "name": "awkward_ListOffsetArray_local_preparenext_64",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [],
+                        "length": 0
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0],
+                        "length": 1
+                    },
+                    "outputs": {
+                        "tocarry": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [2, 0],
+                        "length": 2
+                    },
+                    "outputs": {
+                        "tocarry": [1, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 2],
+                        "length": 2
+                    },
+                    "outputs": {
+                        "tocarry": [0, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 2, 3, 5, 7],
+                        "length": 5
+                    },
+                    "outputs": {
+                        "tocarry": [0, 1, 2, 3, 4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [7, 5, 3, 2, 0],
+                        "length": 5
+                    },
+                    "outputs": {
+                        "tocarry": [4, 3, 2, 1, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 2, 7, 5, 3],
+                        "length": 5
+                    },
+                    "outputs": {
+                        "tocarry": [0, 1, 4, 3, 2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [1, 0, 2, 4, 3, 6, 5, 7],
+                        "length": 8
+                    },
+                    "outputs": {
+                        "tocarry": [1, 0, 2, 4, 3, 6, 5, 7]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_ListOffsetArray_drop_none_indexes",
             "status": true,
             "tests": [

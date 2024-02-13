@@ -301,6 +301,7 @@ def gettypename(spectype):
 def genpykernels():
     print("Generating Python kernels")
     prefix = """
+import numpy
 from numpy import uint8
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
@@ -774,6 +775,7 @@ cuda_kernels_tests = [
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+    "awkward_ListOffsetArray_local_preparenext_64",
     "awkward_ListOffsetArray_rpad_and_clip_axis1",
     "awkward_ListOffsetArray_rpad_length_axis1",
     "awkward_ListOffsetArray_toRegularArray",
@@ -1130,7 +1132,7 @@ def genunittests():
             os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit", func),
             "w",
         ) as file:
-            file.write("import pytest\nimport kernels\n\n")
+            file.write("import pytest\nimport numpy\nimport kernels\n\n")
             for test in function["tests"]:
                 num += 1
                 funcName = "def test_" + function["name"] + "_" + str(num) + "():\n"

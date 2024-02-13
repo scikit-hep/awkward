@@ -1346,7 +1346,7 @@ kernels:
           for i in range(sliceouterlen):
               slicestart = slicestarts[i]
               slicestop = slicestops[i]
-              tooffsets[i] = float(k)
+              tooffsets[i] = k
               if slicestart != slicestop:
                   if slicestop < slicestart:
                       raise ValueError("jagged slice's stops[i] < starts[i]")
@@ -1367,7 +1367,7 @@ kernels:
                           raise ValueError("index out of range")
                       tocarry[k] = start + index
                       k = k + 1
-              tooffsets[i + 1] = float(k)
+          tooffsets[sliceouterlen] = k
     automatic-tests: true
 
   - name: awkward_ListArray_getitem_jagged_carrylen
@@ -2155,7 +2155,10 @@ kernels:
           - {name: length, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
+          array = numpy.argsort(fromindex)
+          for i in range(length):
+              tocarry[i] = array[i]
     automatic-tests: false
 
   - name: awkward_ListOffsetArray_reduce_local_nextparents_64
