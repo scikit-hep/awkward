@@ -24710,6 +24710,72 @@
             ]
         },
         {
+            "name": "awkward_sorting_ranges",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [],
+                        "parentslength": 0,
+                        "tolength": 2
+                    },
+                    "outputs": {
+                        "toindex": [0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [0, 1],
+                        "parentslength": 2,
+                        "tolength": 3
+                    },
+                    "outputs": {
+                        "toindex": [0, 1, 2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [0, 3, 6, 9],
+                        "parentslength": 4,
+                        "tolength": 5
+                    },
+                    "outputs": {
+                        "toindex": [0, 1, 2, 3, 4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [3, 3, 3, 3],
+                        "parentslength": 4,
+                        "tolength": 2
+                    },
+                    "outputs": {
+                        "toindex": [0, 4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "parents": [2, 4, 4],
+                        "parentslength": 3,
+                        "tolength": 3
+                    },
+                    "outputs": {
+                        "toindex": [0, 1, 3]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_sorting_ranges_length",
             "status": true,
             "tests": [

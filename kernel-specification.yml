@@ -5910,7 +5910,16 @@ kernels:
           - {name: parentslength, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_sorting_ranges(toindex, tolength, parents, parentslength):
+          toindex[0] = 0
+          j = 1
+          k = 1
+          for i in range(1, parentslength):
+              if parents[i - 1] != parents[i]:
+                  toindex[j] = k
+                  j += 1
+              k += 1
+          toindex[tolength - 1] = parentslength
     automatic-tests: false
 
   - name: awkward_sorting_ranges_length

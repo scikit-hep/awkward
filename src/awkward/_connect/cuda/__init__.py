@@ -121,6 +121,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_countnonzero",
         "awkward_reduce_max",
         "awkward_reduce_min",
+        "awkward_sorting_ranges",
         "awkward_sorting_ranges_length",
     ]
     template_specializations = []
