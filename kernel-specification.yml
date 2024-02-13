@@ -187,7 +187,7 @@ kernels:
           for i in range(length):
               if (mask[i] != 0) == validwhen:
                   tocarry[k] = i
-                  outindex[i] = float(k)
+                  outindex[i] = k
                   k = k + 1
               else:
                   outindex[i] = -1
@@ -372,7 +372,7 @@ kernels:
       def awkward_IndexedArray_fill(toindex, toindexoffset, fromindex, length, base):
           for i in range(length):
               fromval = fromindex[i]
-              toindex[toindexoffset + i] = -1 if fromval < 0 else float(fromval + base)
+              toindex[toindexoffset + i] = -1 if fromval < 0 else fromval + base
     automatic-tests: true
 
   - name: awkward_IndexedArray_fill_count
@@ -539,7 +539,7 @@ kernels:
                       toindex[i] = -1
                   else:
                       tocarry[k] = j
-                      toindex[i] = float(k)
+                      toindex[i] = k
                       k = k + 1
     automatic-tests: true
 
@@ -1108,7 +1108,7 @@ kernels:
               if (stop - start) != count:
                   raise ValueError("cannot broadcast nested list")
               for j in range(start, stop):
-                  tocarry[k] = float(j)
+                  tocarry[k] = j
                   k = k + 1
     automatic-tests: true
 
@@ -1286,8 +1286,8 @@ kernels:
           base,
       ):
           for i in range(length):
-              tostarts[tostartsoffset + i] = float(fromstarts[i] + base)
-              tostops[tostopsoffset + i] = float(fromstops[i] + base)
+              tostarts[tostartsoffset + i] = fromstarts[i] + base
+              tostops[tostopsoffset + i] = fromstops[i] + base
     automatic-tests: true
 
   - name: awkward_ListArray_getitem_jagged_apply
@@ -1430,7 +1430,7 @@ kernels:
                   raise ValueError(
                       "jagged slice inner length differs from array inner length"
                   )
-              tooffsets[i + 1] = tooffsets[i] + float(count)
+              tooffsets[i + 1] = tooffsets[i] + count
     automatic-tests: true
 
   - name: awkward_ListArray_getitem_jagged_expand
@@ -1774,7 +1774,7 @@ kernels:
                       tocarry[k] = fromstarts[i] + j
                       k = k + 1
                       j += step
-                  tooffsets[i + 1] = float(k)
+                  tooffsets[i + 1] = k
           else:
               for i in range(lenstarts):
                   length = fromstops[i] - fromstarts[i]
@@ -1793,7 +1793,7 @@ kernels:
                       tocarry[k] = fromstarts[i] + j
                       k = k + 1
                       j += step
-                  tooffsets[i + 1] = float(k)
+                  tooffsets[i + 1] = k
     automatic-tests: false
 
   - name: awkward_ListArray_getitem_next_range_carrylength
@@ -2383,10 +2383,10 @@ kernels:
     definition: |
       def awkward_ListOffsetArray_rpad_and_clip_axis1(toindex, fromoffsets, length, target):
           for i in range(length):
-              rangeval = float(fromoffsets[i + 1] - fromoffsets[i])
+              rangeval = fromoffsets[i + 1] - fromoffsets[i]
               shorter = target if target < rangeval else rangeval
               for j in range(shorter):
-                  toindex[(i * target) + j] = float(fromoffsets[i]) + j
+                  toindex[(i * target) + j] = fromoffsets[i] + j
               for j in range(shorter, target):
                   toindex[(i * target) + j] = -1
     automatic-tests: false
@@ -2416,9 +2416,9 @@ kernels:
       def awkward_ListOffsetArray_rpad_axis1(toindex, fromoffsets, fromlength, target):
           count = 0
           for i in range(fromlength):
-              rangeval = float(fromoffsets[i + 1] - fromoffsets[i])
+              rangeval = fromoffsets[i + 1] - fromoffsets[i]
               for j in range(rangeval):
-                  toindex[count] = float(fromoffsets[i]) + j
+                  toindex[count] = fromoffsets[i] + j
                   count = count + 1
               for j in range(rangeval, target):
                   toindex[count] = -1
@@ -3144,7 +3144,7 @@ kernels:
     definition: |
       def awkward_NumpyArray_fill(toptr, tooffset, fromptr, length):
           for i in range(length):
-              toptr[tooffset + i] = float(fromptr[i])
+              toptr[tooffset + i] = fromptr[i]
     automatic-tests: false
 
   - name: awkward_NumpyArray_rearrange_shifted
@@ -3728,7 +3728,7 @@ kernels:
     definition: |
       def awkward_UnionArray_fillindex(toindex, toindexoffset, fromindex, length):
           for i in range(length):
-              toindex[toindexoffset + i] = float(fromindex[i])
+              toindex[toindexoffset + i] = fromindex[i]
     automatic-tests: true
 
   - name: awkward_UnionArray_fillindex_count
@@ -3742,7 +3742,7 @@ kernels:
     definition: |
       def awkward_UnionArray_fillindex_count(toindex, toindexoffset, length):
           for i in range(length):
-              toindex[toindexoffset + i] = float(i)
+              toindex[toindexoffset + i] = i
     automatic-tests: true
 
   - name: awkward_UnionArray_fillna
@@ -3782,7 +3782,7 @@ kernels:
     definition: |
       def awkward_UnionArray_filltags(totags, totagsoffset, fromtags, length, base):
           for i in range(length):
-              totags[totagsoffset + i] = float(fromtags[i] + base)
+              totags[totagsoffset + i] = fromtags[i] + base
     automatic-tests: true
 
   - name: awkward_UnionArray_filltags_const
@@ -3797,7 +3797,7 @@ kernels:
     definition: |
       def awkward_UnionArray_filltags_const(totags, totagsoffset, length, base):
           for i in range(length):
-              totags[totagsoffset + i] = float(base)
+              totags[totagsoffset + i] = base
     automatic-tests: true
 
   - name: awkward_UnionArray_flatten_combine
@@ -4154,8 +4154,8 @@ kernels:
               if outertags[i] == outerwhich:
                   j = outerindex[i]
                   if innertags[j] == innerwhich:
-                      totags[i] = float(towhich)
-                      toindex[i] = float(innerindex[j] + base)
+                      totags[i] = towhich
+                      toindex[i] = innerindex[j] + base
     automatic-tests: true
 
   - name: awkward_UnionArray_simplify_one
@@ -4197,8 +4197,8 @@ kernels:
       ):
           for i in range(length):
               if fromtags[i] == fromwhich:
-                  totags[i] = float(towhich)
-                  toindex[i] = float(fromindex[i] + base)
+                  totags[i] = towhich
+                  toindex[i] = fromindex[i] + base
     automatic-tests: true
 
   - name: awkward_UnionArray_validity
@@ -5109,9 +5109,9 @@ kernels:
     definition: |
       def awkward_reduce_prod(toptr, fromptr, parents, lenparents, outlength):
           for i in range(outlength):
-              toptr[i] = float(1)
+              toptr[i] = 1
           for i in range(lenparents):
-              toptr[parents[i]] *= float(fromptr[i])
+              toptr[parents[i]] *= fromptr[i]
     automatic-tests: true
 
   - name: awkward_reduce_prod_complex
@@ -5360,9 +5360,9 @@ kernels:
     definition: |
       def awkward_reduce_sum(toptr, fromptr, parents, lenparents, outlength):
           for i in range(outlength):
-              toptr[i] = float(0)
+              toptr[i] = 0
           for i in range(lenparents):
-              toptr[parents[i]] += float(fromptr[i])
+              toptr[parents[i]] += fromptr[i]
     automatic-tests: true
 
   - name: awkward_reduce_sum_complex
