@@ -26,17 +26,11 @@ awkward_sorting_ranges_a(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (thread_id < parentslength) {
-      if (thread_id == 0 ) {
-        scan_in_array_k[0] = 0;
-        scan_in_array_j[0] = 0;
+    if (thread_id >= 1 && thread_id < parentslength) {
+      if (parents[thread_id - 1] != parents[thread_id]) {
+        scan_in_array_j[thread_id] = 1;
       }
-      else {
-        if (parents[thread_id - 1] != parents[thread_id]) {
-          scan_in_array_j[thread_id] = 1;
-        }
-        scan_in_array_k[thread_id] = 1;
-      }
+      scan_in_array_k[thread_id] = 1;
     }
   }
 }

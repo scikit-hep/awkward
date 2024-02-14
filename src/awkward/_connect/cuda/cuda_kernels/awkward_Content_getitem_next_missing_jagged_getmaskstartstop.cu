@@ -26,7 +26,6 @@ awkward_Content_getitem_next_missing_jagged_getmaskstartstop_a(
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < length) {
-      scan_in_array[0] = 0;
       if (index_in[thread_id] >= 0) {
         scan_in_array[thread_id + 1] = 1;
       }
