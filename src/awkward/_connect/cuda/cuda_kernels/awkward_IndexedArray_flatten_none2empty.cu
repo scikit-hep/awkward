@@ -7,12 +7,11 @@ enum class INDEXEDARRAY_FLATTEN_NONE2EMPTY_ERRORS {
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (outoffsets, outindex, outindexlength, offsets, offsetslength, invocation_index, err_code) = args
-//     scan_in_array_k = cupy.empty(outindexlength, dtype=cupy.int64)
-//     scan_in_array_outoffsets = cupy.empty(outindexlength + 1, dtype=cupy.int64)
+//     scan_in_array_k = cupy.zeros(outindexlength, dtype=cupy.int64)
+//     scan_in_array_outoffsets = cupy.zeros(outindexlength + 1, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_flatten_none2empty_a", outoffsets.dtype, outindex.dtype, offsets.dtype]))(grid, block, (outoffsets, outindex, outindexlength, offsets, offsetslength, scan_in_array_k, scan_in_array_outoffsets, invocation_index, err_code))
 //     scan_in_array_k = cupy.cumsum(scan_in_array_k)
 //     scan_in_array_outoffsets = cupy.cumsum(scan_in_array_outoffsets)
-//     print(scan_in_array_outoffsets, scan_in_array_k)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_flatten_none2empty_b", outoffsets.dtype, outindex.dtype, offsets.dtype]))(grid, block, (outoffsets, outindex, outindexlength, offsets, offsetslength, scan_in_array_k, scan_in_array_outoffsets, invocation_index, err_code))
 // out["awkward_IndexedArray_flatten_none2empty_a", {dtype_specializations}] = None
 // out["awkward_IndexedArray_flatten_none2empty_b", {dtype_specializations}] = None
@@ -38,7 +37,6 @@ awkward_IndexedArray_flatten_none2empty_a(
       C idx = outindex[thread_id];
       if (idx < 0) {
         scan_in_array_k[thread_id] = 1;
-        scan_in_array_outoffsets[thread_id + 1] = 0;
       } else if (idx + 1 >= offsetslength) {
         RAISE_ERROR(INDEXEDARRAY_FLATTEN_NONE2EMPTY_ERRORS::OFF_OUT_OF_RANGE)
       } else {

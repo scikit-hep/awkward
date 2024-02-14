@@ -3,12 +3,11 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (toindex, tolength, parents, parentslength, invocation_index, err_code) = args
-//     scan_in_array_k = cupy.empty(parentslength, dtype=cupy.int64)
-//     scan_in_array_j = cupy.empty(parentslength, dtype=cupy.int64)
+//     scan_in_array_k = cupy.zeros(parentslength, dtype=cupy.int64)
+//     scan_in_array_j = cupy.zeros(parentslength, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_sorting_ranges_a', toindex.dtype, parents.dtype]))(grid, block, (toindex, tolength, parents, parentslength, scan_in_array_k, scan_in_array_j, invocation_index, err_code))
 //     scan_in_array_k = cupy.cumsum(scan_in_array_k)
 //     scan_in_array_j = cupy.cumsum(scan_in_array_j)
-//     print(scan_in_array_j, scan_in_array_k)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_sorting_ranges_b', toindex.dtype, parents.dtype]))(grid, block, (toindex, tolength, parents, parentslength, scan_in_array_k, scan_in_array_j, invocation_index, err_code))
 // out["awkward_sorting_ranges_a", {dtype_specializations}] = None
 // out["awkward_sorting_ranges_b", {dtype_specializations}] = None
@@ -35,9 +34,6 @@ awkward_sorting_ranges_a(
       else {
         if (parents[thread_id - 1] != parents[thread_id]) {
           scan_in_array_j[thread_id] = 1;
-        }
-        else {
-          scan_in_array_j[thread_id] = 0;
         }
         scan_in_array_k[thread_id] = 1;
       }

@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (nextcarry, nextparents, parents, size, length, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(length * size, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(length * size, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_RegularArray_reduce_nonlocal_preparenext_a', nextcarry.dtype, nextparents.dtype, parents.dtype]))(grid, block, (nextcarry, nextparents, parents, size, length, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_RegularArray_reduce_nonlocal_preparenext_b', nextcarry.dtype, nextparents.dtype, parents.dtype]))(grid, block, (nextcarry, nextparents, parents, size, length, scan_in_array, invocation_index, err_code))

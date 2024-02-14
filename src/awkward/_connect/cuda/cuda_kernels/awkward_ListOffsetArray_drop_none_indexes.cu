@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(length_indexes, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(length_indexes, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_drop_none_indexes_a", tooffsets.dtype, noneindexes.dtype, fromoffsets.dtype]))(grid, block, (tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_drop_none_indexes_b", tooffsets.dtype, noneindexes.dtype, fromoffsets.dtype]))(grid, block, (tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes, scan_in_array, invocation_index, err_code))
@@ -34,8 +34,6 @@ awkward_ListOffsetArray_drop_none_indexes_a(
       for (int j = offset1; j < offset2; j++) {
         if (noneindexes[j] < 0) {
           scan_in_array[j] = 1;
-        } else {
-          scan_in_array[j] = 0;
         }
       }
     }

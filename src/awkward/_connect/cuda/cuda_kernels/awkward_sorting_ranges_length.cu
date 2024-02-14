@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (tolength, parents, parentslength, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(parentslength, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(parentslength, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_sorting_ranges_length_a', tolength.dtype, parents.dtype]))(grid, block, (tolength, parents, parentslength, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_sorting_ranges_length_b', tolength.dtype, parents.dtype]))(grid, block, (tolength, parents, parentslength, scan_in_array, invocation_index, err_code))
@@ -29,9 +29,6 @@ awkward_sorting_ranges_length_a(
       else {
         if (parents[thread_id - 1] != parents[thread_id]) {
           scan_in_array[thread_id] = 1;
-        }
-        else {
-          scan_in_array[thread_id] = 0;
         }
       }
     }

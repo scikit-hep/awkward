@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (index_in, offsets_in, mask_out, starts_out, stops_out, length, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(length + 1, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(length + 1, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_Content_getitem_next_missing_jagged_getmaskstartstop_a", index_in.dtype, offsets_in.dtype, mask_out.dtype, starts_out.dtype, stops_out.dtype]))(grid, block, (index_in, offsets_in, mask_out, starts_out, stops_out, length, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_Content_getitem_next_missing_jagged_getmaskstartstop_b", index_in.dtype, offsets_in.dtype, mask_out.dtype, starts_out.dtype, stops_out.dtype]))(grid, block, (index_in, offsets_in, mask_out, starts_out, stops_out, length, scan_in_array, invocation_index, err_code))
@@ -27,9 +27,7 @@ awkward_Content_getitem_next_missing_jagged_getmaskstartstop_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < length) {
       scan_in_array[0] = 0;
-      if (index_in[thread_id] < 0) {
-        scan_in_array[thread_id + 1] = 0;
-      } else {
+      if (index_in[thread_id] >= 0) {
         scan_in_array[thread_id + 1] = 1;
       }
     }

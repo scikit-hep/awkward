@@ -3,8 +3,8 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (totallen, tooffsets, n, replacement, starts, stops, length, invocation_index, err_code) = args
-//     scan_in_array_totallen = cupy.empty(length, dtype=cupy.int64)
-//     scan_in_array_tooffsets = cupy.empty(length, dtype=cupy.int64)
+//     scan_in_array_totallen = cupy.zeros(length, dtype=cupy.int64)
+//     scan_in_array_tooffsets = cupy.zeros(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_length_a", totallen.dtype, tooffsets.dtype, starts.dtype, stops.dtype]))(grid, block, (totallen, tooffsets, n, replacement, starts, stops, length, scan_in_array_totallen, scan_in_array_tooffsets, invocation_index, err_code))
 //     scan_in_array_totallen = cupy.cumsum(scan_in_array_totallen)
 //     scan_in_array_tooffsets = cupy.cumsum(scan_in_array_tooffsets)

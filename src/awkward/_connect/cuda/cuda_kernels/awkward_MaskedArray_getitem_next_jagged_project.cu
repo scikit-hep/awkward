@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (index, starts_in, stops_in, starts_out, stops_out, length, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(length, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_MaskedArray_getitem_next_jagged_project_a", index.dtype, starts_in.dtype, stops_in.dtype, starts_out.dtype, stops_out.dtype]))(grid, block, (index, starts_in, stops_in, starts_out, stops_out, length, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_MaskedArray_getitem_next_jagged_project_b", index.dtype, starts_in.dtype, stops_in.dtype, starts_out.dtype, stops_out.dtype]))(grid, block, (index, starts_in, stops_in, starts_out, stops_out, length, scan_in_array, invocation_index, err_code))
@@ -29,8 +29,6 @@ awkward_MaskedArray_getitem_next_jagged_project_a(
     if (thread_id < length) {
       if (index[thread_id] >= 0) {
         scan_in_array[thread_id] = 1;
-      } else {
-        scan_in_array[thread_id] = 0;
       }
     }
   }
