@@ -12827,8 +12827,23 @@
         },
         {
             "name": "awkward_ListArray_combinations_length",
-            "status": false,
+            "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "n": 0,
+                        "replacement": false,
+                        "starts": [],
+                        "stops": []
+                    },
+                    "outputs": {
+                        "tooffsets": [0],
+                        "totallen": [0]
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -12842,6 +12857,36 @@
                     "outputs": {
                         "tooffsets": [0, 4, 4, 5, 5, 15],
                         "totallen": [15]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 1,
+                        "n": 2,
+                        "replacement": false,
+                        "starts": [0],
+                        "stops": [1]
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 0],
+                        "totallen": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 1,
+                        "n": 2,
+                        "replacement": false,
+                        "starts": [0],
+                        "stops": [2]
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 1],
+                        "totallen": [1]
                     }
                 },
                 {

@@ -94,6 +94,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
         "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
         "awkward_ListArray_broadcast_tooffsets",
+        "awkward_ListArray_combinations_length",
         "awkward_ListArray_compact_offsets",
         "awkward_ListArray_getitem_jagged_carrylen",
         "awkward_ListArray_getitem_jagged_descend",
