@@ -13,7 +13,6 @@ from awkward._backends.dispatch import (
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
 from awkward._nplikes.dispatch import nplike_of_obj
-from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import TYPE_CHECKING, Any, NamedTuple, Self, TypeVar
@@ -266,10 +265,6 @@ def from_arraylib(array, regulararray, recordarray):
     nplike = nplike_of_obj(array)
 
     def recurse(array, mask=None):
-        cls = type(array)
-        if Jax.is_tracer_type(cls):
-            raise TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
-
         if regulararray and len(array.shape) > 1:
             new_shape = (-1,) + array.shape[2:]
             return RegularArray(
