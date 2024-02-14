@@ -243,14 +243,13 @@ def test_tocuda_unimplementedkernels12():
     assert ak.to_list(copyback_bytemaskedarray) == ak.to_list(bytemaskedarray)
 
 
-@pytest.mark.xfail(reason="awkward_ListArray_broadcast_tooffsets is not implemented")
 def test_tocuda_unimplementedkernels13():
     content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
     index = ak.index.Index32(np.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=np.int64))
     indexedarray = ak.contents.IndexedArray(index, content)
-    bytemaskedarray = ak.contents.ByteMaskedArray(
+    bytemaskedarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(np.array([True, False, False], dtype=np.int8)),
         indexedarray,
         True,
@@ -261,7 +260,6 @@ def test_tocuda_unimplementedkernels13():
     assert ak.to_list(copyback_bytemaskedarray) == ak.to_list(bytemaskedarray)
 
 
-@pytest.mark.xfail(reason="awkward_ListArray_broadcast_tooffsets is not implemented")
 def test_tocuda_unimplementedkernels14():
     content0 = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     content1 = ak.Array(
@@ -270,7 +268,7 @@ def test_tocuda_unimplementedkernels14():
     tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
     index = ak.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
     unionarray = ak.contents.UnionArray(tags, index, [content0, content1])
-    bytemaskedarray = ak.contents.ByteMaskedArray(
+    bytemaskedarray = ak.contents.ByteMaskedArray.simplified(
         ak.index.Index8(np.array([True, False, False], dtype=np.int8)),
         unionarray,
         True,
