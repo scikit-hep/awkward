@@ -357,6 +357,10 @@ def recurse_finalize(
     generate_bitmasks: bool,
     fix_offsets: bool = True,
 ):
+    # Every buffer from Arrow must be offsets-corrected.
+    if fix_offsets and (column.offset != 0 or len(column) != len(out)):
+        out = out[column.offset : column.offset + len(column)]
+
     if validbits is None:
         return revertable(ak.contents.UnmaskedArray.simplified(out), out)
     else:
@@ -422,7 +426,25 @@ def recurse(
         raise NotImplementedError
 
     elif isinstance(arrow_type, pyarrow.lib.StructType):
-        raise NotImplementedError
+        validbits = column.base_mask
+
+        keys = []
+        contents = []
+        for i in range(arrow_type.num_fields):
+            field = arrow_type[i]
+            field_name = field.name
+            keys.append(field_name)
+
+            akcontent = recurse(column.base_children[i], field.type, generate_bitmasks)
+            if not field.nullable:
+                # strip the dummy option-type node
+                akcontent = remove_optiontype(akcontent)
+            contents.append(akcontent)
+
+        out = ak.contents.RecordArray(
+            contents, keys, length=len(column), parameters=None
+        )
+        return recurse_finalize(out, column, validbits, generate_bitmasks)
 
     elif isinstance(arrow_type, pyarrow.lib.UnionType):
         raise NotImplementedError
@@ -431,7 +453,19 @@ def recurse(
         raise NotImplementedError
 
     elif arrow_type == pyarrow.bool_():
-        raise NotImplementedError
+        validbits = column.base_mask
+
+        ## boolean data from CuDF differs from Arrow: it's represented as bytes, not bits!
+        # bitdata = column.base_data
+        # bytedata = cupy.unpackbits(cupy.asarray(bitdata), bitorder="little")
+        bytedata = cupy.asarray(column.base_data)
+
+        out = ak.contents.NumpyArray(
+            cupy.asarray(bytedata).view(cupy.bool_),
+            parameters=None,
+            backend=CupyBackend.instance(),
+        )
+        return recurse_finalize(out, column, validbits, generate_bitmasks)
 
     elif isinstance(arrow_type, pyarrow.lib.DataType):
         validbits = column.base_mask
@@ -522,22 +556,10 @@ if __name__ == "__main__":
         awkward_array = pyarrow_to_awkward(pyarrow_array)
         assert awkward_array.tolist() == example
 
-    examples = [
-        [1.1, 2.2, 3.3],
-        [[1, 2, 3], [], [4, 5]],
-        [[[1, 2], [3]], [], [[]], [[4], [], [5, 6, 7]], [[8, 9]]],
-        [1.1, 2.2, None, 3.3],
-        [[1, 2, None, 3], [], [4, 5]],
-        [[1, 2, 3], None, [], [4, 5]],
-        [[[1, 2, None], [3]], [], [[]], [[4], [], [5, 6, 7]], [[8, 9]]],
-        [[[1, 2], None, [3]], [], [[]], [[4], [], [5, 6, 7]], [[8, 9]]],
-        [[[1, 2], [3]], None, [], [[]], [[4], [], [5, 6, 7]], [[8, 9]]],
-    ]
-
     for example in examples:
         print(f"---- {example}")
         df = cudf.DataFrame({"column": example})
 
         awkward_array = cudf_to_awkward(df["column"])
         assert ak.backend(awkward_array) == "cuda"
-        assert awkward_array.tolist() == example
+        assert awkward_array.tolist() == example, awkward_array.show(type=True)
