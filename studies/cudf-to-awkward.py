@@ -119,11 +119,7 @@ def popbuffers(paarray, arrow_type, buffers, generate_bitmasks):
             # strip the dummy option-type node
             akcontent = remove_optiontype(akcontent)
 
-        out = ak.contents.RegularArray(
-            akcontent,
-            arrow_type.list_size,
-            parameters=None,
-        )
+        out = ak.contents.RegularArray(akcontent, arrow_type.list_size, parameters=None)
         return popbuffers_finalize(out, paarray, validbits, generate_bitmasks)
 
     elif isinstance(arrow_type, (pyarrow.lib.LargeListType, pyarrow.lib.ListType)):
@@ -381,11 +377,61 @@ def recurse(
     arrow_type: pyarrow.lib.DataType,
     generate_bitmasks: bool,
 ):
-    if isinstance(arrow_type, pyarrow.lib.DictionaryType):
-        raise NotImplementedError
+    if isinstance(column, cudf.core.column.CategoricalColumn):
+        validbits = column.base_mask
+
+        paindex = column.base_children[-1]
+        masked_index = recurse(paindex, arrow_type_of(paindex), generate_bitmasks)
+        index = masked_index.content.data
+
+        if not isinstance(masked_index, ak.contents.UnmaskedArray):
+            mask = masked_index.mask_as_bool(valid_when=False)
+            if mask.any():
+                index = cupy.asarray(index, copy=True)
+                index[mask] = -1
+
+        pacats = column.categories
+        content = recurse(pacats, arrow_type_of(pacats), generate_bitmasks)
+
+        if index.dtype == cupy.dtype(cupy.int64):
+            akindex1 = ak.index.Index64(index)
+            akindex2 = akindex1
+        elif index.dtype == cupy.dtype(cupy.uint32):
+            akindex1 = ak.index.Index64(index.astype(cupy.int64))
+            akindex2 = ak.index.IndexU32(index)
+        elif index.dtype == cupy.dtype(cupy.int32):
+            akindex1 = ak.index.Index32(index)
+            akindex2 = akindex1
+        else:
+            akindex1 = ak.index.Index64(index.astype(cupy.int64))
+            akindex2 = akindex1
+
+        return revertable(
+            ak.contents.IndexedOptionArray.simplified(
+                akindex1,
+                content,
+                parameters={"__array__": "categorical"},
+            ),
+            ak.contents.IndexedArray(
+                akindex2,
+                remove_optiontype(content) if content.is_option else content,
+                parameters={"__array__": "categorical"},
+            ),
+        )
 
     elif isinstance(arrow_type, pyarrow.lib.FixedSizeListType):
-        raise NotImplementedError
+        validbits = column.base_mask
+
+        akcontent = recurse(
+            column.base_children[-1], arrow_type.value_type, generate_bitmasks
+        )
+
+        if not arrow_type.value_field.nullable:
+            # strip the dummy option-type node
+            akcontent = remove_optiontype(akcontent)
+
+        out = ak.contents.RegularArray(akcontent, arrow_type.list_size, parameters=None)
+        return recurse_finalize(out, column, validbits, generate_bitmasks)
 
     elif isinstance(arrow_type, (pyarrow.lib.LargeListType, pyarrow.lib.ListType)):
         validbits = column.base_mask
@@ -408,6 +454,8 @@ def recurse(
         return recurse_finalize(out, column, validbits, generate_bitmasks)
 
     elif isinstance(arrow_type, pyarrow.lib.MapType):
+        # FIXME: make a ListOffsetArray of 2-tuples with __array__ == "sorted_map".
+        # (Make sure the keys are sorted).
         raise NotImplementedError
 
     elif isinstance(
@@ -420,10 +468,51 @@ def recurse(
         )
 
     elif isinstance(arrow_type, pyarrow.lib.FixedSizeBinaryType):
-        raise NotImplementedError
+        validbits = column.base_mask
+        pacontent = column.base_data
+
+        parameters = {"__array__": "bytestring"}
+        sub_parameters = {"__array__": "byte"}
+
+        out = ak.contents.RegularArray(
+            ak.contents.NumpyArray(
+                cupy.asarray(pacontent),
+                parameters=sub_parameters,
+                backend=CupyBackend.instance(),
+            ),
+            arrow_type.byte_width,
+            parameters=parameters,
+        )
+        return recurse_finalize(out, column, validbits, generate_bitmasks)
 
     elif arrow_type in _string_like:
-        raise NotImplementedError
+        validbits = column.base_mask
+
+        paoffsets = column.base_children[-1]
+        pacontent = column.base_data
+
+        if arrow_type in _string_like[::2]:
+            akoffsets = ak.index.Index32(cupy.asarray(paoffsets).view(cupy.int32))
+        else:
+            akoffsets = ak.index.Index64(cupy.asarray(paoffsets).view(cupy.int64))
+
+        if arrow_type in _string_like[:2]:
+            parameters = {"__array__": "string"}
+            sub_parameters = {"__array__": "char"}
+        else:
+            parameters = {"__array__": "bytestring"}
+            sub_parameters = {"__array__": "byte"}
+
+        out = ak.contents.ListOffsetArray(
+            akoffsets,
+            ak.contents.NumpyArray(
+                cupy.asarray(pacontent),
+                parameters=sub_parameters,
+                backend=CupyBackend.instance(),
+            ),
+            parameters=parameters,
+        )
+        return recurse_finalize(out, column, validbits, generate_bitmasks)
 
     elif isinstance(arrow_type, pyarrow.lib.StructType):
         validbits = column.base_mask
@@ -450,7 +539,14 @@ def recurse(
         raise NotImplementedError
 
     elif arrow_type == pyarrow.null():
-        raise NotImplementedError
+        validbits = column.base_mask
+
+        # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
+        return ak.contents.IndexedOptionArray(
+            ak.index.Index64(cupy.full(len(column), -1, dtype=cupy.int64)),
+            ak.contents.EmptyArray(parameters=None),
+            parameters=None,
+        )
 
     elif arrow_type == pyarrow.bool_():
         validbits = column.base_mask
@@ -469,7 +565,12 @@ def recurse(
 
     elif isinstance(arrow_type, pyarrow.lib.DataType):
         validbits = column.base_mask
-        dt = arrow_type.to_pandas_dtype()
+
+        to64, dt = _pyarrow_to_numpy_dtype.get(str(arrow_type), (False, None))
+        if to64:
+            data = cupy.asarray(data).view(cupy.int32).astype(cupy.int64)
+        if dt is None:
+            dt = arrow_type.to_pandas_dtype()
 
         out = ak.contents.NumpyArray(
             cupy.asarray(column.base_data).view(dt),
@@ -482,14 +583,28 @@ def recurse(
         raise TypeError(f"unrecognized Arrow array type: {arrow_type!r}")
 
 
+def arrow_type_of(column):
+    dtype = column.dtype
+
+    if isinstance(column, cudf.core.column.StringColumn):
+        return pyarrow.string()
+
+    elif isinstance(column, cudf.core.column.CategoricalColumn):
+        return None  # deal with it in `recurse` for nesting-generality
+
+    elif isinstance(dtype, numpy.dtype):
+        if dtype == numpy.dtype(object):
+            raise TypeError("Python object type encountered in CuDF Series")
+        else:
+            return pyarrow.from_numpy_dtype(dtype)
+
+    else:
+        return dtype.to_arrow()
+
+
 def handle_cudf(cudf_series: cudf.core.series.Series, generate_bitmasks):
     column = cudf_series._data[cudf_series.name]
-    dtype = column.dtype
-    if isinstance(dtype, numpy.dtype):
-        arrow_type = pyarrow.from_numpy_dtype(dtype)
-    else:
-        arrow_type = dtype.to_arrow()
-    return recurse(column, arrow_type, generate_bitmasks)
+    return recurse(column, arrow_type_of(column), generate_bitmasks)
 
 
 def cudf_to_awkward(
@@ -528,6 +643,9 @@ if __name__ == "__main__":
         [{"x": 1}, {"x": 2}, {"x": 3}],
         [{"x": 1.1, "y": []}, {"x": 2.2, "y": [1]}, {"x": 3.3, "y": [1, 2]}],
         [[{"x": 1}, {"x": 2}, {"x": 3}], [], [{"x": 4}, {"x": 5}]],
+        ["This", "is", "a", "string", "array", ".", ""],
+        [["This", "is", "a"], ["nested"], ["string", "array", ".", ""]],
+        [None, None, None, None, None],
         [False, True, None, True],
         [1.1, 2.2, None, 3.3],
         [[False, True, None, True], [], [True, False]],
@@ -545,16 +663,12 @@ if __name__ == "__main__":
         [[{"x": 1}, {"x": None}, {"x": 3}], [], [{"x": 4}, {"x": 5}]],
         [[{"x": 1}, {"x": 2}, None, {"x": 3}], [], [{"x": 4}, {"x": 5}]],
         [[{"x": 1}, {"x": 2}, {"x": 3}], None, [], [{"x": 4}, {"x": 5}]],
+        ["This", "is", "a", None, "string", "array", ".", ""],
+        [["This", "is", "a", None], ["nested"], ["string", "array", ".", ""]],
+        [["This", "is", "a"], None, ["nested"], ["string", "array", ".", ""]],
+        numpy.array(["2024-01-01", "2024-01-02"], dtype="datetime64[s]"),
+        numpy.array([1, 2, 3], dtype="timedelta64[s]"),
     ]
-
-    for example in examples:
-        df = cudf.DataFrame({"column": example})
-
-        pyarrow_array = df._data["column"].to_arrow()
-        assert pyarrow_array.tolist() == example
-
-        awkward_array = pyarrow_to_awkward(pyarrow_array)
-        assert awkward_array.tolist() == example
 
     for example in examples:
         print(f"---- {example}")
@@ -562,4 +676,4 @@ if __name__ == "__main__":
 
         awkward_array = cudf_to_awkward(df["column"])
         assert ak.backend(awkward_array) == "cuda"
-        assert awkward_array.tolist() == example, awkward_array.show(type=True)
+        assert awkward_array.tolist() == list(example), awkward_array.show(type=True)
