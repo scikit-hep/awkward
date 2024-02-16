@@ -1,10 +1,38 @@
 import cudf
-import cupy as cp
-import pyarrow as pa
+import pyarrow
+import cupy
+import numpy
+
 import awkward as ak
+from awkward._backends.numpy import NumpyBackend
 
 
 ######################### stripped-down copy of src/awkward/_connect/pyarrow.py
+
+
+_string_like = (
+    pyarrow.string(),
+    pyarrow.large_string(),
+    pyarrow.binary(),
+    pyarrow.large_binary(),
+)
+
+_pyarrow_to_numpy_dtype = {
+    pyarrow.date32(): (True, numpy.dtype("M8[D]")),
+    pyarrow.date64(): (False, numpy.dtype("M8[ms]")),
+    pyarrow.time32("s"): (True, numpy.dtype("M8[s]")),
+    pyarrow.time32("ms"): (True, numpy.dtype("M8[ms]")),
+    pyarrow.time64("us"): (False, numpy.dtype("M8[us]")),
+    pyarrow.time64("ns"): (False, numpy.dtype("M8[ns]")),
+    pyarrow.timestamp("s"): (False, numpy.dtype("M8[s]")),
+    pyarrow.timestamp("ms"): (False, numpy.dtype("M8[ms]")),
+    pyarrow.timestamp("us"): (False, numpy.dtype("M8[us]")),
+    pyarrow.timestamp("ns"): (False, numpy.dtype("M8[ns]")),
+    pyarrow.duration("s"): (False, numpy.dtype("m8[s]")),
+    pyarrow.duration("ms"): (False, numpy.dtype("m8[ms]")),
+    pyarrow.duration("us"): (False, numpy.dtype("m8[us]")),
+    pyarrow.duration("ns"): (False, numpy.dtype("m8[ns]")),
+}
 
 
 def revertable(modified, original):
@@ -26,14 +54,14 @@ def popbuffers_finalize(out, array, validbits, generate_bitmasks, fix_offsets=Tr
 
     if validbits is None and generate_bitmasks:
         # ceildiv(len(out), 8) = -(len(out) // -8)
-        validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF), dtype=np.uint8)
+        validbits = numpy.full(-(len(out) // -8), numpy.uint8(0xFF), dtype=numpy.uint8)
 
     if validbits is None:
         return revertable(ak.contents.UnmaskedArray.simplified(out), out)
     else:
         return revertable(
             ak.contents.BitMaskedArray.simplified(
-                ak.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
+                ak.index.IndexU8(numpy.frombuffer(validbits, dtype=numpy.uint8)),
                 out,
                 valid_when=True,
                 length=len(out),
@@ -103,9 +131,9 @@ def popbuffers(paarray, storage_type, buffers, generate_bitmasks):
         paoffsets = buffers.pop(0)
 
         if isinstance(storage_type, pyarrow.lib.LargeListType):
-            akoffsets = ak.index.Index64(numpy.frombuffer(paoffsets, dtype=np.int64))
+            akoffsets = ak.index.Index64(numpy.frombuffer(paoffsets, dtype=numpy.int64))
         else:
-            akoffsets = ak.index.Index32(numpy.frombuffer(paoffsets, dtype=np.int32))
+            akoffsets = ak.index.Index32(numpy.frombuffer(paoffsets, dtype=numpy.int32))
 
         akcontent = popbuffers(
             paarray.values, storage_type.value_type, buffers, generate_bitmasks
@@ -142,7 +170,7 @@ def popbuffers(paarray, storage_type, buffers, generate_bitmasks):
 
         out = ak.contents.RegularArray(
             ak.contents.NumpyArray(
-                numpy.frombuffer(pacontent, dtype=np.uint8),
+                numpy.frombuffer(pacontent, dtype=numpy.uint8),
                 parameters=sub_parameters,
                 backend=NumpyBackend.instance(),
             ),
@@ -158,9 +186,9 @@ def popbuffers(paarray, storage_type, buffers, generate_bitmasks):
         pacontent = buffers.pop(0)
 
         if storage_type in _string_like[::2]:
-            akoffsets = ak.index.Index32(numpy.frombuffer(paoffsets, dtype=np.int32))
+            akoffsets = ak.index.Index32(numpy.frombuffer(paoffsets, dtype=numpy.int32))
         else:
-            akoffsets = ak.index.Index64(numpy.frombuffer(paoffsets, dtype=np.int64))
+            akoffsets = ak.index.Index64(numpy.frombuffer(paoffsets, dtype=numpy.int64))
 
         if storage_type in _string_like[:2]:
             parameters = {"__array__": "string"}
@@ -172,7 +200,7 @@ def popbuffers(paarray, storage_type, buffers, generate_bitmasks):
         out = ak.contents.ListOffsetArray(
             akoffsets,
             ak.contents.NumpyArray(
-                numpy.frombuffer(pacontent, dtype=np.uint8),
+                numpy.frombuffer(pacontent, dtype=numpy.uint8),
                 parameters=sub_parameters,
                 backend=NumpyBackend.instance(),
             ),
@@ -210,13 +238,13 @@ def popbuffers(paarray, storage_type, buffers, generate_bitmasks):
         if isinstance(storage_type, pyarrow.lib.SparseUnionType):
             assert storage_type.num_buffers == 2
             validbits = buffers.pop(0)
-            nptags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
-            npindex = numpy.arange(len(nptags), dtype=np.int32)
+            nptags = numpy.frombuffer(buffers.pop(0), dtype=numpy.int8)
+            npindex = numpy.arange(len(nptags), dtype=numpy.int32)
         else:
             assert storage_type.num_buffers == 3
             validbits = buffers.pop(0)
-            nptags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
-            npindex = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
+            nptags = numpy.frombuffer(buffers.pop(0), dtype=numpy.int8)
+            npindex = numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)
 
         akcontents = []
         for i in range(storage_type.num_fields):
@@ -244,7 +272,7 @@ def popbuffers(paarray, storage_type, buffers, generate_bitmasks):
 
         # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
+            ak.index.Index64(numpy.full(len(paarray), -1, dtype=numpy.int64)),
             ak.contents.EmptyArray(parameters=None),
             parameters=None,
         )
@@ -255,11 +283,11 @@ def popbuffers(paarray, storage_type, buffers, generate_bitmasks):
         bitdata = buffers.pop(0)
 
         bytedata = numpy.unpackbits(
-            numpy.frombuffer(bitdata, dtype=np.uint8), bitorder="little"
+            numpy.frombuffer(bitdata, dtype=numpy.uint8), bitorder="little"
         )
 
         out = ak.contents.NumpyArray(
-            bytedata.view(np.bool_),
+            bytedata.view(numpy.bool_),
             parameters=None,
             backend=NumpyBackend.instance(),
         )
@@ -272,7 +300,9 @@ def popbuffers(paarray, storage_type, buffers, generate_bitmasks):
 
         to64, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
         if to64:
-            data = numpy.astype(numpy.frombuffer(data, dtype=np.int32), dtype=np.int64)
+            data = numpy.astype(
+                numpy.frombuffer(data, dtype=numpy.int32), dtype=numpy.int64
+            )
         if dt is None:
             dt = storage_type.to_pandas_dtype()
 
@@ -317,6 +347,40 @@ def pyarrow_to_awkward(
 
 
 if __name__ == "__main__":
-    df = cudf.DataFrame({"record": [{"inner": [[3], [1, 2]], "simple": [8, None]}] * 6})
+    # tests numerics, lists, records, and option-type, but not union-type
+    examples = [
+        [False, True, True],  # booleans are special (1-bit)
+        [1.1, 2.2, 3.3],
+        [[False, True, True], [], [True, False]],
+        [[1, 2, 3], [], [4, 5]],
+        [[[1, 2], [3]], [], [[]], [[4], [], [5, 6, 7]], [[8, 9]]],
+        [{"x": 1}, {"x": 2}, {"x": 3}],
+        [{"x": 1.1, "y": []}, {"x": 2.2, "y": [1]}, {"x": 3.3, "y": [1, 2]}],
+        [[{"x": 1}, {"x": 2}, {"x": 3}], [], [{"x": 4}, {"x": 5}]],
+        [False, True, None, True],
+        [1.1, 2.2, None, 3.3],
+        [[False, True, None, True], [], [True, False]],
+        [[False, True, True], None, [], [True, False]],
+        [[1, 2, None, 3], [], [4, 5]],
+        [[1, 2, 3], None, [], [4, 5]],
+        [[[1, 2, None], [3]], [], [[]], [[4], [], [5, 6, 7]], [[8, 9]]],
+        [[[1, 2], None, [3]], [], [[]], [[4], [], [5, 6, 7]], [[8, 9]]],
+        [[[1, 2], [3]], None, [], [[]], [[4], [], [5, 6, 7]], [[8, 9]]],
+        [{"x": 1}, {"x": None}, {"x": 3}],
+        [{"x": 1}, {"x": 2}, None, {"x": 3}],
+        [{"x": 1.1, "y": []}, {"x": None, "y": [1]}, {"x": 3.3, "y": [1, 2]}],
+        [{"x": 1.1, "y": []}, {"x": 2.2, "y": [1, None]}, {"x": 3.3, "y": [1, 2]}],
+        [{"x": 1.1, "y": []}, {"x": 2.2, "y": [1]}, None, {"x": 3.3, "y": [1, 2]}],
+        [[{"x": 1}, {"x": None}, {"x": 3}], [], [{"x": 4}, {"x": 5}]],
+        [[{"x": 1}, {"x": 2}, None, {"x": 3}], [], [{"x": 4}, {"x": 5}]],
+        [[{"x": 1}, {"x": 2}, {"x": 3}], None, [], [{"x": 4}, {"x": 5}]],
+    ]
 
+    for example in examples:
+        df = cudf.DataFrame({"column": example})
 
+        pyarrow_array = df._data["column"].to_arrow()
+        assert pyarrow_array.tolist() == example
+
+        awkward_array = pyarrow_to_awkward(pyarrow_array)
+        assert awkward_array.tolist() == example
