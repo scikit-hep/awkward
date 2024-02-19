@@ -471,7 +471,9 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 self._lsb_order,
             )
         )
-        return bytemask.data[: self._length].view(np.bool_)
+        return bytemask.data[
+            : self._backend.index_nplike.shape_item_as_index(self._length)
+        ].view(np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
