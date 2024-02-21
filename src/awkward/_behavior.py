@@ -100,29 +100,32 @@ def find_ufunc_generic(
 
 
 def find_ufunc(behavior: Mapping | None, signature: tuple) -> UfuncLike | None:
-    if all(s is not None for s in signature):
-        behavior = overlay_behavior(behavior)
+    if any(s is None for s in signature):
+        return None
 
-        # Special case all strings or hashable types.
+    behavior = overlay_behavior(behavior)
+
+    # Try and fast-path the lookup
+    try:
+        return behavior[signature]
+    except KeyError:
+        # We didn't find an exact overload, and we won't find any!
         if all(isinstance(x, str) for x in signature):
-            return behavior.get(signature)
-        else:
-            for key, custom in behavior.items():
-                if (
-                    isinstance(key, tuple)
-                    and len(key) == len(signature)
-                    and key[0] == signature[0]
-                    and all(
-                        k == s
-                        or (
-                            isinstance(k, type)
-                            and isinstance(s, type)
-                            and issubclass(s, k)
-                        )
-                        for k, s in zip(key[1:], signature[1:])
-                    )
-                ):
-                    return custom
+            return None
+
+    # Fall back on linear search (first-wins)
+    for key, custom in behavior.items():
+        if (
+            isinstance(key, tuple)
+            and len(key) == len(signature)
+            and key[0] == signature[0]
+            and all(
+                k == s
+                or (isinstance(k, type) and isinstance(s, type) and issubclass(s, k))
+                for k, s in zip(key[1:], signature[1:])
+            )
+        ):
+            return custom
     return None
 
 
