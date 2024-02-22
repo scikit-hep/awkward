@@ -61,5 +61,4 @@ jobs:
         uses: scientific-python/upload-nightly-action@95f7bf6a22281b8072fae929429dd0408f09ea63 # 0.4.0
         with:
           artifacts_path: dist
-          anaconda_nightly_upload_organization: scikit-hep-nightly-wheels
           anaconda_nightly_upload_token: ${{ secrets.ANACONDA_ORG_UPLOAD_TOKEN }}
