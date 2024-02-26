@@ -295,6 +295,19 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "index": [],
+                        "indexlength": 0,
+                        "regularsize": 0,
+                        "repetitions": 0
+                    },
+                    "outputs": {
+                        "outindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "index": [0],
                         "indexlength": 1,
                         "regularsize": 1,
@@ -6363,6 +6376,20 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "fromarray": [],
+                        "lenarray": 0,
+                        "length": 0,
+                        "size": 0
+                    },
+                    "outputs": {
+                        "toadvanced": [],
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "fromarray": [0, 0, 0, 0],
                         "lenarray": 4,
                         "length": 1,
@@ -7569,6 +7596,21 @@
             "name": "awkward_RegularArray_getitem_next_array_advanced",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromadvanced": [],
+                        "fromarray": [],
+                        "lenarray": 0,
+                        "length": 0,
+                        "size": 0
+                    },
+                    "outputs": {
+                        "toadvanced": [],
+                        "tocarry": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -8792,6 +8834,18 @@
                     "message": "",
                     "inputs": {
                         "at": 0,
+                        "length": 0,
+                        "size": 1
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "at": 0,
                         "length": 1,
                         "size": 2
                     },
@@ -9033,6 +9087,20 @@
             "name": "awkward_RegularArray_getitem_next_range",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "nextsize": 0,
+                        "regular_start": 0,
+                        "size": 0,
+                        "step": 0
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -13639,6 +13707,22 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "jaggedsize": 0,
+                        "length": 0,
+                        "singleoffsets": []
+                    },
+                    "outputs": {
+                        "multistarts": [],
+                        "multistops": [],
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "fromstarts": [2],
                         "fromstops": [4],
                         "jaggedsize": 2,
@@ -13751,6 +13835,22 @@
                     "outputs": {
                         "toadvanced": [0, 1, 2, 3],
                         "tocarry": [1, 1, 0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromarray": [],
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "lenarray": 0,
+                        "lencontent": 0,
+                        "lenstarts": 0
+                    },
+                    "outputs": {
+                        "toadvanced": [],
+                        "tocarry": []
                     }
                 },
                 {
@@ -16311,6 +16411,18 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "outindexlength": 0,
+                        "starts": [],
+                        "startslength": 0
+                    },
+                    "outputs": {
+                        "outoffsets": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "outindexlength": 2,
                         "starts": [0],
                         "startslength": 1
@@ -16673,6 +16785,23 @@
                     "outputs": {
                         "toadvanced": [0],
                         "tocarry": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromadvanced": [],
+                        "fromarray": [],
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "lenarray": 0,
+                        "lencontent": 0,
+                        "lenstarts": 0
+                    },
+                    "outputs": {
+                        "toadvanced": [],
+                        "tocarry": []
                     }
                 },
                 {
@@ -20223,6 +20352,18 @@
             "name": "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
             "status": true,
             "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "lenparents": 0,
+                        "outlength": 0,
+                        "parents": []
+                    },
+                    "outputs": {
+                        "toptr": []
+                    }
+                },
                 {
                     "error": false,
                     "message": "",
@@ -24936,6 +25077,17 @@
                     },
                     "outputs": {
                         "toindex": [123, 123, 123, 123, 0, 1, 2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "toindexoffset": 0
+                    },
+                    "outputs": {
+                        "toindex": []
                     }
                 },
                 {
