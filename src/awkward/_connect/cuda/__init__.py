@@ -100,6 +100,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_ListArray_getitem_jagged_carrylen",
         "awkward_ListArray_getitem_jagged_descend",
         "awkward_ListArray_getitem_jagged_numvalid",
+        "awkward_ListArray_getitem_jagged_shrink",
         "awkward_ListArray_min_range",
         "awkward_ListArray_rpad_and_clip_length_axis1",
         "awkward_ListArray_rpad_axis1",

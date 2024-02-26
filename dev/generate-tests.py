@@ -745,6 +745,7 @@ cuda_kernels_tests = [
     "awkward_ListArray_getitem_jagged_descend",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_numvalid",
+    "awkward_ListArray_getitem_jagged_shrink",
     "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_next_array",
     "awkward_ListArray_getitem_next_at",
