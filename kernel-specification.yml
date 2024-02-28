@@ -556,14 +556,14 @@ kernels:
     description: null
     definition: |
       def awkward_IndexedArray_local_preparenext(
-        tocarry, starts, parents, parentslength, nextparents. nextlen
+        tocarry, starts, parents, parentslength, nextparents, nextlen
       ):
           for i in range(parentslength):
               parent = parents[i];
               if j < nextlen and parent == nextparents[j]:
                   tocarry[i] = j;
                   j += 1;
-              elif
+              else:
                   tocarry[i] = -1;
     automatic-tests: false
 
