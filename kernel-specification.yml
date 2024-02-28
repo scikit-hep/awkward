@@ -555,7 +555,16 @@ kernels:
           - {name: nextlen, type: "Const[int64_t]", dir: in, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_IndexedArray_local_preparenext(
+        tocarry, starts, parents, parentslength, nextparents. nextlen
+      ):
+          for i in range(parentslength):
+              parent = parents[i];
+              if j < nextlen and parent == nextparents[j]:
+                  tocarry[i] = j;
+                  j += 1;
+              elif
+                  tocarry[i] = -1;
     automatic-tests: false
 
   - name: awkward_IndexedArray_numnull
@@ -2390,7 +2399,7 @@ kernels:
                           distincts[nextparents[k]] = j
                           j += 1
                       k += 1
-                      offsetscopy[i] += 1;
+                      offsetscopy[i] += 1
     automatic-tests: false
 
   - name: awkward_ListOffsetArray_rpad_and_clip_axis1
@@ -3355,7 +3364,21 @@ kernels:
           - {name: toptr, type: "List[uint8_t]", dir: out}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_pad_zero_to_length(
+        fromptr, fromoffsets, offsetslength, target, toptr
+      ):
+          l_to_char = 0
+          # For each sublist
+          for k_sublist in range(offsetslength - 1):
+              # Copy from src to dst
+              for j_from_char in range(fromoffsets[k_sublist],fromoffsets[k_sublist+1]):
+                  toptr[l_to_char] = fromptr[j_from_char]
+                  l_to_char += 1
+              # Pad to remaining width
+              n_to_pad = target - (fromoffsets[k_sublist+1] - fromoffsets[k_sublist])
+              for j_from_char in range(n_to_pad):
+                  toptr[l_to_char] = 0
+                  l_to_char += 1
     automatic-tests: false
 
   - name: awkward_NumpyArray_subrange_equal
@@ -3439,7 +3462,21 @@ kernels:
           - {name: toequal, type: "List[bool]", dir: out}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_subrange_equal(
+        tmpptr, fromstarts, fromstops, length, toequal
+      ):
+          differ = True
+          for i in range(length - 1):
+              leftlen = fromstops[i] - fromstarts[i]
+              for ii in range(i + 1, length - 1):
+                  rightlen = fromstops[ii] - fromstarts[ii]
+                  if leftlen == rightlen:
+                      differ = False
+                      for j in range (leftlen):
+                          if tmpptr[fromstarts[i] + j] != tmpptr[fromstarts[ii] + j]:
+                              differ = True
+                              break
+          toequal[0] = not differ
     automatic-tests: false
 
   - name: awkward_RecordArray_reduce_nonlocal_outoffsets_64
@@ -5739,7 +5776,15 @@ kernels:
           - {name: tolength, type: "List[int64_t]", dir: out, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_unique(
+        toptr, length, tolength
+      ):
+        j = 0
+        for i in range(1, length):
+            if toptr[j] != toptr[i]:
+              j += 1
+              toptr[j] = toptr[i]
+        tolength[0] = j + 1
     automatic-tests: false
 
   - name: awkward_unique_copy
@@ -5812,7 +5857,16 @@ kernels:
           - {name: tolength, type: "List[int64_t]", dir: out, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_unique_copy(
+        fromptr, toptr, length, tolength
+      ):
+        j = 0
+        toptr[0] = fromptr[0]
+        for i in range(1, length):
+            if toptr[j] != fromptr[i]:
+              j += 1
+              toptr[j] = fromptr[i]
+        tolength[0] = j + 1
     automatic-tests: false
 
   - name: awkward_unique_offsets
@@ -5847,7 +5901,17 @@ kernels:
           - {name: startslength, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_unique_offsets(
+        tooffsets, length, fromoffsets, starts, startslength
+      ):
+        j = 0
+        for i in range(length):
+            tooffsets[j] = fromoffsets[i]
+            for k in range(j, startslength - 1):
+                if starts[j] == starts[j + 1]:
+                    tooffsets[j + 1] = fromoffsets[i]
+                    j += 1
+        tooffsets[startslength] = fromoffsets[length - 1]
     automatic-tests: false
 
   - name: awkward_unique_ranges
@@ -5931,7 +5995,19 @@ kernels:
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_unique_ranges(
+        toptr, length, fromoffsets, offsetslength, tooffsets
+      ):
+        m = 0
+        for i in range(offsetslength):
+          tooffsets[i] = m
+          toptr[m] = toptr[fromoffsets[i]]
+          m += 1
+          for k in range(fromoffsets[i], fromoffsets[i + 1]):
+            if (toptr[m - 1] != toptr[k]):
+              toptr[m] = toptr[k]
+              m += 1
+        tooffsets[offsetslength - 1] = m
     automatic-tests: false
 
   - name: awkward_sorting_ranges
