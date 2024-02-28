@@ -2356,7 +2356,41 @@ kernels:
           - {name: maxcount, type: "int64_t", dir: in}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
+          nextcarry,
+          nextparents,
+          nextlen,
+          maxnextparents,
+          distincts,
+          distinctslen,
+          offsetscopy,
+          offsets,
+          length,
+          parents,
+          maxcount,
+      ):
+          maxnextparents[0] = 0
+          for i in range(distinctslen):
+              distincts[i] = -1
+
+          k  = 0
+          while k < nextlen:
+              j = 0
+              for i in range(length):
+                  if offsetscopy[i] < offsets[i + 1]:
+                      diff = offsetscopy[i] - offsets[i]
+                      parent = parents[i]
+                      nextcarry[k] = offsetscopy[i]
+                      nextparents[k] = parent*maxcount + diff
+
+                      if maxnextparents[0] < nextparents[k]:
+                          maxnextparents[0] = nextparents[k]
+
+                      if nextparents[k] < distinctslen and distincts[nextparents[k]] == -1:
+                          distincts[nextparents[k]] = j
+                          j += 1
+                      k += 1
+                      offsetscopy[i] += 1;
     automatic-tests: false
 
   - name: awkward_ListOffsetArray_rpad_and_clip_axis1
