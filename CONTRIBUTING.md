@@ -22,10 +22,8 @@ Please [make the pull request a draft](https://github.blog/2019-02-14-introducin
 
 ### Getting your pull request reviewed
 
-Currently, we have three regular reviewers of pull requests:
+Currently, we have one regular reviewer of pull requests:
 
-  * Angus Hollands ([agoose77](https://github.com/agoose77))
-  * Ioana Ifrim ([ioanaif](https://github.com/ioanaif))
   * Jim Pivarski ([jpivarski](https://github.com/jpivarski))
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
