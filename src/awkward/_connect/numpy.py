@@ -207,15 +207,18 @@ def _array_ufunc_adjust_apply(
         )
 
 
-def _array_ufunc_signature(ufunc, inputs):
-    signature = [ufunc]
+def _array_ufunc_signature(ufunc, inputs) -> tuple[Any, ...] | None:
+    signature = []
+    has_seen_nominal_type = False
     for x in inputs:
         if isinstance(x, ak.contents.Content):
             record_name, list_name = x.parameter("__record__"), x.parameter("__list__")
             if record_name is not None:
                 signature.append(record_name)
+                has_seen_nominal_type = True
             elif list_name is not None:
                 signature.append(list_name)
+                has_seen_nominal_type = True
             elif isinstance(x, NumpyArray):
                 signature.append(x.dtype.type)
             else:
@@ -223,7 +226,10 @@ def _array_ufunc_signature(ufunc, inputs):
         else:
             signature.append(type(x))
 
-    return tuple(signature)
+    if has_seen_nominal_type:
+        return (ufunc, *signature)
+    else:
+        return None
 
 
 def _array_ufunc_categorical(
@@ -364,10 +370,12 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
         assert len(contents) >= 1
 
         signature = _array_ufunc_signature(ufunc, inputs)
-        # Do we have a custom ufunc (an override of the given ufunc)?
-        custom = find_ufunc(behavior, signature)
-        if custom is not None:
-            return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
+        # Should we allow ufunc overloads for this signature?
+        if signature is not None:
+            # Do we have a custom ufunc (an override of the given ufunc)?
+            custom = find_ufunc(behavior, signature)
+            if custom is not None:
+                return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
 
         # Do we have any categoricals?
         if any(
