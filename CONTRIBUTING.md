@@ -141,6 +141,26 @@ python -m pytest tests-cuda-kernels
 python -m pytest tests-cuda
 ```
 
+#### Unit tests for the kernels
+
+You can also run additional unit tests that have more test coverage for all the low-level kernels for even more detailed fine-grained testing.
+
+For Python Kernels:
+```bash
+python -m pytest -n auto awkward-cpp/tests-spec-explicit
+```
+
+For CPU Kernels:
+```bash
+python -m pytest -n auto awkward-cpp/tests-cpu-kernels-explicit
+```
+
+For CUDA Kernels
+```bash
+python -m pytest tests-cuda-kernels-explicit
+```
+
+
 ### Building wheels
 
 Sometimes it's convenient to build a wheel for the `awkward-cpp` package, so that subsequent re-installs do not require the package to be rebuilt. The `build` package can be used to do this, though care must be taken to specify the *current* Python interpreter in [pipx](https://pypa.github.io/pipx/):
