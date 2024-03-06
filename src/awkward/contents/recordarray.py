@@ -437,6 +437,9 @@ class RecordArray(RecordMeta[Content], Content):
     def _getitem_nothing(self) -> Content:
         return self._getitem_range(0, 0)
 
+    def _is_getitem_at_placeholder(self) -> bool:
+        return False
+
     def _getitem_at(self, where: IndexType):
         if self._backend.nplike.known_data and where < 0:
             where += self.length

@@ -11,8 +11,9 @@ from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem
-from awkward._nplikes.typetracer import TypeTracer
+from awkward._nplikes.typetracer import TypeTracer, TypeTracerArray
 from awkward._slicing import normalize_slice
 from awkward._typing import Any, DType, Final, Self, cast
 
@@ -183,9 +184,13 @@ class Index:
         out.append(" len=")
         out.append(repr(str(self._data.shape[0])))
 
-        arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
-            "\n"
-        )
+        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)):
+            arraystr_lines = ["[## ... ##]"]
+        else:
+            arraystr_lines = self._nplike.array_str(
+                self._data, max_line_width=30
+            ).split("\n")
+
         if len(arraystr_lines) > 1 or self._metadata is not None:
             arraystr_lines = self._nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
