@@ -472,7 +472,9 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 self._lsb_order,
             )
         )
-        return bytemask.data[: self._length].view(np.bool_)
+        return bytemask.data[
+            : self._backend.index_nplike.shape_item_as_index(self._length)
+        ].view(np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
@@ -574,7 +576,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         return self.to_ByteMaskedArray().project(mask)
 
     def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
-        return self.to_ByteMaskedArray._offsets_and_flattened(axis, depth)
+        return self.to_ByteMaskedArray()._offsets_and_flattened(axis, depth)
 
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?
