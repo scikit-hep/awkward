@@ -697,6 +697,9 @@ class Content(Meta):
                 + repr(where).replace("\n", "\n    ")
             )
 
+    def _is_getitem_at_placeholder(self) -> bool:
+        raise NotImplementedError
+
     def _getitem_at(self, where: IndexType):
         raise NotImplementedError
 
