@@ -46,7 +46,7 @@ def test_typetracer(function):
     meta = ak.Array(meta)
 
     func(meta)
-    assert set(report.data_touched) == set(["node0", "node2", "node3"])
+    assert set(report.data_touched) == {"node0", "node2", "node3"}
 
 
 @pytest.mark.parametrize("regulararray", [False, True])

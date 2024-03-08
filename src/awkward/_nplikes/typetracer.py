@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 from numbers import Number
-from typing import Callable
+from typing import Callable, Iterator
 
 import numpy
 
@@ -125,34 +125,125 @@ class OneOf:
         )
 
 
+class ImmutableBitSet(Set):
+    def __init__(self, byteset: FillableByteSet):
+        self._labels: dict[str, int] = byteset._labels
+        if not byteset._is_filled.any():
+            self._is_filled = None
+        else:
+            self._is_filled = numpy.packbits(byteset._is_filled)
+
+    def to_set(self) -> set[str]:
+        return set(iter(self))
+
+    def __contains__(self, label: object) -> bool:
+        if self._is_filled is None or label not in self._labels:
+            return False
+        else:
+            assert isinstance(label, str)
+            return numpy.unpackbits(self._is_filled)[self._labels[label]]
+
+    def __iter__(self) -> Iterator[str]:
+        if self._is_filled is not None:
+            is_filled = numpy.unpackbits(self._is_filled)
+            for label, index in self._labels.items():
+                if is_filled[index]:
+                    yield label
+
+    def __len__(self) -> int:
+        if self._is_filled is None:
+            return 0
+        else:
+            return numpy.unpackbits(self._is_filled).sum()
+
+
+class FillableByteSet(Set):
+    # friend class ImmutableBitSet
+
+    def __init__(self, labels: Sequence[str]):
+        self._labels: dict[str, int] = {}
+        for label in labels:
+            self._labels[label] = len(self._labels)
+
+        self._is_filled = numpy.zeros(len(labels), dtype=numpy.bool_)
+
+    def add(self, label: str) -> None:
+        self._is_filled[self._labels[label]] = True
+
+    def to_bitset(self) -> ImmutableBitSet:
+        return ImmutableBitSet(self)
+
+    def clear(self) -> None:
+        self._is_filled.fill(False)
+
+    def __contains__(self, label: object) -> bool:
+        if label not in self._labels:
+            return False
+        else:
+            assert isinstance(label, str)
+            return self._is_filled[self._labels[label]]
+
+    def __iter__(self) -> Iterator[str]:
+        for label, index in self._labels.items():
+            if self._is_filled[index]:
+                yield label
+
+    def __len__(self) -> int:
+        return self._is_filled.sum()
+
+
 class TypeTracerReport:
     def __init__(self):
-        # maybe the order will be useful information
         self._shape_touched_set = set()
         self._data_touched_set = set()
+        self._node_id_to_shape_touched: dict[str, ImmutableBitSet] = {}
+        self._node_id_to_data_touched: dict[str, ImmutableBitSet] = {}
 
     def __repr__(self):
         return f"<TypeTracerReport with {len(self._shape_touched_set)} shape_touched, {len(self._data_touched_set)} data_touched>"
 
+    def use_FillableByteSet(self, layout):
+        layout._touch_data(recursive=True)
+        self._shape_touched_set = FillableByteSet(self._shape_touched_set)
+        self._data_touched_set = FillableByteSet(self._data_touched_set)
+
     @property
-    def shape_touched(self):
+    def shape_touched(self) -> list[str]:
         return list(self._shape_touched_set)
 
     @property
-    def data_touched(self):
+    def data_touched(self) -> list[str]:
         return list(self._data_touched_set)
 
-    def touch_shape(self, label):
-        if label not in self._shape_touched_set:
-            self._shape_touched_set.add(label)
+    def touch_shape(self, label: str) -> None:
+        self._shape_touched_set.add(label)
 
-    def touch_data(self, label):
-        if label not in self._data_touched_set:
-            # touching data implies that the shape will be touched as well
-            # implemented here so that the codebase doesn't need to be filled
-            # with calls to both methods everywhere
-            self._shape_touched_set.add(label)
-            self._data_touched_set.add(label)
+    def touch_data(self, label: str) -> None:
+        # touching data implies that the shape will be touched as well
+        # implemented here so that the codebase doesn't need to be filled
+        # with calls to both methods everywhere
+        self._shape_touched_set.add(label)
+        self._data_touched_set.add(label)
+
+    def commit(self, node_id: str) -> None:
+        assert isinstance(self._shape_touched_set, FillableByteSet)
+        assert isinstance(self._data_touched_set, FillableByteSet)
+        self._node_id_to_shape_touched[node_id] = self._shape_touched_set.to_bitset()
+        self._node_id_to_data_touched[node_id] = self._data_touched_set.to_bitset()
+        self._shape_touched_set.clear()
+        self._data_touched_set.clear()
+
+    def shape_touched_in(self, node_ids: Sequence[str]) -> list[str]:
+        out: set[str] = set()
+        for node_id in node_ids:
+            out.update(self._node_id_to_shape_touched[node_id])
+        return list(out)
+
+    def data_touched_in(self, node_ids: Sequence[str]) -> list[str]:
+        out: set[str] = set()
+        for node_id in node_ids:
+            out.update(self._node_id_to_data_touched[node_id])
+        return list(out)
 
 
 class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
@@ -1652,4 +1743,5 @@ def typetracer_with_report(
     layout = form.length_zero_array().to_typetracer(forget_length=True)
     report = TypeTracerReport()
     _attach_report(layout, form, report, getkey)
+    report.use_FillableByteSet(layout)
     return layout, report
