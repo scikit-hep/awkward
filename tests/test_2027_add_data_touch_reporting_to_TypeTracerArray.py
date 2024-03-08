@@ -52,43 +52,43 @@ def test_prototypical_example():
     )
 
     # the listoffsets, but not the numpys, have been touched because of broadcasting
-    assert report.data_touched == [
+    assert set(report.data_touched) == set([
         "listoffset-1",
         "listoffset-2",
         "listoffset-3",
         "listoffset-4",
-    ]
+    ])
 
     pz = restructured.muons.pt * np.sinh(restructured.muons.eta)  # noqa: F841
 
     # order is preserved: numpy-eta is used before numpy-pt (may or may not be important)
-    assert report.data_touched == [
+    assert set(report.data_touched) == set([
         "listoffset-1",
         "listoffset-2",
         "listoffset-3",
         "listoffset-4",
         "numpy-eta",
         "numpy-pt",
-    ]
+    ])
 
     # slices are views, so they shouldn't trigger data access
     sliced = restructured.muons[:1]  # noqa: F841
-    assert report.data_touched == [
+    assert set(report.data_touched) == set([
         "listoffset-1",
         "listoffset-2",
         "listoffset-3",
         "listoffset-4",
         "numpy-eta",
         "numpy-pt",
-    ]
+    ])
 
     # changed behavior: printing should not touch data anymore
     print(restructured.muons.mass)
-    assert report.data_touched == [
+    assert set(report.data_touched) == set([
         "listoffset-1",
         "listoffset-2",
         "listoffset-3",
         "listoffset-4",
         "numpy-eta",
         "numpy-pt",
-    ]
+    ])

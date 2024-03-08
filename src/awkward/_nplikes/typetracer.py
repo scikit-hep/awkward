@@ -129,25 +129,22 @@ class TypeTracerReport:
     def __init__(self):
         # maybe the order will be useful information
         self._shape_touched_set = set()
-        self._shape_touched = []
         self._data_touched_set = set()
-        self._data_touched = []
 
     def __repr__(self):
-        return f"<TypeTracerReport with {len(self._shape_touched)} shape_touched, {len(self._data_touched)} data_touched>"
+        return f"<TypeTracerReport with {len(self._shape_touched_set)} shape_touched, {len(self._data_touched_set)} data_touched>"
 
     @property
     def shape_touched(self):
-        return self._shape_touched
+        return list(self._shape_touched_set)
 
     @property
     def data_touched(self):
-        return self._data_touched
+        return list(self._data_touched_set)
 
     def touch_shape(self, label):
         if label not in self._shape_touched_set:
             self._shape_touched_set.add(label)
-            self._shape_touched.append(label)
 
     def touch_data(self, label):
         if label not in self._data_touched_set:
@@ -155,9 +152,7 @@ class TypeTracerReport:
             # implemented here so that the codebase doesn't need to be filled
             # with calls to both methods everywhere
             self._shape_touched_set.add(label)
-            self._shape_touched.append(label)
             self._data_touched_set.add(label)
-            self._data_touched.append(label)
 
 
 class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
