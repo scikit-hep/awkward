@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence, Set
+from collections.abc import Collection, Sequence, Set
 from numbers import Number
 from typing import Callable, Iterator
 
@@ -133,9 +133,6 @@ class ImmutableBitSet(Set):
         else:
             self._is_filled = numpy.packbits(byteset._is_filled)
 
-    def to_set(self) -> set[str]:
-        return set(iter(self))
-
     def __contains__(self, label: object) -> bool:
         if self._is_filled is None or label not in self._labels:
             return False
@@ -160,11 +157,8 @@ class ImmutableBitSet(Set):
 class FillableByteSet(Set):
     # friend class ImmutableBitSet
 
-    def __init__(self, labels: Sequence[str]):
-        self._labels: dict[str, int] = {}
-        for label in labels:
-            self._labels[label] = len(self._labels)
-
+    def __init__(self, labels: Collection[str]):
+        self._labels = {label: i for i, label in enumerate(labels)}
         self._is_filled = numpy.zeros(len(labels), dtype=numpy.bool_)
 
     def add(self, label: str) -> None:
@@ -200,12 +194,14 @@ class TypeTracerReport:
         self._node_id_to_data_touched: dict[str, ImmutableBitSet] = {}
 
     def __repr__(self):
-        return f"<TypeTracerReport with {len(self._shape_touched_set)} shape_touched, {len(self._data_touched_set)} data_touched>"
+        return (
+            f"<TypeTracerReport with {len(self._shape_touched_set)} shape_touched, "
+            f"{len(self._data_touched_set)} data_touched>"
+        )
 
-    def use_FillableByteSet(self, layout):
-        layout._touch_data(recursive=True)
-        self._shape_touched_set = FillableByteSet(self._shape_touched_set)
-        self._data_touched_set = FillableByteSet(self._data_touched_set)
+    def set_labels(self, labels: Collection[str]):
+        self._shape_touched_set = FillableByteSet(labels)
+        self._data_touched_set = FillableByteSet(labels)
 
     @property
     def shape_touched(self) -> list[str]:
@@ -219,7 +215,7 @@ class TypeTracerReport:
         self._shape_touched_set.add(label)
 
     def touch_data(self, label: str) -> None:
-        # touching data implies that the shape will be touched as well
+        # Touching data implies that the shape will be touched as well
         # implemented here so that the codebase doesn't need to be filled
         # with calls to both methods everywhere
         self._shape_touched_set.add(label)
@@ -233,13 +229,13 @@ class TypeTracerReport:
         self._shape_touched_set.clear()
         self._data_touched_set.clear()
 
-    def shape_touched_in(self, node_ids: Sequence[str]) -> list[str]:
+    def shape_touched_in(self, node_ids: Collection[str]) -> list[str]:
         out: set[str] = set()
         for node_id in node_ids:
             out.update(self._node_id_to_shape_touched[node_id])
         return list(out)
 
-    def data_touched_in(self, node_ids: Sequence[str]) -> list[str]:
+    def data_touched_in(self, node_ids: Collection[str]) -> list[str]:
         out: set[str] = set()
         for node_id in node_ids:
             out.update(self._node_id_to_data_touched[node_id])
@@ -1743,5 +1739,11 @@ def typetracer_with_report(
     layout = form.length_zero_array().to_typetracer(forget_length=True)
     report = TypeTracerReport()
     _attach_report(layout, form, report, getkey)
-    report.use_FillableByteSet(layout)
+
+    # Optimisation: identify buffer keys ahead of time, and register them with report
+    def buffer_key(form_key, attribute, form):
+        return getkey(form, attribute)
+
+    report.set_labels(form.expected_from_buffers(buffer_key))
+
     return layout, report
