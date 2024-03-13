@@ -1243,18 +1243,16 @@ class NumpyArray(NumpyMeta, Content):
             ),
         )
 
-    def _to_cudf(
-            self,
-            cudf: Any,
-            mask: Content | None,
-            length: int
-    ):
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         import cudf
+
         assert self._backend.nplike.known_data
         data = cupy.asarray(self._data)
         mask = mask._to_cupy(cudf, None, length) if mask is not None else None
         buf = cudf.core.buffer.buffer.Buffer(data)
-        return cudf.cure.column.numerical.NumericalColumn(buf, data.dtype, mask=mask, size=length)
+        return cudf.cure.column.numerical.NumericalColumn(
+            buf, data.dtype, mask=mask, size=length
+        )
 
     def _to_backend_array(self, allow_missing, backend):
         return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
