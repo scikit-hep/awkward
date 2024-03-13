@@ -2009,6 +2009,18 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 ),
             )
 
+    def _to_cudf(
+        self,
+        cudf: Any,
+        mask: Content | None,
+        length: int
+    ):
+        return cudf.core.columns.lists.ListColumn(
+            length,
+            mask=mask._to_cudf(cudf) if mask is not None else None,
+            children=(self._offsets._to_cudf(), self._content._to_cudf())
+        )
+
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param == "string":
