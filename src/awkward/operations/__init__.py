@@ -69,6 +69,7 @@ from awkward.operations.ak_parameters import *
 from awkward.operations.ak_prod import *
 from awkward.operations.ak_ptp import *
 from awkward.operations.ak_ravel import *
+from awkward.operations.ak_real_imag_angle import *
 from awkward.operations.ak_run_lengths import *
 from awkward.operations.ak_singletons import *
 from awkward.operations.ak_softmax import *

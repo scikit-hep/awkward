@@ -545,6 +545,18 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     def is_c_contiguous(self, x: ArrayLikeT | PlaceholderArray) -> bool:
         ...
 
+    @abstractmethod
+    def real(self, x: ArrayLikeT) -> ArrayLikeT:
+        ...
+
+    @abstractmethod
+    def imag(self, x: ArrayLikeT) -> ArrayLikeT:
+        ...
+
+    @abstractmethod
+    def angle(self, x: ArrayLikeT, deg: bool = False) -> ArrayLikeT:
+        ...
+
     @classmethod
     @abstractmethod
     def is_own_array(cls, obj) -> bool:
