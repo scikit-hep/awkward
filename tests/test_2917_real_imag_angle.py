@@ -6,6 +6,7 @@ import numpy as np
 import pytest as _
 
 import awkward as ak
+from awkward.types import ListType
 from awkward.types.numpytype import NumpyType
 
 def test_complex_ops():
@@ -14,7 +15,7 @@ def test_complex_ops():
     """
     arr_1 = ak.Array([[1+0.1j, 2+0.2j, 3+0.3j], [], [4+0.4j, 5+0.5j]])
     arr_csingle = ak.from_numpy(np.array([6.+0.j, 0.+7.j], dtype='complex64'))
-    arr_real = ak.from_numpy(np.array([11., 12.], dtype='float16'))
+    arr_real = ak.Array([11., 12.])
 
     real_1 = np.real(arr_1)
     assert ak.all(real_1 == ak.Array([[1, 2, 3], [], [4, 5]]))
@@ -25,7 +26,6 @@ def test_complex_ops():
 
     real_real = np.real(arr_real)
     assert ak.all(real_real == ak.Array([11., 12.]))
-    assert real_real.type.content == NumpyType('float16')
 
     imag_1 = np.imag(arr_1)
     assert ak.all(imag_1 == ak.Array([[0.1, 0.2, 0.3], [], [0.4, 0.5]]))
@@ -36,7 +36,6 @@ def test_complex_ops():
 
     imag_real = np.imag(arr_real)
     assert ak.all(imag_real == ak.Array([0., 0.]))
-    assert imag_real.type.content == NumpyType('float16')
 
     angle_1 = np.angle(arr_1)
     a1 = np.arctan(0.1)
@@ -49,5 +48,40 @@ def test_complex_ops():
 
     angle_real = np.angle(arr_real)
     assert ak.all(angle_real == ak.Array([0., 0.]))
-    assert angle_real.type.content == NumpyType('float16')
-    assert np.angle(ak.Array([1,2])).type.content == NumpyType('float64')
+
+
+def test_complex_typetracer():
+    tt_arr = ak.to_backend(
+        ak.Array([[1+0.1j, 2+0.2j, 3+0.3j], [], [4+0.4j, 5+0.5j]]),
+        "typetracer"
+    )
+    tt_csingle = ak.to_backend(
+        ak.from_numpy(np.array([6.+0.j, 0.+7.j], dtype='complex64')),
+        "typetracer"
+    )
+    tt_real = ak.to_backend(
+        ak.from_numpy(np.array([11., 12.], dtype='float16')),
+        "typetracer"
+    )
+    tt_int = ak.to_backend(
+        ak.Array([1,2]),
+        "typetracer"
+    )
+
+    real_arr = np.real(tt_arr)
+    assert real_arr.type.content == ListType(NumpyType('float64'))
+    real_tt_csingle = np.real(tt_csingle)
+    assert real_tt_csingle.type.content == NumpyType('float32')
+    real_tt_real = np.real(tt_real)
+    assert real_tt_real.type.content == NumpyType('float16')
+
+    imag_tt_csingle = np.imag(tt_csingle)
+    assert imag_tt_csingle.type.content == NumpyType('float32')
+    imag_tt_real = np.imag(tt_real)
+    assert imag_tt_real.type.content == NumpyType('float16')
+
+    angle_tt_csingle = np.angle(tt_csingle, deg=True)
+    assert angle_tt_csingle.type.content == NumpyType('float32')
+    angle_tt_real = np.angle(tt_real)
+    assert angle_tt_real.type.content == NumpyType('float16')
+    assert np.angle(tt_int).type.content == NumpyType('float64')

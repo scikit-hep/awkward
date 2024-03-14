@@ -1456,12 +1456,12 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         try_touch_data(x)
         return TypeTracerArray._new(_real_parts_of.get(x.dtype, x.dtype), shape=x.shape)
 
-    def angle(self, x: TypeTracerArray) -> TypeTracerArray:
+    def angle(self, x: TypeTracerArray, deg: bool = False) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
         if np.issubdtype(x.dtype, np.integer) or np.issubdtype(x.dtype, np.bool_):
             # numpy's angle() casts integer-like values to float (platform-dependent).
-            result_type = np.dtype(np.float_)
+            result_type = np.dtype(numpy.float_)
         else:
             result_type =  _real_parts_of.get(x.dtype, x.dtype)
         return TypeTracerArray._new(result_type, shape=x.shape)
