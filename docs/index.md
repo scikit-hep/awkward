@@ -93,6 +93,15 @@ Spotted a typo in the documentation? Want to add to the codebase? The contributi
 :class-card: admonition warning
 
 {fas}`history` Need the documentation for version 1 of Awkward Array? Click this card.
+
+:::
+
+:::{grid-item-card} 
+:columns: 12
+:link: https://juliahep.github.io/AwkwardArray.jl/dev/
+:class-card: admonition warning
+
+{fas}`history` Looking for the documentation for Awkward Array in Julia? Click this card.
 ::::
     
 :::::
