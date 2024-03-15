@@ -557,6 +557,12 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     def angle(self, x: ArrayLikeT, deg: bool = False) -> ArrayLikeT:
         ...
 
+    @abstractmethod
+    def round(
+        self, x: ArrayLikeT, decimals: int = 0, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
+        ...
+
     @classmethod
     @abstractmethod
     def is_own_array(cls, obj) -> bool:

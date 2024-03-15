@@ -645,9 +645,13 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def angle(self, x: ArrayLikeT, deg: bool = False) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
-        xr = self._module.angle(x, deg)
-        # For numpy, xr is a view on x, but we don't want to mutate x.
-        return self._module.copy(xr)
+        return self._module.angle(x, deg)
+
+    def round(
+        self, x: ArrayLikeT, decimals: int = 0, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
+        assert not isinstance(x, PlaceholderArray)
+        return self._module.round(x, decimals=decimals, out=maybe_out)
 
     def array_str(
         self,

@@ -1466,6 +1466,13 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             result_type =  _real_parts_of.get(x.dtype, x.dtype)
         return TypeTracerArray._new(result_type, shape=x.shape)
 
+    def round(
+        self, x: TypeTracerArray, decimals: int = 0, maybe_out: TypeTracerArray | None = None
+    ) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        return TypeTracerArray._new(x.dtype, shape=x.shape)
+
     ############################ reducers
 
     def all(
