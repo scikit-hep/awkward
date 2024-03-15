@@ -5,7 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
-from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("real", "imag", "angle")
@@ -111,9 +111,7 @@ def _impl_angle(val, deg, highlevel, behavior, attrs):
     # A closure over deg:
     def action_angle(layout, backend, **kwargs):
         if isinstance(layout, ak.contents.NumpyArray):
-            return ak.contents.NumpyArray(
-                backend.nplike.angle(layout.data, deg)
-            )
+            return ak.contents.NumpyArray(backend.nplike.angle(layout.data, deg))
         else:
             return None
 
@@ -123,17 +121,13 @@ def _impl_angle(val, deg, highlevel, behavior, attrs):
 
 def _action_real(layout, backend, **kwargs):
     if isinstance(layout, ak.contents.NumpyArray):
-        return ak.contents.NumpyArray(
-            backend.nplike.real(layout.data)
-        )
+        return ak.contents.NumpyArray(backend.nplike.real(layout.data))
     else:
         return None
 
 
 def _action_imag(layout, backend, **kwargs):
     if isinstance(layout, ak.contents.NumpyArray):
-        return ak.contents.NumpyArray(
-            backend.nplike.imag(layout.data)
-        )
+        return ak.contents.NumpyArray(backend.nplike.imag(layout.data))
     else:
         return None

@@ -83,9 +83,9 @@ def _emptyarray(x):
 
 _real_parts_of = {
     # Functions real, imag, and angle return real arrays when given complex arguments.
-    np.dtype('csingle'): np.dtype('single'),
-    np.dtype('cdouble'): np.dtype('double'),
-    np.dtype('clongdouble'): np.dtype('longdouble'),
+    np.dtype("csingle"): np.dtype("single"),
+    np.dtype("cdouble"): np.dtype("double"),
+    np.dtype("clongdouble"): np.dtype("longdouble"),
 }
 
 
@@ -1461,13 +1461,16 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         try_touch_data(x)
         if np.issubdtype(x.dtype, np.integer) or np.issubdtype(x.dtype, np.bool_):
             # numpy's angle() casts integer-like values to float (platform-dependent).
-            result_type = np.dtype(numpy.float_)
+            result_type = np.dtype(numpy.float64)
         else:
-            result_type =  _real_parts_of.get(x.dtype, x.dtype)
+            result_type = _real_parts_of.get(x.dtype, x.dtype)
         return TypeTracerArray._new(result_type, shape=x.shape)
 
     def round(
-        self, x: TypeTracerArray, decimals: int = 0, maybe_out: TypeTracerArray | None = None
+        self,
+        x: TypeTracerArray,
+        decimals: int = 0,
+        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
