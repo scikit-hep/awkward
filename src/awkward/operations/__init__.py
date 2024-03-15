@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward.operations.str
 from awkward.operations.ak_all import *
 from awkward.operations.ak_almost_equal import *
+from awkward.operations.ak_angle import *
 from awkward.operations.ak_any import *
 from awkward.operations.ak_argcartesian import *
 from awkward.operations.ak_argcombinations import *
@@ -45,6 +46,7 @@ from awkward.operations.ak_from_parquet import *
 from awkward.operations.ak_from_rdataframe import *
 from awkward.operations.ak_from_regular import *
 from awkward.operations.ak_full_like import *
+from awkward.operations.ak_imag import *
 from awkward.operations.ak_is_categorical import *
 from awkward.operations.ak_is_none import *
 from awkward.operations.ak_is_tuple import *
@@ -69,7 +71,7 @@ from awkward.operations.ak_parameters import *
 from awkward.operations.ak_prod import *
 from awkward.operations.ak_ptp import *
 from awkward.operations.ak_ravel import *
-from awkward.operations.ak_real_imag_angle import *
+from awkward.operations.ak_real import *
 from awkward.operations.ak_round import *
 from awkward.operations.ak_run_lengths import *
 from awkward.operations.ak_singletons import *
