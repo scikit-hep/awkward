@@ -1248,9 +1248,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                 inner_shape = x.shape[1:]
             elif inner_shape != x.shape[1:]:
                 raise ValueError(
-                    "inner dimensions don't match in concatenate: {} vs {}".format(
-                        inner_shape, x.shape[1:]
-                    )
+                    f"inner dimensions don't match in concatenate: {inner_shape} vs {x.shape[1:]}"
                 )
             emptyarrays.append(_emptyarray(x))
 

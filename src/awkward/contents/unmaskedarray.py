@@ -88,9 +88,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
     def __init__(self, content, *, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         if content.is_union or content.is_indexed or content.is_option:
             raise TypeError(

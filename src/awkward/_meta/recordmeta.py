@@ -136,8 +136,6 @@ class RecordMeta(Meta, Generic[T]):
             index = self.field_to_index(index_or_field)
         else:
             raise TypeError(
-                "index_or_field must be an integer (index) or string (field), not {}".format(
-                    repr(index_or_field)
-                )
+                f"index_or_field must be an integer (index) or string (field), not {index_or_field!r}"
             )
         return self._contents[index]  # type: ignore[index]
