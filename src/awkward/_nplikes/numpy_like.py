@@ -558,9 +558,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         ...
 
     @abstractmethod
-    def round(
-        self, x: ArrayLikeT, decimals: int = 0, maybe_out: ArrayLikeT | None = None
-    ) -> ArrayLikeT:
+    def round(self, x: ArrayLikeT, decimals: int = 0) -> ArrayLikeT:
         ...
 
     @classmethod

@@ -229,6 +229,10 @@
     generated/ak.nan_to_num
     generated/ak.values_astype
     generated/ak.strings_astype
+    generated/ak.round
+    generated/ak.real
+    generated/ak.imag
+    generated/ak.angle
 
 .. toctree::
     :caption: Arrays of categorical data

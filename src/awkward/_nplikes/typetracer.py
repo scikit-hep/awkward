@@ -1460,7 +1460,6 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         self,
         x: TypeTracerArray,
         decimals: int = 0,
-        maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
