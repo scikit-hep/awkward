@@ -3371,11 +3371,11 @@ kernels:
           # For each sublist
           for k_sublist in range(offsetslength - 1):
               # Copy from src to dst
-              for j_from_char in range(fromoffsets[k_sublist],fromoffsets[k_sublist+1]):
+              for j_from_char in range(fromoffsets[k_sublist], fromoffsets[k_sublist + 1]):
                   toptr[l_to_char] = fromptr[j_from_char]
                   l_to_char += 1
               # Pad to remaining width
-              n_to_pad = target - (fromoffsets[k_sublist+1] - fromoffsets[k_sublist])
+              n_to_pad = target - (fromoffsets[k_sublist + 1] - fromoffsets[k_sublist])
               for j_from_char in range(n_to_pad):
                   toptr[l_to_char] = 0
                   l_to_char += 1

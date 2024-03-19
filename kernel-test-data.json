@@ -20469,6 +20469,77 @@
             ]
         },
         {
+            "name": "awkward_NumpyArray_pad_zero_to_length",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 2, 3],
+                        "fromptr": [0, 1, 3],
+                        "offsetslength": 3,
+                        "target": 2
+                    },
+                    "outputs": {
+                        "toptr": [0, 1, 3, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [],
+                        "fromptr": [],
+                        "offsetslength": 0,
+                        "target": 0
+                    },
+                    "outputs": {
+                        "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 2, 2, 4],
+                        "fromptr": [1, 3, 3, 5],
+                        "offsetslength": 4,
+                        "target": 4
+                    },
+                    "outputs": {
+                        "toptr": [1, 3, 0, 0, 0, 0, 0, 0, 3, 5, 0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 0],
+                        "fromptr": [3, 5],
+                        "offsetslength": 2,
+                        "target": 4
+                    },
+                    "outputs": {
+                        "toptr": [0, 0, 0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 1, 2, 3, 5],
+                        "fromptr": [0, 3, 3, 5, 6],
+                        "offsetslength": 5,
+                        "target": 4
+                    },
+                    "outputs": {
+                        "toptr": [0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 5, 6, 0, 0]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
             "status": true,
             "tests": [

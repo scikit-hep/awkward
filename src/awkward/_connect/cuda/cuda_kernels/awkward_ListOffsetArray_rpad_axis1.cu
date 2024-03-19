@@ -7,7 +7,6 @@
 //     mask = diff > target
 //     scan_in_array = cupy.where(mask, diff, target)
 //     scan_in_array = cupy.cumsum(scan_in_array)
-//     print(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_rpad_axis1", toindex.dtype, fromoffsets.dtype]))(grid, block, (toindex, fromoffsets, fromlength, target, scan_in_array, invocation_index, err_code))
 // out["awkward_ListOffsetArray_rpad_axis1", {dtype_specializations}] = None
 // END PYTHON
