@@ -13,6 +13,7 @@ from awkward._meta.bitmaskedmeta import BitMaskedMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._regularize import is_integer, is_integer_like
@@ -471,10 +472,17 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 self._lsb_order,
             )
         )
-        return bytemask.data[: self._length].view(np.bool_)
+        return bytemask.data[
+            : self._backend.index_nplike.shape_item_as_index(self._length)
+        ].view(np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
+
+    def _is_getitem_at_placeholder(self) -> bool:
+        if isinstance(self._mask, PlaceholderArray):
+            return True
+        return self._content._is_getitem_at_placeholder()
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
@@ -568,7 +576,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         return self.to_ByteMaskedArray().project(mask)
 
     def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
-        return self.to_ByteMaskedArray._offsets_and_flattened(axis, depth)
+        return self.to_ByteMaskedArray()._offsets_and_flattened(axis, depth)
 
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?

@@ -1,12 +1,12 @@
 /*Styles for our try-awkward-array demo*/
-[role=main] {
+.bd-article {
     flex-grow: 1;
     /*Allow children to grow*/
     display: flex;
     flex-direction: column;
 }
 
-[role=main] > * {
+.bd-article > * {
     /*Accomodate parent size*/
     flex-grow: 1;
     /*Allow children to grow*/

@@ -12,6 +12,7 @@ from awkward._meta.indexedoptionmeta import IndexedOptionMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._parameters import (
@@ -301,6 +302,11 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
+
+    def _is_getitem_at_placeholder(self) -> bool:
+        if isinstance(self._index, PlaceholderArray):
+            return True
+        return self._content._is_getitem_at_placeholder()
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:

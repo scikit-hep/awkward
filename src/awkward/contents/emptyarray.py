@@ -171,6 +171,9 @@ class EmptyArray(EmptyMeta, Content):
     def _getitem_nothing(self):
         return self
 
+    def _is_getitem_at_placeholder(self) -> bool:
+        return False
+
     def _getitem_at(self, where: IndexType):
         raise ak._errors.index_error(self, where, "array is empty")
 

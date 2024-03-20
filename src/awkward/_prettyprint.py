@@ -71,7 +71,14 @@ is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
 # to form an error string: private reimplementation of ak.Array.__getitem__
 
 
+class PlaceholderValue:
+    def __str__(self):
+        return "??"
+
+
 def get_at(data: Content, index: int):
+    if data._layout._is_getitem_at_placeholder():
+        return PlaceholderValue()
     out = data._layout._getitem_at(index)
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
@@ -342,7 +349,6 @@ def valuestr(
     if isinstance(data, (ak.highlevel.Array, ak.highlevel.Record)) and (
         not data.layout.backend.nplike.known_data
     ):
-        data.layout._touch_data(recursive=True)
         if isinstance(data, ak.highlevel.Array):
             return "[...]"
 

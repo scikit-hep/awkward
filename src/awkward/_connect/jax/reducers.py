@@ -111,7 +111,16 @@ class Count(JAXReducer):
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        raise RuntimeError("Cannot differentiate through count_zero")
+        assert isinstance(array, ak.contents.NumpyArray)
+        result = jax.numpy.ones_like(array.data, dtype=array.dtype)
+        result = jax.ops.segment_sum(result, parents.data)
+
+        if np.issubdtype(array.dtype, np.complexfloating):
+            return ak.contents.NumpyArray(
+                result.view(array.dtype), backend=array.backend
+            )
+        else:
+            return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 @overloads(_reducers.CountNonzero)
@@ -169,7 +178,7 @@ class Sum(JAXReducer):
             return ak.contents.NumpyArray(
                 array.backend.nplike.asarray(result, dtype=array.dtype)
             )
-        elif array.dtype.type in (np.complex128, np.complex64):
+        elif np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(result.view(array.dtype))
         else:
             return ak.contents.NumpyArray(result, backend=array.backend)
@@ -200,7 +209,7 @@ class Prod(JAXReducer):
             jax.ops.segment_sum(jax.numpy.log(array.data), parents.data)
         )
 
-        if array.dtype.type in (np.complex128, np.complex64):
+        if np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
                 result.view(array.dtype), backend=array.backend
             )
@@ -318,7 +327,7 @@ class Min(JAXReducer):
         result = jax.ops.segment_min(array.data, parents.data)
         result = jax.numpy.minimum(result, self._min_initial(self.initial, array.dtype))
 
-        if array.dtype.type in (np.complex128, np.complex64):
+        if np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
                 array.backend.nplike.asarray(
                     result.view(array.dtype), dtype=array.dtype
@@ -379,7 +388,7 @@ class Max(JAXReducer):
         result = jax.ops.segment_max(array.data, parents.data)
 
         result = jax.numpy.maximum(result, self._max_initial(self.initial, array.dtype))
-        if array.dtype.type in (np.complex128, np.complex64):
+        if np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
                 array.backend.nplike.asarray(
                     result.view(array.dtype), dtype=array.dtype

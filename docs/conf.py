@@ -46,7 +46,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "myst_nb",
     # Preserve old links
-    "jupyterlite_sphinx",
+    # "jupyterlite_sphinx",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
 ]
