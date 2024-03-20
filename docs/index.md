@@ -101,7 +101,7 @@ Spotted a typo in the documentation? Want to add to the codebase? The contributi
 :link: https://juliahep.github.io/AwkwardArray.jl/dev/
 :class-card: admonition warning
 
-{fas}`history` Looking for the documentation for Awkward Array in Julia? Click this card.
+{fas}`ellipsis` Looking for the documentation for Awkward Array in Julia? Click this card.
 ::::
     
 :::::
