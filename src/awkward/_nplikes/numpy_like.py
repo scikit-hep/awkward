@@ -83,7 +83,7 @@ class NumpyMetadata(PublicSingleton):
     datetime_data = staticmethod(numpy.datetime_data)
     issubdtype = staticmethod(numpy.issubdtype)
 
-    AxisError = numpy.AxisError
+    AxisError = numpy.exceptions.AxisError
 
 
 if hasattr(numpy, "float16"):

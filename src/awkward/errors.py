@@ -11,4 +11,4 @@ class FieldNotFoundError(IndexError):
     ...
 
 
-AxisError = numpy.AxisError
+AxisError = numpy.exceptions.AxisError
