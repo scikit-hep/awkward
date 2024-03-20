@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 from __future__ import annotations
 
-from numpy.core import umath as um
+from numpy._core import umath as um
 
 
 def _disables_array_ufunc(obj):
