@@ -1438,6 +1438,33 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         try_touch_data(x)
         return TypeTracerArray._new(np.dtype(np.bool_), shape=x.shape)
 
+    def real(self, x: TypeTracerArray) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        real_type = numpy.real(numpy.zeros(0, dtype=x.dtype)).dtype
+        return TypeTracerArray._new(real_type, shape=x.shape)
+
+    def imag(self, x: TypeTracerArray) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        real_type = numpy.imag(numpy.zeros(0, dtype=x.dtype)).dtype
+        return TypeTracerArray._new(real_type, shape=x.shape)
+
+    def angle(self, x: TypeTracerArray, deg: bool = False) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        float_type = numpy.angle(numpy.zeros(0, dtype=x.dtype)).dtype
+        return TypeTracerArray._new(float_type, shape=x.shape)
+
+    def round(
+        self,
+        x: TypeTracerArray,
+        decimals: int = 0,
+    ) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        return TypeTracerArray._new(x.dtype, shape=x.shape)
+
     ############################ reducers
 
     def all(
