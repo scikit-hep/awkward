@@ -8,7 +8,7 @@ html[data-theme="dark"] .sd-card {
     background: var(--pst-color-surface);
 }
 
-.sd-card-header .fas {
+.sd-card-header .svg-inline--fa {
     font-size: 3em;
 }
 

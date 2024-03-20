@@ -78,7 +78,7 @@ jobs:
       run: pipx run nox -s prepare
 
     - name: Build distributions
-      run: pipx run build --sdist --wheel
+      run: pipx run build
 
     - name: Check metadata
       run: pipx run twine check dist/*
@@ -113,7 +113,7 @@ jobs:
         name: distributions
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.11
+    - uses: pypa/gh-action-pypi-publish@v1.8.12
 
   publish-headers:
     name: "Publish header-only libraries alongside release"
