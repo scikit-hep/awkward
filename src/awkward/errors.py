@@ -7,7 +7,7 @@ import numpy
 __all__ = ("FieldNotFoundError", "AxisError")
 
 
-class FieldNotFoundError(IndexError): ...
+class FieldNotFoundError(IndexError): ...  # pylint: disable
 
 
 AxisError = numpy.AxisError
