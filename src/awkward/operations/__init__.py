@@ -94,6 +94,7 @@ from awkward.operations.ak_to_list import *
 from awkward.operations.ak_to_numpy import *
 from awkward.operations.ak_to_packed import *
 from awkward.operations.ak_to_parquet import *
+from awkward.operations.ak_to_parquet_dataset import *
 from awkward.operations.ak_to_parquet_row_groups import *
 from awkward.operations.ak_to_rdataframe import *
 from awkward.operations.ak_to_regular import *
