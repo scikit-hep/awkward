@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (tooffsets, slicestarts, slicestops, sliceouterlen, fromstarts, fromstops, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(sliceouterlen, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(sliceouterlen, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_descend_a", tooffsets.dtype, slicestarts.dtype, slicestops.dtype, fromstarts.dtype, fromstops.dtype]))(grid, block, (tooffsets, slicestarts, slicestops, sliceouterlen, fromstarts, fromstops, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_descend_b", tooffsets.dtype, slicestarts.dtype, slicestops.dtype, fromstarts.dtype, fromstops.dtype]))(grid, block, (tooffsets, slicestarts, slicestops, sliceouterlen, fromstarts, fromstops, scan_in_array, invocation_index, err_code))

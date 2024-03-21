@@ -301,6 +301,7 @@ def gettypename(spectype):
 def genpykernels():
     print("Generating Python kernels")
     prefix = """
+import numpy
 from numpy import uint8
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
@@ -732,6 +733,7 @@ cuda_kernels_tests = [
     "awkward_RegularArray_reduce_nonlocal_preparenext",
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
+    "awkward_ListArray_combinations_length",
     "awkward_ListArray_getitem_jagged_carrylen",
     "awkward_ListArray_getitem_jagged_descend",
     "awkward_ListArray_getitem_jagged_expand",
@@ -741,9 +743,11 @@ cuda_kernels_tests = [
     "awkward_ListArray_getitem_next_at",
     "awkward_ListArray_getitem_next_range_counts",
     "awkward_ListArray_rpad_and_clip_length_axis1",
+    "awkward_ListArray_rpad_axis1",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     "awkward_ListArray_getitem_next_range_spreadadvanced",
     "awkward_ListArray_localindex",
+    "awkward_NumpyArray_pad_zero_to_length",
     "awkward_NumpyArray_reduce_adjust_starts_64",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_RegularArray_getitem_next_at",
@@ -757,6 +761,7 @@ cuda_kernels_tests = [
     "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
     "awkward_IndexedArray_flatten_nextcarry",
+    "awkward_IndexedArray_flatten_none2empty",
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
     "awkward_IndexedArray_index_of_nulls",
@@ -766,10 +771,11 @@ cuda_kernels_tests = [
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+    "awkward_ListOffsetArray_local_preparenext_64",
     "awkward_ListOffsetArray_rpad_and_clip_axis1",
     "awkward_ListOffsetArray_rpad_length_axis1",
     "awkward_ListOffsetArray_toRegularArray",
-    # "awkward_ListOffsetArray_rpad_axis1",
+    "awkward_ListOffsetArray_rpad_axis1",
     "awkward_MaskedArray_getitem_next_jagged_project",
     "awkward_UnionArray_project",
     "awkward_ListOffsetArray_drop_none_indexes",
@@ -789,6 +795,7 @@ cuda_kernels_tests = [
     "awkward_reduce_sum_bool",
     "awkward_reduce_prod_bool",
     "awkward_reduce_countnonzero",
+    "awkward_sorting_ranges",
     "awkward_sorting_ranges_length",
 ]
 
@@ -1110,7 +1117,7 @@ def genunittests():
             os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit", func),
             "w",
         ) as file:
-            file.write("import pytest\nimport kernels\n\n")
+            file.write("import pytest\nimport numpy\nimport kernels\n\n")
             for test in function["tests"]:
                 num += 1
                 funcName = "def test_" + function["name"] + "_" + str(num) + "():\n"
