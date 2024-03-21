@@ -378,7 +378,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             elif is_unknown_array(item) and np.issubdtype(item, np.bool_):
                 key_parts.append(self.nplike.nonzero(item)[0])
             else:
-                key_parts.append(item)
+                key_parts.append(item)  # type: ignore[arg-type]
         key = tuple(key_parts)
 
         # 3. Apply Indexing
