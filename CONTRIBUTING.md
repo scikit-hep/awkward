@@ -22,11 +22,10 @@ Please [make the pull request a draft](https://github.blog/2019-02-14-introducin
 
 ### Getting your pull request reviewed
 
-Currently, we have three regular reviewers of pull requests:
+Currently, we have two regular reviewers of pull requests:
 
-  * Angus Hollands ([agoose77](https://github.com/agoose77))
-  * Ioana Ifrim ([ioanaif](https://github.com/ioanaif))
   * Jim Pivarski ([jpivarski](https://github.com/jpivarski))
+  * Topher Cawlfield ([tcawlfield](https://github.com/tcawlfield))
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
 
@@ -142,6 +141,26 @@ Furthermore, if you have an Nvidia GPU and CuPy installed, you can run the CUDA 
 python -m pytest tests-cuda-kernels
 python -m pytest tests-cuda
 ```
+
+#### Unit tests for the kernels
+
+You can also run additional unit tests that have more test coverage for all the low-level kernels for even more detailed fine-grained testing.
+
+For Python Kernels:
+```bash
+python -m pytest -n auto awkward-cpp/tests-spec-explicit
+```
+
+For CPU Kernels:
+```bash
+python -m pytest -n auto awkward-cpp/tests-cpu-kernels-explicit
+```
+
+For CUDA Kernels
+```bash
+python -m pytest tests-cuda-kernels-explicit
+```
+
 
 ### Building wheels
 
