@@ -7,9 +7,9 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "29"
+version = "30"
 dependencies = [
-    "numpy>=1.18.0",
+    "numpy>=1.18.0,<2.0",
     "importlib_resources;python_version < \"3.9\""
 ]
 readme = "README.md"

@@ -82,6 +82,7 @@ def test_prototypical_example():
         "numpy-pt",
     ]
 
+    # changed behavior: printing should not touch data anymore
     print(restructured.muons.mass)
     assert report.data_touched == [
         "listoffset-1",
@@ -90,5 +91,4 @@ def test_prototypical_example():
         "listoffset-4",
         "numpy-eta",
         "numpy-pt",
-        "numpy-mass",
     ]
