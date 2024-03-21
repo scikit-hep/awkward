@@ -23,13 +23,11 @@ class Reducer(Protocol):
     # Does the output correspond to array positions?
     @property
     @abstractmethod
-    def needs_position(self) -> bool:
-        ...
+    def needs_position(self) -> bool: ...
 
     @property
     @abstractmethod
-    def preferred_dtype(self) -> DTypeLike:
-        ...
+    def preferred_dtype(self) -> DTypeLike: ...
 
     @classmethod
     def highlevel_function(cls):
@@ -43,8 +41,7 @@ class Reducer(Protocol):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        ...
+    ) -> ak.contents.NumpyArray: ...
 
 
 class KernelReducer(Reducer):

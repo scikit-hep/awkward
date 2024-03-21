@@ -518,9 +518,7 @@ def gencpukerneltests(specdict):
                         elif count == 2:
                             f.write(
                                 " " * 4
-                                + "{0} = ctypes.pointer(ctypes.cast((ctypes.c_{1}*len({0}[0]))(*{0}[0]),ctypes.POINTER(ctypes.c_{1})))\n".format(
-                                    arg, typename
-                                )
+                                + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
                             )
                 f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
                 args = ""
@@ -635,9 +633,7 @@ def gencpuunittests(specdict):
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + "{0} = ctypes.pointer(ctypes.cast((ctypes.c_{1}*len({0}[0]))(*{0}[0]),ctypes.POINTER(ctypes.c_{1})))\n".format(
-                                            arg, typename
-                                        )
+                                        + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
                                     )
                         for arg, val in test["inputs"].items():
                             typename = remove_const(
@@ -660,9 +656,7 @@ def gencpuunittests(specdict):
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + "{0} = ctypes.pointer(ctypes.cast((ctypes.c_{1}*len({0}[0]))(*{0}[0]),ctypes.POINTER(ctypes.c_{1})))\n".format(
-                                            arg, typename
-                                        )
+                                        + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
                                     )
 
                         f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
@@ -882,9 +876,7 @@ def gencudakerneltests(specdict):
                             if count == 1:
                                 f.write(
                                     " " * 4
-                                    + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                        arg, val, typename
-                                    )
+                                    + f"{arg} = cupy.array({val}, dtype=cupy.{typename})\n"
                                 )
                                 dtypes.append("cupy." + typename)
                             elif count == 2:
@@ -1023,18 +1015,12 @@ def gencudaunittests(specdict):
                                 if count == 1:
                                     f.write(
                                         " " * 4
-                                        + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                            arg,
-                                            [gettypeval(typename)] * len(val),
-                                            typename,
-                                        )
+                                        + f"{arg} = cupy.array({[gettypeval(typename)] * len(val)}, dtype=cupy.{typename})\n"
                                     )
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                            arg, val, typename
-                                        )
+                                        + f"{arg} = cupy.array({val}, dtype=cupy.{typename})\n"
                                     )
                         for arg, val in test["inputs"].items():
                             typename = remove_const(
@@ -1056,16 +1042,12 @@ def gencudaunittests(specdict):
                                 if count == 1:
                                     f.write(
                                         " " * 4
-                                        + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                            arg, val, typename
-                                        )
+                                        + f"{arg} = cupy.array({val}, dtype=cupy.{typename})\n"
                                     )
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                            arg, val, typename
-                                        )
+                                        + f"{arg} = cupy.array({val}, dtype=cupy.{typename})\n"
                                     )
                         cuda_string = (
                             "funcC = cupy_backend['"
