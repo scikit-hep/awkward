@@ -42,6 +42,7 @@
     generated/ak.to_numpy
     generated/ak.to_packed
     generated/ak.to_parquet
+    generated/ak.to_parquet_dataset
     generated/ak.to_parquet_row_groups
     generated/ak.to_rdataframe
 
@@ -229,6 +230,10 @@
     generated/ak.nan_to_num
     generated/ak.values_astype
     generated/ak.strings_astype
+    generated/ak.round
+    generated/ak.real
+    generated/ak.imag
+    generated/ak.angle
 
 .. toctree::
     :caption: Arrays of categorical data

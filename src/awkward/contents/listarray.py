@@ -128,40 +128,32 @@ class ListArray(ListMeta[Content], Content):
             np.dtype(np.int64),
         ):
             raise TypeError(
-                "{} 'starts' must be an Index with dtype in (int32, uint32, int64), "
-                "not {}".format(type(self).__name__, repr(starts))
+                f"{type(self).__name__} 'starts' must be an Index with dtype in (int32, uint32, int64), "
+                f"not {starts!r}"
             )
         if not (isinstance(stops, Index) and starts.dtype == stops.dtype):
             raise TypeError(
-                "{} 'stops' must be an Index with the same dtype as 'starts' ({}), "
-                "not {}".format(type(self).__name__, repr(starts.dtype), repr(stops))
+                f"{type(self).__name__} 'stops' must be an Index with the same dtype as 'starts' ({starts.dtype!r}), "
+                f"not {stops!r}"
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         if content.backend.index_nplike.known_data and starts.length > stops.length:
             raise ValueError(
-                "{} len(starts) ({}) must be <= len(stops) ({})".format(
-                    type(self).__name__, starts.length, stops.length
-                )
+                f"{type(self).__name__} len(starts) ({starts.length}) must be <= len(stops) ({stops.length})"
             )
 
         if parameters is not None and parameters.get("__array__") == "string":
             if not content.is_numpy or not content.parameter("__array__") == "char":
                 raise ValueError(
-                    "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} is a string, so its 'content' must be uint8 NumpyArray of char, not {content!r}"
                 )
         if parameters is not None and parameters.get("__array__") == "bytestring":
             if not content.is_numpy or not content.parameter("__array__") == "byte":
                 raise ValueError(
-                    "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {content!r}"
                 )
 
         assert starts.nplike is content.backend.index_nplike
@@ -417,9 +409,7 @@ class ListArray(ListMeta[Content], Content):
             and offsets.length - 1 != self._starts.length
         ):
             raise AssertionError(
-                "cannot broadcast RegularArray of length {} to length {}".format(
-                    self._starts.length, offsets.length - 1
-                )
+                f"cannot broadcast RegularArray of length {self._starts.length} to length {offsets.length - 1}"
             )
 
         nextcarry = ak.index.Index64.empty(
@@ -464,9 +454,7 @@ class ListArray(ListMeta[Content], Content):
                 ak.contents.ListArray(
                     slicestarts, slicestops, slicecontent, parameters=None
                 ),
-                "cannot fit jagged slice with length {} into {} of size {}".format(
-                    slicestarts.length, type(self).__name__, self.length
-                ),
+                f"cannot fit jagged slice with length {slicestarts.length} into {type(self).__name__} of size {self.length}",
             )
 
         if isinstance(slicecontent, ak.contents.ListOffsetArray):
@@ -699,9 +687,7 @@ class ListArray(ListMeta[Content], Content):
                 )
             else:
                 raise AssertionError(
-                    "expected ListOffsetArray from ListArray._getitem_next_jagged, got {}".format(
-                        type(out).__name__
-                    )
+                    f"expected ListOffsetArray from ListArray._getitem_next_jagged, got {type(out).__name__}"
                 )
 
         elif isinstance(slicecontent, ak.contents.EmptyArray):
@@ -709,9 +695,7 @@ class ListArray(ListMeta[Content], Content):
 
         else:
             raise AssertionError(
-                "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {}".format(
-                    type(slicecontent).__name__
-                )
+                f"expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {type(slicecontent).__name__}"
             )
 
     def _getitem_next(

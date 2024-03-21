@@ -246,6 +246,8 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     _dtype: numpy.dtype
     _shape: tuple[ShapeItem, ...]
 
+    runtime_typechecks = True
+
     def __new__(cls, *args, **kwargs):
         raise TypeError(
             "internal_error: the `TypeTracer` nplike's `TypeTracerArray` object should never be directly instantiated"
@@ -267,12 +269,13 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         self.form_key = form_key
         self.report = report
 
-        if not isinstance(shape, tuple):
-            raise TypeError("typetracer shape must be a tuple")
-        if not all(isinstance(x, int) or x is unknown_length for x in shape):
-            raise TypeError("typetracer shape must be integers or unknown-length")
-        if not isinstance(dtype, np.dtype):
-            raise TypeError("typetracer dtype must be an instance of np.dtype")
+        if cls.runtime_typechecks:
+            if not isinstance(shape, tuple):
+                raise TypeError("typetracer shape must be a tuple")
+            if not all(isinstance(x, int) or x is unknown_length for x in shape):
+                raise TypeError("typetracer shape must be integers or unknown-length")
+            if not isinstance(dtype, np.dtype):
+                raise TypeError("typetracer dtype must be an instance of np.dtype")
         self._shape = shape
         self._dtype = dtype
 
@@ -460,7 +463,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             elif is_unknown_array(item) and np.issubdtype(item, np.bool_):
                 key_parts.append(self.nplike.nonzero(item)[0])
             else:
-                key_parts.append(item)
+                key_parts.append(item)  # type: ignore[arg-type]
         key = tuple(key_parts)
 
         # 3. Apply Indexing
@@ -1330,9 +1333,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                 inner_shape = x.shape[1:]
             elif inner_shape != x.shape[1:]:
                 raise ValueError(
-                    "inner dimensions don't match in concatenate: {} vs {}".format(
-                        inner_shape, x.shape[1:]
-                    )
+                    f"inner dimensions don't match in concatenate: {inner_shape} vs {x.shape[1:]}"
                 )
             emptyarrays.append(_emptyarray(x))
 
@@ -1519,6 +1520,33 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
         return TypeTracerArray._new(np.dtype(np.bool_), shape=x.shape)
+
+    def real(self, x: TypeTracerArray) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        real_type = numpy.real(numpy.zeros(0, dtype=x.dtype)).dtype
+        return TypeTracerArray._new(real_type, shape=x.shape)
+
+    def imag(self, x: TypeTracerArray) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        real_type = numpy.imag(numpy.zeros(0, dtype=x.dtype)).dtype
+        return TypeTracerArray._new(real_type, shape=x.shape)
+
+    def angle(self, x: TypeTracerArray, deg: bool = False) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        float_type = numpy.angle(numpy.zeros(0, dtype=x.dtype)).dtype
+        return TypeTracerArray._new(float_type, shape=x.shape)
+
+    def round(
+        self,
+        x: TypeTracerArray,
+        decimals: int = 0,
+    ) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        return TypeTracerArray._new(x.dtype, shape=x.shape)
 
     ############################ reducers
 

@@ -14,8 +14,7 @@ jax.config.update("jax_enable_x64", True)
 ak.jax.register_and_check()
 
 
-class GradBehavior(ak.Array):
-    ...
+class GradBehavior(ak.Array): ...
 
 
 def test():

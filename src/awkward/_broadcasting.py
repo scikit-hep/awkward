@@ -140,13 +140,7 @@ def ensure_common_length(inputs, options: BroadcastOptions) -> ShapeItem:
             continue
         if other_content.length != length:
             raise ValueError(
-                "cannot broadcast {} of length {} with {} of length {}{}".format(
-                    type(content).__name__,
-                    length,
-                    type(other_content).__name__,
-                    other_content.length,
-                    in_function(options),
-                )
+                f"cannot broadcast {type(content).__name__} of length {length} with {type(other_content).__name__} of length {other_content.length}{in_function(options)}"
             )
     return length
 
@@ -619,9 +613,7 @@ def apply_step(
                     else:
                         raise ValueError(
                             "cannot broadcast RegularArray of size "
-                            "{} with RegularArray of size {}{}".format(
-                                x.size, dim_size, in_function(options)
-                            )
+                            f"{x.size} with RegularArray of size {dim_size}{in_function(options)}"
                         )
                 else:
                     nextinputs.append(x)
@@ -786,12 +778,8 @@ def apply_step(
                     continue
                 elif length != tags.shape[0]:
                     raise ValueError(
-                        "cannot broadcast UnionArray of length {} "
-                        "with UnionArray of length {}{}".format(
-                            length,
-                            tags.shape[0],
-                            in_function(options),
-                        )
+                        f"cannot broadcast UnionArray of length {length} "
+                        f"with UnionArray of length {tags.shape[0]}{in_function(options)}"
                     )
 
         tags = backend.index_nplike.empty(length, dtype=np.int8)

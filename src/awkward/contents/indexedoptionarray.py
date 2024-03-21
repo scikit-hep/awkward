@@ -109,14 +109,12 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             )
         ):
             raise TypeError(
-                "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
-                "not {}".format(type(self).__name__, repr(index))
+                f"{type(self).__name__} 'index' must be an Index with dtype in (int32, uint32, int64), "
+                f"not {index!r}"
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         is_cat = parameters is not None and parameters.get("__array__") == "categorical"
         if (content.is_union and not is_cat) or content.is_indexed or content.is_option:
@@ -419,9 +417,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 ak.contents.ListArray(
                     slicestarts, slicestops, slicecontent, parameters=None
                 ),
-                "cannot fit jagged slice with length {} into {} of size {}".format(
-                    slicestarts.length, type(self).__name__, self.length
-                ),
+                f"cannot fit jagged slice with length {slicestarts.length} into {type(self).__name__} of size {self.length}",
             )
 
         numnull, nextcarry, outindex = self._nextcarry_outindex()
@@ -517,9 +513,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         if mask is not None:
             if self._backend.nplike.known_data and self._index.length != mask.length:
                 raise ValueError(
-                    "mask length ({}) is not equal to {} length ({})".format(
-                        mask.length(), type(self).__name__, self._index.length
-                    )
+                    f"mask length ({mask.length()}) is not equal to {type(self).__name__} length ({self._index.length})"
                 )
             nextindex = ak.index.Index64.empty(
                 self._index.length, self._backend.index_nplike
@@ -1498,9 +1492,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     def _validity_error(self, path):
         if self.parameter("__array__") == "categorical":
             if not ak._do.is_unique(self._content):
-                return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
-                    path, type(self)
-                )
+                return f'at {path} ("{type(self)}"): __array__ = "categorical" requires contents to be unique'
 
         assert self.index.nplike is self._backend.index_nplike
         error = self._backend["awkward_IndexedArray_validity", self.index.dtype.type](
