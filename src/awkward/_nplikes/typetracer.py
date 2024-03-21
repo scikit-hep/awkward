@@ -151,7 +151,7 @@ class ImmutableBitSet(Set):
         if self._is_filled is None:
             return 0
         else:
-            return numpy.unpackbits(self._is_filled).sum()
+            return int(numpy.unpackbits(self._is_filled).sum())
 
 
 class FillableByteSet(Set):
@@ -183,7 +183,7 @@ class FillableByteSet(Set):
                 yield label
 
     def __len__(self) -> int:
-        return self._is_filled.sum()
+        return int(self._is_filled.sum())
 
 
 class TypeTracerReport:
