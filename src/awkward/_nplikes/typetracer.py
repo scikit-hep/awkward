@@ -164,6 +164,8 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     _dtype: numpy.dtype
     _shape: tuple[ShapeItem, ...]
 
+    runtime_typechecks = True
+
     def __new__(cls, *args, **kwargs):
         raise TypeError(
             "internal_error: the `TypeTracer` nplike's `TypeTracerArray` object should never be directly instantiated"
@@ -185,12 +187,13 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         self.form_key = form_key
         self.report = report
 
-        if not isinstance(shape, tuple):
-            raise TypeError("typetracer shape must be a tuple")
-        if not all(isinstance(x, int) or x is unknown_length for x in shape):
-            raise TypeError("typetracer shape must be integers or unknown-length")
-        if not isinstance(dtype, np.dtype):
-            raise TypeError("typetracer dtype must be an instance of np.dtype")
+        if cls.runtime_typechecks:
+            if not isinstance(shape, tuple):
+                raise TypeError("typetracer shape must be a tuple")
+            if not all(isinstance(x, int) or x is unknown_length for x in shape):
+                raise TypeError("typetracer shape must be integers or unknown-length")
+            if not isinstance(dtype, np.dtype):
+                raise TypeError("typetracer dtype must be an instance of np.dtype")
         self._shape = shape
         self._dtype = dtype
 
