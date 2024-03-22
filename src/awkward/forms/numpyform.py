@@ -59,9 +59,7 @@ class NumpyForm(NumpyMeta, Form):
         )
         if not isinstance(inner_shape, Iterable):
             raise TypeError(
-                "{} 'inner_shape' must be iterable, not {}".format(
-                    type(self).__name__, repr(inner_shape)
-                )
+                f"{type(self).__name__} 'inner_shape' must be iterable, not {inner_shape!r}"
             )
 
         self._primitive = primitive

@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (tocarry, outindex, mask, length, validwhen, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(length, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_outindex_a', tocarry.dtype, outindex.dtype, mask.dtype]))(grid, block, (tocarry, outindex, mask, length, validwhen, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_outindex_b', tocarry.dtype, outindex.dtype, mask.dtype]))(grid, block, (tocarry, outindex, mask, length, validwhen, scan_in_array, invocation_index, err_code))
@@ -28,8 +28,6 @@ awkward_ByteMaskedArray_getitem_nextcarry_outindex_a(
     if (thread_id < length) {
       if ((mask[thread_id] != 0) == validwhen) {
         scan_in_array[thread_id] = 1;
-      } else {
-        scan_in_array[thread_id] = 0;
       }
     }
   }
