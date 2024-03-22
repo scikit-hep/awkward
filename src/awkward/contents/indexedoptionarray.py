@@ -1594,26 +1594,15 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
                 data[index_nplike.logical_not(mask0)] = content
 
-                if np.issubdtype(content.dtype, np.bool_):
-                    data[mask0] = False
-                elif np.issubdtype(content.dtype, np.floating):
-                    data[mask0] = np.nan
-                elif np.issubdtype(content.dtype, np.complexfloating):
-                    data[mask0] = np.nan + np.nan * 1j
-                elif np.issubdtype(content.dtype, np.integer):
-                    data[mask0] = np.iinfo(content.dtype).max
-                elif np.issubdtype(content.dtype.type, np.datetime64) or np.issubdtype(
-                    content.dtype.type, np.timedelta64
-                ):
-                    data[mask0] = nplike.asarray(
-                        [np.iinfo(np.int64).max], dtype=content.dtype
-                    )[0]
-                elif np.issubdtype(content.dtype, np.str_):
-                    data[mask0] = ""
-                elif np.issubdtype(content.dtype, np.bytes_):
-                    data[mask0] = b""
+                if content.dtype.names is not None:
+                    missing_data = tuple(
+                        create_missing_data(each_dtype)
+                        for each_dtype, _ in content.dtype.fields.values()
+                    )
                 else:
-                    raise AssertionError(f"unrecognized dtype: {content.dtype}")
+                    missing_data = create_missing_data(content.dtype)
+
+                data[mask0] = missing_data
 
                 return nplike.ma.MaskedArray(data, mask)
             else:
@@ -1775,3 +1764,30 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 other.content, index_dtype, numpyarray, all_parameters
             )
         )
+
+
+def create_missing_data(dtype):
+    """Create missing data based on the input dtype
+
+    Missing data are represented differently based on the Numpy array
+    dtype, this function returns the proper missing data representation
+    given the input dtype
+    """
+    if np.issubdtype(dtype, np.bool_):
+        return False
+    elif np.issubdtype(dtype, np.floating):
+        return np.nan
+    elif np.issubdtype(dtype, np.complexfloating):
+        return np.nan + np.nan * 1j
+    elif np.issubdtype(dtype, np.integer):
+        return np.iinfo(dtype).max
+    elif np.issubdtype(dtype.type, np.datetime64) or np.issubdtype(
+        dtype.type, np.timedelta64
+    ):
+        return nplike.asarray([np.iinfo(np.int64).max], dtype=dtype)[0]
+    elif np.issubdtype(dtype, np.str_):
+        return ""
+    elif np.issubdtype(dtype, np.bytes_):
+        return b""
+    else:
+        raise AssertionError(f"unrecognized dtype: {dtype}")
