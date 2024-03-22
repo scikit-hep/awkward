@@ -304,6 +304,91 @@ def test_drop_none_all_axes():
         ak.drop_none(cuda_array2, axis=-2).tolist()
 
 
+def test_improved_axis_to_posaxis_is_none():
+    array = ak.Array(
+        [
+            None,
+            [None],
+            [{"x": None, "y": None}],
+            [{"x": [None], "y": [None]}],
+            [{"x": [1], "y": [[None]]}],
+            [{"x": [2], "y": [[1, 2, 3]]}],
+        ]
+    )
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert ak.is_none(array, axis=0).tolist() == ak.is_none(cuda_array, axis=0).tolist()
+
+    assert ak.is_none(array, axis=1).tolist() == ak.is_none(cuda_array, axis=1).tolist()
+
+    assert ak.is_none(array, axis=2).tolist() == ak.is_none(cuda_array, axis=2).tolist()
+
+    with pytest.raises(np.AxisError):
+        ak.is_none(array, axis=3)
+        ak.is_none(cuda_array, axis=3)
+
+    assert (
+        ak.is_none(array, axis=-1).tolist() == ak.is_none(cuda_array, axis=-1).tolist()
+    )
+
+    assert (
+        ak.is_none(array, axis=-2).tolist() == ak.is_none(cuda_array, axis=-2).tolist()
+    )
+
+    with pytest.raises(np.AxisError):
+        ak.is_none(array, axis=-3)
+        ak.is_none(cuda_array, axis=-3)
+
+
+def test_improved_axis_to_posaxis_singletons():
+    array = ak.Array(
+        [
+            None,
+            [None],
+            [{"x": None, "y": None}],
+            [{"x": [None], "y": [None]}],
+            [{"x": [1], "y": [[None]]}],
+            [{"x": [2], "y": [[1, 2, 3]]}],
+        ]
+    )
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert (
+        ak.singletons(array, axis=0).tolist()
+        == ak.singletons(cuda_array, axis=0).tolist()
+    )
+
+    assert (
+        ak.singletons(array, axis=1).tolist()
+        == ak.singletons(cuda_array, axis=1).tolist()
+    )
+
+    assert (
+        ak.singletons(array, axis=2).tolist()
+        == ak.singletons(cuda_array, axis=2).tolist()
+    )
+
+    with pytest.raises(np.AxisError):
+        ak.singletons(array, axis=3)
+        ak.singletons(cuda_array, axis=3)
+
+    assert (
+        ak.singletons(array, axis=-1).tolist()
+        == ak.singletons(cuda_array, axis=-1).tolist()
+    )
+
+    assert (
+        ak.singletons(array, axis=-2).tolist()
+        == ak.singletons(cuda_array, axis=-2).tolist()
+    )
+
+    with pytest.raises(np.AxisError):
+        ak.singletons(array, axis=-3)
+        ak.singletons(cuda_array, axis=-3)
+
+
 # def test_fillna_unionarray():
 #     content1 = ak.operations.from_iter([[], [1.1], [2.2, 2.2]], highlevel=False)
 #     content2 = ak.operations.from_iter([["two", "two"], ["one"], []], highlevel=False)

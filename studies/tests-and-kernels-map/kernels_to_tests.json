@@ -2010,7 +2010,7 @@
         "test_2757_attrs_metadata.py::test_single_arg_ops[argmax]",
         "test_2934_argmin_argmax_bool.py::test"
     ],
-    "awkward_RegularArray_reduce_local_nextparents_64 ~": [
+    "awkward_RegularArray_reduce_local_nextparents_64": [
         "test_0115_generic_reducer_operation.py::test_dimension_optiontype",
         "test_0115_generic_reducer_operation.py::test_keepdims",
         "test_0115_generic_reducer_operation.py::test_nonreducers",
@@ -4398,7 +4398,7 @@
         "test_2769_argsort_all_none.py::test_mixed_none_2d_nonlocal",
         "test_2550_validity_error_recursive.py::test"
     ],
-    "awkward_IndexedArray_numnull_unique ~": [
+    "awkward_IndexedArray_numnull_unique": [
         "test_0404_array_validity_check.py::test_ByteMaskedArray_2",
         "test_0404_array_validity_check.py::test_ByteMaskedArray_0",
         "test_0404_array_validity_check.py::test_BitMaskedArray",
@@ -4516,7 +4516,7 @@
         "test_2754_highlevel_behavior_missing.py::test_reducers[var-1]",
         "test_2918_fix_var_axis_not_minus_one.py::test"
     ],
-    "awkward_NumpyArray_unique_strings_uint8 ~": [
+    "awkward_NumpyArray_unique_strings_uint8": [
         "test_0404_array_validity_check.py::test_ListOffsetArray",
         "test_0404_array_validity_check.py::test_same_categories",
         "test_0404_array_validity_check.py::test_categorical"

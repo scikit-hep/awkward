@@ -864,101 +864,6 @@
             "awkward_UnionArray_simplify_one"
         ]
     },
-    "test_0184_concatenate_operation.py::test_broadcast_and_apply_levels": {
-        "count": 5,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_ListArray_compact_offsets",
-            "awkward_UnionArray_nestedfill_tags_index",
-            "awkward_ListArray_broadcast_tooffsets"
-        ]
-    },
-    "test_0184_concatenate_operation.py::test_concatenate_number": {
-        "count": 2,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_UnionArray_nestedfill_tags_index"
-        ]
-    },
-    "test_0184_concatenate_operation.py::test_even_more": {
-        "count": 5,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_UnionArray_nestedfill_tags_index",
-            "awkward_UnionArray_fillindex_count",
-            "awkward_UnionArray_filltags_const"
-        ]
-    },
-    "test_0184_concatenate_operation.py::test_indexed_array_concatenate": {
-        "count": 12,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_IndexedArray_fill",
-            "awkward_UnionArray_fillna",
-            "awkward_IndexedArray_numnull",
-            "awkward_ListArray_compact_offsets",
-            "awkward_UnionArray_nestedfill_tags_index",
-            "awkward_UnionArray_fillindex_count",
-            "awkward_IndexedArray_flatten_nextcarry",
-            "awkward_ListArray_broadcast_tooffsets",
-            "awkward_UnionArray_filltags_const",
-            "awkward_IndexedArray_fill_count"
-        ]
-    },
-    "test_0184_concatenate_operation.py::test_list_array_concatenate": {
-        "count": 3,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_UnionArray_nestedfill_tags_index"
-        ]
-    },
-    "test_0184_concatenate_operation.py::test_list_offset_array_concatenate": {
-        "count": 9,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_UnionArray_fillna",
-            "awkward_IndexedArray_numnull",
-            "awkward_ListArray_compact_offsets",
-            "awkward_index_rpad_and_clip_axis0",
-            "awkward_UnionArray_nestedfill_tags_index",
-            "awkward_IndexedArray_flatten_nextcarry",
-            "awkward_ListArray_broadcast_tooffsets"
-        ]
-    },
-    "test_0184_concatenate_operation.py::test_listoffsetarray_concatenate": {
-        "count": 3,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_UnionArray_nestedfill_tags_index"
-        ]
-    },
-    "test_0184_concatenate_operation.py::test_negative_axis_concatenate": {
-        "count": 5,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_ListArray_compact_offsets",
-            "awkward_UnionArray_nestedfill_tags_index",
-            "awkward_ListArray_broadcast_tooffsets"
-        ]
-    },
-    "test_0184_concatenate_operation.py::test_numbers_and_records_concatenate": {
-        "count": 6,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_ListArray_compact_offsets",
-            "awkward_UnionArray_nestedfill_tags_index",
-            "awkward_ListArray_broadcast_tooffsets",
-            "awkward_IndexedArray_getitem_nextcarry"
-        ]
-    },
     "test_0184_concatenate_operation.py::test_records_concatenate": {
         "count": 1,
         "kernels": [
@@ -1826,13 +1731,6 @@
         "count": 1,
         "kernels": [
             "awkward_IndexedArray_simplify"
-        ]
-    },
-    "test_0788_indexedarray_carrying_recordarray_parameters.py::test": {
-        "count": 2,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_UnionArray_nestedfill_tags_index"
         ]
     },
     "test_0794_ak_cartesian_on_empty_array.py::test": {
@@ -4116,18 +4014,6 @@
             "awkward_ListOffsetArray_toRegularArray"
         ]
     },
-    "test_1586_concatenate_should_preserve_regulararray.py::test_option_option_axis1": {
-        "count": 7,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_UnionArray_fillna",
-            "awkward_ListArray_compact_offsets",
-            "awkward_UnionArray_nestedfill_tags_index",
-            "awkward_ListArray_broadcast_tooffsets",
-            "awkward_ListOffsetArray_toRegularArray"
-        ]
-    },
     "test_1586_concatenate_should_preserve_regulararray.py::test_option_regular": {
         "count": 6,
         "kernels": [
@@ -4137,18 +4023,6 @@
             "awkward_IndexedArray_flatten_nextcarry",
             "awkward_ListOffsetArray_toRegularArray",
             "awkward_IndexedArray_fill_count"
-        ]
-    },
-    "test_1586_concatenate_should_preserve_regulararray.py::test_option_regular_axis1": {
-        "count": 7,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_UnionArray_fillna",
-            "awkward_ListArray_compact_offsets",
-            "awkward_UnionArray_nestedfill_tags_index",
-            "awkward_ListArray_broadcast_tooffsets",
-            "awkward_ListOffsetArray_toRegularArray"
         ]
     },
     "test_1586_concatenate_should_preserve_regulararray.py::test_regular_numpy": {
@@ -4164,18 +4038,6 @@
             "awkward_IndexedArray_numnull",
             "awkward_RegularArray_getitem_carry",
             "awkward_IndexedArray_flatten_nextcarry",
-            "awkward_ListOffsetArray_toRegularArray"
-        ]
-    },
-    "test_1586_concatenate_should_preserve_regulararray.py::test_regular_option_axis1": {
-        "count": 7,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_ListArray_fill",
-            "awkward_UnionArray_fillna",
-            "awkward_ListArray_compact_offsets",
-            "awkward_UnionArray_nestedfill_tags_index",
-            "awkward_ListArray_broadcast_tooffsets",
             "awkward_ListOffsetArray_toRegularArray"
         ]
     },
@@ -4422,13 +4284,6 @@
         "kernels": [
             "awkward_IndexedArray_numnull",
             "awkward_IndexedArray_flatten_nextcarry"
-        ]
-    },
-    "test_1914_improved_axis_to_posaxis.py::test_is_none_union": {
-        "count": 2,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_UnionArray_nestedfill_tags_index"
         ]
     },
     "test_1914_improved_axis_to_posaxis.py::test_singletons": {
@@ -4768,15 +4623,6 @@
             "awkward_IndexedArray_flatten_nextcarry",
             "awkward_UnionArray_filltags_const",
             "awkward_IndexedArray_fill_count"
-        ]
-    },
-    "test_2185_merge_union_of_records.py::test_merge_union_of_records_3": {
-        "count": 4,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_IndexedArray_numnull",
-            "awkward_UnionArray_nestedfill_tags_index",
-            "awkward_IndexedArray_flatten_nextcarry"
         ]
     },
     "test_2192_union_absorb_indexed.py::test_merge_indexed": {
@@ -5333,20 +5179,6 @@
         "count": 1,
         "kernels": [
             "awkward_UnionArray_simplify_one"
-        ]
-    },
-    "test_2663_broadcast_tuples.py::test_record_record": {
-        "count": 2,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_UnionArray_nestedfill_tags_index"
-        ]
-    },
-    "test_2663_broadcast_tuples.py::test_tuple_tuple": {
-        "count": 2,
-        "kernels": [
-            "awkward_UnionArray_simplify_one",
-            "awkward_UnionArray_nestedfill_tags_index"
         ]
     },
     "test_2678_same_backend.py::test_where": {
