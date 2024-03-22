@@ -23,7 +23,7 @@ class ReversibleArray(ak.Array):
         return self[..., ::-1]
 
 
-def test_concatenate_operation():
+def test_concatenate_operation_records():
     one = ak.highlevel.Array([[1, 2, 3], [None, 4], None, [None, 5]]).layout
     two = ak.highlevel.Array([6, 7, 8]).layout
     three = ak.highlevel.Array([[6.6], [7.7, 8.8]]).layout
@@ -31,6 +31,7 @@ def test_concatenate_operation():
     cuda_one = ak.to_backend(one, "cuda")
     cuda_two = ak.to_backend(two, "cuda")
     cuda_three = ak.to_backend(three, "cuda")
+
     # cuda_four = ak.to_backend(four, "cuda")
 
     assert to_list(ak.operations.concatenate([one, two], 0)) == to_list(
@@ -1075,6 +1076,310 @@ def test_regular_mergebool_true():
     )
 
 
+def test_check_TypeTracerArray_in_ak_where():
+    conditionals = ak.Array([True, True, True, False, False, False])
+    unionarray = ak.Array([1, 2, 3, [4, 5], [], [6]])
+    otherarray = ak.Array(range(100, 106))
+
+    cuda_conditionals = ak.to_backend(conditionals, "cuda")
+    cuda_unionarray = ak.to_backend(unionarray, "cuda")
+    cuda_otherarray = ak.to_backend(otherarray, "cuda")
+
+    result = ak.where(cuda_conditionals, cuda_unionarray, cuda_otherarray)
+    assert result.tolist() == [1, 2, 3, 103, 104, 105]
+    assert str(result.type) == "6 * union[int64, var * int64]"
+
+    conditionals_tt = ak.Array(cuda_conditionals.layout.to_typetracer())
+    unionarray_tt = ak.Array(cuda_unionarray.layout.to_typetracer())
+    otherarray_tt = ak.Array(cuda_otherarray.layout.to_typetracer())
+    result_tt = ak.where(conditionals_tt, unionarray_tt, otherarray_tt)
+    assert str(result_tt.type) == "6 * union[int64, var * int64]"
+
+
+def test_missed_a_NumpyArray_raw_call_without_underscore():
+    cuda_record_a = ak.to_backend(ak.Record({"x": "hello"}), "cuda")
+    cuda_record_b = ak.to_backend(ak.Record({"x": b"hello"}), "cuda")
+
+    assert cuda_record_a["x"] == "hello"
+    assert cuda_record_b["x"] == b"hello"
+
+    cuda_array_a = ak.to_backend(ak.Array([{"x": "hello"}]), "cuda")
+    cuda_array_b = ak.to_backend(ak.Array([{"x": b"hello"}]), "cuda")
+
+    assert cuda_array_a["x"][0] == "hello"
+    assert cuda_array_b["x"][0] == b"hello"
+
+
+def test_regular_index():
+    array = ak.from_numpy(np.arange(4 * 4).reshape(4, 4))
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    mask_regular = ak.Array((cuda_array > 4).layout.to_RegularArray())
+    assert cuda_array[mask_regular].to_list() == [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+
+def test_non_list_index():
+    array = ak.Array(
+        [
+            {"x": 10, "y": 1.0},
+            {"x": 30, "y": 20.0},
+            {"x": 40, "y": 20.0},
+            {"x": "hi", "y": 20.0},
+        ]
+    )
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert cuda_array[["x"]].to_list() == [{"x": 10}, {"x": 30}, {"x": 40}, {"x": "hi"}]
+
+    fields_ak = ak.to_backend(ak.Array(["x"]), "cuda")
+    assert cuda_array[fields_ak].to_list() == [
+        {"x": 10},
+        {"x": 30},
+        {"x": 40},
+        {"x": "hi"},
+    ]
+
+    fields_np = ak.to_backend(np.array(["x"]), "cuda")
+    assert cuda_array[fields_np].to_list() == [
+        {"x": 10},
+        {"x": 30},
+        {"x": 40},
+        {"x": "hi"},
+    ]
+
+    class SizedIterable:
+        def __len__(self):
+            return 1
+
+        def __iter__(self):
+            return iter(["y"])
+
+    fields_custom = SizedIterable()
+    assert cuda_array[fields_custom].to_list() == [
+        {"y": 1.0},
+        {"y": 20.0},
+        {"y": 20.0},
+        {"y": 20.0},
+    ]
+
+    fields_tuple = ("x",)
+    assert cuda_array[fields_tuple].to_list() == [10, 30, 40, "hi"]
+
+
+def test_ravel_preserve_none():
+    array = ak.Array([[1, 2, 3, None], [4, 5, 6, 7, 8], [], [9], None, [10]])
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert ak.ravel(cuda_array).to_list() == [1, 2, 3, None, 4, 5, 6, 7, 8, 9, 10]
+    assert ak.flatten(cuda_array, axis=None).to_list() == [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+    ]
+
+
+def test_fill_none_axis_none():
+    array = ak.Array([None, [1, 2, 3, [None, {"x": [None, 2], "y": [1, 4]}]]])
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert ak.fill_none(cuda_array, -1.0, axis=None).to_list() == [
+        -1.0,
+        [1, 2, 3, [-1.0, {"x": [-1.0, 2], "y": [1, 4]}]],
+    ]
+
+
+def test_to_categorical():
+    pytest.importorskip("pyarrow")
+
+    array1 = ak.Array(["one", "two", "one", "one"])
+    array2 = ak.str.to_categorical(array1)
+
+    cuda_array1 = ak.to_backend(array1, "cuda")
+    cuda_array2 = ak.to_backend(array2, "cuda")
+
+    assert cuda_array1.type != cuda_array2.type
+    assert cuda_array2.type == ak.types.ArrayType(
+        ak.types.ListType(
+            ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+            parameters={"__array__": "string", "__categorical__": True},
+        ),
+        4,
+    )
+
+
+def test_categorical_type():
+    pytest.importorskip("pyarrow")
+
+    array1 = ak.Array(["one", "two", "one", "one"])
+    array2 = ak.str.to_categorical(array1)
+
+    cuda_array1 = ak.to_backend(array1, "cuda")
+    cuda_array2 = ak.to_backend(array2, "cuda")
+
+    assert cuda_array1.type != cuda_array2.type
+    assert cuda_array2.type == ak.types.ArrayType(
+        ak.types.ListType(
+            ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+            parameters={"__array__": "string", "__categorical__": True},
+        ),
+        4,
+    )
+
+
+# def test_record_nochange():
+#     class Point(ak.Record):
+#         def __getitem__(self, where):
+#             return super().__getitem__(where)
+
+#     array = ak.Array(
+#         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
+#         with_name="point",
+#         behavior={"point": Point},
+#     )
+
+#     cuda_array = ak.to_backend(array, "cuda")
+
+#     assert cuda_array.to_list() == [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]]
+#     assert cuda_array[0].to_list() == [{"rho": 1, "phi": 1.0}]
+#     assert cuda_array[0, 0].to_list() == {"rho": 1, "phi": 1.0}
+
+
+# def test_array_nochange():
+#     class PointArray(ak.Array):
+#         def __getitem__(self, where):
+#             return super().__getitem__(where)
+
+#     array = ak.Array(
+#         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
+#         with_name="point",
+#         behavior={("*", "point"): PointArray},
+#     )
+
+#     cuda_array = ak.to_backend(array, "cuda")
+
+#     assert cuda_array.to_list() == [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]]
+#     assert cuda_array[0].to_list() == [{"rho": 1, "phi": 1.0}]
+#     assert cuda_array[0, 0].to_list() == {"rho": 1, "phi": 1.0}
+
+
+# def test_record_changed():
+#     class Point(ak.Record):
+#         def __getitem__(self, where):
+#             return str(super().__getitem__(where))
+
+#     array = ak.Array(
+#         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
+#         with_name="point",
+#         behavior={"point": Point},
+#     )
+
+#     cuda_array = ak.to_backend(array, "cuda")
+
+#     assert cuda_array.to_list() == [
+#         [{"rho": "1", "phi": "1.0"}],
+#         [],
+#         [{"rho": "2", "phi": "2.0"}],
+#     ]
+#     assert cuda_array[0].to_list() == [{"rho": "1", "phi": "1.0"}]
+#     assert cuda_array[0, 0].to_list() == {"rho": "1", "phi": "1.0"}
+
+
+# def test_array_changed():
+#     class PointArray(ak.Array):
+#         def __getitem__(self, where):
+#             return str(super().__getitem__(where))
+
+#     array = ak.Array(
+#         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
+#         with_name="point",
+#         behavior={("*", "point"): PointArray},
+#     )
+
+#     cuda_array = ak.to_backend(array, "cuda")
+
+#     assert cuda_array.to_list() == ["[{rho: 1, phi: 1}]", "[]", "[{rho: 2, phi: 2}]"]
+#     assert cuda_array[0] == "[{rho: 1, phi: 1}]"
+#     assert cuda_array[0, 0] == "{rho: 1, phi: 1}"
+
+
+# def test_record_to_Array():
+#     class Point(ak.Record):
+#         def __getitem__(self, where):
+#             return ak.Array([1, 2, 3])
+
+#     array = ak.Array(
+#         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
+#         with_name="point",
+#         behavior={"point": Point},
+#     )
+
+#     cuda_array = ak.to_backend(array, "cuda")
+
+
+#     assert array.to_list() == [
+#         [{"rho": [1, 2, 3], "phi": [1, 2, 3]}],
+#         [],
+#         [{"rho": [1, 2, 3], "phi": [1, 2, 3]}],
+#     ]
+#     assert cuda_array[0].to_list() == [{"rho": [1, 2, 3], "phi": [1, 2, 3]}]
+#     assert cuda_array[0, 0].to_list() == {"rho": [1, 2, 3], "phi": [1, 2, 3]}
+
+
+# def test_record_to_ndarray():
+#     class Point(ak.Record):
+#         def __getitem__(self, where):
+#             return np.array([1, 2, 3])
+
+#     array = ak.Array(
+#         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
+#         with_name="point",
+#         behavior={"point": Point},
+#     )
+
+#     cuda_array = ak.to_backend(array, "cuda")
+
+
+#     assert array.to_list() == [
+#         [{"rho": [1, 2, 3], "phi": [1, 2, 3]}],
+#         [],
+#         [{"rho": [1, 2, 3], "phi": [1, 2, 3]}],
+#     ]
+#     assert cuda_array[0].to_list() == [{"rho": [1, 2, 3], "phi": [1, 2, 3]}]
+#     assert cuda_array[0, 0].to_list() == {"rho": [1, 2, 3], "phi": [1, 2, 3]}
+
+
+# def test_indexedarray_merge_kernel():
+#     x = ak.contents.IndexedArray(
+#         ak.index.Index64(np.array([0, 0, 1], dtype=np.int64)),
+#         ak.contents.NumpyArray(np.array([9, 6, 5], dtype=np.int16)),
+#         parameters={"money": "doesn't buy happiness"},
+#     )
+#     y = ak.contents.IndexedArray(
+#         ak.index.Index64(np.array([0, 1, 2, 4, 3], dtype=np.int64)),
+#         ak.contents.NumpyArray(np.array([9, 6, 5, 8, 2], dtype=np.int16)),
+#         parameters={"age": "number"},
+#     )
+
+#     cuda_x = ak.to_backend(x, "cuda")
+#     cuda_y = ak.to_backend(y, "cuda")
+
+#     # Test that we invoke the merge pathway
+#     z = cuda_x._reverse_merge(cuda_y)
+#     assert z.to_list() == [9, 6, 5, 2, 8, 9, 9, 6]
+#     assert z.parameters == {"money": "doesn't buy happiness", "age": "number"}
+
+
 # def test_parameter_union():
 #     layout = ak.contents.IndexedArray(
 #         ak.index.Index64([0, 1, 2]),
@@ -1202,5 +1507,6 @@ def test_regular_mergebool_true():
 #     value = ak.contents.NumpyArray(np.array([777]))
 #     assert ak._do.fill_none(padded_array, value) == ak._do.fill_none(padded_cupy_array, value)
 
-# no field - project, pad_none, is_equal_to
+# no field - project, pad_none, is_equal_to, is_union, _reverse_merge, parameter, parameters, backend, project
+# snapshot
 # unsupported type - datetime

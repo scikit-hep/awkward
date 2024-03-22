@@ -1076,7 +1076,7 @@
         "kernels": [
             "awkward_ListArray_fill"
         ],
-        "status": false
+        "status": true
     },
     "test_0193_is_none_axis_parameter.py::test": {
         "count": 6,
@@ -5226,7 +5226,7 @@
         "kernels": [
             "awkward_IndexedArray_simplify"
         ],
-        "status": false
+        "status": true
     },
     "test_1671_categorical_type.py::test_to_categorical": {
         "count": 1,
@@ -5234,7 +5234,7 @@
         "kernels": [
             "awkward_IndexedArray_simplify"
         ],
-        "status": false
+        "status": true
     },
     "test_1672_broadcast_parameters.py::test_broadcast_float_int_option": {
         "count": 6,
@@ -5299,7 +5299,7 @@
             "awkward_UnionArray_simplify_one",
             "awkward_UnionArray_fillna"
         ],
-        "status": false
+        "status": true
     },
     "test_1826_ravel_preserve_none.py::test": {
         "count": 2,
@@ -5308,7 +5308,7 @@
             "awkward_IndexedArray_numnull",
             "awkward_IndexedArray_flatten_nextcarry"
         ],
-        "status": false
+        "status": true
     },
     "test_1904_drop_none.py::test_BitMaskedArray_NumpyArray": {
         "count": 3,
@@ -5318,7 +5318,7 @@
             "awkward_ByteMaskedArray_getitem_nextcarry",
             "awkward_ByteMaskedArray_numnull"
         ],
-        "status": false
+        "status": true
     },
     "test_1904_drop_none.py::test_BitMaskedArray_RecordArray_NumpyArray": {
         "count": 8,
@@ -5333,7 +5333,7 @@
             "awkward_IndexedArray_flatten_nextcarry",
             "awkward_ByteMaskedArray_toIndexedOptionArray"
         ],
-        "status": false
+        "status": true
     },
     "test_1904_drop_none.py::test_ByteMaskedArray_NumpyArray": {
         "count": 2,
@@ -5342,7 +5342,7 @@
             "awkward_ByteMaskedArray_getitem_nextcarry",
             "awkward_ByteMaskedArray_numnull"
         ],
-        "status": false
+        "status": true
     },
     "test_1904_drop_none.py::test_ByteMaskedArray_RecordArray_NumpyArray": {
         "count": 6,
@@ -5355,7 +5355,7 @@
             "awkward_IndexedArray_flatten_nextcarry",
             "awkward_ByteMaskedArray_toIndexedOptionArray"
         ],
-        "status": false
+        "status": true
     },
     "test_1904_drop_none.py::test_IndexedOptionArray_NumpyArray_outoforder": {
         "count": 2,
@@ -5364,7 +5364,7 @@
             "awkward_IndexedArray_numnull",
             "awkward_IndexedArray_flatten_nextcarry"
         ],
-        "status": false
+        "status": true
     },
     "test_1904_drop_none.py::test_ListArray_IndexedOptionArray_RecordArray_NumpyArray": {
         "count": 4,
@@ -5375,11 +5375,11 @@
             "awkward_IndexedArray_flatten_nextcarry",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_1904_drop_none.py::test_ListOffsetArray_ByteMaskedArray_NumpyArray": {
         "count": 4,
-        "error": "",
+        "error": "assert [[3.3], [], [5.5], []] == [[3.3], [], [], []]",
         "kernels": [
             "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
             "awkward_ByteMaskedArray_getitem_nextcarry",
@@ -5397,7 +5397,7 @@
             "awkward_IndexedArray_getitem_nextcarry_outindex",
             "awkward_IndexedArray_flatten_nextcarry"
         ],
-        "status": false
+        "status": true
     },
     "test_1914_improved_axis_to_posaxis.py::test_is_none": {
         "count": 2,
@@ -5406,7 +5406,7 @@
             "awkward_IndexedArray_numnull",
             "awkward_IndexedArray_flatten_nextcarry"
         ],
-        "status": false
+        "status": true
     },
     "test_1914_improved_axis_to_posaxis.py::test_singletons": {
         "count": 2,
@@ -5415,11 +5415,11 @@
             "awkward_IndexedArray_numnull",
             "awkward_IndexedArray_flatten_nextcarry"
         ],
-        "status": false
+        "status": true
     },
     "test_1928_replace_simplify_method_with_classmethod_constructor.py::test_indexed_of_union": {
         "count": 4,
-        "error": "",
+        "error": "AttributeError: no field named 'is_union'",
         "kernels": [
             "awkward_UnionArray_simplify_one",
             "awkward_ListArray_compact_offsets",
@@ -5485,7 +5485,7 @@
         "kernels": [
             "awkward_UnionArray_simplify_one"
         ],
-        "status": false
+        "status": true
     },
     "test_1943_regular_indexing.py::test_regular_index": {
         "count": 2,
@@ -5494,7 +5494,7 @@
             "awkward_RegularArray_getitem_next_array",
             "awkward_RegularArray_getitem_next_array_regularize"
         ],
-        "status": false
+        "status": true
     },
     "test_1991_missed_a_NumpyArray_raw_call_without_underscore.py::test": {
         "count": 1,
@@ -5502,15 +5502,7 @@
         "kernels": [
             "awkward_RegularArray_getitem_next_at"
         ],
-        "status": false
-    },
-    "test_2008_ak_type_layout.py::test_complex": {
-        "count": 1,
-        "error": "",
-        "kernels": [
-            "awkward_UnionArray_simplify_one"
-        ],
-        "status": false
+        "status": true
     },
     "test_2021_check_TypeTracerArray_in_ak_where.py::test": {
         "count": 3,
@@ -5520,7 +5512,7 @@
             "awkward_UnionArray_simplify_one",
             "awkward_UnionArray_project"
         ],
-        "status": false
+        "status": true
     },
     "test_2058_merge_numpy_array.py::test_numpy": {
         "count": 1,
