@@ -1596,11 +1596,11 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
                 if content.dtype.names is not None:
                     missing_data = tuple(
-                        create_missing_data(each_dtype)
+                        create_missing_data(each_dtype, backend)
                         for each_dtype, _ in content.dtype.fields.values()
                     )
                 else:
-                    missing_data = create_missing_data(content.dtype)
+                    missing_data = create_missing_data(content.dtype, backend)
 
                 data[mask0] = missing_data
 
@@ -1766,7 +1766,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         )
 
 
-def create_missing_data(dtype):
+def create_missing_data(dtype, backend):
     """Create missing data based on the input dtype
 
     Missing data are represented differently based on the Numpy array
@@ -1784,7 +1784,7 @@ def create_missing_data(dtype):
     elif np.issubdtype(dtype.type, np.datetime64) or np.issubdtype(
         dtype.type, np.timedelta64
     ):
-        return nplike.asarray([np.iinfo(np.int64).max], dtype=dtype)[0]
+        return backend.nplike.asarray([np.iinfo(np.int64).max], dtype=dtype)[0]
     elif np.issubdtype(dtype, np.str_):
         return ""
     elif np.issubdtype(dtype, np.bytes_):
