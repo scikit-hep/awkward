@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-import cupy as cp  # noqa: F401
+import cupy as cp
 import numpy as np
 import pytest
 
 import awkward as ak
+
+pa = pytest.importorskip("pyarrow")
 
 to_list = ak.operations.to_list
 
@@ -14,6 +16,11 @@ try:
     ak.numba.register_and_check()
 except ImportError:
     pytest.skip(reason="too old Numba version", allow_module_level=True)
+
+
+class ReversibleArray(ak.Array):
+    def reversed(self):
+        return self[..., ::-1]
 
 
 def test_concatenate_operation():
@@ -225,6 +232,7 @@ def test_drop_none_ListArray_IndexedOptionArray_RecordArray_NumpyArray():
     )
 
 
+# gives error - assert [[3.3], [], [5.5], []] == [[3.3], [], [], []]
 def test_drop_none_ListOffsetArray_ByteMaskedArray_NumpyArray():
     array = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
@@ -389,6 +397,795 @@ def test_improved_axis_to_posaxis_singletons():
         ak.singletons(cuda_array, axis=-3)
 
 
+def test_chunked_array_strings():
+    array = pa.chunked_array([["foo", "bar"], ["blah", "bleh"]])
+    ak_array = ak.from_arrow(array)
+
+    cuda_array = ak.to_backend(ak_array, "cuda")
+
+    assert ak_array.type == cuda_array.type
+    assert cuda_array.type == ak.types.ArrayType(
+        ak.types.ListType(
+            ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+            parameters={"__array__": "string"},
+        ),
+        4,
+    )
+
+
+def test_chunked_array_strings_option():
+    array = pa.chunked_array([["foo", "bar"], ["blah", "bleh", None]])
+    ak_array = ak.from_arrow(array)
+
+    cuda_array = ak.to_backend(ak_array, "cuda")
+
+    assert ak_array.type == cuda_array.type
+    assert cuda_array.type == ak.types.ArrayType(
+        ak.types.OptionType(
+            ak.types.ListType(
+                ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+                parameters={"__array__": "string"},
+            )
+        ),
+        5,
+    )
+
+
+def test_chunked_array_numbers_option():
+    array = pa.chunked_array([[1, 2, 3], [4, 5, None]])
+    ak_array = ak.from_arrow(array)
+
+    cuda_array = ak.to_backend(ak_array, "cuda")
+
+    assert ak_array.type == cuda_array.type
+    assert cuda_array.type == ak.types.ArrayType(
+        ak.types.OptionType(ak.types.NumpyType("int64")), 6
+    )
+
+
+def test_expected_container_keys_from_form_UnionArray_NumpyArray():
+    # 100 is inaccessible in index
+    # 1.1 is inaccessible in contents[1]
+    array = ak.contents.unionarray.UnionArray.simplified(
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
+        [
+            ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3])),
+            ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+        ],
+    )
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    form, length, container = ak.to_buffers(cuda_array)
+    for name, dtype in form.expected_from_buffers().items():
+        assert container[name].dtype == dtype
+
+
+def test_expected_container_keys_from_form_UnionArray_RecordArray_NumpyArray():
+    # 100 is inaccessible in index
+    # 1.1 is inaccessible in contents[1]
+    array = ak.contents.unionarray.UnionArray.simplified(
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
+        [
+            ak.contents.recordarray.RecordArray(
+                [ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3]))], ["nest"]
+            ),
+            ak.contents.recordarray.RecordArray(
+                [
+                    ak.contents.numpyarray.NumpyArray(
+                        np.array([1.1, 2.2, 3.3, 4.4, 5.5])
+                    )
+                ],
+                ["nest"],
+            ),
+        ],
+    )
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    form, length, container = ak.to_buffers(cuda_array)
+    for name, dtype in form.expected_from_buffers().items():
+        assert container[name].dtype == dtype
+
+
+def test_optiontype_outside_record_strings_ByteMaskedArray():
+    record = ak.zip(
+        {
+            "x": ak.mask(["foo", "bar", "world"], [True, True, False]),
+            "y": ak.mask(["do", "re", "mi"], [False, True, True]),
+        },
+        optiontype_outside_record=True,
+    )
+
+    cuda_record = ak.to_backend(record, "cuda")
+
+    assert cuda_record.to_list() == [None, {"x": "bar", "y": "re"}, None]
+    assert cuda_record.type == ak.types.ArrayType(
+        ak.types.OptionType(
+            ak.types.RecordType(
+                [
+                    ak.types.ListType(
+                        ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+                        parameters={"__array__": "string"},
+                    ),
+                    ak.types.ListType(
+                        ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+                        parameters={"__array__": "string"},
+                    ),
+                ],
+                ["x", "y"],
+            )
+        ),
+        3,
+        None,
+    )
+
+
+def test_optiontype_outside_record_strings_IndexedOptionArray():
+    record = ak.zip(
+        {"x": ["foo", "bar", None], "y": [None, "re", "mi"]},
+        optiontype_outside_record=True,
+    )
+
+    cuda_record = ak.to_backend(record, "cuda")
+
+    assert cuda_record.to_list() == [None, {"x": "bar", "y": "re"}, None]
+    assert cuda_record.type == ak.types.ArrayType(
+        ak.types.OptionType(
+            ak.types.RecordType(
+                [
+                    ak.types.ListType(
+                        ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+                        parameters={"__array__": "string"},
+                    ),
+                    ak.types.ListType(
+                        ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+                        parameters={"__array__": "string"},
+                    ),
+                ],
+                ["x", "y"],
+            )
+        ),
+        3,
+        None,
+    )
+
+
+def test_string_broadcast_regular_string_mixed_invalid():
+    strings = ak.to_regular([["abc", "efg"]], axis=2)
+    numbers = ak.to_regular([[[1, 2, 3], [3, 4, 3]]], axis=2)
+
+    cuda_strings = ak.to_backend(strings, "cuda")
+    cuda_numbers = ak.to_backend(numbers, "cuda")
+
+    with pytest.raises(
+        ValueError,
+        match=r"cannot broadcast RegularArray of length 2 with NumpyArray of length 6",
+    ):
+        ak.broadcast_arrays(cuda_strings, cuda_numbers, right_broadcast=False)
+
+
+def test_string_broadcast_regular_string_mixed_valid():
+    strings = ak.to_regular([["abc", "efg"]], axis=2)
+    numbers = ak.to_regular([[[1], [3]]], axis=2)
+
+    cuda_strings = ak.to_backend(strings, "cuda")
+    cuda_numbers = ak.to_backend(numbers, "cuda")
+
+    assert to_list(
+        ak.broadcast_arrays(strings, numbers, right_broadcast=False)
+    ) == to_list(ak.broadcast_arrays(cuda_strings, cuda_numbers, right_broadcast=False))
+
+    x, y = ak.broadcast_arrays(strings, numbers, right_broadcast=False)
+    cuda_x, cuda_y = ak.broadcast_arrays(
+        cuda_strings, cuda_numbers, right_broadcast=False
+    )
+    assert x.tolist() == cuda_x.tolist() == [[["abc"], ["efg"]]]
+    assert y.tolist() == cuda_y.tolist() == [[[1], [3]]]
+
+
+def test_string_broadcast_regular_string_mixed_below():
+    strings = ak.to_regular([["abc", "efg"]], axis=2)
+    numbers = ak.to_regular([[1, 6], [3, 7]], axis=1)
+
+    cuda_strings = ak.to_backend(strings, "cuda")
+    cuda_numbers = ak.to_backend(numbers, "cuda")
+
+    assert to_list(
+        ak.broadcast_arrays(strings, numbers, right_broadcast=False)
+    ) == to_list(ak.broadcast_arrays(cuda_strings, cuda_numbers, right_broadcast=False))
+
+    x, y = ak.broadcast_arrays(strings, numbers, right_broadcast=False)
+    cuda_x, cuda_y = ak.broadcast_arrays(
+        cuda_strings, cuda_numbers, right_broadcast=False
+    )
+    assert x.tolist() == cuda_x.tolist() == [["abc", "efg"], ["abc", "efg"]]
+    assert y.tolist() == cuda_y.tolist() == [[1, 6], [3, 7]]
+
+
+def test_string_broadcast_regular_string_string_valid():
+    strings = ak.to_regular([["abc", "efg"]], axis=2)
+    numbers = ak.to_regular([[["ab"], ["bc", "de"]]], axis=3)
+
+    cuda_strings = ak.to_backend(strings, "cuda")
+    cuda_numbers = ak.to_backend(numbers, "cuda")
+
+    assert to_list(
+        ak.broadcast_arrays(strings, numbers, right_broadcast=False)
+    ) == to_list(ak.broadcast_arrays(cuda_strings, cuda_numbers, right_broadcast=False))
+
+    x, y = ak.broadcast_arrays(strings, numbers, right_broadcast=False)
+    cuda_x, cuda_y = ak.broadcast_arrays(
+        cuda_strings, cuda_numbers, right_broadcast=False
+    )
+    assert x.tolist() == cuda_x.tolist() == [[["abc"], ["efg", "efg"]]]
+    assert y.tolist() == cuda_y.tolist() == [[["ab"], ["bc", "de"]]]
+
+
+def test_list_nominal_type_string_class():
+    ak.behavior["reversible-string"] = ReversibleArray
+
+    strings = ak.with_parameter(["hi", "book", "cats"], "__list__", "reversible-string")
+
+    cuda_strings = ak.to_backend(strings, "cuda")
+
+    assert isinstance(cuda_strings, ReversibleArray)
+    assert cuda_strings.to_list() == ["hi", "book", "cats"]
+    assert cuda_strings.reversed().to_list() == ["cats", "book", "hi"]
+
+
+def test_forms_from_type_from_iter():
+    # We define `from_type` to match ArrayBuilder where possible. We can't
+    # include options inside unions, though, because ArrayBuilder creates `UnmaskedArray`
+    # nodes for the non-indexed option
+    array = ak.to_packed(
+        ak.from_iter([1, 2, "hi", [3, 4, {"x": 4}], {"y": [None, 2]}])[:0]
+    )
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert ak.forms.from_type(array.type.content) == ak.forms.from_type(
+        cuda_array.type.content
+    )
+    form_from_type = ak.forms.from_type(cuda_array.type.content)
+    assert form_from_type == cuda_array.layout.form
+
+
+def test_forms_from_type_regular():
+    array = ak.to_regular([[1, 2, 3]])[:0]
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert ak.forms.from_type(array.type.content) == ak.forms.from_type(
+        cuda_array.type.content
+    )
+    form_from_type = ak.forms.from_type(cuda_array.type.content)
+    assert form_from_type == cuda_array.layout.form
+
+
+def test_forms_from_type_categorical():
+    pytest.importorskip("pyarrow")
+
+    array = ak.str.to_categorical(["do", "re", "mi", "fa", "so"])
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert ak.forms.from_type(array.type.content) == ak.forms.from_type(
+        cuda_array.type.content
+    )
+    form_from_type = ak.forms.from_type(cuda_array.type.content)
+    assert form_from_type == cuda_array.layout.form
+
+
+def test_forms_from_type_categorical_option():
+    pytest.importorskip("pyarrow")
+
+    array = ak.str.to_categorical(["do", "re", "mi", "fa", "so", None])
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert ak.forms.from_type(array.type.content) == ak.forms.from_type(
+        cuda_array.type.content
+    )
+    form_from_type = ak.forms.from_type(cuda_array.type.content)
+    assert form_from_type == cuda_array.layout.form
+
+
+def test_bytemasked_singletons():
+    array = ak.Array(
+        ak.contents.ByteMaskedArray(
+            mask=ak.index.Index8([1, 1, 0, 0]),
+            content=ak.contents.NumpyArray([3, 4, 2, 5]),
+            valid_when=True,
+        )
+    )
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert (
+        ak.singletons(array, highlevel=False).form
+        == ak.singletons(cuda_array, highlevel=False).form
+    )
+
+    assert (
+        ak.singletons(cuda_array, highlevel=False).form
+        == ak.singletons(
+            cuda_array.layout.to_typetracer(forget_length=True), highlevel=False
+        ).form
+    )
+
+
+def test_cartesian_axis_validation_simple():
+    left = ak.Array([1, 2, 3])
+    right = ak.Array([["lambda", "sigma", "eta", "phi"], ["delta"]])
+
+    cuda_left = ak.to_backend(left, "cuda")
+    cuda_right = ak.to_backend(right, "cuda")
+
+    pair = ak.cartesian([cuda_left, cuda_right], axis=0)
+    assert pair.ndim == 1
+    assert pair.tolist() == [
+        (1, ["lambda", "sigma", "eta", "phi"]),
+        (1, ["delta"]),
+        (2, ["lambda", "sigma", "eta", "phi"]),
+        (2, ["delta"]),
+        (3, ["lambda", "sigma", "eta", "phi"]),
+        (3, ["delta"]),
+    ]
+
+
+def test_string_broadcast_deep_string_string():
+    a = ak.Array([["x", "yz"], ["hello", "world", "foo", "bar"]])
+
+    b = ak.Array(["x", "y"])
+    cuda_a = ak.to_backend(a, "cuda")
+    cuda_b = ak.to_backend(b, "cuda")
+
+    left, right = ak.broadcast_arrays(cuda_a, cuda_b)
+    assert right.to_list() == [["x", "x"], ["y", "y", "y", "y"]]
+
+
+def test_string_broadcast_deep_numbers_string():
+    a = ak.Array([[1, 2], [3, 4, 5, 6]])
+
+    b = ak.Array(["x", "y"])
+    cuda_a = ak.to_backend(a, "cuda")
+    cuda_b = ak.to_backend(b, "cuda")
+
+    left, right = ak.broadcast_arrays(cuda_a, cuda_b)
+    assert right.to_list() == [["x", "x"], ["y", "y", "y", "y"]]
+
+
+def test_string_broadcast_same_depth():
+    a = ak.Array(["z"])
+
+    b = ak.Array(["x", "y"])
+    cuda_a = ak.to_backend(a, "cuda")
+    cuda_b = ak.to_backend(b, "cuda")
+
+    left, right = ak.broadcast_arrays(cuda_a, cuda_b)
+    assert left.to_list() == ["z", "z"]
+    assert right.to_list() == ["x", "y"]
+
+
+def test_union_partial_record():
+    no_fields = ak.Array([{}, []])
+
+    cuda_no_fields = ak.to_backend(no_fields, "cuda")
+
+    with pytest.raises(ValueError, match="cannot add a new field"):
+        cuda_no_fields["new_field"] = ak.to_backend(ak.Array([1, 2, 3, 4, 5]), "cuda")
+
+
+def test_union_record():
+    no_fields = ak.Array([{"x": 1}, {"y": 2}, {}, {}, {}])
+
+    cuda_no_fields = ak.to_backend(no_fields, "cuda")
+
+    cuda_no_fields["new_field"] = ak.to_backend(ak.Array([1, 2, 3, 4, 5]), "cuda")
+    assert cuda_no_fields.to_list() == [
+        {"new_field": 1, "x": 1, "y": None},
+        {"new_field": 2, "x": None, "y": 2},
+        {"new_field": 3, "x": None, "y": None},
+        {"new_field": 4, "x": None, "y": None},
+        {"new_field": 5, "x": None, "y": None},
+    ]
+
+
+def test_merge_union_parameters():
+    one = ak.with_parameter([1, 2, [], [3, 4]], "one", "one")
+    two = ak.with_parameter([100, 200, 300], "two", "two")
+    three = ak.with_parameter([{"x": 1}, {"x": 2}, 5, 6, 7], "two", "two")
+
+    cuda_one = ak.to_backend(one, "cuda")
+    cuda_two = ak.to_backend(two, "cuda")
+    cuda_three = ak.to_backend(three, "cuda")
+
+    # No parameter unions should occur here
+    result = ak.concatenate((cuda_two, cuda_one, cuda_three))
+    assert ak.parameters(result) == {}
+
+
+def test_simplify_merge_as_union_many():
+    result = ak.concatenate(
+        [
+            ak.to_backend(ak.Array(x), "cuda")
+            for x in [[{"a": 3}], [{"c": 3}], [{"d": 3}], [{"e": 3}]]
+        ]
+    )
+    assert result.tolist() == [{"a": 3}, {"c": 3}, {"d": 3}, {"e": 3}]
+
+
+def test_merge_option_of_records():
+    a = ak.Array([None, {"a": 1, "b": 2}])
+    cuda_a = ak.to_backend(a, "cuda")
+
+    assert str(cuda_a.type) == "2 * ?{a: int64, b: int64}"
+
+    b = ak.merge_option_of_records(cuda_a)
+
+    assert b.tolist() == [{"a": None, "b": None}, {"a": 1, "b": 2}]
+
+    assert str(b.type) == "2 * {a: ?int64, b: ?int64}"
+
+
+def test_merge_option_of_records_2():
+    a = ak.Array([None, {"a": 1, "b": 2}, {"a": None, "b": None}])
+    cuda_a = ak.to_backend(a, "cuda")
+
+    assert str(a.type) == "3 * ?{a: ?int64, b: ?int64}"
+
+    b = ak.merge_option_of_records(cuda_a)
+
+    assert b.tolist() == [
+        {"a": None, "b": None},
+        {"a": 1, "b": 2},
+        {"a": None, "b": None},
+    ]
+
+    assert str(b.type) == "3 * {a: ?int64, b: ?int64}"
+
+
+def test_merge_option_of_records_3():
+    a = ak.Array([[[[None, {"a": 1, "b": 2}]]]])
+    cuda_a = ak.to_backend(a, "cuda")
+
+    assert str(a.type) == "1 * var * var * var * ?{a: int64, b: int64}"
+
+    b = ak.merge_option_of_records(cuda_a, axis=-1)
+
+    assert b.tolist() == [[[[{"a": None, "b": None}, {"a": 1, "b": 2}]]]]
+
+    assert str(b.type) == "1 * var * var * var * {a: ?int64, b: ?int64}"
+
+
+def test_fill_none_indexed():
+    layout = ak.contents.IndexedArray(
+        ak.index.Index64(np.arange(10)),
+        ak.contents.RecordArray(
+            [
+                ak.contents.IndexedOptionArray(
+                    ak.index.Index64(
+                        np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, -1], dtype=np.int64)
+                    ),
+                    ak.contents.NumpyArray(np.arange(10, dtype=np.uint8)),
+                )
+            ],
+            ["x"],
+        ),
+    )
+
+    cuda_layout = ak.to_backend(layout, "cuda")
+
+    assert ak.almost_equal(
+        ak.fill_none(cuda_layout, 9, axis=0),
+        ak.zip(
+            {
+                "x": cp.arange(
+                    10,
+                    # Default arraybuilder type
+                    dtype=cp.int64,
+                )
+            }
+        ),
+    )
+
+
+def test_ak_scalar_type_array():
+    array = ak.Array(["this", {"x": ["is", 1, 2, None]}])
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert ak.type(cuda_array) == cuda_array.type
+    assert isinstance(cuda_array.type, ak.types.ArrayType)
+
+
+def test_ak_scalar_type_record():
+    record = ak.Record({"y": ["this", {"x": ["is", 1, 2, None]}]})
+    cuda_record = ak.to_backend(record, "cuda")
+
+    assert ak.type(cuda_record) == cuda_record.type
+    assert isinstance(cuda_record.type, ak.types.ScalarType)
+
+
+@pytest.mark.parametrize("axis", [0, 1, 2])
+def testtest_2082_broadcast_zero_size(axis):
+    this_slice = (slice(None),) * axis + (slice(0, 0),) + (...,)
+    that_slice = (slice(None),) * axis + (slice(0, 1),) + (...,)
+
+    x = np.arange(3 * 5 * 7).reshape(3, 5, 7)
+    cuda_x = ak.to_backend(x, "cuda")
+
+    result = np.broadcast_arrays(cuda_x[this_slice], cuda_x[that_slice])
+
+    y = ak.from_numpy(x)
+    cuda_y = ak.to_backend(y, "cuda")
+
+    result_ak = ak.broadcast_arrays(cuda_y[this_slice], cuda_y[that_slice])
+
+    assert ak.almost_equal(result, result_ak)
+
+
+def test_array_function_wrap():
+    left = ak.Array([1, 2, 3])
+    right = ak.Array([[1, 2], [4, 5, 6], [None]])
+
+    cuda_left = ak.to_backend(left, "cuda")
+    cuda_right = ak.to_backend(right, "cuda")
+
+    result = np.broadcast_arrays(cuda_left, cuda_right)
+    assert isinstance(result, list)
+    assert isinstance(result[0], ak.Array)
+    assert isinstance(result[1], ak.Array)
+    assert result[0].to_list() == [[1, 1], [2, 2, 2], [None]]
+    assert result[1].to_list() == [[1, 2], [4, 5, 6], [None]]
+
+
+def test_unflatten_non_packed_indexed_counts():
+    counts = ak.contents.IndexedArray(
+        ak.index.Index64(np.arange(3)),
+        ak.contents.NumpyArray(np.array([3, 0, 2], dtype=np.int64)),
+    )
+
+    cuda_counts = ak.to_backend(counts, "cuda")
+
+    cuda_arr = ak.to_backend([[1.1, 2.2, 3.3], [], [4.4, 5.5]], "cuda")
+
+    assert ak.almost_equal(
+        ak.unflatten(cp.array([1.1, 2.2, 3.3, 4.4, 5.5]), cuda_counts),
+        cuda_arr,
+    )
+
+
+def test_unflatten_non_packed_counts_indexed_layout():
+    layout = ak.contents.IndexedArray(
+        ak.index.Index64(np.arange(5)),
+        ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64)),
+    )
+
+    cuda_layout = ak.to_backend(layout, "cuda")
+
+    cuda_arr = ak.to_backend([[1.1, 2.2, 3.3], [], [4.4, 5.5]], "cuda")
+
+    assert ak.almost_equal(
+        ak.unflatten(cuda_layout, cp.array([3, 0, 2])),
+        cuda_arr,
+    )
+
+
+def test_byteorder_default():
+    array = ak.Array([[[1, 2, 3], [4, 5], None, "hi"]])
+
+    cuda_array = ak.to_backend(array, "cuda")
+
+    _, _, container_little = ak.to_buffers(cuda_array, byteorder="<")
+    _, _, container_default = ak.to_buffers(cuda_array)
+
+    for name, buffer in container_little.items():
+        assert buffer.tobytes() == container_default[name].tobytes()
+
+
+def test_axis_none():
+    record = ak.zip({"x": [1, None], "y": [2, 3]})
+
+    cuda_record = ak.to_backend(record, "cuda")
+
+    assert ak.fill_none(cuda_record, 0, axis=None).to_list() == [
+        {"x": 1, "y": 2},
+        {"x": 0, "y": 3},
+    ]
+
+
+def test_axis_last():
+    record = ak.zip({"x": [1, None], "y": [2, 3]})
+
+    cuda_record = ak.to_backend(record, "cuda")
+
+    assert ak.fill_none(cuda_record, 0, axis=-1).to_list() == [
+        {"x": 1, "y": 2},
+        {"x": 0, "y": 3},
+    ]
+
+
+def test_option_outside_record():
+    record = ak.zip({"x": [1, 4], "y": [2, 3]}).mask[[True, False]]
+
+    cuda_record = ak.to_backend(record, "cuda")
+
+    assert ak.fill_none(cuda_record, 0, axis=-1).to_list() == [{"x": 1, "y": 2}, 0]
+
+
+def test_numpy():
+    x = ak.from_numpy(
+        np.arange(4 * 3, dtype=np.int64).reshape(4, 3), regulararray=False
+    )
+    y = ak.from_numpy(
+        np.arange(4 * 2, dtype=np.int64).reshape(4, 2), regulararray=False
+    )
+
+    cuda_x = ak.to_backend(x, "cuda")
+    cuda_y = ak.to_backend(y, "cuda")
+
+    assert ak.concatenate((cuda_x, cuda_y)).type == ak.types.ArrayType(
+        ak.types.ListType(ak.types.NumpyType("int64")), 8
+    )
+
+
+def test_regular():
+    x = ak.from_numpy(np.arange(4 * 3, dtype=np.int64).reshape(4, 3), regulararray=True)
+    y = ak.from_numpy(np.arange(4 * 2, dtype=np.int64).reshape(4, 2), regulararray=True)
+
+    cuda_x = ak.to_backend(x, "cuda")
+    cuda_y = ak.to_backend(y, "cuda")
+
+    assert ak.concatenate((cuda_x, cuda_y)).type == ak.types.ArrayType(
+        ak.types.ListType(ak.types.NumpyType("int64")), 8
+    )
+
+
+def test_regular_mergebool_false():
+    x = ak.from_numpy(np.zeros((4, 3), dtype=np.bool_), regulararray=True)
+    y = ak.from_numpy(np.ones((4, 2), dtype=np.int64), regulararray=True)
+
+    cuda_x = ak.to_backend(x, "cuda")
+    cuda_y = ak.to_backend(y, "cuda")
+
+    assert ak.concatenate((cuda_x, cuda_y), mergebool=False).type == ak.types.ArrayType(
+        ak.types.UnionType(
+            [
+                ak.types.RegularType(ak.types.NumpyType("bool"), 3),
+                ak.types.RegularType(ak.types.NumpyType("int64"), 2),
+            ]
+        ),
+        8,
+    )
+
+
+def test_regular_mergebool_true():
+    x = ak.from_numpy(np.zeros((4, 3), dtype=np.bool_), regulararray=True)
+    y = ak.from_numpy(np.ones((4, 2), dtype=np.int64), regulararray=True)
+
+    cuda_x = ak.to_backend(x, "cuda")
+    cuda_y = ak.to_backend(y, "cuda")
+
+    assert ak.concatenate((cuda_x, cuda_y), mergebool=True).type == ak.types.ArrayType(
+        ak.types.ListType(ak.types.NumpyType("int64")), 8
+    )
+
+
+# def test_parameter_union():
+#     layout = ak.contents.IndexedArray(
+#         ak.index.Index64([0, 1, 2]),
+#         ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.uint32)),
+#         parameters={"foo": {"bar": "baz"}},
+#     )
+
+#     cuda_layout = ak.to_backend(layout, "cuda")
+
+#     result = cuda_layout.project()
+#     assert result.is_equal_to(
+#         ak.contents.NumpyArray(
+#             np.array([1, 2, 3], dtype=np.uint32), parameters={"foo": {"bar": "baz"}}
+#         )
+#     )
+
+
+# def test_union_simplification():
+#     array = ak.Array(
+#         ak.contents.UnionArray(
+#             ak.index.Index8(np.arange(64, dtype=np.int8) % 2),
+#             ak.index.Index64(np.arange(64, dtype=np.int64) // 2),
+#             [
+#                 ak.contents.RecordArray(
+#                     [ak.contents.NumpyArray(np.arange(64, dtype=np.int64))], ["x"]
+#                 ),
+#                 ak.contents.RecordArray(
+#                     [
+#                         ak.contents.NumpyArray(np.arange(64, dtype=np.int64)),
+#                         ak.contents.NumpyArray(np.arange(64, dtype=np.int8)),
+#                     ],
+#                     ["x", "y"],
+#                 ),
+#             ],
+#         )
+#     )
+
+#     cuda_array = ak.to_backend(array, "cuda")
+
+#     form, length, container = ak.to_buffers(array)
+#     cuda_form, cuda_length, cuda_container = ak.to_buffers(cuda_array)
+
+#     assert form.to_dict() == cuda_form.to_dict()
+
+#     projected_form = {
+#         "class": "UnionArray",
+#         "tags": "i8",
+#         "index": "i64",
+#         "contents": [
+#             {
+#                 "class": "RecordArray",
+#                 "fields": ["x"],
+#                 "contents": [
+#                     {
+#                         "class": "NumpyArray",
+#                         "primitive": "int64",
+#                         "inner_shape": [],
+#                         "parameters": {},
+#                         "form_key": "node2",
+#                     }
+#                 ],
+#                 "parameters": {},
+#                 "form_key": "node1",
+#             },
+#             {
+#                 "class": "RecordArray",
+#                 "fields": ["x"],
+#                 "contents": [
+#                     {
+#                         "class": "NumpyArray",
+#                         "primitive": "int64",
+#                         "inner_shape": [],
+#                         "parameters": {},
+#                         "form_key": "node4",
+#                     }
+#                 ],
+#                 "parameters": {},
+#                 "form_key": "node3",
+#             },
+#         ],
+#         "parameters": {},
+#         "form_key": "node0",
+#     }
+#     cuda_container.pop("node5-data")
+#     projected = ak.from_buffers(
+#         projected_form, cuda_length, cuda_container, allow_noncanonical_form=True
+#     )
+#     assert projected.layout.form.to_dict(verbose=False) == {
+#         "class": "IndexedArray",
+#         "index": "i64",
+#         "content": {"class": "RecordArray", "fields": ["x"], "contents": ["int64"]},
+#     }
+#     assert ak.almost_equal(cuda_array[["x"]], projected)
+
+# def test_return_scalar_firsts():
+#     array = ak.Array([1, 2, 3, 4])
+#     cuda_array = ak.to_backend(array, "cuda")
+
+#     assert ak.firsts(array, axis=0) == ak.firsts(cuda_array, axis=0)
+#     first = ak.firsts(array, axis=0)
+#     assert isinstance(first, np.int64) and first == 1
+
+
+# def test_return_scalar_firsts_non_scalar():
+#     array = ak.Array([[1, 2, 3], [4]])
+#     cuda_array = ak.to_backend(array, "cuda")
+
+#     first = ak.firsts(array, axis=0)
+#     assert first.to_list() == [1, 2, 3]
+# incompatible backends
+
 # def test_fillna_unionarray():
 #     content1 = ak.operations.from_iter([[], [1.1], [2.2, 2.2]], highlevel=False)
 #     content2 = ak.operations.from_iter([["two", "two"], ["one"], []], highlevel=False)
@@ -397,10 +1194,13 @@ def test_improved_axis_to_posaxis_singletons():
 #     array = ak.contents.UnionArray(tags, index, [content1, content2])
 #     cuda_array = ak.to_backend(array, "cuda")
 
-#     padded_array = ak._do.pad_none(array, 2, 1)
+#     padded_array = ak._do.cuda_layout(array, 2, 1)
 #     padded_cupy_array = ak._do.pad_none(cuda_array, 2, 1)
 
 #     assert padded_array == padded_cupy_array
 
 #     value = ak.contents.NumpyArray(np.array([777]))
 #     assert ak._do.fill_none(padded_array, value) == ak._do.fill_none(padded_cupy_array, value)
+
+# no field - project, pad_none, is_equal_to
+# unsupported type - datetime
