@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from numpy.exceptions import AxisError
 
 import awkward as ak
 
@@ -43,7 +44,7 @@ def test_emptyarray():
     array = ak.contents.EmptyArray()
     assert to_list(ak.num(array, 0)) == 0
     assert to_list(ak.num(array, -1)) == 0
-    with pytest.raises(np.AxisError) as err:
+    with pytest.raises(AxisError) as err:
         ak.num(array, 1)
     assert "axis=1 exceeds the depth" in str(err.value)
 
@@ -58,7 +59,7 @@ def test_numpyarray():
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
     ]
-    with pytest.raises(np.AxisError) as err:
+    with pytest.raises(AxisError) as err:
         ak.num(array, 4)
     assert "axis=4 exceeds the depth" in str(err.value)
 
@@ -75,7 +76,7 @@ def test_regulararray():
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
     ]
-    with pytest.raises(np.AxisError) as err:
+    with pytest.raises(AxisError) as err:
         ak.num(array, 4)
     assert "axis=4 exceeds the depth" in str(err.value)
 
@@ -112,7 +113,7 @@ def test_listarray():
         [],
         [[2, 2, 2], [2, 2, 2]],
     ]
-    with pytest.raises(np.AxisError) as err:
+    with pytest.raises(AxisError) as err:
         ak.num(array, 4)
     assert "axis=4 exceeds the depth" in str(err.value)
 
@@ -140,7 +141,7 @@ def test_listoffsetarray():
         [],
         [[2, 2, 2], [2, 2, 2]],
     ]
-    with pytest.raises(np.AxisError) as err:
+    with pytest.raises(AxisError) as err:
         ak.num(array, 4)
     assert "axis=4 exceeds the depth" in str(err.value)
 
@@ -173,7 +174,7 @@ def test_indexedarray():
         [[2, 2, 2], [2, 2, 2], [2, 2, 2]],
     ]
 
-    with pytest.raises(np.AxisError) as err:
+    with pytest.raises(AxisError) as err:
         ak.num(array, 4)
     assert "axis=4 exceeds the depth" in str(err.value)
 
@@ -210,7 +211,7 @@ def test_indexedoptionarray():
         [[2, 2, 2], [2, 2, 2], [2, 2, 2]],
     ]
 
-    with pytest.raises(np.AxisError) as err:
+    with pytest.raises(AxisError) as err:
         ak.num(array, 4)
     assert "axis=4 exceeds the depth" in str(err.value)
 

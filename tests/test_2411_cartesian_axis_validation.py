@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from numpy.exceptions import AxisError
 
 import awkward as ak
 
@@ -26,5 +27,5 @@ def test_simple():
 def test_out_of_bounds():
     left = ak.Array([1, 2, 3])
     right = ak.Array([["lambda", "sigma", "eta", "phi"], ["delta"]])
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.cartesian([left, right], axis=2)
