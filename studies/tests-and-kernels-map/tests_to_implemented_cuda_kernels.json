@@ -5123,7 +5123,7 @@
             "awkward_BitMaskedArray_to_IndexedOptionArray",
             "awkward_IndexedArray_fill"
         ],
-        "status": false
+        "status": true
     },
     "test_1604_preserve_form_in_concatenate.py::test_IndexedArray": {
         "count": 2,
@@ -5132,7 +5132,7 @@
             "awkward_IndexedArray_fill",
             "awkward_IndexedArray_getitem_nextcarry"
         ],
-        "status": false
+        "status": true
     },
     "test_1604_preserve_form_in_concatenate.py::test_ListOffsetArray": {
         "count": 1,
@@ -5140,7 +5140,7 @@
         "kernels": [
             "awkward_ListArray_fill"
         ],
-        "status": false
+        "status": true
     },
     "test_1604_preserve_form_in_concatenate.py::test_ListOffsetArray_ListOffsetArray": {
         "count": 1,
@@ -5148,7 +5148,7 @@
         "kernels": [
             "awkward_ListArray_fill"
         ],
-        "status": false
+        "status": true
     },
     "test_1604_preserve_form_in_concatenate.py::test_OptionType_transformations": {
         "count": 1,
@@ -5164,11 +5164,11 @@
         "kernels": [
             "awkward_ListOffsetArray_reduce_local_nextparents_64"
         ],
-        "status": false
+        "status": true
     },
     "test_1650_Record_to_list_should_listify_itself.py::test_array_changed": {
         "count": 2,
-        "error": "",
+        "error": "assert ['[{rho: 1, phi: 1.0}]', '[]', '[{rho: 2, phi: 2.0}]'] == ['[{rho: 1, phi: 1}]', '[]', '[{rho: 2, phi: 2}]']",
         "kernels": [
             "awkward_RegularArray_getitem_next_at",
             "awkward_ListArray_getitem_next_at"
