@@ -239,7 +239,7 @@ def test_1904_drop_none_ListArray_IndexedOptionArray_RecordArray_NumpyArray():
     )
 
 
-# gives error - assert [[3.3], [], [5.5], []] == [[3.3], [], [], []]
+# FIXME : gives error - assert [[3.3], [], [5.5], []] == [[3.3], [], [], []]
 def test_1904_drop_none_ListOffsetArray_ByteMaskedArray_NumpyArray():
     array = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
@@ -673,8 +673,6 @@ def test_2425_forms_from_type_regular():
 
 
 def test_2425_forms_from_type_categorical():
-    pytest.importorskip("pyarrow")
-
     array = ak.str.to_categorical(["do", "re", "mi", "fa", "so"])
 
     cuda_array = ak.to_backend(array, "cuda")
@@ -687,8 +685,6 @@ def test_2425_forms_from_type_categorical():
 
 
 def test_2425_forms_from_type_categorical_option():
-    pytest.importorskip("pyarrow")
-
     array = ak.str.to_categorical(["do", "re", "mi", "fa", "so", None])
 
     cuda_array = ak.to_backend(array, "cuda")
@@ -1206,8 +1202,6 @@ def test_1823_fill_none_axis_none():
 
 
 def test_1671_categorical_type():
-    pytest.importorskip("pyarrow")
-
     array1 = ak.Array(["one", "two", "one", "one"])
     array2 = ak.str.to_categorical(array1)
 
@@ -1225,8 +1219,6 @@ def test_1671_categorical_type():
 
 
 def test_1671_categorical_type_to_categorical():
-    pytest.importorskip("pyarrow")
-
     array1 = ak.Array(["one", "two", "one", "one"])
     array2 = ak.str.to_categorical(array1)
 

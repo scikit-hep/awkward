@@ -1254,6 +1254,307 @@ def test_0093_simplify_uniontypes_and_optiontypes_regulararray_merge():
     )
 
 
+def test_0093_simplify_uniontypes_and_optiontypes_mask_as_bool():
+    array = ak.operations.from_iter(
+        ["one", "two", None, "three", None, None, "four"], highlevel=False
+    )
+    index2 = ak.index.Index64(np.array([2, 2, 1, 5, 0], dtype=np.int64))
+    cuda_array = ak.to_backend(array, "cuda", highlevel=False)
+    cuda_index2 = ak.to_backend(index2, "cuda", highlevel=False)
+
+    cuda_array2 = ak.contents.IndexedArray.simplified(cuda_index2, cuda_array)
+
+    assert cp.asarray(
+        cuda_array.mask_as_bool(valid_when=False).view(cp.int8)
+    ).tolist() == [
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+    ]
+    assert cp.asarray(
+        cuda_array2.mask_as_bool(valid_when=False).view(cp.int8)
+    ).tolist() == [
+        1,
+        1,
+        0,
+        1,
+        0,
+    ]
+
+
+def test_0093_simplify_uniontypes_and_optiontypes_listarray_merge():
+    emptyarray = ak.contents.EmptyArray()
+    cuda_emptyarray = ak.to_backend(emptyarray, "cuda", highlevel=False)
+
+    content1 = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    content2 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7]))
+
+    for (dtype1, Index1, ListArray1), (dtype2, Index2, ListArray2) in [
+        (
+            (np.int32, ak.index.Index32, ak.contents.ListArray),
+            (np.int32, ak.index.Index32, ak.contents.ListArray),
+        ),
+        (
+            (np.int32, ak.index.Index32, ak.contents.ListArray),
+            (np.uint32, ak.index.IndexU32, ak.contents.ListArray),
+        ),
+        (
+            (np.int32, ak.index.Index32, ak.contents.ListArray),
+            (np.int64, ak.index.Index64, ak.contents.ListArray),
+        ),
+        (
+            (np.uint32, ak.index.IndexU32, ak.contents.ListArray),
+            (np.int32, ak.index.Index32, ak.contents.ListArray),
+        ),
+        (
+            (np.uint32, ak.index.IndexU32, ak.contents.ListArray),
+            (np.uint32, ak.index.IndexU32, ak.contents.ListArray),
+        ),
+        (
+            (np.uint32, ak.index.IndexU32, ak.contents.ListArray),
+            (np.int64, ak.index.Index64, ak.contents.ListArray),
+        ),
+        (
+            (np.int64, ak.index.Index64, ak.contents.ListArray),
+            (np.int32, ak.index.Index32, ak.contents.ListArray),
+        ),
+        (
+            (np.int64, ak.index.Index64, ak.contents.ListArray),
+            (np.uint32, ak.index.IndexU32, ak.contents.ListArray),
+        ),
+        (
+            (np.int64, ak.index.Index64, ak.contents.ListArray),
+            (np.int64, ak.index.Index64, ak.contents.ListArray),
+        ),
+    ]:
+        starts1 = Index1(np.array([0, 3, 3], dtype=dtype1))
+        stops1 = Index1(np.array([3, 3, 5], dtype=dtype1))
+        starts2 = Index2(np.array([2, 99, 0], dtype=dtype2))
+        stops2 = Index2(np.array([6, 99, 3], dtype=dtype2))
+        array1 = ListArray1(starts1, stops1, content1)
+        array2 = ListArray2(starts2, stops2, content2)
+
+        cuda_array1 = ak.to_backend(array1, "cuda", highlevel=False)
+        cuda_array2 = ak.to_backend(array2, "cuda", highlevel=False)
+
+        assert to_list(cuda_array1) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        assert to_list(cuda_array2) == [[3, 4, 5, 6], [], [1, 2, 3]]
+
+        assert to_list(cuda_array1._mergemany([cuda_array2])) == [
+            [1.1, 2.2, 3.3],
+            [],
+            [4.4, 5.5],
+            [3, 4, 5, 6],
+            [],
+            [1, 2, 3],
+        ]
+        assert to_list(cuda_array2._mergemany([cuda_array1])) == [
+            [3, 4, 5, 6],
+            [],
+            [1, 2, 3],
+            [1.1, 2.2, 3.3],
+            [],
+            [4.4, 5.5],
+        ]
+        assert to_list(cuda_array1._mergemany([cuda_emptyarray])) == to_list(
+            cuda_array1
+        )
+        assert to_list(cuda_emptyarray._mergemany([cuda_array1])) == to_list(
+            cuda_array1
+        )
+
+        assert (
+            cuda_array1.to_typetracer()._mergemany([cuda_array2.to_typetracer()]).form
+            == cuda_array1._mergemany([cuda_array2]).form
+        )
+        assert (
+            cuda_array2.to_typetracer()._mergemany([cuda_array1.to_typetracer()]).form
+            == cuda_array2._mergemany([cuda_array1]).form
+        )
+        assert (
+            cuda_array1.to_typetracer()
+            ._mergemany([cuda_emptyarray.to_typetracer()])
+            .form
+            == cuda_array1._mergemany([cuda_emptyarray]).form
+        )
+        assert (
+            cuda_emptyarray.to_typetracer()
+            ._mergemany([cuda_array1.to_typetracer()])
+            .form
+            == cuda_emptyarray._mergemany([cuda_array1]).form
+        )
+
+    regulararray = ak.contents.RegularArray(content2, 2, zeros_length=0)
+    cuda_regulararray = ak.to_backend(regulararray, "cuda", highlevel=False)
+
+    assert to_list(cuda_regulararray) == [[1, 2], [3, 4], [5, 6]]
+    assert to_list(cuda_regulararray._mergemany([cuda_emptyarray])) == to_list(
+        cuda_regulararray
+    )
+    assert to_list(cuda_emptyarray._mergemany([cuda_regulararray])) == to_list(
+        cuda_regulararray
+    )
+
+    for dtype1, Index1, ListArray1 in [
+        (np.int32, ak.index.Index32, ak.contents.ListArray),
+        (np.uint32, ak.index.IndexU32, ak.contents.ListArray),
+        (np.int64, ak.index.Index64, ak.contents.ListArray),
+    ]:
+        starts1 = Index1(np.array([0, 3, 3], dtype=dtype1))
+        stops1 = Index1(np.array([3, 3, 5], dtype=dtype1))
+        array1 = ListArray1(starts1, stops1, content1)
+        cuda_array1 = ak.to_backend(array1, "cuda", highlevel=False)
+
+        assert to_list(cuda_array1._mergemany([cuda_regulararray])) == [
+            [1.1, 2.2, 3.3],
+            [],
+            [4.4, 5.5],
+            [1, 2],
+            [3, 4],
+            [5, 6],
+        ]
+        assert to_list(cuda_regulararray._mergemany([cuda_array1])) == [
+            [1, 2],
+            [3, 4],
+            [5, 6],
+            [1.1, 2.2, 3.3],
+            [],
+            [4.4, 5.5],
+        ]
+
+
+def test_0193_is_none_axis_parameter():
+    one = ak.operations.from_iter([1, None, 3], highlevel=False)
+    two = ak.operations.from_iter([[], [1], None, [3, 3, 3]], highlevel=False)
+    tags = ak.index.Index8(np.array([0, 1, 1, 0, 0, 1, 1], dtype=np.int8))
+    index = ak.index.Index64(np.array([0, 0, 1, 1, 2, 2, 3], dtype=np.int64))
+    array = ak.Array(ak.contents.UnionArray(tags, index, [one, two]), check_valid=True)
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert ak.to_list(cuda_array) == [1, [], [1], None, 3, None, [3, 3, 3]]
+
+    assert ak.to_list(ak.operations.is_none(cuda_array)) == [
+        False,
+        False,
+        False,
+        True,
+        False,
+        True,
+        False,
+    ]
+
+
+def test_0023_regular_array_maybe_to_Numpy():
+    array = ak.highlevel.Array(
+        [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
+    ).layout
+    array2 = ak.highlevel.Array([3, 6, None, None, -2, 6], check_valid=True).layout
+
+    cuda_array = ak.to_backend(array, "cuda", highlevel=False)
+    cuda_array2 = ak.to_backend(array2, "cuda", highlevel=False)
+
+    assert to_list(cuda_array[cuda_array2]) == [
+        3.3,
+        6.6,
+        None,
+        None,
+        8.8,
+        6.6,
+    ]
+    assert cuda_array.to_typetracer()[cuda_array2].form == cuda_array[cuda_array2].form
+
+    content = ak.contents.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
+    )
+    regulararray = ak.contents.RegularArray(content, 4, zeros_length=0)
+    cuda_regulararray = ak.to_backend(regulararray, "cuda", highlevel=False)
+
+    array3 = ak.highlevel.Array([2, 1, 1, None, -1], check_valid=True).layout
+    cuda_array3 = ak.to_backend(array3, "cuda", highlevel=False)
+
+    cuda_numpyarray = cuda_regulararray.maybe_to_NumpyArray()
+    # assert to_list(cuda_numpyarray[cuda_array3]) == [
+    #     [8.8, 9.9, 10.0, 11.1],
+    #     [4.4, 5.5, 6.6, 7.7],
+    #     [4.4, 5.5, 6.6, 7.7],
+    #     None,
+    #     [8.8, 9.9, 10.0, 11.1],
+    # ]
+    assert (
+        cuda_numpyarray.to_typetracer()[cuda_array3].form
+        == cuda_numpyarray[cuda_array3].form
+    )
+    assert to_list(cuda_numpyarray[:, cuda_array3]) == [
+        [2.2, 1.1, 1.1, None, 3.3],
+        [6.6, 5.5, 5.5, None, 7.7],
+        [10.0, 9.9, 9.9, None, 11.1],
+    ]
+
+    a = ak.contents.regulararray.RegularArray(
+        ak.contents.numpyarray.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+        ),
+        3,
+    )
+    cuda_a = ak.to_backend(a, "cuda", highlevel=False)
+
+    assert len(cuda_a) == 2
+    cuda_a = cuda_a.maybe_to_NumpyArray()
+    assert isinstance(
+        cuda_a[1,],
+        ak.contents.numpyarray.NumpyArray,
+    )
+
+
+def test_0023_regular_array_getitem():
+    content = ak.contents.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
+    regulararray = ak.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
+
+    cuda_regulararray = ak.to_backend(regulararray, "cuda", highlevel=False)
+
+    assert to_list(cuda_regulararray[(0)]) == [[0.0, 1.1, 2.2], []]
+    assert to_list(cuda_regulararray[(1)]) == [[3.3, 4.4], [5.5]]
+    assert to_list(cuda_regulararray[(2)]) == [[6.6, 7.7, 8.8, 9.9], []]
+    assert cuda_regulararray.to_typetracer()[(2)].form == cuda_regulararray[(2)].form
+    assert to_list(cuda_regulararray[(slice(1, None, None))]) == [
+        [[3.3, 4.4], [5.5]],
+        [[6.6, 7.7, 8.8, 9.9], []],
+    ]
+    assert (
+        cuda_regulararray.to_typetracer()[(slice(1, None, None))].form
+        == cuda_regulararray[(slice(1, None, None))].form
+    )
+    assert to_list(cuda_regulararray[(slice(None, -1, None))]) == [
+        [[0.0, 1.1, 2.2], []],
+        [[3.3, 4.4], [5.5]],
+    ]
+    assert (
+        cuda_regulararray.to_typetracer()[(slice(None, -1, None))].form
+        == cuda_regulararray[(slice(None, -1, None))].form
+    )
+
+
+def test_numpyarray():
+    array = ak.highlevel.Array(
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True
+    ).layout
+    array2 = ak.highlevel.Array([[[], [], []], [], [[], []]], check_valid=True).layout
+
+    cuda_array = ak.to_backend(array, "cuda")
+    cuda_array2 = ak.to_backend(array2, "cuda")
+
+    with pytest.raises(IndexError):
+        cuda_array[cuda_array2]
+
+
 # def test_union_simplification():
 #     array = ak.Array(
 #         ak.contents.UnionArray(

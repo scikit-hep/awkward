@@ -147,7 +147,7 @@
             "awkward_RegularArray_getitem_next_range",
             "awkward_RegularArray_getitem_carry"
         ],
-        "status": false
+        "status": true
     },
     "test_0023_regular_array.py::test_maybe_to_Numpy": {
         "count": 9,
@@ -163,7 +163,7 @@
             "awkward_IndexedArray_validity",
             "awkward_RegularArray_getitem_next_array_regularize"
         ],
-        "status": false
+        "status": true
     },
     "test_0023_regular_array.py::test_numpy": {
         "count": 6,
@@ -607,7 +607,7 @@
             "awkward_IndexedArray_flatten_nextcarry",
             "awkward_IndexedArray_getitem_nextcarry"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_listarray_merge": {
         "count": 3,
@@ -617,7 +617,7 @@
             "awkward_ListArray_compact_offsets",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_listoffsetarray_merge": {
         "count": 3,
@@ -627,7 +627,7 @@
             "awkward_ListArray_compact_offsets",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_mask_as_bool": {
         "count": 1,
@@ -635,7 +635,7 @@
         "kernels": [
             "awkward_IndexedArray_simplify"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_merge_parameters": {
         "count": 3,
@@ -661,7 +661,7 @@
         "kernels": [
             "awkward_ListArray_fill"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_regulararray_merge": {
         "count": 1,
@@ -1089,7 +1089,7 @@
             "awkward_IndexedArray_flatten_nextcarry",
             "awkward_IndexedArray_validity"
         ],
-        "status": false
+        "status": true
     },
     "test_0198_tutorial_documentation_1.py::test_allow_missing": {
         "count": 2,
@@ -1972,7 +1972,7 @@
     },
     "test_0590_allow_regulararray_size_zero.py::test_ListOffsetArray_rpad_and_clip": {
         "count": 6,
-        "error": "",
+        "error": "assert [[], [], []] == [[1, 2, 3], [], [4, 5]]",
         "kernels": [
             "awkward_ListOffsetArray_rpad_axis1",
             "awkward_ListOffsetArray_rpad_length_axis1",
@@ -2799,7 +2799,7 @@
     },
     "test_1031b_start_getitem_next_specialized.py::test_RegularArray": {
         "count": 7,
-        "error": "",
+        "error": "IndexError: cannot slice RegularArray (of length 2) with array([138994604062208])",
         "kernels": [
             "awkward_RegularArray_getitem_next_at",
             "awkward_RegularArray_getitem_next_range",
@@ -2936,7 +2936,7 @@
     },
     "test_1075_validityerror.py::test_ByteMaskedArray": {
         "count": 1,
-        "error": "",
+        "error": "'NoneType' object has no attribute 'str'",
         "kernels": [
             "awkward_ListArray_validity"
         ],
@@ -3638,7 +3638,7 @@
     },
     "test_1135_rpad_operation.py::test_rpad_and_clip_numpy_array": {
         "count": 5,
-        "error": "",
+        "error": "IndexError: cannot slice RegularArray (of length 2) with array([0, 2, 3, 7, 7])",
         "kernels": [
             "awkward_IndexedArray_numnull",
             "awkward_RegularArray_getitem_carry",
