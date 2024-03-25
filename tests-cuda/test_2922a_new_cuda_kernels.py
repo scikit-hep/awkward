@@ -1428,3 +1428,24 @@ def test_1604_preserve_form_in_concatenate_BitMaskedArray():
     assert not c.layout.lsb_order
     assert c.layout.form == BitMaskedForm("u8", NumpyForm("float64"), True, False)
     assert c.layout.form == ctt.layout.form
+
+
+def test_1753_indexedarray_merge_kernel():
+    x = ak.contents.IndexedArray(
+        ak.index.Index64(np.array([0, 0, 1], dtype=np.int64)),
+        ak.contents.NumpyArray(np.array([9, 6, 5], dtype=np.int16)),
+        parameters={"money": "doesn't buy happiness"},
+    )
+    y = ak.contents.IndexedArray(
+        ak.index.Index64(np.array([0, 1, 2, 4, 3], dtype=np.int64)),
+        ak.contents.NumpyArray(np.array([9, 6, 5, 8, 2], dtype=np.int16)),
+        parameters={"age": "number"},
+    )
+
+    cuda_x = ak.to_backend(x, "cuda", highlevel=False)
+    cuda_y = ak.to_backend(y, "cuda", highlevel=False)
+
+    # Test that we invoke the merge pathway
+    z = cuda_x._reverse_merge(cuda_y)
+    assert z.to_list() == [9, 6, 5, 2, 8, 9, 9, 6]
+    assert z.parameters == {"money": "doesn't buy happiness", "age": "number"}

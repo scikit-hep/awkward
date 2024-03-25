@@ -223,7 +223,7 @@
         "kernels": [
             "awkward_ListArray_validity"
         ],
-        "status": false
+        "status": true
     },
     "test_0028_add_dressed_types.py::test_string2": {
         "count": 1,
@@ -239,7 +239,7 @@
         "kernels": [
             "awkward_ListArray_validity"
         ],
-        "status": false
+        "status": true
     },
     "test_0046_start_indexedarray.py::test_basic": {
         "count": 3,
@@ -331,7 +331,7 @@
             "awkward_ListArray_validity",
             "awkward_ListArray_getitem_next_at"
         ],
-        "status": false
+        "status": true
     },
     "test_0072_fillna_operation.py::test_fillna_empty_array": {
         "count": 5,
@@ -418,7 +418,7 @@
             "awkward_UnionArray_simplify_one",
             "awkward_UnionArray_project"
         ],
-        "status": false
+        "status": true
     },
     "test_0078_argcross_and_cross.py::test_argcartesian": {
         "count": 4,
@@ -429,7 +429,7 @@
             "awkward_ListOffsetArray_flatten_offsets",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_0078_argcross_and_cross.py::test_argcartesian_negative_axis": {
         "count": 4,
@@ -440,7 +440,7 @@
             "awkward_ListOffsetArray_flatten_offsets",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_0078_argcross_and_cross.py::test_axis0": {
         "count": 3,
@@ -450,7 +450,7 @@
             "awkward_ListArray_broadcast_tooffsets",
             "awkward_IndexedArray_getitem_nextcarry"
         ],
-        "status": false
+        "status": true
     },
     "test_0078_argcross_and_cross.py::test_axis1": {
         "count": 4,
@@ -461,7 +461,7 @@
             "awkward_ListOffsetArray_flatten_offsets",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_0078_argcross_and_cross.py::test_axis2": {
         "count": 3,
@@ -471,7 +471,7 @@
             "awkward_ListOffsetArray_flatten_offsets",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_0078_argcross_and_cross.py::test_localindex": {
         "count": 3,
@@ -481,7 +481,7 @@
             "awkward_ListArray_localindex",
             "awkward_RegularArray_localindex"
         ],
-        "status": false
+        "status": true
     },
     "test_0086_nep13_ufunc.py::test_indexedarray": {
         "count": 1,
@@ -570,7 +570,7 @@
             "awkward_UnionArray_fillindex_count",
             "awkward_UnionArray_filltags_const"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_indexedarray_merge": {
         "count": 7,
@@ -584,7 +584,7 @@
             "awkward_ListArray_broadcast_tooffsets",
             "awkward_IndexedArray_fill_count"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_indexedarray_simplify": {
         "count": 5,
@@ -596,7 +596,7 @@
             "awkward_IndexedArray_flatten_nextcarry",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_indexedarray_simplify_more": {
         "count": 4,
@@ -645,7 +645,7 @@
             "awkward_UnionArray_fillindex_count",
             "awkward_UnionArray_filltags_const"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_numpyarray_merge": {
         "count": 1,
@@ -653,7 +653,7 @@
         "kernels": [
             "awkward_RegularArray_getitem_next_range"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_recordarray_merge": {
         "count": 1,
@@ -669,7 +669,7 @@
         "kernels": [
             "awkward_ListArray_fill"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_unionarray_merge": {
         "count": 6,
@@ -682,7 +682,7 @@
             "awkward_UnionArray_fillindex_count",
             "awkward_UnionArray_filltags_const"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_unionarray_simplify": {
         "count": 2,
@@ -691,7 +691,7 @@
             "awkward_UnionArray_simplify",
             "awkward_UnionArray_simplify_one"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_unionarray_simplify_one": {
         "count": 1,
@@ -699,7 +699,7 @@
         "kernels": [
             "awkward_UnionArray_simplify_one"
         ],
-        "status": false
+        "status": true
     },
     "test_0093_simplify_uniontypes_and_optiontypes.py::test_where": {
         "count": 5,
@@ -711,7 +711,7 @@
             "awkward_ListArray_validity",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_0107_assign_fields_to_records.py::test_listarray": {
         "count": 1,
@@ -5419,14 +5419,14 @@
     },
     "test_1928_replace_simplify_method_with_classmethod_constructor.py::test_indexed_of_union": {
         "count": 4,
-        "error": "AttributeError: no field named 'is_union'",
+        "error": "",
         "kernels": [
             "awkward_UnionArray_simplify_one",
             "awkward_ListArray_compact_offsets",
             "awkward_UnionArray_project",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_1928_replace_simplify_method_with_classmethod_constructor.py::test_indexedoption_of_union": {
         "count": 6,
@@ -5439,7 +5439,7 @@
             "awkward_IndexedArray_flatten_nextcarry",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_1928_replace_simplify_method_with_classmethod_constructor.py::test_indexedoption_of_union_of_option_1": {
         "count": 7,
@@ -5453,7 +5453,7 @@
             "awkward_IndexedArray_flatten_nextcarry",
             "awkward_ListArray_broadcast_tooffsets"
         ],
-        "status": false
+        "status": true
     },
     "test_1928_replace_simplify_method_with_classmethod_constructor.py::test_indexedoption_of_union_of_option_1_2": {
         "count": 5,
@@ -5465,7 +5465,7 @@
             "awkward_UnionArray_project",
             "awkward_IndexedArray_flatten_nextcarry"
         ],
-        "status": false
+        "status": true
     },
     "test_1928_replace_simplify_method_with_classmethod_constructor.py::test_indexedoption_of_union_of_option_2": {
         "count": 5,
@@ -5477,7 +5477,7 @@
             "awkward_UnionArray_project",
             "awkward_IndexedArray_flatten_nextcarry"
         ],
-        "status": false
+        "status": true
     },
     "test_1943_regular_indexing.py::test_non_list_index": {
         "count": 1,
