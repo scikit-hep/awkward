@@ -16,4 +16,8 @@ def test_to_numpy_record_array():
     )
     assert np.array_equal(test_array["x"], expected_numpy["x"])
     # equal_nan not supported on integer arrays
-    assert np.array_equal(test_array["y"], expected_numpy["y"], equal_nan=True)
+    try:
+        assert np.array_equal(test_array["y"], expected_numpy["y"], equal_nan=True)
+    except TypeError:
+        # older numpy versions do not support `equal_nan`
+        assert np.array_equal(test_array["y"].filled(), expected_numpy["y"].filled())
