@@ -1542,7 +1542,7 @@ def test_0023_regular_array_getitem():
     )
 
 
-def test_numpyarray():
+def test_0111_jagged_and_masked_getitem_numpyarray():
     array = ak.highlevel.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True
     ).layout

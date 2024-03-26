@@ -6587,7 +6587,7 @@
     },
     "test_2815_return_scalar_firsts.py::test": {
         "count": 3,
-        "error": "",
+        "error": "ValueError: cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays to the same backend",
         "kernels": [
             "awkward_missing_repeat",
             "awkward_RegularArray_getitem_next_array",
@@ -6597,7 +6597,7 @@
     },
     "test_2815_return_scalar_firsts.py::test_non_scalar": {
         "count": 3,
-        "error": "",
+        "error": "ValueError: cannot operate on arrays with incompatible backends. Use #ak.to_backend to coerce the arrays to the same backend",
         "kernels": [
             "awkward_missing_repeat",
             "awkward_RegularArray_getitem_next_array",
