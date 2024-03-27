@@ -203,7 +203,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
                 assert stringlike_type == "string"
                 if (
                     dtype == np.dtype(np.bool_)
-                    and np.array(["0"], dtype="bool")[0] == True
+                    and nplike.astype(nplike.asarray(["0"]), dtype=np.bool_)[0]
                 ):
                     # Numpy 2.1 converts b"0" to True, which is not what we're going for here.
                     # It converts b"\0" to False, however, which we want here.
