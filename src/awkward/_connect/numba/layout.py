@@ -148,10 +148,8 @@ def find_numba_record_lower(layouttype, behavior):
 @numba.extending.typeof_impl.register(ak.record.Record)
 def fake_typeof(obj, c):
     raise NumbaTypeError(
-        "{} objects cannot be passed directly into Numba-compiled functions; "
-        "construct a high-level ak.Array or ak.Record instead".format(
-            type(obj).__name__
-        )
+        f"{type(obj).__name__} objects cannot be passed directly into Numba-compiled functions; "
+        "construct a high-level ak.Array or ak.Record instead"
     )
 
 
@@ -1228,9 +1226,7 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
             if index is None:
                 if self.fields is None:
                     raise NumbaValueError(
-                        "no field {} in tuples with {} fields".format(
-                            repr(key), len(self.contenttypes)
-                        )
+                        f"no field {key!r} in tuples with {len(self.contenttypes)} fields"
                     )
                 else:
                     raise NumbaValueError(
@@ -1249,9 +1245,7 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
         if index is None:
             if self.fields is None:
                 raise NumbaValueError(
-                    "no field {} in tuples with {} fields".format(
-                        repr(key), len(self.contenttypes)
-                    )
+                    f"no field {key!r} in tuples with {len(self.contenttypes)} fields"
                 )
             else:
                 raise NumbaValueError(
@@ -1268,9 +1262,7 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
         if index is None:
             if self.fields is None:
                 raise NumbaValueError(
-                    "no field {} in tuple with {} fields".format(
-                        repr(key), len(self.contenttypes)
-                    )
+                    f"no field {key!r} in tuple with {len(self.contenttypes)} fields"
                 )
             else:
                 raise NumbaValueError(

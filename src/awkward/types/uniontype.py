@@ -32,24 +32,18 @@ class UnionType(Type):
     ):
         if not isinstance(contents, Iterable):
             raise TypeError(
-                "{} 'contents' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
-                )
+                f"{type(self).__name__} 'contents' must be iterable, not {contents!r}"
             )
         if not isinstance(contents, list):
             contents = list(contents)
         for content in contents:
             if not isinstance(content, Type):
                 raise TypeError(
-                    "{} all 'contents' must be Type subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} all 'contents' must be Type subclasses, not {content!r}"
                 )
         if parameters is not None and not isinstance(parameters, Mapping):
             raise TypeError(
-                "{} 'parameters' must be of type Mapping or None, not {}".format(
-                    type(self).__name__, repr(parameters)
-                )
+                f"{type(self).__name__} 'parameters' must be of type Mapping or None, not {parameters!r}"
             )
         self._contents: list[Type] = contents
         self._parameters = parameters

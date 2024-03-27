@@ -38,16 +38,12 @@ class UnionForm(UnionMeta[Form], Form):
             )
         if not isinstance(contents, Iterable):
             raise TypeError(
-                "{} 'contents' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
-                )
+                f"{type(self).__name__} 'contents' must be iterable, not {contents!r}"
             )
         for content in contents:
             if not isinstance(content, Form):
                 raise TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} all 'contents' must be Form subclasses, not {content!r}"
                 )
 
         self._tags = tags

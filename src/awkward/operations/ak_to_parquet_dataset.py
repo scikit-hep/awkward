@@ -74,9 +74,7 @@ def _impl(directory, filenames, storage_options):
                 first_filepath = filepath
             elif not schema.equals(pyarrow_parquet.ParquetFile(f).schema_arrow):
                 raise ValueError(
-                    "schema in {} differs from the first schema (in {})".format(
-                        repr(filepath), repr(first_filepath)
-                    )
+                    f"schema in {filepath!r} differs from the first schema (in {first_filepath!r})"
                 )
             metadata_collector.append(pyarrow_parquet.ParquetFile(f).metadata)
             metadata_collector[-1].set_file_path(filepath)

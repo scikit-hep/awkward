@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (numvalid, slicestarts, slicestops, length, missing, missinglength, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(missinglength, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(missinglength, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_numvalid_a", numvalid.dtype, slicestarts.dtype, slicestops.dtype, missing.dtype]))(grid, block, (numvalid, slicestarts, slicestops, length, missing, missinglength, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_numvalid_b", numvalid.dtype, slicestarts.dtype, slicestops.dtype, missing.dtype]))(grid, block, (numvalid, slicestarts, slicestops, length, missing, missinglength, scan_in_array, invocation_index, err_code))
@@ -43,7 +43,7 @@ awkward_ListArray_getitem_jagged_numvalid_a(
           RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_NUMVALID_ERRORS::OFF_GET_CON)
         }
         for (int64_t j = slicestart;  j < slicestop;  j++) {
-          scan_in_array[slicestarts[thread_id] + j - slicestart] = missing[j] >= 0 ? 1 : 0;
+          scan_in_array[j] = missing[j] >= 0 ? 1 : 0;
         }
       }
     }

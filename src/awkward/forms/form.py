@@ -381,15 +381,11 @@ class Form(Meta):
     def _init(self, *, parameters: JSONMapping | None, form_key: str | None):
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
-                "{} 'parameters' must be of type dict or None, not {}".format(
-                    type(self).__name__, repr(parameters)
-                )
+                f"{type(self).__name__} 'parameters' must be of type dict or None, not {parameters!r}"
             )
         if form_key is not None and not isinstance(form_key, str):
             raise TypeError(
-                "{} 'form_key' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(form_key)
-                )
+                f"{type(self).__name__} 'form_key' must be of type string or None, not {form_key!r}"
             )
 
         self._parameters = parameters

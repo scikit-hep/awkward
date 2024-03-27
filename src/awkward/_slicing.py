@@ -619,10 +619,10 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                 outindex = ak.index.Index64(
                     item_backend.index_nplike.full(lenoutindex, -1, dtype=np.int64)
                 )
-                outindex.data[
-                    to_nplike(non_negative, item_backend.index_nplike)
-                ] = item_backend.index_nplike.arange(
-                    nextcontent.shape[0], dtype=np.int64
+                outindex.data[to_nplike(non_negative, item_backend.index_nplike)] = (
+                    item_backend.index_nplike.arange(
+                        nextcontent.shape[0], dtype=np.int64
+                    )
                 )
 
             else:

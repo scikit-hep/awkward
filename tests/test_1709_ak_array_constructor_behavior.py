@@ -10,8 +10,7 @@ from awkward._nplikes.numpy import Numpy
 numpy = Numpy.instance()
 
 
-class MyBehavior(ak.Array):
-    ...
+class MyBehavior(ak.Array): ...
 
 
 def test():

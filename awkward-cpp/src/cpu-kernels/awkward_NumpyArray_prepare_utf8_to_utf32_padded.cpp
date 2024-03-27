@@ -8,9 +8,9 @@
 
 ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded(
   const uint8_t *fromptr,
-    const int64_t *fromoffsets,
-      int64_t offsetslength,
-      int64_t *outmaxcodepoints) {
+  const int64_t *fromoffsets,
+  int64_t offsetslength,
+  int64_t *outmaxcodepoints) {
 
   *outmaxcodepoints = 0;
   int64_t i_code_unit = fromoffsets[0];

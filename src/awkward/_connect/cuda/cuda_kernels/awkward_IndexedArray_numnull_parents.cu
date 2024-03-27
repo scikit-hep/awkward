@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (numnull, tolength, fromindex, lenindex, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(lenindex, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(lenindex, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_IndexedArray_numnull_parents_a', numnull.dtype, tolength.dtype, fromindex.dtype]))(grid, block, (numnull, tolength, fromindex, lenindex, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_IndexedArray_numnull_parents_b', numnull.dtype, tolength.dtype, fromindex.dtype]))(grid, block, (numnull, tolength, fromindex, lenindex, scan_in_array, invocation_index, err_code))
@@ -31,7 +31,6 @@ awkward_IndexedArray_numnull_parents_a(
       }
       else {
         numnull[thread_id] = 0;
-        scan_in_array[thread_id] = 0;
       }
     }
   }

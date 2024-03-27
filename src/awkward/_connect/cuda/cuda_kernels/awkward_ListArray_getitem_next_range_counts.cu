@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (total, fromoffsets, lenstarts, invocation_total, err_code) = args
-//     scan_in_array = cupy.empty(lenstarts, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(lenstarts, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_next_range_counts_a", total.dtype, fromoffsets.dtype]))(grid, block, (total, fromoffsets, lenstarts, scan_in_array, invocation_total, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_next_range_counts_b", total.dtype, fromoffsets.dtype]))(grid, block, (total, fromoffsets, lenstarts, scan_in_array, invocation_total, err_code))

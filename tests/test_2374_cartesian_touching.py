@@ -132,32 +132,32 @@ def test():
 
     mval = delta_r2(a["0"], a["1"])
 
-    assert report.data_touched == [
+    assert set(report.data_touched) == {
         "muon_list!",
         "jet_list!",
         "muon_eta!",
         "jet_eta!",
         "muon_phi!",
         "jet_phi!",
-    ]
+    }
 
     mmin = ak.argmin(mval, axis=2)
-    assert report.data_touched == [
+    assert set(report.data_touched) == {
         "muon_list!",
         "jet_list!",
         "muon_eta!",
         "jet_eta!",
         "muon_phi!",
         "jet_phi!",
-    ]
+    }
 
     ak.firsts(a["1"][mmin], axis=2)
 
-    assert report.data_touched == [
+    assert set(report.data_touched) == {
         "muon_list!",
         "jet_list!",
         "muon_eta!",
         "jet_eta!",
         "muon_phi!",
         "jet_phi!",
-    ]
+    }

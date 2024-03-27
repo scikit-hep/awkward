@@ -34,15 +34,11 @@ class OptionType(Type):
     def __init__(self, content: Type, *, parameters: JSONMapping | None = None):
         if not isinstance(content, Type):
             raise TypeError(
-                "{} 'content' must be a Type subclass, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Type subclass, not {content!r}"
             )
         if parameters is not None and not isinstance(parameters, Mapping):
             raise TypeError(
-                "{} 'parameters' must be of type Mapping or None, not {}".format(
-                    type(self).__name__, repr(parameters)
-                )
+                f"{type(self).__name__} 'parameters' must be of type Mapping or None, not {parameters!r}"
             )
         self._content: Type = content
         self._parameters: JSONMapping | None = parameters

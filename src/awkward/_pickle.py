@@ -25,8 +25,7 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class PickleReducer(Protocol):
-    def __call__(self, obj: Any, protocol: int) -> tuple | NotImplemented:
-        ...
+    def __call__(self, obj: Any, protocol: int) -> tuple | NotImplemented: ...
 
 
 _register_lock = threading.Lock()

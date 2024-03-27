@@ -36,15 +36,11 @@ class BitMaskedForm(BitMaskedMeta[Form], Form):
             )
         if not isinstance(content, Form):
             raise TypeError(
-                "{} all 'contents' must be Form subclasses, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} all 'contents' must be Form subclasses, not {content!r}"
             )
         if not isinstance(valid_when, bool):
             raise TypeError(
-                "{} 'valid_when' must be bool, not {}".format(
-                    type(self).__name__, repr(valid_when)
-                )
+                f"{type(self).__name__} 'valid_when' must be bool, not {valid_when!r}"
             )
         if not isinstance(lsb_order, bool):
             raise TypeError(

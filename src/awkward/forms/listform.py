@@ -31,21 +31,15 @@ class ListForm(ListMeta[Form], Form):
     ):
         if not isinstance(starts, str):
             raise TypeError(
-                "{} 'starts' must be of type str, not {}".format(
-                    type(self).__name__, repr(starts)
-                )
+                f"{type(self).__name__} 'starts' must be of type str, not {starts!r}"
             )
         if not isinstance(stops, str):
             raise TypeError(
-                "{} 'starts' must be of type str, not {}".format(
-                    type(self).__name__, repr(starts)
-                )
+                f"{type(self).__name__} 'starts' must be of type str, not {starts!r}"
             )
         if not isinstance(content, Form):
             raise TypeError(
-                "{} all 'contents' must be Form subclasses, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} all 'contents' must be Form subclasses, not {content!r}"
             )
 
         self._starts = starts

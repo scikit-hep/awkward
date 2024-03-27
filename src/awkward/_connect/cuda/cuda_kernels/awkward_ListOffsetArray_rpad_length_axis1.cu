@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (tooffsets, fromoffsets, fromlength, target, tolength, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(fromlength, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(fromlength, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_rpad_length_axis1_a", tooffsets.dtype, fromoffsets.dtype, tolength.dtype]))(grid, block, (tooffsets, fromoffsets, fromlength, target, tolength, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_rpad_length_axis1_b", tooffsets.dtype, fromoffsets.dtype, tolength.dtype]))(grid, block, (tooffsets, fromoffsets, fromlength, target, tolength, scan_in_array, invocation_index, err_code))
@@ -27,7 +27,6 @@ awkward_ListOffsetArray_rpad_length_axis1_a(
     if (thread_id < fromlength) {
       int64_t rangeval = fromoffsets[thread_id + 1] - fromoffsets[thread_id];
       int64_t longer = (target < rangeval) ? rangeval : target;
-
       scan_in_array[thread_id] = longer;
     }
   }

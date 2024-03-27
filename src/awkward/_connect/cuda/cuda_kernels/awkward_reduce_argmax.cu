@@ -44,7 +44,7 @@ awkward_reduce_argmax_b(
       int64_t parent = parents[thread_id];
       if (toptr[parent] == -1 ||
           (fromptr[thread_id] > (fromptr[toptr[parent]]))) {
-        toptr[parent] = thread_id;
+        toptr[parent] = thread_id; // we need the last parent filled, thread random order problem, find max arg at that index
       }
     }
   }

@@ -6,15 +6,16 @@
 
 template <typename FROM, typename TO>
 ERROR
-awkward_NumpyArray_rearrange_shifted(TO* toptr,
-                                     const FROM* shifts,
-                                     int64_t length,
-                                     const FROM* offsets,
-                                     int64_t offsetslength,
-                                     const FROM* parents,
-                                     int64_t /* parentslength */,  // FIXME: these arguments are not needed
-                                     const FROM* starts,
-                                     int64_t /* startslength */) {
+awkward_NumpyArray_rearrange_shifted(
+  TO* toptr,
+  const FROM* shifts,
+  int64_t length,
+  const FROM* offsets,
+  int64_t offsetslength,
+  const FROM* parents,
+  int64_t /* parentslength */,  // FIXME: these arguments are not needed
+  const FROM* starts,
+  int64_t /* startslength */) {
   int64_t k = 0;
   for (int64_t i = 0; i < offsetslength - 1; i++) {
     for (int64_t j = 0; j < offsets[i + 1] - offsets[i]; j++) {
@@ -31,15 +32,16 @@ awkward_NumpyArray_rearrange_shifted(TO* toptr,
   return success();
 }
 ERROR
-awkward_NumpyArray_rearrange_shifted_toint64_fromint64(int64_t* toptr,
-                                                       const int64_t* fromshifts,
-                                                       int64_t length,
-                                                       const int64_t* fromoffsets,
-                                                       int64_t offsetslength,
-                                                       const int64_t* fromparents,
-                                                       int64_t parentslength,
-                                                       const int64_t* fromstarts,
-                                                       int64_t startslength) {
+awkward_NumpyArray_rearrange_shifted_toint64_fromint64(
+  int64_t* toptr,
+  const int64_t* fromshifts,
+  int64_t length,
+  const int64_t* fromoffsets,
+  int64_t offsetslength,
+  const int64_t* fromparents,
+  int64_t parentslength,
+  const int64_t* fromstarts,
+  int64_t startslength) {
   return awkward_NumpyArray_rearrange_shifted<int64_t, int64_t>(
       toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength, fromstarts, startslength);
 }

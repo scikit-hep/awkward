@@ -5,11 +5,11 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_NumpyArray_unique_strings_uint8(
-    uint8_t* toptr,
-    const int64_t* offsets,
-    int64_t offsetslength,
-    int64_t* outoffsets,
-    int64_t* tolength) {
+  uint8_t* toptr,
+  const int64_t* offsets,
+  int64_t offsetslength,
+  int64_t* outoffsets,
+  int64_t* tolength) {
 
   int64_t slen = 0;
   int64_t index = 0;

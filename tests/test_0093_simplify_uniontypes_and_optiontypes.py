@@ -65,9 +65,9 @@ def test_numpyarray_merge():
             one = ak.contents.NumpyArray(np.array([1, 2, 3], dtype=x))
             two = ak.contents.NumpyArray(np.array([4, 5], dtype=y))
             three = one._mergemany([two])
-            assert ak.to_numpy(three).dtype == np.dtype(z), "{} {} {} {}".format(
-                x, y, z, ak.to_numpy(three).dtype.type
-            )
+            assert ak.to_numpy(three).dtype == np.dtype(
+                z
+            ), f"{x} {y} {z} {ak.to_numpy(three).dtype.type}"
             assert to_list(three) == to_list(
                 np.concatenate([ak.to_numpy(one), ak.to_numpy(two)])
             )

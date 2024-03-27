@@ -33,21 +33,15 @@ class RegularType(Type):
     ):
         if not isinstance(content, Type):
             raise TypeError(
-                "{} 'content' must be a Type subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Type subtype, not {content!r}"
             )
         if not (size is unknown_length or (is_integer(size) and size >= 0)):
             raise ValueError(
-                "{} 'size' must be a non-negative int or None, not {}".format(
-                    type(self).__name__, repr(size)
-                )
+                f"{type(self).__name__} 'size' must be a non-negative int or None, not {size!r}"
             )
         if parameters is not None and not isinstance(parameters, Mapping):
             raise TypeError(
-                "{} 'parameters' must be of type Mapping or None, not {}".format(
-                    type(self).__name__, repr(parameters)
-                )
+                f"{type(self).__name__} 'parameters' must be of type Mapping or None, not {parameters!r}"
             )
         self._content: Type = content
         self._size: ShapeItem = size

@@ -121,14 +121,12 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             np.dtype(np.int64),
         ):
             raise TypeError(
-                "{} 'offsets' must be an Index with dtype in (int32, uint32, int64), "
-                "not {}".format(type(self).__name__, repr(offsets))
+                f"{type(self).__name__} 'offsets' must be an Index with dtype in (int32, uint32, int64), "
+                f"not {offsets!r}"
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         if (
             content.backend.index_nplike.known_data
@@ -142,16 +140,12 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         if parameters is not None and parameters.get("__array__") == "string":
             if not content.is_numpy or not content.parameter("__array__") == "char":
                 raise ValueError(
-                    "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} is a string, so its 'content' must be uint8 NumpyArray of char, not {content!r}"
                 )
         if parameters is not None and parameters.get("__array__") == "bytestring":
             if not content.is_numpy or not content.parameter("__array__") == "byte":
                 raise ValueError(
-                    "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {content!r}"
                 )
 
         assert offsets.nplike is content.backend.index_nplike
@@ -399,9 +393,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             and offsets.length != self._offsets.length
         ):
             raise AssertionError(
-                "cannot broadcast RegularArray of length {} to length {}".format(
-                    self.length, offsets.length - 1
-                )
+                f"cannot broadcast RegularArray of length {self.length} to length {offsets.length - 1}"
             )
 
         # Check whether we need to slice the content, shift our offsets

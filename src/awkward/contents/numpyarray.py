@@ -123,9 +123,7 @@ class NumpyArray(NumpyMeta, Content):
 
         if len(self._data.shape) == 0:
             raise TypeError(
-                "{} 'data' must be an array, not a scalar: {}".format(
-                    type(self).__name__, repr(data)
-                )
+                f"{type(self).__name__} 'data' must be an array, not a scalar: {data!r}"
             )
 
         if parameters is not None and parameters.get("__array__") in ("char", "byte"):

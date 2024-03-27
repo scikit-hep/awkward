@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (toindex, frommask, length, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(length, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_a", toindex.dtype, frommask.dtype]))(grid, block, (toindex, frommask, length, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_b", toindex.dtype, frommask.dtype]))(grid, block, (toindex, frommask, length, scan_in_array, invocation_index, err_code))
@@ -24,9 +24,7 @@ awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < length) {
-      if (frommask[thread_id]) {
-        scan_in_array[thread_id] = 0;
-      } else {
+      if (!frommask[thread_id]) {
         scan_in_array[thread_id] = 1;
       }
     }

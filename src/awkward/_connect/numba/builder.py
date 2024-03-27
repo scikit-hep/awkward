@@ -27,9 +27,7 @@ def globalstring(context, builder, pyvalue):
 class ArrayBuilderType(numba.types.Type):
     def __init__(self, behavior):
         super().__init__(
-            name="ak.ArrayBuilderType({})".format(
-                ak._connect.numba.arrayview.repr_behavior(behavior)
-            )
+            name=f"ak.ArrayBuilderType({ak._connect.numba.arrayview.repr_behavior(behavior)})"
         )
         self.behavior = behavior
 

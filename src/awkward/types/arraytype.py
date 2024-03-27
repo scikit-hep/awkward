@@ -18,15 +18,11 @@ class ArrayType:
     ):
         if not isinstance(content, ak.types.Type):
             raise TypeError(
-                "{} all 'contents' must be Type subclasses, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} all 'contents' must be Type subclasses, not {content!r}"
             )
         if not ((is_integer(length) and length >= 0) or length is unknown_length):
             raise ValueError(
-                "{} 'length' must be a non-negative integer or unknown length, not {}".format(
-                    type(self).__name__, repr(length)
-                )
+                f"{type(self).__name__} 'length' must be a non-negative integer or unknown length, not {length!r}"
             )
         self._content: Type = content
         self._length: ShapeItem = length

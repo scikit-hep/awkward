@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (nextstarts, nextparents, nextlen, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(nextlen, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(nextlen, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64_a", nextstarts.dtype, nextparents.dtype]))(grid, block, (nextstarts, nextparents, nextlen, scan_in_array, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64_b", nextstarts.dtype, nextparents.dtype]))(grid, block, (nextstarts, nextparents, nextlen, scan_in_array, invocation_index, err_code))
 // out["awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64_a", {dtype_specializations}] = None

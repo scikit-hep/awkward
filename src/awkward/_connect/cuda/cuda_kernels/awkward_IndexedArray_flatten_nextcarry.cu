@@ -7,7 +7,7 @@ enum class INDEXEDARRAY_FLATTEN_NEXTCARRY_ERRORS {
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (tocarry, fromindex, lenindex, lencontent, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(lenindex, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(lenindex, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_flatten_nextcarry_a", tocarry.dtype, fromindex.dtype]))(grid, block, (tocarry, fromindex, lenindex, lencontent, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_flatten_nextcarry_b", tocarry.dtype, fromindex.dtype]))(grid, block, (tocarry, fromindex, lenindex, lencontent, scan_in_array, invocation_index, err_code))
@@ -33,8 +33,6 @@ awkward_IndexedArray_flatten_nextcarry_a(
         RAISE_ERROR(INDEXEDARRAY_FLATTEN_NEXTCARRY_ERRORS::IND_OUT_OF_RANGE)
       } else if (j >= 0) {
         scan_in_array[thread_id] = 1;
-      } else {
-        scan_in_array[thread_id] = 0;
       }
     }
   }

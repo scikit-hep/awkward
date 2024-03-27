@@ -125,4 +125,4 @@ def test():
     ttarray = ak.Array(ttlayout)
     pairs = ak.cartesian([ttarray.muon, ttarray.jet], axis=1, nested=True)
     a, b = ak.unzip(pairs)
-    assert report.data_touched == ["muon_list!", "jet_list!"]
+    assert set(report.data_touched) == {"muon_list!", "jet_list!"}

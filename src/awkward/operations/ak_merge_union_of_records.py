@@ -110,10 +110,10 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 indexedoption_index[
                     index_nplike.shape_item_as_index(tagged_content.length)
                 ] = -1
-                field_contents[
-                    tag_for_missing
-                ] = ak.contents.IndexedOptionArray.simplified(
-                    ak.index.Index64(indexedoption_index), tagged_content
+                field_contents[tag_for_missing] = (
+                    ak.contents.IndexedOptionArray.simplified(
+                        ak.index.Index64(indexedoption_index), tagged_content
+                    )
                 )
 
             # Index of None values in tagged content (content with extra None item at end)

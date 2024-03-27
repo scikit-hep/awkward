@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (carrylen, slicestarts, slicestops, sliceouterlen, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(sliceouterlen, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(sliceouterlen, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_carrylen_a", carrylen.dtype, slicestarts.dtype, slicestops.dtype]))(grid, block, (carrylen, slicestarts, slicestops, sliceouterlen, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_carrylen_b", carrylen.dtype, slicestarts.dtype, slicestops.dtype]))(grid, block, (carrylen, slicestarts, slicestops, sliceouterlen, scan_in_array, invocation_index, err_code))

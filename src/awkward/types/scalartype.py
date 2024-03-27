@@ -14,9 +14,7 @@ class ScalarType:
     def __init__(self, content: Type, behavior: Mapping | None = None):
         if not isinstance(content, ak.types.Type):
             raise TypeError(
-                "{} all 'contents' must be Type subclasses, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} all 'contents' must be Type subclasses, not {content!r}"
             )
         self._content: Type = content
         self._behavior: Mapping | None = behavior

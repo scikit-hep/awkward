@@ -37,9 +37,7 @@ class ListOffsetForm(ListOffsetMeta[Form], Form):
     ):
         if not isinstance(offsets, str):
             raise TypeError(
-                "{} 'offsets' must be of type str, not {}".format(
-                    type(self).__name__, repr(offsets)
-                )
+                f"{type(self).__name__} 'offsets' must be of type str, not {offsets!r}"
             )
 
         self._offsets = offsets
