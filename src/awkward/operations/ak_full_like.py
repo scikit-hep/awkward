@@ -201,9 +201,9 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
 
             else:
                 assert stringlike_type == "string"
-                if dtype == np.dtype(np.bool_):
+                if dtype == np.dtype(np.bool_) and np.array(["0"], dtype="bool")[0] == True:
                     # Numpy 2.1 converts b"0" to True, which is not what we're going for here.
-                    # All numpy versions convert b"\0" to False, however.
+                    # It converts b"\0" to False, however, which we want here.
                     asstr = b"1" if fill_value else b"\0"
                 else:
                     asstr = str(fill_value).encode("utf-8", "surrogateescape")
