@@ -68,7 +68,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
         # Build an integer-typed slice array, so that we can
         # ensure we have advanced indexing for both length==0
         # and length > 0 cases.
-        slicer = ak.from_iter([None, 0])
+        backend = ak.backend(array)
+        slicer = ak.to_backend(ak.from_iter([None, 0]), backend)
         if layout.length == 0:
             out = layout[slicer[[0]]][0]
         else:

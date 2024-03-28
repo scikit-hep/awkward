@@ -669,15 +669,18 @@ class Content(Meta):
                 return self._getitem_fields(list(where))
 
             else:
-                layout = ak.operations.ak_to_layout._impl(
-                    where,
-                    allow_record=False,
-                    allow_unknown=False,
-                    none_policy="error",
-                    regulararray=False,
-                    use_from_iter=True,
-                    primitive_policy="error",
-                    string_policy="as-characters",
+                layout = ak.to_backend(
+                    ak.operations.ak_to_layout._impl(
+                        where,
+                        allow_record=False,
+                        allow_unknown=False,
+                        none_policy="error",
+                        regulararray=False,
+                        use_from_iter=True,
+                        primitive_policy="error",
+                        string_policy="as-characters",
+                    ),
+                    self._backend,
                 )
                 return self._getitem(layout)
 
