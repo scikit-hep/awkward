@@ -7,9 +7,9 @@ import awkward as ak
 to_list = ak.operations.to_list
 
 
-def test_firsts():
+def test_0582_propagate_context_in_broadcast_and_apply_firsts():
     array = ak.Array([[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]]])
-    cuda_array = ak.to_backend(array, "cuda", highlevel=False)
+    cuda_array = ak.to_backend(array, "cuda")
 
     assert to_list(ak.operations.firsts(cuda_array, axis=0)) == [[0, 1, 2], []]
     assert to_list(ak.operations.firsts(cuda_array, axis=1)) == [
@@ -43,6 +43,89 @@ def test_firsts():
 
     with pytest.raises(ValueError):
         ak.operations.firsts(cuda_array, axis=-4)
+
+
+def test_0198_tutorial_documentation_1_firsts():
+    array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert to_list(
+        ak.operations.firsts(
+            ak.operations.singletons(cuda_array),
+            axis=1,
+        )
+    ) == [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]
+
+    array = ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert to_list(
+        ak.operations.firsts(
+            ak.operations.singletons(cuda_array, axis=1),
+            axis=2,
+        )
+    ) == [[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]]
+
+    array = ak.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert to_list(
+        ak.operations.firsts(
+            ak.operations.singletons(
+                cuda_array,
+                axis=2,
+            ),
+            axis=3,
+        )
+    ) == [[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]]
+
+
+# def test_RegularArray():
+#     new = ak.contents.RegularArray(
+#         ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
+#         3,
+#     )
+
+#     # new = ak.to_backend(new, "cuda")
+
+#     assert to_list(new[1, 1:]) == [[20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
+#     assert new.to_typetracer()[1, 1:].form == new[1, 1:].form
+
+#     with pytest.raises(IndexError):
+#         new[1, "hello"]
+
+#     with pytest.raises(IndexError):
+#         new[1, ["hello", "there"]]
+
+#     assert to_list(new[1, np.newaxis, -2]) == [[20, 21, 22, 23, 24]]
+#     assert to_list(new[1, np.newaxis, np.newaxis, -2]) == [[[20, 21, 22, 23, 24]]]
+#     assert new.to_typetracer()[1, np.newaxis, -2].form == new[1, np.newaxis, -2].form
+
+#     assert new.minmax_depth == (3, 3)
+
+#     assert to_list(new[1, ..., -2]) == [18, 23, 28]
+#     assert new.to_typetracer()[1, ..., -2].form == new[1, ..., -2].form
+
+#     expectation = [
+#         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+#         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+#     ]
+#     assert to_list(new[[1, 0],]) == expectation
+#     assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
+#     assert to_list(new[[1, 0]]) == expectation
+
+#     assert to_list(new[1, [2, 0]]) == [[25, 26, 27, 28, 29], [15, 16, 17, 18, 19]]
+
+#     array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+#     # array = ak.to_backend(array, "cuda", highlevel=False)
+
+#     assert (
+#         repr(array[[True, False, True]])
+#         == "<Array [[1.1, 2.2, 3.3], [4.4, 5.5]] type='2 * var * float64'>"
+#     )
+#     assert (
+#         repr(array[[True, False, True], 1]) != "<Array [2.2, 5.5] type='2 * float64'>"
+#     )
 
 
 # def test_union_simplification():
