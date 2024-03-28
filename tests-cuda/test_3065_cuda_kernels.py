@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 import awkward as ak
@@ -78,6 +79,117 @@ def test_0198_tutorial_documentation_1_firsts():
             axis=3,
         )
     ) == [[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]]
+
+
+def test_0198_tutorial_documentation_1_singletons():
+    array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert to_list(ak.operations.singletons(cuda_array)) == [
+        [1.1],
+        [2.2],
+        [],
+        [3.3],
+        [],
+        [],
+        [4.4],
+        [5.5],
+    ]
+    assert to_list(ak.operations.singletons(cuda_array)) == [
+        [1.1],
+        [2.2],
+        [],
+        [3.3],
+        [],
+        [],
+        [4.4],
+        [5.5],
+    ]
+
+    array = ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
+    cuda_array = ak.to_backend(array, "cuda")
+    assert to_list(ak.operations.singletons(cuda_array, axis=1)) == [
+        [[1.1], [2.2], []],
+        [[3.3], []],
+        [[]],
+        [[4.4], [5.5]],
+    ]
+
+    array = ak.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]])
+    cuda_array = ak.to_backend(array, "cuda")
+    assert to_list(
+        ak.operations.singletons(
+            cuda_array,
+            axis=2,
+        )
+    ) == [[[[1.1], [2.2], []]], [[[3.3], []]], [[[]]], [[[4.4], [5.5]]]]
+
+
+def test_0198_tutorial_documentation_1_allow_missing():
+    array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    ak.operations.to_numpy(cuda_array)
+    with pytest.raises(ValueError):
+        ak.operations.to_numpy(cuda_array, allow_missing=False)
+
+
+def test_0198_tutorial_documentation_1_flatten0():
+    array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert to_list(ak.operations.flatten(cuda_array, axis=0)) == [
+        1.1,
+        2.2,
+        3.3,
+        4.4,
+        5.5,
+    ]
+
+    content0 = ak.operations.from_iter(
+        [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5], highlevel=False
+    )
+    content1 = ak.operations.from_iter(
+        ["one", None, "two", None, "three"], highlevel=False
+    )
+    array = ak.Array(
+        ak.contents.UnionArray(
+            ak.index.Index8(
+                np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0], dtype=np.int8)
+            ),
+            ak.index.Index64(
+                np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 5, 6, 4, 7], dtype=np.int64)
+            ),
+            [content0, content1],
+        )
+    )
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert to_list(cuda_array) == [
+        1.1,
+        "one",
+        2.2,
+        None,
+        None,
+        "two",
+        3.3,
+        None,
+        None,
+        None,
+        4.4,
+        "three",
+        5.5,
+    ]
+    assert to_list(ak.operations.flatten(cuda_array, axis=0)) == [
+        1.1,
+        "one",
+        2.2,
+        "two",
+        3.3,
+        4.4,
+        "three",
+        5.5,
+    ]
 
 
 # def test_RegularArray():
