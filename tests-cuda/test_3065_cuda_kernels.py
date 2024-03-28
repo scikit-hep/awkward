@@ -9,40 +9,40 @@ to_list = ak.operations.to_list
 
 def test_firsts():
     array = ak.Array([[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]]])
-    array = ak.to_backend(array, "cuda", highlevel=False)
+    cuda_array = ak.to_backend(array, "cuda", highlevel=False)
 
-    assert to_list(ak.operations.firsts(array, axis=0)) == [[0, 1, 2], []]
-    assert to_list(ak.operations.firsts(array, axis=1)) == [
+    assert to_list(ak.operations.firsts(cuda_array, axis=0)) == [[0, 1, 2], []]
+    assert to_list(ak.operations.firsts(cuda_array, axis=1)) == [
         [0, 1, 2],
         [3, 4],
         None,
         [5],
     ]
-    assert to_list(ak.operations.firsts(array, axis=2)) == [
+    assert to_list(ak.operations.firsts(cuda_array, axis=2)) == [
         [0, None],
         [3],
         [],
         [5, 6],
     ]
-    assert to_list(ak.operations.firsts(array, axis=-1)) == [
+    assert to_list(ak.operations.firsts(cuda_array, axis=-1)) == [
         [0, None],
         [3],
         [],
         [5, 6],
     ]
-    assert to_list(ak.operations.firsts(array, axis=-2)) == [
+    assert to_list(ak.operations.firsts(cuda_array, axis=-2)) == [
         [0, 1, 2],
         [3, 4],
         None,
         [5],
     ]
-    assert to_list(ak.operations.firsts(array, axis=-3)) == [
+    assert to_list(ak.operations.firsts(cuda_array, axis=-3)) == [
         [0, 1, 2],
         [],
     ]
 
     with pytest.raises(ValueError):
-        ak.operations.firsts(array, axis=-4)
+        ak.operations.firsts(cuda_array, axis=-4)
 
 
 # def test_union_simplification():
