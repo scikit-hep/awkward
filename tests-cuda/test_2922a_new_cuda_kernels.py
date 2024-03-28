@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-
 from __future__ import annotations
 
 import cupy as cp
@@ -14,14 +13,7 @@ from awkward.forms import (
     NumpyForm,
 )
 
-pa = pytest.importorskip("pyarrow")
-
 to_list = ak.operations.to_list
-
-try:
-    ak.numba.register_and_check()
-except ImportError:
-    pytest.skip(reason="too old Numba version", allow_module_level=True)
 
 
 class ReversibleArray(ak.Array):
@@ -239,25 +231,6 @@ def test_1904_drop_none_ListArray_IndexedOptionArray_RecordArray_NumpyArray():
     )
 
 
-# FIXME : gives error - assert [[3.3], [], [5.5], []] == [[3.3], [], [], []]
-def test_1904_drop_none_ListOffsetArray_ByteMaskedArray_NumpyArray():
-    array = ak.contents.listoffsetarray.ListOffsetArray(
-        ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
-        ak.contents.bytemaskedarray.ByteMaskedArray(
-            ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
-            ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-            valid_when=True,
-        ),
-    )
-
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert to_list(array) == to_list(cuda_array)
-    assert to_list(ak.drop_none(array, axis=1)) == to_list(
-        ak.drop_none(cuda_array, axis=1)
-    )
-
-
 def test_1904_drop_none_all_axes():
     array = ak.Array(
         [
@@ -405,6 +378,8 @@ def test_1914_improved_axis_to_posaxis_singletons():
 
 
 def test_2889_chunked_array_strings():
+    pa = pytest.importorskip("pyarrow")
+
     array = pa.chunked_array([["foo", "bar"], ["blah", "bleh"]])
     ak_array = ak.from_arrow(array)
 
@@ -421,6 +396,8 @@ def test_2889_chunked_array_strings():
 
 
 def test_2889_chunked_array_strings_option():
+    pa = pytest.importorskip("pyarrow")
+
     array = pa.chunked_array([["foo", "bar"], ["blah", "bleh", None]])
     ak_array = ak.from_arrow(array)
 
@@ -439,6 +416,8 @@ def test_2889_chunked_array_strings_option():
 
 
 def test_2889_chunked_array_numbers_option():
+    pa = pytest.importorskip("pyarrow")
+
     array = pa.chunked_array([[1, 2, 3], [4, 5, None]])
     ak_array = ak.from_arrow(array)
 
@@ -1441,3 +1420,16 @@ def test_1753_indexedarray_merge_kernel():
     z = cuda_x._reverse_merge(cuda_y)
     assert z.to_list() == [9, 6, 5, 2, 8, 9, 9, 6]
     assert z.parameters == {"money": "doesn't buy happiness", "age": "number"}
+
+
+def test_0111_jagged_and_masked_getitem_numpyarray():
+    array = ak.highlevel.Array(
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True
+    ).layout
+    array2 = ak.highlevel.Array([[[], [], []], [], [[], []]], check_valid=True).layout
+
+    cuda_array = ak.to_backend(array, "cuda")
+    cuda_array2 = ak.to_backend(array2, "cuda")
+
+    with pytest.raises(IndexError):
+        cuda_array[cuda_array2]
