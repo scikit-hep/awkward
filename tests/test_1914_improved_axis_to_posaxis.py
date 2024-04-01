@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import pytest
-from numpy.exceptions import AxisError
 
 import awkward as ak
+from awkward.errors import AxisError
 
 
 def test_is_none():

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from awkward.errors import AxisError
 
 import awkward as ak
+from awkward.errors import AxisError
 
 to_list = ak.operations.to_list
 
