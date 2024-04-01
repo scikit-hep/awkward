@@ -8,10 +8,15 @@ import struct
 import sys
 from collections.abc import Collection
 
+import numpy as np  # noqa: TID251
+import packaging
+
 from awkward._typing import TypeVar
 
 win = os.name == "nt"
 bits32 = struct.calcsize("P") * 8 == 32
+numpy2 = packaging.version.parse(np.__version__) >= packaging.version.Version("2.0.0b1")
+
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
