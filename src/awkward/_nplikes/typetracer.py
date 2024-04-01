@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence, Set
 from numbers import Number
-from typing import Callable
+from typing import Callable, Iterator
 
 import numpy
 
@@ -125,44 +125,128 @@ class OneOf:
         )
 
 
+class ImmutableBitSet(Set):
+    def __init__(self, byteset: FillableByteSet):
+        self._labels: dict[str, int] = byteset._labels
+        if not byteset._is_filled.any():
+            self._is_filled = None
+        else:
+            self._is_filled = numpy.packbits(byteset._is_filled)
+
+    def __contains__(self, label: object) -> bool:
+        if self._is_filled is None or label not in self._labels:
+            return False
+        else:
+            assert isinstance(label, str)
+            return numpy.unpackbits(self._is_filled)[self._labels[label]]
+
+    def __iter__(self) -> Iterator[str]:
+        if self._is_filled is not None:
+            is_filled = numpy.unpackbits(self._is_filled)
+            for label, index in self._labels.items():
+                if is_filled[index]:
+                    yield label
+
+    def __len__(self) -> int:
+        if self._is_filled is None:
+            return 0
+        else:
+            return int(numpy.unpackbits(self._is_filled).sum())
+
+
+class FillableByteSet(Set):
+    # friend class ImmutableBitSet
+
+    def __init__(self, labels: Collection[str]):
+        self._labels = {label: i for i, label in enumerate(labels)}
+        self._is_filled = numpy.zeros(len(labels), dtype=numpy.bool_)
+
+    def add(self, label: str) -> None:
+        self._is_filled[self._labels[label]] = True
+
+    def to_bitset(self) -> ImmutableBitSet:
+        return ImmutableBitSet(self)
+
+    def clear(self) -> None:
+        self._is_filled.fill(False)
+
+    def __contains__(self, label: object) -> bool:
+        if label not in self._labels:
+            return False
+        else:
+            assert isinstance(label, str)
+            return self._is_filled[self._labels[label]]
+
+    def __iter__(self) -> Iterator[str]:
+        for label, index in self._labels.items():
+            if self._is_filled[index]:
+                yield label
+
+    def __len__(self) -> int:
+        return int(self._is_filled.sum())
+
+
 class TypeTracerReport:
     def __init__(self):
-        # maybe the order will be useful information
         self._shape_touched_set = set()
-        self._shape_touched = []
         self._data_touched_set = set()
-        self._data_touched = []
+        self._node_id_to_shape_touched: dict[str, ImmutableBitSet] = {}
+        self._node_id_to_data_touched: dict[str, ImmutableBitSet] = {}
 
     def __repr__(self):
-        return f"<TypeTracerReport with {len(self._shape_touched)} shape_touched, {len(self._data_touched)} data_touched>"
+        return (
+            f"<TypeTracerReport with {len(self._shape_touched_set)} shape_touched, "
+            f"{len(self._data_touched_set)} data_touched>"
+        )
+
+    def set_labels(self, labels: Collection[str]):
+        self._shape_touched_set = FillableByteSet(labels)
+        self._data_touched_set = FillableByteSet(labels)
 
     @property
-    def shape_touched(self):
-        return self._shape_touched
+    def shape_touched(self) -> list[str]:
+        return list(self._shape_touched_set)
 
     @property
-    def data_touched(self):
-        return self._data_touched
+    def data_touched(self) -> list[str]:
+        return list(self._data_touched_set)
 
-    def touch_shape(self, label):
-        if label not in self._shape_touched_set:
-            self._shape_touched_set.add(label)
-            self._shape_touched.append(label)
+    def touch_shape(self, label: str) -> None:
+        self._shape_touched_set.add(label)
 
-    def touch_data(self, label):
-        if label not in self._data_touched_set:
-            # touching data implies that the shape will be touched as well
-            # implemented here so that the codebase doesn't need to be filled
-            # with calls to both methods everywhere
-            self._shape_touched_set.add(label)
-            self._shape_touched.append(label)
-            self._data_touched_set.add(label)
-            self._data_touched.append(label)
+    def touch_data(self, label: str) -> None:
+        # Touching data implies that the shape will be touched as well
+        # implemented here so that the codebase doesn't need to be filled
+        # with calls to both methods everywhere
+        self._shape_touched_set.add(label)
+        self._data_touched_set.add(label)
+
+    def commit(self, node_id: str) -> None:
+        assert isinstance(self._shape_touched_set, FillableByteSet)
+        assert isinstance(self._data_touched_set, FillableByteSet)
+        self._node_id_to_shape_touched[node_id] = self._shape_touched_set.to_bitset()
+        self._node_id_to_data_touched[node_id] = self._data_touched_set.to_bitset()
+        self._shape_touched_set.clear()
+        self._data_touched_set.clear()
+
+    def shape_touched_in(self, node_ids: Collection[str]) -> list[str]:
+        out: set[str] = set()
+        for node_id in node_ids:
+            out.update(self._node_id_to_shape_touched[node_id])
+        return list(out)
+
+    def data_touched_in(self, node_ids: Collection[str]) -> list[str]:
+        out: set[str] = set()
+        for node_id in node_ids:
+            out.update(self._node_id_to_data_touched[node_id])
+        return list(out)
 
 
 class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     _dtype: numpy.dtype
     _shape: tuple[ShapeItem, ...]
+
+    runtime_typechecks = True
 
     def __new__(cls, *args, **kwargs):
         raise TypeError(
@@ -185,12 +269,13 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         self.form_key = form_key
         self.report = report
 
-        if not isinstance(shape, tuple):
-            raise TypeError("typetracer shape must be a tuple")
-        if not all(isinstance(x, int) or x is unknown_length for x in shape):
-            raise TypeError("typetracer shape must be integers or unknown-length")
-        if not isinstance(dtype, np.dtype):
-            raise TypeError("typetracer dtype must be an instance of np.dtype")
+        if cls.runtime_typechecks:
+            if not isinstance(shape, tuple):
+                raise TypeError("typetracer shape must be a tuple")
+            if not all(isinstance(x, int) or x is unknown_length for x in shape):
+                raise TypeError("typetracer shape must be integers or unknown-length")
+            if not isinstance(dtype, np.dtype):
+                raise TypeError("typetracer dtype must be an instance of np.dtype")
         self._shape = shape
         self._dtype = dtype
 
@@ -378,7 +463,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             elif is_unknown_array(item) and np.issubdtype(item, np.bool_):
                 key_parts.append(self.nplike.nonzero(item)[0])
             else:
-                key_parts.append(item)
+                key_parts.append(item)  # type: ignore[arg-type]
         key = tuple(key_parts)
 
         # 3. Apply Indexing
@@ -1248,9 +1333,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                 inner_shape = x.shape[1:]
             elif inner_shape != x.shape[1:]:
                 raise ValueError(
-                    "inner dimensions don't match in concatenate: {} vs {}".format(
-                        inner_shape, x.shape[1:]
-                    )
+                    f"inner dimensions don't match in concatenate: {inner_shape} vs {x.shape[1:]}"
                 )
             emptyarrays.append(_emptyarray(x))
 
@@ -1437,6 +1520,33 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
         return TypeTracerArray._new(np.dtype(np.bool_), shape=x.shape)
+
+    def real(self, x: TypeTracerArray) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        real_type = numpy.real(numpy.zeros(0, dtype=x.dtype)).dtype
+        return TypeTracerArray._new(real_type, shape=x.shape)
+
+    def imag(self, x: TypeTracerArray) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        real_type = numpy.imag(numpy.zeros(0, dtype=x.dtype)).dtype
+        return TypeTracerArray._new(real_type, shape=x.shape)
+
+    def angle(self, x: TypeTracerArray, deg: bool = False) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        float_type = numpy.angle(numpy.zeros(0, dtype=x.dtype)).dtype
+        return TypeTracerArray._new(float_type, shape=x.shape)
+
+    def round(
+        self,
+        x: TypeTracerArray,
+        decimals: int = 0,
+    ) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        return TypeTracerArray._new(x.dtype, shape=x.shape)
 
     ############################ reducers
 
@@ -1657,4 +1767,11 @@ def typetracer_with_report(
     layout = form.length_zero_array().to_typetracer(forget_length=True)
     report = TypeTracerReport()
     _attach_report(layout, form, report, getkey)
+
+    # Optimisation: identify buffer keys ahead of time, and register them with report
+    def buffer_key(form_key, attribute, form):
+        return getkey(form, attribute)
+
+    report.set_labels(form.expected_from_buffers(buffer_key))
+
     return layout, report

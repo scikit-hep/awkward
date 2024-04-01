@@ -107,11 +107,9 @@ class UfuncLike(Protocol):
 
     def resolve_dtypes(
         self, dtypes: tuple[DType | type[int] | type[complex] | type[float] | None, ...]
-    ) -> tuple[DType, ...]:
-        ...
+    ) -> tuple[DType, ...]: ...
 
-    def __call__(self, *args: ArrayLikeT, **kwargs) -> ArrayLikeT:
-        ...
+    def __call__(self, *args: ArrayLikeT, **kwargs) -> ArrayLikeT: ...
 
 
 class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
@@ -124,23 +122,19 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         method: str,
         args: list[Any],
         kwargs: dict[str, Any] | None = None,
-    ) -> ArrayLikeT | tuple[ArrayLikeT, ...]:
-        ...
+    ) -> ArrayLikeT | tuple[ArrayLikeT, ...]: ...
 
     @property
     @abstractmethod
-    def supports_structured_dtypes(self) -> bool:
-        ...
+    def supports_structured_dtypes(self) -> bool: ...
 
     @property
     @abstractmethod
-    def known_data(self) -> bool:
-        ...
+    def known_data(self) -> bool: ...
 
     @property
     @abstractmethod
-    def is_eager(self) -> bool:
-        ...
+    def is_eager(self) -> bool: ...
 
     ############################ array creation
 
@@ -151,26 +145,22 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         *,
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
-    ) -> ArrayLikeT | PlaceholderArray:
-        ...
+    ) -> ArrayLikeT | PlaceholderArray: ...
 
     # FIXME: find a way to express TypeVar(..., OtherTypeVar(...), FOO) such that
     #        this function preserves the type identity of the input
     @abstractmethod
     def ascontiguousarray(
         self, x: ArrayLikeT | PlaceholderArray
-    ) -> ArrayLikeT | PlaceholderArray:
-        ...
+    ) -> ArrayLikeT | PlaceholderArray: ...
 
     @abstractmethod
     def frombuffer(
         self, buffer, *, dtype: DTypeLike | None = None, count: ShapeItem = -1
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
-    def from_dlpack(self, x: Any) -> ArrayLikeT:
-        ...
+    def from_dlpack(self, x: Any) -> ArrayLikeT: ...
 
     @abstractmethod
     def zeros(
@@ -178,8 +168,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         shape: ShapeItem | tuple[ShapeItem, ...],
         *,
         dtype: DTypeLike | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def ones(
@@ -187,8 +176,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         shape: ShapeItem | tuple[ShapeItem, ...],
         *,
         dtype: DTypeLike | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def empty(
@@ -196,8 +184,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         shape: ShapeItem | tuple[ShapeItem, ...],
         *,
         dtype: DTypeLike | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def full(
@@ -206,20 +193,17 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         fill_value,
         *,
         dtype: DTypeLike | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def zeros_like(
         self, x: ArrayLikeT | PlaceholderArray, *, dtype: DTypeLike | None = None
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def ones_like(
         self, x: ArrayLikeT | PlaceholderArray, *, dtype: DTypeLike | None = None
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def full_like(
@@ -228,8 +212,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         fill_value,
         *,
         dtype: DTypeLike | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def arange(
@@ -239,22 +222,19 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         step: float | int = 1,
         *,
         dtype: DTypeLike | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def meshgrid(
         self, *arrays: ArrayLikeT, indexing: Literal["xy", "ij"] = "xy"
-    ) -> list[ArrayLikeT]:
-        ...
+    ) -> list[ArrayLikeT]: ...
 
     ############################ testing
 
     @abstractmethod
     def array_equal(
         self, x1: ArrayLikeT, x2: ArrayLikeT, *, equal_nan: bool = False
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @abstractmethod
     def searchsorted(
@@ -264,38 +244,33 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         *,
         side: Literal["left", "right"] = "left",
         sorter: ArrayLikeT | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     ############################ manipulation
 
     @abstractmethod
-    def broadcast_arrays(self, *arrays: ArrayLikeT) -> list[ArrayLikeT]:
-        ...
+    def broadcast_arrays(self, *arrays: ArrayLikeT) -> list[ArrayLikeT]: ...
 
     @abstractmethod
-    def broadcast_to(self, x: ArrayLikeT, shape: tuple[ShapeItem, ...]) -> ArrayLikeT:
-        ...
+    def broadcast_to(
+        self, x: ArrayLikeT, shape: tuple[ShapeItem, ...]
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
-    def shape_item_as_index(self, x1: ShapeItem) -> int | ArrayLikeT:
-        ...
+    def shape_item_as_index(self, x1: ShapeItem) -> int | ArrayLikeT: ...
 
     @abstractmethod
-    def index_as_shape_item(self, x1: IndexType) -> ShapeItem:
-        ...
+    def index_as_shape_item(self, x1: IndexType) -> ShapeItem: ...
 
     @abstractmethod
     def derive_slice_for_length(
         self, slice_: slice, length: ShapeItem
-    ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]:
-        ...
+    ) -> tuple[IndexType, IndexType, IndexType, ShapeItem]: ...
 
     @abstractmethod
     def regularize_index_for_length(
         self, index: IndexType, length: ShapeItem
-    ) -> IndexType:
-        ...
+    ) -> IndexType: ...
 
     # FIXME: find a way to express TypeVar(..., OtherTypeVar(...), FOO) such that
     #        this function preserves the type identity of the input
@@ -306,26 +281,21 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         shape: tuple[ShapeItem, ...],
         *,
         copy: bool | None = None,
-    ) -> ArrayLikeT | PlaceholderArray:
-        ...
+    ) -> ArrayLikeT | PlaceholderArray: ...
 
     @abstractmethod
-    def nonzero(self, x: ArrayLikeT) -> tuple[ArrayLikeT, ...]:
-        ...
+    def nonzero(self, x: ArrayLikeT) -> tuple[ArrayLikeT, ...]: ...
 
     @abstractmethod
     def where(
         self, condition: ArrayLikeT, x1: ArrayLikeT, x2: ArrayLikeT
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
-    def unique_values(self, x: ArrayLikeT) -> ArrayLikeT:
-        ...
+    def unique_values(self, x: ArrayLikeT) -> ArrayLikeT: ...
 
     @abstractmethod
-    def unique_all(self, x: ArrayLikeT) -> UniqueAllResult:
-        ...
+    def unique_all(self, x: ArrayLikeT) -> UniqueAllResult: ...
 
     @abstractmethod
     def sort(
@@ -335,8 +305,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         axis: int = -1,
         descending: bool = False,
         stable: bool = True,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def concat(
@@ -344,8 +313,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int | None = 0,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def repeat(
@@ -354,8 +322,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         repeats: ArrayLikeT | int,
         *,
         axis: int | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def stack(
@@ -363,8 +330,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int = 0,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def packbits(
@@ -373,8 +339,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         *,
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def unpackbits(
@@ -384,52 +349,45 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         axis: int | None = None,
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
-    def strides(self, x: ArrayLikeT | PlaceholderArray) -> tuple[ShapeItem, ...]:
-        ...
+    def strides(self, x: ArrayLikeT | PlaceholderArray) -> tuple[ShapeItem, ...]: ...
 
     ############################ ufuncs
 
     @abstractmethod
     def add(
         self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def logical_or(
         self, x1: ArrayLikeT, x2: ArrayLikeT, *, maybe_out: ArrayLikeT | None = None
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def logical_and(
         self, x1: ArrayLikeT, x2: ArrayLikeT, *, maybe_out: ArrayLikeT | None = None
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def logical_not(
         self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
-    def sqrt(self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None) -> ArrayLikeT:
-        ...
+    def sqrt(
+        self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
-    def exp(self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None) -> ArrayLikeT:
-        ...
+    def exp(self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None) -> ArrayLikeT: ...
 
     @abstractmethod
     def divide(
         self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     ############################ almost-ufuncs
 
@@ -442,8 +400,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         nan: int | float | None = 0.0,
         posinf: int | float | None = None,
         neginf: int | float | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def isclose(
@@ -454,12 +411,10 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         rtol: float = 1e-5,
         atol: float = 1e-8,
         equal_nan: bool = False,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
-    def isnan(self, x: ArrayLikeT) -> ArrayLikeT:
-        ...
+    def isnan(self, x: ArrayLikeT) -> ArrayLikeT: ...
 
     @abstractmethod
     def all(
@@ -469,8 +424,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLikeT | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def any(
@@ -480,8 +434,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLikeT | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def min(
@@ -491,8 +444,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLikeT | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def max(
@@ -502,14 +454,12 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLikeT | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def count_nonzero(
         self, x: ArrayLikeT, *, axis: int | tuple[int, ...] | None = None
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def cumsum(
@@ -518,8 +468,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         *,
         axis: int | None = None,
         maybe_out: ArrayLikeT | None = None,
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
     def array_str(
@@ -529,29 +478,35 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         max_line_width: int | None = None,
         precision: int | None = None,
         suppress_small: bool | None = None,
-    ):
-        ...
+    ): ...
 
     @abstractmethod
     def astype(
         self, x: ArrayLikeT, dtype: DTypeLike, *, copy: bool | None = True
-    ) -> ArrayLikeT:
-        ...
+    ) -> ArrayLikeT: ...
 
     @abstractmethod
-    def can_cast(self, from_: DType | ArrayLikeT, to: DType | ArrayLikeT) -> bool:
-        ...
+    def can_cast(self, from_: DType | ArrayLikeT, to: DType | ArrayLikeT) -> bool: ...
 
     @abstractmethod
-    def is_c_contiguous(self, x: ArrayLikeT | PlaceholderArray) -> bool:
-        ...
+    def is_c_contiguous(self, x: ArrayLikeT | PlaceholderArray) -> bool: ...
+
+    @abstractmethod
+    def real(self, x: ArrayLikeT) -> ArrayLikeT: ...
+
+    @abstractmethod
+    def imag(self, x: ArrayLikeT) -> ArrayLikeT: ...
+
+    @abstractmethod
+    def angle(self, x: ArrayLikeT, deg: bool = False) -> ArrayLikeT: ...
+
+    @abstractmethod
+    def round(self, x: ArrayLikeT, decimals: int = 0) -> ArrayLikeT: ...
 
     @classmethod
     @abstractmethod
-    def is_own_array(cls, obj) -> bool:
-        ...
+    def is_own_array(cls, obj) -> bool: ...
 
     @classmethod
     @abstractmethod
-    def is_own_array_type(cls, type_: type) -> bool:
-        ...
+    def is_own_array_type(cls, type_: type) -> bool: ...

@@ -111,9 +111,7 @@ class NumpyType(Type):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))
         if parameters is not None and not isinstance(parameters, Mapping):
             raise TypeError(
-                "{} 'parameters' must be of type Mapping or None, not {}".format(
-                    type(self).__name__, repr(parameters)
-                )
+                f"{type(self).__name__} 'parameters' must be of type Mapping or None, not {parameters!r}"
             )
         self._primitive: str = primitive
         self._parameters: JSONMapping | None = parameters
