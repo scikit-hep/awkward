@@ -158,7 +158,11 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
 
         elif layout.parameter("__array__") in {"bytestring", "string"}:
             stringlike_type = layout.parameter("__array__")
+            charlike_type = "byte" if stringlike_type == "bytestring" else "char"
+
             if fill_value is _ZEROS:
+                # special case because output lists will all have length zero,
+                # rather than b"0" or "0" or something
                 asbytes = nplike.frombuffer(b"", dtype=np.uint8)
                 result = ak.contents.ListArray(
                     ak.index.Index64(
@@ -171,22 +175,26 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
                     ),
                     ak.contents.NumpyArray(
                         asbytes,
-                        parameters={
-                            "__array__": "byte"
-                            if stringlike_type == "bytestring"
-                            else "char"
-                        },
+                        parameters={"__array__": charlike_type},
                     ),
                     parameters={"__array__": stringlike_type},
                 )
 
-            elif stringlike_type == "bytestring":
-                if isinstance(fill_value, bytes):
+            else:
+                # NumPy 2.x converts "0" and b"0" (ASCII codec 48) to True (because it's not codec 0)
+                # NumPy 1.x converts them to False because it parses bytestrings and strings
+                # both versions of NumPy parse bytestrings and strings when converting to anything other than booleans
+                numpy2_behavior = nplike.astype(nplike.asarray(["0"]), dtype=np.bool_)[
+                    0
+                ]
+                if dtype == np.dtype(np.bool_) and numpy2_behavior:
+                    asbytes = b"\1" if fill_value else b"\0"
+                elif isinstance(fill_value, bytes):
                     asbytes = fill_value
                 else:
                     asbytes = str(fill_value).encode("utf-8", "surrogateescape")
+
                 asbytes = nplike.frombuffer(asbytes, dtype=np.uint8)
-
                 result = ak.contents.ListArray(
                     ak.index.Index64(
                         index_nplike.zeros(layout.length, dtype=np.int64),
@@ -195,33 +203,12 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
                     ak.index.Index64(
                         index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
                     ),
-                    ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
-                    parameters={"__array__": "bytestring"},
+                    ak.contents.NumpyArray(
+                        asbytes, parameters={"__array__": charlike_type}
+                    ),
+                    parameters={"__array__": stringlike_type},
                 )
 
-            else:
-                assert stringlike_type == "string"
-                if (
-                    dtype == np.dtype(np.bool_)
-                    and nplike.astype(nplike.asarray(["0"]), dtype=np.bool_)[0]
-                ):
-                    # Numpy 2.1 converts b"0" to True, which is not what we're going for here.
-                    # It converts b"\0" to False, however, which we want here.
-                    asstr = b"1" if fill_value else b"\0"
-                else:
-                    asstr = str(fill_value).encode("utf-8", "surrogateescape")
-                asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
-                result = ak.contents.ListArray(
-                    ak.index.Index64(
-                        index_nplike.zeros(layout.length, dtype=np.int64),
-                        nplike=index_nplike,
-                    ),
-                    ak.index.Index64(
-                        index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
-                    ),
-                    ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
-                    parameters={"__array__": "string"},
-                )
             if dtype is not None:
                 # Interpret strings as numeric/bool types
                 result = ak.operations.strings_astype(
