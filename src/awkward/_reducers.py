@@ -64,11 +64,14 @@ class KernelReducer(Reducer):
 
     @classmethod
     def _promote_integer_rank(cls, given_dtype: DTypeLike) -> DTypeLike:
-        if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
-            return np.int32 if ak._util.win or ak._util.bits32 else np.int64
+        if (ak._util.win or ak._util.bits32) and isinstance(given_dtype, type):
+            return numpy._module.sum([given_dtype(0)]).dtype.type
+
+        elif given_dtype in (np.bool_, np.int8, np.int16, np.int32):
+            return np.int64
 
         elif given_dtype in (np.uint8, np.uint16, np.uint32):
-            return np.uint32 if ak._util.win or ak._util.bits32 else np.uint64
+            return np.uint64
 
         else:
             return given_dtype
