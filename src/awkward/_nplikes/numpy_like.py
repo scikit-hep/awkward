@@ -19,6 +19,7 @@ from awkward._typing import (
     TypeAlias,
     TypeVar,
 )
+from awkward.errors import AxisError
 
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
@@ -83,7 +84,7 @@ class NumpyMetadata(PublicSingleton):
     datetime_data = staticmethod(numpy.datetime_data)
     issubdtype = staticmethod(numpy.issubdtype)
 
-    AxisError = numpy.exceptions.AxisError
+    AxisError = AxisError
 
 
 if hasattr(numpy, "float16"):
