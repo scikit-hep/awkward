@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import annotations
 
-from numpy.core import umath as um
+import numpy as np
 
 
 def _disables_array_ufunc(obj):
@@ -179,39 +179,39 @@ class NDArrayOperatorsMixin:
     # overrides NEP.
 
     # comparisons don't have reflected and in-place versions
-    __lt__ = _binary_method(um.less, "lt")
-    __le__ = _binary_method(um.less_equal, "le")
-    __eq__ = _binary_method(um.equal, "eq")
-    __ne__ = _binary_method(um.not_equal, "ne")
-    __gt__ = _binary_method(um.greater, "gt")
-    __ge__ = _binary_method(um.greater_equal, "ge")
+    __lt__ = _binary_method(np.less, "lt")
+    __le__ = _binary_method(np.less_equal, "le")
+    __eq__ = _binary_method(np.equal, "eq")
+    __ne__ = _binary_method(np.not_equal, "ne")
+    __gt__ = _binary_method(np.greater, "gt")
+    __ge__ = _binary_method(np.greater_equal, "ge")
 
     # numeric methods
-    __add__, __radd__, __iadd__ = _numeric_methods(um.add, "add")
-    __sub__, __rsub__, __isub__ = _numeric_methods(um.subtract, "sub")
-    __mul__, __rmul__, __imul__ = _numeric_methods(um.multiply, "mul")
-    __matmul__, __rmatmul__, __imatmul__ = _numeric_methods(um.matmul, "matmul")
+    __add__, __radd__, __iadd__ = _numeric_methods(np.add, "add")
+    __sub__, __rsub__, __isub__ = _numeric_methods(np.subtract, "sub")
+    __mul__, __rmul__, __imul__ = _numeric_methods(np.multiply, "mul")
+    __matmul__, __rmatmul__, __imatmul__ = _numeric_methods(np.matmul, "matmul")
     # Python 3 does not use __div__, __rdiv__, or __idiv__
     __truediv__, __rtruediv__, __itruediv__ = _numeric_methods(
-        um.true_divide, "truediv"
+        np.true_divide, "truediv"
     )
     __floordiv__, __rfloordiv__, __ifloordiv__ = _numeric_methods(
-        um.floor_divide, "floordiv"
+        np.floor_divide, "floordiv"
     )
-    __mod__, __rmod__, __imod__ = _numeric_methods(um.remainder, "mod")
-    __divmod__ = _binary_method(um.divmod, "divmod")
-    __rdivmod__ = _reflected_binary_method(um.divmod, "divmod")
+    __mod__, __rmod__, __imod__ = _numeric_methods(np.remainder, "mod")
+    __divmod__ = _binary_method(np.divmod, "divmod")
+    __rdivmod__ = _reflected_binary_method(np.divmod, "divmod")
     # __idivmod__ does not exist
     # TODO: handle the optional third argument for __pow__?
-    __pow__, __rpow__, __ipow__ = _numeric_methods(um.power, "pow")
-    __lshift__, __rlshift__, __ilshift__ = _numeric_methods(um.left_shift, "lshift")
-    __rshift__, __rrshift__, __irshift__ = _numeric_methods(um.right_shift, "rshift")
-    __and__, __rand__, __iand__ = _numeric_methods(um.bitwise_and, "and")
-    __xor__, __rxor__, __ixor__ = _numeric_methods(um.bitwise_xor, "xor")
-    __or__, __ror__, __ior__ = _numeric_methods(um.bitwise_or, "or")
+    __pow__, __rpow__, __ipow__ = _numeric_methods(np.power, "pow")
+    __lshift__, __rlshift__, __ilshift__ = _numeric_methods(np.left_shift, "lshift")
+    __rshift__, __rrshift__, __irshift__ = _numeric_methods(np.right_shift, "rshift")
+    __and__, __rand__, __iand__ = _numeric_methods(np.bitwise_and, "and")
+    __xor__, __rxor__, __ixor__ = _numeric_methods(np.bitwise_xor, "xor")
+    __or__, __ror__, __ior__ = _numeric_methods(np.bitwise_or, "or")
 
     # unary methods
-    __neg__ = _unary_method(um.negative, "neg")
-    __pos__ = _unary_method(um.positive, "pos")
-    __abs__ = _unary_method(um.absolute, "abs")
-    __invert__ = _unary_method(um.invert, "invert")
+    __neg__ = _unary_method(np.negative, "neg")
+    __pos__ = _unary_method(np.positive, "pos")
+    __abs__ = _unary_method(np.absolute, "abs")
+    __invert__ = _unary_method(np.invert, "invert")

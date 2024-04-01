@@ -144,3 +144,59 @@ def test():
     assert_array_type(int_type64, np.int64)
     assert_array_type(float_type, float)
     assert_array_type(bool_type, np.bool_)
+
+
+def test_numpy2_changes():
+    numpy2_behavior = np.asarray(["0"]).astype(np.bool_)[0]
+
+    if numpy2_behavior:
+        assert ak.full_like([[True, False], [], [True]], b"0").to_list() == [
+            [True, True],
+            [],
+            [True],
+        ]
+        assert ak.full_like([[True, False], [], [True]], "0").to_list() == [
+            [True, True],
+            [],
+            [True],
+        ]
+
+    else:
+        assert ak.full_like([[True, False], [], [True]], b"0").to_list() == [
+            [False, False],
+            [],
+            [False],
+        ]
+        assert ak.full_like([[True, False], [], [True]], "0").to_list() == [
+            [False, False],
+            [],
+            [False],
+        ]
+
+    assert ak.full_like(
+        [["one", "two"], [], ["three"]], 0, dtype=np.bool_
+    ).to_list() == [[False, False], [], [False]]
+    assert ak.full_like(
+        [[b"one", b"two"], [], [b"three"]], 0, dtype=np.bool_
+    ).to_list() == [[False, False], [], [False]]
+
+    assert ak.full_like([["one", "two"], [], ["three"]], "0").to_list() == [
+        ["0", "0"],
+        [],
+        ["0"],
+    ]
+    assert ak.full_like([["one", "two"], [], ["three"]], b"0").to_list() == [
+        ["0", "0"],
+        [],
+        ["0"],
+    ]
+    assert ak.full_like([[b"one", b"two"], [], [b"three"]], "0").to_list() == [
+        [b"0", b"0"],
+        [],
+        [b"0"],
+    ]
+    assert ak.full_like([[b"one", b"two"], [], [b"three"]], b"0").to_list() == [
+        [b"0", b"0"],
+        [],
+        [b"0"],
+    ]
