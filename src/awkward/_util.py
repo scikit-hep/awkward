@@ -9,7 +9,7 @@ import sys
 from collections.abc import Collection
 
 import numpy as np  # noqa: TID251
-import packaging
+import packaging.version
 
 from awkward._typing import TypeVar
 
