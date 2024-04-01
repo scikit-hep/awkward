@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from numpy.exceptions import AxisError
+from awkward.errors import AxisError
 
 import awkward as ak
 
