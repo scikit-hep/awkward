@@ -15850,7 +15850,7 @@
         },
         {
             "name": "awkward_UnionArray_validity",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
