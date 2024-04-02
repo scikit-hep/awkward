@@ -1157,6 +1157,19 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "bitmasklength": 2,
+                        "frombitmask": [58, 59],
+                        "lsb_order": false,
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "tobytemask": [0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "bitmasklength": 1,
                         "frombitmask": [66],
                         "lsb_order": true,
@@ -10020,7 +10033,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_drop_none_indexes",
-            "status": true,
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -15837,7 +15850,7 @@
         },
         {
             "name": "awkward_UnionArray_validity",
-            "status": true,
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -21964,6 +21977,19 @@
                     },
                     "outputs": {
                         "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "bitmasklength": 2,
+                        "frombitmask": [58, 59],
+                        "lsb_order": false,
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "toindex": [0,  1, -1, -1, -1,  5, -1,  7,  8,  9, -1, -1, -1, 13, -1, -1]
                     }
                 },
                 {

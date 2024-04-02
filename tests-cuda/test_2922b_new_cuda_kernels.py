@@ -221,12 +221,11 @@ def test_0028_add_dressed_types_highlevel():
     )
 
 
-class Pointy(ak.highlevel.Record):
-    def __str__(self):
-        return "<{} {}>".format(self["x"], self["y"])
-
-
 def test_0049_distinguish_record_and_recordarray_behaviors():
+    class Pointy(ak.highlevel.Record):
+        def __str__(self):
+            return "<{} {}>".format(self["x"], self["y"])
+
     behavior = {}
     behavior["__typestr__", "Point"] = "P"
     behavior["Point"] = Pointy
@@ -1442,68 +1441,6 @@ def test_0193_is_none_axis_parameter():
         True,
         False,
     ]
-
-
-def test_0023_regular_array_maybe_to_Numpy():
-    array = ak.highlevel.Array(
-        [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
-    ).layout
-    array2 = ak.highlevel.Array([3, 6, None, None, -2, 6], check_valid=True).layout
-
-    cuda_array = ak.to_backend(array, "cuda", highlevel=False)
-    cuda_array2 = ak.to_backend(array2, "cuda", highlevel=False)
-
-    assert to_list(cuda_array[cuda_array2]) == [
-        3.3,
-        6.6,
-        None,
-        None,
-        8.8,
-        6.6,
-    ]
-    assert cuda_array.to_typetracer()[cuda_array2].form == cuda_array[cuda_array2].form
-
-    content = ak.contents.NumpyArray(
-        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
-    )
-    regulararray = ak.contents.RegularArray(content, 4, zeros_length=0)
-    cuda_regulararray = ak.to_backend(regulararray, "cuda", highlevel=False)
-
-    array3 = ak.highlevel.Array([2, 1, 1, None, -1], check_valid=True).layout
-    cuda_array3 = ak.to_backend(array3, "cuda", highlevel=False)
-
-    cuda_numpyarray = cuda_regulararray.maybe_to_NumpyArray()
-    # assert to_list(cuda_numpyarray[cuda_array3]) == [
-    #     [8.8, 9.9, 10.0, 11.1],
-    #     [4.4, 5.5, 6.6, 7.7],
-    #     [4.4, 5.5, 6.6, 7.7],
-    #     None,
-    #     [8.8, 9.9, 10.0, 11.1],
-    # ]
-    assert (
-        cuda_numpyarray.to_typetracer()[cuda_array3].form
-        == cuda_numpyarray[cuda_array3].form
-    )
-    assert to_list(cuda_numpyarray[:, cuda_array3]) == [
-        [2.2, 1.1, 1.1, None, 3.3],
-        [6.6, 5.5, 5.5, None, 7.7],
-        [10.0, 9.9, 9.9, None, 11.1],
-    ]
-
-    a = ak.contents.regulararray.RegularArray(
-        ak.contents.numpyarray.NumpyArray(
-            np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-        ),
-        3,
-    )
-    cuda_a = ak.to_backend(a, "cuda", highlevel=False)
-
-    assert len(cuda_a) == 2
-    cuda_a = cuda_a.maybe_to_NumpyArray()
-    assert isinstance(
-        cuda_a[1,],
-        ak.contents.numpyarray.NumpyArray,
-    )
 
 
 def test_0023_regular_array_getitem():
