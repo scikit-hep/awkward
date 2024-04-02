@@ -48,13 +48,113 @@ def test_0582_propagate_context_in_broadcast_and_apply_firsts():
         ak.operations.firsts(cuda_array, axis=-4)
 
 
-def test_2616_use_pyarrow_for_strings_to_categorical():
-    assert (
-        ak.str.to_categorical(["foo", "bar", "bar", "fee"]).layout.form
-        == ak.str.to_categorical(
-            ak.to_backend(["foo", "bar", "bar", "fee"], "cuda")
-        ).layout.form
+def test_0582_propagate_context_in_broadcast_and_apply_toregular():
+    array = ak.Array(
+        [
+            {
+                "x": np.arange(2 * 3 * 5).reshape(2, 3, 5).tolist(),
+                "y": np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7),
+            }
+        ]
     )
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert str(cuda_array.type) in (
+        "1 * {x: var * var * var * int64, y: var * var * var * var * int64}",
+        "1 * {y: var * var * var * var * int64, x: var * var * var * int64}",
+    )
+    assert str(ak.operations.to_regular(cuda_array, axis=-1).type) in (
+        "1 * {x: var * var * 5 * int64, y: var * var * var * 7 * int64}",
+        "1 * {y: var * var * var * 7 * int64, x: var * var * 5 * int64}",
+    )
+    assert str(ak.operations.to_regular(cuda_array, axis=-2).type) in (
+        "1 * {x: var * 3 * var * int64, y: var * var * 5 * var * int64}",
+        "1 * {y: var * var * 5 * var * int64, x: var * 3 * var * int64}",
+    )
+    assert str(ak.operations.to_regular(cuda_array, axis=-3).type) in (
+        "1 * {x: 2 * var * var * int64, y: var * 3 * var * var * int64}",
+        "1 * {y: var * 3 * var * var * int64, x: 2 * var * var * int64}",
+    )
+
+
+def test_0582_propagate_context_in_broadcast_and_apply_cartesian():
+    one = ak.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7).tolist())
+    two = ak.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7).tolist())
+
+    cuda_one = ak.to_backend(one, "cuda")
+    cuda_two = ak.to_backend(two, "cuda")
+
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=0, nested=True).type)
+        == "2 * 2 * (var * var * var * int64, var * var * var * int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=1, nested=True).type)
+        == "2 * var * var * (var * var * int64, var * var * int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=2, nested=True).type)
+        == "2 * var * var * var * (var * int64, var * int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=3, nested=True).type)
+        == "2 * var * var * var * var * (int64, int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=-1, nested=True).type)
+        == "2 * var * var * var * var * (int64, int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=-2, nested=True).type)
+        == "2 * var * var * var * (var * int64, var * int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=-3, nested=True).type)
+        == "2 * var * var * (var * var * int64, var * var * int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=-4, nested=True).type)
+        == "2 * 2 * (var * var * var * int64, var * var * var * int64)"
+    )
+
+    with pytest.raises(ValueError):
+        ak.operations.cartesian([cuda_one, cuda_two], axis=-5, nested=True)
+
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=0).type)
+        == "4 * (var * var * var * int64, var * var * var * int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=1).type)
+        == "2 * var * (var * var * int64, var * var * int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=2).type)
+        == "2 * var * var * (var * int64, var * int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=3).type)
+        == "2 * var * var * var * (int64, int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=-1).type)
+        == "2 * var * var * var * (int64, int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=-2).type)
+        == "2 * var * var * (var * int64, var * int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=-3).type)
+        == "2 * var * (var * var * int64, var * var * int64)"
+    )
+    assert (
+        str(ak.operations.cartesian([cuda_one, cuda_two], axis=-4).type)
+        == "4 * (var * var * var * int64, var * var * var * int64)"
+    )
+
+    with pytest.raises(ValueError):
+        ak.operations.cartesian([cuda_one, cuda_two], axis=-5)
 
 
 def test_0334_fully_broadcastable_where():
@@ -519,6 +619,7 @@ def test_0198_tutorial_documentation_1_singletons():
 
     array = ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
     cuda_array = ak.to_backend(array, "cuda")
+
     assert to_list(ak.operations.singletons(cuda_array, axis=1)) == [
         [[1.1], [2.2], []],
         [[3.3], []],
@@ -528,6 +629,7 @@ def test_0198_tutorial_documentation_1_singletons():
 
     array = ak.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]])
     cuda_array = ak.to_backend(array, "cuda")
+
     assert to_list(
         ak.operations.singletons(
             cuda_array,
@@ -603,7 +705,479 @@ def test_0198_tutorial_documentation_1_flatten0():
     ]
 
 
-# def test_RegularArray():
+def test_0527_fix_unionarray_ufuncs_and_parameters_in_merging_0459():
+    plain_plain = ak.highlevel.Array([[0.0, 1.1, 2.2, 3.3, 4.4]])
+    cuda_plain_plain = ak.to_backend(plain_plain, "cuda")
+
+    cuda_array_plain = ak.operations.with_parameter(
+        cuda_plain_plain, "__list__", "zoinks"
+    )
+    cuda_plain_isdoc = ak.operations.with_parameter(
+        cuda_plain_plain, "__doc__", "This is a zoink."
+    )
+    cuda_array_isdoc = ak.operations.with_parameter(
+        cuda_array_plain, "__doc__", "This is a zoink."
+    )
+
+    assert ak.operations.parameters(cuda_plain_plain) == {}
+    assert ak.operations.parameters(cuda_array_plain) == {"__list__": "zoinks"}
+    assert ak.operations.parameters(cuda_plain_isdoc) == {"__doc__": "This is a zoink."}
+    assert ak.operations.parameters(cuda_array_isdoc) == {
+        "__list__": "zoinks",
+        "__doc__": "This is a zoink.",
+    }
+
+    assert (
+        ak.operations.parameters(
+            ak.operations.concatenate([cuda_plain_plain, cuda_plain_plain])
+        )
+        == {}
+    )
+    assert ak.operations.parameters(
+        ak.operations.concatenate([cuda_array_plain, cuda_array_plain])
+    ) == {"__list__": "zoinks"}
+    assert ak.operations.parameters(
+        ak.operations.concatenate([cuda_plain_isdoc, cuda_plain_isdoc])
+    ) == {"__doc__": "This is a zoink."}
+    assert ak.operations.parameters(
+        ak.operations.concatenate([cuda_array_isdoc, cuda_array_isdoc])
+    ) == {
+        "__list__": "zoinks",
+        "__doc__": "This is a zoink.",
+    }
+
+    assert isinstance(
+        ak.operations.concatenate([cuda_plain_plain, cuda_plain_plain]).layout,
+        ak.contents.ListOffsetArray,
+    )
+    assert isinstance(
+        ak.operations.concatenate([cuda_array_plain, cuda_array_plain]).layout,
+        ak.contents.ListOffsetArray,
+    )
+    assert isinstance(
+        ak.operations.concatenate([cuda_plain_isdoc, cuda_plain_isdoc]).layout,
+        ak.contents.ListOffsetArray,
+    )
+    assert isinstance(
+        ak.operations.concatenate([cuda_array_isdoc, cuda_array_isdoc]).layout,
+        ak.contents.ListOffsetArray,
+    )
+
+    assert (
+        ak.operations.parameters(
+            ak.operations.concatenate([cuda_plain_plain, cuda_array_plain])
+        )
+        == {}
+    )
+    assert (
+        ak.operations.parameters(
+            ak.operations.concatenate([cuda_plain_isdoc, cuda_array_isdoc])
+        )
+        == {}
+    )
+    assert (
+        ak.operations.parameters(
+            ak.operations.concatenate([cuda_array_plain, cuda_plain_plain])
+        )
+        == {}
+    )
+    assert (
+        ak.operations.parameters(
+            ak.operations.concatenate([cuda_array_isdoc, cuda_plain_isdoc])
+        )
+        == {}
+    )
+
+    assert isinstance(
+        ak.operations.concatenate([cuda_plain_plain, cuda_array_plain]).layout,
+        ak.contents.UnionArray,
+    )
+    assert isinstance(
+        ak.operations.concatenate([cuda_plain_isdoc, cuda_array_isdoc]).layout,
+        ak.contents.UnionArray,
+    )
+    assert isinstance(
+        ak.operations.concatenate([cuda_array_plain, cuda_plain_plain]).layout,
+        ak.contents.UnionArray,
+    )
+    assert isinstance(
+        ak.operations.concatenate([cuda_array_isdoc, cuda_plain_isdoc]).layout,
+        ak.contents.UnionArray,
+    )
+
+    assert (
+        ak.operations.parameters(
+            ak.operations.concatenate([cuda_plain_plain, cuda_plain_isdoc])
+        )
+        == {}
+    )
+    assert ak.operations.parameters(
+        ak.operations.concatenate([cuda_array_plain, cuda_array_isdoc])
+    ) == {"__list__": "zoinks"}
+    assert (
+        ak.operations.parameters(
+            ak.operations.concatenate([cuda_plain_isdoc, cuda_plain_plain])
+        )
+        == {}
+    )
+    assert ak.operations.parameters(
+        ak.operations.concatenate([cuda_array_isdoc, cuda_array_plain])
+    ) == {"__list__": "zoinks"}
+
+    assert isinstance(
+        ak.operations.concatenate([cuda_plain_plain, cuda_plain_isdoc]).layout,
+        ak.contents.ListOffsetArray,
+    )
+    assert isinstance(
+        ak.operations.concatenate([cuda_array_plain, cuda_array_isdoc]).layout,
+        ak.contents.ListOffsetArray,
+    )
+    assert isinstance(
+        ak.operations.concatenate([cuda_plain_isdoc, cuda_plain_plain]).layout,
+        ak.contents.ListOffsetArray,
+    )
+    assert isinstance(
+        ak.operations.concatenate([cuda_array_isdoc, cuda_array_plain]).layout,
+        ak.contents.ListOffsetArray,
+    )
+
+
+def test_0527_fix_unionarray_ufuncs_and_parameters_in_merging_0522():
+    content1 = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4]).layout
+    content2 = ak.highlevel.Array([[0], [100], [200], [300], [400]]).layout
+    tags = ak.index.Index8(np.array([0, 0, 0, 1, 1, 0, 0, 1, 1, 1], np.int8))
+    index = ak.index.Index64(np.array([0, 1, 2, 0, 1, 3, 4, 2, 3, 4], np.int64))
+    unionarray = ak.highlevel.Array(
+        ak.contents.UnionArray(tags, index, [content1, content2])
+    )
+    cuda_unionarray = ak.to_backend(unionarray, "cuda")
+
+    assert cuda_unionarray.to_list() == [
+        0.0,
+        1.1,
+        2.2,
+        [0],
+        [100],
+        3.3,
+        4.4,
+        [200],
+        [300],
+        [400],
+    ]
+
+    assert (cuda_unionarray + 10).to_list() == [
+        10.0,
+        11.1,
+        12.2,
+        [10],
+        [110],
+        13.3,
+        14.4,
+        [210],
+        [310],
+        [410],
+    ]
+    assert (10 + cuda_unionarray).to_list() == [
+        10.0,
+        11.1,
+        12.2,
+        [10],
+        [110],
+        13.3,
+        14.4,
+        [210],
+        [310],
+        [410],
+    ]
+
+    assert (cuda_unionarray + range(0, 100, 10)).to_list() == [
+        0.0,
+        11.1,
+        22.2,
+        [30],
+        [140],
+        53.3,
+        64.4,
+        [270],
+        [380],
+        [490],
+    ]
+    assert (range(0, 100, 10) + cuda_unionarray).to_list() == [
+        0.0,
+        11.1,
+        22.2,
+        [30],
+        [140],
+        53.3,
+        64.4,
+        [270],
+        [380],
+        [490],
+    ]
+
+    assert (cuda_unionarray + cp.arange(0, 100, 10)).tolist() == [
+        0.0,
+        11.1,
+        22.2,
+        [30],
+        [140],
+        53.3,
+        64.4,
+        [270],
+        [380],
+        [490],
+    ]
+    assert (cp.arange(0, 100, 10) + cuda_unionarray).tolist() == [
+        0.0,
+        11.1,
+        22.2,
+        [30],
+        [140],
+        53.3,
+        64.4,
+        [270],
+        [380],
+        [490],
+    ]
+
+    assert (cuda_unionarray + ak.highlevel.Array(cp.arange(0, 100, 10))).tolist() == [
+        0.0,
+        11.1,
+        22.2,
+        [30],
+        [140],
+        53.3,
+        64.4,
+        [270],
+        [380],
+        [490],
+    ]
+    assert (ak.highlevel.Array(cp.arange(0, 100, 10)) + cuda_unionarray).tolist() == [
+        0.0,
+        11.1,
+        22.2,
+        [30],
+        [140],
+        53.3,
+        64.4,
+        [270],
+        [380],
+        [490],
+    ]
+
+    # assert (cuda_unionarray + cuda_unionarray).to_list() == [
+    #     0.0,
+    #     2.2,
+    #     4.4,
+    #     [0],
+    #     [200],
+    #     6.6,
+    #     8.8,
+    #     [400],
+    #     [600],
+    #     [800],
+    # ]
+
+
+def test_0546_fill_none_replacement_value_type():
+    array = ak.operations.values_astype(
+        ak.highlevel.Array([1.1, 2.2, None, 3.3]), np.float32
+    )
+    cuda_array = ak.to_backend(array, "cuda")
+
+    assert str(ak.operations.fill_none(cuda_array, cp.float32(0)).type) == "4 * float32"
+
+
+empty = ak.highlevel.Array(
+    ak.contents.RegularArray(
+        ak.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
+    )
+)
+cuda_empty = ak.to_backend(empty, "cuda")
+
+
+def test_0590_allow_regulararray_size_zero_carry():
+    assert cuda_empty[[]].to_list() == []
+
+
+def test_0590_allow_regulararray_size_zero_mergeable():
+    assert ak.operations.concatenate([cuda_empty, cuda_empty]).to_list() == []
+
+
+def test_0590_allow_regulararray_size_zero_localindex():
+    assert ak.operations.local_index(cuda_empty, axis=0).to_list() == []
+    assert ak.operations.local_index(cuda_empty, axis=1).to_list() == []
+    assert ak.operations.local_index(cuda_empty, axis=2).to_list() == []
+
+
+def test_0627_behavior_from_dict_of_arrays():
+    simple = {"what": "ever"}
+    one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], behavior=simple)
+    two = ak.Array([["one", "two"], ["three"], ["four", "five"]], behavior=simple)
+    cuda_one = ak.to_backend(one, "cuda")
+    cuda_two = ak.to_backend(two, "cuda")
+
+    cuda_three = ak.operations.cartesian({"one": cuda_one, "two": cuda_two})
+    assert cuda_three.behavior == {"what": "ever"}
+
+
+def test_0713_getitem_field_should_simplify_optiontype():
+    arr1 = ak.highlevel.Array({"a": [1, 2], "b": [1, None]})
+    cuda_arr1 = ak.to_backend(arr1, "cuda")
+    cuda_arr2 = ak.operations.mask(cuda_arr1, cp.array([True, True]))
+
+    assert isinstance(cuda_arr2.layout, ak.contents.ByteMaskedArray)
+    assert isinstance(cuda_arr2.layout.content, ak.contents.RecordArray)
+    assert isinstance(cuda_arr2.layout.content["b"], ak.contents.IndexedOptionArray)
+
+    assert isinstance(cuda_arr2.b.layout, ak.contents.IndexedOptionArray)
+    assert isinstance(cuda_arr2.b.layout.content, ak.contents.NumpyArray)
+
+    assert ak.operations.is_none(cuda_arr2.b).to_list() == [False, True]
+
+
+def test_0766_prevent_combinations_of_characters_cartesian():
+    one = ak.Array([1, 2, 3, 4])
+    two = ak.Array(["aa", "bb", "cc", "dd"])
+    cuda_one = ak.to_backend(one, "cuda")
+    cuda_two = ak.to_backend(two, "cuda")
+
+    with pytest.raises(ValueError):
+        ak.operations.cartesian([cuda_one, cuda_two], axis=1)
+
+    two = ak.Array([["aa", "bb"], ["cc"], [], ["dd"]])
+    cuda_two = ak.to_backend(two, "cuda")
+
+    assert to_list(ak.operations.cartesian([cuda_one, cuda_two], axis=1)) == [
+        [(1, "aa"), (1, "bb")],
+        [(2, "cc")],
+        [],
+        [(4, "dd")],
+    ]
+    with pytest.raises(ValueError):
+        ak.operations.cartesian([cuda_one, cuda_two], axis=2)
+
+
+def test_0773_typeparser_arraytype_12():
+    array = ak.Array([[1, 2], [3, 4], [5, 6]])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    text = str(ak.to_regular(cuda_array).type)
+    parsedtype = ak.types.from_datashape(text, highlevel=False)
+    assert str(parsedtype) == text
+
+
+def test_0773_typeparser_arraytype_13():
+    array = ak.Array([[1, 2], [3, 4], [5, 6]])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    text = str(ak.with_parameter(ak.to_regular(cuda_array), "wonky", "string").type)
+    parsedtype = ak.types.from_datashape(text, highlevel=False)
+    assert str(parsedtype) == text
+
+
+def test_0773_typeparser_arraytype_14():
+    array = ak.Array([1, 2, 3, [1], [1, 2], [1, 2, 3]])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    text = str(ak.with_parameter(cuda_array, "wonky", "string").type)
+    parsedtype = ak.types.from_datashape(text, highlevel=False)
+    assert str(parsedtype) == text
+
+
+def test_0773_typeparser_arraytype_15():
+    array = ak.Array([1, 2, 3, None, [1], [1, 2], [1, 2, 3]])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    text = str(ak.with_parameter(cuda_array, "wonky", "string").type)
+    parsedtype = ak.types.from_datashape(text, highlevel=False)
+    assert str(parsedtype) == text
+
+
+def test_0773_typeparser_arraytype_16():
+    array = ak.Array([1, 2, 3, None, [1], [1, 2], [1, 2, 3]])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    text = str(cuda_array.type)
+    parsedtype = ak.types.from_datashape(text, highlevel=False)
+    assert str(parsedtype) == text
+
+
+def test_0773_typeparser_arraytype_17():
+    array = ak.Array([1, 2, 3, None, [], [], []])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    text = str(cuda_array.type)
+    parsedtype = ak.types.from_datashape(text, highlevel=False)
+    assert str(parsedtype) == text
+
+
+def test_0773_typeparser_arraytype_categorical_1():
+    pytest.importorskip("pyarrow")
+
+    array = ak.Array(["one", "one", "two", "three", "one", "three"])
+    cuda_array = ak.to_backend(array, "cuda")
+
+    text = str(ak.str.to_categorical(cuda_array).type)
+    parsedtype = ak.types.from_datashape(text, highlevel=True)
+    assert isinstance(parsedtype, ak.types.ArrayType)
+    assert str(parsedtype) == text
+
+
+def test_0866_getitem_field_and_flatten_unions_getitem_field():
+    a1 = ak.operations.zip(
+        {"a": [[1], [], [2, 3]], "b": [[4], [], [5, 6]]}, with_name="a1"
+    )
+    a2 = ak.operations.zip(
+        {"a": [[7, 8], [9], []], "b": [[10, 11], [12], []]}, with_name="a2"
+    )
+    cuda_a1 = ak.to_backend(a1, "cuda")
+    cuda_a2 = ak.to_backend(a2, "cuda")
+
+    union = ak.operations.where(cp.array([True, False, True]), cuda_a1, cuda_a2)
+    assert str(union.a.type) == "3 * var * int64"
+
+
+def test_0866_getitem_field_and_flatten_unions_flatten_axis_none():
+    a1 = ak.operations.zip(
+        {"a": [[1], [], [2, 3]], "b": [[4], [], [5, 6]]}, with_name="a1"
+    )
+    a2 = ak.operations.zip(
+        {"a": [[7, 8], [9], []], "b": [[10, 11], [12], []]}, with_name="a2"
+    )
+    cuda_a1 = ak.to_backend(a1, "cuda")
+    cuda_a2 = ak.to_backend(a2, "cuda")
+
+    union = ak.operations.where(cp.array([True, False, True]), cuda_a1, cuda_a2)
+    assert ak.operations.flatten(union, axis=None) == {
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        9,
+        12,
+    }
+
+
+def test():
+    layout = ak.contents.IndexedArray(
+        ak.index.Index64(np.array([3, 1, 0, 2])),
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.array([0, 3, 6, 9, 12])),
+            ak.contents.NumpyArray(np.array([0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3, 3])),
+        ),
+    )
+    cuda_layout = ak.to_backend(layout, "cuda")
+
+    assert ak.operations.unflatten(
+        cuda_layout,
+        ak.operations.flatten(ak.operations.run_lengths(cuda_layout)),
+        axis=1,
+    ).to_list() == [[[3, 3, 3]], [[1, 1, 1]], [[0, 0, 0]], [[2, 2], [3]]]
+
+
 #     new = ak.contents.RegularArray(
 #         ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
 #         3,
