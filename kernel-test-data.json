@@ -1157,13 +1157,13 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "bitmasklength": 2,
-                        "frombitmask": [58, 59],
-                        "lsb_order": false,
+                        "bitmasklength": 1,
+                        "frombitmask": [66],
+                        "lsb_order": true,
                         "validwhen": false
                     },
                     "outputs": {
-                        "tobytemask": [0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1]
+                        "tobytemask": [0, 1, 0, 0, 0, 0, 1, 0]
                     }
                 },
                 {
@@ -1172,7 +1172,7 @@
                     "inputs": {
                         "bitmasklength": 1,
                         "frombitmask": [66],
-                        "lsb_order": true,
+                        "lsb_order": false,
                         "validwhen": false
                     },
                     "outputs": {
@@ -10033,7 +10033,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_drop_none_indexes",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
@@ -10642,7 +10642,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_rpad_axis1",
-            "status": true,
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -21983,13 +21983,26 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "bitmasklength": 2,
-                        "frombitmask": [58, 59],
+                        "bitmasklength": 1,
+                        "frombitmask": [66],
+                        "lsb_order": true,
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "toindex": [0, -1, 2, 3, 4, 5, -1, 7]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "bitmasklength": 1,
+                        "frombitmask": [66],
                         "lsb_order": false,
                         "validwhen": false
                     },
                     "outputs": {
-                        "toindex": [0,  1, -1, -1, -1,  5, -1,  7,  8,  9, -1, -1, -1, 13, -1, -1]
+                        "toindex": [0, -1, 2, 3, 4, 5, -1, 7]
                     }
                 },
                 {
