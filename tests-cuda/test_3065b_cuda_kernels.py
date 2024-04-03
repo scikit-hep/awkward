@@ -6,6 +6,7 @@ import pytest
 
 import awkward as ak
 from awkward._behavior import behavior_of
+from awkward._nplikes.typetracer import TypeTracer
 
 to_list = ak.operations.to_list
 
@@ -157,139 +158,6 @@ def test_0582_propagate_context_in_broadcast_and_apply_cartesian():
         ak.operations.cartesian([cuda_one, cuda_two], axis=-5)
 
 
-def test_0334_fully_broadcastable_where():
-    one = ak.highlevel.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
-    two = ak.highlevel.Array(
-        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
-    )
-    condition = ak.highlevel.Array(
-        [[False, True, False], [], [True, False], [True], [False, False, True, True]]
-    )
-
-    cuda_one = ak.to_backend(one, "cuda")
-    cuda_two = ak.to_backend(two, "cuda")
-    cuda_condition = ak.to_backend(condition, "cuda")
-
-    assert ak.operations.where(cuda_condition, cuda_one, cuda_two).to_list() == [
-        [0, 1, 2.2],
-        [],
-        [3, 4.4],
-        [5],
-        [6.6, 7.7, 8, 9],
-    ]
-
-
-def test_0334_fully_broadcastable_where_issue_334():
-    a = ak.highlevel.Array([1, 2, 3, 4])
-    b = ak.highlevel.Array([-1])
-    c = ak.highlevel.Array([True, False, True, True])
-
-    cuda_a = ak.to_backend(a, "cuda")
-    cuda_b = ak.to_backend(b, "cuda")
-    cuda_c = ak.to_backend(c, "cuda")
-
-    assert ak.operations.where(cuda_c, cuda_a, cuda_b).to_list() == [1, -1, 3, 4]
-    assert ak.operations.where(
-        *ak.operations.broadcast_arrays(cuda_c, cuda_a, cuda_b)
-    ).to_list() == [
-        1,
-        -1,
-        3,
-        4,
-    ]
-    assert ak.operations.where(cuda_c, cuda_a, -1).to_list() == [1, -1, 3, 4]
-    assert ak.operations.where(
-        *ak.operations.broadcast_arrays(cuda_c, cuda_a, -1)
-    ).to_list() == [
-        1,
-        -1,
-        3,
-        4,
-    ]
-
-
-def test_0150_flatten_axis_none_0866():
-    a1 = ak.operations.zip(
-        {"a": [[1], [], [2, 3]], "b": [[4], [], [5, 6]]}, with_name="a1"
-    )
-    a2 = ak.operations.zip(
-        {"a": [[7, 8], [9], []], "b": [[10, 11], [12], []]}, with_name="a2"
-    )
-    cuda_a1 = ak.to_backend(a1, "cuda")
-    cuda_a2 = ak.to_backend(a2, "cuda")
-
-    condition = ak.Array([True, False, True])
-    cuda_condition = ak.to_backend(condition, "cuda")
-    union = ak.operations.where(cuda_condition, cuda_a1, cuda_a2)
-
-    assert set(cp.asnumpy(ak.operations.flatten(union, axis=None))) == {
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        9,
-        12,
-    }
-
-
-def test_0150_flatten_0198():
-    array = ak.highlevel.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]).layout
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert ak.operations.to_list(ak.operations.flatten(cuda_array, axis=0)) == [
-        1.1,
-        2.2,
-        3.3,
-        4.4,
-        5.5,
-    ]
-
-    content0 = ak.operations.from_iter(
-        [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5], highlevel=False
-    )
-    content1 = ak.operations.from_iter(
-        ["one", None, "two", None, "three"], highlevel=False
-    )
-    array = ak.contents.UnionArray(
-        ak.index.Index8(
-            np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0], dtype=np.int8)
-        ),
-        ak.index.Index64(
-            np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 5, 6, 4, 7], dtype=np.int64)
-        ),
-        [content0, content1],
-    )
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert to_list(cuda_array) == [
-        1.1,
-        "one",
-        2.2,
-        None,
-        None,
-        "two",
-        3.3,
-        None,
-        None,
-        None,
-        4.4,
-        "three",
-        5.5,
-    ]
-    assert ak.operations.to_list(ak.operations.flatten(cuda_array, axis=0)) == [
-        1.1,
-        "one",
-        2.2,
-        "two",
-        3.3,
-        4.4,
-        "three",
-        5.5,
-    ]
-
-
 def test_0193_is_none_axis_parameter():
     array = ak.Array([1, 2, 3, None, 5])
     cuda_array = ak.to_backend(array, "cuda")
@@ -360,31 +228,6 @@ def test_0193_is_none_axis_parameter():
         True,
         False,
     ]
-
-
-def test_0150_flatten_0042():
-    array = ak.highlevel.Array(
-        [[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True
-    ).layout
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert ak.operations.to_list(ak.operations.flatten(cuda_array, axis=1)) == [
-        1.1,
-        2.2,
-        3.3,
-        4.4,
-        5.5,
-    ]
-
-
-def test_2678_same_backend_where():
-    result = ak.where(
-        ak.to_backend([True, False, False], "cuda"),
-        ak.to_backend([1, 2, 3], "cuda"),
-        ak.to_backend([4, 5, 6], "cuda"),
-    )
-
-    assert ak.backend(result) == "cuda"
 
 
 def test_0493_zeros_ones_full_like():
@@ -535,174 +378,6 @@ def test_0504_block_ufuncs_for_strings():
 
     with pytest.raises(TypeError):
         cuda_array + 1
-
-
-def test_2426_is_equal_to_equal_union():
-    union_1 = ak.from_iter([1, None, {"x": 2}], highlevel=False)
-    union_2 = ak.from_iter([1, None, {"x": 2}], highlevel=False)
-
-    cuda_union_1 = ak.to_backend(union_1, "cuda", highlevel=False)
-    cuda_union_2 = ak.to_backend(union_2, "cuda", highlevel=False)
-
-    assert cuda_union_1.is_equal_to(cuda_union_2)
-
-
-def test_2426_is_equal_to_unequal_union():
-    union_1 = ak.from_iter([1, None, {"x": 2}, 3], highlevel=False)
-    union_2 = ak.from_iter([1, None, {"x": 2}, 2], highlevel=False)
-
-    cuda_union_1 = ak.to_backend(union_1, "cuda", highlevel=False)
-    cuda_union_2 = ak.to_backend(union_2, "cuda", highlevel=False)
-
-    assert not cuda_union_1.is_equal_to(cuda_union_2)
-
-
-def test_0198_tutorial_documentation_1_firsts():
-    array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert to_list(
-        ak.operations.firsts(
-            ak.operations.singletons(cuda_array),
-            axis=1,
-        )
-    ) == [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]
-
-    array = ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert to_list(
-        ak.operations.firsts(
-            ak.operations.singletons(cuda_array, axis=1),
-            axis=2,
-        )
-    ) == [[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]]
-
-    array = ak.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert to_list(
-        ak.operations.firsts(
-            ak.operations.singletons(
-                cuda_array,
-                axis=2,
-            ),
-            axis=3,
-        )
-    ) == [[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]]
-
-
-def test_0198_tutorial_documentation_1_singletons():
-    array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert to_list(ak.operations.singletons(cuda_array)) == [
-        [1.1],
-        [2.2],
-        [],
-        [3.3],
-        [],
-        [],
-        [4.4],
-        [5.5],
-    ]
-    assert to_list(ak.operations.singletons(cuda_array)) == [
-        [1.1],
-        [2.2],
-        [],
-        [3.3],
-        [],
-        [],
-        [4.4],
-        [5.5],
-    ]
-
-    array = ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert to_list(ak.operations.singletons(cuda_array, axis=1)) == [
-        [[1.1], [2.2], []],
-        [[3.3], []],
-        [[]],
-        [[4.4], [5.5]],
-    ]
-
-    array = ak.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert to_list(
-        ak.operations.singletons(
-            cuda_array,
-            axis=2,
-        )
-    ) == [[[[1.1], [2.2], []]], [[[3.3], []]], [[[]]], [[[4.4], [5.5]]]]
-
-
-def test_0198_tutorial_documentation_1_allow_missing():
-    array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    ak.operations.to_numpy(cuda_array)
-    with pytest.raises(ValueError):
-        ak.operations.to_numpy(cuda_array, allow_missing=False)
-
-
-def test_0198_tutorial_documentation_1_flatten0():
-    array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert to_list(ak.operations.flatten(cuda_array, axis=0)) == [
-        1.1,
-        2.2,
-        3.3,
-        4.4,
-        5.5,
-    ]
-
-    content0 = ak.operations.from_iter(
-        [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5], highlevel=False
-    )
-    content1 = ak.operations.from_iter(
-        ["one", None, "two", None, "three"], highlevel=False
-    )
-    array = ak.Array(
-        ak.contents.UnionArray(
-            ak.index.Index8(
-                np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0], dtype=np.int8)
-            ),
-            ak.index.Index64(
-                np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 5, 6, 4, 7], dtype=np.int64)
-            ),
-            [content0, content1],
-        )
-    )
-    cuda_array = ak.to_backend(array, "cuda")
-
-    assert to_list(cuda_array) == [
-        1.1,
-        "one",
-        2.2,
-        None,
-        None,
-        "two",
-        3.3,
-        None,
-        None,
-        None,
-        4.4,
-        "three",
-        5.5,
-    ]
-    assert to_list(ak.operations.flatten(cuda_array, axis=0)) == [
-        1.1,
-        "one",
-        2.2,
-        "two",
-        3.3,
-        4.4,
-        "three",
-        5.5,
-    ]
 
 
 def test_0527_fix_unionarray_ufuncs_and_parameters_in_merging_0459():
@@ -979,364 +654,817 @@ def test_0527_fix_unionarray_ufuncs_and_parameters_in_merging_0522():
     # ]
 
 
-def test_0546_fill_none_replacement_value_type():
-    array = ak.operations.values_astype(
-        ak.highlevel.Array([1.1, 2.2, None, 3.3]), np.float32
+def test_0959_getitem_array_implementation_UnionArray_NumpyArray():
+    v2a = ak.contents.unionarray.UnionArray(
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
+        [
+            ak.from_iter([[1], [2], [3]], highlevel=False),
+            ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+        ],
     )
-    cuda_array = ak.to_backend(array, "cuda")
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
 
-    assert str(ak.operations.fill_none(cuda_array, cp.float32(0)).type) == "4 * float32"
-
-
-empty = ak.highlevel.Array(
-    ak.contents.RegularArray(
-        ak.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
+    cuda_resultv2 = cuda_v2a[cp.array([0, 1, 3], cp.int64)]
+    assert to_list(cuda_resultv2) == [5.5, 4.4, [2]]
+    assert (
+        cuda_v2a.to_typetracer()[cp.array([0, 1, 3], cp.int64)].form
+        == cuda_resultv2.form
     )
-)
-cuda_empty = ak.to_backend(empty, "cuda")
 
 
-def test_0590_allow_regulararray_size_zero_carry():
-    assert cuda_empty[[]].to_list() == []
-
-
-def test_0590_allow_regulararray_size_zero_mergeable():
-    assert ak.operations.concatenate([cuda_empty, cuda_empty]).to_list() == []
-
-
-def test_0590_allow_regulararray_size_zero_localindex():
-    assert ak.operations.local_index(cuda_empty, axis=0).to_list() == []
-    assert ak.operations.local_index(cuda_empty, axis=1).to_list() == []
-    assert ak.operations.local_index(cuda_empty, axis=2).to_list() == []
-
-
-def test_0627_behavior_from_dict_of_arrays():
-    simple = {"what": "ever"}
-    one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], behavior=simple)
-    two = ak.Array([["one", "two"], ["three"], ["four", "five"]], behavior=simple)
-    cuda_one = ak.to_backend(one, "cuda")
-    cuda_two = ak.to_backend(two, "cuda")
-
-    cuda_three = ak.operations.cartesian({"one": cuda_one, "two": cuda_two})
-    assert cuda_three.behavior == {"what": "ever"}
-
-
-def test_0713_getitem_field_should_simplify_optiontype():
-    arr1 = ak.highlevel.Array({"a": [1, 2], "b": [1, None]})
-    cuda_arr1 = ak.to_backend(arr1, "cuda")
-    cuda_arr2 = ak.operations.mask(cuda_arr1, cp.array([True, True]))
-
-    assert isinstance(cuda_arr2.layout, ak.contents.ByteMaskedArray)
-    assert isinstance(cuda_arr2.layout.content, ak.contents.RecordArray)
-    assert isinstance(cuda_arr2.layout.content["b"], ak.contents.IndexedOptionArray)
-
-    assert isinstance(cuda_arr2.b.layout, ak.contents.IndexedOptionArray)
-    assert isinstance(cuda_arr2.b.layout.content, ak.contents.NumpyArray)
-
-    assert ak.operations.is_none(cuda_arr2.b).to_list() == [False, True]
-
-
-def test_0766_prevent_combinations_of_characters_cartesian():
-    one = ak.Array([1, 2, 3, 4])
-    two = ak.Array(["aa", "bb", "cc", "dd"])
-    cuda_one = ak.to_backend(one, "cuda")
-    cuda_two = ak.to_backend(two, "cuda")
-
-    with pytest.raises(ValueError):
-        ak.operations.cartesian([cuda_one, cuda_two], axis=1)
-
-    two = ak.Array([["aa", "bb"], ["cc"], [], ["dd"]])
-    cuda_two = ak.to_backend(two, "cuda")
-
-    assert to_list(ak.operations.cartesian([cuda_one, cuda_two], axis=1)) == [
-        [(1, "aa"), (1, "bb")],
-        [(2, "cc")],
-        [],
-        [(4, "dd")],
-    ]
-    with pytest.raises(ValueError):
-        ak.operations.cartesian([cuda_one, cuda_two], axis=2)
-
-
-def test_0773_typeparser_arraytype_12():
-    array = ak.Array([[1, 2], [3, 4], [5, 6]])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    text = str(ak.to_regular(cuda_array).type)
-    parsedtype = ak.types.from_datashape(text, highlevel=False)
-    assert str(parsedtype) == text
-
-
-def test_0773_typeparser_arraytype_13():
-    array = ak.Array([[1, 2], [3, 4], [5, 6]])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    text = str(ak.with_parameter(ak.to_regular(cuda_array), "wonky", "string").type)
-    parsedtype = ak.types.from_datashape(text, highlevel=False)
-    assert str(parsedtype) == text
-
-
-def test_0773_typeparser_arraytype_14():
-    array = ak.Array([1, 2, 3, [1], [1, 2], [1, 2, 3]])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    text = str(ak.with_parameter(cuda_array, "wonky", "string").type)
-    parsedtype = ak.types.from_datashape(text, highlevel=False)
-    assert str(parsedtype) == text
-
-
-def test_0773_typeparser_arraytype_15():
-    array = ak.Array([1, 2, 3, None, [1], [1, 2], [1, 2, 3]])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    text = str(ak.with_parameter(cuda_array, "wonky", "string").type)
-    parsedtype = ak.types.from_datashape(text, highlevel=False)
-    assert str(parsedtype) == text
-
-
-def test_0773_typeparser_arraytype_16():
-    array = ak.Array([1, 2, 3, None, [1], [1, 2], [1, 2, 3]])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    text = str(cuda_array.type)
-    parsedtype = ak.types.from_datashape(text, highlevel=False)
-    assert str(parsedtype) == text
-
-
-def test_0773_typeparser_arraytype_17():
-    array = ak.Array([1, 2, 3, None, [], [], []])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    text = str(cuda_array.type)
-    parsedtype = ak.types.from_datashape(text, highlevel=False)
-    assert str(parsedtype) == text
-
-
-def test_0773_typeparser_arraytype_categorical_1():
-    pytest.importorskip("pyarrow")
-
-    array = ak.Array(["one", "one", "two", "three", "one", "three"])
-    cuda_array = ak.to_backend(array, "cuda")
-
-    text = str(ak.str.to_categorical(cuda_array).type)
-    parsedtype = ak.types.from_datashape(text, highlevel=True)
-    assert isinstance(parsedtype, ak.types.ArrayType)
-    assert str(parsedtype) == text
-
-
-def test_0866_getitem_field_and_flatten_unions_getitem_field():
-    a1 = ak.operations.zip(
-        {"a": [[1], [], [2, 3]], "b": [[4], [], [5, 6]]}, with_name="a1"
+def test_0959_getitem_array_implementation_BitMaskedArray_NumpyArray():
+    v2a = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=False,
     )
-    a2 = ak.operations.zip(
-        {"a": [[7, 8], [9], []], "b": [[10, 11], [12], []]}, with_name="a2"
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2a[cp.array([0, 1, 4], cp.int64)]
+    assert to_list(cuda_resultv2) == [0.0, 1.0, None]
+    assert (
+        cuda_v2a.to_typetracer()[cp.array([0, 1, 4], cp.int64)].form
+        == cuda_resultv2.form
     )
-    cuda_a1 = ak.to_backend(a1, "cuda")
-    cuda_a2 = ak.to_backend(a2, "cuda")
 
-    union = ak.operations.where(cp.array([True, False, True]), cuda_a1, cuda_a2)
-    assert str(union.a.type) == "3 * var * int64"
-
-
-def test_0866_getitem_field_and_flatten_unions_flatten_axis_none():
-    a1 = ak.operations.zip(
-        {"a": [[1], [], [2, 3]], "b": [[4], [], [5, 6]]}, with_name="a1"
+    v2b = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=False,
+        length=13,
+        lsb_order=False,
     )
-    a2 = ak.operations.zip(
-        {"a": [[7, 8], [9], []], "b": [[10, 11], [12], []]}, with_name="a2"
+    cuda_v2b = ak.to_backend(v2b, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2b[cp.array([0, 1, 4], cp.int64)]
+    assert to_list(cuda_resultv2) == [0.0, 1.0, None]
+    assert (
+        cuda_v2b.to_typetracer()[cp.array([0, 1, 4], cp.int64)].form
+        == cuda_resultv2.form
     )
-    cuda_a1 = ak.to_backend(a1, "cuda")
-    cuda_a2 = ak.to_backend(a2, "cuda")
 
-    union = ak.operations.where(cp.array([True, False, True]), cuda_a1, cuda_a2)
-    assert ak.operations.flatten(union, axis=None) == {
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        9,
-        12,
-    }
+    v2c = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=True,
+    )
+    cuda_v2c = ak.to_backend(v2c, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2c[cp.array([0, 1, 4], cp.int64)]
+    assert to_list(cuda_resultv2) == [0.0, 1.0, None]
+    assert (
+        cuda_v2c.to_typetracer()[cp.array([0, 1, 4], cp.int64)].form
+        == cuda_resultv2.form
+    )
+
+    v2d = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=False,
+        length=13,
+        lsb_order=True,
+    )
+    cuda_v2d = ak.to_backend(v2d, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2d[cp.array([0, 1, 4], cp.int64)]
+    assert to_list(cuda_resultv2) == [0.0, 1.0, None]
+    assert (
+        cuda_v2d.to_typetracer()[cp.array([0, 1, 4], cp.int64)].form
+        == cuda_resultv2.form
+    )
 
 
-def test():
-    layout = ak.contents.IndexedArray(
-        ak.index.Index64(np.array([3, 1, 0, 2])),
-        ak.contents.ListOffsetArray(
-            ak.index.Index64(np.array([0, 3, 6, 9, 12])),
-            ak.contents.NumpyArray(np.array([0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3, 3])),
+def test_0959_getitem_array_implementation_BitMaskedArray_RecordArray_NumpyArray():
+    v2a = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        True,
+                        True,
+                        True,
+                        True,
+                        False,
+                        False,
+                        False,
+                        False,
+                        True,
+                        False,
+                        True,
+                        False,
+                        True,
+                    ]
+                )
+            )
+        ),
+        ak.contents.recordarray.RecordArray(
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array(
+                        [
+                            0.0,
+                            1.0,
+                            2.0,
+                            3.0,
+                            4.0,
+                            5.0,
+                            6.0,
+                            7.0,
+                            1.1,
+                            2.2,
+                            3.3,
+                            4.4,
+                            5.5,
+                            6.6,
+                        ]
+                    )
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=False,
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+    indexa = ak.index.Index(cp.array([0, 1, 4], cp.int64))
+    cuda_resultv2 = cuda_v2a._carry(indexa, False)
+    assert to_list(cuda_resultv2) == [{"nest": 0.0}, {"nest": 1.0}, None]
+    assert (
+        cuda_v2a.to_typetracer()
+        ._carry(indexa.to_nplike(TypeTracer.instance()), False)
+        .form
+        == cuda_resultv2.form
+    )
+
+    v2b = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak.contents.recordarray.RecordArray(
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array(
+                        [
+                            0.0,
+                            1.0,
+                            2.0,
+                            3.0,
+                            4.0,
+                            5.0,
+                            6.0,
+                            7.0,
+                            1.1,
+                            2.2,
+                            3.3,
+                            4.4,
+                            5.5,
+                            6.6,
+                        ]
+                    )
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=False,
+        length=13,
+        lsb_order=False,
+    )
+    cuda_v2b = ak.to_backend(v2b, "cuda", highlevel=False)
+
+    indexb = ak.index.Index(cp.array([1, 1, 4], cp.int64))
+    cuda_resultv2 = cuda_v2b._carry(indexb, False)
+    assert to_list(cuda_resultv2) == [{"nest": 1.0}, {"nest": 1.0}, None]
+    assert (
+        cuda_v2b.to_typetracer()
+        ._carry(indexb.to_nplike(TypeTracer.instance()), False)
+        .form
+        == cuda_resultv2.form
+    )
+
+    v2c = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak.contents.recordarray.RecordArray(
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array(
+                        [
+                            0.0,
+                            1.0,
+                            2.0,
+                            3.0,
+                            4.0,
+                            5.0,
+                            6.0,
+                            7.0,
+                            1.1,
+                            2.2,
+                            3.3,
+                            4.4,
+                            5.5,
+                            6.6,
+                        ]
+                    )
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=True,
+    )
+    cuda_v2c = ak.to_backend(v2c, "cuda", highlevel=False)
+
+    indexc = ak.index.Index(cp.array([0, 1, 4], cp.int64))
+    cuda_resultv2 = cuda_v2c._carry(indexc, False)
+    assert to_list(cuda_resultv2) == [{"nest": 0.0}, {"nest": 1.0}, None]
+    assert (
+        cuda_v2c.to_typetracer()
+        ._carry(indexc.to_nplike(TypeTracer.instance()), False)
+        .form
+        == cuda_resultv2.form
+    )
+
+    v2d = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak.contents.recordarray.RecordArray(
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array(
+                        [
+                            0.0,
+                            1.0,
+                            2.0,
+                            3.0,
+                            4.0,
+                            5.0,
+                            6.0,
+                            7.0,
+                            1.1,
+                            2.2,
+                            3.3,
+                            4.4,
+                            5.5,
+                            6.6,
+                        ]
+                    )
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=False,
+        length=13,
+        lsb_order=True,
+    )
+    cuda_v2d = ak.to_backend(v2d, "cuda", highlevel=False)
+
+    indexd = ak.index.Index(cp.array([0, 0, 0], cp.int64))
+    cuda_resultv2 = cuda_v2d._carry(indexd, False)
+    assert to_list(cuda_resultv2) == [{"nest": 0.0}, {"nest": 0.0}, {"nest": 0.0}]
+    assert (
+        cuda_v2d.to_typetracer()
+        ._carry(indexd.to_nplike(TypeTracer.instance()), False)
+        .form
+        == cuda_resultv2.form
+    )
+
+
+def test_0959_getitem_array_implementation_IndexedArray_RecordArray_NumpyArray():
+    v2a = ak.contents.indexedarray.IndexedArray(
+        ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
+        ak.contents.recordarray.RecordArray(
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
         ),
     )
-    cuda_layout = ak.to_backend(layout, "cuda")
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
 
-    assert ak.operations.unflatten(
-        cuda_layout,
-        ak.operations.flatten(ak.operations.run_lengths(cuda_layout)),
-        axis=1,
-    ).to_list() == [[[3, 3, 3]], [[1, 1, 1]], [[0, 0, 0]], [[2, 2], [3]]]
-
-
-#     new = ak.contents.RegularArray(
-#         ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
-#         3,
-#     )
-
-#     # new = ak.to_backend(new, "cuda")
-
-#     assert to_list(new[1, 1:]) == [[20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
-#     assert new.to_typetracer()[1, 1:].form == new[1, 1:].form
-
-#     with pytest.raises(IndexError):
-#         new[1, "hello"]
-
-#     with pytest.raises(IndexError):
-#         new[1, ["hello", "there"]]
-
-#     assert to_list(new[1, np.newaxis, -2]) == [[20, 21, 22, 23, 24]]
-#     assert to_list(new[1, np.newaxis, np.newaxis, -2]) == [[[20, 21, 22, 23, 24]]]
-#     assert new.to_typetracer()[1, np.newaxis, -2].form == new[1, np.newaxis, -2].form
-
-#     assert new.minmax_depth == (3, 3)
-
-#     assert to_list(new[1, ..., -2]) == [18, 23, 28]
-#     assert new.to_typetracer()[1, ..., -2].form == new[1, ..., -2].form
-
-#     expectation = [
-#         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
-#         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
-#     ]
-#     assert to_list(new[[1, 0],]) == expectation
-#     assert new.to_typetracer()[[1, 0],].form == new[[1, 0],].form
-#     assert to_list(new[[1, 0]]) == expectation
-
-#     assert to_list(new[1, [2, 0]]) == [[25, 26, 27, 28, 29], [15, 16, 17, 18, 19]]
-
-#     array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-#     # array = ak.to_backend(array, "cuda", highlevel=False)
-
-#     assert (
-#         repr(array[[True, False, True]])
-#         == "<Array [[1.1, 2.2, 3.3], [4.4, 5.5]] type='2 * var * float64'>"
-#     )
-#     assert (
-#         repr(array[[True, False, True], 1]) != "<Array [2.2, 5.5] type='2 * float64'>"
-#     )
+    cuda_resultv2 = cuda_v2a[cp.array([0, 1, 4], cp.int64)]
+    assert to_list(cuda_resultv2) == [{"nest": 3.3}, {"nest": 3.3}, {"nest": 5.5}]
+    assert (
+        cuda_v2a.to_typetracer()[cp.array([0, 1, 4], cp.int64)].form
+        == cuda_resultv2.form
+    )
 
 
-# def test_union_simplification():
-#     array = ak.Array(
-#         ak.contents.UnionArray(
-#             ak.index.Index8(np.arange(64, dtype=np.int8) % 2),
-#             ak.index.Index64(np.arange(64, dtype=np.int64) // 2),
-#             [
-#                 ak.contents.RecordArray(
-#                     [ak.contents.NumpyArray(np.arange(64, dtype=np.int64))], ["x"]
-#                 ),
-#                 ak.contents.RecordArray(
-#                     [
-#                         ak.contents.NumpyArray(np.arange(64, dtype=np.int64)),
-#                         ak.contents.NumpyArray(np.arange(64, dtype=np.int8)),
-#                     ],
-#                     ["x", "y"],
-#                 ),
-#             ],
-#         )
-#     )
+def test_0959_getitem_array_implementation_IndexedOptionArray_RecordArray_NumpyArray():
+    v2a = ak.contents.indexedoptionarray.IndexedOptionArray(
+        ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
+        ak.contents.recordarray.RecordArray(
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
 
-#     cuda_array = ak.to_backend(array, "cuda")
-
-#     form, length, container = ak.to_buffers(array)
-#     cuda_form, cuda_length, cuda_container = ak.to_buffers(cuda_array)
-
-#     assert form.to_dict() == cuda_form.to_dict()
-
-#     projected_form = {
-#         "class": "UnionArray",
-#         "tags": "i8",
-#         "index": "i64",
-#         "contents": [
-#             {
-#                 "class": "RecordArray",
-#                 "fields": ["x"],
-#                 "contents": [
-#                     {
-#                         "class": "NumpyArray",
-#                         "primitive": "int64",
-#                         "inner_shape": [],
-#                         "parameters": {},
-#                         "form_key": "node2",
-#                     }
-#                 ],
-#                 "parameters": {},
-#                 "form_key": "node1",
-#             },
-#             {
-#                 "class": "RecordArray",
-#                 "fields": ["x"],
-#                 "contents": [
-#                     {
-#                         "class": "NumpyArray",
-#                         "primitive": "int64",
-#                         "inner_shape": [],
-#                         "parameters": {},
-#                         "form_key": "node4",
-#                     }
-#                 ],
-#                 "parameters": {},
-#                 "form_key": "node3",
-#             },
-#         ],
-#         "parameters": {},
-#         "form_key": "node0",
-#     }
-#     cuda_container.pop("node5-data")
-#     projected = ak.from_buffers(
-#         projected_form, cuda_length, cuda_container, allow_noncanonical_form=True
-#     )
-#     assert projected.layout.form.to_dict(verbose=False) == {
-#         "class": "IndexedArray",
-#         "index": "i64",
-#         "content": {"class": "RecordArray", "fields": ["x"], "contents": ["int64"]},
-#     }
-#     assert ak.almost_equal(cuda_array[["x"]], projected)
-
-# def test_return_scalar_firsts():
-#     array = ak.Array([1, 2, 3, 4])
-#     cuda_array = ak.to_backend(array, "cuda")
-
-#     first = ak.firsts(cuda_array, axis=0)
-#     assert isinstance(first, np.int64) and first == 1
-# incompatible backends
-
-# def test_return_scalar_firsts_non_scalar():
-#     array = ak.Array([[1, 2, 3], [4]])
-#     cuda_array = ak.to_backend(array, "cuda")
-
-#     first = ak.firsts(cuda_array, axis=0)
-#     assert first.to_list() == [1, 2, 3]
-# incompatible backends
-
-# def test_fillna_unionarray():
-#     content1 = ak.operations.from_iter([[], [1.1], [2.2, 2.2]], highlevel=False)
-#     content2 = ak.operations.from_iter([["two", "two"], ["one"], []], highlevel=False)
-#     tags = ak.index.Index8(np.array([0, 1, 0, 1, 0, 1], dtype=np.int8))
-#     index = ak.index.Index64(np.array([0, 0, 1, 1, 2, 2], dtype=np.int64))
-#     array = ak.contents.UnionArray(tags, index, [content1, content2])
-#     cuda_array = ak.to_backend(array, "cuda", highlevel=False)
-
-#     padded_array =  ak._do.pad_none(array, 2, 1)
-#     padded_cupy_array = ak._do.pad_none(cuda_array, 2, 1)
-
-#     assert padded_array == padded_cupy_array
-
-#     value = ak.contents.NumpyArray(np.array([777]))
-#     assert ak._do.fill_none(padded_array, value) == ak._do.fill_none(padded_cupy_array, value, highlevel=False)
-
-# no field - pad_none, is_equal_to, parameter, parameters, backend, project
-# snapshot
-# unsupported type - datetime
+    cuda_resultv2 = cuda_v2a[cp.array([0, 1, 4], cp.int64)]
+    assert to_list(cuda_resultv2) == [{"nest": 3.3}, {"nest": 3.3}, None]
+    assert (
+        cuda_v2a.to_typetracer()[cp.array([0, 1, 4], cp.int64)].form
+        == cuda_resultv2.form
+    )
 
 
-#  converts int to float too if other elements are float
+def test_0959_getitem_array_implementation_ByteMaskedArray_RecordArray_NumpyArray():
+    v2a = ak.contents.bytemaskedarray.ByteMaskedArray(
+        ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
+        ak.contents.recordarray.RecordArray(
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=True,
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    index = ak.index.Index(cp.array([0, 1, 4], cp.int64))
+    cuda_resultv2 = cuda_v2a._carry(index, False)
+    assert to_list(cuda_resultv2) == [{"nest": 1.1}, None, {"nest": 5.5}]
+    assert (
+        cuda_v2a.to_typetracer()
+        ._carry(index.to_nplike(TypeTracer.instance()), False)
+        .form
+        == cuda_resultv2.form
+    )
+
+    v2b = ak.contents.bytemaskedarray.ByteMaskedArray(
+        ak.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
+        ak.contents.recordarray.RecordArray(
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=False,
+    )
+    cuda_v2b = ak.to_backend(v2b, "cuda", highlevel=False)
+
+    indexb = ak.index.Index(cp.array([3, 1, 4], cp.int64))
+    cuda_resultv2 = cuda_v2b._carry(indexb, False)
+    assert to_list(cuda_resultv2) == [None, None, {"nest": 5.5}]
+    assert (
+        cuda_v2b.to_typetracer()
+        ._carry(indexb.to_nplike(TypeTracer.instance()), False)
+        .form
+        == cuda_resultv2.form
+    )
+
+
+def test_0959_getitem_array_implementation_IndexedArray_NumpyArray():
+    v2a = ak.contents.indexedarray.IndexedArray(
+        ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2a[cp.array([0, 1, 4], cp.int64)]
+    assert to_list(cuda_resultv2) == [3.3, 3.3, 5.5]
+    assert (
+        cuda_v2a.to_typetracer()[cp.array([0, 1, 4], cp.int64)].form
+        == cuda_resultv2.form
+    )
+
+
+def test_0959_getitem_array_implementation_IndexedOptionArray_NumpyArray():
+    v2a = ak.contents.indexedoptionarray.IndexedOptionArray(
+        ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2a[cp.array([0, 1, -1], cp.int64)]
+    assert to_list(cuda_resultv2) == [3.3, 3.3, 5.5]
+    assert (
+        cuda_v2a.to_typetracer()[cp.array([0, 1, -1], cp.int64)].form
+        == cuda_resultv2.form
+    )
+
+
+def test_0959_getitem_array_implementation_RecordArray_NumpyArray():
+    v2a = ak.contents.recordarray.RecordArray(
+        [
+            ak.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+        ],
+        ["x", "y"],
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2a[cp.array([1, 2], cp.int64)]
+    assert to_list(cuda_resultv2) == [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}]
+    assert (
+        cuda_v2a.to_typetracer()[cp.array([1, 2], cp.int64)].form == cuda_resultv2.form
+    )
+
+    v2b = ak.contents.recordarray.RecordArray(
+        [
+            ak.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+        ],
+        None,
+    )
+    cuda_v2b = ak.to_backend(v2b, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2b[cp.array([0, 1, 2, 3, -1], cp.int64)]
+    assert to_list(cuda_resultv2) == [(0, 0.0), (1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4)]
+    assert (
+        cuda_v2b.to_typetracer()[cp.array([0, 1, 2, 3, -1], cp.int64)].form
+        == cuda_resultv2.form
+    )
+
+    v2c = ak.contents.recordarray.RecordArray([], [], 10)
+    cuda_v2c = ak.to_backend(v2c, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2c[cp.array([0], cp.int64)]
+    assert to_list(cuda_resultv2) == [{}]
+    assert cuda_v2c.to_typetracer()[cp.array([0], cp.int64)].form == cuda_resultv2.form
+
+    v2d = ak.contents.recordarray.RecordArray([], None, 10)
+    cuda_v2d = ak.to_backend(v2d, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2d[cp.array([0], cp.int64)]
+    assert to_list(cuda_resultv2) == [()]
+    assert cuda_v2d.to_typetracer()[cp.array([0], cp.int64)].form == cuda_resultv2.form
+
+
+def test_0959_getitem_array_implementation_RegularArray_NumpyArray():
+    v2a = ak.contents.regulararray.RegularArray(
+        ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+        3,
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2a[cp.array([0, 1], cp.int64)]
+    assert to_list(cuda_resultv2) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
+    assert (
+        cuda_v2a.to_typetracer()[cp.array([0, 1], cp.int64)].form == cuda_resultv2.form
+    )
+
+    v2b = ak.contents.regulararray.RegularArray(
+        ak.contents.emptyarray.EmptyArray(), 0, zeros_length=10
+    )
+    cuda_v2b = ak.to_backend(v2b, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2b[cp.array([0, 0, 0], cp.int64)]
+    assert to_list(cuda_resultv2) == [[], [], []]
+    assert (
+        cuda_v2b.to_typetracer()[cp.array([0, 0, 0], cp.int64)].form
+        == cuda_resultv2.form
+    )
+
+    assert to_list(cuda_resultv2) == [[], [], []]
+
+
+def test_0959_getitem_array_implementation_ListArray_NumpyArray():
+    v2a = ak.contents.listarray.ListArray(
+        ak.index.Index(np.array([4, 100, 1], np.int64)),
+        ak.index.Index(np.array([7, 100, 3, 200], np.int64)),
+        ak.contents.numpyarray.NumpyArray(
+            np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
+        ),
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2a[cp.array([1, -1], cp.int64)]
+    assert to_list(cuda_resultv2) == [[], [4.4, 5.5]]
+    assert (
+        cuda_v2a.to_typetracer()[cp.array([1, -1], cp.int64)].form == cuda_resultv2.form
+    )
+
+
+def test_0959_getitem_array_implementation_UnionArray_RecordArray_NumpyArray():
+    v2a = ak.contents.unionarray.UnionArray(
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
+        [
+            ak.contents.recordarray.RecordArray(
+                [ak.from_iter([[1], [2], [3]], highlevel=False)],
+                ["nest"],
+            ),
+            ak.contents.recordarray.RecordArray(
+                [
+                    ak.contents.numpyarray.NumpyArray(
+                        np.array([1.1, 2.2, 3.3, 4.4, 5.5])
+                    )
+                ],
+                ["nest"],
+            ),
+        ],
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2a[cp.array([0, 1, 1], cp.int64)]
+    assert to_list(cuda_resultv2) == [{"nest": 5.5}, {"nest": 4.4}, {"nest": 4.4}]
+    assert (
+        cuda_v2a.to_typetracer()[cp.array([0, 1, 1], cp.int64)].form
+        == cuda_resultv2.form
+    )
+
+
+def test_0959_getitem_array_implementation_RecordArray_NumpyArray_lazy():
+    v2a = ak.contents.recordarray.RecordArray(
+        [
+            ak.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+        ],
+        ["x", "y"],
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2a._carry(ak.index.Index(cp.array([1, 2], cp.int64)), True)
+    assert to_list(cuda_resultv2) == [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}]
+    assert (
+        cuda_v2a.to_typetracer()
+        ._carry(ak.index.Index(cp.array([1, 2], cp.int64)), True)
+        .form
+        == cuda_resultv2.form
+    )
+
+    v2b = ak.contents.recordarray.RecordArray(
+        [
+            ak.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+        ],
+        None,
+    )
+    cuda_v2b = ak.to_backend(v2b, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2b._carry(
+        ak.index.Index(cp.array([0, 1, 2, 3, 4], cp.int64)), True
+    )
+    assert to_list(cuda_resultv2) == [(0, 0.0), (1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4)]
+    assert (
+        cuda_v2b.to_typetracer()
+        ._carry(ak.index.Index(cp.array([0, 1, 2, 3, 4], cp.int64)), True)
+        .form
+        == cuda_resultv2.form
+    )
+
+    v2c = ak.contents.recordarray.RecordArray([], [], 10)
+    cuda_v2c = ak.to_backend(v2c, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2c[cp.array([0], cp.int64)]
+    assert to_list(cuda_resultv2) == [{}]
+    assert cuda_v2c.to_typetracer()[cp.array([0], cp.int64)].form == cuda_resultv2.form
+
+    v2d = ak.contents.recordarray.RecordArray([], None, 10)
+    cuda_v2d = ak.to_backend(v2d, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2d[cp.array([0], cp.int64)]
+    assert to_list(cuda_resultv2) == [()]
+    assert cuda_v2d.to_typetracer()[cp.array([0], cp.int64)].form == cuda_resultv2.form
+
+
+def test_0959_getitem_array_implementation_RegularArray_RecordArray_NumpyArray():
+    v2a = ak.contents.regulararray.RegularArray(
+        ak.contents.recordarray.RecordArray(
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        3,
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2a._carry(ak.index.Index(cp.array([0], cp.int64)), False)
+    assert to_list(cuda_resultv2) == [[{"nest": 0.0}, {"nest": 1.1}, {"nest": 2.2}]]
+    assert (
+        cuda_v2a.to_typetracer()
+        ._carry(ak.index.Index(cp.array([0], cp.int64)), False)
+        .form
+        == cuda_resultv2.form
+    )
+
+    v2b = ak.contents.regulararray.RegularArray(
+        ak.contents.recordarray.RecordArray(
+            [ak.contents.emptyarray.EmptyArray()], ["nest"]
+        ),
+        0,
+        zeros_length=10,
+    )
+    cuda_v2b = ak.to_backend(v2b, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2b._carry(ak.index.Index(cp.array([0], cp.int64)), False)
+    assert to_list(cuda_resultv2) == [[]]
+    assert (
+        cuda_v2b.to_typetracer()
+        ._carry(ak.index.Index(cp.array([0], cp.int64)), False)
+        .form
+        == cuda_resultv2.form
+    )
+
+
+def test_0959_getitem_array_implementation_ListArray_RecordArray_NumpyArray():
+    v2a = ak.contents.listarray.ListArray(
+        ak.index.Index(np.array([4, 100, 1], np.int64)),
+        ak.index.Index(np.array([7, 100, 3, 200], np.int64)),
+        ak.contents.recordarray.RecordArray(
+            [
+                ak.contents.numpyarray.NumpyArray(
+                    np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
+                )
+            ],
+            ["nest"],
+        ),
+    )
+    cuda_v2a = ak.to_backend(v2a, "cuda", highlevel=False)
+
+    cuda_resultv2 = cuda_v2a[cp.array([0, 1], np.int64)]
+    assert to_list(cuda_resultv2) == [[{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}], []]
+    assert (
+        cuda_v2a.to_typetracer()[np.array([0, 1], np.int64)].form == cuda_resultv2.form
+    )
