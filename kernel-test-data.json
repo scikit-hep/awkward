@@ -10629,7 +10629,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_rpad_axis1",
-            "status": true,
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -21964,6 +21964,19 @@
                     },
                     "outputs": {
                         "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "bitmasklength": 1,
+                        "frombitmask": [66],
+                        "lsb_order": true,
+                        "validwhen": false
+                    },
+                    "outputs": {
+                        "toindex": [0, -1, 2, 3, 4, 5, -1, 7]
                     }
                 },
                 {

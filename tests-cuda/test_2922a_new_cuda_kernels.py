@@ -16,11 +16,6 @@ from awkward.forms import (
 to_list = ak.operations.to_list
 
 
-class ReversibleArray(ak.Array):
-    def reversed(self):
-        return self[..., ::-1]
-
-
 def test_0184_concatenate_operation_records():
     one = ak.highlevel.Array([[1, 2, 3], [None, 4], None, [None, 5]]).layout
     two = ak.highlevel.Array([6, 7, 8]).layout
@@ -611,6 +606,10 @@ def test_2564_string_broadcast_regular_string_string_valid():
 
 
 def test_2549_list_nominal_type_string_class():
+    class ReversibleArray(ak.Array):
+        def reversed(self):
+            return self[..., ::-1]
+
     ak.behavior["reversible-string"] = ReversibleArray
 
     strings = ak.with_parameter(["hi", "book", "cats"], "__list__", "reversible-string")
