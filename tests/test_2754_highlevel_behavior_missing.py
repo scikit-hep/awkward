@@ -16,7 +16,7 @@ behavior = {**behavior_1, **behavior_2}
 @pytest.mark.parametrize(
     ("func", "axis"),
     [
-        pytest.param(ak.softmax, 0, marks=pytest.mark.xfail()),
+        # (ak.softmax, 0),   # see https://github.com/scikit-hep/awkward/issues/2760#issuecomment-2034749982
         (ak.std, 0),
         (ak.var, 0),
         (ak.softmax, 1),
