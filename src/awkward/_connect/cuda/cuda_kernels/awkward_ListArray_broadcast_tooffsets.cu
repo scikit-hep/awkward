@@ -7,7 +7,7 @@
 //         len_array = int(fromoffsets[offsetslength - 1])
 //     else:
 //         len_array = 0
-//     scan_in_array = cupy.empty(len_array, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(len_array, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_broadcast_tooffsets_a", tocarry.dtype, fromoffsets.dtype, fromstarts.dtype, fromstops.dtype]))(grid, block, (tocarry, fromoffsets, offsetslength, fromstarts, fromstops, lencontent, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_broadcast_tooffsets_b", tocarry.dtype, fromoffsets.dtype, fromstarts.dtype, fromstops.dtype]))(grid, block, (tocarry, fromoffsets, offsetslength, fromstarts, fromstops, lencontent, scan_in_array, invocation_index, err_code))

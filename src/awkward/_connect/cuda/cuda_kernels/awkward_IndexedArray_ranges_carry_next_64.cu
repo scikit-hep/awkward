@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (index, fromstarts, fromstops, length, tocarry, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty_like(index, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros_like(index, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_ranges_carry_next_64_a", index.dtype, fromstarts.dtype, fromstops.dtype, tocarry.dtype]))(grid, block, (index, fromstarts, fromstops, length, tocarry, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_ranges_carry_next_64_b", index.dtype, fromstarts.dtype, fromstops.dtype, tocarry.dtype]))(grid, block, (index, fromstarts, fromstops, length, tocarry, scan_in_array, invocation_index, err_code))
@@ -31,9 +31,6 @@ awkward_IndexedArray_ranges_carry_next_64_a(
       for (int64_t j = 0; j < stride; j++) {
         if (!(index[fromstarts[thread_id] + j] < 0)) {
           scan_in_array[fromstarts[thread_id] + j] = 1;
-        }
-        else {
-          scan_in_array[fromstarts[thread_id] + j] = 0;
         }
       }
     }

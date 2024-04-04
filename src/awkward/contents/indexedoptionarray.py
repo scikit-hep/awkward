@@ -109,14 +109,12 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             )
         ):
             raise TypeError(
-                "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
-                "not {}".format(type(self).__name__, repr(index))
+                f"{type(self).__name__} 'index' must be an Index with dtype in (int32, uint32, int64), "
+                f"not {index!r}"
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         is_cat = parameters is not None and parameters.get("__array__") == "categorical"
         if (content.is_union and not is_cat) or content.is_indexed or content.is_option:
@@ -419,9 +417,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 ak.contents.ListArray(
                     slicestarts, slicestops, slicecontent, parameters=None
                 ),
-                "cannot fit jagged slice with length {} into {} of size {}".format(
-                    slicestarts.length, type(self).__name__, self.length
-                ),
+                f"cannot fit jagged slice with length {slicestarts.length} into {type(self).__name__} of size {self.length}",
             )
 
         numnull, nextcarry, outindex = self._nextcarry_outindex()
@@ -517,9 +513,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         if mask is not None:
             if self._backend.nplike.known_data and self._index.length != mask.length:
                 raise ValueError(
-                    "mask length ({}) is not equal to {} length ({})".format(
-                        mask.length(), type(self).__name__, self._index.length
-                    )
+                    f"mask length ({mask.length()}) is not equal to {type(self).__name__} length ({self._index.length})"
                 )
             nextindex = ak.index.Index64.empty(
                 self._index.length, self._backend.index_nplike
@@ -1498,9 +1492,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     def _validity_error(self, path):
         if self.parameter("__array__") == "categorical":
             if not ak._do.is_unique(self._content):
-                return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
-                    path, type(self)
-                )
+                return f'at {path} ("{type(self)}"): __array__ = "categorical" requires contents to be unique'
 
         assert self.index.nplike is self._backend.index_nplike
         error = self._backend["awkward_IndexedArray_validity", self.index.dtype.type](
@@ -1602,26 +1594,15 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
                 data[index_nplike.logical_not(mask0)] = content
 
-                if np.issubdtype(content.dtype, np.bool_):
-                    data[mask0] = False
-                elif np.issubdtype(content.dtype, np.floating):
-                    data[mask0] = np.nan
-                elif np.issubdtype(content.dtype, np.complexfloating):
-                    data[mask0] = np.nan + np.nan * 1j
-                elif np.issubdtype(content.dtype, np.integer):
-                    data[mask0] = np.iinfo(content.dtype).max
-                elif np.issubdtype(content.dtype.type, np.datetime64) or np.issubdtype(
-                    content.dtype.type, np.timedelta64
-                ):
-                    data[mask0] = nplike.asarray(
-                        [np.iinfo(np.int64).max], dtype=content.dtype
-                    )[0]
-                elif np.issubdtype(content.dtype, np.str_):
-                    data[mask0] = ""
-                elif np.issubdtype(content.dtype, np.bytes_):
-                    data[mask0] = b""
+                if content.dtype.names is not None:
+                    missing_data = tuple(
+                        create_missing_data(each_dtype, backend)
+                        for each_dtype, _ in content.dtype.fields.values()
+                    )
                 else:
-                    raise AssertionError(f"unrecognized dtype: {content.dtype}")
+                    missing_data = create_missing_data(content.dtype, backend)
+
+                data[mask0] = missing_data
 
                 return nplike.ma.MaskedArray(data, mask)
             else:
@@ -1783,3 +1764,30 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 other.content, index_dtype, numpyarray, all_parameters
             )
         )
+
+
+def create_missing_data(dtype, backend):
+    """Create missing data based on the input dtype
+
+    Missing data are represented differently based on the Numpy array
+    dtype, this function returns the proper missing data representation
+    given the input dtype
+    """
+    if np.issubdtype(dtype, np.bool_):
+        return False
+    elif np.issubdtype(dtype, np.floating):
+        return np.nan
+    elif np.issubdtype(dtype, np.complexfloating):
+        return np.nan + np.nan * 1j
+    elif np.issubdtype(dtype, np.integer):
+        return np.iinfo(dtype).max
+    elif np.issubdtype(dtype.type, np.datetime64) or np.issubdtype(
+        dtype.type, np.timedelta64
+    ):
+        return backend.nplike.asarray([np.iinfo(np.int64).max], dtype=dtype)[0]
+    elif np.issubdtype(dtype, np.str_):
+        return ""
+    elif np.issubdtype(dtype, np.bytes_):
+        return b""
+    else:
+        raise AssertionError(f"unrecognized dtype: {dtype}")

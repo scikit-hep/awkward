@@ -23,13 +23,11 @@ class Reducer(Protocol):
     # Does the output correspond to array positions?
     @property
     @abstractmethod
-    def needs_position(self) -> bool:
-        ...
+    def needs_position(self) -> bool: ...
 
     @property
     @abstractmethod
-    def preferred_dtype(self) -> DTypeLike:
-        ...
+    def preferred_dtype(self) -> DTypeLike: ...
 
     @classmethod
     def highlevel_function(cls):
@@ -43,8 +41,7 @@ class Reducer(Protocol):
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        ...
+    ) -> ak.contents.NumpyArray: ...
 
 
 class KernelReducer(Reducer):
@@ -65,13 +62,15 @@ class KernelReducer(Reducer):
         else:
             return dtype
 
+    _use32 = (ak._util.win or ak._util.bits32) and not ak._util.numpy2
+
     @classmethod
     def _promote_integer_rank(cls, given_dtype: DTypeLike) -> DTypeLike:
         if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
-            return np.int32 if ak._util.win or ak._util.bits32 else np.int64
+            return np.int32 if cls._use32 else np.int64
 
         elif given_dtype in (np.uint8, np.uint16, np.uint32):
-            return np.uint32 if ak._util.win or ak._util.bits32 else np.uint64
+            return np.uint32 if cls._use32 else np.uint64
 
         else:
             return given_dtype

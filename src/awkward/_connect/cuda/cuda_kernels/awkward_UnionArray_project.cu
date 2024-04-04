@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (lenout, tocarry, fromtags, fromindex, length, which, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(length, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_UnionArray_project_a", lenout.dtype, tocarry.dtype, fromtags.dtype, fromindex.dtype]))(grid, block, (lenout, tocarry, fromtags, fromindex, length, which, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_UnionArray_project_b", lenout.dtype, tocarry.dtype, fromtags.dtype, fromindex.dtype]))(grid, block, (lenout, tocarry, fromtags, fromindex, length, which, scan_in_array, invocation_index, err_code))
@@ -28,8 +28,6 @@ awkward_UnionArray_project_a(
     if (thread_id < length) {
       if (fromtags[thread_id] == which) {
         scan_in_array[thread_id] = 1;
-      } else {
-        scan_in_array[thread_id] = 0;
       }
     }
   }
