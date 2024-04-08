@@ -3205,10 +3205,10 @@ kernels:
           - {name: startslength, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      def awkward_NumpyArray_rearrange_shifted(toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength):
+      def awkward_NumpyArray_rearrange_shifted(toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength, fromstarts, startslength):
           k = 0
           for i in range(offsetslength - 1):
-              for j in rage(fromoffsets[i + 1] - fromoffsets[i]):
+              for j in range(fromoffsets[i + 1] - fromoffsets[i]):
                   toptr[k] = toptr[k] + fromoffsets[i]
                   k = k + 1
 
