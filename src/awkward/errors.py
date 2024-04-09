@@ -8,7 +8,7 @@ __all__ = ("FieldNotFoundError", "AxisError")
 
 
 class FieldNotFoundError(IndexError):
-    ...
+    pass
 
 
-AxisError = numpy.AxisError
+AxisError = getattr(numpy, "exceptions", numpy).AxisError

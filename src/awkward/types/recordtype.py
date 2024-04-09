@@ -40,9 +40,7 @@ class RecordType(Type):
     ):
         if not isinstance(contents, Iterable):
             raise TypeError(
-                "{} 'contents' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
-                )
+                f"{type(self).__name__} 'contents' must be iterable, not {contents!r}"
             )
         elif not isinstance(contents, list):
             contents = list(contents)
@@ -50,9 +48,7 @@ class RecordType(Type):
         for content in contents:
             if not isinstance(content, Type):
                 raise TypeError(
-                    "{} all 'contents' must be Type subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} all 'contents' must be Type subclasses, not {content!r}"
                 )
         if fields is not None:
             if not isinstance(fields, Iterable):
@@ -64,9 +60,7 @@ class RecordType(Type):
 
         if parameters is not None and not isinstance(parameters, Mapping):
             raise TypeError(
-                "{} 'parameters' must be of type Mapping or None, not {}".format(
-                    type(self).__name__, repr(parameters)
-                )
+                f"{type(self).__name__} 'parameters' must be of type Mapping or None, not {parameters!r}"
             )
         self._contents: list[Type] = contents
         self._fields: list[str] = fields
@@ -269,8 +263,6 @@ class RecordType(Type):
             index = self.field_to_index(index_or_field)
         else:
             raise TypeError(
-                "index_or_field must be an integer (index) or string (field), not {}".format(
-                    repr(index_or_field)
-                )
+                f"index_or_field must be an integer (index) or string (field), not {index_or_field!r}"
             )
         return self._contents[index]
