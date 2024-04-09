@@ -30,7 +30,7 @@ Awkward Array is a library for **nested, variable-sized data**, including arbitr
 
 % % Unfortunately, `target` does not support document references
 :::{image} https://img.shields.io/badge/-Try%20It%21-orange?style=for-the-badge
-:alt: Try It! ⭷
+:alt: Try it!
 :target: _static/try-it.html
 :class: shield-badge
 :::
