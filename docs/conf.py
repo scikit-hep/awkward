@@ -137,7 +137,7 @@ if show_version_switcher:
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_css_files = ["css/awkward.css"]
-html_js_files = ["awkward.js"]
+html_js_files = ["js/awkward.js"]
 
 # MyST settings
 myst_enable_extensions = ["colon_fence"]
