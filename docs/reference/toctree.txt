@@ -5,11 +5,6 @@
     generated/ak.Record
 
 .. toctree::
-    :caption: Append-only builder
-
-    generated/ak.ArrayBuilder
-
-.. toctree::
     :caption: Converting untyped data
 
     generated/ak.from_iter
@@ -45,7 +40,7 @@
     generated/ak.from_avro_file
 
 .. toctree::
-    :caption: Converting Pandas DataFrames
+    :caption: Converting to Pandas DataFrames
 
     generated/ak.to_dataframe
 
@@ -54,6 +49,11 @@
 
     generated/ak.from_rdataframe
     generated/ak.to_rdataframe
+
+.. toctree::
+    :caption: Append-only builder
+
+    generated/ak.ArrayBuilder
 
 .. toctree::
     :caption: Low-level conversion primitives
@@ -68,12 +68,6 @@
 
     generated/ak.is_valid
     generated/ak.validity_error
-
-.. toctree::
-    :caption: Lengths of lists
-
-    generated/ak.num
-    generated/ak.count
 
 .. toctree::
     :caption: Restructuring records (columns)
@@ -97,15 +91,21 @@
     generated/ak.ravel
 
 .. toctree::
+    :caption: Lengths of lists
+
+    generated/ak.num
+    generated/ak.count
+
+.. toctree::
     :caption: Reducers
 
+    generated/ak.count_nonzero
     generated/ak.sum
     generated/ak.nansum
     generated/ak.prod
     generated/ak.nanprod
     generated/ak.any
     generated/ak.all
-    generated/ak.count_nonzero
 
 .. toctree::
     :caption: Minimum and maximum

@@ -6,3 +6,5 @@ New users should start with {doc}`10-minutes-to-awkward-array`.
 
 ```{tableofcontents}
 ```
+
+<br><br><br><br><br>
