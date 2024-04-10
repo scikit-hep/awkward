@@ -17,6 +17,7 @@
     generated/ak.from_avro_file
     generated/ak.from_buffers
     generated/ak.from_cupy
+    generated/ak.from_dlpack
     generated/ak.from_feather
     generated/ak.from_iter
     generated/ak.from_jax
