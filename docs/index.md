@@ -28,7 +28,7 @@ Awkward Array is a library for **nested, variable-sized data**, including arbitr
 :class: shield-badge
 :::
 
-:::{image} https://img.shields.io/badge/-Try%20It%21-orange?style=for-the-badge
+:::{image} https://img.shields.io/badge/-Try%20It%21%20%E2%86%97-orange?style=for-the-badge
 :alt: Try It! ⭷
 :target: _static/try-it.html
 :class: shield-badge
