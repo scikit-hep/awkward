@@ -1063,19 +1063,10 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             options,
         )
 
-    def _to_cudf(
-        self,
-        cudf: Any,
-        mask: Content | None,
-        length: int
-    ):
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         validbytes = self.mask_as_bool(valid_when=True)
 
-        return self._content._to_cudf(
-            cudf,
-            validbytes,
-            length
-        )
+        return self._content._to_cudf(cudf, validbytes, length)
 
     def _to_backend_array(self, allow_missing, backend):
         return self.to_IndexedOptionArray64()._to_backend_array(allow_missing, backend)

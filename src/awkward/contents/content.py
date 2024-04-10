@@ -1014,12 +1014,7 @@ class Content(Meta):
     ):
         raise NotImplementedError
 
-    def _to_cudf(
-        self,
-        cudf: Any,
-        mask: Content | None,
-        length: int
-    ):
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         # prototype abstract signature
         raise NotImplementedError
 
