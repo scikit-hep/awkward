@@ -1075,12 +1075,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             )
             return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-    def _to_cudf(
-        self,
-        cudf: Any,
-        mask: Content | None,
-        length: int
-    ):
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         if self._content.length == 0:
             # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
             # every masked value is self._content[0], unless self._content.length == 0.
