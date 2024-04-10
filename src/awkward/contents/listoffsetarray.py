@@ -10,6 +10,7 @@ from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -2015,10 +2016,17 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         mask: Content | None,
         length: int
     ):
-        return cudf.core.columns.lists.ListColumn(
+        cupy = Cupy.instance()
+        index = self._offsets.raw(cupy).astype('int32')
+        buf = cudf.core.buffer.as_buffer(index)
+        ind_buf = cudf.core.column.numerical.NumericalColumn(buf, index.dtype, None, size=len(index))
+        breakpoint()
+        cont = self._content._to_cudf(cudf, None, len(self._content))
+        return cudf.core.column.lists.ListColumn(
             length,
             mask=mask._to_cudf(cudf) if mask is not None else None,
-            children=(self._offsets._to_cudf(), self._content._to_cudf())
+            children=(ind_buf, cont),
+            dtype=cudf.core.dtypes.ListDtype(cont.dtype)
         )
 
     def _to_backend_array(self, allow_missing, backend):

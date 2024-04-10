@@ -18,6 +18,7 @@ from awkward._nplikes import to_nplike
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -1249,12 +1250,13 @@ class NumpyArray(NumpyMeta, Content):
             mask: Content | None,
             length: int
     ):
-        import cudf
+        cupy = Cupy.instance()
+
         assert self._backend.nplike.known_data
         data = cupy.asarray(self._data)
         mask = mask._to_cupy(cudf, None, length) if mask is not None else None
-        buf = cudf.core.buffer.buffer.Buffer(data)
-        return cudf.cure.column.numerical.NumericalColumn(buf, data.dtype, mask=mask, size=length)
+        buf = cudf.core.buffer.as_buffer(data)
+        return cudf.core.column.numerical.NumericalColumn(buf, data.dtype, mask=mask, size=length)
 
     def _to_backend_array(self, allow_missing, backend):
         return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
