@@ -53,7 +53,7 @@ def named_high_level_function(func: DispatcherType, name: str) -> HighLevelType:
                         # Future proof the implementation by permitting the `__awkward_function__` to return `NotImplemented`
                         # This may later be used to signal that another overload should be used.
                         if result is NotImplemented:
-                            raise NotImplementedError
+                            raise NotImplementedError(f"no overload for {name} with arguments {array_likes}")
                         else:
                             return result
 
