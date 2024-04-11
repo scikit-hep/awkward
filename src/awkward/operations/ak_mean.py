@@ -169,8 +169,8 @@ def nanmean(
         mask_identity,
         highlevel=highlevel,
         behavior=behavior,
+        attrs=attrs,
     )
-
 
 def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
