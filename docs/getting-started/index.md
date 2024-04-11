@@ -2,158 +2,134 @@
 
 ## Installation
 
-::::::{grid} 1 1 2 2
-:::::{grid-item-card} Working with Conda?
+:::::{card} If you use pip, rip, pixi, or uv to install packages,
 
-Awkward Array can be installed from the conda-forge channel.
-```bash
-conda install -c conda-forge awkward
-```
-
-:::::
-:::::{grid-item-card}  Prefer pip?
-
-Binary wheels for Awkward Array are available on PyPI.
 ```bash
 pip install awkward
 ```
 :::::
-::::::
+:::::{card} If you use conda/mamba, it's in the conda-forge channel.
 
-## Overview
+```bash
+conda install -c conda-forge awkward
+```
+:::::
+
+If you're installing as a developer or testing updates that haven't been released in a package manager yet, see the [developer installation instructions](https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md#building-and-testing-locally) in the [Contributor guide](https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md).
+
+## Frequently asked questions
+
 ::::::::{grid} 1
 
 :::::::{grid-item} 
-::::::{dropdown} What kind of data does Awkward Array handle?
+::::::{dropdown} What is Awkward Array for? How does it compare to other libraries?
 
-Awkward Array is designed to make working with [_ragged_ arrays](https://en.wikipedia.org/wiki/Jagged_array) as trivial as manipulating regular (non-ragged) N-dimensional arrays in NumPy. It understands data with variable-length lists,
-```pycon
->>> ak.Array([
-...     [1, 2, 3],
-...     [4]
-... ])
-<Array [[1, 2, 3], [4]] type='2 * var * int64'>
-```
-missing ({data}`None`) values,
-```pycon
->>> ak.Array([1, None])
-<Array [1, None] type='2 * ?int64]'>
-```
-record structures,
-```pycon
->>> ak.Array([{'x': 1, 'y': 2}])
-<Array [{x: 1, y: 2}] type='1 * {x: int64, y: int64}'>
-```
-and even union-types!
-```pycon
->>> ak.Array([1, "hi", None])
-<Array [1, 'hi', None] type='3 * union[?int64, ?string]'>
-```
+Python's builtin lists, dicts, and classes can be used to analyze arbitrary data structures, but at a cost in speed and memory. Therefore, they can't be used (easily) with large datasets.
+
+[Pandas](https://pandas.pydata.org/) DataFrames (as well as [Polars](https://pola.rs/), [cuDF](https://docs.rapids.ai/api/cudf/stable/), and [Dask DataFrame](https://docs.dask.org/en/stable/dataframe.html)) are well-suited to tabular data, including tables with relational indexes, but not arbitrary data structures. If a DataFrame is filled with Python's builtin types, then it offers no speed or memory advantage over Python itself.
+
+[NumPy](https://numpy.org/) is ideal for rectangular arrays of numbers, but not arbitrary data structures. If a NumPy array is filled with Python's builtin types, then it offers no speed or memory advantage over Python itself.
+
+[Apache Arrow](https://arrow.apache.org/) ([pyarrow](https://arrow.apache.org/docs/python/)) manages arrays of arbitrary data structures (including those in [Polars](https://pola.rs/), [cuDF](https://docs.rapids.ai/api/cudf/stable/), and to some extent, [Pandas](https://pandas.pydata.org/)), with great language interoperability and interprocess communication, but without manipulation functions oriented toward data analysts.
+
+Awkward Array is a data analyst-friendly extension of NumPy-like idioms for arbitrary data structures. It is intended to be used interchangeably with NumPy and share data with Arrow and DataFrames. Like NumPy, it simplifies and accelerates computations that transform arrays into arrays—all computations over elements in an array are compiled. Also like NumPy, imperative-style computations can be accelerated with [Numba](https://numba.pydata.org/).
+
+Note that there is also a [ragged](https://github.com/scikit-hep/ragged) array library with simpler (but still non-rectangular) data types that more closely adheres to [array APIs](https://data-apis.org/array-api/latest/API_specification).
+
 ::::::
 :::::::
 
 :::::::{grid-item} 
-::::::{dropdown} How do I read and write ragged arrays?
+::::::{dropdown} Where is an Awkward Array's `shape` and `dtype`?
 
-Awkward Array provides a suite of high-level IO functions (`ak.to_*` and `ak.from_*`), such as {func}`ak.to_parquet` and {func}`ak.from_parquet` that make it simple to serialise Awkward Arrays to disk, or read ragged arrays from other formats. 
+Since Awkward Arrays can contain arbitrary data structures, their type can't be separated into a `shape` and a `dtype`, the way a NumPy array can.
 
-In addition to specialised IO reading and writing routines, Awkward Arrays can also be serialised to/from a set of one dimensional buffers with the {func}`ak.to_buffers`/{func}`ak.from_buffers` functions. These buffers can then be written to/read from a wide range of existing array serialisation formats that understand NumPy arrays, e.g. {func}`numpy.savez`. 
-::::::
-:::::::
+For an array of records like
 
-:::::::{grid-item} 
-::::::{dropdown} How do I see the type and shape of an array?
+```python
+import awkward as ak
 
-Ragged arrays do not have shapes that can be described by a collection of integers. Instead, Awkward Array uses an extended version of the [DataShape](https://datashape.readthedocs.io/en/latest/) layout language to describe the structure and type of an Array. The {attr}`ak.Array.type` attribute of an array reveals its DataShape:
-```pycon
->>> array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-...           [],
-...           [{"x": 3.3, "y": [3, 3, 3]}]])
->>> array.type
-3 * var * {"x": float64, "y": var * int64}
+array = ak.Array([
+    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
+    [],
+    [{"x": 4.4, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}]
+])
 ```
+
+the `x` field contains floating point numbers and the `y` field contains lists of integers. They would have different `dtypes`, as well as different numbers of dimensions. This array also can't be separated into `x` and `y` columns with different `dtypes`, as in a DataFrame, since both fields are inside of records in a variable-length list.
+
+Instead, Awkward Arrays have a `type`, which looks like
+
+```python
+3 * var * {x: float64, y: var * int64}
+```
+
+for the above. This combines `shape` and `dtype` information in the following way: the length of the array is `3`, the first dimension has `var` or variable length, it contains records with `x` and `y` field names in `{` `}`, the `x` field has `float64` primitive type and the `y` field is a `var` variable length list of `int64`. You can `print(array.type)` or `array.type.show()` to see the type of any `array`.
+
+See the [ragged](https://github.com/scikit-hep/ragged) array library for variable-length dimensions that are nevertheless separable into a `shape` and `dtype`, like a conventional array.
+
 ::::::
 :::::::
 
 :::::::{grid-item} 
-::::::{dropdown} How do I select a subset of an array?
+::::::{dropdown} QUESTION
 
-Awkward Array extends the rich indexing syntax used by NumPy to support named fields and ragged indexing:
-```pycon
->>> array = ak.Array([
-...     [1, 2, 3], 
-...     [6, 7, 8, 9]
-... ])
->>> is_even = (array % 2) == 0
->>> array[is_even].to_list()
-<Array [[2], [6, 8]] type='2 * var * int64'>
-``` 
+ANSWER
 
-Meanwhile, the {attr}`ak.Array.mask` interface makes it easy to select a subset of an array whilst preserving its structure:
-```pycon
->>> array.mask[is_even].to_list()
-[[None, 2, None], [4, None], [6, None, 8, None]]
-``` 
-::::::
-:::::::
-
-
-:::::::{grid-item} 
-::::::{dropdown} How do I reshape ragged arrays to change their dimensions?
-New, regular, dimensions can be added using {data}`numpy.newaxis`, whilst {func}`ak.unflatten` can be used to introduce a new _ragged_ axis.
-```pycon
->>> array = ak.Array([1, 2, 3, 4, 5, 6, 7, 8, 9])
->>> array[:, np.newaxis]
-<Array [[1], [2], [3], [4], [5], [6], [7], [8], [9]] type='9 * 1 * int64'>
->>> ak.unflatten(array, [3, 2, 4])
-<Array [[0, 1, 2], [3, 4], [5, 6, 7, 8]] type='3 * var * int64'>
-``` 
-The {func}`ak.flatten` and {func}`ak.ravel` functions can be used to remove surplus (or all) dimensions from Awkward Arrays. 
-```pycon
->>> array = ak.Array([
-...     [1, 2, 3], 
-...     [6, 7, 8, 9]
-... ])
->>> ak.flatten(array, axis=1)
-<Array [1, 2, 3, 6, 7, 8, 9] type='7 * int64'>
->>> ak.ravel(array)
-<Array [1, 2, 3, 6, 7, 8, 9] type='7 * int64'>
-``` 
-::::::
-:::::::
-
-
-:::::::{grid-item} 
-::::::{dropdown} How do I compute reductions or summary statistics?
-
-Awkward Array supports NumPy's {np:doc}`reference/ufuncs` mechanism, and many of the high-level NumPy reducers (e.g. {func}`numpy.sum`).
-
-:::::{grid} 1 1 2 2
-
-::::{grid-item}
-```pycon
->>> array = ak.Array([
-...     [1,    2,    4], 
-...     [             ],
-...     [None, 8      ],
-...     [16           ]
-... ])
->>> ak.sum(array, axis=0)
-<Array [17, 10, 4] type='3 * int64'>
->>> ak.sum(array, axis=1)
-<Array [7, 0, 8, 16] type='4 * int64'>
-``` 
-::::
-
-::::{grid-item}
-:::{figure} ../image/example-reduction-sum-only.svg
-:::
-::::
-
-:::::
 ::::::
 :::::::
 
 ::::::::
 
 <br><br><br><br><br>
+
+
+
+
+
+
+
+
+<!-- ### What are the most common questions new users have about the Awkward Array library in Python? -->
+
+<!-- New users of the Awkward Array library in Python often have questions related to the following areas: -->
+
+<!-- 1. **Basics and Getting Started**: -->
+<!--    - What is Awkward Array, and how is it different from NumPy arrays? -->
+<!--    - How do I install Awkward Array? -->
+
+<!-- 2. **Creating and Manipulating Arrays**: -->
+<!--    - How do I create an Awkward Array? -->
+<!--    - How can I convert a NumPy array or a list into an Awkward Array? -->
+<!--    - How do I access or modify elements in an Awkward Array? -->
+
+<!-- 3. **Multidimensional and Nested Data**: -->
+<!--    - How do I deal with nested data or arrays of variable length? -->
+<!--    - How can I perform operations on nested data, like filtering or mapping? -->
+
+<!-- 4. **Performance and Optimization**: -->
+<!--    - Are there best practices for optimizing the performance of Awkward Array computations? -->
+<!--    - How does Awkward Array handle memory management, especially with large datasets? -->
+
+<!-- 5. **Interoperability**: -->
+<!--    - How do I use Awkward Array with other libraries like pandas, NumPy, or PyTorch? -->
+<!--    - Can I use Awkward Array with data formats like JSON or Parquet? -->
+
+<!-- 6. **Saving and Loading**: -->
+<!--    - How do I save and load Awkward Arrays to and from disk? -->
+<!--    - What file formats are supported for serialization? -->
+
+<!-- 7. **Advanced Features**: -->
+<!--    - What are the special functions and capabilities of Awkward Array for complex data manipulation (like jagged arrays, etc.)? -->
+<!--    - How do I work with high-dimensional or complex nested structures? -->
+
+<!-- 8. **Troubleshooting and Error Handling**: -->
+<!--    - What common errors might I encounter, and how can I troubleshoot them? -->
+<!--    - How do I interpret error messages related to type mismatches or unsupported operations? -->
+
+<!-- 9. **Community and Support**: -->
+<!--    - Where can I find documentation and tutorials? -->
+<!--    - How do I contribute to the Awkward Array project, or where do I report bugs? -->
+
+<!-- Understanding these topics can significantly smooth the learning curve for new Awkward Array users, enabling them to leverage the library effectively for complex data manipulation and analysis tasks. -->
+

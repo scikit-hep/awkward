@@ -16,6 +16,8 @@ For details about adding record fields to an array of records, see {func}`ak.Arr
 
 To get a low-level {obj}`ak.contents.Content` from an array or record, see {obj}`ak.Array.layout` and {obj}`ak.Record.layout`.
 
+You can test any of these functions in a new window/tab by clicking on [![Try It! ⭷](https://img.shields.io/badge/-Try%20It%21%20%E2%86%97-orange?style=for-the-badge)](https://awkward-array.org/doc/main/_static/try-it.html).
+
 <br><br><br><br><br>
 
 :::{card} C++ Documentation {fas}`external-link-alt`
