@@ -61,6 +61,11 @@ def _length_0_1_if_typetracer(
 ) -> T:
     typetracer_backend = TypeTracerBackend.instance()
 
+    if type(array).__module__.startswith("dask_awkward."):
+        raise TypeError(
+            "ak.typetracer._length_0_1_if_typetracer cannot take a dask-awkward Array; pass its '_meta' instead"
+        )
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(
             array,
@@ -149,6 +154,12 @@ def touch_data(
 
     Recursively touches the data and returns a shall copy of the given array.
     """
+
+    if type(array).__module__.startswith("dask_awkward."):
+        raise TypeError(
+            "ak.typetracer.touch_data cannot take a dask-awkward Array; pass its '_meta' instead"
+        )
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(
             array,
