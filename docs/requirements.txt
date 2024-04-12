@@ -25,6 +25,8 @@ pyarrow>=7.0.0
 fsspec
 fsspec-xrootd
 hist[plot]
+particle
+hepunits
 s3fs
 h5py
 matplotlib
