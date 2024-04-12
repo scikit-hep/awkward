@@ -23,6 +23,7 @@ pandas>=0.24.0
 numexpr
 pyarrow>=7.0.0
 fsspec
+fsspec-xrootd
 s3fs
 h5py
 matplotlib
