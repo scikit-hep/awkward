@@ -27,6 +27,7 @@ fsspec-xrootd
 hist[plot]
 particle
 hepunits
+vector
 s3fs
 h5py
 matplotlib
