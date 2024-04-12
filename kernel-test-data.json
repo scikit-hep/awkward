@@ -25987,10 +25987,10 @@
                     "message": "",
                     "inputs": {
                         "toptr": [],
-                        "length": 0,
-                        "tolength": [1]
+                        "length": 0
                     },
                     "outputs": {
+                        "tolength": [1],
                         "toptr": []
                     }
                 },
@@ -25999,10 +25999,10 @@
                     "message": "",
                     "inputs": {
                         "toptr": [0, 1, 2],
-                        "length": 3,
-                        "tolength": [3]
+                        "length": 3
                     },
                     "outputs": {
+                        "tolength": [3],
                         "toptr": [0, 1, 2]
                     }
                 },
@@ -26011,10 +26011,10 @@
                     "message": "",
                     "inputs": {
                         "toptr": [0, 1, 2, 2, 3],
-                        "length": 5,
-                        "tolength": [4]
+                        "length": 5
                     },
                     "outputs": {
+                        "tolength": [4],
                         "toptr": [0, 1, 2, 3, 3]
                     }
                 },
@@ -26023,10 +26023,10 @@
                     "message": "",
                     "inputs": {
                         "toptr": [3, 2, 1, 0],
-                        "length": 4,
-                        "tolength": [4]
+                        "length": 4
                     },
                     "outputs": {
+                        "tolength": [4],
                         "toptr": [3, 2, 1, 0]
                     }
                 },
@@ -26035,10 +26035,10 @@
                     "message": "",
                     "inputs": {
                         "toptr": [3, 2, 2, 1, 0, 0],
-                        "length": 6,
-                        "tolength": [4]
+                        "length": 6
                     },
                     "outputs": {
+                        "tolength": [4],
                         "toptr": [3, 2, 1, 0, 0, 0]
                     }
                 }
@@ -26053,10 +26053,10 @@
                     "message": "",
                     "inputs": {
                         "toptr": [],
-                        "length": 0,
-                        "tolength": [1]
+                        "length": 0
                     },
                     "outputs": {
+                        "tolength": [1],
                         "toptr": []
                     }
                 },
@@ -26065,10 +26065,10 @@
                     "message": "",
                     "inputs": {
                         "toptr": [0, 1, 2],
-                        "length": 3,
-                        "tolength": [3]
+                        "length": 3
                     },
                     "outputs": {
+                        "tolength": [3],
                         "toptr": [0, 1, 2]
                     }
                 },
@@ -26077,11 +26077,11 @@
                     "message": "",
                     "inputs": {
                         "toptr": [0, 1, 2, 2, 3],
-                        "length": 5,
-                        "tolength": [4]
+                        "length": 5
                     },
                     "outputs": {
-                        "toptr": [0, 1, 2, 3, 3]
+                        "tolength": [4],
+                        "toptr": [0, 1, 2, 2, 3]
                     }
                 },
                 {
@@ -26089,11 +26089,11 @@
                     "message": "",
                     "inputs": {
                         "toptr": [3, 2, 1, 0],
-                        "length": 4,
-                        "tolength": [4]
+                        "length": 4
                     },
                     "outputs": {
-                        "toptr": [3, 2, 1, 0]
+                        "tolength": [4],
+                        "toptr": [3, 0, 1, 0]
                     }
                 },
                 {
@@ -26101,11 +26101,11 @@
                     "message": "",
                     "inputs": {
                         "toptr": [3, 2, 2, 1, 0, 0],
-                        "length": 6,
-                        "tolength": [4]
+                        "length": 6
                     },
                     "outputs": {
-                        "toptr": [3, 2, 1, 0, 0, 0]
+                        "tolength": [4],
+                        "toptr": [3, 0, 2, 1, 0, 0]
                     }
                 }
             ]
@@ -26119,10 +26119,10 @@
                     "message": "",
                     "inputs": {
                         "fromptr": [],
-                        "length": 0,
-                        "tolength": [1]
+                        "length": 0
                     },
                     "outputs": {
+                        "tolength": [1],
                         "toptr": []
                     }
                 },
@@ -26131,10 +26131,10 @@
                     "message": "",
                     "inputs": {
                         "fromptr": [0, 1, 2],
-                        "length": 3,
-                        "tolength": [3]
+                        "length": 3
                     },
                     "outputs": {
+                        "tolength": [3],
                         "toptr": [0, 1, 2]
                     }
                 },
@@ -26143,11 +26143,11 @@
                     "message": "",
                     "inputs": {
                         "fromptr": [0, 1, 2, 2, 3],
-                        "length": 5,
-                        "tolength": [4]
+                        "length": 5
                     },
                     "outputs": {
-                        "toptr": [0, 1, 2, 3, 3]
+                        "tolength": [4],
+                        "toptr": [0, 1, 2, 3]
                     }
                 },
                 {
@@ -26155,10 +26155,10 @@
                     "message": "",
                     "inputs": {
                         "fromptr": [3, 2, 1, 0],
-                        "length": 4,
-                        "tolength": [4]
+                        "length": 4
                     },
                     "outputs": {
+                        "tolength": [4],
                         "toptr": [3, 2, 1, 0]
                     }
                 },
@@ -26167,11 +26167,11 @@
                     "message": "",
                     "inputs": {
                         "fromptr": [3, 2, 2, 1, 0, 0],
-                        "length": 6,
-                        "tolength": [4]
+                        "length": 6
                     },
                     "outputs": {
-                        "toptr": [3, 2, 1, 0, 0, 0]
+                        "tolength": [4],
+                        "toptr": [3, 2, 1, 0]
                     }
                 }
             ]
