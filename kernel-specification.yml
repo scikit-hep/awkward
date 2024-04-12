@@ -3411,13 +3411,6 @@ kernels:
 
   - name: awkward_NumpyArray_subrange_equal
     specializations:
-      - name: awkward_NumpyArray_subrange_equal_bool
-        args:
-          - {name: tmpptr, type: "List[bool]", dir: in, role: IndexedArray-index}
-          - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
-          - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: toequal, type: "List[bool]", dir: out}
       - name: awkward_NumpyArray_subrange_equal_int8
         args:
           - {name: tmpptr, type: "List[int8_t]", dir: in, role: IndexedArray-index}
@@ -5854,12 +5847,6 @@ kernels:
 
   - name: awkward_unique_copy
     specializations:
-      - name: awkward_unique_copy_bool
-        args:
-          - {name: fromptr, type: "Const[List[bool]]", dir: in}
-          - {name: toptr, type: "List[bool]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_copy_int8
         args:
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in}
@@ -5976,6 +5963,7 @@ kernels:
                 if starts[j] == starts[j + 1]:
                     tooffsets[j + 1] = fromoffsets[i]
                     j += 1
+            j += 1
         tooffsets[startslength] = fromoffsets[length - 1]
     automatic-tests: false
 
@@ -5994,7 +5982,7 @@ kernels:
         toptr, length, fromoffsets, offsetslength, tooffsets
       ):
         m = 0
-        for i in range(offsetslength):
+        for i in range(offsetslength - 1):
           tooffsets[i] = m
           toptr[m] = toptr[fromoffsets[i]]
           m += 1
@@ -6007,13 +5995,6 @@ kernels:
 
   - name: awkward_unique_ranges
     specializations:
-      - name: awkward_unique_ranges_bool
-        args:
-          - {name: toptr, type: "List[bool]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_ranges_int8
         args:
           - {name: toptr, type: "List[int8_t]", dir: out}
@@ -6090,7 +6071,7 @@ kernels:
         toptr, length, fromoffsets, offsetslength, tooffsets
       ):
         m = 0
-        for i in range(offsetslength):
+        for i in range(offsetslength - 1):
           tooffsets[i] = m
           toptr[m] = toptr[fromoffsets[i]]
           m += 1

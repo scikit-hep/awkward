@@ -26262,12 +26262,12 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromptr": [],
-                        "length": 0
+                        "fromptr": [0, 2],
+                        "length": 2
                     },
                     "outputs": {
-                        "tolength": [1],
-                        "toptr": []
+                        "tolength": [2],
+                        "toptr": [0, 2]
                     }
                 },
                 {
@@ -26418,39 +26418,26 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromoffsets": [],
+                        "fromoffsets": [0],
                         "starts": [],
                         "startslength": 0,
-                        "length": 0
+                        "length": 1
                     },
                     "outputs": {
-                        "tooffsets": []
+                        "tooffsets": [0]
                     }
                 },
                 {
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromoffsets": [0, 1, 2],
-                        "starts": [0, 0, 0, 0, 0],
-                        "startslength": 5,
-                        "length": 3
-                    },
-                    "outputs": {
-                        "tooffsets": [0, 0, 0, 0, 0, 2, 2]
-                    }
-                },
-                {
-                    "error": false,
-                    "message": "",
-                    "inputs": {
-                        "fromoffsets": [0, 2, 2, 3],
-                        "starts": [0, 1, 0, 1],
+                        "fromoffsets": [0, 2, 2, 3, 4, 5],
+                        "starts": [0, 2, 4, 6],
                         "startslength": 4,
-                        "length": 4
+                        "length": 6
                     },
                     "outputs": {
-                        "tooffsets": [0, 2, 2, 3, 3]
+                        "tooffsets": [0, 2, 2, 3, 5, 5]
                     }
                 },
                 {
@@ -26458,7 +26445,7 @@
                     "message": "",
                     "inputs": {
                         "fromoffsets": [0, 1, 2, 2, 3],
-                        "starts": [0, 1, 0, 1],
+                        "starts": [0, 1, 3, 4],
                         "startslength": 4,
                         "length": 5
                     },
@@ -26496,21 +26483,21 @@
                     },
                     "outputs": {
                         "toptr": [],
-                        "tooffsets": []
+                        "tooffsets": [0]
                     }
                 },
                 {
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "toptr": [1],
+                        "toptr": [1, 2],
                         "fromoffsets": [0, 2],
                         "offsetslength": 2,
-                        "length": 1
+                        "length": 2
                     },
                     "outputs": {
-                        "toptr": [1],
-                        "tooffsets": [0]
+                        "toptr": [1, 2],
+                        "tooffsets": [0, 2]
                     }
                 },
                 {
@@ -26554,25 +26541,25 @@
                         "toptr": [],
                         "fromoffsets": [0],
                         "offsetslength": 1,
-                        "length": 0
+                        "length": 1
                     },
                     "outputs": {
                         "toptr": [],
-                        "tooffsets": []
+                        "tooffsets": [0]
                     }
                 },
                 {
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "toptr": [1],
+                        "toptr": [1, 2],
                         "fromoffsets": [0, 2],
                         "offsetslength": 2,
                         "length": 1
                     },
                     "outputs": {
-                        "toptr": [1],
-                        "tooffsets": [0]
+                        "toptr": [1, 2],
+                        "tooffsets": [0, 1]
                     }
                 },
                 {
@@ -26585,7 +26572,7 @@
                         "length": 6
                     },
                     "outputs": {
-                        "toptr": [0, 1, 1, 1, 1, 1],
+                        "toptr": [0, 1, 3, 5, 4, 5],
                         "tooffsets": [0, 2, 3, 4]
                     }
                 },
@@ -26599,7 +26586,7 @@
                         "length": 4
                     },
                     "outputs": {
-                        "toptr": [1, 1, 0, 0],
+                        "toptr": [3, 3, 0, 0],
                         "tooffsets": [0, 1, 2, 3]
                     }
                 }

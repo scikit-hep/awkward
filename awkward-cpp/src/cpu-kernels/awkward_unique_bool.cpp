@@ -1,11 +1,11 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_unique_bool_64.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_unique_bool.cpp", line)
 
 #include "awkward/kernels.h"
 
 template <typename T>
-ERROR awkward_unique_bool_64(
+ERROR awkward_unique_bool(
   T* toptr,
   int64_t length,
   int64_t* tolength) {

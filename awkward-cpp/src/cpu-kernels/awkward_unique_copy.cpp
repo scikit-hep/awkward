@@ -22,17 +22,6 @@ ERROR awkward_unique_copy(
   *tolength = j + 1;
   return success();
 }
-ERROR awkward_unique_copy_bool(
-  const bool* fromptr,
-  bool* toptr,
-  int64_t length,
-  int64_t* tolength) {
-    return awkward_unique_copy<bool>(
-      fromptr,
-      toptr,
-      length,
-      tolength);
-}
 ERROR awkward_unique_copy_int8(
   const int8_t* fromptr,
   int8_t* toptr,
