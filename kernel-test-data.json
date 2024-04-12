@@ -25990,8 +25990,32 @@
                         "length": 0
                     },
                     "outputs": {
-                        "tolength": [1],
+                        "tolength": [0],
                         "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [2],
+                        "length": 1
+                    },
+                    "outputs": {
+                        "tolength": [1],
+                        "toptr": [2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [0, 0, 0],
+                        "length": 3
+                    },
+                    "outputs": {
+                        "tolength": [1],
+                        "toptr": [0, 0, 0]
                     }
                 },
                 {
@@ -26056,8 +26080,44 @@
                         "length": 0
                     },
                     "outputs": {
-                        "tolength": [1],
+                        "tolength": [0],
                         "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [2],
+                        "length": 1
+                    },
+                    "outputs": {
+                        "tolength": [1],
+                        "toptr": [2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [2],
+                        "length": 1
+                    },
+                    "outputs": {
+                        "tolength": [1],
+                        "toptr": [2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [0, 0, 0],
+                        "length": 3
+                    },
+                    "outputs": {
+                        "tolength": [1],
+                        "toptr": [0, 0, 0]
                     }
                 },
                 {
@@ -26068,7 +26128,7 @@
                         "length": 3
                     },
                     "outputs": {
-                        "tolength": [3],
+                        "tolength": [2],
                         "toptr": [0, 1, 2]
                     }
                 },
@@ -26080,7 +26140,7 @@
                         "length": 5
                     },
                     "outputs": {
-                        "tolength": [4],
+                        "tolength": [2],
                         "toptr": [0, 1, 2, 2, 3]
                     }
                 },
@@ -26092,7 +26152,7 @@
                         "length": 4
                     },
                     "outputs": {
-                        "tolength": [4],
+                        "tolength": [2],
                         "toptr": [3, 0, 1, 0]
                     }
                 },
@@ -26104,7 +26164,7 @@
                         "length": 6
                     },
                     "outputs": {
-                        "tolength": [4],
+                        "tolength": [2],
                         "toptr": [3, 0, 2, 1, 0, 0]
                     }
                 }
@@ -26122,8 +26182,20 @@
                         "length": 0
                     },
                     "outputs": {
-                        "tolength": [1],
+                        "tolength": [0],
                         "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [0, 0, 0],
+                        "length": 3
+                    },
+                    "outputs": {
+                        "tolength": [1],
+                        "toptr": [0, 0, 0]
                     }
                 },
                 {

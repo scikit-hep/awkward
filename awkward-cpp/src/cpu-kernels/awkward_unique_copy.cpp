@@ -12,6 +12,7 @@ ERROR awkward_unique_copy(
   int64_t* tolength) {
 
   int64_t j = 0;
+  tolength[0] = 0
   toptr[0] = fromptr[0];
   for (int64_t i = 1;  i < length;  i++) {
     if (toptr[j] != fromptr[i]) {

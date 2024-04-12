@@ -754,13 +754,24 @@ class IndexedArray(IndexedMeta[Content], Content):
                 next.nplike is self._backend.index_nplike
                 and length.nplike is self._backend.index_nplike
             )
-            self._backend.maybe_kernel_error(
-                self._backend["awkward_unique", next.dtype.type, length.dtype.type](
-                    next.data,
-                    self._index.length,
-                    length.data,
+            if next.dtype == np.bool_:
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_unique_bool_64", next.dtype.type, length.dtype.type
+                    ](
+                        next.data,
+                        self._index.length,
+                        length.data,
+                    )
                 )
-            )
+            else:
+                self._backend.maybe_kernel_error(
+                    self._backend["awkward_unique", next.dtype.type, length.dtype.type](
+                        next.data,
+                        self._index.length,
+                        length.data,
+                    )
+                )
 
         else:
             assert (
