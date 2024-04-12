@@ -146,5 +146,6 @@
   "_auto/ak.without_parameters.any-ext": "../reference/generated/ak.without_parameters.html",
   "_auto/ak.zeros_like.any-ext": "../reference/generated/ak.zeros_like.html",
   "_auto/ak.zip.any-ext": "../reference/generated/ak.zip.html",
-  "_auto/kernels.any-ext": "../reference/generated/kernels.html"
+  "_auto/kernels.any-ext": "../reference/generated/kernels.html",
+  "user-guide/10-minutes-to-awkward-array.any-ext": "getting-started/10-minutes-to-awkward-array.html"
 }

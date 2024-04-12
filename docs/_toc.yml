@@ -10,14 +10,13 @@ subtrees:
       - file: getting-started/index
         subtrees:
             - entries:
-#              - file: getting-started/try-awkward-array
+              - file: getting-started/what-is-an-awkward-array
+              - file: getting-started/10-minutes-to-awkward-array
               - file: getting-started/community-tutorials
               - file: getting-started/papers-and-talks
       - file: user-guide/index
         subtrees:
             - entries:
-              - file: user-guide/10-minutes-to-awkward-array
-            
               - file: user-guide/how-to-convert
                 title: "Converting arrays"
                 subtrees:
