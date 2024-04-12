@@ -160,15 +160,11 @@ class RecordArray(RecordMeta[Content], Content):
                 length = int(length)  # TODO: this should not happen!
             except TypeError:
                 raise TypeError(
-                    "{} 'length' must be a non-negative integer or None, not {}".format(
-                        type(self).__name__, repr(length)
-                    )
+                    f"{type(self).__name__} 'length' must be a non-negative integer or None, not {length!r}"
                 ) from None
         if not isinstance(contents, Iterable):
             raise TypeError(
-                "{} 'contents' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
-                )
+                f"{type(self).__name__} 'contents' must be iterable, not {contents!r}"
             )
         if not isinstance(contents, list):
             contents = list(contents)
@@ -177,19 +173,13 @@ class RecordArray(RecordMeta[Content], Content):
         for content in contents:
             if not isinstance(content, Content):
                 raise TypeError(
-                    "{} all 'contents' must be Content subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} all 'contents' must be Content subclasses, not {content!r}"
                 )
             if backend is None:
                 backend = content.backend
             elif backend is not content.backend:
                 raise TypeError(
-                    "{} 'contents' must use the same array library (backend): {} vs {}".format(
-                        type(self).__name__,
-                        type(backend).__name__,
-                        type(content.backend).__name__,
-                    )
+                    f"{type(self).__name__} 'contents' must use the same array library (backend): {type(backend).__name__} vs {type(content.backend).__name__}"
                 )
 
         # If no content backend was found, then choose our own
@@ -200,9 +190,7 @@ class RecordArray(RecordMeta[Content], Content):
             # Require a length if we have no contents
             if len(contents) == 0:
                 raise TypeError(
-                    "{} if len(contents) == 0, a 'length' must be specified".format(
-                        type(self).__name__
-                    )
+                    f"{type(self).__name__} if len(contents) == 0, a 'length' must be specified"
                 )
 
             # Take length as minimum length of contents. This will touch shapes
@@ -236,9 +224,7 @@ class RecordArray(RecordMeta[Content], Content):
                     and content.length < length
                 ):
                     raise ValueError(
-                        "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
-                            type(self).__name__, content.length, length
-                        )
+                        f"{type(self).__name__} len(content) ({content.length}) must be >= length ({length}) for all 'contents'"
                     )
 
         if isinstance(fields, Iterable):
@@ -246,21 +232,15 @@ class RecordArray(RecordMeta[Content], Content):
                 fields = list(fields)
             if not all(isinstance(x, str) for x in fields):
                 raise TypeError(
-                    "{} 'fields' must all be strings, not {}".format(
-                        type(self).__name__, repr(fields)
-                    )
+                    f"{type(self).__name__} 'fields' must all be strings, not {fields!r}"
                 )
             if not len(contents) == len(fields):
                 raise ValueError(
-                    "{} len(contents) ({}) must be equal to len(fields) ({})".format(
-                        type(self).__name__, len(contents), len(fields)
-                    )
+                    f"{type(self).__name__} len(contents) ({len(contents)}) must be equal to len(fields) ({len(fields)})"
                 )
         elif fields is not None:
             raise TypeError(
-                "{} 'fields' must be an iterable or None, not {}".format(
-                    type(self).__name__, repr(fields)
-                )
+                f"{type(self).__name__} 'fields' must be an iterable or None, not {fields!r}"
             )
 
         self._contents = contents
@@ -401,9 +381,7 @@ class RecordArray(RecordMeta[Content], Content):
         else:
             for i, x in enumerate(self._contents):
                 out.append(
-                    "{}    <content index={} field={}>\n".format(
-                        indent, repr(str(i)), repr(self._fields[i])
-                    )
+                    f"{indent}    <content index={str(i)!r} field={self._fields[i]!r}>\n"
                 )
                 out.append(x._repr(indent + "        ", "", "\n"))
                 out.append(indent + "    </content>\n")
@@ -436,6 +414,9 @@ class RecordArray(RecordMeta[Content], Content):
 
     def _getitem_nothing(self) -> Content:
         return self._getitem_range(0, 0)
+
+    def _is_getitem_at_placeholder(self) -> bool:
+        return False
 
     def _getitem_at(self, where: IndexType):
         if self._backend.nplike.known_data and where < 0:
@@ -1168,11 +1149,9 @@ class RecordArray(RecordMeta[Content], Content):
             if options["function_name"] is not None:
                 in_function = " in " + options["function_name"]
             raise TypeError(
-                (
-                    "encountered a record whilst removing array structure{}, "
-                    "but this operation does not support erasing records. "
-                    "Try first calling `ak.ravel` or `ak.flatten(..., axis=None)."
-                ).format(in_function)
+                f"encountered a record whilst removing array structure{in_function}, "
+                "but this operation does not support erasing records. "
+                "Try first calling `ak.ravel` or `ak.flatten(..., axis=None)."
             )
 
     def _recursively_apply(

@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   coverage:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Push version switcher
     permissions:
       id-token: write
@@ -23,7 +23,7 @@ jobs:
       S3_BUCKET: "awkward-array.org"
       CLOUDFRONT_ID: "EFM4QVENUIXHS"
     environment:
-      name: docs-prod
+      name: docs
     steps:
       - uses: actions/checkout@v4
       - name: Configure AWS credentials

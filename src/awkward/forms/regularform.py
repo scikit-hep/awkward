@@ -25,15 +25,11 @@ class RegularForm(RegularMeta[Form], Form):
     def __init__(self, content, size, *, parameters=None, form_key=None):
         if not isinstance(content, Form):
             raise TypeError(
-                "{} all 'contents' must be Form subclasses, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} all 'contents' must be Form subclasses, not {content!r}"
             )
         if not (size is unknown_length or (is_integer(size) and size >= 0)):
             raise TypeError(
-                "{} 'size' must be a non-negative int or None, not {}".format(
-                    type(self).__name__, repr(size)
-                )
+                f"{type(self).__name__} 'size' must be a non-negative int or None, not {size!r}"
             )
 
         self._content = content

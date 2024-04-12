@@ -17,6 +17,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._parameters import (
@@ -122,9 +123,7 @@ class NumpyArray(NumpyMeta, Content):
 
         if len(self._data.shape) == 0:
             raise TypeError(
-                "{} 'data' must be an array, not a scalar: {}".format(
-                    type(self).__name__, repr(data)
-                )
+                f"{type(self).__name__} 'data' must be an array, not a scalar: {data!r}"
             )
 
         if parameters is not None and parameters.get("__array__") in ("char", "byte"):
@@ -245,9 +244,13 @@ class NumpyArray(NumpyMeta, Content):
             )
 
         extra = self._repr_extra(indent + "    ")
-        arraystr_lines = self._backend.nplike.array_str(
-            self._data, max_line_width=30
-        ).split("\n")
+
+        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)):
+            arraystr_lines = ["[## ... ##]"]
+        else:
+            arraystr_lines = self._backend.nplike.array_str(
+                self._data, max_line_width=30
+            ).split("\n")
 
         if len(extra) != 0 or len(arraystr_lines) > 1:
             arraystr_lines = self._backend.nplike.array_str(
@@ -297,6 +300,9 @@ class NumpyArray(NumpyMeta, Content):
             parameters=None,
             backend=self._backend,
         )
+
+    def _is_getitem_at_placeholder(self) -> bool:
+        return isinstance(self._data, PlaceholderArray)
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:

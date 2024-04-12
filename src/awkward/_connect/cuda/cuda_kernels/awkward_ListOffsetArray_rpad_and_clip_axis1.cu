@@ -2,12 +2,13 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_ListOffsetArray_rpad_and_clip_axis1(T* toindex,
-                                            const C* fromoffsets,
-                                            int64_t length,
-                                            int64_t target,
-                                            uint64_t invocation_index,
-                                            uint64_t* err_code) {
+awkward_ListOffsetArray_rpad_and_clip_axis1(
+    T* toindex,
+    const C* fromoffsets,
+    int64_t length,
+    int64_t target,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / target;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % target;

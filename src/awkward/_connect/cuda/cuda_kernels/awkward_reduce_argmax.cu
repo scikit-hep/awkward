@@ -11,13 +11,14 @@
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_argmax_a(T* toptr,
-                        const C* fromptr,
-                        const U* parents,
-                        int64_t lenparents,
-                        int64_t outlength,
-                        uint64_t invocation_index,
-                        uint64_t* err_code) {
+awkward_reduce_argmax_a(
+    T* toptr,
+    const C* fromptr,
+    const U* parents,
+    int64_t lenparents,
+    int64_t outlength,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < outlength) {
@@ -28,13 +29,14 @@ awkward_reduce_argmax_a(T* toptr,
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_argmax_b(T* toptr,
-                        const C* fromptr,
-                        const U* parents,
-                        int64_t lenparents,
-                        int64_t outlength,
-                        uint64_t invocation_index,
-                        uint64_t* err_code) {
+awkward_reduce_argmax_b(
+    T* toptr,
+    const C* fromptr,
+    const U* parents,
+    int64_t lenparents,
+    int64_t outlength,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -42,7 +44,7 @@ awkward_reduce_argmax_b(T* toptr,
       int64_t parent = parents[thread_id];
       if (toptr[parent] == -1 ||
           (fromptr[thread_id] > (fromptr[toptr[parent]]))) {
-        toptr[parent] = thread_id;
+        toptr[parent] = thread_id; // we need the last parent filled, thread random order problem, find max arg at that index
       }
     }
   }

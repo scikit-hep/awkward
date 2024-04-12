@@ -88,9 +88,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
     def __init__(self, content, *, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         if content.is_union or content.is_indexed or content.is_option:
             raise TypeError(
@@ -230,6 +228,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
 
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
+
+    def _is_getitem_at_placeholder(self) -> bool:
+        return self._content._is_getitem_at_placeholder()
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:

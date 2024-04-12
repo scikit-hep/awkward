@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
 import awkward as ak
+from awkward.errors import AxisError
 
 
 def test_is_none():
@@ -45,7 +45,7 @@ def test_is_none():
         [{"x": [False], "y": [False]}],
     ]
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.is_none(array, axis=3)
 
     assert ak.is_none(array, axis=-1).tolist() == [
@@ -65,7 +65,7 @@ def test_is_none():
         [{"x": False, "y": [False]}],
     ]
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.is_none(array, axis=-3)
 
 
@@ -108,7 +108,7 @@ def test_singletons():
         [{"x": [[2]], "y": [[[1, 2, 3]]]}],
     ]
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.singletons(array, axis=3)
 
     assert ak.singletons(array, axis=-1).tolist() == [
@@ -129,7 +129,7 @@ def test_singletons():
         [{"x": [[2]], "y": [[[1, 2, 3]]]}],
     ]
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.singletons(array, axis=-3)
 
 
