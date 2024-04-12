@@ -281,6 +281,9 @@
             `
               import numpy as np
               import awkward as ak
+              if hasattr(ak._util, "STDOUT"):
+                  import sys
+                  ak._util.STDOUT.stream = sys.stdout
               example = ak.Array([
                   [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
                   [],

@@ -86,6 +86,9 @@ class Sentinel:
 
 UNSET = Sentinel("UNSET", __name__)
 
+STDOUT = Sentinel("STDOUT", __name__)
+STDOUT.stream = sys.stdout
+
 
 T = TypeVar("T")
 

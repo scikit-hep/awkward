@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import json
-import sys
 from collections.abc import Mapping
 
 import awkward as ak
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Any, JSONMapping, JSONSerializable, Self
-from awkward._util import UNSET, Sentinel
+from awkward._util import STDOUT, UNSET, Sentinel
 from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
 
 np = NumpyMetadata.instance()
@@ -39,9 +38,14 @@ class Type:
     def _str(self, indent: str, compact: bool, behavior: Mapping | None) -> list[str]:
         raise NotImplementedError
 
-    def show(self, stream=sys.stdout):
-        # TODO: deprecate lowlevel show
-        stream.write("".join([*self._str("", False, None), "\n"]))
+    def show(self, stream=STDOUT):
+        out = "".join(self._str("", False, None))
+        if out is None:
+            return out
+        else:
+            if stream is STDOUT:
+                stream = STDOUT.stream
+            stream.write(out + "\n")
 
     _str_parameters_exclude: tuple[str, ...] = ("__categorical__",)
 
