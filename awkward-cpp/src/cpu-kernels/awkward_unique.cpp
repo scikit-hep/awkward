@@ -11,7 +11,6 @@ ERROR awkward_unique(
   int64_t* tolength) {
 
   int64_t j = 0;
-  *tolength = 0;
   for (int64_t i = 1;  i < length;  i++) {
     if (toptr[j] != toptr[i]) {
       j++;

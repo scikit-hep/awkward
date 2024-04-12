@@ -11,7 +11,6 @@ ERROR awkward_unique_bool_64(
   int64_t* tolength) {
 
   int64_t j = 0;
-  *tolength = 0;
   for (int64_t i = 1;  i < length;  i++) {
     if ((toptr[j] != 0) != (toptr[i] != 0)) {
       j++;
