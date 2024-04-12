@@ -5717,13 +5717,28 @@ kernels:
       Insert Python definition here
     automatic-tests: false
 
-  - name: awkward_unique
+  - name: awkward_unique_bool_64
     specializations:
-      - name: awkward_unique_bool
+      - name: awkward_unique_bool_64
         args:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+    description: null
+    definition: |
+      def awkward_unique_bool_64(
+        toptr, length, tolength
+      ):
+        j = 0
+        for i in range(1, length):
+            if (toptr[j] != 0) != (toptr[i] != 0):
+              j += 1
+              toptr[j] = toptr[i]
+        tolength[0] = j + 1
+    automatic-tests: false
+
+  - name: awkward_unique
+    specializations:
       - name: awkward_unique_int8
         args:
           - {name: toptr, type: "List[int8_t]", dir: out}

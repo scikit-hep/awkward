@@ -20,15 +20,6 @@ ERROR awkward_unique(
   *tolength = j + 1;
   return success();
 }
-ERROR awkward_unique_bool(
-  bool* toptr,
-  int64_t length,
-  int64_t* tolength) {
-    return awkward_unique<bool>(
-      toptr,
-      length,
-      tolength);
-}
 ERROR awkward_unique_int8(
   int8_t* toptr,
   int64_t length,
