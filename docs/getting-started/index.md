@@ -17,7 +17,9 @@ conda install -c conda-forge awkward
 
 If you're installing as a developer or testing updates that haven't been released in a package manager yet, see the [developer installation instructions](https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md#building-and-testing-locally) in the [Contributor guide](https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md).
 
-<br><br><br>
+## Tutorials
+
+See the left side-bar (or bring it into view by clicking on the upper-left `≡`) for tutorials that illustrate the purpose and main concepts behind Awkward Arrays.
 
 ## Frequently asked questions
 
