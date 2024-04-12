@@ -28,6 +28,7 @@ hist[plot]
 particle
 hepunits
 vector
+skhep_testdata
 s3fs
 h5py
 matplotlib
