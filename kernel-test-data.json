@@ -15818,7 +15818,7 @@
         },
         {
             "name": "awkward_UnionArray_flatten_length",
-            "status": true,
+            "status": false,
             "tests": [
                 {
                     "error": false,
@@ -15858,6 +15858,58 @@
                     },
                     "outputs": {
                         "total_length": [7]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_UnionArray_flatten_combine",
+            "status": false,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromtags": [],
+                        "fromindex": [],
+                        "length": 0,
+                        "offsetsraws": [[], []]
+                    },
+                    "outputs": {
+                        "totags": [],
+                        "toindex": [],
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromtags": [0, 1, 0, 1],
+                        "fromindex": [0, 0, 1, 1],
+                        "length": 4,
+                        "offsetsraws": [[0, 2, 2, 3, 5], [2, 2, 3, 5, 6]]
+                    },
+                    "outputs": {
+                        "totags": [0, 0, 1],
+                        "toindex": [0, 1, 2],
+                        "tooffsets": [0, 2, 2, 2, 3]
+                    }
+                },
+
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromtags": [0, 0, 0, 0],
+                        "fromindex": [0, 1, 2, 3],
+                        "length": 4,
+                        "offsetsraws": [[0, 1, 3, 5, 7], [1, 3, 5, 7, 9]]
+                    },
+                    "outputs": {
+                        "totags": [0, 0, 0, 0, 0, 0, 0],
+                        "toindex": [0, 1, 2, 3, 4, 5, 6],
+                        "tooffsets": [0, 1, 3, 5, 7]
                     }
                 }
             ]
@@ -25979,6 +26031,38 @@
             ]
         },
         {
+            "name": "awkward_NumpyArray_subrange_equal_bool",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "tmpptr": [],
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "length": 0
+                    },
+                    "outputs": {
+                        "toequal": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "tmpptr": [0, 1, 2, 3, 4, 5, 6, 7],
+                        "fromstarts": [0, 1, 3, 5],
+                        "fromstops": [1, 3, 5, 7],
+                        "length": 4
+                    },
+                    "outputs": {
+                        "toequal": [1]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_unique",
             "status": true,
             "tests": [
@@ -26069,7 +26153,7 @@
             ]
         },
         {
-            "name": "awkward_unique_bool_64",
+            "name": "awkward_unique_bool",
             "status": true,
             "tests": [
                 {
@@ -26171,6 +26255,84 @@
             ]
         },
         {
+            "name": "awkward_unique_copy_bool",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [],
+                        "length": 0
+                    },
+                    "outputs": {
+                        "tolength": [1],
+                        "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [0, 0, 0],
+                        "length": 3
+                    },
+                    "outputs": {
+                        "tolength": [1],
+                        "toptr": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [0, 1, 2],
+                        "length": 3
+                    },
+                    "outputs": {
+                        "tolength": [2],
+                        "toptr": [0, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [0, 1, 2, 2, 3],
+                        "length": 5
+                    },
+                    "outputs": {
+                        "tolength": [2],
+                        "toptr": [0, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [3, 2, 1, 0],
+                        "length": 4
+                    },
+                    "outputs": {
+                        "tolength": [2],
+                        "toptr": [3, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [3, 2, 2, 1, 0, 0],
+                        "length": 6
+                    },
+                    "outputs": {
+                        "tolength": [2],
+                        "toptr": [3, 0]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_unique_copy",
             "status": true,
             "tests": [
@@ -26244,6 +26406,201 @@
                     "outputs": {
                         "tolength": [4],
                         "toptr": [3, 2, 1, 0]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_unique_offsets",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [],
+                        "starts": [],
+                        "startslength": 0,
+                        "length": 0
+                    },
+                    "outputs": {
+                        "tooffsets": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 1, 2],
+                        "starts": [0, 0, 0, 0, 0],
+                        "startslength": 5,
+                        "length": 3
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 0, 0, 0, 0, 2, 2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 2, 2, 3],
+                        "starts": [0, 1, 0, 1],
+                        "startslength": 4,
+                        "length": 4
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 2, 2, 3, 3]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 1, 2, 2, 3],
+                        "starts": [0, 1, 0, 1],
+                        "startslength": 4,
+                        "length": 5
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 1, 2, 2, 3]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromoffsets": [0, 1, 2, 2, 3],
+                        "starts": [0, 1, 2, 3],
+                        "startslength": 4,
+                        "length": 5
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 1, 2, 2, 3]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_unique_ranges",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [],
+                        "fromoffsets": [0],
+                        "offsetslength": 1,
+                        "length": 0
+                    },
+                    "outputs": {
+                        "toptr": [],
+                        "tooffsets": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [1],
+                        "fromoffsets": [0, 2],
+                        "offsetslength": 2,
+                        "length": 1
+                    },
+                    "outputs": {
+                        "toptr": [1],
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [0, 1, 2, 3, 4, 5],
+                        "fromoffsets": [0, 3, 5, 6],
+                        "offsetslength": 4,
+                        "length": 6
+                    },
+                    "outputs": {
+                        "toptr": [0, 1, 2, 3, 4, 5],
+                        "tooffsets": [0, 3, 5, 6]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [3, 2, 1, 0],
+                        "fromoffsets": [0, 0, 3, 3],
+                        "offsetslength": 4,
+                        "length": 4
+                    },
+                    "outputs": {
+                        "toptr": [3, 3, 1, 0],
+                        "tooffsets": [0, 1, 3, 4]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_unique_ranges_bool",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [],
+                        "fromoffsets": [0],
+                        "offsetslength": 1,
+                        "length": 0
+                    },
+                    "outputs": {
+                        "toptr": [],
+                        "tooffsets": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [1],
+                        "fromoffsets": [0, 2],
+                        "offsetslength": 2,
+                        "length": 1
+                    },
+                    "outputs": {
+                        "toptr": [1],
+                        "tooffsets": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [0, 1, 2, 3, 4, 5],
+                        "fromoffsets": [0, 3, 5, 6],
+                        "offsetslength": 4,
+                        "length": 6
+                    },
+                    "outputs": {
+                        "toptr": [0, 1, 1, 1, 1, 1],
+                        "tooffsets": [0, 2, 3, 4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [3, 2, 1, 0],
+                        "fromoffsets": [0, 0, 3, 3],
+                        "offsetslength": 4,
+                        "length": 4
+                    },
+                    "outputs": {
+                        "toptr": [1, 1, 0, 0],
+                        "tooffsets": [0, 1, 2, 3]
                     }
                 }
             ]

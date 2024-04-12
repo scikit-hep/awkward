@@ -757,7 +757,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             if next.dtype == np.bool_:
                 self._backend.maybe_kernel_error(
                     self._backend[
-                        "awkward_unique_bool_64", next.dtype.type, length.dtype.type
+                        "awkward_unique_bool", next.dtype.type, length.dtype.type
                     ](
                         next.data,
                         self._index.length,

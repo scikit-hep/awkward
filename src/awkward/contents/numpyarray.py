@@ -768,7 +768,7 @@ class NumpyArray(NumpyMeta, Content):
             if out.dtype == np.bool_:
                 self._backend.maybe_kernel_error(
                     self._backend[
-                        "awkward_unique_bool_64",
+                        "awkward_unique_bool",
                         out.dtype.type,
                         nextlength.dtype.type,
                     ](

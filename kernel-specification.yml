@@ -3381,6 +3381,34 @@ kernels:
                   l_to_char += 1
     automatic-tests: false
 
+  - name: awkward_NumpyArray_subrange_equal_bool
+    specializations:
+      - name: awkward_NumpyArray_subrange_equal_bool
+        args:
+          - {name: tmpptr, type: "List[bool]", dir: in, role: IndexedArray-index}
+          - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
+          - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: toequal, type: "List[bool]", dir: out}
+    description: null
+    definition: |
+      def awkward_NumpyArray_subrange_equal_bool(
+        tmpptr, fromstarts, fromstops, length, toequal
+      ):
+          differ = True
+          for i in range(length - 1):
+              leftlen = fromstops[i] - fromstarts[i]
+              for ii in range(i + 1, length - 1):
+                  rightlen = fromstops[ii] - fromstarts[ii]
+                  if leftlen == rightlen:
+                      differ = False
+                      for j in range (leftlen):
+                          if (tmpptr[fromstarts[i] + j] != 0) != (tmpptr[fromstarts[ii] + j] != 0):
+                              differ = True
+                              break
+          toequal[0] = not differ
+    automatic-tests: false
+
   - name: awkward_NumpyArray_subrange_equal
     specializations:
       - name: awkward_NumpyArray_subrange_equal_bool
@@ -5717,16 +5745,16 @@ kernels:
       Insert Python definition here
     automatic-tests: false
 
-  - name: awkward_unique_bool_64
+  - name: awkward_unique_bool
     specializations:
-      - name: awkward_unique_bool_64
+      - name: awkward_unique_bool
         args:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: tolength, type: "List[int64_t]", dir: out, role: default}
     description: null
     definition: |
-      def awkward_unique_bool_64(
+      def awkward_unique_bool(
         toptr, length, tolength
       ):
         j = 0
@@ -5799,6 +5827,28 @@ kernels:
             if toptr[j] != toptr[i]:
               j += 1
               toptr[j] = toptr[i]
+        tolength[0] = j + 1
+    automatic-tests: false
+
+  - name: awkward_unique_copy_bool
+    specializations:
+      - name: awkward_unique_copy_bool
+        args:
+          - {name: fromptr, type: "Const[List[bool]]", dir: in}
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+    description: null
+    definition: |
+      def awkward_unique_copy_bool(
+        fromptr, toptr, length, tolength
+      ):
+        j = 0
+        for i in range(1, length):
+            toptr[0] = fromptr[0]
+            if (toptr[j] != 0) != (fromptr[i] != 0):
+              j += 1
+              toptr[j] = fromptr[i]
         tolength[0] = j + 1
     automatic-tests: false
 
@@ -5927,6 +5977,32 @@ kernels:
                     tooffsets[j + 1] = fromoffsets[i]
                     j += 1
         tooffsets[startslength] = fromoffsets[length - 1]
+    automatic-tests: false
+
+  - name: awkward_unique_ranges_bool
+    specializations:
+      - name: awkward_unique_ranges_bool
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
+    description: null
+    definition: |
+      def awkward_unique_ranges_bool(
+        toptr, length, fromoffsets, offsetslength, tooffsets
+      ):
+        m = 0
+        for i in range(offsetslength):
+          tooffsets[i] = m
+          toptr[m] = toptr[fromoffsets[i]]
+          m += 1
+          for k in range(fromoffsets[i], fromoffsets[i + 1]):
+            if ((toptr[m - 1] != 0) != (toptr[k] != 0)):
+              toptr[m] = toptr[k]
+              m += 1
+        tooffsets[offsetslength - 1] = m
     automatic-tests: false
 
   - name: awkward_unique_ranges
