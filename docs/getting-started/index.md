@@ -169,7 +169,7 @@ you can call
 :::::::{grid-item} 
 ::::::{dropdown} How do I flatten a ragged array for plotting?
 
-{func}`ak.flatten` eliminates one level of nested lists, and {func}`ak.ravel` eliminates them all. These functions also remove missing values (`None`), which plotting libraries might not recognize.
+{func}`ak.flatten` eliminates one level of nested lists, and {func}`ak.ravel` eliminates them all. {func}`ak.flatten` also removes missing values (`None`), which plotting libraries might not recognize.
 
 Depending on what you're trying to plot, selecting the first element of each list or computing the {func}`ak.sum` or {func}`ak.mean` of each list might be more meaningful.
 
@@ -319,7 +319,7 @@ x = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 `None` represents a missing value (distinct from floating-point `nan`), and the `?` or `option[float64]` in the type means that values _could_ be missing. Such an array can be used in numerical calculations—missing values pass through most functions as missing values in the output—but third-party libraries might not recognize them.
 
 * {func}`ak.drop_none` simply removes the missing values, changing the lengths of lists and the data type to reflect the fact that no values are missing.
-* {func}`ak.flatten` and {func}`ak.ravel` remove missing values in the process of flattening nested lists (they treat `None` like `[]`).
+* {func}`ak.flatten` removes missing values in the process of flattening nested lists (it treats `None` like `[]`).
 * {func}`ak.fill_none` lets you replace missing values with a specified value.
 * {func}`ak.firsts` and {func}`ak.singletons` convert between representing option-type data as `option[T]` and `var * T`. In the latter, a missing value is an empty list and a non-missing value is a length-1 list.
 
