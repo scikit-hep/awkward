@@ -24,6 +24,7 @@ numexpr
 pyarrow>=7.0.0
 fsspec
 fsspec-xrootd
+hist
 s3fs
 h5py
 matplotlib
