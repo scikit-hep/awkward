@@ -303,3 +303,14 @@ To make an `awkward` release:
 3. A `docs/switcher.json` entry must be added for new minor/major versions.
 
 Pushes that modify `docs/switcher.json` on `main` will automatically be synchronised with AWS.
+
+#### Nightly wheels
+
+Nightly wheels of `awkward-cpp` and `awkward` are built and published to the [Scientific Python Nightly Wheels Anaconda Cloud organization](https://anaconda.org/scientific-python-nightly-wheels).
+As the `awkward-cpp` and `awkward` nightly wheels do not include version control system information, they will have the same version numbers as the last released versions on the public PyPI. To avoid resolution conflicts when installing the nightly wheels, it is recommended to first install `awkward-cpp` and `awkward` from PyPI to get all of their dependencies, then uninstall `awkward-cpp` and `awkward` and install the nightly wheels from the Scientific Python nightly index.
+
+```
+python -m pip install --upgrade awkward
+python -m pip uninstall --yes awkward awkward-cpp
+python -m pip install --upgrade --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple awkward
+```
