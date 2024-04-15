@@ -519,7 +519,13 @@ def gencpukerneltests(specdict):
                         elif count == 2:
                             f.write(
                                 " " * 4
-                                + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
+                                + f"{arg}_ptr = (ctypes.POINTER(ctypes.c_{typename}) * len({arg}))()\n"
+                                + " " * 4
+                                + f"for i in range(len({arg})):\n"
+                                + " " * 8
+                                + f"{arg}_ptr[i] = (ctypes.c_{typename} * len({arg}[i]))(*{arg}[i])\n"
+                                + " " * 4
+                                + f"{arg} = {arg}_ptr\n"
                             )
                 f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
                 args = ""
@@ -634,7 +640,13 @@ def gencpuunittests(specdict):
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
+                                        + f"{arg}_ptr = (ctypes.POINTER(ctypes.c_{typename}) * len({arg}))()\n"
+                                        + " " * 4
+                                        + f"for i in range(len({arg})):\n"
+                                        + " " * 8
+                                        + f"{arg}_ptr[i] = (ctypes.c_{typename} * len({arg}[i]))(*{arg}[i])\n"
+                                        + " " * 4
+                                        + f"{arg} = {arg}_ptr\n"
                                     )
                         for arg, val in test["inputs"].items():
                             typename = remove_const(
@@ -657,7 +669,13 @@ def gencpuunittests(specdict):
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
+                                        + f"{arg}_ptr = (ctypes.POINTER(ctypes.c_{typename}) * len({arg}))()\n"
+                                        + " " * 4
+                                        + f"for i in range(len({arg})):\n"
+                                        + " " * 8
+                                        + f"{arg}_ptr[i] = (ctypes.c_{typename} * len({arg}[i]))(*{arg}[i])\n"
+                                        + " " * 4
+                                        + f"{arg} = {arg}_ptr\n"
                                     )
 
                         f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
