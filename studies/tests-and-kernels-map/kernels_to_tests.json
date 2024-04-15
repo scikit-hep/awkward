@@ -4405,9 +4405,6 @@
         "test_0404_array_validity_check.py::test_RegularArray",
         "test_0404_array_validity_check.py::test_ByteMaskedArray_1"
     ],
-    "awkward_NumpyArray_fill": [
-        "test_0404_array_validity_check.py::test_subranges_equal"
-    ],
     "awkward_reduce_max_complex": [
         "test_0395_complex_type_arrays.py::test_astype_complex",
         "test_0395_complex_type_arrays.py::test_count_max_complex",

@@ -3960,7 +3960,6 @@
             "awkward_ListOffsetArray_reduce_local_nextparents_64",
             "awkward_sorting_ranges_length",
             "awkward_sort",
-            "awkward_NumpyArray_fill",
             "awkward_sorting_ranges",
             "awkward_NumpyArray_subrange_equal"
         ],

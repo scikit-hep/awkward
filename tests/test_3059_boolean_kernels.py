@@ -75,3 +75,43 @@ def test_bool_IndexedArray():
         [False],
         [True],
     ]
+
+
+def test_bool_subranges_equal():
+    array = ak.contents.NumpyArray(
+        np.array(
+            [
+                [True, False, True, True, False],
+                [False, False, True, True, True],
+                [False, True, False, True, True],
+            ]
+        )
+    )
+
+    starts = ak.index.Index64(np.array([0, 5, 10]))
+    stops = ak.index.Index64(np.array([5, 10, 15]))
+
+    result = ak.sort(array, axis=-1, highlevel=False).content._subranges_equal(
+        starts, stops, 15
+    )
+    assert result is True
+
+    starts = ak.index.Index64(np.array([0, 7]))
+    stops = ak.index.Index64(np.array([7, 15]))
+
+    assert (
+        ak.sort(array, axis=-1, highlevel=False).content._subranges_equal(
+            starts, stops, 15
+        )
+        is False
+    )
+
+    starts = ak.index.Index64(np.array([0]))
+    stops = ak.index.Index64(np.array([15]))
+
+    assert (
+        ak.sort(array, axis=-1, highlevel=False).content._subranges_equal(
+            starts, stops, 15
+        )
+        is False
+    )

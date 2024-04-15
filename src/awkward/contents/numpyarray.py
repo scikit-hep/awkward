@@ -565,58 +565,13 @@ class NumpyArray(NumpyMeta, Content):
     def _subranges_equal(self, starts, stops, length, sorted=True):
         is_equal = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
 
-        tmp = self._backend.nplike.empty(length, dtype=self.dtype)
-        self._backend.maybe_kernel_error(
-            self._backend[
-                "awkward_NumpyArray_fill",
-                self.dtype.type,
-                self._data.dtype.type,
-            ](
-                tmp,
-                0,
-                self._data,
-                length,
-            )
-        )
+        (self._backend.nplike.astype(self._data, dtype=self.dtype, copy=True),)
 
-        if not sorted:
-            tmp_beg_ptr = ak.index.Index64.empty(
-                ak._util.kMaxLevels, nplike=self._backend.index_nplike
-            )
-            tmp_end_ptr = ak.index.Index64.empty(
-                ak._util.kMaxLevels, nplike=self._backend.index_nplike
-            )
-
-            assert (
-                tmp_beg_ptr.nplike is self._backend.index_nplike
-                and tmp_end_ptr.nplike is self._backend.index_nplike
-                and starts.nplike is self._backend.index_nplike
-                and stops.nplike is self._backend.index_nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_quick_sort",
-                    self.dtype.type,
-                    tmp_beg_ptr.dtype.type,
-                    tmp_end_ptr.dtype.type,
-                    starts.dtype.type,
-                    stops.dtype.type,
-                ](
-                    tmp,
-                    tmp_beg_ptr.data,
-                    tmp_end_ptr.data,
-                    starts.data,
-                    stops.data,
-                    True,
-                    starts.length,
-                    ak._util.kMaxLevels,
-                )
-            )
         assert (
             starts.nplike is self._backend.index_nplike
             and stops.nplike is self._backend.index_nplike
         )
-        if tmp.dtype == np.bool_:
+        if self.dtype == np.bool_:
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_NumpyArray_subrange_equal_bool",
@@ -625,7 +580,7 @@ class NumpyArray(NumpyMeta, Content):
                     stops.dtype.type,
                     np.bool_,
                 ](
-                    tmp,
+                    self._data,
                     starts.data,
                     stops.data,
                     starts.length,
@@ -641,7 +596,7 @@ class NumpyArray(NumpyMeta, Content):
                     stops.dtype.type,
                     np.bool_,
                 ](
-                    tmp,
+                    self._data,
                     starts.data,
                     stops.data,
                     starts.length,
