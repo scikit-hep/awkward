@@ -616,21 +616,38 @@ class NumpyArray(NumpyMeta, Content):
             starts.nplike is self._backend.index_nplike
             and stops.nplike is self._backend.index_nplike
         )
-        self._backend.maybe_kernel_error(
-            self._backend[
-                "awkward_NumpyArray_subrange_equal",
-                self.dtype.type,
-                starts.dtype.type,
-                stops.dtype.type,
-                np.bool_,
-            ](
-                tmp,
-                starts.data,
-                stops.data,
-                starts.length,
-                is_equal.data,
+        if tmp.dtype == np.bool_:
+            self._backend.maybe_kernel_error(
+                self._backend[
+                    "awkward_NumpyArray_subrange_equal_bool",
+                    self.dtype.type,
+                    starts.dtype.type,
+                    stops.dtype.type,
+                    np.bool_,
+                ](
+                    tmp,
+                    starts.data,
+                    stops.data,
+                    starts.length,
+                    is_equal.data,
+                )
             )
-        )
+        else:
+            self._backend.maybe_kernel_error(
+                self._backend[
+                    "awkward_NumpyArray_subrange_equal",
+                    self.dtype.type,
+                    starts.dtype.type,
+                    stops.dtype.type,
+                    np.bool_,
+                ](
+                    tmp,
+                    starts.data,
+                    stops.data,
+                    starts.length,
+                    is_equal.data,
+                )
+            )
 
         return True if is_equal[0] == 1 else False
 
@@ -870,20 +887,36 @@ class NumpyArray(NumpyMeta, Content):
                 offsets.nplike is self._backend.index_nplike
                 and nextoffsets.nplike is self._backend.index_nplike
             )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_unique_ranges",
-                    out.dtype.type,
-                    offsets.dtype.type,
-                    nextoffsets.dtype.type,
-                ](
-                    out,
-                    out.shape[0],
-                    offsets.data,
-                    offsets.length,
-                    nextoffsets.data,
+            if out.dtype == np.bool_:
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_unique_ranges_bool",
+                        out.dtype.type,
+                        offsets.dtype.type,
+                        nextoffsets.dtype.type,
+                    ](
+                        out,
+                        out.shape[0],
+                        offsets.data,
+                        offsets.length,
+                        nextoffsets.data,
+                    )
                 )
-            )
+            else:
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_unique_ranges",
+                        out.dtype.type,
+                        offsets.dtype.type,
+                        nextoffsets.dtype.type,
+                    ](
+                        out,
+                        out.shape[0],
+                        offsets.data,
+                        offsets.length,
+                        nextoffsets.data,
+                    )
+                )
 
             outoffsets = ak.index.Index64.empty(
                 starts.length + 1, self._backend.index_nplike

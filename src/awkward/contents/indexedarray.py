@@ -779,19 +779,34 @@ class IndexedArray(IndexedMeta[Content], Content):
                 and next.nplike is self._backend.index_nplike
                 and length.nplike is self._backend.index_nplike
             )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_unique_copy",
-                    self._index.dtype.type,
-                    next.dtype.type,
-                    length.dtype.type,
-                ](
-                    self._index.data,
-                    next.data,
-                    self._index.length,
-                    length.data,
+            if self._index.dtype == np.bool_:
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_unique_copy_bool",
+                        self._index.dtype.type,
+                        next.dtype.type,
+                        length.dtype.type,
+                    ](
+                        self._index.data,
+                        next.data,
+                        self._index.length,
+                        length.data,
+                    )
                 )
-            )
+            else:
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_unique_copy",
+                        self._index.dtype.type,
+                        next.dtype.type,
+                        length.dtype.type,
+                    ](
+                        self._index.data,
+                        next.data,
+                        self._index.length,
+                        length.data,
+                    )
+                )
 
         return next[0 : length[0]]
 
