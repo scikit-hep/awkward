@@ -4,10 +4,9 @@
 
 #include "awkward/kernels.h"
 
-template <typename T>
 ERROR awkward_unique_copy_bool(
-  const T* fromptr,
-  T* toptr,
+  const bool* fromptr,
+  bool* toptr,
   int64_t length,
   int64_t* tolength) {
 

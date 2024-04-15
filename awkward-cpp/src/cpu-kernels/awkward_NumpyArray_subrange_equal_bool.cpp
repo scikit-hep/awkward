@@ -4,9 +4,8 @@
 
 #include "awkward/kernels.h"
 
-template <typename T>
 ERROR awkward_NumpyArray_subrange_equal_bool(
-  T* tmpptr,
+  bool* tmpptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,

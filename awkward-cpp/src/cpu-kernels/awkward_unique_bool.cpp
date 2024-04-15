@@ -4,9 +4,8 @@
 
 #include "awkward/kernels.h"
 
-template <typename T>
 ERROR awkward_unique_bool(
-  T* toptr,
+  bool* toptr,
   int64_t length,
   int64_t* tolength) {
 
@@ -17,6 +16,7 @@ ERROR awkward_unique_bool(
       toptr[j] = toptr[i];
     }
   }
+  printf("start");
   *tolength = j + 1;
   return success();
 }
