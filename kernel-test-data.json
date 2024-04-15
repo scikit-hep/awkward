@@ -26141,12 +26141,24 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "toptr": [3, 2, 2, 1, 0, 0],
+                        "toptr": [3, 3, 3, 2, 1, 0],
                         "length": 6
                     },
                     "outputs": {
                         "tolength": [4],
-                        "toptr": [3, 2, 1, 0, 0, 0]
+                        "toptr": [3, 2, 1, 0, 1, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "toptr": [0, 0, 1, 1, 2, 2],
+                        "length": 6
+                    },
+                    "outputs": {
+                        "tolength": [3],
+                        "toptr": [0, 1, 2, 1, 2, 2]
                     }
                 }
             ]
@@ -26219,12 +26231,12 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "toptr": [0, 1, 1, 0, 1],
+                        "toptr": [0, 0, 1, 1, 1],
                         "length": 5
                     },
                     "outputs": {
                         "tolength": [2],
-                        "toptr": [0, 1, 1, 0, 1]
+                        "toptr": [0, 1, 1, 1, 1]
                     }
                 },
                 {
@@ -26243,12 +26255,12 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "toptr": [1, 0, 1, 1, 0, 0],
+                        "toptr": [0, 0, 0, 1, 1, 1],
                         "length": 6
                     },
                     "outputs": {
                         "tolength": [2],
-                        "toptr": [1, 0, 1, 1, 0, 0]
+                        "toptr": [0, 1, 0, 1, 1, 1]
                     }
                 }
             ]
@@ -26321,12 +26333,12 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromptr": [1, 0, 1, 1, 0, 0],
+                        "fromptr": [0, 0, 0, 1, 1, 1],
                         "length": 6
                     },
                     "outputs": {
                         "tolength": [2],
-                        "toptr": [1, 0, 1, 1, 0, 0]
+                        "toptr": [0, 1]
                     }
                 }
             ]
@@ -26399,12 +26411,12 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromptr": [3, 2, 2, 1, 0, 0],
+                        "fromptr": [0, 0, 1, 1, 2, 2],
                         "length": 6
                     },
                     "outputs": {
-                        "tolength": [4],
-                        "toptr": [3, 2, 1, 0]
+                        "tolength": [3],
+                        "toptr": [0, 1, 2]
                     }
                 }
             ]
