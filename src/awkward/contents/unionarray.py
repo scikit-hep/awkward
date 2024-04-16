@@ -527,11 +527,11 @@ class UnionArray(UnionMeta[Content], Content):
         if isinstance(self._tags, PlaceholderArray) or isinstance(
             self._index, PlaceholderArray
         ):
-            return False
+            return True
         for content in self._contents:
             if content._is_getitem_at_placeholder():
-                return False
-        return True
+                return True
+        return False
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
