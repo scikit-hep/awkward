@@ -1581,18 +1581,11 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             options,
         )
 
-    def _to_cudf(
-        self,
-        cudf: Any,
-        mask: Content | None,
-        length: int
-    ):
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         index = numpy.asarray(self._index.data, copy=True)
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
-        next = ak.contents.IndexedArray(
-            ak.index.Index(index), self._content
-        )
+        next = ak.contents.IndexedArray(ak.index.Index(index), self._content)
         mask = ak._connect.pyarrow.and_validbytes(mask, this_validbytes)
         return next._to_cudf(cudf, mask, len(next))
 
