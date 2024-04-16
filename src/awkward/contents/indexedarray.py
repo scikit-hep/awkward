@@ -750,63 +750,17 @@ class IndexedArray(IndexedMeta[Content], Content):
                 )
             )
 
-            assert (
-                next.nplike is self._backend.index_nplike
-                and length.nplike is self._backend.index_nplike
-            )
-            if next.dtype == np.bool_:
-                self._backend.maybe_kernel_error(
-                    self._backend[
-                        "awkward_unique_bool", next.dtype.type, length.dtype.type
-                    ](
-                        next.data,
-                        self._index.length,
-                        length.data,
-                    )
-                )
-            else:
-                self._backend.maybe_kernel_error(
-                    self._backend["awkward_unique", next.dtype.type, length.dtype.type](
-                        next.data,
-                        self._index.length,
-                        length.data,
-                    )
-                )
+        assert (
+            self._index.nplike is self._backend.index_nplike
+            and next.nplike is self._backend.index_nplike
+            and length.nplike is self._backend.index_nplike
+        )
 
-        else:
-            assert (
-                self._index.nplike is self._backend.index_nplike
-                and next.nplike is self._backend.index_nplike
-                and length.nplike is self._backend.index_nplike
-            )
-            if self._index.dtype == np.bool_:
-                self._backend.maybe_kernel_error(
-                    self._backend[
-                        "awkward_unique_copy_bool",
-                        self._index.dtype.type,
-                        next.dtype.type,
-                        length.dtype.type,
-                    ](
-                        self._index.data,
-                        next.data,
-                        self._index.length,
-                        length.data,
-                    )
-                )
-            else:
-                self._backend.maybe_kernel_error(
-                    self._backend[
-                        "awkward_unique_copy",
-                        self._index.dtype.type,
-                        next.dtype.type,
-                        length.dtype.type,
-                    ](
-                        self._index.data,
-                        next.data,
-                        self._index.length,
-                        length.data,
-                    )
-                )
+        next = ak.index.Index64(
+            self._backend.index_nplike.unique_values(self._index),
+            nplike=self._backend.index_nplike,
+        )
+        length[0] = next.data.size
 
         return next[0 : length[0]]
 

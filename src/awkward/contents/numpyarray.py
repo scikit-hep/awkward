@@ -737,30 +737,8 @@ class NumpyArray(NumpyMeta, Content):
             )
             nextlength = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert nextlength.nplike is self._backend.index_nplike
-            if out.dtype == np.bool_:
-                self._backend.maybe_kernel_error(
-                    self._backend[
-                        "awkward_unique_bool",
-                        out.dtype.type,
-                        nextlength.dtype.type,
-                    ](
-                        out,
-                        out.shape[0],
-                        nextlength.data,
-                    )
-                )
-            else:
-                self._backend.maybe_kernel_error(
-                    self._backend[
-                        "awkward_unique",
-                        out.dtype.type,
-                        nextlength.dtype.type,
-                    ](
-                        out,
-                        out.shape[0],
-                        nextlength.data,
-                    )
-                )
+            out = self._backend.index_nplike.unique_values(out)
+            nextlength[0] = out.size
 
             return ak.contents.NumpyArray(
                 self._backend.nplike.asarray(out[: nextlength[0]], dtype=self.dtype),

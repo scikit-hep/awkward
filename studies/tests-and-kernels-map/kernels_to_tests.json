@@ -1150,12 +1150,6 @@
         "test_0395_complex_type_arrays.py::test_astype_complex",
         "test_0652_tests_of_complex_numbers.py::test_reducers"
     ],
-    "awkward_unique_copy": [
-        "test_0404_array_validity_check.py::test_IndexedArray",
-        "test_0404_array_validity_check.py::test_same_categories",
-        "test_0404_array_validity_check.py::test_categorical",
-        "test_2616_use_pyarrow_for_strings.py::test_split_whitespace - AssertionError"
-    ],
     "awkward_ListArray_getitem_next_range_spreadadvanced": [
         "test_0011_listarray.py::test_listarray_array_slice",
         "test_0011_listarray.py::test_listoffsetarray_array_slice",
@@ -2444,26 +2438,6 @@
         "test_2860_enforce_concatenated_form.py::test_symmetric[right14-left10]",
         "test_2860_enforce_concatenated_form.py::test_symmetric[right14-left11]",
         "test_2860_enforce_concatenated_form.py::test_symmetric[right14-left14]"
-    ],
-    "awkward_unique": [
-        "test_0404_array_validity_check.py::test_NumpyArray",
-        "test_0404_array_validity_check.py::test_ByteMaskedArray_2",
-        "test_0404_array_validity_check.py::test_ByteMaskedArray_1",
-        "test_0404_array_validity_check.py::test_BitMaskedArray",
-        "test_0404_array_validity_check.py::test_UnmaskedArray",
-        "test_0404_array_validity_check.py::test_RecordArray",
-        "test_0404_array_validity_check.py::test_ListOffsetArray",
-        "test_0404_array_validity_check.py::test_IndexedArray",
-        "test_0404_array_validity_check.py::test_2d_in_axis",
-        "test_1149_datetime_sort.py::test_date_time_sort_argsort_unique",
-        "test_1149_datetime_sort.py::test_time_delta_sort_argsort_unique",
-        "test_0404_array_validity_check.py::test_3d_non_unique",
-        "test_0404_array_validity_check.py::test_ByteMaskedArray_0",
-        "test_0404_array_validity_check.py::test_RegularArray",
-        "test_0404_array_validity_check.py::test_3d",
-        "test_0404_array_validity_check.py::test_2d",
-        "test_0404_array_validity_check.py::test_UnionArray",
-        "test_2550_validity_error_recursive.py::test"
     ],
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64": [
         "test_0074_argsort_and_sort.py::test_ByteMaskedArray",
