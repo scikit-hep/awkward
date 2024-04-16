@@ -565,8 +565,6 @@ class NumpyArray(NumpyMeta, Content):
     def _subranges_equal(self, starts, stops, length, sorted=True):
         is_equal = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
 
-        (self._backend.nplike.astype(self._data, dtype=self.dtype, copy=True),)
-
         assert (
             starts.nplike is self._backend.index_nplike
             and stops.nplike is self._backend.index_nplike
@@ -580,7 +578,9 @@ class NumpyArray(NumpyMeta, Content):
                     stops.dtype.type,
                     np.bool_,
                 ](
-                    self._data,
+                    self._backend.nplike.astype(
+                        self._data, dtype=self.dtype, copy=True
+                    ),
                     starts.data,
                     stops.data,
                     starts.length,
@@ -596,7 +596,9 @@ class NumpyArray(NumpyMeta, Content):
                     stops.dtype.type,
                     np.bool_,
                 ](
-                    self._data,
+                    self._backend.nplike.astype(
+                        self._data, dtype=self.dtype, copy=True
+                    ),
                     starts.data,
                     stops.data,
                     starts.length,
