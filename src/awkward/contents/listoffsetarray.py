@@ -2020,7 +2020,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         index = self._offsets.raw(cupy).astype('int32')
         buf = cudf.core.buffer.as_buffer(index)
         ind_buf = cudf.core.column.numerical.NumericalColumn(buf, index.dtype, None, size=len(index))
-        breakpoint()
         cont = self._content._to_cudf(cudf, None, len(self._content))
         return cudf.core.column.lists.ListColumn(
             length,
