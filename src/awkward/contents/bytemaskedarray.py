@@ -113,15 +113,11 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
     def __init__(self, mask, content, valid_when, *, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise TypeError(
-                "{} 'mask' must be an Index with dtype=int8, not {}".format(
-                    type(self).__name__, repr(mask)
-                )
+                f"{type(self).__name__} 'mask' must be an Index with dtype=int8, not {mask!r}"
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         if content.is_union or content.is_indexed or content.is_option:
             raise TypeError(
@@ -131,9 +127,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             )
         if not isinstance(valid_when, bool):
             raise TypeError(
-                "{} 'valid_when' must be boolean, not {}".format(
-                    type(self).__name__, repr(valid_when)
-                )
+                f"{type(self).__name__} 'valid_when' must be boolean, not {valid_when!r}"
             )
         if (
             content.backend.index_nplike.known_data
@@ -142,9 +136,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             and mask.length > content.length
         ):
             raise ValueError(
-                "{} len(mask) ({}) must be <= len(content) ({})".format(
-                    type(self).__name__, mask.length, content.length
-                )
+                f"{type(self).__name__} len(mask) ({mask.length}) must be <= len(content) ({content.length})"
             )
 
         assert mask.nplike is content.backend.index_nplike
@@ -502,9 +494,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
                 ak.contents.ListArray(
                     slicestarts, slicestops, slicecontent, parameters=None
                 ),
-                "cannot fit jagged slice with length {} into {} of size {}".format(
-                    slicestarts.length, type(self).__name__, self.length
-                ),
+                f"cannot fit jagged slice with length {slicestarts.length} into {type(self).__name__} of size {self.length}",
             )
 
         numnull, nextcarry, outindex = self._nextcarry_outindex()
@@ -602,9 +592,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         if mask is not None:
             if self._backend.nplike.known_data and mask_length != mask.length:
                 raise ValueError(
-                    "mask length ({}) is not equal to {} length ({})".format(
-                        mask.length, type(self).__name__, mask_length
-                    )
+                    f"mask length ({mask.length}) is not equal to {type(self).__name__} length ({mask_length})"
                 )
 
             nextmask = ak.index.Index8.empty(

@@ -314,9 +314,9 @@ def reduce(
                 )
             if negaxis > depth:
                 raise ValueError(
-                    "cannot use axis={} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={} "
-                    "from the leaves".format(axis, depth)
+                    f"cannot use axis={axis} on a nested list structure that splits into "
+                    f"different depths, the minimum of which is depth={depth} "
+                    "from the leaves"
                 )
         else:
             if negaxis <= 0:

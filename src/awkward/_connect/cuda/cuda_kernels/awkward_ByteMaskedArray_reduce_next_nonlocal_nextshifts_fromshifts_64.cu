@@ -3,8 +3,8 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (nextshifts, mask, length, valid_when, shifts, invocation_index, err_code) = args
-//     scan_in_array_k = cupy.empty(length, dtype=cupy.int64)
-//     scan_in_array_nullsum = cupy.empty(length, dtype=cupy.int64)
+//     scan_in_array_k = cupy.zeros(length, dtype=cupy.int64)
+//     scan_in_array_nullsum = cupy.zeros(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64_a", nextshifts.dtype, mask.dtype, shifts.dtype]))(grid, block, (nextshifts, mask, length, valid_when, shifts, scan_in_array_k, scan_in_array_nullsum, invocation_index, err_code))
 //     scan_in_array_k = cupy.cumsum(scan_in_array_k)
 //     scan_in_array_nullsum = cupy.cumsum(scan_in_array_nullsum)
@@ -31,10 +31,8 @@ awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64_a(
     if (thread_id < length) {
       if ((mask[thread_id] != 0) == (valid_when != 0)) {
         scan_in_array_k[thread_id] = 1;
-        scan_in_array_nullsum[thread_id] = 0;
       } else {
         scan_in_array_nullsum[thread_id] = 1;
-        scan_in_array_k[thread_id] = 0;
       }
     }
   }

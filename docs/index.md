@@ -28,10 +28,9 @@ Awkward Array is a library for **nested, variable-sized data**, including arbitr
 :class: shield-badge
 :::
 
-% Unfortunately, `target` does not support document references
-:::{image} https://img.shields.io/badge/-Try%20It%21-orange?style=for-the-badge
-:alt: Try It!
-:target: getting-started/try-awkward-array.html
+:::{image} https://img.shields.io/badge/-Try%20It%21%20%E2%86%97-orange?style=for-the-badge
+:alt: Try It! ⭷
+:target: _static/try-it.html
 :class: shield-badge
 :::
 
@@ -93,6 +92,15 @@ Spotted a typo in the documentation? Want to add to the codebase? The contributi
 :class-card: admonition warning
 
 {fas}`history` Need the documentation for version 1 of Awkward Array? Click this card.
+
+:::
+
+:::{grid-item-card} 
+:columns: 12
+:link: https://juliahep.github.io/AwkwardArray.jl/dev/
+:class-card: admonition warning
+
+<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNC4zNzYyMzk4bW0iIGhlaWdodD0iNC4wNzkxODE3bW0iIHZpZXdCb3g9IjAgMCA0LjM3NjIzOTggNC4wNzkxODE3IiB2ZXJzaW9uPSIxLjEiIHN0eWxlPSJmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MC4wNTgxODI7IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnN2Zz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPiA8Y2lyY2xlIHN0eWxlPSJmaWxsOiNjYjNjMzM7IiBjeD0iMS4wNzA5NSIgY3k9IjMuMDA4MjMxIiByPSIwLjk3MDk1MTU2IiAvPiA8Y2lyY2xlIHN0eWxlPSJmaWxsOiM5NTU4YjI7IiBjeD0iMy4zMDUyOSIgY3k9IjMuMDA4MjMxIiByPSIwLjk3MDk1MTU2IiAvPiA8Y2lyY2xlIHN0eWxlPSJmaWxsOiMzODk4MjY7IiBjeD0iMi4xODgxNCIgY3k9IjEuMDcwOTUyIiByPSIwLjk3MDk1MTU2IiAvPiA8L3N2Zz4="> Looking for the documentation for Awkward Array in Julia? Click this card.
 ::::
     
 :::::

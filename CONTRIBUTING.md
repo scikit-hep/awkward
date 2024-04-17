@@ -22,11 +22,10 @@ Please [make the pull request a draft](https://github.blog/2019-02-14-introducin
 
 ### Getting your pull request reviewed
 
-Currently, we have three regular reviewers of pull requests:
+Currently, we have two regular reviewers of pull requests:
 
-  * Angus Hollands ([agoose77](https://github.com/agoose77))
-  * Ioana Ifrim ([ioanaif](https://github.com/ioanaif))
   * Jim Pivarski ([jpivarski](https://github.com/jpivarski))
+  * Topher Cawlfield ([tcawlfield](https://github.com/tcawlfield))
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
 
@@ -142,6 +141,26 @@ Furthermore, if you have an Nvidia GPU and CuPy installed, you can run the CUDA 
 python -m pytest tests-cuda-kernels
 python -m pytest tests-cuda
 ```
+
+#### Unit tests for the kernels
+
+You can also run additional unit tests that have more test coverage for all the low-level kernels for even more detailed fine-grained testing.
+
+For Python Kernels:
+```bash
+python -m pytest -n auto awkward-cpp/tests-spec-explicit
+```
+
+For CPU Kernels:
+```bash
+python -m pytest -n auto awkward-cpp/tests-cpu-kernels-explicit
+```
+
+For CUDA Kernels
+```bash
+python -m pytest tests-cuda-kernels-explicit
+```
+
 
 ### Building wheels
 
@@ -284,3 +303,14 @@ To make an `awkward` release:
 3. A `docs/switcher.json` entry must be added for new minor/major versions.
 
 Pushes that modify `docs/switcher.json` on `main` will automatically be synchronised with AWS.
+
+#### Nightly wheels
+
+Nightly wheels of `awkward-cpp` and `awkward` are built and published to the [Scientific Python Nightly Wheels Anaconda Cloud organization](https://anaconda.org/scientific-python-nightly-wheels).
+As the `awkward-cpp` and `awkward` nightly wheels do not include version control system information, they will have the same version numbers as the last released versions on the public PyPI. To avoid resolution conflicts when installing the nightly wheels, it is recommended to first install `awkward-cpp` and `awkward` from PyPI to get all of their dependencies, then uninstall `awkward-cpp` and `awkward` and install the nightly wheels from the Scientific Python nightly index.
+
+```
+python -m pip install --upgrade awkward
+python -m pip uninstall --yes awkward awkward-cpp
+python -m pip install --upgrade --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple awkward
+```

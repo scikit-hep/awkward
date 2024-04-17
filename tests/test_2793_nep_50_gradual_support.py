@@ -13,6 +13,9 @@ import awkward as ak
 NUMPY_HAS_NEP_50 = packaging.version.parse(np.__version__) >= packaging.version.Version(
     "1.24.0"
 )
+NUMPY_2 = packaging.version.parse(np.__version__) >= packaging.version.Version(
+    "2.0.0b1"
+)
 
 
 @pytest.mark.skipif(not NUMPY_HAS_NEP_50, reason="NEP-50 requires NumPy >= 1.24.0")
@@ -25,11 +28,14 @@ def test_with_nep_50(backend):
     assert (array + typed_scalar).layout.dtype == np.dtype(np.uint64)
 
     # With NEP-50, we can ask NumPy to use value-less type resolution
-    warn_context = (
-        pytest.warns(DeprecationWarning, match="out-of-bound Python integers")
-        if backend == "cpu"
-        else contextlib.nullcontext()
-    )
+    if NUMPY_2 and backend == "cpu":
+        warn_context = pytest.raises(OverflowError)
+    else:
+        warn_context = (
+            pytest.warns(DeprecationWarning, match="out-of-bound Python integers")
+            if backend == "cpu"
+            else contextlib.nullcontext()
+        )
     with warn_context:
         untyped_scalar = 512
         assert (array + untyped_scalar).layout.dtype == np.dtype(np.uint8)

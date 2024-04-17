@@ -119,8 +119,7 @@ def test_empty():
 
 
 def test_behavior():
-    class CustomList(ak.Array):
-        ...
+    class CustomList(ak.Array): ...
 
     behavior = {"custom_list": CustomList}
 

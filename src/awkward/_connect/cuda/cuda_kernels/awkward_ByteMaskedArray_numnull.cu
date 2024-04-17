@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (numnull, mask, length, validwhen, invocation_index, err_code) = args
-//     scan_in_array = cupy.empty(length, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(length, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_numnull_a', numnull.dtype, mask.dtype]))(grid, block, (numnull, mask, length, validwhen, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_numnull_b', numnull.dtype, mask.dtype]))(grid, block, (numnull, mask, length, validwhen, scan_in_array, invocation_index, err_code))
@@ -27,9 +27,6 @@ awkward_ByteMaskedArray_numnull_a(
     if (thread_id < length) {
       if ((mask[thread_id] != 0) != validwhen) {
         scan_in_array[thread_id] = 1;
-      }
-      else {
-        scan_in_array[thread_id] = 0;
       }
     }
   }

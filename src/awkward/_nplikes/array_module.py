@@ -631,6 +631,26 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         assert not isinstance(x, PlaceholderArray)
         return self._module.cumsum(x, axis=axis, out=maybe_out)
 
+    def real(self, x: ArrayLikeT) -> ArrayLikeT:
+        assert not isinstance(x, PlaceholderArray)
+        xr = self._module.real(x)
+        # For numpy, xr is a view on x, but we don't want to mutate x.
+        return self._module.copy(xr)
+
+    def imag(self, x: ArrayLikeT) -> ArrayLikeT:
+        assert not isinstance(x, PlaceholderArray)
+        xr = self._module.imag(x)
+        # For numpy, xr is a view on x, but we don't want to mutate x.
+        return self._module.copy(xr)
+
+    def angle(self, x: ArrayLikeT, deg: bool = False) -> ArrayLikeT:
+        assert not isinstance(x, PlaceholderArray)
+        return self._module.angle(x, deg)
+
+    def round(self, x: ArrayLikeT, decimals: int = 0) -> ArrayLikeT:
+        assert not isinstance(x, PlaceholderArray)
+        return self._module.round(x, decimals=decimals)
+
     def array_str(
         self,
         x: ArrayLikeT,

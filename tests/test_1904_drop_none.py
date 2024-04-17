@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 import awkward as ak
+from awkward.errors import AxisError
 
 to_list = ak.operations.to_list
 
@@ -428,10 +429,10 @@ def test_highlevel_return():
 
 
 def test_incorect_axis():
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.drop_none(ak.Array([[[None]]]), axis=4)
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.drop_none(ak.Array([1, 2, None]), axis=2)
 
 
@@ -546,7 +547,7 @@ def test_all_axes():
         [None, {"x": False, "y": [False]}],
         [{"x": False, "y": [True]}, {"x": False, "y": [False]}],
     ]
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.drop_none(array, axis=-2).tolist()
 
     array2 = ak.Array(
@@ -567,5 +568,5 @@ def test_all_axes():
         [None, {"x": False, "y": [False]}],
         [{"x": True, "y": [True]}, {"x": False, "y": [False]}],
     ]
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.drop_none(array2, axis=-2).tolist()

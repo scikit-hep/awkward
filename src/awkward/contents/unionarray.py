@@ -107,9 +107,7 @@ class UnionArray(UnionMeta[Content], Content):
     def __init__(self, tags, index, contents, *, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
             raise TypeError(
-                "{} 'tags' must be an Index with dtype=int8, not {}".format(
-                    type(self).__name__, repr(tags)
-                )
+                f"{type(self).__name__} 'tags' must be an Index with dtype=int8, not {tags!r}"
             )
 
         if not isinstance(index, Index) and index.dtype in (
@@ -118,15 +116,13 @@ class UnionArray(UnionMeta[Content], Content):
             np.dtype(np.int64),
         ):
             raise TypeError(
-                "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
-                "not {}".format(type(self).__name__, repr(index))
+                f"{type(self).__name__} 'index' must be an Index with dtype in (int32, uint32, int64), "
+                f"not {index!r}"
             )
 
         if not isinstance(contents, Iterable):
             raise TypeError(
-                "{} 'contents' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
-                )
+                f"{type(self).__name__} 'contents' must be iterable, not {contents!r}"
             )
         if not isinstance(contents, list):
             contents = list(contents)
@@ -138,9 +134,7 @@ class UnionArray(UnionMeta[Content], Content):
         for content in contents:
             if not isinstance(content, Content):
                 raise TypeError(
-                    "{} all 'contents' must be Content subclasses, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} all 'contents' must be Content subclasses, not {content!r}"
                 )
             if content.is_union:
                 raise TypeError(
@@ -152,16 +146,14 @@ class UnionArray(UnionMeta[Content], Content):
                 n_seen_options += 1
             elif content.is_indexed and content.parameter("__array__") != "categorical":
                 raise TypeError(
-                    (
-                        "{0} cannot contain non-categorical indexed-types in its 'contents' ({1}); "
-                        "try {0}.simplified instead"
-                    ).format(type(self).__name__, type(content).__name__)
+                    f"{type(self).__name__} cannot contain non-categorical indexed-types in its 'contents' ({type(content).__name__}); "
+                    f"try {type(self).__name__}.simplified instead"
                 )
 
         if n_seen_options not in {0, len(contents)}:
             raise TypeError(
-                "{0} must either be comprised of entirely optional contents, or no optional contents; "
-                "try {0}.simplified instead".format(type(self).__name__)
+                f"{type(self).__name__} must either be comprised of entirely optional contents, or no optional contents; "
+                f"try {type(self).__name__}.simplified instead"
             )
 
         backend = None
@@ -170,11 +162,7 @@ class UnionArray(UnionMeta[Content], Content):
                 backend = content.backend
             elif backend is not content.backend:
                 raise TypeError(
-                    "{} 'contents' must use the same array library (backend): {} vs {}".format(
-                        type(self).__name__,
-                        type(backend).__name__,
-                        type(content.backend).__name__,
-                    )
+                    f"{type(self).__name__} 'contents' must use the same array library (backend): {type(backend).__name__} vs {type(content.backend).__name__}"
                 )
 
         if (
@@ -184,9 +172,7 @@ class UnionArray(UnionMeta[Content], Content):
             and tags.length > index.length
         ):
             raise ValueError(
-                "{} len(tags) ({}) must be <= len(index) ({})".format(
-                    type(self).__name__, tags.length, index.length
-                )
+                f"{type(self).__name__} len(tags) ({tags.length}) must be <= len(index) ({index.length})"
             )
 
         assert tags.nplike is backend.index_nplike
@@ -253,11 +239,7 @@ class UnionArray(UnionMeta[Content], Content):
                 backend = content.backend
             elif backend is not content.backend:
                 raise TypeError(
-                    "{} 'contents' must use the same array library (backend): {} vs {}".format(
-                        cls.__name__,
-                        type(backend).__name__,
-                        type(content.backend).__name__,
-                    )
+                    f"{cls.__name__} 'contents' must use the same array library (backend): {type(backend).__name__} vs {type(content.backend).__name__}"
                 )
 
         if backend.nplike.known_data and self_index.length < self_tags.length:
@@ -545,11 +527,11 @@ class UnionArray(UnionMeta[Content], Content):
         if isinstance(self._tags, PlaceholderArray) or isinstance(
             self._index, PlaceholderArray
         ):
-            return False
+            return True
         for content in self._contents:
             if content._is_getitem_at_placeholder():
-                return False
-        return True
+                return True
+        return False
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:

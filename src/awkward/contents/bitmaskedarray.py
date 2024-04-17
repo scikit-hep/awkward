@@ -138,15 +138,11 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
             raise TypeError(
-                "{} 'mask' must be an Index with dtype=uint8, not {}".format(
-                    type(self).__name__, repr(mask)
-                )
+                f"{type(self).__name__} 'mask' must be an Index with dtype=uint8, not {mask!r}"
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         if content.is_union or content.is_indexed or content.is_option:
             raise TypeError(
@@ -156,21 +152,15 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             )
         if not isinstance(valid_when, bool):
             raise TypeError(
-                "{} 'valid_when' must be boolean, not {}".format(
-                    type(self).__name__, repr(valid_when)
-                )
+                f"{type(self).__name__} 'valid_when' must be boolean, not {valid_when!r}"
             )
         if length is not unknown_length and not (is_integer(length) and length >= 0):
             raise TypeError(
-                "{} 'length' must be a non-negative integer, not {}".format(
-                    type(self).__name__, length
-                )
+                f"{type(self).__name__} 'length' must be a non-negative integer, not {length}"
             )
         if not isinstance(lsb_order, bool):
             raise TypeError(
-                "{} 'lsb_order' must be boolean, not {}".format(
-                    type(self).__name__, repr(lsb_order)
-                )
+                f"{type(self).__name__} 'lsb_order' must be boolean, not {lsb_order!r}"
             )
         if (
             content.backend.index_nplike.known_data
@@ -179,9 +169,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             and length > mask.length * 8
         ):
             raise ValueError(
-                "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
-                    type(self).__name__, length, mask.length * 8
-                )
+                f"{type(self).__name__} 'length' ({length}) must be <= len(mask) * 8 ({mask.length * 8})"
             )
         if (
             content.backend.index_nplike.known_data
@@ -190,9 +178,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             and length > content.length * 8
         ):
             raise ValueError(
-                "{} 'length' ({}) must be <= len(content) ({})".format(
-                    type(self).__name__, length, content.length
-                )
+                f"{type(self).__name__} 'length' ({length}) must be <= len(content) ({content.length})"
             )
 
         assert mask.nplike is content.backend.index_nplike

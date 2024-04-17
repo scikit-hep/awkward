@@ -78,7 +78,7 @@ jobs:
       run: pipx run nox -s prepare
 
     - name: Build distributions
-      run: pipx run build --sdist --wheel
+      run: pipx run build
 
     - name: Check metadata
       run: pipx run twine check dist/*
@@ -113,7 +113,7 @@ jobs:
         name: distributions
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.12
+    - uses: pypa/gh-action-pypi-publish@v1.8.14
 
   publish-headers:
     name: "Publish header-only libraries alongside release"
@@ -129,6 +129,6 @@ jobs:
       run: |
         # Don't include `header-only` parent directory
         env -C header-only/ zip -r header-only.zip .
-    - uses: softprops/action-gh-release@v1
+    - uses: softprops/action-gh-release@v2
       with:
         files: header-only/header-only.zip

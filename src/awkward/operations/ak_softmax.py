@@ -7,6 +7,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import (
     HighLevelContext,
     maybe_highlevel_to_lowlevel,
+    maybe_posaxis,
 )
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -32,10 +33,9 @@ def softmax(
     Args:
         x: The data on which to compute the softmax (anything #ak.to_layout recognizes).
         axis (None or int): If None, combine all values from the array into
-            a single scalar result; if an int, group by that axis: `0` is the
-            outermost, `1` is the first level of nested lists, etc., and
-            negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            a single scalar result; if an int, group by that axis. Only `axis`
+            arguments equivalent to `-1` (softmax reduction along the innermost
+            dimension) is supported.
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -74,11 +74,17 @@ def softmax(
 
 
 def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
+    original_axis = axis
     axis = regularize_axis(axis)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout = ctx.unwrap(x, allow_record=False, primitive_policy="error")
     x = ctx.wrap(x_layout)
+
+    if maybe_posaxis(x_layout, axis, 1) != maybe_posaxis(x_layout, -1, 1):
+        raise NotImplementedError(
+            f"ak.softmax is only defined for axis=-1, but axis={original_axis}; see https://github.com/scikit-hep/awkward/issues/2760#issuecomment-2034749982"
+        )
 
     with np.errstate(invalid="ignore", divide="ignore"):
         expx = ufuncs.exp(x)
