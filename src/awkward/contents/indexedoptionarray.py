@@ -10,6 +10,7 @@ from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.indexedoptionmeta import IndexedOptionMeta
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -48,6 +49,7 @@ if TYPE_CHECKING:
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
+cupy = Cupy.instance()
 
 
 @final
@@ -1574,11 +1576,12 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
-        index = numpy.asarray(self._index.data, copy=True)
+        from awkward._connect.pyarrow import and_validbytes
+        index = cupy.asarray(self._index.data, copy=True)
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
         next = ak.contents.IndexedArray(ak.index.Index(index), self._content)
-        mask = ak._connect.pyarrow.and_validbytes(mask, this_validbytes)
+        mask = and_validbytes(mask, this_validbytes)
         return next._to_cudf(cudf, mask, len(next))
 
     def _to_backend_array(self, allow_missing, backend):
