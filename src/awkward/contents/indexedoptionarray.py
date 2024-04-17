@@ -1577,6 +1577,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         from awkward._connect.pyarrow import and_validbytes
+
         index = cupy.asarray(self._index.data, copy=True)
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
