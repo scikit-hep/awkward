@@ -14,6 +14,7 @@ from awkward._layout import maybe_posaxis
 from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes import to_nplike
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -1237,6 +1238,17 @@ class NumpyArray(NumpyMeta, Content):
             null_count=ak._connect.pyarrow.to_null_count(
                 validbytes, options["count_nulls"]
             ),
+        )
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        cupy = Cupy.instance()
+
+        assert self._backend.nplike.known_data
+        data = cupy.asarray(self._data)
+        mask = mask._to_cupy(cudf, None, length) if mask is not None else None
+        buf = cudf.core.buffer.as_buffer(data)
+        return cudf.core.column.numerical.NumericalColumn(
+            buf, data.dtype, mask=mask, size=length
         )
 
     def _to_backend_array(self, allow_missing, backend):
