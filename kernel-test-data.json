@@ -13816,6 +13816,57 @@
             ]
         },
         {
+            "name": "awkward_ListArray_getitem_next_range_carrylength",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "lenstarts": 0,
+                        "start": 0,
+                        "stop": 0,
+                        "step": 0
+                    },
+                    "outputs": {
+                        "carrylength": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 2, 2, 3, 5],
+                        "fromstops": [2, 2, 3, 5, 7],
+                        "lenstarts": 5,
+                        "start": 0,
+                        "stop": 3,
+                        "step": 1
+                    },
+                    "outputs": {
+                        "carrylength": [7]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 2, 2, 3, 5],
+                        "fromstops": [2, 2, 3, 5, 7],
+                        "lenstarts": 5,
+                        "start": 0,
+                        "stop": 2,
+                        "step": 0
+                    },
+                    "outputs": {
+                        "carrylength": [0]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_ListArray_getitem_next_array",
             "status": true,
             "tests": [
@@ -16316,6 +16367,68 @@
                         "nextcarry": [1, 3, 4],
                         "nextparents": [0, 1, 1],
                         "outindex": [-1, 0, -1, 1, 2]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_IndexedArray_local_preparenext",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "nextlen": 4,
+                        "nextparents": [0, 0, 0, 0],
+                        "parentslength": 5,
+                        "parents": [0, 0, 0, 0, 0],
+                        "starts": [0]
+                    },
+                    "outputs": {
+                        "tocarry": [0, 1, 2, 3, -1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "nextlen": 7,
+                        "nextparents": [0, 0, 0, 0, 1, 1, 1],
+                        "parentslength": 11,
+                        "parents": [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+                        "starts": [0, 2, 5]
+                    },
+                    "outputs": {
+                        "tocarry": [0, 1, 2, 3, -1, -1, 4, 5, 6, -1, -1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "nextlen": 0,
+                        "nextparents": [],
+                        "parentslength": 0,
+                        "parents": [],
+                        "starts": []
+                    },
+                    "outputs": {
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "nextlen": 9,
+                        "nextparents": [0, 0, 0, 2, 2, 3, 4, 4, 4],
+                        "parentslength": 17,
+                        "parents": [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4],
+                        "starts": [0, 5, 8, 11, 14]
+                    },
+                    "outputs": {
+                        "tocarry": [0, 1, 2, -1, -1, -1, -1, -1, 3, 4, -1, 5, -1, -1, 6, 7, 8]
                     }
                 }
             ]
