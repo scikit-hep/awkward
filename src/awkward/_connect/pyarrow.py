@@ -610,6 +610,11 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         validbits = buffers.pop(0)
         assert storage_type.num_fields == 0
 
+        if mask_parameters(awkwardarrow_type) is None and len(paarray) == 0:
+            # Special case: pyarrow does not support a non-option null type.
+            # So if we have a zero-length null-type arrow array, return this as EmptyArray.
+            return ak.contents.EmptyArray()
+
         # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
@@ -903,6 +908,9 @@ def is_revertable(akarray):
 
 
 def remove_optiontype(akarray):
+    if not is_revertable(akarray):
+        # In the case of the Unknown type, we get an EmptyArray at this point.
+        return akarray
     if callable(akarray.__pyarrow_original):
         return akarray.__pyarrow_original()
     else:
