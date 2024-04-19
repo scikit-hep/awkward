@@ -65,6 +65,9 @@ cppyy.include("rdataframe/jagged_builders.h")
 def from_rdataframe(
     data_frame, columns, highlevel, behavior, with_name, offsets_type, keep_order
 ):
+    if hasattr(data_frame, "proxied_node"):
+        raise NotImplementedError("Distributed RDataFrame is not yet supported")
+
     def cpp_builder_type(depth, data_type):
         if depth == 1:
             return f"awkward::LayoutBuilder::Numpy<{data_type}>>"
