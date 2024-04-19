@@ -639,7 +639,7 @@ def test_0184_even_more():
     ]
 
 
-def test_numpy_regular():
+def test_1586_numpy_regular():
     a1 = ak.Array(np.array([[0.0, 1.1], [2.2, 3.3]]))
     a2 = ak.from_json("[[4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]")
     cuda_a1 = ak.to_backend(a1, "cuda")
@@ -661,7 +661,7 @@ def test_numpy_regular():
     assert cuda_c.type == ArrayType(RegularType(NumpyType("float64"), 2), 5)
 
 
-def test_regular_option():
+def test_1586_regular_option():
     a1 = ak.from_json("[[0.0, 1.1], [2.2, 3.3]]")
     a2 = ak.from_json("[[4.4, 5.5], [6.6, 7.7], null, [8.8, 9.9]]")
     cuda_a1 = ak.to_backend(a1, "cuda")
@@ -683,7 +683,7 @@ def test_regular_option():
     assert cuda_c.type == ArrayType(OptionType(RegularType(NumpyType("float64"), 2)), 6)
 
 
-def test_regular_regular():
+def test_1586_regular_regular():
     a1 = ak.from_json("[[0.0, 1.1], [2.2, 3.3]]")
     a2 = ak.from_json("[[4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]")
     cuda_a1 = ak.to_backend(a1, "cuda")
@@ -704,7 +704,7 @@ def test_regular_regular():
     assert cuda_c.type == ArrayType(RegularType(NumpyType("float64"), 2), 5)
 
 
-def test_option_option():
+def test_1586_option_option():
     a1 = ak.from_json("[[0.0, 1.1], null, [2.2, 3.3]]")
     a2 = ak.from_json("[[4.4, 5.5], [6.6, 7.7], null, [8.8, 9.9]]")
     cuda_a1 = ak.to_backend(a1, "cuda")
@@ -726,7 +726,7 @@ def test_option_option():
     assert cuda_c.type == ArrayType(OptionType(RegularType(NumpyType("float64"), 2)), 7)
 
 
-def test_option_option_axis1():
+def test_1586_option_option_axis1():
     a1 = ak.from_json("[[0.0, 1.1], null, [2.2, 3.3]]")
     a2 = ak.from_json("[[4.4, 5.5, 6.6], null, [7.7, 8.8, 9.9]]")
     cuda_a1 = ak.to_backend(a1, "cuda")
@@ -743,7 +743,7 @@ def test_option_option_axis1():
     assert cuda_c.type == ArrayType(ListType(NumpyType("float64")), 3)
 
 
-def test_regular_option_axis1():
+def test_1586_regular_option_axis1():
     a1 = ak.from_json("[[0.0, 1.1], [7, 8], [2.2, 3.3]]")
     a2 = ak.from_json("[[4.4, 5.5, 6.6], null, [7.7, 8.8, 9.9]]")
     cuda_a1 = ak.to_backend(a1, "cuda")
@@ -760,7 +760,7 @@ def test_regular_option_axis1():
     assert cuda_c.type == ArrayType(ListType(NumpyType("float64")), 3)
 
 
-def test_option_regular():
+def test_1586_option_regular():
     a1 = ak.from_json("[[0.0, 1.1], null, [2.2, 3.3]]")
     a2 = ak.from_json("[[4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]")
     cuda_a1 = ak.to_backend(a1, "cuda")
@@ -780,7 +780,7 @@ def test_option_regular():
     assert cuda_c.type == ArrayType(OptionType(RegularType(NumpyType("float64"), 2)), 6)
 
 
-def test_option_regular_axis1():
+def test_1586_option_regular_axis1():
     a1 = ak.from_json("[[0.0, 1.1], null, [2.2, 3.3]]")
     a2 = ak.from_json("[[4.4, 5.5, 6.6], [7, 8, 9], [7.7, 8.8, 9.9]]")
     cuda_a1 = ak.to_backend(a1, "cuda")
@@ -797,11 +797,20 @@ def test_option_regular_axis1():
     assert cuda_c.type == ArrayType(ListType(NumpyType("float64")), 3)
 
 
-def test_regular_numpy():
+def test_1586_regular_numpy():
     a1 = ak.from_json("[[0.0, 1.1], [2.2, 3.3]]")
     a2 = ak.Array(np.array([[4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]))
-    a1 = ak.to_regular(a1, axis=1)
-    assert isinstance(a2.layout, ak.contents.NumpyArray)
-    c = ak.concatenate([a1, a2])
-    assert c.to_list() == [[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]
-    assert c.type == ArrayType(RegularType(NumpyType("float64"), 2), 5)
+    cuda_a1 = ak.to_backend(a1, "cuda")
+    cuda_a2 = ak.to_backend(a2, "cuda")
+
+    cuda_a1 = ak.to_regular(cuda_a1, axis=1)
+    assert isinstance(cuda_a2.layout, ak.contents.NumpyArray)
+    cuda_c = ak.concatenate([cuda_a1, cuda_a2])
+    assert cuda_c.to_list() == [
+        [0.0, 1.1],
+        [2.2, 3.3],
+        [4.4, 5.5],
+        [6.6, 7.7],
+        [8.8, 9.9],
+    ]
+    assert cuda_c.type == ArrayType(RegularType(NumpyType("float64"), 2), 5)
