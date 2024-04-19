@@ -238,7 +238,9 @@ class TypeTracerReport:
     def data_touched_in(self, node_ids: Collection[str]) -> list[str]:
         out: set[str] = set()
         for node_id in node_ids:
-            out.update(self._node_id_to_data_touched[node_id])
+            tmp = self._node_id_to_data_touched.get(node_id)
+            if tmp is not None:
+                out.update(tmp)
         return list(out)
 
 
