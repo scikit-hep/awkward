@@ -21689,15 +21689,30 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "tmpstarts": [0, 2, 3, 5, 7],
-                        "fromcounts": [2, 2, 3, 4, 5],
+                        "tmpstarts": [0, 5, 5, 6, 8],
+                        "fromcounts": [5, 0, 2, 3, 1],
                         "length": 5,
                         "tag": 1
                     },
                     "outputs": {
-                        "totags": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                        "toindex": [0, 1, 2, 4, 5, 7, 8, 11, 12, 13, 14, 15],
-                        "tmpstarts": [2, 4, 6, 9, 12]
+                        "totags": [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                        "toindex": [0, 1, 2, 3, 4, 5, 7, 8, 10],
+                        "tmpstarts": [5, 5, 7, 9, 9]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "tmpstarts": [0, 2, 4, 5, 7],
+                        "fromcounts": [2, 3, 2, 2, 0],
+                        "length": 5,
+                        "tag": 1
+                    },
+                    "outputs": {
+                        "totags": [1, 1, 1, 1, 1, 1, 1],
+                        "toindex": [0, 1, 2, 3, 5, 7, 8],
+                        "tmpstarts": [2, 5, 6, 7, 7]
                     }
                 }
             ]
