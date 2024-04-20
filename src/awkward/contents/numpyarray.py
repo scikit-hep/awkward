@@ -565,72 +565,46 @@ class NumpyArray(NumpyMeta, Content):
     def _subranges_equal(self, starts, stops, length, sorted=True):
         is_equal = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
 
-        tmp = self._backend.nplike.empty(length, dtype=self.dtype)
-        self._backend.maybe_kernel_error(
-            self._backend[
-                "awkward_NumpyArray_fill",
-                self.dtype.type,
-                self._data.dtype.type,
-            ](
-                tmp,
-                0,
-                self._data,
-                length,
-            )
-        )
-
-        if not sorted:
-            tmp_beg_ptr = ak.index.Index64.empty(
-                ak._util.kMaxLevels, nplike=self._backend.index_nplike
-            )
-            tmp_end_ptr = ak.index.Index64.empty(
-                ak._util.kMaxLevels, nplike=self._backend.index_nplike
-            )
-
-            assert (
-                tmp_beg_ptr.nplike is self._backend.index_nplike
-                and tmp_end_ptr.nplike is self._backend.index_nplike
-                and starts.nplike is self._backend.index_nplike
-                and stops.nplike is self._backend.index_nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_quick_sort",
-                    self.dtype.type,
-                    tmp_beg_ptr.dtype.type,
-                    tmp_end_ptr.dtype.type,
-                    starts.dtype.type,
-                    stops.dtype.type,
-                ](
-                    tmp,
-                    tmp_beg_ptr.data,
-                    tmp_end_ptr.data,
-                    starts.data,
-                    stops.data,
-                    True,
-                    starts.length,
-                    ak._util.kMaxLevels,
-                )
-            )
         assert (
             starts.nplike is self._backend.index_nplike
             and stops.nplike is self._backend.index_nplike
         )
-        self._backend.maybe_kernel_error(
-            self._backend[
-                "awkward_NumpyArray_subrange_equal",
-                self.dtype.type,
-                starts.dtype.type,
-                stops.dtype.type,
-                np.bool_,
-            ](
-                tmp,
-                starts.data,
-                stops.data,
-                starts.length,
-                is_equal.data,
+        if self.dtype == np.bool_:
+            self._backend.maybe_kernel_error(
+                self._backend[
+                    "awkward_NumpyArray_subrange_equal_bool",
+                    self.dtype.type,
+                    starts.dtype.type,
+                    stops.dtype.type,
+                    np.bool_,
+                ](
+                    self._backend.nplike.astype(
+                        self._data, dtype=self.dtype, copy=True
+                    ),
+                    starts.data,
+                    stops.data,
+                    starts.length,
+                    is_equal.data,
+                )
             )
-        )
+        else:
+            self._backend.maybe_kernel_error(
+                self._backend[
+                    "awkward_NumpyArray_subrange_equal",
+                    self.dtype.type,
+                    starts.dtype.type,
+                    stops.dtype.type,
+                    np.bool_,
+                ](
+                    self._backend.nplike.astype(
+                        self._data, dtype=self.dtype, copy=True
+                    ),
+                    starts.data,
+                    stops.data,
+                    starts.length,
+                    is_equal.data,
+                )
+            )
 
         return True if is_equal[0] == 1 else False
 
@@ -763,20 +737,10 @@ class NumpyArray(NumpyMeta, Content):
                     False,
                 )
             )
-
             nextlength = ak.index.Index64.empty(1, self._backend.index_nplike)
             assert nextlength.nplike is self._backend.index_nplike
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_unique",
-                    out.dtype.type,
-                    nextlength.dtype.type,
-                ](
-                    out,
-                    out.shape[0],
-                    nextlength.data,
-                )
-            )
+            out = self._backend.index_nplike.unique_values(out)
+            nextlength[0] = out.size
 
             return ak.contents.NumpyArray(
                 self._backend.nplike.asarray(out[: nextlength[0]], dtype=self.dtype),
@@ -858,20 +822,36 @@ class NumpyArray(NumpyMeta, Content):
                 offsets.nplike is self._backend.index_nplike
                 and nextoffsets.nplike is self._backend.index_nplike
             )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_unique_ranges",
-                    out.dtype.type,
-                    offsets.dtype.type,
-                    nextoffsets.dtype.type,
-                ](
-                    out,
-                    out.shape[0],
-                    offsets.data,
-                    offsets.length,
-                    nextoffsets.data,
+            if out.dtype == np.bool_:
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_unique_ranges_bool",
+                        out.dtype.type,
+                        offsets.dtype.type,
+                        nextoffsets.dtype.type,
+                    ](
+                        out,
+                        out.shape[0],
+                        offsets.data,
+                        offsets.length,
+                        nextoffsets.data,
+                    )
                 )
-            )
+            else:
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_unique_ranges",
+                        out.dtype.type,
+                        offsets.dtype.type,
+                        nextoffsets.dtype.type,
+                    ](
+                        out,
+                        out.shape[0],
+                        offsets.data,
+                        offsets.length,
+                        nextoffsets.data,
+                    )
+                )
 
             outoffsets = ak.index.Index64.empty(
                 starts.length + 1, self._backend.index_nplike

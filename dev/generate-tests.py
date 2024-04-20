@@ -519,7 +519,13 @@ def gencpukerneltests(specdict):
                         elif count == 2:
                             f.write(
                                 " " * 4
-                                + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
+                                + f"{arg}_ptr = (ctypes.POINTER(ctypes.c_{typename}) * len({arg}))()\n"
+                                + " " * 4
+                                + f"for i in range(len({arg})):\n"
+                                + " " * 8
+                                + f"{arg}_ptr[i] = (ctypes.c_{typename} * len({arg}[i]))(*{arg}[i])\n"
+                                + " " * 4
+                                + f"{arg} = {arg}_ptr\n"
                             )
                 f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
                 args = ""
@@ -634,7 +640,13 @@ def gencpuunittests(specdict):
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
+                                        + f"{arg}_ptr = (ctypes.POINTER(ctypes.c_{typename}) * len({arg}))()\n"
+                                        + " " * 4
+                                        + f"for i in range(len({arg})):\n"
+                                        + " " * 8
+                                        + f"{arg}_ptr[i] = (ctypes.c_{typename} * len({arg}[i]))(*{arg}[i])\n"
+                                        + " " * 4
+                                        + f"{arg} = {arg}_ptr\n"
                                     )
                         for arg, val in test["inputs"].items():
                             typename = remove_const(
@@ -657,7 +669,13 @@ def gencpuunittests(specdict):
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
+                                        + f"{arg}_ptr = (ctypes.POINTER(ctypes.c_{typename}) * len({arg}))()\n"
+                                        + " " * 4
+                                        + f"for i in range(len({arg})):\n"
+                                        + " " * 8
+                                        + f"{arg}_ptr[i] = (ctypes.c_{typename} * len({arg}[i]))(*{arg}[i])\n"
+                                        + " " * 4
+                                        + f"{arg} = {arg}_ptr\n"
                                     )
 
                         f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
@@ -704,7 +722,6 @@ cuda_kernels_tests = [
     "awkward_IndexedArray_numnull",
     "awkward_IndexedArray_numnull_parents",
     "awkward_IndexedArray_numnull_unique_64",
-    "awkward_NumpyArray_fill",
     "awkward_ListArray_fill",
     "awkward_IndexedArray_fill",
     "awkward_IndexedArray_fill_count",
@@ -749,6 +766,7 @@ cuda_kernels_tests = [
     "awkward_ListArray_localindex",
     "awkward_NumpyArray_pad_zero_to_length",
     "awkward_NumpyArray_reduce_adjust_starts_64",
+    "awkward_NumpyArray_rearrange_shifted",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_RegularArray_getitem_next_at",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
