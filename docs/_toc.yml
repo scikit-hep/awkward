@@ -72,7 +72,7 @@ subtrees:
                       - file: user-guide/how-to-examine-simple-slicing
                         title: "Simple slicing"
                       - file: user-guide/how-to-examine-checking-validity
-                        title: "Checking validity [todo]"
+                        title: "Checking validity"
 
               - file: user-guide/how-to-math
                 title: "Numerical math"
