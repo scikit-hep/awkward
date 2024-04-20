@@ -83,7 +83,7 @@ subtrees:
                       - file: user-guide/how-to-math-broadcasting
                         title: "Awkward broadcasting"
                       - file: user-guide/how-to-math-reducing
-                        title: "Reducing (sum/min/any/all) [todo]"
+                        title: "Reducing (sum/min/any/all)"
                       - file: user-guide/how-to-math-statistics
                         title: "Statistics (mean/var/std) [todo]"
                       - file: user-guide/how-to-math-argminmax
