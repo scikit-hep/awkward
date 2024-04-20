@@ -70,7 +70,7 @@ subtrees:
                       - file: user-guide/how-to-examine-list-fields
                         title: "Listing fields/keys/columns"
                       - file: user-guide/how-to-examine-simple-slicing
-                        title: "Simple slicing [todo]"
+                        title: "Simple slicing"
                       - file: user-guide/how-to-examine-checking-validity
                         title: "Checking validity [todo]"
 
