@@ -66,7 +66,7 @@ subtrees:
                       - file: user-guide/how-to-examine-type
                         title: "Data type"
                       - file: user-guide/how-to-examine-single-item
-                        title: "Single item detail [todo]"
+                        title: "Single item detail"
                       - file: user-guide/how-to-examine-list-fields
                         title: "Listing fields/keys/columns"
                       - file: user-guide/how-to-examine-simple-slicing
