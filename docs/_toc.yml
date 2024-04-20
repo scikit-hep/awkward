@@ -79,7 +79,7 @@ subtrees:
                 subtrees:
                   - entries:
                       - file: user-guide/how-to-math-numpy
-                        title: "NumPy functions [todo]"
+                        title: "NumPy functions"
                       - file: user-guide/how-to-math-broadcasting
                         title: "Awkward broadcasting [todo]"
                       - file: user-guide/how-to-math-reducing
