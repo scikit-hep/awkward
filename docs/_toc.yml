@@ -81,7 +81,7 @@ subtrees:
                       - file: user-guide/how-to-math-numpy
                         title: "NumPy functions"
                       - file: user-guide/how-to-math-broadcasting
-                        title: "Awkward broadcasting [todo]"
+                        title: "Awkward broadcasting"
                       - file: user-guide/how-to-math-reducing
                         title: "Reducing (sum/min/any/all) [todo]"
                       - file: user-guide/how-to-math-statistics
