@@ -67,7 +67,7 @@ def coverage(session):
     """
     session.install("-r", "requirements-test-full.txt", "./awkward-cpp", ".")
     session.run(
-        "pytest", "tests", "--cov=awkward", "--cov-report=xml", *session.posargs
+        "pytest", "--pdb", "tests", "--cov=awkward", "--cov-report=xml", *session.posargs
     )
 
 
