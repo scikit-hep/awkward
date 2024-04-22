@@ -128,20 +128,20 @@ jobs:
         run: pipx run nox -s diagnostics -- --check-spec-sorted
 
       - name: Test specification
-        run: python -m pytest -vv -rs awkward-cpp/tests-spec
+        run: python -m pytest --pdb -vv -rs awkward-cpp/tests-spec
 
       - name: Test specification with explicitly defined values
-        run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
+        run: python -m pytest --pdb -vv -rs awkward-cpp/tests-spec-explicit
 
       - name: Test CPU kernels
-        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
+        run: python -m pytest --pdb -vv -rs awkward-cpp/tests-cpu-kernels
 
       - name: Test CPU kernels with explicitly defined values
-        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels-explicit
+        run: python -m pytest --pdb -vv -rs awkward-cpp/tests-cpu-kernels-explicit
 
       - name: Test non-kernels
         run: >-
-          python -m pytest -vv -rs tests --cov=awkward --cov-report=term
+          python -m pytest --pdb -vv -rs tests --cov=awkward --cov-report=term
           --cov-report=xml
 
       - name: Upload Codecov results
