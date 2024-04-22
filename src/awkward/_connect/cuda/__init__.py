@@ -111,6 +111,8 @@ def fetch_template_specializations(kernel_dict):
         "awkward_RegularArray_reduce_nonlocal_preparenext",
         "awkward_UnionArray_nestedfill_tags_index",
         "awkward_NumpyArray_rearrange_shifted",
+        "awkward_UnionArray_flatten_length",
+        "awkward_UnionArray_flatten_combine",
         "awkward_UnionArray_project",
         "awkward_reduce_count_64",
         "awkward_reduce_sum",

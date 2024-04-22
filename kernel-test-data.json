@@ -15960,7 +15960,7 @@
         },
         {
             "name": "awkward_UnionArray_flatten_length",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
@@ -15988,7 +15988,6 @@
                         "total_length": [3]
                     }
                 },
-
                 {
                     "error": false,
                     "message": "",
@@ -16006,7 +16005,7 @@
         },
         {
             "name": "awkward_UnionArray_flatten_combine",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
