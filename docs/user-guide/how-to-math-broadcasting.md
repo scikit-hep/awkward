@@ -244,4 +244,4 @@ One way to control this is to ensure that all arrays involved in an expression h
 
 But it might also be the case that your arrays have lists of equal length, so they seem to be regular like a NumPy array, yet their data type says that the lists _can_ be variable-length. Perhaps you got the NumPy-like data from a source that doesn't enforce fixed lengths, such as Python lists ({func}`ak.from_iter`), JSON ({func}`ak.from_json`), or Parquet ({func}`ak.from_parquet`). Check the array's {func}`ak.type` to see whether all dimensions are ragged (`var *`) or regular (some number `*`).
 
-The {func}`ak.from_regular` and {func}`ak.to_regular` functions toggle ragged (`var *`) and regular (some number `*`) dimensions.
+The {func}`ak.from_regular` and {func}`ak.to_regular` functions toggle ragged (`var *`) and regular (some number `*`) dimensions, and {func}`ak.enforce_type` can be used to cast types like this in general.
