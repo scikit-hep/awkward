@@ -26,20 +26,6 @@ ERROR awkward_unique_ranges(
   return success();
 }
 
-ERROR awkward_unique_ranges_bool(
-  bool* toptr,
-  int64_t length,
-  const int64_t* fromoffsets,
-  int64_t offsetslength,
-  int64_t* tooffsets) {
-    return awkward_unique_ranges<bool>(
-      toptr,
-      length,
-      fromoffsets,
-      offsetslength,
-      tooffsets);
-}
-
 ERROR awkward_unique_ranges_int8(
   int8_t* toptr,
   int64_t length,
