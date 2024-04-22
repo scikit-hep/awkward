@@ -83,13 +83,17 @@ class EmptyArray(EmptyMeta, Content):
     """
 
     def __init__(self, *, parameters=None, backend=None):
-        if not (parameters is None or len(parameters) == 0):
-            raise TypeError(f"{type(self).__name__} cannot contain parameters")
+        self._enforce_parameters(parameters, type(self).__name__)
         if backend is None:
             backend = NumpyBackend.instance()
         self._init(parameters, backend)
+        # We validate but ignore passed-in parameters as EmptyArray is always a leaf.
+        self._set_own_parameters()
 
     form_cls: Final = EmptyForm
+    PARAMETERS_FOR_ARROW = {
+        "is_empty_array": True,  # used to add & remove nullability going to & from Arrow
+    }
 
     def copy(
         self,
@@ -97,8 +101,7 @@ class EmptyArray(EmptyMeta, Content):
         parameters=UNSET,
         backend=UNSET,
     ):
-        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
-            raise TypeError(f"{type(self).__name__} cannot contain parameters")
+        self._enforce_parameters(parameters, type(self).__name__)
         return EmptyArray(
             backend=self._backend if backend is UNSET else backend,
         )
@@ -109,10 +112,22 @@ class EmptyArray(EmptyMeta, Content):
     def __deepcopy__(self, memo):
         return self.copy()
 
+    def _set_own_parameters(self):
+        self._parameters = EmptyArray.PARAMETERS_FOR_ARROW
+
+    @classmethod
+    def _enforce_parameters(cls, parameters, instance_name):
+        "Requires that passed-in parameters have at most PARAMETERS_FOR_ARROW"
+        if parameters is UNSET or parameters is None:
+            return
+        if len(parameters) > 0 and parameters != cls.PARAMETERS_FOR_ARROW:
+            raise TypeError(
+                f"{instance_name} can only contain the is_empty_array parameter"
+            )
+
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):
-        if not (parameters is None or len(parameters) == 0):
-            raise TypeError(f"{cls.__name__} cannot contain parameters")
+        cls._enforce_parameters(parameters, cls.__name__)
         return cls(backend=backend)
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> EmptyForm:

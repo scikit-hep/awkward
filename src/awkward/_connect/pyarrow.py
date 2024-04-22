@@ -164,6 +164,12 @@ if pyarrow is not None:
         def num_fields(self):
             return self.storage_type.num_fields
 
+        def get_node_parameter(self, key):
+            params = self.node_parameters
+            if isinstance(params, dict):
+                return params.get(key)
+            return None
+
     pyarrow.register_extension_type(
         AwkwardArrowType(pyarrow.null(), None, None, None, None, None, None)
     )
@@ -610,9 +616,14 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         validbits = buffers.pop(0)
         assert storage_type.num_fields == 0
 
-        if mask_parameters(awkwardarrow_type) is None and len(paarray) == 0:
+        if (
+            awkwardarrow_type
+            and awkwardarrow_type.get_node_parameter("is_empty_array")
+            and len(paarray) == 0
+        ):
             # Special case: pyarrow does not support a non-option null type.
-            # So if we have a zero-length null-type arrow array, return this as EmptyArray.
+            # If the length is not zero, we're not on a leaf node and EmptyArray objects are
+            # nested within.
             return ak.contents.EmptyArray()
 
         # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
@@ -737,6 +748,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
         akcontent = form_popbuffers(a, b)
 
+        # Topher
         if not storage_type.value_field.nullable:
             # strip the dummy option-type node
             akcontent = form_remove_optiontype(akcontent)
