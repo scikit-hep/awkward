@@ -16000,6 +16000,19 @@
                     "outputs": {
                         "total_length": [7]
                     }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromtags": [1, 1, 1, 1],
+                        "fromindex": [0, 1, 2, 3],
+                        "length": 4,
+                        "offsetsraws": [[0, 1, 3, 5, 7], [1, 3, 5, 7, 9]]
+                    },
+                    "outputs": {
+                        "total_length": [8]
+                    }
                 }
             ]
         },

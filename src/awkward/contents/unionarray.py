@@ -878,12 +878,15 @@ class UnionArray(UnionMeta[Content], Content):
                 len(self._contents), dtype=np.intp
             )
             contents = []
-
             for i in range(len(self._contents)):
                 offsets, flattened = self._contents[i]._offsets_and_flattened(
                     axis, depth
                 )
-                offsetsraws[i] = offsets.ptr
+                if self._backend.nplike == Cupy.instance():
+                    offsetsraws_array = offsets.ptr
+                    offsetsraws[i] = offsetsraws_array.data.ptr
+                else:
+                    offsetsraws[i] = offsets.ptr
                 contents.append(flattened)
                 has_offsets = offsets.length != 0
 
@@ -927,7 +930,7 @@ class UnionArray(UnionMeta[Content], Content):
                             self._tags.data,
                             self._index.data,
                             self._tags.length,
-                            offsetsraws.data.ptr,
+                            offsetsraws,
                         )
                     )
 
@@ -987,7 +990,7 @@ class UnionArray(UnionMeta[Content], Content):
                             self._tags.data,
                             self._index.data,
                             self._tags.length,
-                            offsetsraws.data.ptr,
+                            offsetsraws,
                         )
                     )
                 return (

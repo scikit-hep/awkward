@@ -136,10 +136,10 @@ class Index:
 
     @property
     def ptr(self):
-        if self._nplike == Numpy.instance():
+        if self._nplike == Cupy.instance():
+            return self._nplike.array(self._data)
+        else:
             return self._data.ctypes.data
-        elif self._nplike == Cupy.instance():
-            return self._data.data.ptr
 
     @property
     def length(self) -> ShapeItem:

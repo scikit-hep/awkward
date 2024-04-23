@@ -4,9 +4,9 @@
 // def f(grid, block, args):
 //     (total_length, fromtags, fromindex, length, offsetsraws, invocation_index, err_code) = args
 //     scan_in_array = cupy.zeros(length, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_UnionArray_flatten_length_a', total_length.dtype, fromtags.dtype, fromindex.dtype, offsetsraws.dtype]))(grid, block, (total_length, fromtags, fromindex, length, offsetsraws, scan_in_array, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_UnionArray_flatten_length_a', total_length.dtype, fromtags.dtype, fromindex.dtype, offsetsraws[0].dtype]))(grid, block, (total_length, fromtags, fromindex, length, offsetsraws, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_UnionArray_flatten_length_b', total_length.dtype, fromtags.dtype, fromindex.dtype, offsetsraws.dtype]))(grid, block, (total_length, fromtags, fromindex, length, offsetsraws, scan_in_array, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_UnionArray_flatten_length_b', total_length.dtype, fromtags.dtype, fromindex.dtype, offsetsraws[0].dtype]))(grid, block, (total_length, fromtags, fromindex, length, offsetsraws, scan_in_array, invocation_index, err_code))
 // out["awkward_UnionArray_flatten_length_a", {dtype_specializations}] = None
 // out["awkward_UnionArray_flatten_length_b", {dtype_specializations}] = None
 // END PYTHON
@@ -49,5 +49,3 @@ awkward_UnionArray_flatten_length_b(
     *total_length = length > 0 ? scan_in_array[length - 1] : 0;
   }
 }
-
-// does not take 2d array as input

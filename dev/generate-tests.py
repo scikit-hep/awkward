@@ -1049,6 +1049,10 @@ def gencudaunittests(specdict):
                                     f.write(
                                         " " * 4
                                         + f"{arg} = cupy.array({val}, dtype=cupy.{typename})\n"
+                                        + " " * 4
+                                        + f"{arg}_array = [cupy.array(row, dtype=cupy.{typename}) for row in {arg}]\n"
+                                        + " " * 4
+                                        + f"{arg} = cupy.array([row.data.ptr for row in {arg}_array])\n"
                                     )
                         for arg, val in test["inputs"].items():
                             typename = remove_const(
@@ -1076,6 +1080,10 @@ def gencudaunittests(specdict):
                                     f.write(
                                         " " * 4
                                         + f"{arg} = cupy.array({val}, dtype=cupy.{typename})\n"
+                                        + " " * 4
+                                        + f"{arg}_array = [cupy.array(row, dtype=cupy.{typename}) for row in {arg}]\n"
+                                        + " " * 4
+                                        + f"{arg} = cupy.array([row.data.ptr for row in {arg}_array])\n"
                                     )
                         cuda_string = (
                             "funcC = cupy_backend['"
