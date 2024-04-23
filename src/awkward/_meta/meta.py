@@ -118,3 +118,7 @@ class Meta:
 
     def copy(self, *, parameters: JSONMapping | None | Sentinel = UNSET) -> Self:
         raise NotImplementedError
+
+    @classmethod
+    def _arrow_needs_option_type(cls):
+        return cls.is_option

@@ -87,13 +87,8 @@ class EmptyArray(EmptyMeta, Content):
         if backend is None:
             backend = NumpyBackend.instance()
         self._init(parameters, backend)
-        # We validate but ignore passed-in parameters as EmptyArray is always a leaf.
-        self._set_own_parameters()
 
     form_cls: Final = EmptyForm
-    PARAMETERS_FOR_ARROW = {
-        "is_empty_array": True,  # used to add & remove nullability going to & from Arrow
-    }
 
     def copy(
         self,
@@ -112,17 +107,11 @@ class EmptyArray(EmptyMeta, Content):
     def __deepcopy__(self, memo):
         return self.copy()
 
-    def _set_own_parameters(self):
-        self._parameters = EmptyArray.PARAMETERS_FOR_ARROW
-
     @classmethod
     def _enforce_parameters(cls, parameters, instance_name):
-        "Requires that passed-in parameters have at most PARAMETERS_FOR_ARROW"
-        if parameters is UNSET or parameters is None:
-            return
-        if len(parameters) > 0 and parameters != cls.PARAMETERS_FOR_ARROW:
+        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
             raise TypeError(
-                f"{instance_name} can only contain the is_empty_array parameter"
+                f"{instance_name} does not support parameters (given {parameters})"
             )
 
     @classmethod
@@ -379,11 +368,12 @@ class EmptyArray(EmptyMeta, Content):
         if options["emptyarray_to"] is None:
             return pyarrow.Array.from_buffers(
                 ak._connect.pyarrow.to_awkwardarrow_type(
-                    pyarrow.null(),
-                    options["extensionarray"],
-                    options["record_is_scalar"],
-                    mask_node,
-                    self,
+                    storage_type=pyarrow.null(),
+                    use_extensionarray=options["extensionarray"],
+                    record_is_scalar=options["record_is_scalar"],
+                    mask=mask_node,
+                    node=self,
+                    is_nonnullable_nulltype=True,
                 ),
                 length,
                 [
@@ -400,6 +390,10 @@ class EmptyArray(EmptyMeta, Content):
                 backend=self._backend,
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
+    @classmethod
+    def _arrow_needs_option_type(cls):
+        return True  # This overrides Meta._arrow_needs_option_type
 
     def _to_backend_array(self, allow_missing, backend):
         return backend.nplike.empty(0, dtype=np.float64)

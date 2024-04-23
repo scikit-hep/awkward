@@ -1974,8 +1974,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
-                # Note: null Arrow arrays must be nullable
-                akcontent.is_option or isinstance(akcontent, ak.contents.EmptyArray)
+                akcontent._arrow_needs_option_type()
             )
 
             if issubclass(npoffsets.dtype.type, np.int32):
