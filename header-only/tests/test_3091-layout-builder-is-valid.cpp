@@ -52,7 +52,7 @@ test_Indexed_categorical_invalid_index() {
   // index should be less than the length of content
   subbuilder.append("two");
   builder.append_index(9);
-  assert(builder.is_valid(error) == not BUG_FIXED);
+  assert(builder.is_valid(error) == !BUG_FIXED);
 }
 
 void
@@ -99,7 +99,7 @@ test_IndexedOption_categorical_invalid_index() {
   // index should be less than the length of content
   builder.append_valid(9);
   subbuilder.append("two");
-  assert(builder.is_valid(error) == not BUG_FIXED);
+  assert(builder.is_valid(error) == !BUG_FIXED);
 }
 
 int main(int /* argc */, char ** /* argv */) {
