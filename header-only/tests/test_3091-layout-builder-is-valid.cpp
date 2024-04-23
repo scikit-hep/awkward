@@ -1,9 +1,9 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-// if BUG_FIXED is false, the tests confirm the presence of the bugs in is_valid
-#define BUG_FIXED false
-
 #include "awkward/LayoutBuilder.h"
+
+// if BUG_FIXED is false, the tests confirm the presence of the bugs in is_valid
+const bool BUG_FIXED=0;
 
 template<class PRIMITIVE, class BUILDER>
 using IndexedBuilder = awkward::LayoutBuilder::Indexed<PRIMITIVE, BUILDER>;
