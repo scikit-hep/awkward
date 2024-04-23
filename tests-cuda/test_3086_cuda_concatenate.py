@@ -816,7 +816,7 @@ def test_1586_regular_numpy():
     assert cuda_c.type == ArrayType(RegularType(NumpyType("float64"), 2), 5)
 
 
-def test_record_record():
+def test_2663_broadcast_tuples_record_record():
     record_1 = ak.Array(
         [
             [
@@ -835,10 +835,11 @@ def test_record_record():
     )
     cuda_record_1 = ak.to_backend(record_1, "cuda")
     cuda_record_2 = ak.to_backend(record_2, "cuda")
-
     cuda_result = ak.concatenate([cuda_record_1, cuda_record_2], axis=-1)
+    print(to_list(cuda_result))
+
     assert ak.almost_equal(
-        cuda_result,
+        to_list(cuda_result),
         [
             [
                 {"0": [1, 5, 1, 1, 5, 1], "1": [2, 5, 1, 9, 10, 11]},
@@ -848,7 +849,7 @@ def test_record_record():
     )
 
 
-def test_tuple_tuple():
+def test_2663_broadcast_tuples_tuple_tuple():
     tuple_1 = ak.Array(
         [
             [
