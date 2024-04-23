@@ -1151,6 +1151,14 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Inserts an explicit value in the `index` buffer and
+      /// returns the reference to the builder content.
+      BUILDER&
+      append_index(size_t i) noexcept {
+        index_.append(i);
+        return content_;
+      }
+
       /// @brief Inserts `size` number indices in the `index` buffer
       /// and returns the reference to the builder content.
       ///
@@ -1339,6 +1347,15 @@ namespace awkward {
       append_valid() noexcept {
         last_valid_ = content_.length();
         index_.append(last_valid_);
+        return content_;
+      }
+
+      /// @brief Inserts an explicit value in the `index` buffer and
+      /// returns the reference to the builder content.
+      BUILDER&
+      append_valid(size_t i) noexcept {
+        last_valid_ = content_.length();
+        index_.append(i);
         return content_;
       }
 
