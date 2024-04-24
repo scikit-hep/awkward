@@ -878,11 +878,13 @@ class UnionArray(UnionMeta[Content], Content):
             )
             contents = []
 
+            keep_offsets = []
             for i in range(len(self._contents)):
                 offsets, flattened = self._contents[i]._offsets_and_flattened(
                     axis, depth
                 )
                 offsetsraws[i] = offsets.ptr
+                keep_offsets.append(offsets)
                 contents.append(flattened)
                 has_offsets = offsets.length != 0
 
