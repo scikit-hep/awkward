@@ -11,6 +11,7 @@ pyarrow = pytest.importorskip("pyarrow")
 pq = pytest.importorskip("pyarrow.parquet")
 
 import awkward as ak
+from awkward.contents import EmptyArray, RecordArray
 from awkward.operations import to_list
 from awkward.types import ListType, OptionType, UnknownType
 
@@ -47,7 +48,7 @@ def test_option_unknown():
 
 
 def test_toplevel_unknown():
-    unk_array = ak.Array([])  # type is unknown
+    unk_array = ak.Array([])
     assert unk_array.type.content == UnknownType()
 
     unk_array_arrow = ak.to_arrow(unk_array)
@@ -61,6 +62,28 @@ def test_toplevel_unknown():
     orig_array = ak.from_arrow(unk_array_arrow)
     assert orig_array.type == unk_array.type
     assert to_list(orig_array) == []
+
+
+def test_recordarray_with_unknowns():
+    a = RecordArray([EmptyArray()], ["x"], length=0)
+    arr = ak.to_arrow(a)
+    assert arr.type.storage_type.field(0).nullable
+    array_is_valid_within_parquet(arr)
+    # This is a strange, laboratory kind of object.
+    # It seems unlikely to be found in the wild.
+    # I'm not sure what other tests here would be meaningful.
+
+
+def test_table_with_unknowns():
+    a = RecordArray([EmptyArray()], ["x"], length=0)
+    # Again this is a strange one!
+    table = ak.to_arrow_table(a)
+    assert table.field(0).nullable
+    temp = io.BytesIO()
+    pq.write_table(table, temp)
+
+
+#### Helper method(s)
 
 
 def array_is_valid_within_parquet(arrow_array):
