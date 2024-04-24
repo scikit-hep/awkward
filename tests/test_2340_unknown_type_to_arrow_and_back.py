@@ -92,6 +92,8 @@ def test_table_with_unknowns():
 
 def test_regulararray_with_unknown():
     a = RegularArray(EmptyArray(), 0)
+    # RegularArray is helpful.
+    # But when it's given an EmptyArray to recycle, it becomes absolutely unhelpful.
     arw = ak.to_arrow(a)
     assert arw.type.storage_type.field(0).nullable
     assert to_list(arw) == []
