@@ -85,7 +85,7 @@ subtrees:
                       - file: user-guide/how-to-math-reducing
                         title: "Reducing (sum/min/any/all)"
                       - file: user-guide/how-to-math-statistics
-                        title: "Statistics (mean/var/std) [todo]"
+                        title: "Statistics (mean/var/std)"
                       - file: user-guide/how-to-math-argminmax
                         title: "Using argmin/argmax [todo]"
                       - file: user-guide/how-to-math-gpu
