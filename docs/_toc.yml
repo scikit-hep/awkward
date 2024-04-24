@@ -107,7 +107,7 @@ subtrees:
                 subtrees:
                   - entries:
                       - file: user-guide/how-to-filter-num
-                        title: "By number of items [todo]"
+                        title: "By number of items"
                       - file: user-guide/how-to-filter-cut-mask
                         title: "Cuts vs. masks [todo]"
                       - file: user-guide/how-to-filter-ragged
