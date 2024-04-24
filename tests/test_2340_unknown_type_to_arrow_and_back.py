@@ -11,7 +11,7 @@ pyarrow = pytest.importorskip("pyarrow")
 pq = pytest.importorskip("pyarrow.parquet")
 
 import awkward as ak
-from awkward.contents import EmptyArray, RecordArray
+from awkward.contents import EmptyArray, RecordArray, RegularArray, NumpyArray
 from awkward.operations import to_list
 from awkward.types import ListType, OptionType, UnknownType
 
@@ -65,7 +65,7 @@ def test_toplevel_unknown():
 
 
 def test_recordarray_with_unknowns():
-    a = RecordArray([EmptyArray()], ["x"], length=0)
+    a = RecordArray([EmptyArray(), NumpyArray([])], ["x", "y"], length=0)
     arr = ak.to_arrow(a)
     assert arr.type.storage_type.field(0).nullable
     array_is_valid_within_parquet(arr)
@@ -75,12 +75,19 @@ def test_recordarray_with_unknowns():
 
 
 def test_table_with_unknowns():
-    a = RecordArray([EmptyArray()], ["x"], length=0)
+    a = RecordArray([EmptyArray(), NumpyArray([1, 2])], ["x", "y"])
     # Again this is a strange one!
     table = ak.to_arrow_table(a)
     assert table.field(0).nullable
     temp = io.BytesIO()
     pq.write_table(table, temp)
+
+
+def test_regulararray_with_unknown():
+    a = RegularArray(EmptyArray(), 0)
+    arw = ak.to_arrow(a)
+    assert arw.type.storage_type.field(0).nullable
+    assert to_list(arw) == []
 
 
 #### Helper method(s)
