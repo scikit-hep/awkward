@@ -28,7 +28,7 @@ def test_bare_unknown():
     assert unk_array[0].type.content == UnknownType()
 
     unk_array_arrow = ak.to_arrow(unk_array)
-    # This array has one field, where we can git at pyarrow storage info
+    # This array has one field, where we can get at pyarrow storage info
     field = unk_array_arrow.type.storage_type.field(0)
     assert field.type.storage_type == pyarrow.null()
     assert field.nullable  # Must be nullable to be valid in Arrow
