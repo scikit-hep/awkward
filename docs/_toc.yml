@@ -87,9 +87,9 @@ subtrees:
                       - file: user-guide/how-to-math-statistics
                         title: "Statistics (mean/var/std)"
                       - file: user-guide/how-to-math-argminmax
-                        title: "Using argmin/argmax [todo]"
+                        title: "Min/max/sort one array by another"
                       - file: user-guide/how-to-math-gpu
-                        title: "On GPUs [todo]"
+                        title: "Compute on GPUs"
 
               - file: user-guide/how-to-strings
                 title: "Working with strings"
