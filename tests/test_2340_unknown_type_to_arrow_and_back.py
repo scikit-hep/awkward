@@ -29,9 +29,11 @@ def test_bare_unknown():
 
     unk_array_arrow = ak.to_arrow(unk_array)
     # This array has one field, where we can get at pyarrow storage info
-    field = unk_array_arrow.type.storage_type.field(0)
-    assert field.type.storage_type == pyarrow.null()
-    assert field.nullable  # Must be nullable to be valid in Arrow
+    if hasattr(unk_array_arrow.type.storage_type, "field"):
+        # We support older versions of pyarrow that lack a field method
+        field = unk_array_arrow.type.storage_type.field(0)
+        assert field.type.storage_type == pyarrow.null()
+        assert field.nullable  # Must be nullable to be valid in Arrow
     array_is_valid_within_parquet(unk_array_arrow)
 
     orig_array = ak.from_arrow(unk_array_arrow)
@@ -44,9 +46,10 @@ def test_option_unknown():
     assert unk_option_array.type.content == ListType(OptionType(UnknownType()))
 
     unk_opt_array_arrow = ak.to_arrow(unk_option_array)
-    field = unk_opt_array_arrow.type.storage_type.field(0)
-    assert field.type.storage_type == pyarrow.null()
-    assert field.nullable  # Must be nullable to be valid in Arrow
+    if hasattr(unk_opt_array_arrow.type.storage_type, "field"):
+        field = unk_opt_array_arrow.type.storage_type.field(0)
+        assert field.type.storage_type == pyarrow.null()
+        assert field.nullable  # Must be nullable to be valid in Arrow
     array_is_valid_within_parquet(unk_opt_array_arrow)
 
     orig_array = ak.from_arrow(unk_opt_array_arrow)
@@ -74,7 +77,8 @@ def test_toplevel_unknown():
 def test_recordarray_with_unknowns():
     a = RecordArray([EmptyArray(), NumpyArray([])], ["x", "y"], length=0)
     arw = ak.to_arrow(a)
-    assert arw.type.storage_type.field(0).nullable
+    if hasattr(arw.type.storage_type, "field"):
+        assert arw.type.storage_type.field(0).nullable
     array_is_valid_within_parquet(arw)
     # This is a strange, laboratory kind of object.
     # It seems unlikely to be found in the wild.
@@ -95,7 +99,8 @@ def test_regulararray_with_unknown():
     # RegularArray is helpful.
     # But when it's given an EmptyArray to recycle, it becomes absolutely unhelpful.
     arw = ak.to_arrow(a)
-    assert arw.type.storage_type.field(0).nullable
+    if hasattr(arw.type.storage_type, "field"):
+        assert arw.type.storage_type.field(0).nullable
     assert to_list(arw) == []
     array_is_valid_within_parquet(arw)
 
@@ -105,21 +110,21 @@ def test_unionarray_with_unknown():
     # we can still exercise a code path this way.
     a = UnionArray(
         tags=ak.index.Index8(np.array([1, 1, 1], dtype=np.int8)),
+        # tags: none of the elements are, or could be, taken from the EmptyArray.
         index=ak.index.Index64(np.array([0, 1, 2], dtype=np.int64)),
         contents=[
             EmptyArray(),
             NumpyArray([10, 20, 30]),
         ],
     )
-    # None of the elements are, or could be, taken from the EmptyArray.
     assert to_list(a) == [10, 20, 30]
     arw = ak.to_arrow(a)
-    assert arw.type.storage_type.field(0).nullable
-    assert not arw.type.storage_type.field(1).nullable
+    if hasattr(arw.type.storage_type, "field"):
+        assert arw.type.storage_type.field(0).nullable
+        assert not arw.type.storage_type.field(1).nullable
     # array_is_valid_within_parquet(arw)  # This fails for unrelated reasons.
-    art = ak.from_arrow(
-        arw
-    )  # round-trip is okay but the UnionArray is lost. Separate issue?
+    art = ak.from_arrow(arw)
+    # round-trip is okay but the UnionArray is lost. Separate issue?
     assert to_list(art) == [10, 20, 30]
 
 
