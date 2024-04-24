@@ -746,7 +746,6 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
         akcontent = form_popbuffers(a, b)
 
-        # Topher
         if not storage_type.value_field.nullable:
             # strip the dummy option-type node
             akcontent = form_remove_optiontype(akcontent)
