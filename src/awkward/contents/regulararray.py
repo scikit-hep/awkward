@@ -1336,7 +1336,7 @@ class RegularArray(RegularMeta[Content], Content):
             )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
-                akcontent.is_option
+                akcontent._arrow_needs_option_type()
             )
 
             return pyarrow.Array.from_buffers(

@@ -7,13 +7,13 @@ import io
 
 import pytest
 
-pyarrow = pytest.importorskip("pyarrow")
-pq = pytest.importorskip("pyarrow.parquet")
-
 import awkward as ak
-from awkward.contents import EmptyArray, RecordArray, RegularArray, NumpyArray
+from awkward.contents import EmptyArray, NumpyArray, RecordArray, RegularArray
 from awkward.operations import to_list
 from awkward.types import ListType, OptionType, UnknownType
+
+pyarrow = pytest.importorskip("pyarrow")
+pq = pytest.importorskip("pyarrow.parquet")
 
 
 def test_bare_unknown():
