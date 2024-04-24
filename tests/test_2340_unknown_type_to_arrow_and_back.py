@@ -5,10 +5,17 @@ from __future__ import annotations
 
 import io
 
+import numpy as np
 import pytest
 
 import awkward as ak
-from awkward.contents import EmptyArray, NumpyArray, RecordArray, RegularArray
+from awkward.contents import (
+    EmptyArray,
+    NumpyArray,
+    RecordArray,
+    RegularArray,
+    UnionArray,
+)
 from awkward.operations import to_list
 from awkward.types import ListType, OptionType, UnknownType
 
@@ -66,9 +73,9 @@ def test_toplevel_unknown():
 
 def test_recordarray_with_unknowns():
     a = RecordArray([EmptyArray(), NumpyArray([])], ["x", "y"], length=0)
-    arr = ak.to_arrow(a)
-    assert arr.type.storage_type.field(0).nullable
-    array_is_valid_within_parquet(arr)
+    arw = ak.to_arrow(a)
+    assert arw.type.storage_type.field(0).nullable
+    array_is_valid_within_parquet(arw)
     # This is a strange, laboratory kind of object.
     # It seems unlikely to be found in the wild.
     # I'm not sure what other tests here would be meaningful.
@@ -88,6 +95,30 @@ def test_regulararray_with_unknown():
     arw = ak.to_arrow(a)
     assert arw.type.storage_type.field(0).nullable
     assert to_list(arw) == []
+    array_is_valid_within_parquet(arw)
+
+
+def test_unionarray_with_unknown():
+    # Although a UnionArray with an EmptyArray content type has no application,
+    # we can still exercise a code path this way.
+    a = UnionArray(
+        tags=ak.index.Index8(np.array([1, 1, 1], dtype=np.int8)),
+        index=ak.index.Index64(np.array([0, 1, 2], dtype=np.int64)),
+        contents=[
+            EmptyArray(),
+            NumpyArray([10, 20, 30]),
+        ],
+    )
+    # None of the elements are, or could be, taken from the EmptyArray.
+    assert to_list(a) == [10, 20, 30]
+    arw = ak.to_arrow(a)
+    assert arw.type.storage_type.field(0).nullable
+    assert not arw.type.storage_type.field(1).nullable
+    # array_is_valid_within_parquet(arw)  # This fails for unrelated reasons.
+    art = ak.from_arrow(
+        arw
+    )  # round-trip is okay but the UnionArray is lost. Separate issue?
+    assert to_list(art) == [10, 20, 30]
 
 
 #### Helper method(s)
