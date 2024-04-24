@@ -89,7 +89,7 @@ subtrees:
                       - file: user-guide/how-to-math-argminmax
                         title: "Min/max/sort one array by another"
                       - file: user-guide/how-to-math-gpu
-                        title: "Compute on GPUs"
+                        title: "Awkward Arrays on GPUs"
 
               - file: user-guide/how-to-strings
                 title: "Working with strings"
