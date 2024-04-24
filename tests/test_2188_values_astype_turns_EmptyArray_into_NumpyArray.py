@@ -18,8 +18,6 @@ def test():
 
     assert b.tolist() == []
     assert str(b.type) == "0 * uint16"
-    # TODO: b.type is "uint16[parameters={"is_empty_array": true}]'"
-    #       Is that bad? If not, can we be more graceful here?
 
     c = ak.values_astype(a, np.uint16, including_unknown=False)
 
