@@ -14,7 +14,7 @@ def backend(*arrays):
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
 
-    Returns the names of the backend used by `arrays`. This name may be
+    Returns the name of the backend used by `arrays`. This name may be
 
     * `"cpu"` for arrays backed by NumPy;
     * `"cuda"` for arrays backed by CuPy;

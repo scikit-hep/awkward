@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import math
 from functools import lru_cache
 
@@ -390,13 +391,25 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def unique_values(self, x: ArrayLikeT) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
-        return self._module.unique(
-            x,
-            return_counts=False,
-            return_index=False,
-            return_inverse=False,
-            equal_nan=False,
+        np_unique_accepts_equal_nan = (
+            "equal_nan" in inspect.signature(self._module.unique).parameters
         )
+
+        if np_unique_accepts_equal_nan:
+            return self._module.unique(
+                x,
+                return_counts=False,
+                return_index=False,
+                return_inverse=False,
+                equal_nan=False,
+            )
+        else:
+            return self._module.unique(
+                x,
+                return_counts=False,
+                return_index=False,
+                return_inverse=False,
+            )
 
     def unique_all(self, x: ArrayLikeT) -> UniqueAllResult:
         assert not isinstance(x, PlaceholderArray)

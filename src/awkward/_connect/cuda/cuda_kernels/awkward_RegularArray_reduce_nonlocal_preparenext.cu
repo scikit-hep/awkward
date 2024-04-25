@@ -3,37 +3,15 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (nextcarry, nextparents, parents, size, length, invocation_index, err_code) = args
-//     scan_in_array = cupy.zeros(length * size, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_RegularArray_reduce_nonlocal_preparenext_a', nextcarry.dtype, nextparents.dtype, parents.dtype]))(grid, block, (nextcarry, nextparents, parents, size, length, scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.ones(length * size, dtype=cupy.int64)
 //     scan_in_array = cupy.cumsum(scan_in_array)
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_RegularArray_reduce_nonlocal_preparenext_b', nextcarry.dtype, nextparents.dtype, parents.dtype]))(grid, block, (nextcarry, nextparents, parents, size, length, scan_in_array, invocation_index, err_code))
-// out["awkward_RegularArray_reduce_nonlocal_preparenext_a", {dtype_specializations}] = None
-// out["awkward_RegularArray_reduce_nonlocal_preparenext_b", {dtype_specializations}] = None
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_RegularArray_reduce_nonlocal_preparenext', nextcarry.dtype, nextparents.dtype, parents.dtype]))(grid, block, (nextcarry, nextparents, parents, size, length, scan_in_array, invocation_index, err_code))
+// out["awkward_RegularArray_reduce_nonlocal_preparenext", {dtype_specializations}] = None
 // END PYTHON
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_RegularArray_reduce_nonlocal_preparenext_a(
-    T* nextcarry,
-    C* nextparents,
-    const U* parents,
-    int64_t size,
-    int64_t length,
-    int64_t* scan_in_array,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
-if (err_code[0] == NO_ERROR) {
-    int64_t thready_id = blockIdx.x * blockDim.x + threadIdx.x;
-    int64_t len = length * size;
-    if (thready_id < len) {
-      scan_in_array[thready_id] = 1;
-    }
-  }
-}
-
-template <typename T, typename C, typename U>
-__global__ void
-awkward_RegularArray_reduce_nonlocal_preparenext_b(
+awkward_RegularArray_reduce_nonlocal_preparenext(
     T* nextcarry,
     C* nextparents,
     const U* parents,
