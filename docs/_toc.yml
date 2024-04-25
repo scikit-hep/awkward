@@ -129,8 +129,6 @@ subtrees:
                         title: "Padding/clipping for machine learning"
                       - file: user-guide/how-to-restructure-concatenate
                         title: "Concatenating and interleaving"
-                      - file: user-guide/how-to-restructure-sort
-                        title: "Sorting [todo]"
 
               - file: user-guide/how-to-combinatorics
                 title: "Combinatorics"
