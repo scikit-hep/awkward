@@ -1739,8 +1739,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
         index = self._index.raw(numpy)
         not_missing = index >= 0
-
-        nextcontent = self._content._carry(ak.index.Index(index[not_missing]), False)
+        #  on numpy
+        content = ak.to_backend(self._content, "cpu", highlevel=False)
+        nextcontent = content._carry(ak.index.Index(index[not_missing]), False)
         out = nextcontent._to_list(behavior, json_conversions)
 
         for i, isvalid in enumerate(not_missing):

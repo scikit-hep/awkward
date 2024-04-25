@@ -670,7 +670,6 @@ def test_1586_regular_option():
     cuda_a1 = ak.to_regular(cuda_a1, axis=1)
     cuda_a2 = ak.to_regular(cuda_a2, axis=1)
     cuda_c = ak.concatenate([cuda_a1, cuda_a2])
-    print("c\n")
 
     assert cuda_c.to_list() == [
         [0.0, 1.1],
@@ -836,7 +835,6 @@ def test_2663_broadcast_tuples_record_record():
     cuda_record_1 = ak.to_backend(record_1, "cuda")
     cuda_record_2 = ak.to_backend(record_2, "cuda")
     cuda_result = ak.concatenate([cuda_record_1, cuda_record_2], axis=-1)
-    print(to_list(cuda_result))
 
     assert ak.almost_equal(
         to_list(cuda_result),
