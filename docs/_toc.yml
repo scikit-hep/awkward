@@ -109,7 +109,7 @@ subtrees:
                       - file: user-guide/how-to-filter-num
                         title: "By number of items"
                       - file: user-guide/how-to-filter-cut-mask
-                        title: "Cuts vs. masks [todo]"
+                        title: "Cuts vs. masks"
                       - file: user-guide/how-to-filter-ragged
                         title: "Using ragged arrays"
                       - file: user-guide/how-to-filter-masked

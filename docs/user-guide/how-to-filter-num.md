@@ -87,4 +87,6 @@ ak.count(array, axis=1)
 ak.count(array, axis=2)   # equivalent to axis=-1 for this array
 ```
 
-{func}`ak.count` is a reducer, and it's meant to be used with other reducers, like {func}`ak.sum`, {func}`ak.max`, etc. (usually as a denominator).
+Also, {func}`ak.num` can be used on arrays that contain records, whereas {func}`ak.count` (like other reducers), can't.
+
+As a reducer, {func}`ak.count` is intended to be used in a mathematical formula with other reducers, like {func}`ak.sum`, {func}`ak.max`, etc. (usually as a denominator). Its `axis` behavior matches that of other reducers, which is important for the shapes of nested lists to align.
