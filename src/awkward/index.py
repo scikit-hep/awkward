@@ -137,7 +137,7 @@ class Index:
     @property
     def ptr(self):
         if self._nplike == Cupy.instance():
-            return self._nplike.array(self._data)
+            return self._data.data.ptr
         else:
             return self._data.ctypes.data
 
