@@ -83,7 +83,8 @@ class EmptyArray(EmptyMeta, Content):
     """
 
     def __init__(self, *, parameters=None, backend=None):
-        self._enforce_parameters(parameters, type(self).__name__)
+        if not (parameters is None or len(parameters) == 0):
+            raise TypeError(f"{type(self).__name__} cannot contain parameters")
         if backend is None:
             backend = NumpyBackend.instance()
         self._init(parameters, backend)
@@ -96,7 +97,8 @@ class EmptyArray(EmptyMeta, Content):
         parameters=UNSET,
         backend=UNSET,
     ):
-        self._enforce_parameters(parameters, type(self).__name__)
+        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
+            raise TypeError(f"{type(self).__name__} cannot contain parameters")
         return EmptyArray(
             backend=self._backend if backend is UNSET else backend,
         )
@@ -108,15 +110,9 @@ class EmptyArray(EmptyMeta, Content):
         return self.copy()
 
     @classmethod
-    def _enforce_parameters(cls, parameters, instance_name):
-        if not (parameters is UNSET or parameters is None or len(parameters) == 0):
-            raise TypeError(
-                f"{instance_name} does not support parameters (given {parameters})"
-            )
-
-    @classmethod
     def simplified(cls, *, parameters=None, backend=None):
-        cls._enforce_parameters(parameters, cls.__name__)
+        if not (parameters is None or len(parameters) == 0):
+            raise TypeError(f"{cls.__name__} cannot contain parameters")
         return cls(backend=backend)
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> EmptyForm:
