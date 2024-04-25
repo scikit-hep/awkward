@@ -123,8 +123,6 @@ subtrees:
                         title: "Zip/unzip and project"
                       - file: user-guide/how-to-restructure-add-fields
                         title: "Adding fields to records"
-                      - file: user-guide/how-to-restructure-rename-records
-                        title: "Renaming records [todo]"
                       - file: user-guide/how-to-restructure-flatten
                         title: "Flattening for plots"
                       - file: user-guide/how-to-restructure-pad
