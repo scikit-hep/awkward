@@ -146,9 +146,7 @@ subtrees:
                       - file: user-guide/how-to-use-in-numba-intro.md
                         title: "Introduction"
                       - file: user-guide/how-to-use-in-numba-features
-                        title: "Supported features [todo]"
-                      - file: user-guide/how-to-use-in-numba-arraybuilder
-                        title: "Building array output [todo]"
+                        title: "Supported features"
                       - file: user-guide/how-to-use-in-numba-cuda
                         title: "Working with CUDA"
 
