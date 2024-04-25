@@ -389,7 +389,7 @@ class EmptyArray(EmptyMeta, Content):
 
     @classmethod
     def _arrow_needs_option_type(cls):
-        return True  # This overrides Meta._arrow_needs_option_type
+        return True  # This overrides Content._arrow_needs_option_type
 
     def _to_backend_array(self, allow_missing, backend):
         return backend.nplike.empty(0, dtype=np.float64)
