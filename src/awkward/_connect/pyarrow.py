@@ -614,17 +614,18 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         validbits = buffers.pop(0)
         assert storage_type.num_fields == 0
 
+        empty_array = ak.contents.EmptyArray(
+            parameters=node_parameters(awkwardarrow_type)
+        )
         if awkwardarrow_type is not None and awkwardarrow_type._is_nonnullable_nulltype:
-            # Special case: pyarrow does not support a non-option null type.
-            # If the length is not zero, we're not on a leaf node and EmptyArray objects are
-            # nested within.
-            out = ak.contents.EmptyArray()
-            return revertable(out, out)
+            # Special case: pyarrow does not support a non-option null type,
+            # So we short-cut the Option wrapper when _is_nonnullable_nulltype is True.
+            return revertable(empty_array, empty_array)
 
         # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
-            ak.contents.EmptyArray(parameters=node_parameters(awkwardarrow_type)),
+            empty_array,
             parameters=mask_parameters(awkwardarrow_type),
         )
 
