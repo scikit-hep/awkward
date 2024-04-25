@@ -143,6 +143,8 @@ subtrees:
                 title: "Using arrays in Numba"
                 subtrees:
                   - entries:
+                      - file: user-guide/how-to-use-in-numba-intro.md
+                        title: "Introduction"
                       - file: user-guide/how-to-use-in-numba-features
                         title: "Supported features [todo]"
                       - file: user-guide/how-to-use-in-numba-arraybuilder
