@@ -137,7 +137,7 @@ subtrees:
                       - file: user-guide/how-to-combinatorics-cartesian-combinations
                         title: 'Cartesian and "n choose k"'
                       - file: user-guide/how-to-combinatorics-best-match
-                        title: "Best match between collections [todo]"
+                        title: "Best match between collections"
 
               - file: user-guide/how-to-use-in-numba
                 title: "Using arrays in Numba"
