@@ -135,7 +135,7 @@ subtrees:
                 subtrees:
                   - entries:
                       - file: user-guide/how-to-combinatorics-cartesian-combinations
-                        title: 'Cartesian and "n choose k" [todo]'
+                        title: 'Cartesian and "n choose k"'
                       - file: user-guide/how-to-combinatorics-best-match
                         title: "Best match between collections [todo]"
 
