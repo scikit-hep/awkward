@@ -373,7 +373,7 @@ class EmptyArray(EmptyMeta, Content):
                     record_is_scalar=options["record_is_scalar"],
                     mask=mask_node,
                     node=self,
-                    is_nonnullable_nulltype=True,
+                    is_nonnullable_nulltype=mask_node is None,
                 ),
                 length,
                 [

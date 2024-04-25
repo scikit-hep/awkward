@@ -49,12 +49,24 @@ def test_option_unknown():
     if hasattr(unk_opt_array_arrow.type.storage_type, "field"):
         field = unk_opt_array_arrow.type.storage_type.field(0)
         assert field.type.storage_type == pyarrow.null()
-        assert field.nullable  # Must be nullable to be valid in Arrow
+        assert field.nullable  # Nullable but this time it's because we're ?unknown
     array_is_valid_within_parquet(unk_opt_array_arrow)
 
     orig_array = ak.from_arrow(unk_opt_array_arrow)
     assert orig_array.type == unk_option_array.type
     assert to_list(orig_array) == [[None, None], []]
+
+    # This is different for ... reasons:
+    ua1 = ak.Array([[], [], [], [None]])[0:3]
+    assert ua1.type.content == ListType(OptionType(UnknownType()))
+    ua1a = ak.to_arrow(ua1)
+    if hasattr(ua1a.type.storage_type, "field"):
+        field = ua1a.type.storage_type.field(0)
+        assert field.type.storage_type == pyarrow.null()
+        assert field.nullable  # Like above, still nullable
+    ua1aa = ak.from_arrow(ua1a)
+    assert ua1aa.type.content == ListType(OptionType(UnknownType()))
+    assert len(ua1aa) == 3
 
 
 def test_toplevel_unknown():
@@ -72,6 +84,12 @@ def test_toplevel_unknown():
     orig_array = ak.from_arrow(unk_array_arrow)
     assert orig_array.type == unk_array.type
     assert to_list(orig_array) == []
+
+    ua2 = ak.Array([None])[0:0]  # This is a top-level Option<EmptyArray>
+    assert ua2.type.content == OptionType(UnknownType())
+    ua2a = ak.to_arrow(ua2)
+    ua2aa = ak.from_arrow(ua2a)
+    assert ua2aa.type.content == OptionType(UnknownType())
 
 
 def test_recordarray_with_unknowns():
