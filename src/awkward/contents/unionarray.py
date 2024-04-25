@@ -878,15 +878,14 @@ class UnionArray(UnionMeta[Content], Content):
                 len(self._contents), dtype=np.intp
             )
             contents = []
+
+            keep_offsets = []
             for i in range(len(self._contents)):
                 offsets, flattened = self._contents[i]._offsets_and_flattened(
                     axis, depth
                 )
-                if self._backend.nplike == Cupy.instance():
-                    offsetsraws_array = offsets.ptr
-                    offsetsraws[i] = offsetsraws_array.data.ptr
-                else:
-                    offsetsraws[i] = offsets.ptr
+                offsetsraws[i] = offsets.ptr
+                keep_offsets.append(offsets)
                 contents.append(flattened)
                 has_offsets = offsets.length != 0
 
