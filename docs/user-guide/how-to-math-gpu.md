@@ -136,4 +136,4 @@ type: 50000 * var * float64
 
 ## JIT-compilation in Numba
 
-Just as Awkward Arrays in main memory can be iterated over in functions that have been JIT-compiled by [Numba](https://numba.pydata.org/), Awkward Arrays on GPUs can be iterated over in functions JIT-compiled by `@numba.cuda.jit`. The same restrictions apply (iteration only; no `ak.*` functions); see [How to use Awkward Arrays in Numba's CUDA target](https://awkward-array.org/doc/main/user-guide/how-to-use-in-numba-cuda.html).
+Just as Awkward Arrays in main memory can be iterated over in functions that have been JIT-compiled by [Numba](https://numba.pydata.org/), Awkward Arrays on GPUs can be iterated over in functions JIT-compiled by `@numba.cuda.jit`. The same restrictions apply (iteration only; no `ak.*` functions); see {doc}`how-to-use-in-numba-cuda.md`.
