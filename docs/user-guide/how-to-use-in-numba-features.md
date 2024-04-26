@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.10.3
+    jupytext_version: 1.16.1
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -141,4 +141,54 @@ This ability to cast Awkward Arrays as NumPy arrays, and then use NumPy's ufuncs
 
 ## Creating new arrays with `ak.ArrayBuilder`
 
-TODO!
+Numba can create NumPy arrays inside a compiled function and return them as NumPy arrays in Python, but Awkward Arrays are more complex and this is not possible. (Aside from implementation, what would be the interface? Data in Numba's compiled context must be fully typed, and Awkward Array types are complex.)
+
+Instead, arrays can be built with {obj}`ak.ArrayBuilder`, which can be used in compiled contexts and discovers type dynamically. Each {obj}`ak.ArrayBuilder` must be instantiated outside of a compiled function and passed in, and then its {func}`ak.ArrayBuilder.snapshot` (which creates the {obj}`ak.Array`) must be called outside of the compiled function, like this:
+
+```{code-cell} ipython3
+@nb.jit
+def create_ragged_array(builder, n):
+    for i in range(n):
+        builder.begin_list()
+        for j in range(i):
+            builder.integer(j)
+        builder.end_list()
+    return builder
+```
+
+```{code-cell} ipython3
+builder = ak.ArrayBuilder()
+
+create_ragged_array(builder, 10)
+
+array = builder.snapshot()
+
+array
+```
+
+or, more succintly,
+
+```{code-cell} ipython3
+create_ragged_array(ak.ArrayBuilder(), 10).snapshot()
+```
+
+Note that we didn't need to specify that the type of the data would be `var * int64`; this was determined by the way that {obj}`ak.ArrayBuilder` was called: {func}`ak.ArrayBuilder.integer` was only ever called between {func}`ak.ArrayBuilder.begin_list` and {func}`ak.ArrayBuilder.end_list`, and hence the type is `var * int64`.
+
+Note that {obj}`ak.ArrayBuilder` can be used outside of compiled functions, too, so it can be tested interactively:
+
+```{code-cell} ipython3
+with builder.record():
+    builder.field("x").real(3.14)
+    with builder.field("y").list():
+        builder.string("one")
+        builder.string("two")
+        builder.string("three")
+```
+
+```{code-cell} ipython3
+builder.snapshot()
+```
+
+But the context managers, `with builder.record()` and `with builder.list()`, don't work in Numba-compiled functions because Numba does not yet support it as a language feature.
+
+## Overriding behavior with `ak.behavior`
