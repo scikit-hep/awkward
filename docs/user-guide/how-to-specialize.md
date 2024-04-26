@@ -11,8 +11,8 @@ kernelspec:
   name: python3
 ---
 
-Specialized behavior
-====================
+Special topics
+==============
 
 The user guide is a collection of "how to..." guides for common tasks. See the left side-bar (or bring it into view by clicking on the upper-left `≡`) to access the guides, grouped by topic.
 

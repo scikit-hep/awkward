@@ -193,4 +193,4 @@ But the context managers, `with builder.record()` and `with builder.list()`, don
 
 ## Overriding behavior with `ak.behavior`
 
-Just as {doc}`behaviors can be customized <how-to-specialize-subclass>` for Awkward Arrays in general, they can be customized in the compiled context as well. The way they're registered in {obj}`ak.behavior` is different, and one must write _lowered_ (compilable) code. See {doc}`how-to-specialize-in-numba` for details.
+Just as behaviors can be customized for Awkward Arrays in general, they can be customized in the compiled context as well. See the last section of the {obj}`ak.behavior` reference for details.

@@ -160,17 +160,9 @@ subtrees:
                         title: "JIT compiling operations with C++ in cppyy"
 
               - file: user-guide/how-to-specialize
-                title: "Specialized behavior"
+                title: "Special topics"
                 subtrees:
                   - entries:
-                      - file: user-guide/how-to-specialize-subclass
-                        title: "Subclassing Array/Record [todo]"
-                      - file: user-guide/how-to-specialize-override-numpy
-                        title: "Overriding NumPy functions [todo]"
-                      - file: user-guide/how-to-specialize-in-numba
-                        title: "In Numba [todo]"
-                      - file: user-guide/how-to-specialize-lorentz
-                        title: "For physics: Lorentz vectors [todo]"
                       - file: user-guide/how-to-specialize-differentiate-jax
                         title: "Differentiation using JAX"
 
