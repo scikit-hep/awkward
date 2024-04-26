@@ -130,7 +130,7 @@ def nanmin(
 
     # Implementation
     return _impl(
-        ak.operations.ak_nan_to_none._impl(array, False, None),
+        ak.operations.ak_nan_to_none._impl(array, False, None, None),
         axis,
         keepdims,
         initial,
@@ -159,6 +159,7 @@ def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior, at
 
 
 @ak._connect.numpy.implements("amin")
+@ak._connect.numpy.implements("min")
 def _nep_18_impl_amin(
     a,
     axis=None,

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import sys
 from collections.abc import Mapping
 
 import awkward as ak
 from awkward._typing import Any
+from awkward._util import STDOUT
 from awkward.types.type import Type
 
 
@@ -30,8 +30,14 @@ class ScalarType:
     def __str__(self) -> str:
         return "".join(self._str("", True))
 
-    def show(self, stream=sys.stdout):
-        stream.write("".join([*self._str("", False), "\n"]))
+    def show(self, stream=STDOUT):
+        out = "".join(self._str("", False))
+        if out is None:
+            return out
+        else:
+            if stream is STDOUT:
+                stream = STDOUT.stream
+            stream.write(out + "\n")
 
     def _str(self, indent: str, compact: bool) -> list[str]:
         return self._content._str(

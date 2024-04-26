@@ -193,7 +193,7 @@ ak.cartesian(
 )
 ```
 
-Names are for giving records [specialized behavior](how-to-specialize) through the {data}`ak.behavior` registry. These are like attaching methods to a class in the sense that all records with a particular name can be given Python properties and methods.
+Names are for giving records specialized behavior through the {data}`ak.behavior` registry (see the {data}`ak.behavior` reference documentation for details). These are like attaching methods to a class in the sense that all records with a particular name can be given Python properties and methods.
 
 ```{code-cell} ipython3
 class XYZRecord(ak.Record):
