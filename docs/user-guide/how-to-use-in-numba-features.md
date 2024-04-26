@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.1
+    jupytext_version: 1.10.3
 kernelspec:
-  display_name: Python 3 (ipykernel)
+  display_name: Python 3
   language: python
   name: python3
 ---
@@ -192,3 +192,5 @@ builder.snapshot()
 But the context managers, `with builder.record()` and `with builder.list()`, don't work in Numba-compiled functions because Numba does not yet support it as a language feature.
 
 ## Overriding behavior with `ak.behavior`
+
+Just as {doc}`behaviors can be customized <how-to-specialize-subclass>` for Awkward Arrays in general, they can be customized in the compiled context as well. The way they're registered in {obj}`ak.behavior` is different, and one must write _lowered_ (compilable) code. See {doc}`how-to-specialize-in-numba` for details.
