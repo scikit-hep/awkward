@@ -18,7 +18,7 @@ Using Awkward Array with Numba
 
 The array-oriented (NumPy-like) interface that Awkward Array provides is often more convenient than imperative code and it's always faster than pure Python. But sometimes it's less convenient than imperative code and it's always slower than C, C++, Julia, Rust, or other compiled code.
 
-* The matching problem described in [How to find the best match between two collections](https://awkward-array.org/doc/main/user-guide/how-to-combinatorics-best-match.html) is already rather complex—if a problem is more intricate than that, you may want to consider doing it in imperative code, so that you or anyone reading your code don't get lost in indices.
+* The matching problem described in {doc}`how-to-combinatorics-best-match` is already rather complex—if a problem is more intricate than that, you may want to consider doing it in imperative code, so that you or anyone reading your code don't get lost in indices.
 * Although all iterations over arrays in Awkward Array are precompiled, most operations involve several passes over the data, which are not cache-friendly and might exceed your working memory budget.
 
 For this reason, Awkward Arrays were made to be interchangeable with [Numba](https://numba.pydata.org/), a JIT-compiler for Python. Recently, JIT-compiled C++ and Julia have been added as well. Our intention is not to make you choose upfront whether to use array-oriented syntax or JIT-compiled code, but to mix them in the most convenient ways for each task.
@@ -123,4 +123,4 @@ Numba's JIT-compilation is
 * bad for working through type errors, as you would have in any compiled language (unlike pure Python),
 * bad for unboxing and boxing large non-array data when entering and exiting a compiled function.
 
-The [next section](https://awkward-array.org/doc/main/user-guide/how-to-use-in-numba-features.html) lists what you can and can't do with Awkward Arrays in Numba-compiled code.
+The {doc}`next section <how-to-use-in-numba-features>` lists what you can and can't do with Awkward Arrays in Numba-compiled code.

@@ -70,7 +70,7 @@ data[best_index]
 
 ## What happend?
 
-Following the logic for [reducers](https://awkward-array.org/doc/main/user-guide/how-to-math-reducing.html), the {func}`ak.argmin` function returns an array with one fewer dimension than the input: the `data` is an array of lists of records, but `best_index` is an array of integers. We want an array of lists of integers.
+Following the logic for {doc}`reducers <how-to-math-reducing>`, the {func}`ak.argmin` function returns an array with one fewer dimension than the input: the `data` is an array of lists of records, but `best_index` is an array of integers. We want an array of lists of integers.
 
 The `keepdims=True` parameter can ensure that the output has the same number of dimensions as the input:
 

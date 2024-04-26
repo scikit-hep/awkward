@@ -136,7 +136,7 @@ ak.concatenate([a[:, np.newaxis], b[:, np.newaxis]], axis=1)
 
 ## Differences from Pandas
 
-Concatenation in Awkward Array combines arrays lengthwise: by adding the lengths of the arrays or adding the lengths of lists within an array. It does not refer to adding fields to a record (that is, "adding columns to a table"). To add fields to a record, see {func}`ak.zip` or {func}`ak.Array.__setitem__` in [How to zip/unzip and project](https://awkward-array.org/doc/main/user-guide/how-to-restructure-zip-project.html) and [How to add fields](https://awkward-array.org/doc/main/user-guide/how-to-restructure-add-fields.html). This is important to note because [pandas.concat](https://pandas.pydata.org/docs/reference/api/pandas.concat.html) does both, depending on its `axis` argument (and there's no equivalent in NumPy).
+Concatenation in Awkward Array combines arrays lengthwise: by adding the lengths of the arrays or adding the lengths of lists within an array. It does not refer to adding fields to a record (that is, "adding columns to a table"). To add fields to a record, see {func}`ak.zip` or {func}`ak.Array.__setitem__` in {doc}`how to zip/unzip and project <how-to-restructure-zip-project>` and {doc}`how to add fields <how-to-restructure-add-fields>`. This is important to note because [pandas.concat](https://pandas.pydata.org/docs/reference/api/pandas.concat.html) does both, depending on its `axis` argument (and there's no equivalent in NumPy).
 
 Here's a table-like example of concatenation in Awkward Array:
 

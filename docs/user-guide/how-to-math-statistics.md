@@ -14,7 +14,7 @@ kernelspec:
 How to compute statistics on dimensions (mean/var/std)
 ======================================================
 
-Awkward Array provides several functions for statistical analysis that operate on ragged arrays. These are dimensional reducers, like {func}`ak.sum`, {func}`ak.min`, {func}`ak.any`, and {func}`ak.all` in the [previous section](https://awkward-array.org/doc/main/user-guide/how-to-math-reducing.html), but they compute quantities such as mean, variance, standard deviation, and higher moments, as well as functions for linear regression and correlation.
+Awkward Array provides several functions for statistical analysis that operate on ragged arrays. These are dimensional reducers, like {func}`ak.sum`, {func}`ak.min`, {func}`ak.any`, and {func}`ak.all` in the {doc}`previous section <how-to-math-reducing>`, but they compute quantities such as mean, variance, standard deviation, and higher moments, as well as functions for linear regression and correlation.
 
 ```{code-cell}
 import awkward as ak
@@ -25,7 +25,7 @@ import numpy as np
 
 ### Mean, variance, and standard deviation
 
-To compute the [mean](https://en.wikipedia.org/wiki/Mean), [variance](https://en.wikipedia.org/wiki/Variance), and [standard deviation](https://en.wikipedia.org/wiki/Standard_deviation) of an array, use {func}`ak.mean`, {func}`ak.var`, and {func}`ak.std`. Unlike the NumPy functions with the same names, these functions apply to arrays with variable-length dimensions and missing values (but not heterogeneous dimensionality or records; see [this part of the previous section](https://awkward-array.org/doc/main/user-guide/how-to-math-reducing.html#heterogeneous-data-and-records-cannot-be-reduced)).
+To compute the [mean](https://en.wikipedia.org/wiki/Mean), [variance](https://en.wikipedia.org/wiki/Variance), and [standard deviation](https://en.wikipedia.org/wiki/Standard_deviation) of an array, use {func}`ak.mean`, {func}`ak.var`, and {func}`ak.std`. Unlike the NumPy functions with the same names, these functions apply to arrays with variable-length dimensions and missing values (but not heterogeneous dimensionality or records; see the last section of {doc}`reducing <how-to-math-reducing>`.
 
 ```{code-cell}
 array = ak.Array([[0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])

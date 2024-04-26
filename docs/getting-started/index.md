@@ -437,7 +437,7 @@ which is the `record` that has `np.asarray(record.y).sum() == 10`. (One-dimensio
 
 Awkward Arrays are immutable inside of JIT-compiled functions, just as they are outside. To create new Awkward Arrays with Numba, use {obj}`ak.ArrayBuilder`.
 
-Awkward Arrays with {func}`ak.backend` equal to `"cuda"` can be passed to Numba functions on GPUs, compiled with `@nb.cuda.jit`. See [How to use Awkward Arrays in Numba's CUDA target](https://awkward-array.org/doc/main/user-guide/how-to-use-in-numba-cuda.html) for more.
+Awkward Arrays with {func}`ak.backend` equal to `"cuda"` can be passed to Numba functions on GPUs, compiled with `@nb.cuda.jit`. See {doc}`../user-guide/how-to-use-in-numba-cuda` for more.
 
 The choice between computing outside of a Numba JIT-compiled function and outside of one is an either/or choice between imperative style in Numba (only iteration is allowed, no `ak.*` functions or fancy slices) and array-oriented style outside (iteration is slow in Python; `ak.*` functions are encouraged).
 
@@ -488,7 +488,7 @@ Several array-constructing functions accept a `with_name` argument, including th
 :::::::{grid-item} 
 ::::::{dropdown} How would I write my own suite of functions, like Vector?
 
-Add new classes or functions to [ak.behavior](https://awkward-array.org/doc/main/reference/ak.behavior.html), which links record names to Python code.
+Add new classes or functions to {obj}`ak.behavior`, which links record names to Python code.
 
 Names are strings that can be saved in files or transferred across networks, but Python code is not always serializable.
 
@@ -533,7 +533,7 @@ The [dask-awkward project](https://github.com/dask-contrib/dask-awkward) intends
 
 [Uproot](https://uproot.readthedocs.io/) can read and write ROOT files, and works with Awkward Arrays by default.
 
-Also, {func}`ak.to_rdataframe` and {func}`ak.from_rdataframe` converts Awkward Arrays in memory to and from ROOT's [RDataFrame](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) for computations. See [How to convert to/from ROOT RDataFrame](https://awkward-array.org/doc/main/user-guide/how-to-convert-rdataframe.html) for details.
+Also, {func}`ak.to_rdataframe` and {func}`ak.from_rdataframe` converts Awkward Arrays in memory to and from ROOT's [RDataFrame](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) for computations. See {doc}`../user-guide/how-to-convert-rdataframe` for details.
 
 ::::::
 :::::::
@@ -543,9 +543,9 @@ Also, {func}`ak.to_rdataframe` and {func}`ak.from_rdataframe` converts Awkward A
 
 One method is to convert Awkward Arrays to or from ROOT's [RDataFrame](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) using {func}`ak.to_rdataframe` and {func}`ak.from_rdataframe`. RDataFrame supports computation in JIT-compiled C++.
 
-Another method is to pass Awkward Arrays into JIT-compiled C++ functions defined with [cppyy](https://cppyy.readthedocs.io/)'s [cppdef](https://cppyy.readthedocs.io/en/latest/toplevel.html#loading-c). This interface is similar to Numba, in that the JIT-compiled functions have arbitrary arguments and return values, rather than fitting into a pipeline like RDataFrame, but it also means that you need to set up the loop over entries manually and inside the compiled block. See [How to use Awkward Arrays in C++ with cppyy](https://awkward-array.org/doc/main/user-guide/how-to-use-in-cpp-cppyy.html) for details.
+Another method is to pass Awkward Arrays into JIT-compiled C++ functions defined with [cppyy](https://cppyy.readthedocs.io/)'s [cppdef](https://cppyy.readthedocs.io/en/latest/toplevel.html#loading-c). This interface is similar to Numba, in that the JIT-compiled functions have arbitrary arguments and return values, rather than fitting into a pipeline like RDataFrame, but it also means that you need to set up the loop over entries manually and inside the compiled block. See {doc}`../user-guide/how-to-use-in-cpp-cppyy` for details.
 
-If you are a library developer wishing to produce and/or consume Awkward Arrays in ahead-of-time compiled code (not JIT), like [fastjet](https://github.com/scikit-hep/fastjet), you'll want to use [LayoutBuilder](https://awkward-array.org/doc/main/user-guide/how-to-use-header-only-layoutbuilder.html), {func}`ak.from_buffers`/{func}`ak.to_buffers`, or both. LayoutBuilder constructs an append-only array object like {obj}`ak.ArrayBuilder`, but with statically typed array type in header-only C++ that can be integrated with CMake.
+If you are a library developer wishing to produce and/or consume Awkward Arrays in ahead-of-time compiled code (not JIT), like [fastjet](https://github.com/scikit-hep/fastjet), you'll want to use {doc}`LayoutBuilder <../user-guide/how-to-use-header-only-layoutbuilder>`, {func}`ak.from_buffers`/{func}`ak.to_buffers`, or both. LayoutBuilder constructs an append-only array object like {obj}`ak.ArrayBuilder`, but with statically typed array type in header-only C++ that can be integrated with CMake.
 
 ::::::
 :::::::
@@ -613,7 +613,7 @@ These pairs (or triples, etc.) are tuples, which are records without field names
 :::::::{grid-item} 
 ::::::{dropdown} Why don't my arrays broadcast as in NumPy?
 
-See [Awkward broadcasting](https://awkward-array.org/doc/main/user-guide/how-to-math-broadcasting.html#differences-from-numpy-broadcasting).
+See the last section of {doc}`../user-guide/how-to-math-broadcasting`.
 
 ::::::
 :::::::
