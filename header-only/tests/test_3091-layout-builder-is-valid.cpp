@@ -59,7 +59,7 @@ test_Indexed_categorical_invalid_index() {
 
 void
 test_IndexedOption_categorical() {
-  IndexedOptionBuilder<uint32_t, StringBuilder<double>> builder;
+  IndexedOptionBuilder<int32_t, StringBuilder<double>> builder;
   assert(builder.length() == 0);
   builder.set_parameters("\"__array__\": \"categorical\"");
 
@@ -83,7 +83,7 @@ test_IndexedOption_categorical() {
 
 void
 test_IndexedOption_categorical_invalid_index() {
-  IndexedOptionBuilder<uint32_t, StringBuilder<double>> builder;
+  IndexedOptionBuilder<int32_t, StringBuilder<double>> builder;
   assert(builder.length() == 0);
   builder.set_parameters("\"__array__\": \"categorical\"");
 
