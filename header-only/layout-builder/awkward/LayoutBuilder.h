@@ -2326,11 +2326,16 @@ namespace awkward {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
         std::vector<size_t> lengths = content_lengths(index_sequence);
-        for (size_t tag = 0; tag < contents_count_; tag++) {
-          if (lengths[tag] != last_valid_index_[tag] + 1) {
+        std::unique_ptr<INDEX[]> index_ptr(new INDEX[index_.length()]);
+        index_.concatenate(index_ptr.get());
+        std::unique_ptr<TAGS[]> tags_ptr(new TAGS[tags_.length()]);
+        tags_.concatenate(tags_ptr.get());
+        for (size_t i = 0; i < index_.length(); i++) {
+          if (index_ptr.get()[i] < 0 || index_ptr.get()[i] >= lengths[tags_ptr.get()[i]]) {
             std::stringstream out;
-            out << "Union node" << id_ << " has content length " << lengths[tag]
-                << " but index length " << last_valid_index_[tag] << "\n";
+            out << "Union node" << id_ << " has index " << index_ptr.get()[i]
+                << " at position " << i << " but content has length "
+                << lengths[tags_ptr.get()[i]] << "\n";
             error.append(out.str());
 
             return false;
