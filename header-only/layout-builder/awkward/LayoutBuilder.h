@@ -1434,17 +1434,22 @@ namespace awkward {
       /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
-        if (content_.length() != last_valid_ + 1) {
-          std::stringstream out;
-          out << "IndexedOption node" << id_ << " has content length "
-              << content_.length() << " but last valid index is " << last_valid_
-              << "\n";
-          error.append(out.str());
+        std::unique_ptr<PRIMITIVE[]> ptr(new PRIMITIVE[index_.length()]);
+        index_.concatenate(ptr.get());
+        // check that each element of index_ is  < content_.length()
+        PRIMITIVE content_length = (PRIMITIVE) content_.length();
+        for (size_t i = 0; i < index_.length(); i++) {
+          if (ptr.get()[i] >= content_length) {
+            std::stringstream out;
+            out << "IndexedOption node" << id_ << " has index " << ptr.get()[i]
+                << " at position " << i << " but content has length "
+                << content_length << "\n";
+            error.append(out.str());
 
-          return false;
-        } else {
-          return content_.is_valid(error);
+            return false;
+          }
         }
+        return content_.is_valid(error);
       }
 
       /// @brief Retrieves the names and sizes (in bytes) of the buffers used
