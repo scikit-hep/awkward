@@ -52,7 +52,9 @@ test_Indexed_categorical_invalid_index() {
   // index should be less than the length of content
   subbuilder.append("two");
   builder.append_index(9);
-  assert(builder.is_valid(error) == !BUG_FIXED);
+  bool assertion = builder.is_valid(error) == !BUG_FIXED;
+  std::cout << error << std::endl;
+  assert(assertion);
 }
 
 void
