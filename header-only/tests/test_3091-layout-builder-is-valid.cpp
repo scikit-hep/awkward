@@ -101,7 +101,9 @@ test_IndexedOption_categorical_invalid_index() {
   // index should be less than the length of content
   builder.append_valid(9);
   subbuilder.append("two");
-  assert(builder.is_valid(error) == !BUG_FIXED);
+  assertion = builder.is_valid(error) == !BUG_FIXED;
+  std::cout << error << std::endl;
+  assert(assertion);
 }
 
 int main(int /* argc */, char ** /* argv */) {
