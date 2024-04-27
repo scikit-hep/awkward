@@ -3,7 +3,7 @@
 #include "awkward/LayoutBuilder.h"
 
 // if BUG_FIXED is false, the tests confirm the presence of the bugs in is_valid
-const bool BUG_FIXED=0;
+const bool BUG_FIXED=1;
 
 template<class PRIMITIVE, class BUILDER>
 using IndexedBuilder = awkward::LayoutBuilder::Indexed<PRIMITIVE, BUILDER>;
