@@ -1121,7 +1121,8 @@ namespace awkward {
       /// buffer, using `AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS` for initializing the buffer.
       Indexed()
           : index_(
-                awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)) {
+                awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
+            max_index_(0) {
         size_t id = 0;
         set_id(id);
       }
@@ -1132,7 +1133,8 @@ namespace awkward {
       ///
       /// @param options Initial size configuration of a buffer.
       Indexed(const awkward::BuilderOptions& options)
-          : index_(awkward::GrowableBuffer<PRIMITIVE>(options)) {
+          : index_(awkward::GrowableBuffer<PRIMITIVE>(options)),
+            max_index_(0) {
         size_t id = 0;
         set_id(id);
       }
@@ -1156,6 +1158,9 @@ namespace awkward {
       BUILDER&
       append_index(size_t i) noexcept {
         index_.append(i);
+        if (i > max_index_) {
+          max_index_ = i;
+        }
         return content_;
       }
 
@@ -1197,6 +1202,7 @@ namespace awkward {
       /// of the builder.
       void
       clear() noexcept {
+        max_index_ = 0;
         index_.clear();
         content_.clear();
       }
@@ -1220,22 +1226,15 @@ namespace awkward {
       bool
       is_valid(std::string& error) const noexcept {
 
-        std::unique_ptr<PRIMITIVE[]> ptr(new PRIMITIVE[index_.length()]);
-        index_.concatenate(ptr.get());
-        // check that each element of index_ is >= 0 and < content_.length()
-        for (size_t i = 0; i < index_.length(); i++) {
-          if (ptr.get()[i] < 0 ||
-              ptr.get()[i] >= content_.length()) {
-            std::stringstream out;
-            out << "Indexed node" << id_ << " has index " << ptr.get()[i]
-                << " at position " << i << " but content has length "
-                << content_.length() << "\n";
-            error.append(out.str());
-
-            return false;
-          }
+        if (max_index_ >= content_.length()) {
+          std::stringstream out;
+          out << "Indexed node" << id_ << " has index " << max_index_
+              << " but content has length "
+              << content_.length() << "\n";
+          error.append(out.str());
+          return false;
         }
-          return content_.is_valid(error);
+        return content_.is_valid(error);
       }
 
       /// @brief Copies and concatenates all the accumulated data in each of the
@@ -1304,6 +1303,9 @@ namespace awkward {
 
       /// @brief Unique form ID.
       size_t id_;
+
+      /// @brief Keep track of maximum index value.
+      size_t max_index_;
     };
 
     /// @class IndexedOption
