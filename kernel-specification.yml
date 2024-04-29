@@ -1853,7 +1853,6 @@ kernels:
                   stop != kSliceNone,
                   length,
               )
-              print(regular_start, regular_stop)
               if step > 0:
                   j = regular_start
                   while j < regular_stop:
