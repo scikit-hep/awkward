@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.16.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -30,7 +30,6 @@ As seen in {doc}`how-to-create-records`, one of Awkward Array's most useful feat
 import awkward as ak
 import numpy as np
 
-
 records = ak.Array(
     [
         {"x": 0.014309631995020777, "y": 0.7077380205549498},
@@ -45,7 +44,11 @@ records = ak.Array(
 The type of an array gives an indication of the fields that it contains. We can see that the `records` array contains two fields `"x"` and `"y"`:
 
 ```{code-cell} ipython3
-records.type
+print(records.type)
+```
+
+```{code-cell} ipython3
+records.type.show()
 ```
 
 The {class}`ak.Array` object itself provides a convenient {attr}`ak.Array.fields` property that returns the list of field names
@@ -78,7 +81,7 @@ tuples = ak.Array(
 These look very similar to records, but the fields are un-named:
 
 ```{code-cell} ipython3
-tuples.type
+print(tuples.type)
 ```
 
 Despite this, the {func}`ak.fields` function, and {attr}`ak.Array.fields` property both return non-empty lists of strings when used to query a tuple array:

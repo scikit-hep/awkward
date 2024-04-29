@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.16.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -29,8 +29,12 @@ Our dataset is formatted as a 611 MB [Apache Parquet](https://parquet.apache.org
 Given that this file is so large, let's first look at the *metadata* with `ak.metadata_from_parquet` to see what we're working with:
 
 ```{code-cell} ipython3
-:tags: [hide-cell]
-
+---
+editable: true
+slideshow:
+  slide_type: ''
+tags: [hide-cell]
+---
 %config InteractiveShell.ast_node_interactivity = "last_expr_or_assign"
 ```
 
