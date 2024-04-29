@@ -1172,6 +1172,9 @@ namespace awkward {
       extend_index(size_t size) noexcept {
         size_t start = content_.length();
         size_t stop = start + size;
+        if (stop - 1 > max_index_) {
+          max_index_ = stop - 1;
+        }
         for (size_t i = start; i < stop; i++) {
           index_.append(i);
         }
@@ -1326,7 +1329,8 @@ namespace awkward {
       IndexedOption()
           : index_(
                 awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
-            last_valid_(-1) {
+            last_valid_(-1),
+            max_index_(0) {
         size_t id = 0;
         set_id(id);
       }
@@ -1338,7 +1342,8 @@ namespace awkward {
       /// @param options Initial size configuration of a buffer.
       IndexedOption(const awkward::BuilderOptions& options)
           : index_(awkward::GrowableBuffer<PRIMITIVE>(options)),
-            last_valid_(-1) {
+            last_valid_(-1),
+            max_index_(0) {
         size_t id = 0;
         set_id(id);
       }
@@ -1354,8 +1359,7 @@ namespace awkward {
       BUILDER&
       append_valid() noexcept {
         last_valid_ = content_.length();
-        index_.append(last_valid_);
-        return content_;
+        return append_valid(last_valid_)
       }
 
       /// @brief Inserts an explicit value in the `index` buffer and
@@ -1364,6 +1368,9 @@ namespace awkward {
       append_valid(size_t i) noexcept {
         last_valid_ = content_.length();
         index_.append(i);
+        if (i > max_index_) {
+          max_index_ = i;
+        }
         return content_;
       }
 
@@ -1376,6 +1383,7 @@ namespace awkward {
         size_t start = content_.length();
         size_t stop = start + size;
         last_valid_ = stop - 1;
+        max_index_ = stop - 1;
         for (size_t i = start; i < stop; i++) {
           index_.append(i);
         }
@@ -1532,6 +1540,9 @@ namespace awkward {
 
       /// @brief Last valid index.
       size_t last_valid_;
+
+      /// @brief Keep track of maximum index value.
+      size_t max_index_;
     };
 
     /// @class Unmasked
