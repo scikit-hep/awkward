@@ -26282,6 +26282,45 @@
                     "outputs": {
                         "toequal": [0]
                     }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "tmpptr": [0, 2, 2, 3, 5],
+                        "fromstarts": [0, 2, 3, 3],
+                        "fromstops": [2, 3, 3, 5],
+                        "length": 4
+                    },
+                    "outputs": {
+                        "toequal": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "tmpptr": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        "fromstarts": [0, 2, 4, 6, 8, 10],
+                        "fromstops": [2, 4, 6, 8, 10, 12],
+                        "length": 6
+                    },
+                    "outputs": {
+                        "toequal": [1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "tmpptr": [1, 1, 1, 1, 1, 1],
+                        "fromstarts": [2, 2, 2, 2, 2, 2],
+                        "fromstops": [4, 4, 4, 4, 4, 4],
+                        "length": 6
+                    },
+                    "outputs": {
+                        "toequal": [1]
+                    }
                 }
             ]
         },
@@ -26310,6 +26349,45 @@
                         "fromstarts": [0, 1, 3, 5],
                         "fromstops": [1, 3, 5, 7],
                         "length": 4
+                    },
+                    "outputs": {
+                        "toequal": [1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "tmpptr": [0, 2, 2, 3, 5],
+                        "fromstarts": [0, 2, 3, 3],
+                        "fromstops": [2, 3, 3, 5],
+                        "length": 4
+                    },
+                    "outputs": {
+                        "toequal": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "tmpptr": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        "fromstarts": [0, 2, 4, 6, 8, 10],
+                        "fromstops": [2, 4, 6, 8, 10, 12],
+                        "length": 6
+                    },
+                    "outputs": {
+                        "toequal": [1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "tmpptr": [1, 1, 1, 1, 1, 1],
+                        "fromstarts": [2, 2, 2, 2, 2, 2],
+                        "fromstops": [4, 4, 4, 4, 4, 4],
+                        "length": 6
                     },
                     "outputs": {
                         "toequal": [1]
