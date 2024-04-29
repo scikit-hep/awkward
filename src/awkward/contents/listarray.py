@@ -374,7 +374,6 @@ class ListArray(ListMeta[Content], Content):
             and self._starts.nplike is self._backend.index_nplike
             and self._stops.nplike is self._backend.index_nplike
         )
-
         self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_ListArray_compact_offsets",

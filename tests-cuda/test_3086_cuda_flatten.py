@@ -406,7 +406,13 @@ def test_flatten_UnionArray():
         [3.3, 3.3, 3.3],
         [[1]],
     ]
-
+    assert to_list(array[1:]) == [
+        [[3, 3, 3], [3, 3, 3], [3, 3, 3]],
+        [2.2, 2.2],
+        [[2, 2], [2, 2]],
+        [3.3, 3.3, 3.3],
+        [[1]],
+    ]
     assert ak.operations.to_list(ak.operations.flatten(array)) == [
         1.1,
         [3, 3, 3],

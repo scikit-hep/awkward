@@ -44,10 +44,6 @@ class Cupy(ArrayModuleNumpyLike):  # pylint: disable=too-many-ancestors
     def ndarray(self):
         return self._module.ndarray
 
-    @property
-    def array(self):
-        return self._module.array
-
     def frombuffer(
         self, buffer, *, dtype: DTypeLike | None = None, count: ShapeItem = -1
     ) -> ArrayLike:
