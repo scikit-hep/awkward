@@ -898,23 +898,7 @@ class UnionArray(UnionMeta[Content], Content):
                     and self._tags.nplike is self._backend.index_nplike
                     and self._index.nplike is self._backend.index_nplike
                 )
-                if self._backend.nplike == Cupy.instance():
-                    self._backend.maybe_kernel_error(
-                        self._backend[
-                            "awkward_UnionArray_flatten_length",
-                            total_length.dtype.type,
-                            self._tags.dtype.type,
-                            self._index.dtype.type,
-                            np.int64,
-                        ](
-                            total_length.data,
-                            self._tags.data,
-                            self._index.data,
-                            self._tags.length,
-                            offsetsraws,
-                        )
-                    )
-                else:
+                if self._backend.nplike == Numpy.instance():
                     self._backend.maybe_kernel_error(
                         self._backend[
                             "awkward_UnionArray_flatten_length",
@@ -930,6 +914,22 @@ class UnionArray(UnionMeta[Content], Content):
                             offsetsraws.ctypes.data_as(
                                 ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))
                             ),
+                        )
+                    )
+                elif self._backend.nplike == Cupy.instance():
+                    self._backend.maybe_kernel_error(
+                        self._backend[
+                            "awkward_UnionArray_flatten_length",
+                            total_length.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                            np.int64,
+                        ](
+                            total_length.data,
+                            self._tags.data,
+                            self._index.data,
+                            self._tags.length,
+                            offsetsraws,
                         )
                     )
 
@@ -950,27 +950,7 @@ class UnionArray(UnionMeta[Content], Content):
                     and self._tags.nplike is self._backend.index_nplike
                     and self._index.nplike is self._backend.index_nplike
                 )
-                if self._backend.nplike == Cupy.instance():
-                    self._backend.maybe_kernel_error(
-                        self._backend[
-                            "awkward_UnionArray_flatten_combine",
-                            totags.dtype.type,
-                            toindex.dtype.type,
-                            tooffsets.dtype.type,
-                            self._tags.dtype.type,
-                            self._index.dtype.type,
-                            np.int64,
-                        ](
-                            totags.data,
-                            toindex.data,
-                            tooffsets.data,
-                            self._tags.data,
-                            self._index.data,
-                            self._tags.length,
-                            offsetsraws,
-                        )
-                    )
-                else:
+                if self._backend.nplike == Numpy.instance():
                     self._backend.maybe_kernel_error(
                         self._backend[
                             "awkward_UnionArray_flatten_combine",
@@ -990,6 +970,26 @@ class UnionArray(UnionMeta[Content], Content):
                             offsetsraws.ctypes.data_as(
                                 ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))
                             ),
+                        )
+                    )
+                elif self._backend.nplike == Cupy.instance():
+                    self._backend.maybe_kernel_error(
+                        self._backend[
+                            "awkward_UnionArray_flatten_combine",
+                            totags.dtype.type,
+                            toindex.dtype.type,
+                            tooffsets.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                            np.int64,
+                        ](
+                            totags.data,
+                            toindex.data,
+                            tooffsets.data,
+                            self._tags.data,
+                            self._index.data,
+                            self._tags.length,
+                            offsetsraws,
                         )
                     )
                 return (
