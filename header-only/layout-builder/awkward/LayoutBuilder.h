@@ -1383,7 +1383,9 @@ namespace awkward {
         size_t start = content_.length();
         size_t stop = start + size;
         last_valid_ = stop - 1;
-        max_index_ = stop - 1;
+        if (last_valid_ > max_index_) {
+          max_index_ = last_valid_;
+        }
         for (size_t i = start; i < stop; i++) {
           index_.append(i);
         }
