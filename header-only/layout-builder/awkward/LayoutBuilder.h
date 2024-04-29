@@ -1446,20 +1446,14 @@ namespace awkward {
       /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
-        std::unique_ptr<PRIMITIVE[]> ptr(new PRIMITIVE[index_.length()]);
-        index_.concatenate(ptr.get());
-        // check that each element of index_ is  < content_.length()
-        PRIMITIVE content_length = (PRIMITIVE) content_.length();
-        for (size_t i = 0; i < index_.length(); i++) {
-          if (ptr.get()[i] >= content_length) {
-            std::stringstream out;
-            out << "IndexedOption node" << id_ << " has index " << ptr.get()[i]
-                << " at position " << i << " but content has length "
-                << content_length << "\n";
-            error.append(out.str());
+        if (max_index_ >= content_.length()) {
+          std::stringstream out;
+          out << "IndexedOption node" << id_ << " has index " << max_index_
+              << " but content has length "
+              << content_.length() << "\n";
+          error.append(out.str());
 
-            return false;
-          }
+          return false;
         }
         return content_.is_valid(error);
       }
