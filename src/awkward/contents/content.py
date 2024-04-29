@@ -1264,6 +1264,10 @@ class Content(Meta):
     def copy(self, *, parameters: JSONMapping | None = UNSET) -> Self:
         raise NotImplementedError
 
+    @classmethod
+    def _arrow_needs_option_type(cls):
+        return cls.is_option  # is_option is a class property of Meta
+
 
 @register_backend_lookup_factory
 def find_content_backend(obj: type):
