@@ -157,7 +157,7 @@ if pyarrow is not None:
                 metadata["node_parameters"],
                 metadata["record_is_tuple"],
                 metadata["record_is_scalar"],
-                is_nonnullable_nulltype=metadata["is_nonnullable_nulltype"],
+                is_nonnullable_nulltype=metadata.get("is_nonnullable_nulltype", False),
             )
 
         @property
