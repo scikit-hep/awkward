@@ -1359,7 +1359,7 @@ namespace awkward {
       BUILDER&
       append_valid() noexcept {
         last_valid_ = content_.length();
-        return append_valid(last_valid_)
+        return append_valid(last_valid_);
       }
 
       /// @brief Inserts an explicit value in the `index` buffer and
