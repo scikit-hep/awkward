@@ -996,7 +996,7 @@ class RegularArray(RegularMeta[Content], Content):
             )
             self._backend.maybe_kernel_error(
                 self._backend[
-                    "awkward_RegularArray_reduce_nonlocal_preparenext",
+                    "awkward_RegularArray_reduce_nonlocal_preparenext_64",
                     nextcarry.dtype.type,
                     nextparents.dtype.type,
                     parents.dtype.type,
@@ -1067,7 +1067,7 @@ class RegularArray(RegularMeta[Content], Content):
             assert nextparents.nplike is index_nplike
             self._backend.maybe_kernel_error(
                 self._backend[
-                    "awkward_RegularArray_reduce_local_nextparents",
+                    "awkward_RegularArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                 ](
                     nextparents.data,
