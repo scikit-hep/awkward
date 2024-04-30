@@ -878,11 +878,13 @@ class UnionArray(UnionMeta[Content], Content):
             )
             contents = []
 
+            keep_offsets = []
             for i in range(len(self._contents)):
                 offsets, flattened = self._contents[i]._offsets_and_flattened(
                     axis, depth
                 )
                 offsetsraws[i] = offsets.ptr
+                keep_offsets.append(offsets)
                 contents.append(flattened)
                 has_offsets = offsets.length != 0
 
@@ -1479,7 +1481,8 @@ class UnionArray(UnionMeta[Content], Content):
         types = pyarrow.union(
             [
                 pyarrow.field(str(i), values[i].type).with_nullable(
-                    mask_node is not None or self._contents[i].is_option
+                    mask_node is not None
+                    or self._contents[i]._arrow_needs_option_type()
                 )
                 for i in range(len(values))
             ],

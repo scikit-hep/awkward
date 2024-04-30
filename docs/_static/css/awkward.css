@@ -47,3 +47,7 @@ html[data-theme="dark"] .sd-card {
   margin-top: 0.15em;
   margin-bottom: 0.15em;
 }
+
+div.toctree-wrapper {
+  display: none;
+}

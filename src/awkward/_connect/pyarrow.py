@@ -89,6 +89,7 @@ if pyarrow is not None:
             node_parameters,
             record_is_tuple,
             record_is_scalar,
+            is_nonnullable_nulltype=False,
         ):
             self._mask_type = mask_type
             self._node_type = node_type
@@ -96,6 +97,7 @@ if pyarrow is not None:
             self._node_parameters = node_parameters
             self._record_is_tuple = record_is_tuple
             self._record_is_scalar = record_is_scalar
+            self._is_nonnullable_nulltype = is_nonnullable_nulltype
             super().__init__(storage_type, "awkward")
 
         def __str__(self):
@@ -140,6 +142,7 @@ if pyarrow is not None:
                     "node_parameters": self._node_parameters,
                     "record_is_tuple": self._record_is_tuple,
                     "record_is_scalar": self._record_is_scalar,
+                    "is_nonnullable_nulltype": self._is_nonnullable_nulltype,
                 }
             ).encode(errors="surrogatescape")
 
@@ -154,6 +157,7 @@ if pyarrow is not None:
                 metadata["node_parameters"],
                 metadata["record_is_tuple"],
                 metadata["record_is_scalar"],
+                is_nonnullable_nulltype=metadata.get("is_nonnullable_nulltype", False),
             )
 
         @property
@@ -610,10 +614,18 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         validbits = buffers.pop(0)
         assert storage_type.num_fields == 0
 
+        empty_array = ak.contents.EmptyArray(
+            parameters=node_parameters(awkwardarrow_type)
+        )
+        if awkwardarrow_type is not None and awkwardarrow_type._is_nonnullable_nulltype:
+            # Special case: pyarrow does not support a non-option null type,
+            # So we short-cut the Option wrapper when _is_nonnullable_nulltype is True.
+            return revertable(empty_array, empty_array)
+
         # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
-            ak.contents.EmptyArray(parameters=node_parameters(awkwardarrow_type)),
+            empty_array,
             parameters=mask_parameters(awkwardarrow_type),
         )
 
@@ -857,17 +869,25 @@ def form_popbuffers(awkwardarrow_type, storage_type):
 
 
 def to_awkwardarrow_type(
-    storage_type, use_extensionarray, record_is_scalar, mask, node
+    storage_type,
+    use_extensionarray,
+    record_is_scalar,
+    mask,
+    node,
+    is_nonnullable_nulltype=False,
 ):
     if use_extensionarray:
         return AwkwardArrowType(
-            storage_type,
-            direct_Content_subclass_name(mask),
-            direct_Content_subclass_name(node),
-            None if mask is None else mask.parameters,
-            None if node is None else node.parameters,
-            node.is_tuple if isinstance(node, ak.contents.RecordArray) else None,
-            record_is_scalar,
+            storage_type=storage_type,
+            mask_type=direct_Content_subclass_name(mask),
+            node_type=direct_Content_subclass_name(node),
+            mask_parameters=None if mask is None else mask.parameters,
+            node_parameters=None if node is None else node.parameters,
+            record_is_tuple=node.is_tuple
+            if isinstance(node, ak.contents.RecordArray)
+            else None,
+            record_is_scalar=record_is_scalar,
+            is_nonnullable_nulltype=is_nonnullable_nulltype,
         )
     else:
         return storage_type

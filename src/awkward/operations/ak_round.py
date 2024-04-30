@@ -13,6 +13,7 @@ __all__ = ("round",)
 np = NumpyMetadata.instance()
 
 
+@ak._connect.numpy.implements("around")
 @ak._connect.numpy.implements("round")
 @high_level_function()
 def round(
