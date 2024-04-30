@@ -5165,9 +5165,9 @@ kernels:
           for i in range(offsetslength - 1):
               sub_list = sorted(fromptr[offsets[i]:offsets[i+1]], reverse=not ascending)
               if stable:
-                  result.extend(sub_list)
+                  result += sub_list
               else:
-                  result.extend(sorted(sub_list, reverse=not ascending))
+                  result += sorted(sub_list, reverse=not ascending)
           for i in range(parentslength):
               toptr[i] = result[i]
     automatic-tests: false
