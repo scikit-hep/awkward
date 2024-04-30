@@ -5158,7 +5158,18 @@ kernels:
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_sort(
+          toptr, fromptr, length, offsets, offsetslength, parentslength, ascending, stable
+      ):
+          result = []
+          for i in range(offsetslength - 1):
+              sub_list = sorted(fromptr[offsets[i]:offsets[i+1]], reverse=not ascending)
+              if stable:
+                  result.extend(sub_list)
+              else:
+                  result.extend(sorted(sub_list, reverse=not ascending))
+          for i in range(parentslength):
+              toptr[i] = result[i]
     automatic-tests: false
 
   - name: awkward_unique_offsets
