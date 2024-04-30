@@ -5007,13 +5007,6 @@ kernels:
 
   - name: awkward_reduce_sum_bool_64
     specializations:
-      - name: awkward_reduce_sum_int64_bool_64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
-          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_int32_bool_64
         args:
           - {name: toptr, type: "List[int32_t]", dir: out}
@@ -5021,9 +5014,9 @@ kernels:
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_uint64_bool_64
+      - name: awkward_reduce_sum_int64_bool_64
         args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
@@ -5031,6 +5024,13 @@ kernels:
       - name: awkward_reduce_sum_uint32_bool_64
         args:
           - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_uint64_bool_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
           - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}

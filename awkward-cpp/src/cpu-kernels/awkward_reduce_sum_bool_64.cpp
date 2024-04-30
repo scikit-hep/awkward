@@ -20,19 +20,6 @@ ERROR awkward_reduce_sum_bool_64(
   return success();
 }
 
-ERROR awkward_reduce_sum_int64_bool_64(
-  int64_t* toptr,
-  const bool* fromptr,
-  const int64_t* parents,
-  int64_t lenparents,
-  int64_t outlength) {
-  return awkward_reduce_sum_bool_64<int64_t>(
-    toptr,
-    fromptr,
-    parents,
-    lenparents,
-    outlength);
-}
 ERROR awkward_reduce_sum_int32_bool_64(
   int32_t* toptr,
   const bool* fromptr,
@@ -46,13 +33,13 @@ ERROR awkward_reduce_sum_int32_bool_64(
     lenparents,
     outlength);
 }
-ERROR awkward_reduce_sum_uint64_bool_64(
-  uint64_t* toptr,
+ERROR awkward_reduce_sum_int64_bool_64(
+  int64_t* toptr,
   const bool* fromptr,
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  return awkward_reduce_sum_bool_64<uint64_t>(
+  return awkward_reduce_sum_bool_64<int64_t>(
     toptr,
     fromptr,
     parents,
@@ -66,6 +53,19 @@ ERROR awkward_reduce_sum_uint32_bool_64(
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_sum_bool_64<uint32_t>(
+    toptr,
+    fromptr,
+    parents,
+    lenparents,
+    outlength);
+}
+ERROR awkward_reduce_sum_uint64_bool_64(
+  uint64_t* toptr,
+  const bool* fromptr,
+  const int64_t* parents,
+  int64_t lenparents,
+  int64_t outlength) {
+  return awkward_reduce_sum_bool_64<uint64_t>(
     toptr,
     fromptr,
     parents,
