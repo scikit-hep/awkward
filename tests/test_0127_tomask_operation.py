@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 
@@ -750,6 +750,7 @@ def test_ByteMaskedArray_localindex():
         None,
         [[], [0, 1, 2]],
     ]
+
 
 @pytest.mark.skip(reason="Testing segfault")
 def test_ByteMaskedArray_combinations():

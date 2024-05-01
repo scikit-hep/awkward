@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 
@@ -196,6 +196,7 @@ def test_ListOffsetArray():
             (12.2, 12.2, 12.2),
         ],
     ]
+
 
 @pytest.mark.skip(reason="Testing segfault")
 def test_RegularArray():
