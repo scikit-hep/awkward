@@ -26245,8 +26245,7 @@
                     "inputs": {
                         "toptr": [],
                         "fromoffsets": [0],
-                        "offsetslength": 1,
-                        "length": 0
+                        "offsetslength": 1
                     },
                     "outputs": {
                         "toptr": [],
@@ -26259,8 +26258,7 @@
                     "inputs": {
                         "toptr": [1, 2],
                         "fromoffsets": [0, 2],
-                        "offsetslength": 2,
-                        "length": 2
+                        "offsetslength": 2
                     },
                     "outputs": {
                         "toptr": [1, 2],
@@ -26273,8 +26271,7 @@
                     "inputs": {
                         "toptr": [0, 1, 2, 3, 4, 5],
                         "fromoffsets": [0, 3, 5, 6],
-                        "offsetslength": 4,
-                        "length": 6
+                        "offsetslength": 4
                     },
                     "outputs": {
                         "toptr": [0, 1, 2, 3, 4, 5],
@@ -26287,8 +26284,7 @@
                     "inputs": {
                         "toptr": [3, 2, 1, 0],
                         "fromoffsets": [0, 0, 3, 3],
-                        "offsetslength": 4,
-                        "length": 4
+                        "offsetslength": 4
                     },
                     "outputs": {
                         "toptr": [3, 3, 1, 0],
@@ -26307,8 +26303,7 @@
                     "inputs": {
                         "toptr": [],
                         "fromoffsets": [0],
-                        "offsetslength": 1,
-                        "length": 1
+                        "offsetslength": 1
                     },
                     "outputs": {
                         "toptr": [],
@@ -26321,8 +26316,7 @@
                     "inputs": {
                         "toptr": [1, 1],
                         "fromoffsets": [0, 2],
-                        "offsetslength": 2,
-                        "length": 1
+                        "offsetslength": 2
                     },
                     "outputs": {
                         "toptr": [1, 1],
@@ -26335,8 +26329,7 @@
                     "inputs": {
                         "toptr": [0, 1, 1, 1, 1, 1],
                         "fromoffsets": [0, 3, 5, 6],
-                        "offsetslength": 4,
-                        "length": 6
+                        "offsetslength": 4
                     },
                     "outputs": {
                         "toptr": [0, 1, 1, 1, 1, 1],
@@ -26349,8 +26342,7 @@
                     "inputs": {
                         "toptr": [1, 1, 1, 0],
                         "fromoffsets": [0, 0, 3, 3],
-                        "offsetslength": 4,
-                        "length": 4
+                        "offsetslength": 4
                     },
                     "outputs": {
                         "toptr": [1, 1, 0, 0],

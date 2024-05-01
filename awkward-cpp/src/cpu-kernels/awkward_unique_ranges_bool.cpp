@@ -6,7 +6,6 @@
 
 ERROR awkward_unique_ranges_bool(
   bool* toptr,
-  int64_t /* length */,   // FIXME: this argument is not needed
   const int64_t* fromoffsets,
   int64_t offsetslength,
   int64_t* tooffsets) {
