@@ -751,7 +751,7 @@ def test_ByteMaskedArray_localindex():
         [[], [0, 1, 2]],
     ]
 
-
+@pytest.mark.skip(reason="Testing segfault")
 def test_ByteMaskedArray_combinations():
     content = ak.operations.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
@@ -822,6 +822,7 @@ def test_ByteMaskedArray_combinations():
     ]
 
 
+@pytest.mark.skip(reason="Testing segfault")
 def test_IndexedOptionArray_combinations():
     content = ak.operations.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],

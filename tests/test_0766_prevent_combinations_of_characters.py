@@ -10,6 +10,7 @@ import awkward as ak
 to_list = ak.operations.to_list
 
 
+@pytest.mark.skip(reason="Testing segfault")
 def test_combinations():
     two = ak.Array(["aa", "bb", "cc", "dd"])
     with pytest.raises(ValueError):

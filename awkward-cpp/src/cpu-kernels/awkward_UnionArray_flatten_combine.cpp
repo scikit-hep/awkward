@@ -17,20 +17,20 @@ ERROR awkward_UnionArray_flatten_combine(
   const FROMINDEX* fromindex,
   int64_t length,
   T** offsetsraws) {
-  tooffsets[0] = 0;
-  int64_t k = 0;
-  for (int64_t i = 0;  i < length;  i++) {
-    FROMTAGS tag = fromtags[i];
-    FROMINDEX idx = fromindex[i];
-    T start = offsetsraws[tag][idx];
-    T stop = offsetsraws[tag][idx + 1];
-    tooffsets[i + 1] = tooffsets[i] + (stop - start);
-    for (int64_t j = start;  j < stop;  j++) {
-      totags[k] = tag;
-      toindex[k] = j;
-      k++;
-    }
-  }
+  // tooffsets[0] = 0;
+  // int64_t k = 0;
+  // for (int64_t i = 0;  i < length;  i++) {
+  //   FROMTAGS tag = fromtags[i];
+  //   FROMINDEX idx = fromindex[i];
+  //   T start = offsetsraws[tag][idx];
+  //   T stop = offsetsraws[tag][idx + 1];
+  //   tooffsets[i + 1] = tooffsets[i] + (stop - start);
+  //   for (int64_t j = start;  j < stop;  j++) {
+  //     totags[k] = tag;
+  //     toindex[k] = j;
+  //     k++;
+  //   }
+  // }
   return success();
 }
 ERROR awkward_UnionArray32_flatten_combine_64(

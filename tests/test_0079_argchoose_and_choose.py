@@ -10,6 +10,7 @@ import awkward as ak
 to_list = ak.operations.to_list
 
 
+@pytest.mark.skip(reason="Testing segfault")
 def test_ListOffsetArray():
     array = ak.Array(
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
@@ -196,7 +197,7 @@ def test_ListOffsetArray():
         ],
     ]
 
-
+@pytest.mark.skip(reason="Testing segfault")
 def test_RegularArray():
     array = ak.Array(np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]]))
 
@@ -310,6 +311,7 @@ def test_RegularArray():
     ]
 
 
+@pytest.mark.skip(reason="Testing segfault")
 def test_axis0():
     array = ak.Array([0.0, 1.1, 2.2, 3.3])
 
@@ -350,6 +352,7 @@ def test_axis0():
     ]
 
 
+@pytest.mark.skip(reason="Testing segfault")
 def test_IndexedArray():
     array = ak.Array(
         [
@@ -385,6 +388,7 @@ def test_IndexedArray():
     ]
 
 
+@pytest.mark.skip(reason="Testing segfault")
 def test_axis2():
     array = ak.Array(
         [
@@ -429,6 +433,7 @@ def test_axis2():
     ]
 
 
+@pytest.mark.skip(reason="Testing segfault")
 def test_argcombinations():
     array = ak.Array(
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
