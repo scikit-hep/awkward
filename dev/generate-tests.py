@@ -611,7 +611,7 @@ def gencpuunittests(specdict):
     for spec in specdict.values():
         if (
             spec.templatized_kernel_name in list(unit_test_map.keys())
-            and spec.templatized_kernel_name not in exclude_list
+            and spec.name not in exclude_list
         ):
             func = "test_unit_cpu" + spec.name + ".py"
             num = 1
