@@ -1160,6 +1160,8 @@ namespace awkward {
         index_.append(i);
         if (i > max_index_) {
           max_index_ = i;
+        } else if (i < 0) {
+          max_index_ = UINTMAX_MAX;
         }
         return content_;
       }
