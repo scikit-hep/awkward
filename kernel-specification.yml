@@ -5005,7 +5005,7 @@ kernels:
     definition: |
     automatic-tests: false
 
-  - name: awkward_reduce_sum_bool_64
+  - name: awkward_reduce_sum_int_bool_64
     specializations:
       - name: awkward_reduce_sum_int32_bool_64
         args:
@@ -5037,7 +5037,7 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
-      def awkward_reduce_sum_bool_64(toptr, fromptr, parents, lenparents, outlength):
+      def awkward_reduce_sum_int_bool_64(toptr, fromptr, parents, lenparents, outlength):
           for i in range(outlength):
               toptr[i] = 0
           for i in range(lenparents):

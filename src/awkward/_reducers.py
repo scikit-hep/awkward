@@ -356,7 +356,7 @@ class Sum(KernelReducer):
                 assert parents.nplike is array.backend.index_nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
-                        "awkward_reduce_sum_bool_64",
+                        "awkward_reduce_sum_int_bool_64",
                         np.int64,
                         array.dtype.type,
                         parents.dtype.type,

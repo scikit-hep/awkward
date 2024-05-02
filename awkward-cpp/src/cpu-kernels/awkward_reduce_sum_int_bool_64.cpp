@@ -1,11 +1,11 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_reduce_sum_bool_64.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_reduce_sum_int_bool_64.cpp", line)
 
 #include "awkward/kernels.h"
 
 template <typename OUT>
-ERROR awkward_reduce_sum_bool_64(
+ERROR awkward_reduce_sum_int_bool_64(
   OUT* toptr,
   const bool* fromptr,
   const int64_t* parents,
@@ -26,7 +26,7 @@ ERROR awkward_reduce_sum_int32_bool_64(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  return awkward_reduce_sum_bool_64<int32_t>(
+  return awkward_reduce_sum_int_bool_64<int32_t>(
     toptr,
     fromptr,
     parents,
@@ -39,7 +39,7 @@ ERROR awkward_reduce_sum_int64_bool_64(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  return awkward_reduce_sum_bool_64<int64_t>(
+  return awkward_reduce_sum_int_bool_64<int64_t>(
     toptr,
     fromptr,
     parents,
@@ -52,7 +52,7 @@ ERROR awkward_reduce_sum_uint32_bool_64(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  return awkward_reduce_sum_bool_64<uint32_t>(
+  return awkward_reduce_sum_int_bool_64<uint32_t>(
     toptr,
     fromptr,
     parents,
@@ -65,7 +65,7 @@ ERROR awkward_reduce_sum_uint64_bool_64(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  return awkward_reduce_sum_bool_64<uint64_t>(
+  return awkward_reduce_sum_int_bool_64<uint64_t>(
     toptr,
     fromptr,
     parents,
