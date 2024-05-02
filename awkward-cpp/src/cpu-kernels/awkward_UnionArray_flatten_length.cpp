@@ -11,14 +11,14 @@ ERROR awkward_UnionArray_flatten_length(
   const FROMINDEX* fromindex,
   int64_t length,
   T** offsetsraws) {
-  // *total_length = 0;
-  // for (int64_t i = 0;  i < length;  i++) {
-  //   int64_t tag = (int64_t)fromtags[i];
-  //   int64_t idx = (int64_t)fromindex[i];
-  //   T start = offsetsraws[tag][idx];
-  //   T stop = offsetsraws[tag][idx + 1];
-  //   *total_length = *total_length + (int64_t)(stop - start);
-  // }
+  *total_length = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    int64_t tag = (int64_t)fromtags[i];
+    int64_t idx = (int64_t)fromindex[i];
+    T start = offsetsraws[tag][idx];
+    T stop = offsetsraws[tag][idx + 1];
+    *total_length = *total_length + (int64_t)(stop - start);
+  }
   return success();
 }
 ERROR awkward_UnionArray32_flatten_length_64(

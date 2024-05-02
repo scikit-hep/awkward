@@ -15,22 +15,22 @@ ERROR awkward_ListArray_combinations(
   const C* starts,
   const C* stops,
   int64_t length) {
-  // for (int64_t j = 0;  j < n;  j++) {
-  //   toindex[j] = 0;
-  // }
-  // for (int64_t i = 0;  i < length;  i++) {
-  //   int64_t start = (int64_t)starts[i];
-  //   int64_t stop = (int64_t)stops[i];
-  //   fromindex[0] = start;
-  //   awkward_ListArray_combinations_step_64(
-  //     tocarry,
-  //     toindex,
-  //     fromindex,
-  //     0,
-  //     stop,
-  //     n,
-  //     replacement);
-  // }
+  for (int64_t j = 0;  j < n;  j++) {
+    toindex[j] = 0;
+  }
+  for (int64_t i = 0;  i < length;  i++) {
+    int64_t start = (int64_t)starts[i];
+    int64_t stop = (int64_t)stops[i];
+    fromindex[0] = start;
+    awkward_ListArray_combinations_step_64(
+      tocarry,
+      toindex,
+      fromindex,
+      0,
+      stop,
+      n,
+      replacement);
+  }
   return success();
 }
 ERROR awkward_ListArray32_combinations_64(

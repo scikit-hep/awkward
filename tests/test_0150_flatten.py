@@ -322,7 +322,6 @@ def test_flatten_RecordArray():
     ]
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_flatten_UnionArray():
     content1 = ak.operations.from_iter(
         [[1.1], [2.2, 2.2], [3.3, 3.3, 3.3]], highlevel=False
