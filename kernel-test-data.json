@@ -24130,6 +24130,96 @@
             ]
         },
         {
+            "name": "awkward_reduce_sum_int32_bool_64",
+            "status": false,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [],
+                        "lenparents": 0,
+                        "outlength": 0,
+                        "parents": []
+                    },
+                    "outputs": {
+                        "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [0],
+                        "lenparents": 1,
+                        "outlength": 1,
+                        "parents": [0]
+                    },
+                    "outputs": {
+                        "toptr": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                        "lenparents": 15,
+                        "outlength": 10,
+                        "parents": [0, 5, 5, 1, 6, 6, 2, 7, 7, 3, 8, 8, 4, 9, 9]
+                    },
+                    "outputs": {
+                        "toptr": [0, 1, 1, 1, 1, 2, 2, 2, 2, 2]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_reduce_sum_int64_bool_64",
+            "status": false,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [],
+                        "lenparents": 0,
+                        "outlength": 0,
+                        "parents": []
+                    },
+                    "outputs": {
+                        "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [0],
+                        "lenparents": 1,
+                        "outlength": 1,
+                        "parents": [0]
+                    },
+                    "outputs": {
+                        "toptr": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                        "lenparents": 15,
+                        "outlength": 10,
+                        "parents": [0, 5, 5, 1, 6, 6, 2, 7, 7, 3, 8, 8, 4, 9, 9]
+                    },
+                    "outputs": {
+                        "toptr": [0, 1, 1, 1, 1, 2, 2, 2, 2, 2]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_reduce_sum",
             "status": false,
             "tests": [
