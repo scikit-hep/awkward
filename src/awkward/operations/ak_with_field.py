@@ -5,7 +5,6 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -14,7 +13,6 @@ from awkward._regularize import is_non_string_like_sequence
 __all__ = ("with_field",)
 
 np = NumpyMetadata.instance()
-cpu = NumpyBackend.instance()
 
 
 @high_level_function()

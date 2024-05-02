@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -13,7 +12,6 @@ from awkward.errors import AxisError
 __all__ = ("fill_none",)
 
 np = NumpyMetadata.instance()
-cpu = NumpyBackend.instance()
 
 
 @high_level_function()

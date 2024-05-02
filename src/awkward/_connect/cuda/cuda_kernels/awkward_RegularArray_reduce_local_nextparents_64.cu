@@ -5,13 +5,13 @@
 //     (nextparents, size, length, invocation_index, err_code) = args
 //     scan_in_array = cupy.ones(length * size, dtype=cupy.int64)
 //     scan_in_array = cupy.cumsum(scan_in_array)
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_RegularArray_reduce_local_nextparents', nextparents.dtype]))(grid, block, (nextparents, size, length, scan_in_array, invocation_index, err_code))
-// out["awkward_RegularArray_reduce_local_nextparents", {dtype_specializations}] = None
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_RegularArray_reduce_local_nextparents_64', nextparents.dtype]))(grid, block, (nextparents, size, length, scan_in_array, invocation_index, err_code))
+// out["awkward_RegularArray_reduce_local_nextparents_64", {dtype_specializations}] = None
 // END PYTHON
 
 template <typename T>
 __global__ void
-awkward_RegularArray_reduce_local_nextparents(
+awkward_RegularArray_reduce_local_nextparents_64(
     T* nextparents,
     int64_t size,
     int64_t length,

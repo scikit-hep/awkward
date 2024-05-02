@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes import ufuncs
@@ -12,7 +11,6 @@ from awkward._regularize import regularize_axis
 
 __all__ = ("linear_fit",)
 
-cpu = NumpyBackend.instance()
 np = NumpyMetadata.instance()
 
 

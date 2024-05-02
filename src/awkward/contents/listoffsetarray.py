@@ -680,7 +680,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                         regular_flathead.data,
                         advanced.data,
                         lenstarts,
-                        regular_flathead.length,
                         self._content.length,
                     ),
                     slicer=head,
@@ -769,7 +768,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                         self._offsets.data,
                         self._offsets.length,
                         inneroffsets.data,
-                        inneroffsets.length,
                     )
                 )
                 return (
