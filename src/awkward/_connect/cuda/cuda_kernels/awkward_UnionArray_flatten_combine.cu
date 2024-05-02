@@ -6,7 +6,6 @@
 //     scan_in_array_tooffsets = cupy.zeros(length + 1, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_UnionArray_flatten_combine_a', totags.dtype, toindex.dtype, tooffsets.dtype, fromtags.dtype, fromindex.dtype, offsetsraws[0].dtype]))(grid, block, (totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws, scan_in_array_tooffsets, invocation_index, err_code))
 //     scan_in_array_tooffsets = cupy.cumsum(scan_in_array_tooffsets)
-//     print(scan_in_array_tooffsets)
 //     cuda_kernel_templates.get_function(fetch_specialization(['awkward_UnionArray_flatten_combine_b', totags.dtype, toindex.dtype, tooffsets.dtype, fromtags.dtype, fromindex.dtype, offsetsraws[0].dtype]))(grid, block, (totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws, scan_in_array_tooffsets, invocation_index, err_code))
 // out["awkward_UnionArray_flatten_combine_a", {dtype_specializations}] = None
 // out["awkward_UnionArray_flatten_combine_b", {dtype_specializations}] = None
