@@ -2162,7 +2162,7 @@
             "awkward_ListOffsetArray_reduce_local_nextparents_64",
             "awkward_ListOffsetArray_reduce_local_outoffsets_64",
             "awkward_reduce_prod",
-            "awkward_reduce_sum_bool_64",
+            "awkward_reduce_sum_int64_bool_64",
             "awkward_reduce_prod_bool",
             "awkward_reduce_sum"
         ],
@@ -2173,7 +2173,7 @@
         "kernels": [
             "awkward_ListOffsetArray_reduce_local_nextparents_64",
             "awkward_ListOffsetArray_reduce_local_outoffsets_64",
-            "awkward_reduce_sum_bool_64",
+            "awkward_reduce_sum_int64_bool_64",
             "awkward_reduce_prod_bool"
         ],
         "status": false

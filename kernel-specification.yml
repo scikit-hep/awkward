@@ -5005,7 +5005,7 @@ kernels:
     definition: |
     automatic-tests: false
 
-  - name: awkward_reduce_sum_int_bool_64
+  - name: awkward_reduce_sum_int32_bool_64
     specializations:
       - name: awkward_reduce_sum_int32_bool_64
         args:
@@ -5014,6 +5014,17 @@ kernels:
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+      def awkward_reduce_sum_int32_bool_64(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i] = 0
+          for i in range(lenparents):
+              toptr[parents[i]] += fromptr[i] != 0
+    automatic-tests: true
+
+  - name: awkward_reduce_sum_int64_bool_64
+    specializations:
       - name: awkward_reduce_sum_int64_bool_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
@@ -5021,23 +5032,9 @@ kernels:
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_uint32_bool_64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
-          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_uint64_bool_64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
-          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
-      def awkward_reduce_sum_int_bool_64(toptr, fromptr, parents, lenparents, outlength):
+      def awkward_reduce_sum_int64_bool_64(toptr, fromptr, parents, lenparents, outlength):
           for i in range(outlength):
               toptr[i] = 0
           for i in range(lenparents):

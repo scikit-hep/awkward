@@ -352,12 +352,28 @@ class Sum(KernelReducer):
                 self._length_for_kernel(array.dtype.type, outlength),
                 dtype=self._promote_integer_rank(np.bool_),
             )
-            if result.dtype in (np.int64, np.uint64, np.int32, np.uint32):
+            if result.dtype in (np.int64, np.uint64):
                 assert parents.nplike is array.backend.index_nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
-                        "awkward_reduce_sum_int_bool_64",
+                        "awkward_reduce_sum_int64_bool_64",
                         np.int64,
+                        array.dtype.type,
+                        parents.dtype.type,
+                    ](
+                        result,
+                        array.data,
+                        parents.data,
+                        parents.length,
+                        outlength,
+                    )
+                )
+            elif result.dtype in (np.int32, np.uint32):
+                assert parents.nplike is array.backend.index_nplike
+                array.backend.maybe_kernel_error(
+                    array.backend[
+                        "awkward_reduce_sum_int32_bool_64",
+                        np.int32,
                         array.dtype.type,
                         parents.dtype.type,
                     ](

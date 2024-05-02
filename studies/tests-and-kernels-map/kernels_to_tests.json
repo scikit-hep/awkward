@@ -4528,7 +4528,7 @@
     "awkward_UnionArray_flatten_combine": [
         "test_0150_flatten.py::test_flatten_UnionArray"
     ],
-    "awkward_reduce_sum_int_bool_64": [
+    "awkward_reduce_sum_int64_bool_64": [
         "test_0115_generic_reducer_operation.py::test_sumprod_types",
         "test_0115_generic_reducer_operation.py::test_sumprod_types_FIXME"
     ],
