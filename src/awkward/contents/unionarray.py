@@ -1519,7 +1519,8 @@ class UnionArray(UnionMeta[Content], Content):
         types = pyarrow.union(
             [
                 pyarrow.field(str(i), values[i].type).with_nullable(
-                    mask_node is not None or self._contents[i].is_option
+                    mask_node is not None
+                    or self._contents[i]._arrow_needs_option_type()
                 )
                 for i in range(len(values))
             ],

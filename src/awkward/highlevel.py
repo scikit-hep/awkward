@@ -12,7 +12,6 @@ import itertools
 import keyword
 import pickle
 import re
-import sys
 from collections.abc import Iterable, Mapping, Sequence, Sized
 
 from awkward_cpp.lib import _ext
@@ -35,6 +34,7 @@ from awkward._pickle import (
 from awkward._prettyprint import Formatter
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
+from awkward._util import STDOUT
 
 __all__ = ("Array", "ArrayBuilder", "Record")
 
@@ -1337,7 +1337,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         limit_rows=20,
         limit_cols=80,
         type=False,
-        stream=sys.stdout,
+        stream=STDOUT,
         *,
         formatter=None,
         precision=3,
@@ -1380,6 +1380,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if stream is None:
             return out
         else:
+            if stream is STDOUT:
+                stream = STDOUT.stream
             stream.write(out + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
@@ -2202,7 +2204,7 @@ class Record(NDArrayOperatorsMixin):
         limit_rows=20,
         limit_cols=80,
         type=False,
-        stream=sys.stdout,
+        stream=STDOUT,
         *,
         formatter=None,
         precision=3,
@@ -2243,6 +2245,8 @@ class Record(NDArrayOperatorsMixin):
         if stream is None:
             return out
         else:
+            if stream is STDOUT:
+                stream = STDOUT.stream
             stream.write(out + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
@@ -2651,7 +2655,7 @@ class ArrayBuilder(Sized):
         limit_rows=20,
         limit_cols=80,
         type=False,
-        stream=sys.stdout,
+        stream=STDOUT,
         *,
         formatter=None,
         precision=3,

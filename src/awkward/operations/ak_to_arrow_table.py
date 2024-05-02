@@ -136,7 +136,7 @@ def _impl(
             # accounting for options above the record layout.
             arrow_fields.append(
                 pyarrow.field(name, arrow_arrays[-1].type).with_nullable(
-                    outer_field_content.is_option
+                    outer_field_content._arrow_needs_option_type()
                 )
             )
 
