@@ -1,13 +1,13 @@
 [build-system]
 requires = [
     "hatchling>=1.10.0",
-    "hatch-fancy-pypi-readme"
+    "hatch-fancy-pypi-readme",
+    "hatch-vcs"
 ]
 build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.6.3"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.8"
@@ -48,7 +48,8 @@ dependencies = [
     "fsspec>=2022.11.0"
 ]
 dynamic = [
-    "readme"
+    "readme",
+    "version"
 ]
 
 [project.entry-points.numba_extensions]
@@ -110,6 +111,9 @@ text = """
 path = "README.md"
 start-after = "<!-- end-logo -->"
 end-before = "<!-- readme-pypi-ignore-after -->"
+
+[tool.hatch.version]
+source = "vcs"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
