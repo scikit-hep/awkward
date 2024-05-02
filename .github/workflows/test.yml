@@ -44,6 +44,7 @@ jobs:
           - '3.10'
           - '3.9'
           - '3.8'
+          - 'pypy3.9'
         python-architecture:
           - x64
         dependencies-kind:
@@ -139,15 +140,20 @@ jobs:
       - name: Test CPU kernels with explicitly defined values
         run: python -m pytest --pdb -vv -rs awkward-cpp/tests-cpu-kernels-explicit
 
-      - name: Test non-kernels
+      - name: Test non-kernels (Python)
         run: >-
           python -m pytest --pdb -vv -rs tests --cov=awkward --cov-report=term
           --cov-report=xml
+        if: startsWith(matrix.python-version, '3.')
+
+      - name: Test non-kernels (PyPy)
+        run: >-
+          python -m pytest --pdb -vv -rs tests
+        if: startsWith(matrix.python-version, 'pypy')
 
       - name: Upload Codecov results
         if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')
         uses: codecov/codecov-action@v4
-
 
   Linux-ROOT:
     runs-on: ubuntu-20.04
