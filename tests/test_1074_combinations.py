@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
+import pytest  # noqa: F401
 
 import awkward as ak
 
 to_list = ak.operations.to_list
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_ListOffsetArray():
     v2_array = ak.highlevel.Array(
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
@@ -229,7 +228,6 @@ def test_ListOffsetArray():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_RegularArray():
     v2_array = ak.highlevel.Array(
         np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]])
@@ -378,7 +376,6 @@ def test_RegularArray():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_axis0():
     v2_array = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3]).layout
 
@@ -445,7 +442,6 @@ def test_axis0():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_IndexedArray():
     v2_array = ak.highlevel.Array(
         [
@@ -485,7 +481,6 @@ def test_IndexedArray():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_axis2():
     v2_array = ak.highlevel.Array(
         [
@@ -538,7 +533,6 @@ def test_axis2():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_ByteMaskedArray():
     content = ak.operations.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
@@ -630,7 +624,6 @@ def test_ByteMaskedArray():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_IndexedOptionArray():
     content = ak.operations.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
@@ -722,7 +715,6 @@ def test_IndexedOptionArray():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_NumpyArray():
     v2_array = ak.contents.numpyarray.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
@@ -772,7 +764,6 @@ def test_NumpyArray():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_BitMaskedArray():
     v2_array = ak.contents.bitmaskedarray.BitMaskedArray(
         ak.index.Index(
@@ -1196,7 +1187,6 @@ def test_EmptyArray():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_RecordArray():
     v2_array = ak.contents.listarray.ListArray(
         ak.index.Index(np.array([4, 100, 1])),
@@ -1252,7 +1242,6 @@ def test_RecordArray():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_UnionArray():
     v2_array = ak.contents.unionarray.UnionArray(
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
@@ -1413,7 +1402,6 @@ def test_UnionArray():
     )
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test_UnmaskedArray():
     v2_array = ak.contents.unmaskedarray.UnmaskedArray(
         ak.contents.numpyarray.NumpyArray(
