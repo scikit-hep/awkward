@@ -597,22 +597,8 @@ def gencpuunittests(specdict):
 """
         )
 
-    exclude_list = [
-        "awkward_UnionArray32_flatten_combine_64",
-        "awkward_UnionArray32_flatten_combine_64",
-        "awkward_UnionArray64_flatten_length_64",
-        "awkward_UnionArray32_flatten_length_64",
-        "awkward_UnionArrayU32_flatten_combine_64",
-        "awkward_UnionArray64_flatten_combine_64",
-        "awkward_UnionArrayU32_flatten_length_64",
-        "awkward_RegularArray_combinations_64",
-    ]
-
     for spec in specdict.values():
-        if (
-            spec.templatized_kernel_name in list(unit_test_map.keys())
-            and spec.name not in exclude_list
-        ):
+        if spec.templatized_kernel_name in list(unit_test_map.keys()):
             func = "test_unit_cpu" + spec.name + ".py"
             num = 1
             with open(os.path.join(unit_tests_cpu_kernels, func), "w") as f:
