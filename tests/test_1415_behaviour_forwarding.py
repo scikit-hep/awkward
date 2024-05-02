@@ -8,7 +8,6 @@ import pytest
 import awkward as ak
 
 
-@pytest.mark.skip(reason="Testing segfault")
 @pytest.mark.parametrize("operation_behavior", [None, {"other-type": ak.Record}])
 def test_behavior_forwarding_structure(operation_behavior):
     """Ensure that explicit behaviors win, or the existing behavior is maintained"""

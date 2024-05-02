@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
+import pytest  # noqa: F401
 
 import awkward as ak
 
 to_list = ak.operations.to_list
 
 
-@pytest.mark.skip(reason="Testing segfault")
 def test():
     behavior = {}
 
