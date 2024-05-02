@@ -11,7 +11,6 @@ ERROR awkward_RegularArray_getitem_next_array_advanced(
   const T* fromadvanced,
   const T* fromarray,
   int64_t length,
-  int64_t /* lenarray */,  // FIXME: this argument is not needed
   int64_t size) {
   for (int64_t i = 0;  i < length;  i++) {
     tocarry[i] = i*size + fromarray[fromadvanced[i]];
@@ -25,7 +24,6 @@ ERROR awkward_RegularArray_getitem_next_array_advanced_64(
   const int64_t* fromadvanced,
   const int64_t* fromarray,
   int64_t length,
-  int64_t lenarray,
   int64_t size) {
   return awkward_RegularArray_getitem_next_array_advanced<int64_t>(
     tocarry,
@@ -33,6 +31,5 @@ ERROR awkward_RegularArray_getitem_next_array_advanced_64(
     fromadvanced,
     fromarray,
     length,
-    lenarray,
     size);
 }

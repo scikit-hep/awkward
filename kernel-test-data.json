@@ -7680,7 +7680,6 @@
                     "inputs": {
                         "fromadvanced": [],
                         "fromarray": [],
-                        "lenarray": 0,
                         "length": 0,
                         "size": 0
                     },
@@ -7695,7 +7694,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [0, 1, 0, 1],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 2
                     },
@@ -7710,7 +7708,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [0, 0, 0, 0],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 3
                     },
@@ -7725,7 +7722,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [0, 1, 2, 1],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 3
                     },
@@ -7740,7 +7736,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [0, 0, 0, 0],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 5
                     },
@@ -7755,7 +7750,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [0, 1, 4, 1],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 5
                     },
@@ -7770,7 +7764,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [1, 0, 1, 0],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 2
                     },
@@ -7785,7 +7778,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [1, 0, 0, 1],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 3
                     },
@@ -7800,7 +7792,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [1, 0, 0, 1],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 5
                     },
@@ -7815,7 +7806,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [1, 3, 0, 4],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 5
                     },
@@ -7830,7 +7820,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [2, 0, 0, 1],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 5
                     },
@@ -7845,7 +7834,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [2, 2, 2, 2],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 3
                     },
@@ -7860,7 +7848,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [2, 2, 2, 2],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 5
                     },
@@ -7875,7 +7862,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [3, 3, 3, 3],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 5
                     },
@@ -7890,7 +7876,6 @@
                     "inputs": {
                         "fromadvanced": [0, 1, 2, 3],
                         "fromarray": [4, 4, 4, 4],
-                        "lenarray": 4,
                         "length": 4,
                         "size": 5
                     },
@@ -10241,7 +10226,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0],
-                        "inneroffsetslen": 1,
                         "outeroffsets": [],
                         "outeroffsetslen": 0
                     },
@@ -10254,7 +10238,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 1, 2, 3],
-                        "inneroffsetslen": 4,
                         "outeroffsets": [0, 0, 0, 1, 3],
                         "outeroffsetslen": 5
                     },
@@ -10267,7 +10250,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 1, 2, 3, 4, 5, 6],
-                        "inneroffsetslen": 7,
                         "outeroffsets": [0, 0, 1, 3, 6],
                         "outeroffsetslen": 5
                     },
@@ -10280,7 +10262,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 1, 1, 5],
-                        "inneroffsetslen": 4,
                         "outeroffsets": [0, 0, 1, 3],
                         "outeroffsetslen": 4
                     },
@@ -10293,7 +10274,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 1, 1, 6, 6],
-                        "inneroffsetslen": 5,
                         "outeroffsets": [0, 0, 1, 4],
                         "outeroffsetslen": 4
                     },
@@ -10306,7 +10286,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 4, 8, 12, 14, 16],
-                        "inneroffsetslen": 6,
                         "outeroffsets": [0, 3, 3, 5],
                         "outeroffsetslen": 4
                     },
@@ -10319,7 +10298,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 1, 2, 5, 5, 7, 7, 11],
-                        "inneroffsetslen": 8,
                         "outeroffsets": [0, 1, 2, 2, 5, 7],
                         "outeroffsetslen": 6
                     },
@@ -10332,7 +10310,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 1, 2, 3, 4, 5, 6],
-                        "inneroffsetslen": 7,
                         "outeroffsets": [0, 1, 3, 6],
                         "outeroffsetslen": 4
                     },
@@ -10345,7 +10322,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 5, 10, 15, 20, 25, 30],
-                        "inneroffsetslen": 7,
                         "outeroffsets": [0, 3, 6],
                         "outeroffsetslen": 3
                     },
@@ -10358,7 +10334,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 2, 6],
-                        "inneroffsetslen": 3,
                         "outeroffsets": [0, 1, 1, 1, 2],
                         "outeroffsetslen": 5
                     },
@@ -10371,7 +10346,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 0, 2, 6],
-                        "inneroffsetslen": 4,
                         "outeroffsets": [0, 2, 2, 2, 3],
                         "outeroffsetslen": 5
                     },
@@ -10384,7 +10358,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 0, 0, 2, 6],
-                        "inneroffsetslen": 5,
                         "outeroffsets": [0, 3, 3, 3, 4],
                         "outeroffsetslen": 5
                     },
@@ -10397,7 +10370,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 0, 0, 0, 2, 7, 7],
-                        "inneroffsetslen": 7,
                         "outeroffsets": [0, 4, 4, 4, 6],
                         "outeroffsetslen": 5
                     },
@@ -10410,7 +10382,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 3, 5, 6, 6],
-                        "inneroffsetslen": 5,
                         "outeroffsets": [0, 1, 2, 3, 4],
                         "outeroffsetslen": 5
                     },
@@ -10423,7 +10394,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105, 112, 119, 126, 133, 140, 147, 154, 161, 168, 175, 182, 189, 196, 203, 210],
-                        "inneroffsetslen": 31,
                         "outeroffsets": [0, 5, 10, 15, 20, 25, 30],
                         "outeroffsetslen": 7
                     },
@@ -10436,7 +10406,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16],
-                        "inneroffsetslen": 11,
                         "outeroffsets": [0, 2, 4, 6, 8, 10],
                         "outeroffsetslen": 6
                     },
@@ -10449,7 +10418,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 3, 5, 6, 6, 10],
-                        "inneroffsetslen": 6,
                         "outeroffsets": [0, 2, 2, 3, 5],
                         "outeroffsetslen": 5
                     },
@@ -10462,7 +10430,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 3, 3, 5, 6, 6, 10],
-                        "inneroffsetslen": 7,
                         "outeroffsets": [0, 3, 3, 4, 6],
                         "outeroffsetslen": 5
                     },
@@ -10475,7 +10442,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 3, 3, 3, 5, 6, 6, 10],
-                        "inneroffsetslen": 8,
                         "outeroffsets": [0, 4, 4, 5, 7],
                         "outeroffsetslen": 5
                     },
@@ -10488,7 +10454,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 3, 3, 5, 5, 8],
-                        "inneroffsetslen": 6,
                         "outeroffsets": [0, 3, 3, 5],
                         "outeroffsetslen": 4
                     },
@@ -10501,7 +10466,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 3, 6, 9, 12, 14, 16],
-                        "inneroffsetslen": 7,
                         "outeroffsets": [0, 2, 4, 5, 6, 6, 6],
                         "outeroffsetslen": 7
                     },
@@ -10514,7 +10478,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 2, 4, 6, 8, 10],
-                        "inneroffsetslen": 6,
                         "outeroffsets": [0, 3, 3, 5],
                         "outeroffsetslen": 4
                     },
@@ -10527,7 +10490,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20],
-                        "inneroffsetslen": 11,
                         "outeroffsets": [0, 3, 3, 5, 8, 8, 10],
                         "outeroffsetslen": 7
                     },
@@ -10540,7 +10502,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 4, 4, 4, 4, 6, 7, 7, 12, 12],
-                        "inneroffsetslen": 10,
                         "outeroffsets": [0, 5, 5, 6, 9],
                         "outeroffsetslen": 5
                     },
@@ -10553,7 +10514,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 3, 6, 9, 11, 13, 14],
-                        "inneroffsetslen": 7,
                         "outeroffsets": [0, 3, 5, 6],
                         "outeroffsetslen": 4
                     },
@@ -10566,7 +10526,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 3, 5, 6, 6],
-                        "inneroffsetslen": 5,
                         "outeroffsets": [1, 2, 3, 4],
                         "outeroffsetslen": 4
                     },
@@ -10579,7 +10538,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 3, 3, 5, 6, 6, 10],
-                        "inneroffsetslen": 7,
                         "outeroffsets": [3, 3, 4, 6],
                         "outeroffsetslen": 4
                     },
@@ -10592,7 +10550,6 @@
                     "message": "",
                     "inputs": {
                         "inneroffsets": [0, 3, 3, 3, 5, 6, 6, 10],
-                        "inneroffsetslen": 8,
                         "outeroffsets": [4, 4, 5, 7],
                         "outeroffsetslen": 4
                     },
@@ -16991,7 +16948,6 @@
                         "fromarray": [0, 0],
                         "fromstarts": [0, 0],
                         "fromstops": [-1, 1],
-                        "lenarray": 2,
                         "lencontent": 5,
                         "lenstarts": 2
                     },
@@ -17008,7 +16964,6 @@
                         "fromarray": [0],
                         "fromstarts": [0],
                         "fromstops": [5],
-                        "lenarray": 1,
                         "lencontent": 4,
                         "lenstarts": 1
                     },
@@ -17025,7 +16980,6 @@
                         "fromarray": [0, 1, -4, 1],
                         "fromstarts": [0, 0, 0, 0],
                         "fromstops": [3, 3, 3, 3],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17042,7 +16996,6 @@
                         "fromarray": [0, 0],
                         "fromstarts": [0, 0],
                         "fromstops": [1, 1],
-                        "lenarray": 2,
                         "lencontent": 5,
                         "lenstarts": 2
                     },
@@ -17059,7 +17012,6 @@
                         "fromarray": [0],
                         "fromstarts": [0],
                         "fromstops": [2],
-                        "lenarray": 1,
                         "lencontent": 4,
                         "lenstarts": 1
                     },
@@ -17076,7 +17028,6 @@
                         "fromarray": [],
                         "fromstarts": [],
                         "fromstops": [],
-                        "lenarray": 0,
                         "lencontent": 0,
                         "lenstarts": 0
                     },
@@ -17093,7 +17044,6 @@
                         "fromarray": [0, 1, -1, 1],
                         "fromstarts": [0, 0, 0, 0],
                         "fromstops": [3, 3, 3, 3],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17110,7 +17060,6 @@
                         "fromarray": [0, 0, 0, 0],
                         "fromstarts": [0, 3, 3, 3],
                         "fromstops": [3, 6, 6, 6],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17127,7 +17076,6 @@
                         "fromarray": [1, 0],
                         "fromstarts": [0, 0],
                         "fromstops": [3, 3],
-                        "lenarray": 2,
                         "lencontent": 5,
                         "lenstarts": 2
                     },
@@ -17144,7 +17092,6 @@
                         "fromarray": [1, 0, 0, 1],
                         "fromstarts": [0, 0, 0, 0],
                         "fromstops": [3, 3, 3, 3],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17161,7 +17108,6 @@
                         "fromarray": [0, 0],
                         "fromstarts": [1, 0],
                         "fromstops": [3, 2],
-                        "lenarray": 2,
                         "lencontent": 3,
                         "lenstarts": 2
                     },
@@ -17178,7 +17124,6 @@
                         "fromarray": [0, 1, -1, 1],
                         "fromstarts": [10, 10, 10, 10],
                         "fromstops": [15, 15, 15, 15],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17195,7 +17140,6 @@
                         "fromarray": [0],
                         "fromstarts": [1],
                         "fromstops": [3],
-                        "lenarray": 1,
                         "lencontent": 3,
                         "lenstarts": 1
                     },
@@ -17212,7 +17156,6 @@
                         "fromarray": [1, 0, 0, 1],
                         "fromstarts": [10, 10, 10, 10],
                         "fromstops": [15, 15, 15, 15],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17229,7 +17172,6 @@
                         "fromarray": [1, -2, 0, -1],
                         "fromstarts": [10, 10, 10, 10],
                         "fromstops": [15, 15, 15, 15],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17246,7 +17188,6 @@
                         "fromarray": [1, -2, 0, -1],
                         "fromstarts": [10, 0, 0, 5],
                         "fromstops": [15, 5, 5, 10],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17263,7 +17204,6 @@
                         "fromarray": [1, 0, 0, 1],
                         "fromstarts": [0, 15, 15, 15],
                         "fromstops": [5, 20, 20, 20],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17280,7 +17220,6 @@
                         "fromarray": [1, 2],
                         "fromstarts": [0, 0],
                         "fromstops": [3, 3],
-                        "lenarray": 2,
                         "lencontent": 5,
                         "lenstarts": 2
                     },
@@ -17297,7 +17236,6 @@
                         "fromarray": [2, 0, 0, 1],
                         "fromstarts": [10, 10, 10, 10],
                         "fromstops": [15, 15, 15, 15],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17314,7 +17252,6 @@
                         "fromarray": [2, 2, 2, 2],
                         "fromstarts": [10, 0, 0, 5],
                         "fromstops": [15, 5, 5, 10],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17331,7 +17268,6 @@
                         "fromarray": [-2, -2, -2, -2],
                         "fromstarts": [10, 10, 10, 10],
                         "fromstops": [15, 15, 15, 15],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17348,7 +17284,6 @@
                         "fromarray": [-2, -2, -2, -2],
                         "fromstarts": [10, 0, 0, 5],
                         "fromstops": [15, 5, 5, 10],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17365,7 +17300,6 @@
                         "fromarray": [1, 0, 0, 1],
                         "fromstarts": [0, 3, 3, 3],
                         "fromstops": [3, 6, 6, 6],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17382,7 +17316,6 @@
                         "fromarray": [1, 0, 0, 1],
                         "fromstarts": [0, 5, 10, 5],
                         "fromstops": [5, 10, 15, 10],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17399,7 +17332,6 @@
                         "fromarray": [0, 1, -1, 1],
                         "fromstarts": [15, 0, 0, 15],
                         "fromstops": [20, 5, 5, 20],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17416,7 +17348,6 @@
                         "fromarray": [0, 1, -1, 1],
                         "fromstarts": [15, 15, 15, 15],
                         "fromstops": [20, 20, 20, 20],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17433,7 +17364,6 @@
                         "fromarray": [1, 0, 0, 1],
                         "fromstarts": [15, 15, 15, 15],
                         "fromstops": [20, 20, 20, 20],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17450,7 +17380,6 @@
                         "fromarray": [-1, -1, -1, -1],
                         "fromstarts": [15, 0, 0, 15],
                         "fromstops": [20, 5, 5, 20],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17467,7 +17396,6 @@
                         "fromarray": [-1, 0],
                         "fromstarts": [0, 0],
                         "fromstops": [3, 3],
-                        "lenarray": 2,
                         "lencontent": 5,
                         "lenstarts": 2
                     },
@@ -17484,7 +17412,6 @@
                         "fromarray": [-1, -1, -1, -1],
                         "fromstarts": [0, 0, 0, 0],
                         "fromstops": [3, 3, 3, 3],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17501,7 +17428,6 @@
                         "fromarray": [1, 2],
                         "fromstarts": [1, 1],
                         "fromstops": [4, 4],
-                        "lenarray": 2,
                         "lencontent": 4,
                         "lenstarts": 2
                     },
@@ -17518,7 +17444,6 @@
                         "fromarray": [-1, -1, -1, -1],
                         "fromstarts": [0, 3, 3, 3],
                         "fromstops": [3, 6, 6, 6],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17535,7 +17460,6 @@
                         "fromarray": [0, 0, 0, 0],
                         "fromstarts": [3, 0, 0, 3],
                         "fromstops": [6, 3, 3, 6],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17552,7 +17476,6 @@
                         "fromarray": [1],
                         "fromstarts": [2],
                         "fromstops": [5],
-                        "lenarray": 1,
                         "lencontent": 5,
                         "lenstarts": 1
                     },
@@ -17569,7 +17492,6 @@
                         "fromarray": [-1, 0],
                         "fromstarts": [1, 1],
                         "fromstops": [4, 4],
-                        "lenarray": 2,
                         "lencontent": 4,
                         "lenstarts": 2
                     },
@@ -17586,7 +17508,6 @@
                         "fromarray": [0, 1, -1, 1],
                         "fromstarts": [3, 0, 0, 3],
                         "fromstops": [6, 3, 3, 6],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17603,7 +17524,6 @@
                         "fromarray": [0, 0, 0, 0],
                         "fromstarts": [3, 3, 3, 3],
                         "fromstops": [6, 6, 6, 6],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17620,7 +17540,6 @@
                         "fromarray": [0, 1, -1, 1],
                         "fromstarts": [3, 3, 3, 3],
                         "fromstops": [6, 6, 6, 6],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17637,7 +17556,6 @@
                         "fromarray": [1, 1],
                         "fromstarts": [3, 0],
                         "fromstops": [5, 3],
-                        "lenarray": 2,
                         "lencontent": 5,
                         "lenstarts": 2
                     },
@@ -17654,7 +17572,6 @@
                         "fromarray": [1, 1, 0, 0],
                         "fromstarts": [3, 0, 0, 6],
                         "fromstops": [5, 3, 3, 9],
-                        "lenarray": 4,
                         "lencontent": 9,
                         "lenstarts": 4
                     },
@@ -17671,7 +17588,6 @@
                         "fromarray": [-1, -1, -1, -1],
                         "fromstarts": [0, 15, 15, 15],
                         "fromstops": [5, 20, 20, 20],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17688,7 +17604,6 @@
                         "fromarray": [1, -1, 0, 0],
                         "fromstarts": [3, 0, 0, 3],
                         "fromstops": [5, 3, 3, 5],
-                        "lenarray": 4,
                         "lencontent": 5,
                         "lenstarts": 4
                     },
@@ -17705,7 +17620,6 @@
                         "fromarray": [1, 0, 0, 1],
                         "fromstarts": [3, 3, 3, 3],
                         "fromstops": [6, 6, 6, 6],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17722,7 +17636,6 @@
                         "fromarray": [-1, -1, -1, -1],
                         "fromstarts": [0, 5, 10, 5],
                         "fromstops": [5, 10, 15, 10],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17739,7 +17652,6 @@
                         "fromarray": [2, 0, 1, 1, 2, 0],
                         "fromstarts": [3, 0, 3, 3, 3, 0],
                         "fromstops": [6, 3, 6, 6, 6, 3],
-                        "lenarray": 6,
                         "lencontent": 6,
                         "lenstarts": 6
                     },
@@ -17756,7 +17668,6 @@
                         "fromarray": [0, 1, -1, 1],
                         "fromstarts": [5, 0, 0, 5],
                         "fromstops": [10, 5, 5, 10],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -17773,7 +17684,6 @@
                         "fromarray": [-1, -1, -1, -1],
                         "fromstarts": [3, 0, 0, 3],
                         "fromstops": [6, 3, 3, 6],
-                        "lenarray": 4,
                         "lencontent": 6,
                         "lenstarts": 4
                     },
@@ -17790,7 +17700,6 @@
                         "fromarray": [1, 1, 0, 0],
                         "fromstarts": [6, 0, 0, 6],
                         "fromstops": [9, 3, 3, 9],
-                        "lenarray": 4,
                         "lencontent": 9,
                         "lenstarts": 4
                     },
@@ -17807,7 +17716,6 @@
                         "fromarray": [-1, -1, -1, -1],
                         "fromstarts": [5, 0, 0, 5],
                         "fromstops": [10, 5, 5, 10],
-                        "lenarray": 4,
                         "lencontent": 30,
                         "lenstarts": 4
                     },
@@ -20767,9 +20675,7 @@
                         "fromoffsets": [],
                         "offsetslength": 0,
                         "fromparents": [],
-                        "parentslength": 0,
-                        "fromstarts": [],
-                        "startslength": 0
+                        "fromstarts": []
                     },
                     "outputs": {
                         "toptr": []
@@ -20785,9 +20691,7 @@
                         "fromoffsets": [0, 1, 3, 3, 5, 7, 9],
                         "offsetslength": 7,
                         "fromparents": [0, 1, 3, 6],
-                        "parentslength": 4,
-                        "fromstarts": [0, 1, 2, 3, 4, 5, 6],
-                        "startslength": 7
+                        "fromstarts": [0, 1, 2, 3, 4, 5, 6]
                     },
                     "outputs": {
                         "toptr": [0, 3, 3, 6, 7, 10, 11, 14, 15]
@@ -20803,9 +20707,7 @@
                         "fromoffsets": [0, 2, 5, 8],
                         "offsetslength": 4,
                         "fromparents": [0, 1, 3, 6],
-                        "parentslength": 4,
-                        "fromstarts": [0, 1, 2, 3, 4, 5, 6],
-                        "startslength": 7
+                        "fromstarts": [0, 1, 2, 3, 4, 5, 6]
                     },
                     "outputs": {
                         "toptr": [0, -1, 1, -2, 2, 5, 5, 5]

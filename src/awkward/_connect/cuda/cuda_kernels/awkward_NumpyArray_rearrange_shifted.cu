@@ -2,9 +2,9 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength, fromstarts, startslength, invocation_index, err_code) = args
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_rearrange_shifted_a", toptr.dtype, fromshifts.dtype, fromoffsets.dtype, fromparents.dtype, fromstarts.dtype]))(grid, block, (toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength, fromstarts, startslength, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_rearrange_shifted_b", toptr.dtype, fromshifts.dtype, fromoffsets.dtype, fromparents.dtype, fromstarts.dtype]))(grid, block, (toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength, fromstarts, startslength, invocation_index, err_code))
+//     (toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, fromstarts, invocation_index, err_code) = args
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_rearrange_shifted_a", toptr.dtype, fromshifts.dtype, fromoffsets.dtype, fromparents.dtype, fromstarts.dtype]))(grid, block, (toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, fromstarts, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_rearrange_shifted_b", toptr.dtype, fromshifts.dtype, fromoffsets.dtype, fromparents.dtype, fromstarts.dtype]))(grid, block, (toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, fromstarts, invocation_index, err_code))
 // out["awkward_NumpyArray_rearrange_shifted_a", {dtype_specializations}] = None
 // out["awkward_NumpyArray_rearrange_shifted_b", {dtype_specializations}] = None
 // END PYTHON
@@ -19,9 +19,7 @@ awkward_NumpyArray_rearrange_shifted_a(
     U* fromoffsets,
     int64_t offsetslength,
     V* fromparents,
-    int64_t /* parentslength */,
     W* fromstarts,
-    int64_t /* startslength */,
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
@@ -45,9 +43,7 @@ awkward_NumpyArray_rearrange_shifted_b(
     U* fromoffsets,
     int64_t offsetslength,
     V* fromparents,
-    int64_t /* parentslength */,
     W* fromstarts,
-    int64_t /* startslength */,
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {

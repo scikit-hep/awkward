@@ -647,7 +647,6 @@ class RegularArray(RegularMeta[Content], Content):
                         advanced.data,
                         regular_flathead.data,
                         self._length,
-                        regular_flathead.length,
                         self._size,
                     ),
                     slicer=head,

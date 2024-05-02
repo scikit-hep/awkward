@@ -1639,7 +1639,6 @@ kernels:
           - {name: fromarray, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: fromadvanced, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
-          - {name: lenarray, type: "int64_t", dir: in, role: default}
           - {name: lencontent, type: "int64_t", dir: in, role: ListArray-length}
       - name: awkward_ListArray64_getitem_next_array_advanced_64
         args:
@@ -1650,7 +1649,6 @@ kernels:
           - {name: fromarray, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: fromadvanced, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
-          - {name: lenarray, type: "int64_t", dir: in, role: default}
           - {name: lencontent, type: "int64_t", dir: in, role: ListArray-length}
       - name: awkward_ListArrayU32_getitem_next_array_advanced_64
         args:
@@ -1661,7 +1659,6 @@ kernels:
           - {name: fromarray, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: fromadvanced, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
-          - {name: lenarray, type: "int64_t", dir: in, role: default}
           - {name: lencontent, type: "int64_t", dir: in, role: ListArray-length}
     description: null
     definition: |
@@ -1673,7 +1670,6 @@ kernels:
           fromarray,
           fromadvanced,
           lenstarts,
-          lenarray,
           lencontent,
       ):
           for i in range(lenstarts):
@@ -2160,25 +2156,22 @@ kernels:
           - {name: outeroffsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: outeroffsetslen, type: "int64_t", dir: in, role: default}
           - {name: inneroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
-          - {name: inneroffsetslen, type: "int64_t", dir: in, role: default}
       - name: awkward_ListOffsetArray64_flatten_offsets_64
         args:
           - {name: tooffsets, type: "List[int64_t]", dir: out}
           - {name: outeroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: outeroffsetslen, type: "int64_t", dir: in, role: default}
           - {name: inneroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
-          - {name: inneroffsetslen, type: "int64_t", dir: in, role: default}
       - name: awkward_ListOffsetArrayU32_flatten_offsets_64
         args:
           - {name: tooffsets, type: "List[int64_t]", dir: out}
           - {name: outeroffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: outeroffsetslen, type: "int64_t", dir: in, role: default}
           - {name: inneroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
-          - {name: inneroffsetslen, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
       def awkward_ListOffsetArray_flatten_offsets(
-          tooffsets, outeroffsets, outeroffsetslen, inneroffsets, inneroffsetslen
+          tooffsets, outeroffsets, outeroffsetslen, inneroffsets
       ):
           for i in range(outeroffsetslen):
               tooffsets[i] = inneroffsets[outeroffsets[i]]
@@ -2620,12 +2613,10 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: fromparents, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
-          - {name: parentslength, type: "int64_t", dir: in, role: default}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
-          - {name: startslength, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      def awkward_NumpyArray_rearrange_shifted(toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength, fromstarts, startslength):
+      def awkward_NumpyArray_rearrange_shifted(toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, fromstarts):
           k = 0
           for i in range(offsetslength - 1):
               for j in range(fromoffsets[i + 1] - fromoffsets[i]):
@@ -3051,12 +3042,11 @@ kernels:
           - {name: fromadvanced, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: fromarray, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
           - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: lenarray, type: "int64_t", dir: in, role: default}
           - {name: size, type: "int64_t", dir: in, role: RegularArray-size}
     description: null
     definition: |
       def awkward_RegularArray_getitem_next_array_advanced(
-          tocarry, toadvanced, fromadvanced, fromarray, length, lenarray, size
+          tocarry, toadvanced, fromadvanced, fromarray, length, size
       ):
           for i in range(length):
               tocarry[i] = (i * size) + fromarray[fromadvanced[i]]
