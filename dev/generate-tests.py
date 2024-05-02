@@ -518,7 +518,10 @@ def gencpukerneltests(specdict):
             )
 
             f.write(
-                "import ctypes\nimport pytest\n\nfrom awkward_cpp.cpu_kernels import lib\n\n"
+                "import ctypes\n"
+                "import numpy as np\n"
+                "import pytest\n\n"
+                "from awkward_cpp.cpu_kernels import lib\n\n"
             )
             num = 1
             if spec.tests == []:
@@ -547,13 +550,29 @@ def gencpukerneltests(specdict):
                         elif count == 2:
                             f.write(
                                 " " * 4
-                                + f"{arg}_ptr = (ctypes.POINTER(ctypes.c_{typename}) * len({arg}))()\n"
+                                + f"{typename}Ptr = ctypes.POINTER(ctypes.c_{typename})\n"
                                 + " " * 4
-                                + f"for i in range(len({arg})):\n"
+                                + f"{typename}PtrPtr = ctypes.POINTER({typename}Ptr)\n"
+                                + " " * 4
+                                + f"dim0 = len({arg})\n"
+                                + " " * 4
+                                + f"dim1 = len({arg}[0])\n"
+                                + " " * 4
+                                + f"{arg}_np_arr_2d = np.empty([dim0, dim1], dtype=np.{typename})\n"
+                                + " " * 4
+                                + "for i in range(dim0):\n"
                                 + " " * 8
-                                + f"{arg}_ptr[i] = (ctypes.c_{typename} * len({arg}[i]))(*{arg}[i])\n"
+                                + "for j in range(dim1):\n"
+                                + " " * 12
+                                + f"{arg}_np_arr_2d[i][j] = {arg}[i][j]\n"
                                 + " " * 4
-                                + f"{arg} = {arg}_ptr\n"
+                                + f"{arg}_ct_arr = np.ctypeslib.as_ctypes({arg}_np_arr_2d)\n"
+                                + " " * 4
+                                + f"{typename}PtrArr = {typename}Ptr * {arg}_ct_arr._length_\n"
+                                + " " * 4
+                                + f"{arg}_ct_ptr = ctypes.cast({typename}PtrArr(*(ctypes.cast(row, {typename}Ptr) for row in {arg}_ct_arr)), {typename}PtrPtr)\n"
+                                + " " * 4
+                                + f"{arg} = {arg}_ct_ptr\n"
                             )
                 f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
                 args = ""
@@ -627,6 +646,7 @@ def gencpuunittests(specdict):
 
                 f.write(
                     "import ctypes\n"
+                    "import numpy as np\n"
                     "import pytest\n\n"
                     "from awkward_cpp.cpu_kernels import lib\n\n"
                 )
@@ -662,13 +682,29 @@ def gencpuunittests(specdict):
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + f"{arg}_ptr = (ctypes.POINTER(ctypes.c_{typename}) * len({arg}))()\n"
+                                        + f"{typename}Ptr = ctypes.POINTER(ctypes.c_{typename})\n"
                                         + " " * 4
-                                        + f"for i in range(len({arg})):\n"
+                                        + f"{typename}PtrPtr = ctypes.POINTER({typename}Ptr)\n"
+                                        + " " * 4
+                                        + f"dim0 = len({arg})\n"
+                                        + " " * 4
+                                        + f"dim1 = len({arg}[0])\n"
+                                        + " " * 4
+                                        + f"{arg}_np_arr_2d = np.empty([dim0, dim1], dtype=np.{typename})\n"
+                                        + " " * 4
+                                        + "for i in range(dim0):\n"
                                         + " " * 8
-                                        + f"{arg}_ptr[i] = (ctypes.c_{typename} * len({arg}[i]))(*{arg}[i])\n"
+                                        + "for j in range(dim1):\n"
+                                        + " " * 12
+                                        + f"{arg}_np_arr_2d[i][j] = {arg}[i][j]\n"
                                         + " " * 4
-                                        + f"{arg} = {arg}_ptr\n"
+                                        + f"{arg}_ct_arr = np.ctypeslib.as_ctypes({arg}_np_arr_2d)\n"
+                                        + " " * 4
+                                        + f"{typename}PtrArr = {typename}Ptr * {arg}_ct_arr._length_\n"
+                                        + " " * 4
+                                        + f"{arg}_ct_ptr = ctypes.cast({typename}PtrArr(*(ctypes.cast(row, {typename}Ptr) for row in {arg}_ct_arr)), {typename}PtrPtr)\n"
+                                        + " " * 4
+                                        + f"{arg} = {arg}_ct_ptr\n"
                                     )
                         for arg, val in test["inputs"].items():
                             typename = gettype(arg, spec.args)
@@ -684,13 +720,29 @@ def gencpuunittests(specdict):
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + f"{arg}_ptr = (ctypes.POINTER(ctypes.c_{typename}) * len({arg}))()\n"
+                                        + f"{typename}Ptr = ctypes.POINTER(ctypes.c_{typename})\n"
                                         + " " * 4
-                                        + f"for i in range(len({arg})):\n"
+                                        + f"{typename}PtrPtr = ctypes.POINTER({typename}Ptr)\n"
+                                        + " " * 4
+                                        + f"dim0 = len({arg})\n"
+                                        + " " * 4
+                                        + f"dim1 = len({arg}[0])\n"
+                                        + " " * 4
+                                        + f"{arg}_np_arr_2d = np.empty([dim0, dim1], dtype=np.{typename})\n"
+                                        + " " * 4
+                                        + "for i in range(dim0):\n"
                                         + " " * 8
-                                        + f"{arg}_ptr[i] = (ctypes.c_{typename} * len({arg}[i]))(*{arg}[i])\n"
+                                        + "for j in range(dim1):\n"
+                                        + " " * 12
+                                        + f"{arg}_np_arr_2d[i][j] = {arg}[i][j]\n"
                                         + " " * 4
-                                        + f"{arg} = {arg}_ptr\n"
+                                        + f"{arg}_ct_arr = np.ctypeslib.as_ctypes({arg}_np_arr_2d)\n"
+                                        + " " * 4
+                                        + f"{typename}PtrArr = {typename}Ptr * {arg}_ct_arr._length_\n"
+                                        + " " * 4
+                                        + f"{arg}_ct_ptr = ctypes.cast({typename}PtrArr(*(ctypes.cast(row, {typename}Ptr) for row in {arg}_ct_arr)), {typename}PtrPtr)\n"
+                                        + " " * 4
+                                        + f"{arg} = {arg}_ct_ptr\n"
                                     )
 
                         f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
@@ -1183,7 +1235,7 @@ def genunittests():
             os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit", func),
             "w",
         ) as file:
-            file.write("import pytest\nimport numpy\nimport kernels\n\n")
+            file.write("import pytest\n" "import numpy\n" "import kernels\n\n")
             for test in function["tests"]:
                 num += 1
                 funcName = "def test_" + function["name"] + "_" + str(num) + "():\n"

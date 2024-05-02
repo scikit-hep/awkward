@@ -831,7 +831,6 @@ class NumpyArray(NumpyMeta, Content):
                         nextoffsets.dtype.type,
                     ](
                         out,
-                        out.shape[0],
                         offsets.data,
                         offsets.length,
                         nextoffsets.data,
@@ -846,7 +845,6 @@ class NumpyArray(NumpyMeta, Content):
                         nextoffsets.dtype.type,
                     ](
                         out,
-                        out.shape[0],
                         offsets.data,
                         offsets.length,
                         nextoffsets.data,
