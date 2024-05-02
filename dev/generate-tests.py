@@ -308,6 +308,35 @@ import numpy
 from numpy import uint8
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
+
+def awkward_regularize_rangeslice(
+    start, stop, posstep, hasstart, hasstop, length,
+):
+    if posstep:
+        if not hasstart:         start = 0
+        elif start < 0:          start += length
+        if start < 0:            start = 0
+        if start > length:       start = length
+
+        if not hasstop:          stop = length
+        elif stop < 0:           stop += length
+        if stop < 0:             stop = 0
+        if stop > length:        stop = length
+        if stop < start:         stop = start
+
+    else:
+        if not hasstart:         start = length - 1
+        elif start < 0:          start += length
+        if start < -1:           start = -1
+        if start > length - 1:   start = length - 1
+
+        if not hasstop:          stop = -1
+        elif stop < 0:           stop += length
+        if stop < -1:            stop = -1
+        if stop > length - 1:    stop = length - 1
+        if stop > start:         stop = start
+    return start, stop
+
 """
 
     tests_spec = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec")
