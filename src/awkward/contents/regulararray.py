@@ -123,46 +123,34 @@ class RegularArray(RegularMeta[Content], Content):
     def __init__(self, content, size, zeros_length=0, *, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         if size is unknown_length:
             if content.backend.index_nplike.known_data:
                 raise TypeError(
-                    "{} 'size' must be a non-negative integer for backends with known shapes, not None".format(
-                        type(self).__name__
-                    )
+                    f"{type(self).__name__} 'size' must be a non-negative integer for backends with known shapes, not None"
                 )
         elif not (is_integer(size) and size >= 0):
             raise TypeError(
-                "{} 'size' must be a non-negative integer, not {}".format(
-                    type(self).__name__, size
-                )
+                f"{type(self).__name__} 'size' must be a non-negative integer, not {size}"
             )
 
         if zeros_length is not unknown_length and not (
             is_integer(zeros_length) and zeros_length >= 0
         ):
             raise TypeError(
-                "{} 'zeros_length' must be a non-negative integer, not {}".format(
-                    type(self).__name__, zeros_length
-                )
+                f"{type(self).__name__} 'zeros_length' must be a non-negative integer, not {zeros_length}"
             )
 
         if parameters is not None and parameters.get("__array__") == "string":
             if not content.is_numpy or not content.parameter("__array__") == "char":
                 raise ValueError(
-                    "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} is a string, so its 'content' must be uint8 NumpyArray of char, not {content!r}"
                 )
         if parameters is not None and parameters.get("__array__") == "bytestring":
             if not content.is_numpy or not content.parameter("__array__") == "byte":
                 raise ValueError(
-                    "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {content!r}"
                 )
 
         self._content = content
@@ -292,6 +280,9 @@ class RegularArray(RegularMeta[Content], Content):
 
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
+
+    def _is_getitem_at_placeholder(self) -> bool:
+        return False
 
     def _getitem_at(self, where: IndexType):
         index_nplike = self._backend.index_nplike
@@ -425,9 +416,7 @@ class RegularArray(RegularMeta[Content], Content):
             and offsets.length - 1 != self._length
         ):
             raise AssertionError(
-                "cannot broadcast RegularArray of length {} to length {}".format(
-                    self._length, offsets.length - 1
-                )
+                f"cannot broadcast RegularArray of length {self._length} to length {offsets.length - 1}"
             )
 
         if self._size is not unknown_length and self._size == 1:
@@ -658,7 +647,6 @@ class RegularArray(RegularMeta[Content], Content):
                         advanced.data,
                         regular_flathead.data,
                         self._length,
-                        regular_flathead.length,
                         self._size,
                     ),
                     slicer=head,
@@ -681,9 +669,7 @@ class RegularArray(RegularMeta[Content], Content):
                 raise ak._errors.index_error(
                     self,
                     head,
-                    "cannot fit jagged slice with length {} into {} of size {}".format(
-                        head.length, type(self).__name__, self._size
-                    ),
+                    f"cannot fit jagged slice with length {head.length} into {type(self).__name__} of size {self._size}",
                 )
 
             multistarts = ak.index.Index64.empty(
@@ -1009,7 +995,7 @@ class RegularArray(RegularMeta[Content], Content):
             )
             self._backend.maybe_kernel_error(
                 self._backend[
-                    "awkward_RegularArray_reduce_nonlocal_preparenext",
+                    "awkward_RegularArray_reduce_nonlocal_preparenext_64",
                     nextcarry.dtype.type,
                     nextparents.dtype.type,
                     parents.dtype.type,
@@ -1080,7 +1066,7 @@ class RegularArray(RegularMeta[Content], Content):
             assert nextparents.nplike is index_nplike
             self._backend.maybe_kernel_error(
                 self._backend[
-                    "awkward_RegularArray_reduce_local_nextparents",
+                    "awkward_RegularArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                 ](
                     nextparents.data,
@@ -1349,7 +1335,7 @@ class RegularArray(RegularMeta[Content], Content):
             )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
-                akcontent.is_option
+                akcontent._arrow_needs_option_type()
             )
 
             return pyarrow.Array.from_buffers(

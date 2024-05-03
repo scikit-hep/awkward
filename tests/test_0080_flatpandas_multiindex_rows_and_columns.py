@@ -22,9 +22,7 @@ def test():
         if n in ("values", "x", "y"):
             return n
         else:
-            return tuple(
-                eval(n.replace("nan", "None").replace("null", "None"))  # noqa: PGH001
-            )
+            return tuple(eval(n.replace("nan", "None").replace("null", "None")))
 
     def regularize(data):
         if isinstance(data, dict):

@@ -86,8 +86,7 @@ class ImplementsApplyAction(Protocol):
         behavior: Mapping | None,
         backend: Backend,
         options: ApplyActionOptions,
-    ) -> Content | None:
-        ...
+    ) -> Content | None: ...
 
 
 class ApplyActionOptions(TypedDict):
@@ -126,9 +125,7 @@ class Content(Meta):
             pass
         elif not isinstance(parameters, dict):
             raise TypeError(
-                "{} 'parameters' must be a dict or None, not {}".format(
-                    type(self).__name__, repr(parameters)
-                )
+                f"{type(self).__name__} 'parameters' must be a dict or None, not {parameters!r}"
             )
         # Validate built-in `__array__`
         elif parameters.get("__array__") is not None:
@@ -178,9 +175,7 @@ class Content(Meta):
 
         if not isinstance(backend, Backend):
             raise TypeError(
-                "{} 'backend' must be a Backend, not {}".format(
-                    type(self).__name__, repr(backend)
-                )
+                f"{type(self).__name__} 'backend' must be a Backend, not {backend!r}"
             )
 
         self._parameters = parameters
@@ -411,9 +406,7 @@ class Content(Meta):
             raise ak._errors.index_error(
                 self,
                 head,
-                "cannot fit masked jagged slice with length {} into {} of size {}".format(
-                    index.length, type(that).__name__, content.length
-                ),
+                f"cannot fit masked jagged slice with length {index.length} into {type(that).__name__} of size {content.length}",
             )
 
         outputmask = Index64.empty(index.length, self._backend.index_nplike)
@@ -676,15 +669,18 @@ class Content(Meta):
                 return self._getitem_fields(list(where))
 
             else:
-                layout = ak.operations.ak_to_layout._impl(
-                    where,
-                    allow_record=False,
-                    allow_unknown=False,
-                    none_policy="error",
-                    regulararray=False,
-                    use_from_iter=True,
-                    primitive_policy="error",
-                    string_policy="as-characters",
+                layout = ak.to_backend(
+                    ak.operations.ak_to_layout._impl(
+                        where,
+                        allow_record=False,
+                        allow_unknown=False,
+                        none_policy="error",
+                        regulararray=False,
+                        use_from_iter=True,
+                        primitive_policy="error",
+                        string_policy="as-characters",
+                    ),
+                    self._backend,
                 )
                 return self._getitem(layout)
 
@@ -696,6 +692,9 @@ class Content(Meta):
                 "iterable of str) are valid indices for slicing, not\n\n    "
                 + repr(where).replace("\n", "\n    ")
             )
+
+    def _is_getitem_at_placeholder(self) -> bool:
+        raise NotImplementedError
 
     def _getitem_at(self, where: IndexType):
         raise NotImplementedError
@@ -1264,6 +1263,10 @@ class Content(Meta):
 
     def copy(self, *, parameters: JSONMapping | None = UNSET) -> Self:
         raise NotImplementedError
+
+    @classmethod
+    def _arrow_needs_option_type(cls):
+        return cls.is_option  # is_option is a class property of Meta
 
 
 @register_backend_lookup_factory

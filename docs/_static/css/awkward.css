@@ -8,7 +8,7 @@ html[data-theme="dark"] .sd-card {
     background: var(--pst-color-surface);
 }
 
-.sd-card-header .fas {
+.sd-card-header .svg-inline--fa {
     font-size: 3em;
 }
 
@@ -46,4 +46,8 @@ html[data-theme="dark"] .sd-card {
 .shield-badge {
   margin-top: 0.15em;
   margin-bottom: 0.15em;
+}
+
+div.toctree-wrapper {
+  display: none;
 }

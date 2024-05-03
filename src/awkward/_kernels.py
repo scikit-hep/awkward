@@ -31,8 +31,7 @@ class KernelError(Protocol):
 class Kernel(Protocol):
     @property
     @abstractmethod
-    def key(self) -> KernelKeyType:
-        ...
+    def key(self) -> KernelKeyType: ...
 
     @abstractmethod
     def __call__(self, *args) -> KernelError | None:
@@ -62,8 +61,7 @@ class BaseKernel(Kernel):
 class CTypesFunc(Protocol):
     argtypes: tuple[Any, ...]
 
-    def __call__(self, *args) -> Any:
-        ...
+    def __call__(self, *args) -> Any: ...
 
 
 class NumpyKernel(BaseKernel):
@@ -82,7 +80,7 @@ class NumpyKernel(BaseKernel):
                 return ctypes.cast(x, t)
             else:
                 raise AssertionError(
-                    "CuPy buffers shouldn't be passed to Numpy Kernels."
+                    f"Only NumPy buffers should be passed to Numpy Kernels, received {type(t).__name__}"
                 )
         else:
             return x

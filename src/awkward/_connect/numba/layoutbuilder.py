@@ -1081,7 +1081,9 @@ def BitMasked_append_end(builder):
         builder._current_byte_index[1] += np.uint8(1)
         if builder._valid_when:
             # 0 indicates null, 1 indicates valid
-            builder._mask[-1] = np.uint8(builder._current_byte_index[0])
+            builder._mask._panels[-1][builder._mask._length_pos[1] - 1] = (
+                builder._current_byte_index[0]
+            )
         else:
             # 0 indicates valid, 1 indicates null
             builder._mask[-1] = np.uint8(~builder._current_byte_index[0])

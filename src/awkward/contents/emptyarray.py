@@ -8,7 +8,6 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
-from awkward._errors import deprecate
 from awkward._layout import maybe_posaxis
 from awkward._meta.emptymeta import EmptyMeta
 from awkward._nplikes.array_like import ArrayLike
@@ -110,13 +109,6 @@ class EmptyArray(EmptyMeta, Content):
     def __deepcopy__(self, memo):
         return self.copy()
 
-    def __array__(self, dtype=None):
-        deprecate(
-            f"np.asarray(content) is deprecated for {type(self).__name__}. Use ak.to_numpy(content) instead",
-            version="2.6.0",
-        )
-        return numpy.empty(0, dtype=dtype)
-
     @classmethod
     def simplified(cls, *, parameters=None, backend=None):
         if not (parameters is None or len(parameters) == 0):
@@ -178,6 +170,9 @@ class EmptyArray(EmptyMeta, Content):
 
     def _getitem_nothing(self):
         return self
+
+    def _is_getitem_at_placeholder(self) -> bool:
+        return False
 
     def _getitem_at(self, where: IndexType):
         raise ak._errors.index_error(self, where, "array is empty")
@@ -369,11 +364,12 @@ class EmptyArray(EmptyMeta, Content):
         if options["emptyarray_to"] is None:
             return pyarrow.Array.from_buffers(
                 ak._connect.pyarrow.to_awkwardarrow_type(
-                    pyarrow.null(),
-                    options["extensionarray"],
-                    options["record_is_scalar"],
-                    mask_node,
-                    self,
+                    storage_type=pyarrow.null(),
+                    use_extensionarray=options["extensionarray"],
+                    record_is_scalar=options["record_is_scalar"],
+                    mask=mask_node,
+                    node=self,
+                    is_nonnullable_nulltype=mask_node is None,
                 ),
                 length,
                 [
@@ -390,6 +386,10 @@ class EmptyArray(EmptyMeta, Content):
                 backend=self._backend,
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
+    @classmethod
+    def _arrow_needs_option_type(cls):
+        return True  # This overrides Content._arrow_needs_option_type
 
     def _to_backend_array(self, allow_missing, backend):
         return backend.nplike.empty(0, dtype=np.float64)

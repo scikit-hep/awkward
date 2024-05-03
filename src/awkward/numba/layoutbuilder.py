@@ -590,7 +590,9 @@ class BitMasked(LayoutBuilder):
         self._current_byte_index[1] += np.uint8(1)
         if self._valid_when:
             # 0 indicates null, 1 indicates valid
-            self._mask[-1] = self._current_byte_index[0]
+            self._mask._panels[-1][self._mask._length_pos[1] - 1] = (
+                self._current_byte_index[0]
+            )
         else:
             # 0 indicates valid, 1 indicates null
             self._mask._panels[-1] = ~self._current_byte_index[0]

@@ -9,6 +9,7 @@ from contextlib import nullcontext
 from io import BytesIO
 from urllib.parse import urlparse
 
+import fsspec
 from awkward_cpp.lib import _ext
 
 import awkward as ak
@@ -376,8 +377,6 @@ def _get_reader(source):
         if parsed_url.scheme == "" or parsed_url.netloc == "":
             return open(source, "rb")
         else:
-            import fsspec
-
             return fsspec.open(source, "rb").open()
 
     else:

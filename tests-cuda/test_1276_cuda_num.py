@@ -14,7 +14,6 @@ except ImportError:
     pytest.skip(reason="too old Numba version", allow_module_level=True)
 
 
-@pytest.mark.xfail(reason="unimplemented CUDA Kernels (awkward_ByteMaskedArray_numnull")
 def test_num_1():
     content = ak.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
@@ -25,11 +24,8 @@ def test_num_1():
     )
     cuda_array = ak.to_backend(array, "cuda")
     assert ak.num(cuda_array, 0) == ak.num(array, 0)
-    with pytest.raises(NotImplementedError):
-        ak.num(cuda_array, 1)
 
 
-@pytest.mark.xfail(reason="unimplemented CUDA Kernels (awkward_ByteMaskedArray_numnull")
 def test_num_2():
     content = ak.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
@@ -40,8 +36,6 @@ def test_num_2():
     )
     cuda_array = ak.to_backend(array, "cuda")
     assert ak.num(cuda_array, 0) == ak.num(array, 0)
-    with pytest.raises(NotImplementedError):
-        ak.num(cuda_array, 1)
 
 
 def test_num_3():
@@ -138,7 +132,7 @@ def test_num_8():
     assert ak.num(cuda_recordarray, 0) == ak.num(recordarray, 0)
 
     content0 = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    content = ak.Array(
+    content1 = ak.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     ).layout
     tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
@@ -199,5 +193,4 @@ def test_num_9():
         )
     )
     cuda_ioa = ak.to_backend(ioa, "cuda")
-    ak.to_backend(cuda_ioa, "cpu")
     assert ak.num(cuda_ioa, 0) == ak.num(ioa, 0)

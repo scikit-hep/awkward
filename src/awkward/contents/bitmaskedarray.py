@@ -13,6 +13,7 @@ from awkward._meta.bitmaskedmeta import BitMaskedMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
 from awkward._regularize import is_integer, is_integer_like
@@ -137,15 +138,11 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
             raise TypeError(
-                "{} 'mask' must be an Index with dtype=uint8, not {}".format(
-                    type(self).__name__, repr(mask)
-                )
+                f"{type(self).__name__} 'mask' must be an Index with dtype=uint8, not {mask!r}"
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         if content.is_union or content.is_indexed or content.is_option:
             raise TypeError(
@@ -155,21 +152,15 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             )
         if not isinstance(valid_when, bool):
             raise TypeError(
-                "{} 'valid_when' must be boolean, not {}".format(
-                    type(self).__name__, repr(valid_when)
-                )
+                f"{type(self).__name__} 'valid_when' must be boolean, not {valid_when!r}"
             )
         if length is not unknown_length and not (is_integer(length) and length >= 0):
             raise TypeError(
-                "{} 'length' must be a non-negative integer, not {}".format(
-                    type(self).__name__, length
-                )
+                f"{type(self).__name__} 'length' must be a non-negative integer, not {length}"
             )
         if not isinstance(lsb_order, bool):
             raise TypeError(
-                "{} 'lsb_order' must be boolean, not {}".format(
-                    type(self).__name__, repr(lsb_order)
-                )
+                f"{type(self).__name__} 'lsb_order' must be boolean, not {lsb_order!r}"
             )
         if (
             content.backend.index_nplike.known_data
@@ -178,9 +169,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             and length > mask.length * 8
         ):
             raise ValueError(
-                "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
-                    type(self).__name__, length, mask.length * 8
-                )
+                f"{type(self).__name__} 'length' ({length}) must be <= len(mask) * 8 ({mask.length * 8})"
             )
         if (
             content.backend.index_nplike.known_data
@@ -189,9 +178,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             and length > content.length * 8
         ):
             raise ValueError(
-                "{} 'length' ({}) must be <= len(content) ({})".format(
-                    type(self).__name__, length, content.length
-                )
+                f"{type(self).__name__} 'length' ({length}) must be <= len(content) ({content.length})"
             )
 
         assert mask.nplike is content.backend.index_nplike
@@ -471,10 +458,17 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 self._lsb_order,
             )
         )
-        return bytemask.data[: self._length].view(np.bool_)
+        return bytemask.data[
+            : self._backend.index_nplike.shape_item_as_index(self._length)
+        ].view(np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
+
+    def _is_getitem_at_placeholder(self) -> bool:
+        if isinstance(self._mask, PlaceholderArray):
+            return True
+        return self._content._is_getitem_at_placeholder()
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
@@ -568,7 +562,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         return self.to_ByteMaskedArray().project(mask)
 
     def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
-        return self.to_ByteMaskedArray._offsets_and_flattened(axis, depth)
+        return self.to_ByteMaskedArray()._offsets_and_flattened(axis, depth)
 
     def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
         # Is the other content is an identity, or a union?

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import sys
 from collections.abc import Mapping
 
 import awkward as ak
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._regularize import is_integer
 from awkward._typing import Any
+from awkward._util import STDOUT
 from awkward.types.type import Type
 
 
@@ -18,15 +18,11 @@ class ArrayType:
     ):
         if not isinstance(content, ak.types.Type):
             raise TypeError(
-                "{} all 'contents' must be Type subclasses, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} all 'contents' must be Type subclasses, not {content!r}"
             )
         if not ((is_integer(length) and length >= 0) or length is unknown_length):
             raise ValueError(
-                "{} 'length' must be a non-negative integer or unknown length, not {}".format(
-                    type(self).__name__, repr(length)
-                )
+                f"{type(self).__name__} 'length' must be a non-negative integer or unknown length, not {length!r}"
             )
         self._content: Type = content
         self._length: ShapeItem = length
@@ -47,8 +43,14 @@ class ArrayType:
     def __str__(self) -> str:
         return "".join(self._str("", True))
 
-    def show(self, stream=sys.stdout):
-        stream.write("".join([*self._str("", False), "\n"]))
+    def show(self, stream=STDOUT):
+        out = "".join(self._str("", False))
+        if out is None:
+            return out
+        else:
+            if stream is STDOUT:
+                stream = STDOUT.stream
+            stream.write(out + "\n")
 
     def _str(self, indent: str, compact: bool) -> list[str]:
         return [

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._nplikes.numpy_like import ArrayLike, NumpyMetadata
@@ -13,7 +12,6 @@ from awkward.errors import AxisError
 __all__ = ("merge_union_of_records",)
 
 np = NumpyMetadata.instance()
-cpu = NumpyBackend.instance()
 
 
 @high_level_function()
@@ -110,10 +108,10 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 indexedoption_index[
                     index_nplike.shape_item_as_index(tagged_content.length)
                 ] = -1
-                field_contents[
-                    tag_for_missing
-                ] = ak.contents.IndexedOptionArray.simplified(
-                    ak.index.Index64(indexedoption_index), tagged_content
+                field_contents[tag_for_missing] = (
+                    ak.contents.IndexedOptionArray.simplified(
+                        ak.index.Index64(indexedoption_index), tagged_content
+                    )
                 )
 
             # Index of None values in tagged content (content with extra None item at end)

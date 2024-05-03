@@ -10,14 +10,15 @@ subtrees:
       - file: getting-started/index
         subtrees:
             - entries:
-              - file: getting-started/try-awkward-array
-              - file: getting-started/community-tutorials
+              - file: getting-started/what-is-an-awkward-array
+              - file: getting-started/10-minutes-to-awkward-array
+              - file: getting-started/uproot-awkward-columnar-hats
+              - file: getting-started/jagged-ragged-awkward-arrays
+              - file: getting-started/thinking-in-arrays
               - file: getting-started/papers-and-talks
       - file: user-guide/index
         subtrees:
             - entries:
-              - file: user-guide/10-minutes-to-awkward-array
-            
               - file: user-guide/how-to-convert
                 title: "Converting arrays"
                 subtrees:
@@ -65,30 +66,30 @@ subtrees:
                       - file: user-guide/how-to-examine-type
                         title: "Data type"
                       - file: user-guide/how-to-examine-single-item
-                        title: "Single item detail [todo]"
+                        title: "Single item detail"
                       - file: user-guide/how-to-examine-list-fields
                         title: "Listing fields/keys/columns"
                       - file: user-guide/how-to-examine-simple-slicing
-                        title: "Simple slicing [todo]"
+                        title: "Simple slicing"
                       - file: user-guide/how-to-examine-checking-validity
-                        title: "Checking validity [todo]"
+                        title: "Checking validity"
 
               - file: user-guide/how-to-math
                 title: "Numerical math"
                 subtrees:
                   - entries:
                       - file: user-guide/how-to-math-numpy
-                        title: "NumPy functions [todo]"
+                        title: "NumPy functions"
                       - file: user-guide/how-to-math-broadcasting
-                        title: "Awkward broadcasting [todo]"
+                        title: "Awkward broadcasting"
                       - file: user-guide/how-to-math-reducing
-                        title: "Reducing (sum/min/any/all) [todo]"
+                        title: "Reducing (sum/min/any/all)"
                       - file: user-guide/how-to-math-statistics
-                        title: "Statistics (mean/var/std) [todo]"
+                        title: "Statistics (mean/var/std)"
                       - file: user-guide/how-to-math-argminmax
-                        title: "Using argmin/argmax [todo]"
+                        title: "Min/max/sort one array by another"
                       - file: user-guide/how-to-math-gpu
-                        title: "On GPUs [todo]"
+                        title: "Awkward Arrays on GPUs"
 
               - file: user-guide/how-to-strings
                 title: "Working with strings"
@@ -106,9 +107,9 @@ subtrees:
                 subtrees:
                   - entries:
                       - file: user-guide/how-to-filter-num
-                        title: "By number of items [todo]"
+                        title: "By number of items"
                       - file: user-guide/how-to-filter-cut-mask
-                        title: "Cuts vs. masks [todo]"
+                        title: "Cuts vs. masks"
                       - file: user-guide/how-to-filter-ragged
                         title: "Using ragged arrays"
                       - file: user-guide/how-to-filter-masked
@@ -122,34 +123,30 @@ subtrees:
                         title: "Zip/unzip and project"
                       - file: user-guide/how-to-restructure-add-fields
                         title: "Adding fields to records"
-                      - file: user-guide/how-to-restructure-rename-records
-                        title: "Renaming records [todo]"
                       - file: user-guide/how-to-restructure-flatten
                         title: "Flattening for plots"
                       - file: user-guide/how-to-restructure-pad
                         title: "Padding/clipping for machine learning"
                       - file: user-guide/how-to-restructure-concatenate
-                        title: "Concatenating and interleaving [todo]"
-                      - file: user-guide/how-to-restructure-sort
-                        title: "Sorting [todo]"
+                        title: "Concatenating and interleaving"
 
               - file: user-guide/how-to-combinatorics
                 title: "Combinatorics"
                 subtrees:
                   - entries:
                       - file: user-guide/how-to-combinatorics-cartesian-combinations
-                        title: 'Cartesian and "n choose k" [todo]'
+                        title: 'Cartesian and "n choose k"'
                       - file: user-guide/how-to-combinatorics-best-match
-                        title: "Best match between collections [todo]"
+                        title: "Best match between collections"
 
               - file: user-guide/how-to-use-in-numba
                 title: "Using arrays in Numba"
                 subtrees:
                   - entries:
+                      - file: user-guide/how-to-use-in-numba-intro.md
+                        title: "Introduction"
                       - file: user-guide/how-to-use-in-numba-features
-                        title: "Supported features [todo]"
-                      - file: user-guide/how-to-use-in-numba-arraybuilder
-                        title: "Building array output [todo]"
+                        title: "Supported features"
                       - file: user-guide/how-to-use-in-numba-cuda
                         title: "Working with CUDA"
 
@@ -163,17 +160,9 @@ subtrees:
                         title: "JIT compiling operations with C++ in cppyy"
 
               - file: user-guide/how-to-specialize
-                title: "Specialized behavior"
+                title: "Special topics"
                 subtrees:
                   - entries:
-                      - file: user-guide/how-to-specialize-subclass
-                        title: "Subclassing Array/Record [todo]"
-                      - file: user-guide/how-to-specialize-override-numpy
-                        title: "Overriding NumPy functions [todo]"
-                      - file: user-guide/how-to-specialize-in-numba
-                        title: "In Numba [todo]"
-                      - file: user-guide/how-to-specialize-lorentz
-                        title: "For physics: Lorentz vectors [todo]"
                       - file: user-guide/how-to-specialize-differentiate-jax
                         title: "Differentiation using JAX"
 

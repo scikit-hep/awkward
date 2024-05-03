@@ -12,6 +12,7 @@ from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer, is_unknown_scalar
 from awkward._parameters import (
@@ -120,14 +121,12 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             np.dtype(np.int64),
         ):
             raise TypeError(
-                "{} 'offsets' must be an Index with dtype in (int32, uint32, int64), "
-                "not {}".format(type(self).__name__, repr(offsets))
+                f"{type(self).__name__} 'offsets' must be an Index with dtype in (int32, uint32, int64), "
+                f"not {offsets!r}"
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         if (
             content.backend.index_nplike.known_data
@@ -141,16 +140,12 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         if parameters is not None and parameters.get("__array__") == "string":
             if not content.is_numpy or not content.parameter("__array__") == "char":
                 raise ValueError(
-                    "{} is a string, so its 'content' must be uint8 NumpyArray of char, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} is a string, so its 'content' must be uint8 NumpyArray of char, not {content!r}"
                 )
         if parameters is not None and parameters.get("__array__") == "bytestring":
             if not content.is_numpy or not content.parameter("__array__") == "byte":
                 raise ValueError(
-                    "{} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {}".format(
-                        type(self).__name__, repr(content)
-                    )
+                    f"{type(self).__name__} is a bytestring, so its 'content' must be uint8 NumpyArray of byte, not {content!r}"
                 )
 
         assert offsets.nplike is content.backend.index_nplike
@@ -305,6 +300,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
 
+    def _is_getitem_at_placeholder(self) -> bool:
+        return isinstance(self._offsets, PlaceholderArray)
+
     def _getitem_at(self, where: IndexType):
         # Wrap `where` by length
         if not is_unknown_scalar(where) and where < 0:
@@ -395,9 +393,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             and offsets.length != self._offsets.length
         ):
             raise AssertionError(
-                "cannot broadcast RegularArray of length {} to length {}".format(
-                    self.length, offsets.length - 1
-                )
+                f"cannot broadcast RegularArray of length {self.length} to length {offsets.length - 1}"
             )
 
         # Check whether we need to slice the content, shift our offsets
@@ -684,7 +680,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                         regular_flathead.data,
                         advanced.data,
                         lenstarts,
-                        regular_flathead.length,
                         self._content.length,
                     ),
                     slicer=head,
@@ -773,7 +768,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                         self._offsets.data,
                         self._offsets.length,
                         inneroffsets.data,
-                        inneroffsets.length,
                     )
                 )
                 return (
@@ -1978,7 +1972,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
-                akcontent.is_option
+                akcontent._arrow_needs_option_type()
             )
 
             if issubclass(npoffsets.dtype.type, np.int32):

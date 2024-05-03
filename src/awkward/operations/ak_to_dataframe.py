@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from functools import reduce
+from operator import iconcat
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy import Numpy
@@ -193,7 +196,8 @@ or
             if layout.is_union:
                 return [(ak.operations.to_numpy(layout), row_arrays, col_names)]
             else:
-                return sum(
+                return reduce(
+                    iconcat,
                     (
                         recurse(layout._getitem_field(n), row_arrays, (*col_names, n))
                         for n in layout.fields
@@ -202,7 +206,8 @@ or
                 )
 
         elif isinstance(layout, ak.contents.RecordArray):
-            return sum(
+            return reduce(
+                iconcat,
                 (
                     recurse(layout._getitem_field(n), row_arrays, (*col_names, n))
                     for n in layout.fields

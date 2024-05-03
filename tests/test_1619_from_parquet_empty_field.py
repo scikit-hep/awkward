@@ -10,7 +10,6 @@ import pytest
 import awkward as ak
 
 pytest.importorskip("pyarrow.parquet")
-pytest.importorskip("fsspec")
 
 
 def test_no_extension(tmp_path):

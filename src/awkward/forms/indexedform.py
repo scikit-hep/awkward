@@ -37,9 +37,7 @@ class IndexedForm(IndexedMeta[Form], Form):
             )
         if not isinstance(content, Form):
             raise TypeError(
-                "{} all 'contents' must be Form subclasses, not {}".format(
-                    type(self).__name__, repr(content)
-                )
+                f"{type(self).__name__} all 'contents' must be Form subclasses, not {content!r}"
             )
 
         self._index = index

@@ -35,19 +35,19 @@ kernels:
               for i in range(bitmasklength):
                   byte = frombitmask[i]
                   tobytemask[(i * 8) + 0] = ((byte & uint8(128)) != 0) != validwhen
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   tobytemask[(i * 8) + 1] = ((byte & uint8(128)) != 0) != validwhen
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   tobytemask[(i * 8) + 2] = ((byte & uint8(128)) != 0) != validwhen
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   tobytemask[(i * 8) + 3] = ((byte & uint8(128)) != 0) != validwhen
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   tobytemask[(i * 8) + 4] = ((byte & uint8(128)) != 0) != validwhen
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   tobytemask[(i * 8) + 5] = ((byte & uint8(128)) != 0) != validwhen
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   tobytemask[(i * 8) + 6] = ((byte & uint8(128)) != 0) != validwhen
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   tobytemask[(i * 8) + 7] = ((byte & uint8(128)) != 0) != validwhen
     automatic-tests: true
 
@@ -114,37 +114,37 @@ kernels:
                       toindex[(i * 8) + 0] = (i * 8) + 0
                   else:
                       toindex[(i * 8) + 0] = -1
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   if ((byte & uint8(128)) != 0) == validwhen:
                       toindex[(i * 8) + 1] = (i * 8) + 1
                   else:
                       toindex[(i * 8) + 1] = -1
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   if ((byte & uint8(128)) != 0) == validwhen:
                       toindex[(i * 8) + 2] = (i * 8) + 2
                   else:
                       toindex[(i * 8) + 2] = -1
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   if ((byte & uint8(128)) != 0) == validwhen:
                       toindex[(i * 8) + 3] = (i * 8) + 3
                   else:
                       toindex[(i * 8) + 3] = -1
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   if ((byte & uint8(128)) != 0) == validwhen:
                       toindex[(i * 8) + 4] = (i * 8) + 4
                   else:
                       toindex[(i * 8) + 4] = -1
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   if ((byte & uint8(128)) != 0) == validwhen:
                       toindex[(i * 8) + 5] = (i * 8) + 5
                   else:
                       toindex[(i * 8) + 5] = -1
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   if ((byte & uint8(128)) != 0) == validwhen:
                       toindex[(i * 8) + 6] = (i * 8) + 6
                   else:
                       toindex[(i * 8) + 6] = -1
-                  byte <<= 1
+                  byte = (byte << 1) & 0xFF
                   if ((byte & uint8(128)) != 0) == validwhen:
                       toindex[(i * 8) + 7] = (i * 8) + 7
                   else:
@@ -187,7 +187,7 @@ kernels:
           for i in range(length):
               if (mask[i] != 0) == validwhen:
                   tocarry[k] = i
-                  outindex[i] = float(k)
+                  outindex[i] = k
                   k = k + 1
               else:
                   outindex[i] = -1
@@ -372,7 +372,7 @@ kernels:
       def awkward_IndexedArray_fill(toindex, toindexoffset, fromindex, length, base):
           for i in range(length):
               fromval = fromindex[i]
-              toindex[toindexoffset + i] = -1 if fromval < 0 else float(fromval + base)
+              toindex[toindexoffset + i] = -1 if fromval < 0 else fromval + base
     automatic-tests: true
 
   - name: awkward_IndexedArray_fill_count
@@ -539,7 +539,7 @@ kernels:
                       toindex[i] = -1
                   else:
                       tocarry[k] = j
-                      toindex[i] = float(k)
+                      toindex[i] = k
                       k = k + 1
     automatic-tests: true
 
@@ -555,7 +555,17 @@ kernels:
           - {name: nextlen, type: "Const[int64_t]", dir: in, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_IndexedArray_local_preparenext(
+        tocarry, starts, parents, parentslength, nextparents, nextlen
+      ):
+          j = 0
+          for i in range(parentslength):
+              parent = parents[i];
+              if j < nextlen and parent == nextparents[j]:
+                  tocarry[i] = j;
+                  j += 1;
+              else:
+                  tocarry[i] = -1;
     automatic-tests: false
 
   - name: awkward_IndexedArray_numnull
@@ -1001,10 +1011,10 @@ kernels:
               stride = fromstops[i] - fromstarts[i]
               tostarts[i] = k
               for j in range(stride):
-                  if index[fromstarts[i] + j] > 0:
+                  if index[fromstarts[i] + j] >= 0:
                       k = k + 1
               tostops[i] = k
-          tolength = k
+          tolength[0] = k
     automatic-tests: false
 
 
@@ -1040,7 +1050,7 @@ kernels:
           for i in range(length):
               stride = fromstops[i] - fromstarts[i]
               for j in range(stride):
-                  if index[fromstarts[i] + j] > 0:
+                  if index[fromstarts[i] + j] >= 0:
                       tocarry[k] = index[fromstarts[i] + j]
                       k = k + 1
     automatic-tests: false
@@ -1108,7 +1118,7 @@ kernels:
               if (stop - start) != count:
                   raise ValueError("cannot broadcast nested list")
               for j in range(start, stop):
-                  tocarry[k] = float(j)
+                  tocarry[k] = j
                   k = k + 1
     automatic-tests: true
 
@@ -1286,8 +1296,8 @@ kernels:
           base,
       ):
           for i in range(length):
-              tostarts[tostartsoffset + i] = float(fromstarts[i] + base)
-              tostops[tostopsoffset + i] = float(fromstops[i] + base)
+              tostarts[tostartsoffset + i] = fromstarts[i] + base
+              tostops[tostopsoffset + i] = fromstops[i] + base
     automatic-tests: true
 
   - name: awkward_ListArray_getitem_jagged_apply
@@ -1346,7 +1356,7 @@ kernels:
           for i in range(sliceouterlen):
               slicestart = slicestarts[i]
               slicestop = slicestops[i]
-              tooffsets[i] = float(k)
+              tooffsets[i] = k
               if slicestart != slicestop:
                   if slicestop < slicestart:
                       raise ValueError("jagged slice's stops[i] < starts[i]")
@@ -1367,7 +1377,7 @@ kernels:
                           raise ValueError("index out of range")
                       tocarry[k] = start + index
                       k = k + 1
-              tooffsets[i + 1] = float(k)
+          tooffsets[sliceouterlen] = k
     automatic-tests: true
 
   - name: awkward_ListArray_getitem_jagged_carrylen
@@ -1430,7 +1440,7 @@ kernels:
                   raise ValueError(
                       "jagged slice inner length differs from array inner length"
                   )
-              tooffsets[i + 1] = tooffsets[i] + float(count)
+              tooffsets[i + 1] = tooffsets[i] + count
     automatic-tests: true
 
   - name: awkward_ListArray_getitem_jagged_expand
@@ -1515,7 +1525,8 @@ kernels:
                   if slicestop > missinglength:
                       raise ValueError("jagged slice's offsets extend beyond its content")
                   for j in range(slicestart, slicestop):
-                      numvalid[0] = numvalid[0] + 1 if missing[j] >= 0 else 0
+                    if  missing[j] >= 0:
+                      numvalid[0] = numvalid[0] + 1
     automatic-tests: false
 
   - name: awkward_ListArray_getitem_jagged_shrink
@@ -1628,7 +1639,6 @@ kernels:
           - {name: fromarray, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: fromadvanced, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
-          - {name: lenarray, type: "int64_t", dir: in, role: default}
           - {name: lencontent, type: "int64_t", dir: in, role: ListArray-length}
       - name: awkward_ListArray64_getitem_next_array_advanced_64
         args:
@@ -1639,7 +1649,6 @@ kernels:
           - {name: fromarray, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: fromadvanced, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
-          - {name: lenarray, type: "int64_t", dir: in, role: default}
           - {name: lencontent, type: "int64_t", dir: in, role: ListArray-length}
       - name: awkward_ListArrayU32_getitem_next_array_advanced_64
         args:
@@ -1650,7 +1659,6 @@ kernels:
           - {name: fromarray, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: fromadvanced, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
-          - {name: lenarray, type: "int64_t", dir: in, role: default}
           - {name: lencontent, type: "int64_t", dir: in, role: ListArray-length}
     description: null
     definition: |
@@ -1662,7 +1670,6 @@ kernels:
           fromarray,
           fromadvanced,
           lenstarts,
-          lenarray,
           lencontent,
       ):
           for i in range(lenstarts):
@@ -1760,7 +1767,7 @@ kernels:
                   length = fromstops[i] - fromstarts[i]
                   regular_start = start
                   regular_stop = stop
-                  awkward_regularize_rangeslice(
+                  regular_start, regular_stop = awkward_regularize_rangeslice(
                       regular_start,
                       regular_stop,
                       step > 0,
@@ -1773,13 +1780,13 @@ kernels:
                       tocarry[k] = fromstarts[i] + j
                       k = k + 1
                       j += step
-                  tooffsets[i + 1] = float(k)
+                  tooffsets[i + 1] = k
           else:
               for i in range(lenstarts):
                   length = fromstops[i] - fromstarts[i]
                   regular_start = start
                   regular_stop = stop
-                  awkward_regularize_rangeslice(
+                  regular_start, regular_stop = awkward_regularize_rangeslice(
                       regular_start,
                       regular_stop,
                       step > 0,
@@ -1792,7 +1799,7 @@ kernels:
                       tocarry[k] = fromstarts[i] + j
                       k = k + 1
                       j += step
-                  tooffsets[i + 1] = float(k)
+                  tooffsets[i + 1] = k
     automatic-tests: false
 
   - name: awkward_ListArray_getitem_next_range_carrylength
@@ -1834,7 +1841,7 @@ kernels:
               length = fromstops[i] - fromstarts[i]
               regular_start = start
               regular_stop = stop
-              awkward_regularize_rangeslice(
+              regular_start, regular_stop = awkward_regularize_rangeslice(
                   regular_start,
                   regular_stop,
                   step > 0,
@@ -1960,11 +1967,12 @@ kernels:
     description: null
     definition: |
       def awkward_ListArray_min_range(tomin, fromstarts, fromstops, lenstarts):
-          shorter = fromstops[0] - fromstarts[0]
-          for i in range(1, lenstarts):
-              rangeval = fromstops[i] - fromstarts[i]
-              shorter = shorter if shorter < rangeval else rangeval
-          tomin[0] = shorter
+          if lenstarts > 0:
+            shorter = fromstops[0] - fromstarts[0]
+            for i in range(1, lenstarts):
+                rangeval = fromstops[i] - fromstarts[i]
+                shorter = shorter if shorter < rangeval else rangeval
+            tomin[0] = shorter
     automatic-tests: true
 
   - name: awkward_ListArray_rpad_and_clip_length_axis1
@@ -2120,25 +2128,22 @@ kernels:
           - {name: outeroffsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: outeroffsetslen, type: "int64_t", dir: in, role: default}
           - {name: inneroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
-          - {name: inneroffsetslen, type: "int64_t", dir: in, role: default}
       - name: awkward_ListOffsetArray64_flatten_offsets_64
         args:
           - {name: tooffsets, type: "List[int64_t]", dir: out}
           - {name: outeroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: outeroffsetslen, type: "int64_t", dir: in, role: default}
           - {name: inneroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
-          - {name: inneroffsetslen, type: "int64_t", dir: in, role: default}
       - name: awkward_ListOffsetArrayU32_flatten_offsets_64
         args:
           - {name: tooffsets, type: "List[int64_t]", dir: out}
           - {name: outeroffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: outeroffsetslen, type: "int64_t", dir: in, role: default}
           - {name: inneroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
-          - {name: inneroffsetslen, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
       def awkward_ListOffsetArray_flatten_offsets(
-          tooffsets, outeroffsets, outeroffsetslen, inneroffsets, inneroffsetslen
+          tooffsets, outeroffsets, outeroffsetslen, inneroffsets
       ):
           for i in range(outeroffsetslen):
               tooffsets[i] = inneroffsets[outeroffsets[i]]
@@ -2153,7 +2158,10 @@ kernels:
           - {name: length, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
+          array = numpy.argsort(fromindex)
+          for i in range(length):
+              tocarry[i] = array[i]
     automatic-tests: false
 
   - name: awkward_ListOffsetArray_reduce_local_nextparents_64
@@ -2351,7 +2359,41 @@ kernels:
           - {name: maxcount, type: "int64_t", dir: in}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
+          nextcarry,
+          nextparents,
+          nextlen,
+          maxnextparents,
+          distincts,
+          distinctslen,
+          offsetscopy,
+          offsets,
+          length,
+          parents,
+          maxcount,
+      ):
+          maxnextparents[0] = 0
+          for i in range(distinctslen):
+              distincts[i] = -1
+
+          k  = 0
+          while k < nextlen:
+              j = 0
+              for i in range(length):
+                  if offsetscopy[i] < offsets[i + 1]:
+                      diff = offsetscopy[i] - offsets[i]
+                      parent = parents[i]
+                      nextcarry[k] = offsetscopy[i]
+                      nextparents[k] = parent*maxcount + diff
+
+                      if maxnextparents[0] < nextparents[k]:
+                          maxnextparents[0] = nextparents[k]
+
+                      if nextparents[k] < distinctslen and distincts[nextparents[k]] == -1:
+                          distincts[nextparents[k]] = j
+                          j += 1
+                      k += 1
+                      offsetscopy[i] += 1
     automatic-tests: false
 
   - name: awkward_ListOffsetArray_rpad_and_clip_axis1
@@ -2378,10 +2420,10 @@ kernels:
     definition: |
       def awkward_ListOffsetArray_rpad_and_clip_axis1(toindex, fromoffsets, length, target):
           for i in range(length):
-              rangeval = float(fromoffsets[i + 1] - fromoffsets[i])
+              rangeval = fromoffsets[i + 1] - fromoffsets[i]
               shorter = target if target < rangeval else rangeval
               for j in range(shorter):
-                  toindex[(i * target) + j] = float(fromoffsets[i]) + j
+                  toindex[(i * target) + j] = fromoffsets[i] + j
               for j in range(shorter, target):
                   toindex[(i * target) + j] = -1
     automatic-tests: false
@@ -2411,9 +2453,9 @@ kernels:
       def awkward_ListOffsetArray_rpad_axis1(toindex, fromoffsets, fromlength, target):
           count = 0
           for i in range(fromlength):
-              rangeval = float(fromoffsets[i + 1] - fromoffsets[i])
+              rangeval = fromoffsets[i + 1] - fromoffsets[i]
               for j in range(rangeval):
-                  toindex[count] = float(fromoffsets[i]) + j
+                  toindex[count] = fromoffsets[i] + j
                   count = count + 1
               for j in range(rangeval, target):
                   toindex[count] = -1
@@ -2533,615 +2575,6 @@ kernels:
                   k = k + 1
     automatic-tests: true
 
-  - name: awkward_NumpyArray_fill
-    specializations:
-      - name: awkward_NumpyArray_fill_toint8_fromint8
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint8_fromint16
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint8_fromint32
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint8_fromint64
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint8_fromuint8
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint8_fromuint16
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint8_fromuint32
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint8_fromuint64
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint8_fromfloat32
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint8_fromfloat64
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint16_fromint8
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint16_fromint16
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint16_fromint32
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint16_fromint64
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint16_fromuint8
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint16_fromuint16
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint16_fromuint32
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint16_fromuint64
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint16_fromfloat32
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint16_fromfloat64
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint32_fromint8
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint32_fromint16
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint32_fromint32
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint32_fromint64
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint32_fromuint8
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint32_fromuint16
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint32_fromuint32
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint32_fromuint64
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint32_fromfloat32
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint32_fromfloat64
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint64_fromint8
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint64_fromint16
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint64_fromint32
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint64_fromint64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint64_fromuint8
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint64_fromuint16
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint64_fromuint32
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint64_fromuint64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint64_fromfloat32
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_toint64_fromfloat64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint8_fromint8
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint8_fromint16
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint8_fromint32
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint8_fromint64
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint8_fromuint8
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint8_fromuint16
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint8_fromuint32
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint8_fromuint64
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint8_fromfloat32
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint8_fromfloat64
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint16_fromint8
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint16_fromint16
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint16_fromint32
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint16_fromint64
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint16_fromuint8
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint16_fromuint16
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint16_fromuint32
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint16_fromuint64
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint16_fromfloat32
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint16_fromfloat64
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint32_fromint8
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint32_fromint16
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint32_fromint32
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint32_fromint64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint32_fromuint8
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint32_fromuint16
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint32_fromuint32
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint32_fromuint64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint32_fromfloat32
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint32_fromfloat64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint64_fromint8
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint64_fromint16
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint64_fromint32
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint64_fromint64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint64_fromuint8
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint64_fromuint16
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint64_fromuint32
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint64_fromuint64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint64_fromfloat32
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_touint64_fromfloat64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat32_fromint8
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat32_fromint16
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat32_fromint32
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat32_fromint64
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat32_fromuint8
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat32_fromuint16
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat32_fromuint32
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat32_fromuint64
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat32_fromfloat32
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat32_fromfloat64
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat64_fromint8
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat64_fromint16
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat64_fromint32
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat64_fromint64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat64_fromuint8
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat64_fromuint16
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat64_fromuint32
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat64_fromuint64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat64_fromfloat32
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tofloat64_fromfloat64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
-          - {name: length, type: "int64_t", dir: in, role: default}
-    description: null
-    definition: |
-      def awkward_NumpyArray_fill(toptr, tooffset, fromptr, length):
-          for i in range(length):
-              toptr[tooffset + i] = float(fromptr[i])
-    automatic-tests: false
-
   - name: awkward_NumpyArray_rearrange_shifted
     specializations:
       - name: awkward_NumpyArray_rearrange_shifted_toint64_fromint64
@@ -3152,15 +2585,13 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: fromparents, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
-          - {name: parentslength, type: "int64_t", dir: in, role: default}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
-          - {name: startslength, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      def awkward_NumpyArray_rearrange_shifted(toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength):
+      def awkward_NumpyArray_rearrange_shifted(toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, fromstarts):
           k = 0
           for i in range(offsetslength - 1):
-              for j in rage(fromoffsets[i + 1] - fromoffsets[i]):
+              for j in range(fromoffsets[i + 1] - fromoffsets[i]):
                   toptr[k] = toptr[k] + fromoffsets[i]
                   k = k + 1
 
@@ -3316,10 +2747,24 @@ kernels:
           - {name: toptr, type: "List[uint8_t]", dir: out}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_pad_zero_to_length(
+        fromptr, fromoffsets, offsetslength, target, toptr
+      ):
+          l_to_char = 0
+          # For each sublist
+          for k_sublist in range(offsetslength - 1):
+              # Copy from src to dst
+              for j_from_char in range(fromoffsets[k_sublist], fromoffsets[k_sublist + 1]):
+                  toptr[l_to_char] = fromptr[j_from_char]
+                  l_to_char += 1
+              # Pad to remaining width
+              n_to_pad = target - (fromoffsets[k_sublist + 1] - fromoffsets[k_sublist])
+              for j_from_char in range(n_to_pad):
+                  toptr[l_to_char] = 0
+                  l_to_char += 1
     automatic-tests: false
 
-  - name: awkward_NumpyArray_subrange_equal
+  - name: awkward_NumpyArray_subrange_equal_bool
     specializations:
       - name: awkward_NumpyArray_subrange_equal_bool
         args:
@@ -3328,6 +2773,27 @@ kernels:
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "List[bool]", dir: out}
+    description: null
+    definition: |
+      def awkward_NumpyArray_subrange_equal_bool(
+        tmpptr, fromstarts, fromstops, length, toequal
+      ):
+          differ = True
+          for i in range(length - 1):
+              leftlen = fromstops[i] - fromstarts[i]
+              for ii in range(i + 1, length - 1):
+                  rightlen = fromstops[ii] - fromstarts[ii]
+                  if leftlen == rightlen:
+                      differ = False
+                      for j in range (leftlen):
+                          if (tmpptr[fromstarts[i] + j] != 0) != (tmpptr[fromstarts[ii] + j] != 0):
+                              differ = True
+                              break
+          toequal[0] = not differ
+    automatic-tests: false
+
+  - name: awkward_NumpyArray_subrange_equal
+    specializations:
       - name: awkward_NumpyArray_subrange_equal_int8
         args:
           - {name: tmpptr, type: "List[int8_t]", dir: in, role: IndexedArray-index}
@@ -3400,7 +2866,21 @@ kernels:
           - {name: toequal, type: "List[bool]", dir: out}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_subrange_equal(
+        tmpptr, fromstarts, fromstops, length, toequal
+      ):
+          differ = True
+          for i in range(length - 1):
+              leftlen = fromstops[i] - fromstarts[i]
+              for ii in range(i + 1, length - 1):
+                  rightlen = fromstops[ii] - fromstarts[ii]
+                  if leftlen == rightlen:
+                      differ = False
+                      for j in range (leftlen):
+                          if tmpptr[fromstarts[i] + j] != tmpptr[fromstarts[ii] + j]:
+                              differ = True
+                              break
+          toequal[0] = not differ
     automatic-tests: false
 
   - name: awkward_RecordArray_reduce_nonlocal_outoffsets_64
@@ -3534,12 +3014,11 @@ kernels:
           - {name: fromadvanced, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: fromarray, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
           - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: lenarray, type: "int64_t", dir: in, role: default}
           - {name: size, type: "int64_t", dir: in, role: RegularArray-size}
     description: null
     definition: |
       def awkward_RegularArray_getitem_next_array_advanced(
-          tocarry, toadvanced, fromadvanced, fromarray, length, lenarray, size
+          tocarry, toadvanced, fromadvanced, fromarray, length, size
       ):
           for i in range(length):
               tocarry[i] = (i * size) + fromarray[fromadvanced[i]]
@@ -3640,7 +3119,7 @@ kernels:
                   toindex[(i * size) + j] = j
     automatic-tests: true
 
-  - name: awkward_RegularArray_reduce_local_nextparents
+  - name: awkward_RegularArray_reduce_local_nextparents_64
     specializations:
       - name: awkward_RegularArray_reduce_local_nextparents_64
         args:
@@ -3649,7 +3128,7 @@ kernels:
           - {name: length, type: "int64_t", dir: in, role: reducer-length}
     description: null
     definition: |
-      def awkward_RegularArray_reduce_local_nextparents(nextparents, size, length):
+      def awkward_RegularArray_reduce_local_nextparents_64(nextparents, size, length):
           k = 0
           for i in range(length):
               for _ in range(size):
@@ -3658,7 +3137,7 @@ kernels:
                   k += 1
     automatic-tests: false
 
-  - name: awkward_RegularArray_reduce_nonlocal_preparenext
+  - name: awkward_RegularArray_reduce_nonlocal_preparenext_64
     specializations:
       - name: awkward_RegularArray_reduce_nonlocal_preparenext_64
         args:
@@ -3669,7 +3148,7 @@ kernels:
           - {name: length, type: "int64_t", dir: in}
     description: null
     definition: |
-      def awkward_RegularArray_reduce_nonlocal_preparenext(nextcarry, nextparents, parents, size, length):
+      def awkward_RegularArray_reduce_nonlocal_preparenext_64(nextcarry, nextparents, parents, size, length):
           k = 0
           for j in range(size):
               for i in range(length):
@@ -3723,7 +3202,7 @@ kernels:
     definition: |
       def awkward_UnionArray_fillindex(toindex, toindexoffset, fromindex, length):
           for i in range(length):
-              toindex[toindexoffset + i] = float(fromindex[i])
+              toindex[toindexoffset + i] = fromindex[i]
     automatic-tests: true
 
   - name: awkward_UnionArray_fillindex_count
@@ -3737,7 +3216,7 @@ kernels:
     definition: |
       def awkward_UnionArray_fillindex_count(toindex, toindexoffset, length):
           for i in range(length):
-              toindex[toindexoffset + i] = float(i)
+              toindex[toindexoffset + i] = i
     automatic-tests: true
 
   - name: awkward_UnionArray_fillna
@@ -3777,7 +3256,7 @@ kernels:
     definition: |
       def awkward_UnionArray_filltags(totags, totagsoffset, fromtags, length, base):
           for i in range(length):
-              totags[totagsoffset + i] = float(fromtags[i] + base)
+              totags[totagsoffset + i] = fromtags[i] + base
     automatic-tests: true
 
   - name: awkward_UnionArray_filltags_const
@@ -3792,7 +3271,7 @@ kernels:
     definition: |
       def awkward_UnionArray_filltags_const(totags, totagsoffset, length, base):
           for i in range(length):
-              totags[totagsoffset + i] = float(base)
+              totags[totagsoffset + i] = base
     automatic-tests: true
 
   - name: awkward_UnionArray_flatten_combine
@@ -4149,8 +3628,8 @@ kernels:
               if outertags[i] == outerwhich:
                   j = outerindex[i]
                   if innertags[j] == innerwhich:
-                      totags[i] = float(towhich)
-                      toindex[i] = float(innerindex[j] + base)
+                      totags[i] = towhich
+                      toindex[i] = innerindex[j] + base
     automatic-tests: true
 
   - name: awkward_UnionArray_simplify_one
@@ -4192,8 +3671,8 @@ kernels:
       ):
           for i in range(length):
               if fromtags[i] == fromwhich:
-                  totags[i] = float(towhich)
-                  toindex[i] = float(fromindex[i] + base)
+                  totags[i] = towhich
+                  toindex[i] = fromindex[i] + base
     automatic-tests: true
 
   - name: awkward_UnionArray_validity
@@ -5104,9 +4583,9 @@ kernels:
     definition: |
       def awkward_reduce_prod(toptr, fromptr, parents, lenparents, outlength):
           for i in range(outlength):
-              toptr[i] = float(1)
+              toptr[i] = 1
           for i in range(lenparents):
-              toptr[parents[i]] *= float(fromptr[i])
+              toptr[parents[i]] *= fromptr[i]
     automatic-tests: true
 
   - name: awkward_reduce_prod_complex
@@ -5355,9 +4834,9 @@ kernels:
     definition: |
       def awkward_reduce_sum(toptr, fromptr, parents, lenparents, outlength):
           for i in range(outlength):
-              toptr[i] = float(0)
+              toptr[i] = 0
           for i in range(lenparents):
-              toptr[parents[i]] += float(fromptr[i])
+              toptr[parents[i]] += fromptr[i]
     automatic-tests: true
 
   - name: awkward_reduce_sum_complex
@@ -5638,142 +5117,18 @@ kernels:
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
     description: null
     definition: |
-      Insert Python definition here
-    automatic-tests: false
-
-  - name: awkward_unique
-    specializations:
-      - name: awkward_unique_bool
-        args:
-          - {name: toptr, type: "List[bool]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_int8
-        args:
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_int16
-        args:
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_int32
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_uint8
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_uint16
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_uint32
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_uint64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_float32
-        args:
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_float64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-    description: null
-    definition: |
-      Insert Python definition here
-    automatic-tests: false
-
-  - name: awkward_unique_copy
-    specializations:
-      - name: awkward_unique_copy_bool
-        args:
-          - {name: fromptr, type: "Const[List[bool]]", dir: in}
-          - {name: toptr, type: "List[bool]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_copy_int8
-        args:
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in}
-          - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_copy_int16
-        args:
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in}
-          - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_copy_int32
-        args:
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in}
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_copy_int64
-        args:
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in}
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_copy_uint8
-        args:
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in}
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_copy_uint16
-        args:
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in}
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_copy_uint32
-        args:
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in}
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_copy_uint64
-        args:
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in}
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_copy_float32
-        args:
-          - {name: fromptr, type: "Const[List[float]]", dir: in}
-          - {name: toptr, type: "List[float]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-      - name: awkward_unique_copy_float64
-        args:
-          - {name: fromptr, type: "Const[List[double]]", dir: in}
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
-    description: null
-    definition: |
-      Insert Python definition here
+      def awkward_sort(
+          toptr, fromptr, length, offsets, offsetslength, parentslength, ascending, stable
+      ):
+          result = []
+          for i in range(offsetslength - 1):
+              sub_list = sorted(fromptr[offsets[i]:offsets[i+1]], reverse=not ascending)
+              if stable:
+                  result += sub_list
+              else:
+                  result += sorted(sub_list, reverse=not ascending)
+          for i in range(parentslength):
+              toptr[i] = result[i]
     automatic-tests: false
 
   - name: awkward_unique_offsets
@@ -5808,91 +5163,122 @@ kernels:
           - {name: startslength, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_unique_offsets(
+        tooffsets, length, fromoffsets, starts, startslength
+      ):
+        j = 0
+        for i in range(length):
+            tooffsets[j] = fromoffsets[i]
+            for k in range(j, startslength - 1):
+                if starts[j] == starts[j + 1]:
+                    tooffsets[j + 1] = fromoffsets[i]
+                    j += 1
+            j += 1
+        tooffsets[startslength] = fromoffsets[length - 1]
     automatic-tests: false
 
-  - name: awkward_unique_ranges
+  - name: awkward_unique_ranges_bool
     specializations:
       - name: awkward_unique_ranges_bool
         args:
           - {name: toptr, type: "List[bool]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
+    description: null
+    definition: |
+      def awkward_unique_ranges_bool(
+        toptr, fromoffsets, offsetslength, tooffsets
+      ):
+        m = 0
+        for i in range(offsetslength - 1):
+          tooffsets[i] = m
+          toptr[m] = toptr[fromoffsets[i]]
+          m += 1
+          for k in range(fromoffsets[i], fromoffsets[i + 1]):
+            if ((toptr[m - 1] != 0) != (toptr[k] != 0)):
+              toptr[m] = toptr[k]
+              m += 1
+        tooffsets[offsetslength - 1] = m
+    automatic-tests: false
+
+  - name: awkward_unique_ranges
+    specializations:
       - name: awkward_unique_ranges_int8
         args:
           - {name: toptr, type: "List[int8_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_ranges_int16
         args:
           - {name: toptr, type: "List[int16_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_ranges_int32
         args:
           - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_ranges_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_ranges_uint8
         args:
           - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_ranges_uint16
         args:
           - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_ranges_uint32
         args:
           - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_ranges_uint64
         args:
           - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_ranges_float32
         args:
           - {name: toptr, type: "List[float]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_ranges_float64
         args:
           - {name: toptr, type: "List[double]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_unique_ranges(
+        toptr, fromoffsets, offsetslength, tooffsets
+      ):
+        m = 0
+        for i in range(offsetslength - 1):
+          tooffsets[i] = m
+          toptr[m] = toptr[fromoffsets[i]]
+          m += 1
+          for k in range(fromoffsets[i], fromoffsets[i + 1]):
+            if (toptr[m - 1] != toptr[k]):
+              toptr[m] = toptr[k]
+              m += 1
+        tooffsets[offsetslength - 1] = m
     automatic-tests: false
 
   - name: awkward_sorting_ranges
@@ -5905,7 +5291,16 @@ kernels:
           - {name: parentslength, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_sorting_ranges(toindex, tolength, parents, parentslength):
+          toindex[0] = 0
+          j = 1
+          k = 1
+          for i in range(1, parentslength):
+              if parents[i - 1] != parents[i]:
+                  toindex[j] = k
+                  j += 1
+              k += 1
+          toindex[tolength - 1] = parentslength
     automatic-tests: false
 
   - name: awkward_sorting_ranges_length
@@ -5917,5 +5312,9 @@ kernels:
           - {name: parentslength, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_sorting_ranges_length(tolength, parents, parentslength):
+          tolength[0] = 2
+          for i in range(1, parentslength):
+              if parents[i - 1] != parents[i]:
+                  tolength[0] = tolength[0] + 1
     automatic-tests: false

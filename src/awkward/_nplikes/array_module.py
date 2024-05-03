@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import math
 from functools import lru_cache
 
@@ -390,13 +391,25 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def unique_values(self, x: ArrayLikeT) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
-        return self._module.unique(
-            x,
-            return_counts=False,
-            return_index=False,
-            return_inverse=False,
-            equal_nan=False,
+        np_unique_accepts_equal_nan = (
+            "equal_nan" in inspect.signature(self._module.unique).parameters
         )
+
+        if np_unique_accepts_equal_nan:
+            return self._module.unique(
+                x,
+                return_counts=False,
+                return_index=False,
+                return_inverse=False,
+                equal_nan=False,
+            )
+        else:
+            return self._module.unique(
+                x,
+                return_counts=False,
+                return_index=False,
+                return_inverse=False,
+            )
 
     def unique_all(self, x: ArrayLikeT) -> UniqueAllResult:
         assert not isinstance(x, PlaceholderArray)
@@ -630,6 +643,26 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         return self._module.cumsum(x, axis=axis, out=maybe_out)
+
+    def real(self, x: ArrayLikeT) -> ArrayLikeT:
+        assert not isinstance(x, PlaceholderArray)
+        xr = self._module.real(x)
+        # For numpy, xr is a view on x, but we don't want to mutate x.
+        return self._module.copy(xr)
+
+    def imag(self, x: ArrayLikeT) -> ArrayLikeT:
+        assert not isinstance(x, PlaceholderArray)
+        xr = self._module.imag(x)
+        # For numpy, xr is a view on x, but we don't want to mutate x.
+        return self._module.copy(xr)
+
+    def angle(self, x: ArrayLikeT, deg: bool = False) -> ArrayLikeT:
+        assert not isinstance(x, PlaceholderArray)
+        return self._module.angle(x, deg)
+
+    def round(self, x: ArrayLikeT, decimals: int = 0) -> ArrayLikeT:
+        assert not isinstance(x, PlaceholderArray)
+        return self._module.round(x, decimals=decimals)
 
     def array_str(
         self,

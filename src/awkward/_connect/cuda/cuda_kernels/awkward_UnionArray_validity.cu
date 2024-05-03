@@ -9,13 +9,14 @@ enum class UNIONARRAY_VALIDITY_ERRORS {
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_UnionArray_validity(const T* tags,
-                            const C* index,
-                            int64_t length,
-                            int64_t numcontents,
-                            const U* lencontents,
-                            uint64_t invocation_index,
-                            uint64_t* err_code) {
+awkward_UnionArray_validity(
+    const T* tags,
+    const C* index,
+    int64_t length,
+    int64_t numcontents,
+    const U* lencontents,
+    uint64_t invocation_index,
+    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < length) {
