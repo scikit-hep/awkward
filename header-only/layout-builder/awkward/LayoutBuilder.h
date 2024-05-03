@@ -1231,7 +1231,12 @@ namespace awkward {
       bool
       is_valid(std::string& error) const noexcept {
 
-        if (max_index_ >= content_.length()) {
+        if (max_index_ == UINTMAX_MAX) {
+          std::stringstream out;
+          out << "Indexed node" << id_ << " has a negative index\n";
+          error.append(out.str());
+          return false;
+        } else if (max_index_ >= content_.length()) {
           std::stringstream out;
           out << "Indexed node" << id_ << " has index " << max_index_
               << " but content has length "
