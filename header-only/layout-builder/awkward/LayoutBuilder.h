@@ -1121,7 +1121,8 @@ namespace awkward {
       /// buffer, using `AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS` for initializing the buffer.
       Indexed()
           : index_(
-                awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)) {
+                awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
+            max_index_(0) {
         size_t id = 0;
         set_id(id);
       }
@@ -1132,7 +1133,8 @@ namespace awkward {
       ///
       /// @param options Initial size configuration of a buffer.
       Indexed(const awkward::BuilderOptions& options)
-          : index_(awkward::GrowableBuffer<PRIMITIVE>(options)) {
+          : index_(awkward::GrowableBuffer<PRIMITIVE>(options)),
+            max_index_(0) {
         size_t id = 0;
         set_id(id);
       }
@@ -1151,6 +1153,19 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Inserts an explicit value in the `index` buffer and
+      /// returns the reference to the builder content.
+      BUILDER&
+      append_index(size_t i) noexcept {
+        index_.append(i);
+        if (i > max_index_) {
+          max_index_ = i;
+        } else if (i < 0) {
+          max_index_ = UINTMAX_MAX;
+        }
+        return content_;
+      }
+
       /// @brief Inserts `size` number indices in the `index` buffer
       /// and returns the reference to the builder content.
       ///
@@ -1159,6 +1174,9 @@ namespace awkward {
       extend_index(size_t size) noexcept {
         size_t start = content_.length();
         size_t stop = start + size;
+        if (stop - 1 > max_index_) {
+          max_index_ = stop - 1;
+        }
         for (size_t i = start; i < stop; i++) {
           index_.append(i);
         }
@@ -1189,6 +1207,7 @@ namespace awkward {
       /// of the builder.
       void
       clear() noexcept {
+        max_index_ = 0;
         index_.clear();
         content_.clear();
       }
@@ -1211,17 +1230,21 @@ namespace awkward {
       /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
-        if (content_.length() != index_.length()) {
-          std::stringstream out;
-          out << "Indexed node" << id_ << " has content length "
-              << content_.length() << " but index has length " << index_.length()
-              << "\n";
-          error.append(out.str());
 
+        if (max_index_ == UINTMAX_MAX) {
+          std::stringstream out;
+          out << "Indexed node" << id_ << " has a negative index\n";
+          error.append(out.str());
           return false;
-        } else {
-          return content_.is_valid(error);
+        } else if (max_index_ >= content_.length()) {
+          std::stringstream out;
+          out << "Indexed node" << id_ << " has index " << max_index_
+              << " but content has length "
+              << content_.length() << "\n";
+          error.append(out.str());
+          return false;
         }
+        return content_.is_valid(error);
       }
 
       /// @brief Copies and concatenates all the accumulated data in each of the
@@ -1290,6 +1313,9 @@ namespace awkward {
 
       /// @brief Unique form ID.
       size_t id_;
+
+      /// @brief Keep track of maximum index value.
+      size_t max_index_;
     };
 
     /// @class IndexedOption
@@ -1310,7 +1336,8 @@ namespace awkward {
       IndexedOption()
           : index_(
                 awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
-            last_valid_(-1) {
+            last_valid_(-1),
+            max_index_(0) {
         size_t id = 0;
         set_id(id);
       }
@@ -1322,7 +1349,8 @@ namespace awkward {
       /// @param options Initial size configuration of a buffer.
       IndexedOption(const awkward::BuilderOptions& options)
           : index_(awkward::GrowableBuffer<PRIMITIVE>(options)),
-            last_valid_(-1) {
+            last_valid_(-1),
+            max_index_(0) {
         size_t id = 0;
         set_id(id);
       }
@@ -1338,7 +1366,18 @@ namespace awkward {
       BUILDER&
       append_valid() noexcept {
         last_valid_ = content_.length();
-        index_.append(last_valid_);
+        return append_valid(last_valid_);
+      }
+
+      /// @brief Inserts an explicit value in the `index` buffer and
+      /// returns the reference to the builder content.
+      BUILDER&
+      append_valid(size_t i) noexcept {
+        last_valid_ = content_.length();
+        index_.append(i);
+        if (i > max_index_) {
+          max_index_ = i;
+        }
         return content_;
       }
 
@@ -1351,6 +1390,9 @@ namespace awkward {
         size_t start = content_.length();
         size_t stop = start + size;
         last_valid_ = stop - 1;
+        if (last_valid_ > max_index_) {
+          max_index_ = last_valid_;
+        }
         for (size_t i = start; i < stop; i++) {
           index_.append(i);
         }
@@ -1411,17 +1453,16 @@ namespace awkward {
       /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
-        if (content_.length() != last_valid_ + 1) {
+        if (max_index_ >= content_.length()) {
           std::stringstream out;
-          out << "IndexedOption node" << id_ << " has content length "
-              << content_.length() << " but last valid index is " << last_valid_
-              << "\n";
+          out << "IndexedOption node" << id_ << " has index " << max_index_
+              << " but content has length "
+              << content_.length() << "\n";
           error.append(out.str());
 
           return false;
-        } else {
-          return content_.is_valid(error);
         }
+        return content_.is_valid(error);
       }
 
       /// @brief Retrieves the names and sizes (in bytes) of the buffers used
@@ -1502,6 +1543,9 @@ namespace awkward {
 
       /// @brief Last valid index.
       size_t last_valid_;
+
+      /// @brief Keep track of maximum index value.
+      size_t max_index_;
     };
 
     /// @class Unmasked
@@ -2298,11 +2342,16 @@ namespace awkward {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
         std::vector<size_t> lengths = content_lengths(index_sequence);
-        for (size_t tag = 0; tag < contents_count_; tag++) {
-          if (lengths[tag] != last_valid_index_[tag] + 1) {
+        std::unique_ptr<INDEX[]> index_ptr(new INDEX[index_.length()]);
+        index_.concatenate(index_ptr.get());
+        std::unique_ptr<TAGS[]> tags_ptr(new TAGS[tags_.length()]);
+        tags_.concatenate(tags_ptr.get());
+        for (size_t i = 0; i < index_.length(); i++) {
+          if (index_ptr.get()[i] < 0 || index_ptr.get()[i] >= lengths[tags_ptr.get()[i]]) {
             std::stringstream out;
-            out << "Union node" << id_ << " has content length " << lengths[tag]
-                << " but index length " << last_valid_index_[tag] << "\n";
+            out << "Union node" << id_ << " has index " << index_ptr.get()[i]
+                << " at position " << i << " but content has length "
+                << lengths[tags_ptr.get()[i]] << "\n";
             error.append(out.str());
 
             return false;

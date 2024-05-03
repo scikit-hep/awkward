@@ -6,7 +6,6 @@ from itertools import permutations
 
 import awkward as ak
 from awkward._backends.dispatch import backend_of_obj
-from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._do import mergeable
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
@@ -22,7 +21,6 @@ from awkward.types.numpytype import primitive_to_dtype
 __all__ = ("concatenate",)
 
 np = NumpyMetadata.instance()
-cpu = NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
@@ -194,7 +192,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                 nextinputs = []
                 for x in inputs:
                     if x.is_option and x.content.is_list:
-                        nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
+                        empty = ak.to_backend([], backend)
+                        nextinputs.append(fill_none(x, empty, axis=0, highlevel=False))
                     else:
                         nextinputs.append(x)
                 inputs = nextinputs

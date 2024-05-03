@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 import awkward as ak
-from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -13,7 +12,6 @@ from awkward._regularize import regularize_axis
 __all__ = ("argcartesian",)
 
 np = NumpyMetadata.instance()
-cpu = NumpyBackend.instance()
 
 
 @high_level_function()
