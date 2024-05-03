@@ -16,7 +16,6 @@ awkward_ListArray_getitem_next_array_advanced(
     const W* fromarray,
     const X* fromadvanced,
     int64_t lenstarts,
-    int64_t lenarray,
     int64_t lencontent,
     uint64_t invocation_index,
     uint64_t* err_code) {

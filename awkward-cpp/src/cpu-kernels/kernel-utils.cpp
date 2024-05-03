@@ -60,7 +60,7 @@ void awkward_ListArray_combinations_step(
     }
     if (j + 1 == n) {
       for (int64_t k = 0;  k < n;  k++) {
-        tocarry[k][toindex[k]] = fromindex[k];
+        tocarry[k][toindex[k]] = (T)fromindex[k];
         toindex[k]++;
       }
     }

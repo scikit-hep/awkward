@@ -7,7 +7,6 @@ awkward_ListOffsetArray_flatten_offsets(
     const C* outeroffsets,
     int64_t outeroffsetslen,
     const U* inneroffsets,
-    int64_t inneroffsetslen,
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {

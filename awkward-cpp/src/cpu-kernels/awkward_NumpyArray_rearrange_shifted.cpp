@@ -13,9 +13,7 @@ awkward_NumpyArray_rearrange_shifted(
   const FROM* fromoffsets,
   int64_t offsetslength,
   const FROM* fromparents,
-  int64_t /* parentslength */,  // FIXME: these arguments are not needed
-  const FROM* fromstarts,
-  int64_t /* startslength */) {
+  const FROM* fromstarts) {
   int64_t k = 0;
   for (int64_t i = 0; i < offsetslength - 1; i++) {
     for (int64_t j = 0; j < fromoffsets[i + 1] - fromoffsets[i]; j++) {
@@ -39,9 +37,7 @@ awkward_NumpyArray_rearrange_shifted_toint64_fromint64(
   const int64_t* fromoffsets,
   int64_t offsetslength,
   const int64_t* fromparents,
-  int64_t parentslength,
-  const int64_t* fromstarts,
-  int64_t startslength) {
+  const int64_t* fromstarts) {
   return awkward_NumpyArray_rearrange_shifted<int64_t, int64_t>(
-      toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength, fromstarts, startslength);
+      toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, fromstarts);
 }
