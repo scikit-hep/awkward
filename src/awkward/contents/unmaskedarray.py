@@ -268,6 +268,12 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
             self._content._carry(carry, allow_lazy), parameters=self._parameters
         )
 
+    def _nextcarry_outindex(self) -> tuple[int, ak.index.Index64, ak.index.Index64]:
+        counting = self._backend.index_nplike.arange(self._content.length)
+        nextcarry = ak.index.Index64(counting, nplike=self._backend.index_nplike)
+        outindex = ak.index.Index64(counting, nplike=self._backend.index_nplike)
+        return 0, nextcarry, outindex
+
     def _getitem_next_jagged(
         self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
     ) -> Content:
