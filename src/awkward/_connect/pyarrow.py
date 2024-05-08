@@ -134,20 +134,22 @@ if pyarrow is not None:
             return AwkwardArrowArray
 
         def __arrow_ext_serialize__(self):
-            return json.dumps(
-                {
-                    "mask_type": self._mask_type,
-                    "node_type": self._node_type,
-                    "mask_parameters": self._mask_parameters,
-                    "node_parameters": self._node_parameters,
-                    "record_is_tuple": self._record_is_tuple,
-                    "record_is_scalar": self._record_is_scalar,
-                    "is_nonnullable_nulltype": self._is_nonnullable_nulltype,
-                }
-            ).encode(errors="surrogatescape")
+            return json.dumps(self._metadata_as_dict()).encode(errors="surrogatescape")
+
+        def _metadata_as_dict(self):
+            return {
+                "mask_type": self._mask_type,
+                "node_type": self._node_type,
+                "mask_parameters": self._mask_parameters,
+                "node_parameters": self._node_parameters,
+                "record_is_tuple": self._record_is_tuple,
+                "record_is_scalar": self._record_is_scalar,
+                "is_nonnullable_nulltype": self._is_nonnullable_nulltype,
+            }
 
         @classmethod
         def __arrow_ext_deserialize__(cls, storage_type, serialized):
+            # pyarrow calls this internally
             metadata = json.loads(serialized.decode(errors="surrogatescape"))
             return cls(
                 storage_type,
