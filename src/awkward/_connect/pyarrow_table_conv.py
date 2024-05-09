@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 
 import pyarrow
-
 from .pyarrow import AwkwardArrowType
 
 
@@ -15,9 +14,9 @@ def convert_awkward_arrow_table_to_native(aatable: pyarrow.Table) -> pyarrow.Tab
       convert the resulting table back into one with extensionarrays.
     """
     new_fields = []
-    metadata = {}
+    metadata = []
     for aacol_field in aatable.schema:
-        metadata[aacol_field.name] = collect_ak_arr_type_metadata(aacol_field)
+        metadata.append(collect_ak_arr_type_metadata(aacol_field))
         new_field = awkward_arrow_field_to_native(aacol_field)
         new_fields.append(new_field)
     metadata_serial = json.dumps(metadata).encode(errors="surrogatescape")
@@ -36,17 +35,20 @@ def collect_ak_arr_type_metadata(aafield: pyarrow.Field) -> dict | list | None:
     typ = aafield.type
     if not isinstance(typ, AwkwardArrowType):
         return None  # Not expected to reach here
+    metadata = typ._metadata_as_dict()
+    metadata["field_name"] = aafield.name
     if typ.num_fields == 0:
         # Simple type
-        return typ._metadata_as_dict()
+        return metadata
     # Compound type
     subfield_metadata_list = []
     for ifield in range(typ.num_fields):
         # Note: You can treat some, but not all, compound pyarrow types as iterators.
         # Note: AwkwardArrowType provides num_fields property but not field() method.
         ak_field = typ.storage_type.field(ifield)
-        subfield_metadata_list.append(collect_ak_arr_type_metadata(ak_field))
-    metadata = typ._metadata_as_dict()
+        subfield_metadata_list.append(
+            collect_ak_arr_type_metadata(ak_field)  # Recurse
+        )
     metadata["subfield_metadata"] = subfield_metadata_list
     return metadata
 
