@@ -151,6 +151,10 @@ if pyarrow is not None:
         def __arrow_ext_deserialize__(cls, storage_type, serialized):
             # pyarrow calls this internally
             metadata = json.loads(serialized.decode(errors="surrogatescape"))
+            return cls._from_metadata_object(storage_type, metadata)
+
+        @classmethod
+        def _from_metadata_object(cls, storage_type, metadata):
             return cls(
                 storage_type,
                 metadata["mask_type"],
