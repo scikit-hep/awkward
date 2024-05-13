@@ -17,9 +17,9 @@ class ArrayViewArgHandler:
             if isinstance(val.layout.backend, CupyBackend):
                 # Use uint64 for pos, start, stop, the array pointers values, and the pylookup value
                 tys = numba.types.UniTuple(numba.types.uint64, 5)
-                
+
                 view = val._numbaview
-                
+
                 start = view.start
                 stop = view.stop
                 pos = view.pos
