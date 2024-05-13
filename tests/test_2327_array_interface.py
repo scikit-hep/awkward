@@ -13,7 +13,8 @@ def test_wrap_index_cupy():
     data = cp.arange(10, dtype=cp.int64)
     index = ak.index.Index64(data)
     other_data = cp.asarray(index)
-    assert cp.shares_memory(data, other_data)
+    result = cp.shares_memory(data, other_data)
+    assert result is True
 
 
 def test_wrap_index_numpy():
