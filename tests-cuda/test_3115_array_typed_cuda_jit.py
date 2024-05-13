@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
 import awkward as ak
@@ -24,11 +23,11 @@ except ImportError:
 
 def test_array_typed():
     # create an ak.Array with a cuda backend:
-    gpu_arr_type = ak.Array([[[0, 1], [2, 3]], [[4, 5]]], backend='cuda').numba_type
-    
+    gpu_arr_type = ak.Array([[[0, 1], [2, 3]], [[4, 5]]], backend="cuda").numba_type
+
     @nb.cuda.jit(types.void(gpu_arr_type), extensions=[ak.numba.cuda])
     def cuda_kernel(arr):
         return None
-    
-    array = ak.Array([[[0, 1], [2, 3]], [[4, 5]]], backend='cuda')
+
+    array = ak.Array([[[0, 1], [2, 3]], [[4, 5]]], backend="cuda")
     cuda_kernel[1024, 1024](array)
