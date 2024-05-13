@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
 import awkward as ak
@@ -15,4 +14,3 @@ def test_wrap_index_cupy():
     other_data = cp.asarray(index)
     result = cp.shares_memory(data, other_data)
     assert result is True
-  
