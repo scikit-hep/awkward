@@ -7,6 +7,7 @@ import pytest
 import awkward as ak
 
 numba = pytest.importorskip("numba")
+jax = pytest.importorskip("jax")
 
 
 def test():
