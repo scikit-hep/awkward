@@ -99,7 +99,7 @@ jobs:
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v2.17.0
+    - uses: pypa/cibuildwheel@v2.18.0
       env:
         CIBW_BUILD: "${{ matrix.build }}*"
         CIBW_ARCHS: ${{ matrix.arch }}
@@ -148,7 +148,7 @@ jobs:
 
     - uses: docker/setup-qemu-action@v3.0.0
 
-    - uses: pypa/cibuildwheel@v2.17.0
+    - uses: pypa/cibuildwheel@v2.18.0
       env:
         CIBW_BUILD: cp${{ matrix.python }}-*
         CIBW_ARCHS: ${{ matrix.arch }}
