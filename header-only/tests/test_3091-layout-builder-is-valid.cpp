@@ -53,7 +53,7 @@ test_Indexed_categorical_invalid_index() {
   subbuilder.append("two");
   builder.append_index(9);
   bool assertion = builder.is_valid(error) == !BUG_FIXED;
-  std::cout << error << std::endl;
+  // std::cout << error << std::endl;
   assert(assertion);
 }
 
@@ -71,7 +71,7 @@ test_IndexedOption_categorical() {
 
   std::string error;
   bool assertion = builder.is_valid(error);
-  std::cout << error << std::endl;
+  // std::cout << error << std::endl;
   assert(assertion);
 
   // index and content could have different lengths
@@ -95,14 +95,14 @@ test_IndexedOption_categorical_invalid_index() {
 
   std::string error;
   bool assertion = builder.is_valid(error);
-  std::cout << error << std::endl;
+  // std::cout << error << std::endl;
   assert(assertion);
 
   // index should be less than the length of content
   builder.append_valid(9);
   subbuilder.append("two");
   assertion = builder.is_valid(error) == !BUG_FIXED;
-  std::cout << error << std::endl;
+  // std::cout << error << std::endl;
   assert(assertion);
 }
 
