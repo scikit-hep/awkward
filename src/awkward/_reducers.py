@@ -276,7 +276,7 @@ class Count(KernelReducer):
                 "awkward_reduce_count_64",
                 result.dtype.type,
                 parents.dtype.type,
-                starts.dtype.type
+                starts.dtype.type,
             ](
                 result,
                 parents.data,
