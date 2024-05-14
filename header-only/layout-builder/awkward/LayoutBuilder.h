@@ -1149,8 +1149,7 @@ namespace awkward {
       /// returns the reference to the builder content.
       BUILDER&
       append_index() noexcept {
-        index_.append(content_.length());
-        return content_;
+        return append_index(content_.length());
       }
 
       /// @brief Inserts an explicit value in the `index` buffer and
