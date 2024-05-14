@@ -108,6 +108,16 @@ test_IndexedOption_categorical_invalid_index() {
 
 void
 test_Indexed_empty() {
+  IndexedBuilder<uint32_t, StringBuilder<double>> builder;
+  assert(builder.length() == 0);
+
+  // empty indexed builder should be valid
+  std::string error;
+  assert(builder.is_valid(error));
+}
+
+void
+test_IndexedOption_empty() {
   IndexedOptionBuilder<uint32_t, StringBuilder<double>> builder;
   assert(builder.length() == 0);
 
@@ -125,6 +135,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_Indexed_categorical_invalid_index();
   test_IndexedOption_categorical();
   test_IndexedOption_categorical_invalid_index();
+  test_IndexedOption_empty();
   test_Indexed_empty();
 
   return 0;
