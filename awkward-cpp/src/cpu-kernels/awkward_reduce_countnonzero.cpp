@@ -9,6 +9,7 @@ ERROR awkward_reduce_countnonzero(
   int64_t* toptr,
   const IN* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   for (int64_t i = 0;  i < outlength;  i++) {
@@ -23,12 +24,14 @@ ERROR awkward_reduce_countnonzero_bool_64(
   int64_t* toptr,
   const bool* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<bool>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -36,12 +39,14 @@ ERROR awkward_reduce_countnonzero_int8_64(
   int64_t* toptr,
   const int8_t* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<int8_t>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -49,12 +54,14 @@ ERROR awkward_reduce_countnonzero_uint8_64(
   int64_t* toptr,
   const uint8_t* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<uint8_t>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -62,12 +69,14 @@ ERROR awkward_reduce_countnonzero_int16_64(
   int64_t* toptr,
   const int16_t* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<int16_t>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -75,12 +84,14 @@ ERROR awkward_reduce_countnonzero_uint16_64(
   int64_t* toptr,
   const uint16_t* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<uint16_t>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -88,12 +99,14 @@ ERROR awkward_reduce_countnonzero_int32_64(
   int64_t* toptr,
   const int32_t* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<int32_t>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -101,12 +114,14 @@ ERROR awkward_reduce_countnonzero_uint32_64(
   int64_t* toptr,
   const uint32_t* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<uint32_t>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -114,12 +129,14 @@ ERROR awkward_reduce_countnonzero_int64_64(
   int64_t* toptr,
   const int64_t* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<int64_t>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -127,12 +144,14 @@ ERROR awkward_reduce_countnonzero_uint64_64(
   int64_t* toptr,
   const uint64_t* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<uint64_t>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -140,12 +159,14 @@ ERROR awkward_reduce_countnonzero_float32_64(
   int64_t* toptr,
   const float* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<float>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -153,12 +174,14 @@ ERROR awkward_reduce_countnonzero_float64_64(
   int64_t* toptr,
   const double* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_countnonzero<double>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }

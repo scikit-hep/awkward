@@ -9,6 +9,7 @@ ERROR awkward_reduce_max_complex(
   OUT* toptr,
   const IN* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength,
   OUT identity) {
@@ -32,6 +33,7 @@ ERROR awkward_reduce_max_complex64_complex64_64(
   float* toptr,
   const float* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength,
   float identity) {
@@ -39,6 +41,7 @@ ERROR awkward_reduce_max_complex64_complex64_64(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength,
     identity);
@@ -47,6 +50,7 @@ ERROR awkward_reduce_max_complex128_complex128_64(
   double* toptr,
   const double* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength,
   double identity) {
@@ -54,6 +58,7 @@ ERROR awkward_reduce_max_complex128_complex128_64(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength,
     identity);

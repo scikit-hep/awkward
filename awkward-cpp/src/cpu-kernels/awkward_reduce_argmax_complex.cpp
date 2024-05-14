@@ -9,6 +9,7 @@ ERROR awkward_reduce_argmax_complex(
   OUT* toptr,
   const IN* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   for (int64_t k = 0;  k < outlength;  k++) {
@@ -29,12 +30,14 @@ ERROR awkward_reduce_argmax_complex64_64(
   int64_t* toptr,
   const float* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_argmax_complex<int64_t, float>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -42,12 +45,14 @@ ERROR awkward_reduce_argmax_complex128_64(
   int64_t* toptr,
   const double* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_argmax_complex<int64_t, double>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }

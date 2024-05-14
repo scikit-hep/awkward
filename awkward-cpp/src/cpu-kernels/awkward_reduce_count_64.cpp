@@ -7,6 +7,7 @@
 ERROR awkward_reduce_count_64(
   int64_t* toptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   for (int64_t i = 0;  i < outlength;  i++) {

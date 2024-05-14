@@ -156,10 +156,12 @@ class ArgMin(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -172,10 +174,12 @@ class ArgMin(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -218,10 +222,12 @@ class ArgMax(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -234,10 +240,12 @@ class ArgMax(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -265,10 +273,14 @@ class Count(KernelReducer):
         assert parents.nplike is array.backend.index_nplike
         array.backend.maybe_kernel_error(
             array.backend[
-                "awkward_reduce_count_64", result.dtype.type, parents.dtype.type
+                "awkward_reduce_count_64",
+                result.dtype.type,
+                parents.dtype.type,
+                starts.dtype.type
             ](
                 result,
                 parents.data,
+                starts.data,
                 parents.length,
                 outlength,
             )
@@ -302,10 +314,12 @@ class CountNonzero(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -318,10 +332,12 @@ class CountNonzero(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -360,10 +376,12 @@ class Sum(KernelReducer):
                         np.int64,
                         array.dtype.type,
                         parents.dtype.type,
+                        starts.dtype.type,
                     ](
                         result,
                         array.data,
                         parents.data,
+                        starts.data,
                         parents.length,
                         outlength,
                     )
@@ -376,10 +394,12 @@ class Sum(KernelReducer):
                         np.int32,
                         array.dtype.type,
                         parents.dtype.type,
+                        starts.dtype.type,
                     ](
                         result,
                         array.data,
                         parents.data,
+                        starts.data,
                         parents.length,
                         outlength,
                     )
@@ -402,10 +422,12 @@ class Sum(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        starts.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        starts.data,
                         parents.length,
                         outlength,
                     )
@@ -418,10 +440,12 @@ class Sum(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        starts.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        starts.data,
                         parents.length,
                         outlength,
                     )
@@ -464,10 +488,12 @@ class Prod(KernelReducer):
                     result.dtype.type,
                     array.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     array.data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -493,10 +519,12 @@ class Prod(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        starts.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        starts.data,
                         parents.length,
                         outlength,
                     )
@@ -509,10 +537,12 @@ class Prod(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        starts.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        starts.data,
                         parents.length,
                         outlength,
                     )
@@ -550,10 +580,12 @@ class Any(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -566,10 +598,12 @@ class Any(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -603,10 +637,12 @@ class All(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -619,10 +655,12 @@ class All(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -683,10 +721,12 @@ class Min(KernelReducer):
                     result.dtype.type,
                     array.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     array.data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -707,10 +747,12 @@ class Min(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        starts.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        starts.data,
                         parents.length,
                         outlength,
                         self._identity_for(result.dtype),
@@ -724,10 +766,12 @@ class Min(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        starts.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        starts.data,
                         parents.length,
                         outlength,
                         self._identity_for(result.dtype),
@@ -791,10 +835,12 @@ class Max(KernelReducer):
                     result.dtype.type,
                     array.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     array.data,
                     parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -815,10 +861,12 @@ class Max(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        starts.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        starts.data,
                         parents.length,
                         outlength,
                         self._identity_for(result.dtype),
@@ -832,10 +880,12 @@ class Max(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        starts.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        starts.data,
                         parents.length,
                         outlength,
                         self._identity_for(result.dtype),

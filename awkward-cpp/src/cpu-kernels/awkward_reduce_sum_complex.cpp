@@ -9,6 +9,7 @@ ERROR awkward_reduce_sum_complex(
   OUT* toptr,
   const IN* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   for (int64_t i = 0;  i < outlength;  i++) {
@@ -26,12 +27,14 @@ ERROR awkward_reduce_sum_complex64_complex64_64(
   float* toptr,
   const float* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_sum_complex<float, float>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
@@ -39,12 +42,14 @@ ERROR awkward_reduce_sum_complex128_complex128_64(
   double* toptr,
   const double* fromptr,
   const int64_t* parents,
+  const int64_t* starts,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_sum_complex<double, double>(
     toptr,
     fromptr,
     parents,
+    starts,
     lenparents,
     outlength);
 }
