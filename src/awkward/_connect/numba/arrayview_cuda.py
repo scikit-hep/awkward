@@ -15,11 +15,14 @@ class ArrayViewArgHandler:
     def prepare_args(self, ty, val, stream, retr):
         if isinstance(val, ak.Array):
             if isinstance(val.layout.backend, CupyBackend):
+                if ty is not val.numba_type:
+                    raise NumbaTypeError(
+                        f"the array type: {val.numba_type} does not match "
+                        f"the kernel signature type: {ty}"
+                    )
+                
                 # Use uint64 for pos, start, stop, the array pointers values, and the pylookup value
                 tys = numba.types.UniTuple(numba.types.uint64, 5)
-
-                if val._numbaview is None:
-                    _ = val.numba_type
 
                 view = val._numbaview
                 assert view is not None
