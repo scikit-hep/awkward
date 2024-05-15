@@ -20,7 +20,7 @@ class ArrayViewArgHandler:
                         f"the array type: {val.numba_type} does not match "
                         f"the kernel signature type: {ty}"
                     )
-                
+
                 # Use uint64 for pos, start, stop, the array pointers values, and the pylookup value
                 tys = numba.types.UniTuple(numba.types.uint64, 5)
 
