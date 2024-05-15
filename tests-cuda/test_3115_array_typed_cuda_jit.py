@@ -31,3 +31,10 @@ def test_array_typed():
 
     array = ak.Array([[[0, 1], [2, 3]], [[4, 5]]], backend="cuda")
     cuda_kernel[1024, 1024](array)
+
+    other_array = ak.Array([[1.1, 2.2, 3.3], [None, 4.4], None, [None, 5.5]], backend='cuda')
+    gpu_other_arr_type = other_array.numba_type
+
+    with pytest.raises(nb.core.errors.NumbaTypeError):
+        cuda_kernel[1024, 1024](other_array)
+
