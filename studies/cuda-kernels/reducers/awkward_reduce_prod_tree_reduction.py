@@ -2,16 +2,16 @@ import cupy as cp
 
 cuda_kernel = """
 extern "C" {
-    __global__ void awkward_reduce_sum_a(int* toptr, int* fromptr, int* parents, int lenparents, int outlength) {
+    __global__ void awkward_reduce_prod_a(int* toptr, int* fromptr, int* parents, int lenparents, int outlength) {
        int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
        if (thread_id < outlength) {
-          toptr[thread_id] = 0;
+          toptr[thread_id] = 1;
        }
     }
 }
     extern "C" {
-    __global__ void awkward_reduce_sum_b(int *toptr, int *fromptr, int *parents, int lenparents, int outlength) {
+    __global__ void awkward_reduce_prod_b(int *toptr, int *fromptr, int *parents, int lenparents, int outlength) {
         extern __shared__ int shared[];
 
         int idx = threadIdx.x;
@@ -24,7 +24,7 @@ extern "C" {
             for (int stride = 1; stride < blockDim.x; stride *= 2) {
                 int index = idx - stride;
                 if (index >= 0 && parents[index] == parents[idx]) {
-                    shared[idx] += shared[index];
+                    shared[idx] *= shared[index];
                 }
                 __syncthreads();
             }
@@ -55,11 +55,11 @@ toptr = cp.zeros(outlength, dtype=cp.int32)
 
 raw_module = cp.RawModule(code=cuda_kernel)
 
-awkward_reduce_sum_a = raw_module.get_function('awkward_reduce_sum_a')
-awkward_reduce_sum_b = raw_module.get_function('awkward_reduce_sum_b')
+awkward_reduce_prod_a = raw_module.get_function('awkward_reduce_prod_a')
+awkward_reduce_prod_b = raw_module.get_function('awkward_reduce_prod_b')
 
-awkward_reduce_sum_a((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength))
-awkward_reduce_sum_b((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength))
+awkward_reduce_prod_a((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength))
+awkward_reduce_prod_b((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength))
 
 toptr_host = toptr.get()
 print("tree reduction toptr:", toptr_host)
