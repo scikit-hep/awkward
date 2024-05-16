@@ -174,6 +174,9 @@ if pyarrow is not None:
         def num_fields(self):
             return self.storage_type.num_fields
 
+        def field(self, i: int | str):
+            return self.storage_type.field(i)
+
     pyarrow.register_extension_type(
         AwkwardArrowType(pyarrow.null(), None, None, None, None, None, None)
     )

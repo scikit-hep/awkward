@@ -4,7 +4,7 @@ import json
 
 import pyarrow
 
-from .pyarrow import AwkwardArrowType
+from .pyarrow import AwkwardArrowType, to_awkwardarrow_storage_types
 
 AWKWARD_INFO_KEY = b"awkward_info"  # metadata field in Table schema
 
@@ -46,9 +46,8 @@ def convert_native_arrow_table_to_awkward(table: pyarrow.Table) -> pyarrow.Table
             native_arrow_field_to_akarraytype(aacol_field, field_metadata)
         )
     new_schema = pyarrow.schema(new_fields, metadata=table.schema.metadata)
-    # new_table = table.cast(new_schema)
-    # return new_table
-    return new_schema
+    # return table.cast(new_schema)  # Similar (same even?) results
+    return replace_schema(table, new_schema)
 
 
 def collect_ak_arr_type_metadata(aafield: pyarrow.Field) -> dict | list | None:
@@ -106,12 +105,7 @@ def awkward_arrow_field_to_native(aafield: pyarrow.Field) -> pyarrow.Field:
         native_fields.append(
             awkward_arrow_field_to_native(ak_field)  # Recurse
         )
-
-    typ_cls = typ.storage_type.__class__
-    if typ_cls not in _pyarrow_type_builder:
-        raise NotImplementedError(f"Class {typ_cls} is not handled for conversion.")
-    native_type = _pyarrow_type_builder[typ_cls](*native_fields)
-
+    native_type = _make_pyarrow_type_like(typ, native_fields)
     new_field = pyarrow.field(aafield.name, type=native_type, nullable=aafield.nullable)
     # print(f"Returning new field {new_field.name}: {new_field}")
     return new_field
@@ -140,11 +134,82 @@ def native_arrow_field_to_akarraytype(
             awkwardized_fields.append(
                 native_arrow_field_to_akarraytype(subfield, submeta)  # Recurse
             )
-
-        typ_cls = storage_type.__class__
-        if typ_cls not in _pyarrow_type_builder:
-            raise NotImplementedError(f"Class {typ_cls} is not handled for conversion.")
-        storage_type = _pyarrow_type_builder[typ_cls](*awkwardized_fields)
+        storage_type = _make_pyarrow_type_like(storage_type, awkwardized_fields)
 
     ak_type = AwkwardArrowType._from_metadata_object(storage_type, metadata)
     return pyarrow.field(ntv_field.name, type=ak_type, nullable=ntv_field.nullable)
+
+
+def _make_pyarrow_type_like(typ: pyarrow.Type, fields: list[pyarrow.Field]) -> pyarrow.Type:
+    storage_type = to_awkwardarrow_storage_types(typ)[1]
+    if isinstance(storage_type, pyarrow.lib.DictionaryType):
+        # TODO: num_fields == 0 but sub-types are value_type and index_type
+        return pyarrow.dictionary(storage_type.index_type, storage_type.value_type)
+    if isinstance(storage_type, pyarrow.lib.FixedSizeListType):
+        return pyarrow.list_(fields[0], storage_type.list_size)
+    if isinstance(storage_type, pyarrow.lib.ListType):
+        return pyarrow.list_(fields[0])
+    if isinstance(storage_type, pyarrow.lib.LargeListType):
+        return pyarrow.large_list(fields[0])
+    if isinstance(storage_type, pyarrow.lib.MapType):
+        return pyarrow.map_(storage_type.index_type, fields[0])
+    if isinstance(storage_type, pyarrow.lib.StructType):
+        return pyarrow.struct(fields)
+    if isinstance(storage_type, pyarrow.lib.UnionType):
+        return pyarrow.union(fields, storage_type.mode, storage_type.type_codes)
+    if isinstance(storage_type, pyarrow.lib.DataType) and storage_type.num_fields == 0:
+        # Catch-all for primitive types, nulltype, string types, FixedSizeBinaryType
+        return storage_type
+    raise NotImplementedError(f"Type {typ} is not handled for conversion.")
+
+
+def replace_schema(table: pyarrow.Table, new_schema: pyarrow.Schema) -> pyarrow.Table:
+    """
+    This function is like `pyarrow.Table.cast()` except it only works if the
+    new schema uses the same storage types and storage geometries as the original.
+    It explicitly will not convert one primitive type to another.
+    """
+    new_batches = []
+    for batch in table.to_batches():
+        columns = []
+        for col, new_field in zip(batch.itercolumns(), new_schema):
+            columns.append(
+                array_with_replacement_type(col, new_field.type)
+            )
+        new_batches.append(
+            pyarrow.RecordBatch.from_arrays(arrays=columns, schema=new_schema)
+        )
+    return pyarrow.Table.from_batches(new_batches)
+
+
+def array_with_replacement_type(orig_array: pyarrow.Array, new_type: pyarrow.Type) -> pyarrow.Array:
+    children_orig = _get_children(orig_array)
+    if len(children_orig) != new_type.num_fields:
+        # Probable error in _get_children, not the passed arguments.
+        raise AssertionError(f"Number of children: {len(children_orig) =} != {new_type.num_fields =}")
+    children_new = []
+    for idx, child in enumerate(children_orig):
+        new_child_type = new_type.field(idx).type
+        children_new.append(
+            array_with_replacement_type(child, new_child_type)
+        )
+    own_buffers = orig_array.buffers()[:orig_array.type.num_buffers]
+    return pyarrow.Array.from_buffers(
+        type=new_type,
+        length=len(orig_array),
+        buffers=own_buffers,
+        null_count=orig_array.null_count,
+        offset=orig_array.offset,
+        children=children_new,
+    )
+
+
+def _get_children(array: pyarrow.Array) -> list[pyarrow.Array]:
+    arrow_type = to_awkwardarrow_storage_types(array.type)[1]
+    if array.type.num_fields == 0:
+        return []
+    if hasattr(array, "field"):
+        return [array.field(idx) for idx in range(array.type.num_fields)]
+    if hasattr(array, "values"):
+        return [array.values, ]
+    raise NotImplementedError(f"Cannot get children of arrow type {arrow_type}")
