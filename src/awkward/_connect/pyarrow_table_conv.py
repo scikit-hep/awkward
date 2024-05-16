@@ -140,7 +140,9 @@ def native_arrow_field_to_akarraytype(
     return pyarrow.field(ntv_field.name, type=ak_type, nullable=ntv_field.nullable)
 
 
-def _make_pyarrow_type_like(typ: pyarrow.Type, fields: list[pyarrow.Field]) -> pyarrow.Type:
+def _make_pyarrow_type_like(
+    typ: pyarrow.Type, fields: list[pyarrow.Field]
+) -> pyarrow.Type:
     storage_type = to_awkwardarrow_storage_types(typ)[1]
     if isinstance(storage_type, pyarrow.lib.DictionaryType):
         # TODO: num_fields == 0 but sub-types are value_type and index_type
@@ -173,27 +175,27 @@ def replace_schema(table: pyarrow.Table, new_schema: pyarrow.Schema) -> pyarrow.
     for batch in table.to_batches():
         columns = []
         for col, new_field in zip(batch.itercolumns(), new_schema):
-            columns.append(
-                array_with_replacement_type(col, new_field.type)
-            )
+            columns.append(array_with_replacement_type(col, new_field.type))
         new_batches.append(
             pyarrow.RecordBatch.from_arrays(arrays=columns, schema=new_schema)
         )
     return pyarrow.Table.from_batches(new_batches)
 
 
-def array_with_replacement_type(orig_array: pyarrow.Array, new_type: pyarrow.Type) -> pyarrow.Array:
+def array_with_replacement_type(
+    orig_array: pyarrow.Array, new_type: pyarrow.Type
+) -> pyarrow.Array:
     children_orig = _get_children(orig_array)
     if len(children_orig) != new_type.num_fields:
         # Probable error in _get_children, not the passed arguments.
-        raise AssertionError(f"Number of children: {len(children_orig) =} != {new_type.num_fields =}")
+        raise AssertionError(
+            f"Number of children: {len(children_orig) =} != {new_type.num_fields =}"
+        )
     children_new = []
     for idx, child in enumerate(children_orig):
         new_child_type = new_type.field(idx).type
-        children_new.append(
-            array_with_replacement_type(child, new_child_type)
-        )
-    own_buffers = orig_array.buffers()[:orig_array.type.num_buffers]
+        children_new.append(array_with_replacement_type(child, new_child_type))
+    own_buffers = orig_array.buffers()[: orig_array.type.num_buffers]
     return pyarrow.Array.from_buffers(
         type=new_type,
         length=len(orig_array),
@@ -211,5 +213,7 @@ def _get_children(array: pyarrow.Array) -> list[pyarrow.Array]:
     if hasattr(array, "field"):
         return [array.field(idx) for idx in range(array.type.num_fields)]
     if hasattr(array, "values"):
-        return [array.values, ]
+        return [
+            array.values,
+        ]
     raise NotImplementedError(f"Cannot get children of arrow type {arrow_type}")
