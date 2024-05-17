@@ -51,8 +51,6 @@ toptr = cp.zeros(outlength, dtype=cp.int32)
 block_size = 256
 grid_size = (lenparents + block_size - 1) // block_size
 
-toptr = cp.zeros(outlength, dtype=cp.int32)
-
 raw_module = cp.RawModule(code=cuda_kernel)
 
 awkward_reduce_sum_a = raw_module.get_function('awkward_reduce_sum_a')
