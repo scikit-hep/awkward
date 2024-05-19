@@ -60,17 +60,15 @@ def collect_ak_arr_type_metadata(aafield: pyarrow.Field) -> dict | list | None:
     typ = aafield.type
     if not isinstance(typ, AwkwardArrowType):
         return None  # Not expected to reach here
+    subfields = _fields_of_strg_type(typ.storage_type)
     metadata = typ._metadata_as_dict()
     metadata["field_name"] = aafield.name
-    if typ.num_fields == 0:
+    if len(subfields) == 0:
         # Simple type
         return metadata
     # Compound type
     subfield_metadata_list = []
-    for ifield in range(typ.num_fields):
-        # Note: You can treat some, but not all, compound pyarrow types as iterators.
-        # Note: AwkwardArrowType provides num_fields property but not field() method.
-        ak_field = typ.storage_type.field(ifield)
+    for ak_field in subfields:
         subfield_metadata_list.append(
             collect_ak_arr_type_metadata(ak_field)  # Recurse
         )
@@ -88,34 +86,22 @@ def awkward_arrow_field_to_native(aafield: pyarrow.Field) -> pyarrow.Field:
         # Not expected to reach this. Maybe throw ValueError?
         return aafield
 
-    if typ.num_fields == 0:
+    fields = _fields_of_strg_type(typ.storage_type)
+    if len(fields) == 0:
         # We have a simple type wrapped in AwkwardArrowType.
         new_field = pyarrow.field(
             aafield.name, type=typ.storage_type, nullable=aafield.nullable
         )
-        # print(f"  Returning simple field {new_field.name}: {new_field =}")
         return new_field
 
-    # We have a container/compound type, wrapped in AwkwardArrowType.
-    # print(f"field {aafield.name}")
-    native_fields = []
-    for ifield in range(typ.storage_type.num_fields):
-        ak_field = typ.storage_type.field(ifield)
-        # print(f"Sub-field {ak_field.name}: {ak_field}")
-        native_fields.append(
-            awkward_arrow_field_to_native(ak_field)  # Recurse
-        )
+    # We have nested types
+    native_fields = [
+        awkward_arrow_field_to_native(field)  # Recurse
+        for field in fields
+    ]
     native_type = _make_pyarrow_type_like(typ, native_fields)
     new_field = pyarrow.field(aafield.name, type=native_type, nullable=aafield.nullable)
-    # print(f"Returning new field {new_field.name}: {new_field}")
     return new_field
-
-
-# TODO: add the remaining Arrow non-primitive types that we use
-_pyarrow_type_builder = {
-    pyarrow.lib.StructType: lambda *subfields: pyarrow.struct(subfields),
-    pyarrow.lib.LargeListType: lambda subfield: pyarrow.large_list(subfield),
-}
 
 
 def native_arrow_field_to_akarraytype(
@@ -124,20 +110,24 @@ def native_arrow_field_to_akarraytype(
     if isinstance(ntv_field, AwkwardArrowType):
         raise ValueError(f"field {ntv_field} is already an AwkwardArrowType")
     storage_type = ntv_field.type
-
-    if storage_type.num_fields > 0:
+    fields = _fields_of_strg_type(storage_type)
+    if len(fields) > 0:
         # We need to replace storage_type with one that contains AwkwardArrowTypes.
-        awkwardized_fields = []
-        for ifield in range(storage_type.num_fields):
-            subfield = storage_type.field(ifield)
-            submeta = metadata["subfield_metadata"][ifield]
-            awkwardized_fields.append(
-                native_arrow_field_to_akarraytype(subfield, submeta)  # Recurse
-            )
+        awkwardized_fields = [
+            native_arrow_field_to_akarraytype(field, meta)  # Recurse
+            for field, meta in zip(fields, metadata["subfield_metadata"])
+        ]
         storage_type = _make_pyarrow_type_like(storage_type, awkwardized_fields)
-
     ak_type = AwkwardArrowType._from_metadata_object(storage_type, metadata)
     return pyarrow.field(ntv_field.name, type=ak_type, nullable=ntv_field.nullable)
+
+
+def _fields_of_strg_type(typ: pyarrow.Type) -> list[pyarrow.Field]:
+    if isinstance(typ, pyarrow.lib.DictionaryType):
+        return [
+            pyarrow.field("value", typ.value_type)
+        ]  # Wrap in a field for consistency
+    return [typ.field(i) for i in range(typ.num_fields)]
 
 
 def _make_pyarrow_type_like(
@@ -145,8 +135,7 @@ def _make_pyarrow_type_like(
 ) -> pyarrow.Type:
     storage_type = to_awkwardarrow_storage_types(typ)[1]
     if isinstance(storage_type, pyarrow.lib.DictionaryType):
-        # TODO: num_fields == 0 but sub-types are value_type and index_type
-        return pyarrow.dictionary(storage_type.index_type, storage_type.value_type)
+        return pyarrow.dictionary(storage_type.index_type, fields[0].type)
     if isinstance(storage_type, pyarrow.lib.FixedSizeListType):
         return pyarrow.list_(fields[0], storage_type.list_size)
     if isinstance(storage_type, pyarrow.lib.ListType):
@@ -154,7 +143,8 @@ def _make_pyarrow_type_like(
     if isinstance(storage_type, pyarrow.lib.LargeListType):
         return pyarrow.large_list(fields[0])
     if isinstance(storage_type, pyarrow.lib.MapType):
-        return pyarrow.map_(storage_type.index_type, fields[0])
+        # return pyarrow.map_(storage_type.index_type, fields[0])
+        raise NotImplementedError("pyarrow MapType is not supported by Awkward")
     if isinstance(storage_type, pyarrow.lib.StructType):
         return pyarrow.struct(fields)
     if isinstance(storage_type, pyarrow.lib.UnionType):
@@ -186,34 +176,45 @@ def array_with_replacement_type(
     orig_array: pyarrow.Array, new_type: pyarrow.Type
 ) -> pyarrow.Array:
     children_orig = _get_children(orig_array)
-    if len(children_orig) != new_type.num_fields:
-        # Probable error in _get_children, not the passed arguments.
+    native_type = to_awkwardarrow_storage_types(new_type)[1]
+    new_fields = _fields_of_strg_type(native_type)
+    if len(new_fields) != len(children_orig):
         raise AssertionError(
-            f"Number of children: {len(children_orig) =} != {new_type.num_fields =}"
+            f"Number of children: {len(children_orig) =} != {len(new_fields) =}"
         )
-    children_new = []
-    for idx, child in enumerate(children_orig):
-        new_child_type = new_type.field(idx).type
-        children_new.append(array_with_replacement_type(child, new_child_type))
+    children_new = [
+        array_with_replacement_type(child, new_child_type.type)
+        for child, new_child_type in zip(children_orig, new_fields)
+    ]
     own_buffers = orig_array.buffers()[: orig_array.type.num_buffers]
-    return pyarrow.Array.from_buffers(
-        type=new_type,
-        length=len(orig_array),
-        buffers=own_buffers,
-        null_count=orig_array.null_count,
-        offset=orig_array.offset,
-        children=children_new,
-    )
+    if isinstance(native_type, pyarrow.lib.DictionaryType):
+        return pyarrow.DictionaryArray.from_buffers(
+            type=new_type,
+            length=len(orig_array),
+            buffers=own_buffers,
+            dictionary=children_new[0],
+            null_count=orig_array.null_count,
+            offset=orig_array.offset,
+        )
+    else:
+        return pyarrow.Array.from_buffers(
+            type=new_type,
+            length=len(orig_array),
+            buffers=own_buffers,
+            null_count=orig_array.null_count,
+            offset=orig_array.offset,
+            children=children_new,
+        )
 
 
 def _get_children(array: pyarrow.Array) -> list[pyarrow.Array]:
     arrow_type = to_awkwardarrow_storage_types(array.type)[1]
+    if isinstance(array.type, pyarrow.lib.DictionaryType):
+        return [array.dictionary]
     if array.type.num_fields == 0:
         return []
     if hasattr(array, "field"):
         return [array.field(idx) for idx in range(array.type.num_fields)]
     if hasattr(array, "values"):
-        return [
-            array.values,
-        ]
+        return [array.values]
     raise NotImplementedError(f"Cannot get children of arrow type {arrow_type}")
