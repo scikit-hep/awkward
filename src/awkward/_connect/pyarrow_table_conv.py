@@ -4,7 +4,7 @@ import json
 
 import pyarrow
 
-from .pyarrow import AwkwardArrowType, to_awkwardarrow_storage_types
+from .pyarrow import AwkwardArrowArray, AwkwardArrowType, to_awkwardarrow_storage_types
 
 AWKWARD_INFO_KEY = b"awkward_info"  # metadata field in Table schema
 
@@ -188,14 +188,18 @@ def array_with_replacement_type(
     ]
     own_buffers = orig_array.buffers()[: orig_array.type.num_buffers]
     if isinstance(native_type, pyarrow.lib.DictionaryType):
-        return pyarrow.DictionaryArray.from_buffers(
-            type=new_type,
+        native_dict = pyarrow.DictionaryArray.from_buffers(
+            type=native_type,
             length=len(orig_array),
             buffers=own_buffers,
             dictionary=children_new[0],
             null_count=orig_array.null_count,
             offset=orig_array.offset,
         )
+        if isinstance(new_type, pyarrow.ExtensionType):
+            return AwkwardArrowArray.from_storage(new_type, native_dict)
+        else:
+            return native_dict
     else:
         return pyarrow.Array.from_buffers(
             type=new_type,
