@@ -108,7 +108,7 @@ jobs:
           python -m build -w awkward-cpp
 
       - name: Find built wheel
-        uses: tj-actions/glob@v21
+        uses: tj-actions/glob@v22
         id: find-wheel
         with:
           files: |
