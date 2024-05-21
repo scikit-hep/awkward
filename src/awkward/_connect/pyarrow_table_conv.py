@@ -6,7 +6,7 @@ import pyarrow
 
 from .pyarrow import AwkwardArrowArray, AwkwardArrowType, to_awkwardarrow_storage_types
 
-AWKWARD_INFO_KEY = b"awkward_info"  # metadata field in Table schema
+AWKWARD_INFO_KEY = b"ak_extn_array_info"  # metadata field in Table schema
 
 
 def convert_awkward_arrow_table_to_native(aatable: pyarrow.Table) -> pyarrow.Table:
@@ -26,8 +26,8 @@ def convert_awkward_arrow_table_to_native(aatable: pyarrow.Table) -> pyarrow.Tab
     new_schema = pyarrow.schema(
         new_fields, metadata={AWKWARD_INFO_KEY: metadata_serial}
     )
-    new_table = aatable.cast(new_schema)
-    return new_table
+    # return = aatable.cast(new_schema)
+    return replace_schema(aatable, new_schema)
 
 
 def convert_native_arrow_table_to_awkward(table: pyarrow.Table) -> pyarrow.Table:
@@ -37,6 +37,8 @@ def convert_native_arrow_table_to_awkward(table: pyarrow.Table) -> pyarrow.Table
       with 'awkward_info' in the schema's metadata that can be used to
       convert the resulting table back into one with extensionarrays.
     """
+    if AWKWARD_INFO_KEY not in table.schema.metadata:
+        return table  # Prior versions don't include metadata here
     new_fields = []
     metadata = json.loads(
         table.schema.metadata[AWKWARD_INFO_KEY].decode(errors="surrogatescape")
@@ -45,7 +47,10 @@ def convert_native_arrow_table_to_awkward(table: pyarrow.Table) -> pyarrow.Table
         new_fields.append(
             native_arrow_field_to_akarraytype(aacol_field, field_metadata)
         )
-    new_schema = pyarrow.schema(new_fields, metadata=table.schema.metadata)
+    new_metadata = table.schema.metadata.copy()
+    del new_metadata[AWKWARD_INFO_KEY]
+    new_schema = pyarrow.schema(new_fields, metadata=new_metadata)
+    new_schema.metadata
     # return table.cast(new_schema)  # Similar (same even?) results
     return replace_schema(table, new_schema)
 
@@ -175,6 +180,10 @@ def replace_schema(table: pyarrow.Table, new_schema: pyarrow.Schema) -> pyarrow.
 def array_with_replacement_type(
     orig_array: pyarrow.Array, new_type: pyarrow.Type
 ) -> pyarrow.Array:
+    """
+    Creates a new array with a different type.
+    Either pyarrow native -> ExtensionArray or vice-versa.
+    """
     children_orig = _get_children(orig_array)
     native_type = to_awkwardarrow_storage_types(new_type)[1]
     new_fields = _fields_of_strg_type(native_type)
@@ -212,13 +221,20 @@ def array_with_replacement_type(
 
 
 def _get_children(array: pyarrow.Array) -> list[pyarrow.Array]:
+    """
+    Different types of pyarrow Arrays have different ways to
+    access their "children." It helps to unify these.
+    """
     arrow_type = to_awkwardarrow_storage_types(array.type)[1]
-    if isinstance(array.type, pyarrow.lib.DictionaryType):
+    if isinstance(array, AwkwardArrowArray):
+        array = array.storage
+
+    if isinstance(arrow_type, pyarrow.lib.DictionaryType):
         return [array.dictionary]
-    if array.type.num_fields == 0:
+    if arrow_type.num_fields == 0:
         return []
     if hasattr(array, "field"):
-        return [array.field(idx) for idx in range(array.type.num_fields)]
+        return [array.field(idx) for idx in range(arrow_type.num_fields)]
     if hasattr(array, "values"):
         return [array.values]
     raise NotImplementedError(f"Cannot get children of arrow type {arrow_type}")
