@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import os
 
 import numpy as np
 import pytest
@@ -184,3 +185,17 @@ def test_table_conversion():
         extn_tbl["struct_array"].chunks[0].storage.field(2).buffers()[3].address
         == conv_extn_tbl["struct_array"].chunks[0].storage.field(2).buffers()[3].address
     )
+
+
+def test_selective_parquet(tmp_path):
+    filename = os.path.join(tmp_path, "whatever.parquet")
+    ak_tbl = ak.Array(
+        {
+            "with_nulls": with_nulls,
+            "struct_array": struct_array,
+            "indexed": indexed,
+        }
+    )
+    ak.to_parquet(ak_tbl, filename)
+    tbl_tr = ak.from_parquet(filename, columns=["struct_array", "indexed"])
+    assert to_list(tbl_tr["struct_array"]) == to_list(ak_tbl["struct_array"])

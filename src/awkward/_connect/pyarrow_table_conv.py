@@ -21,15 +21,18 @@ def convert_awkward_arrow_table_to_native(aatable: pyarrow.Table) -> pyarrow.Tab
       convert the resulting table back into one with extensionarrays.
     """
     new_fields = []
-    metadata = []
+    metadata = {}  # metadata for table column types
     for aacol_field in aatable.schema:
-        metadata.append(collect_ak_arr_type_metadata(aacol_field))
+        metadata[aacol_field.name] = collect_ak_arr_type_metadata(aacol_field)
         new_field = awkward_arrow_field_to_native(aacol_field)
         new_fields.append(new_field)
     metadata_serial = json.dumps(metadata).encode(errors="surrogatescape")
-    new_schema = pyarrow.schema(
-        new_fields, metadata={AWKWARD_INFO_KEY: metadata_serial}
-    )
+    if aatable.schema.metadata is None:
+        new_metadata = {}
+    else:
+        new_metadata = aatable.schema.metadata.copy()
+    new_metadata[AWKWARD_INFO_KEY] = metadata_serial
+    new_schema = pyarrow.schema(new_fields, metadata=new_metadata)
     # return = aatable.cast(new_schema)
     return replace_schema(aatable, new_schema)
 
@@ -47,9 +50,13 @@ def convert_native_arrow_table_to_awkward(table: pyarrow.Table) -> pyarrow.Table
     metadata = json.loads(
         table.schema.metadata[AWKWARD_INFO_KEY].decode(errors="surrogatescape")
     )
-    for aacol_field, field_metadata in zip(table.schema, metadata):
+    for aacol_field in table.schema:
+        if aacol_field.name not in metadata:
+            raise ValueError(
+                f"Awkward metadata in Arrow table does not have info for column {aacol_field.name}"
+            )
         new_fields.append(
-            native_arrow_field_to_akarraytype(aacol_field, field_metadata)
+            native_arrow_field_to_akarraytype(aacol_field, metadata[aacol_field.name])
         )
     new_metadata = table.schema.metadata.copy()
     del new_metadata[AWKWARD_INFO_KEY]
