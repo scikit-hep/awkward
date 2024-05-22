@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import json
 
-import pyarrow
+from .pyarrow import (
+    AwkwardArrowArray,
+    AwkwardArrowType,
+    import_pyarrow,
+    to_awkwardarrow_storage_types,
+)
 
-from .pyarrow import AwkwardArrowArray, AwkwardArrowType, to_awkwardarrow_storage_types
-
+pyarrow = import_pyarrow("pyarrow_table_conv")
 AWKWARD_INFO_KEY = b"ak_extn_array_info"  # metadata field in Table schema
 
 
@@ -50,7 +54,6 @@ def convert_native_arrow_table_to_awkward(table: pyarrow.Table) -> pyarrow.Table
     new_metadata = table.schema.metadata.copy()
     del new_metadata[AWKWARD_INFO_KEY]
     new_schema = pyarrow.schema(new_fields, metadata=new_metadata)
-    new_schema.metadata
     # return table.cast(new_schema)  # Similar (same even?) results
     return replace_schema(table, new_schema)
 
