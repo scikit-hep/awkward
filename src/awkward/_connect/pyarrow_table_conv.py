@@ -37,7 +37,7 @@ def convert_native_arrow_table_to_awkward(table: pyarrow.Table) -> pyarrow.Table
       with 'awkward_info' in the schema's metadata that can be used to
       convert the resulting table back into one with extensionarrays.
     """
-    if AWKWARD_INFO_KEY not in table.schema.metadata:
+    if table.schema.metadata is None or AWKWARD_INFO_KEY not in table.schema.metadata:
         return table  # Prior versions don't include metadata here
     new_fields = []
     metadata = json.loads(

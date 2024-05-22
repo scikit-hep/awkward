@@ -5,6 +5,7 @@ from __future__ import annotations
 import fsspec.parquet
 
 import awkward as ak
+from awkward._connect.pyarrow_table_conv import convert_native_arrow_table_to_awkward
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._regularize import is_integer
@@ -296,6 +297,7 @@ def _read_parquet_file(
         else:
             arrow_table = parquetfile.read_row_groups(row_groups, parquet_columns)
 
+    arrow_table = convert_native_arrow_table_to_awkward(arrow_table)
     return ak.operations.ak_from_arrow._impl(
         arrow_table,
         generate_bitmasks,

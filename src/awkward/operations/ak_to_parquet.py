@@ -8,6 +8,7 @@ from os import fsdecode
 import fsspec
 
 import awkward as ak
+from awkward._connect.pyarrow_table_conv import convert_awkward_arrow_table_to_native
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -400,6 +401,9 @@ def _impl(
                 {x: value for x in parquet_columns(specifier, only="floating")}
             )
         parquet_byte_stream_split = [x for x, value in replacement.items() if value]
+
+    if extensionarray:
+        table = convert_awkward_arrow_table_to_native(table)
 
     if parquet_extra_options is None:
         parquet_extra_options = {}
