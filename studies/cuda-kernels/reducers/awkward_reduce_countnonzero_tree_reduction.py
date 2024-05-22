@@ -2,7 +2,7 @@ import cupy as cp
 
 cuda_kernel = """
 extern "C" {
-    __global__ void awkward_reduce_sum_a(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
+    __global__ void awkward_reduce_countnonzero_a(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
        int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
        if (thread_id < outlength) {
@@ -12,14 +12,14 @@ extern "C" {
 }
     
 extern "C" {
-    __global__ void awkward_reduce_sum_b(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
+    __global__ void awkward_reduce_countnonzero_b(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
         extern __shared__ int shared[];
 
         int idx = threadIdx.x;
         int thread_id = blockIdx.x * blockDim.x + idx;
 
         if (thread_id < lenparents) {
-            shared[idx] = fromptr[thread_id];
+            shared[idx] = (fromptr[thread_id] != 0) ? 1 : 0;
         }
         __syncthreads();
 
@@ -43,23 +43,23 @@ extern "C" {
 }
 
 extern "C" {
-    __global__ void awkward_reduce_sum_c(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
+    __global__ void awkward_reduce_countnonzero_c(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
         int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (thread_id < outlength) {
-            int sum = 0;
+            int countnonzero = 0;
             int blocks = (lenparents + blockDim.x - 1) / blockDim.x;
             for (int i = 0; i < blocks; ++i) {
-                sum += partial[i * outlength + thread_id];
+                countnonzero += partial[i * outlength + thread_id];
             }
-            toptr[thread_id] = sum;
+            toptr[thread_id] = countnonzero;
         }
     }
 }
 """
 
 parents = cp.array([0, 1, 1, 2, 2, 2, 2, 2, 2, 5], dtype=cp.int32)
-fromptr = cp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], dtype=cp.int32)
+fromptr = cp.array([1, 2, 3, 0, 5, 6, 0, 8, 9, 0], dtype=cp.int32)
 lenparents = len(parents)
 outlength = int(cp.max(parents)) + 1
 toptr = cp.zeros(outlength, dtype=cp.int32)
@@ -72,12 +72,12 @@ for i in range (len(block_size)):
 
     raw_module = cp.RawModule(code=cuda_kernel)
 
-    awkward_reduce_sum_a = raw_module.get_function('awkward_reduce_sum_a')
-    awkward_reduce_sum_b = raw_module.get_function('awkward_reduce_sum_b')
-    awkward_reduce_sum_c = raw_module.get_function('awkward_reduce_sum_c')
+    awkward_reduce_countnonzero_a = raw_module.get_function('awkward_reduce_countnonzero_a')
+    awkward_reduce_countnonzero_b = raw_module.get_function('awkward_reduce_countnonzero_b')
+    awkward_reduce_countnonzero_c = raw_module.get_function('awkward_reduce_countnonzero_c')
 
-    awkward_reduce_sum_a((grid_size,), (block_size[i],), (toptr, fromptr, parents, lenparents, outlength, partial))
-    awkward_reduce_sum_b((grid_size,), (block_size[i],), (toptr, fromptr, parents, lenparents, outlength, partial), shared_mem=shared_mem_size)
-    awkward_reduce_sum_c(((outlength + block_size[i] - 1) // block_size[i],), (block_size[i],), (toptr, fromptr, parents, lenparents, outlength, partial))
+    awkward_reduce_countnonzero_a((grid_size,), (block_size[i],), (toptr, fromptr, parents, lenparents, outlength, partial))
+    awkward_reduce_countnonzero_b((grid_size,), (block_size[i],), (toptr, fromptr, parents, lenparents, outlength, partial), shared_mem=shared_mem_size)
+    awkward_reduce_countnonzero_c(((outlength + block_size[i] - 1) // block_size[i],), (block_size[i],), (toptr, fromptr, parents, lenparents, outlength, partial))
 
-    assert cp.array_equal(toptr, cp.array([1, 5, 39, 0, 0, 10]))
+    assert cp.array_equal(toptr, cp.array([1, 2, 4, 0, 0, 0]))
