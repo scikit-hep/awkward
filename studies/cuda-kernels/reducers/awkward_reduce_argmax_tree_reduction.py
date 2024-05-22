@@ -12,7 +12,7 @@ extern "C" {
 }
     
 extern "C" {
-    __global__ void awkward_reduce_argmax_b(int *toptr, int *fromptr, int *parents, int lenparents, int outlength, int* partial) {
+    __global__ void awkward_reduce_argmax_b(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
         extern __shared__ int shared[];
 
         int idx = threadIdx.x;
@@ -45,7 +45,7 @@ extern "C" {
 }
 
 extern "C" {
-    __global__ void awkward_reduce_argmax_c(int *toptr, int *fromptr, int *parents, int lenparents, int outlength, int* partial) {
+    __global__ void awkward_reduce_argmax_c(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
         int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (thread_id < outlength) {
@@ -83,5 +83,4 @@ awkward_reduce_argmax_a((grid_size,), (block_size,), (toptr, fromptr, parents, l
 awkward_reduce_argmax_b((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, partial), shared_mem=shared_mem_size)
 awkward_reduce_argmax_c(((outlength + block_size - 1) // block_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, partial))
 
-toptr_host = toptr.get()
-print("tree reduction toptr:", toptr_host)
+assert cp.array_equal(toptr, cp.array([0, 2, 8, -1, -1, 9]))

@@ -2,17 +2,17 @@ import cupy as cp
 
 cuda_kernel = """
 extern "C" {
-    __global__ void awkward_reduce_prod_a(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
+    __global__ void awkward_reduce_prod_bool_a(bool* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
        int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
        if (thread_id < outlength) {
-          toptr[thread_id] = 1;
+          toptr[thread_id] = true;
        }
     }
 }
     
 extern "C" {
-    __global__ void awkward_reduce_prod_b(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
+    __global__ void awkward_reduce_prod_bool_b(bool* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
         extern __shared__ int shared[];
 
         int idx = threadIdx.x;
@@ -29,7 +29,7 @@ extern "C" {
                 val = shared[idx - stride];
             }
             __syncthreads();
-            shared[idx] *= val;
+            shared[idx] &= (val != 0);
             __syncthreads();
         }
 
@@ -43,14 +43,14 @@ extern "C" {
 }
 
 extern "C" {
-    __global__ void awkward_reduce_prod_c(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
+    __global__ void awkward_reduce_prod_bool_c(bool* toptr, int* fromptr, int* parents, int lenparents, int outlength, int* partial) {
         int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (thread_id < outlength) {
             int prod = 1;
             int blocks = (lenparents + blockDim.x - 1) / blockDim.x;
             for (int i = 0; i < blocks; ++i) {
-                prod *= partial[i * outlength + thread_id];
+                prod &= (partial[i * outlength + thread_id] != 0);
             }
             toptr[thread_id] = prod;
         }
@@ -58,11 +58,11 @@ extern "C" {
 }
 """
 
-parents = cp.array([0, 1, 1, 2, 2, 2, 2, 2, 2, 5], dtype=cp.int32)
-fromptr = cp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], dtype=cp.int32)
+parents = cp.array([0, 0, 0, 1, 1, 1, 2, 2, 2, 3], dtype=cp.int32)
+fromptr = cp.array([1, 0, 0, 1, 1, 1, 1, 0, 0, 1], dtype=cp.int32)
 lenparents = len(parents)
 outlength = int(cp.max(parents)) + 1
-toptr = cp.zeros(outlength, dtype=cp.int32)
+toptr = cp.ones(outlength, dtype=cp.bool_)
 
 block_size = 2
 partial = cp.ones((outlength * ((lenparents + block_size - 1) // block_size)), dtype=cp.int32)
@@ -71,12 +71,12 @@ shared_mem_size = block_size * cp.int32().nbytes
 
 raw_module = cp.RawModule(code=cuda_kernel)
 
-awkward_reduce_prod_a = raw_module.get_function('awkward_reduce_prod_a')
-awkward_reduce_prod_b = raw_module.get_function('awkward_reduce_prod_b')
-awkward_reduce_prod_c = raw_module.get_function('awkward_reduce_prod_c')
+awkward_reduce_prod_bool_a = raw_module.get_function('awkward_reduce_prod_bool_a')
+awkward_reduce_prod_bool_b = raw_module.get_function('awkward_reduce_prod_bool_b')
+awkward_reduce_prod_bool_c = raw_module.get_function('awkward_reduce_prod_bool_c')
 
-awkward_reduce_prod_a((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, partial))
-awkward_reduce_prod_b((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, partial), shared_mem=shared_mem_size)
-awkward_reduce_prod_c(((outlength + block_size - 1) // block_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, partial))
+awkward_reduce_prod_bool_a((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, partial))
+awkward_reduce_prod_bool_b((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, partial), shared_mem=shared_mem_size)
+awkward_reduce_prod_bool_c(((outlength + block_size - 1) // block_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, partial))
 
-assert cp.array_equal(toptr, cp.array([1, 6, 60480, 1, 1, 10]))
+assert cp.array_equal(toptr, cp.array([0, 1, 0, 1]))

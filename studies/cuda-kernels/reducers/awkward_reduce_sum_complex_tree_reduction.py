@@ -88,5 +88,4 @@ awkward_reduce_sum_complex_a((grid_size,), (block_size,), (toptr, fromptr, paren
 awkward_reduce_sum_complex_b((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, partial), shared_mem=shared_mem_size)
 awkward_reduce_sum_complex_c(((outlength + block_size - 1) // block_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, partial))
 
-toptr_host = toptr.get()
-print("tree reduction toptr:", toptr_host)
+assert cp.array_equal(toptr, cp.array([1, 0, 5, 3, 39, 33, 0, 0, 0, 0, 10, 0]))

@@ -12,7 +12,7 @@ extern "C" {
 }
     
 extern "C" {
-    __global__ void awkward_reduce_max_b(int *toptr, int *fromptr, int *parents, int lenparents, int outlength, int identity, int* partial) {
+    __global__ void awkward_reduce_max_b(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int identity, int* partial) {
         extern __shared__ int shared[];
 
         int idx = threadIdx.x;
@@ -43,7 +43,7 @@ extern "C" {
 }
 
 extern "C" {
-    __global__ void awkward_reduce_max_c(int *toptr, int *fromptr, int *parents, int lenparents, int outlength, int identity, int* partial) {
+    __global__ void awkward_reduce_max_c(int* toptr, int* fromptr, int* parents, int lenparents, int outlength, int identity, int* partial) {
         int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (thread_id < outlength) {
@@ -62,10 +62,10 @@ parents = cp.array([0, 1, 1, 2, 2, 2, 2, 2, 2, 5], dtype=cp.int32)
 fromptr = cp.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], dtype=cp.int32)
 lenparents = len(parents)
 outlength = int(cp.max(parents)) + 1
-toptr = cp.full(outlength, cp.iinfo(cp.int32).min, dtype=cp.int32)
 identity = cp.iinfo(cp.int32).min
+toptr = cp.full(outlength, identity, dtype=cp.int32)
 block_size = 2
-partial = cp.full((outlength * ((lenparents + block_size - 1) // block_size)), cp.iinfo(cp.int32).min, dtype=cp.int32)
+partial = cp.full((outlength * ((lenparents + block_size - 1) // block_size)), identity, dtype=cp.int32)
 grid_size = (lenparents + block_size - 1) // block_size
 shared_mem_size = block_size * cp.int32().nbytes
 
@@ -79,5 +79,4 @@ awkward_reduce_max_a((grid_size,), (block_size,), (toptr, fromptr, parents, lenp
 awkward_reduce_max_b((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, identity, partial), shared_mem=shared_mem_size)
 awkward_reduce_max_c(((outlength + block_size - 1) // block_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, identity, partial))
 
-toptr_host = toptr.get()
-print("tree reduction toptr:", toptr_host)
+assert cp.array_equal(toptr, cp.array([1, 3, 9, -2147483648, -2147483648, 10]))
