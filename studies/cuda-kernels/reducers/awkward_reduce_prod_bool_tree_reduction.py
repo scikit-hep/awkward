@@ -47,7 +47,7 @@ extern "C" {
         int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (thread_id < outlength) {
-            int prod = 1;
+            bool prod = 1;
             int blocks = (lenparents + blockDim.x - 1) / blockDim.x;
             for (int i = 0; i < blocks; ++i) {
                 prod &= (partial[i * outlength + thread_id] != 0);

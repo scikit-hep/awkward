@@ -85,5 +85,5 @@ for i in range (len(block_size)):
     awkward_reduce_argmax_a((grid_size,), (block_size[i],), (toptr, fromptr, parents, lenparents, outlength, partial))
     awkward_reduce_argmax_b((grid_size,), (block_size[i],), (toptr, fromptr, parents, lenparents, outlength, partial), shared_mem=shared_mem_size)
     awkward_reduce_argmax_c(((outlength + block_size[i] - 1) // block_size[i],), (block_size[i],), (toptr, fromptr, parents, lenparents, outlength, partial))
-    
+
     assert cp.array_equal(toptr, cp.array([0, 2, 8, -1, -1, 9]))
