@@ -10,7 +10,7 @@ from .pyarrow import (
 )
 
 pyarrow = import_pyarrow("pyarrow_table_conv")
-AWKWARD_INFO_KEY = b"ak_extn_array_info"  # metadata field in Table schema
+AWKWARD_INFO_KEY = b"awkward_array_metadata"  # metadata field in Table schema
 
 
 def convert_awkward_arrow_table_to_native(aatable: pyarrow.Table) -> pyarrow.Table:
