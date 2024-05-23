@@ -448,6 +448,8 @@ def _impl(
                 # a `for` loop implicitly calls `next` and stops at `StopIteration`
                 for item in data:
                     layout, table = get_layout_and_table(item)
+                    if extensionarray:
+                        table = convert_awkward_arrow_table_to_native(table)
                     writer.write_table(table, row_group_size=row_group_size)
 
         finally:
