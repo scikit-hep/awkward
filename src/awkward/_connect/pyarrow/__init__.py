@@ -40,29 +40,33 @@ else:
         error_message = "pyarrow 7.0.0 or later required for {0}"
 
 if error_message is None:
+    from .conversions import (
+        and_validbytes,
+        convert_to_array,
+        direct_Content_subclass,
+        direct_Content_subclass_name,
+        form_handle_arrow,
+        handle_arrow,
+        popbuffers,
+        remove_optiontype,
+        to_awkwardarrow_storage_types,
+        to_awkwardarrow_type,
+        to_length,
+        to_null_count,
+        to_validbits,
+    )
     from .extn_types import AwkwardArrowArray, AwkwardArrowType
     from .table_conv import (
         convert_awkward_arrow_table_to_native,
         convert_native_arrow_table_to_awkward,
     )
-    from .conversions import (
-        and_validbytes,
-        to_validbits,
-        to_length,
-        to_null_count,
-        to_awkwardarrow_storage_types,
-        popbuffers,
-        handle_arrow,
-        convert_to_array,
-        to_awkwardarrow_type,
-        direct_Content_subclass,
-        direct_Content_subclass_name,
-        remove_optiontype,
-        form_handle_arrow,
-    )
 else:
+
     def nothing_without_pyarrow(*args, **kwargs):
-        raise NotImplementedError("This function requires pyarrow, which is not installed.")
+        raise NotImplementedError(
+            "This function requires pyarrow, which is not installed."
+        )
+
     convert_awkward_arrow_table_to_native = nothing_without_pyarrow
     convert_native_arrow_table_to_awkward = nothing_without_pyarrow
     and_validbytes = nothing_without_pyarrow
@@ -78,6 +82,7 @@ else:
     direct_Content_subclass_name = nothing_without_pyarrow
     remove_optiontype = nothing_without_pyarrow
     form_handle_arrow = nothing_without_pyarrow
+
 
 def import_pyarrow(name: str) -> ModuleType:
     if pyarrow is None:
