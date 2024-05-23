@@ -8,7 +8,8 @@ from os import fsdecode
 import fsspec
 
 import awkward as ak
-from awkward._connect.pyarrow.table_conv import convert_awkward_arrow_table_to_native
+import awkward._connect.pyarrow
+from awkward._connect.pyarrow import convert_awkward_arrow_table_to_native
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -238,7 +239,6 @@ def _impl(
     write_iteratively,
 ):
     # Implementation
-    import awkward._connect.pyarrow
 
     data = array
 

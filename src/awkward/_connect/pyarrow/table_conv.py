@@ -2,14 +2,11 @@ from __future__ import annotations
 
 import json
 
-from . import (
-    AwkwardArrowArray,
-    AwkwardArrowType,
-    import_pyarrow,
-    to_awkwardarrow_storage_types,
-)
+import pyarrow
 
-pyarrow = import_pyarrow("pyarrow_table_conv")
+from .extn_types import AwkwardArrowArray, AwkwardArrowType
+from .conversions import to_awkwardarrow_storage_types
+
 AWKWARD_INFO_KEY = b"awkward_array_metadata"  # metadata field in Table schema
 
 
