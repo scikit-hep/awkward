@@ -2,21 +2,32 @@
 
 from __future__ import annotations
 
-import json
-from collections.abc import Iterable, Sized
-from functools import lru_cache
 from types import ModuleType
 
 from packaging.version import parse as parse_version
 
-import awkward as ak
-from awkward._backends.numpy import NumpyBackend
-from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._parameters import parameters_union
-
-np = NumpyMetadata.instance()
-numpy = Numpy.instance()
+__all__ = [
+    "import_pyarrow",
+    "import_pyarrow_parquet",
+    "import_pyarrow_compute",
+    "AwkwardArrowArray",
+    "AwkwardArrowType",
+    "and_validbytes",
+    "convert_to_array",
+    "direct_Content_subclass",
+    "direct_Content_subclass_name",
+    "form_handle_arrow",
+    "handle_arrow",
+    "popbuffers",
+    "remove_optiontype",
+    "to_awkwardarrow_storage_types",
+    "to_awkwardarrow_type",
+    "to_length",
+    "to_null_count",
+    "to_validbits",
+    "convert_awkward_arrow_table_to_native",
+    "convert_native_arrow_table_to_awkward",
+]
 
 try:
     import pyarrow
@@ -61,6 +72,8 @@ if error_message is None:
         convert_native_arrow_table_to_awkward,
     )
 else:
+    AwkwardArrowArray = None
+    AwkwardArrowType = None
 
     def nothing_without_pyarrow(*args, **kwargs):
         raise NotImplementedError(

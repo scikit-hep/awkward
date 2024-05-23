@@ -1,9 +1,9 @@
+from __future__ import annotations
+
 import json
 from collections.abc import Iterable, Sized
 from functools import lru_cache
-from types import ModuleType
 
-from packaging.version import parse as parse_version
 import pyarrow
 
 import awkward as ak
@@ -11,7 +11,8 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_union
-from .extn_types import AwkwardArrowArray, AwkwardArrowType
+
+from .extn_types import AwkwardArrowType
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -980,7 +981,6 @@ def convert_to_array(layout, type=None):
         return out
     else:
         return pyarrow.array(out, type=type)
-
 
 
 # order is important; _string_like[:2] vs _string_like[::2]

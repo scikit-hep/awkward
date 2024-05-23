@@ -4,8 +4,8 @@ import json
 
 import pyarrow
 
-from .extn_types import AwkwardArrowArray, AwkwardArrowType
 from .conversions import to_awkwardarrow_storage_types
+from .extn_types import AwkwardArrowArray, AwkwardArrowType
 
 AWKWARD_INFO_KEY = b"awkward_array_metadata"  # metadata field in Table schema
 
