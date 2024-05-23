@@ -20,6 +20,8 @@ extern "C" {
 
         if (thread_id < lenparents) {
             shared[idx] = thread_id;
+        } else {
+            shared[idx] = -1;
         }
         __syncthreads();
 
@@ -28,7 +30,6 @@ extern "C" {
             if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
                 index = shared[idx - stride];
             }
-            __syncthreads();
             if (index != -1 && (shared[idx] == -1 || fromptr[index] < fromptr[shared[idx]])) {
                 shared[idx] = index;
             }
