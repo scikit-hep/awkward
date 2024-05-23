@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from .pyarrow import (
+from . import (
     AwkwardArrowArray,
     AwkwardArrowType,
     import_pyarrow,

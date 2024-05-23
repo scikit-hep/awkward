@@ -1,3 +1,5 @@
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import os
@@ -5,8 +7,11 @@ import os
 import numpy as np
 import pytest
 
+pa = pytest.importorskip("pyarrow")
+pq = pytest.importorskip("pyarrow.parquet")
+
 import awkward as ak
-from awkward._connect.pyarrow_table_conv import (
+from awkward._connect.pyarrow.table_conv import (
     AWKWARD_INFO_KEY,
     array_with_replacement_type,
     awkward_arrow_field_to_native,
@@ -16,9 +21,6 @@ from awkward._connect.pyarrow_table_conv import (
     native_arrow_field_to_akarraytype,
 )
 from awkward.operations import to_list
-
-pa = pytest.importorskip("pyarrow")
-pq = pytest.importorskip("pyarrow.parquet")
 
 nested_ints = ak.Array([[[[[1, 2, 3], [], [4, 5]] * 5] * 3] * 2])
 
