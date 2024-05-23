@@ -17,7 +17,7 @@ def convert_awkward_arrow_table_to_native(aatable: pyarrow.Table) -> pyarrow.Tab
     """
     aatable: A pyarrow Table created with extensionarray=True
     returns: A pyarrow Table without extensionsarrays, but
-      with 'awkward_info' in the schema's metadata that can be used to
+      with `awkward_array_metadata` in the schema's metadata that can be used to
       convert the resulting table back into one with extensionarrays.
     """
     new_fields = []
@@ -41,7 +41,7 @@ def convert_native_arrow_table_to_awkward(table: pyarrow.Table) -> pyarrow.Table
     """
     table: A pyarrow Table converted with convert_awkward_arrow_table_to_native
     returns: A pyarrow Table without extensionsarrays, but
-      with 'awkward_info' in the schema's metadata that can be used to
+      with `awkward_array_metadata` in the schema's metadata that can be used to
       convert the resulting table back into one with extensionarrays.
     """
     if table.schema.metadata is None or AWKWARD_INFO_KEY not in table.schema.metadata:
@@ -151,20 +151,22 @@ def _make_pyarrow_type_like(
     storage_type = to_awkwardarrow_storage_types(typ)[1]
     if isinstance(storage_type, pyarrow.lib.DictionaryType):
         return pyarrow.dictionary(storage_type.index_type, fields[0].type)
-    if isinstance(storage_type, pyarrow.lib.FixedSizeListType):
+    elif isinstance(storage_type, pyarrow.lib.FixedSizeListType):
         return pyarrow.list_(fields[0], storage_type.list_size)
-    if isinstance(storage_type, pyarrow.lib.ListType):
+    elif isinstance(storage_type, pyarrow.lib.ListType):
         return pyarrow.list_(fields[0])
-    if isinstance(storage_type, pyarrow.lib.LargeListType):
+    elif isinstance(storage_type, pyarrow.lib.LargeListType):
         return pyarrow.large_list(fields[0])
-    if isinstance(storage_type, pyarrow.lib.MapType):
+    elif isinstance(storage_type, pyarrow.lib.MapType):
         # return pyarrow.map_(storage_type.index_type, fields[0])
         raise NotImplementedError("pyarrow MapType is not supported by Awkward")
-    if isinstance(storage_type, pyarrow.lib.StructType):
+    elif isinstance(storage_type, pyarrow.lib.StructType):
         return pyarrow.struct(fields)
-    if isinstance(storage_type, pyarrow.lib.UnionType):
+    elif isinstance(storage_type, pyarrow.lib.UnionType):
         return pyarrow.union(fields, storage_type.mode, storage_type.type_codes)
-    if isinstance(storage_type, pyarrow.lib.DataType) and storage_type.num_fields == 0:
+    elif (
+        isinstance(storage_type, pyarrow.lib.DataType) and storage_type.num_fields == 0
+    ):
         # Catch-all for primitive types, nulltype, string types, FixedSizeBinaryType
         return storage_type
     raise NotImplementedError(f"Type {typ} is not handled for conversion.")
