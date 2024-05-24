@@ -60,13 +60,16 @@ if error_message is None:
         handle_arrow,
         popbuffers,
         remove_optiontype,
-        to_awkwardarrow_storage_types,
         to_awkwardarrow_type,
         to_length,
         to_null_count,
         to_validbits,
     )
-    from .extn_types import AwkwardArrowArray, AwkwardArrowType
+    from .extn_types import (
+        AwkwardArrowArray,
+        AwkwardArrowType,
+        to_awkwardarrow_storage_types,
+    )
     from .table_conv import (
         convert_awkward_arrow_table_to_native,
         convert_native_arrow_table_to_awkward,

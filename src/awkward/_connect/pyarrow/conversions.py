@@ -12,7 +12,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_union
 
-from .extn_types import AwkwardArrowType
+from .extn_types import AwkwardArrowType, to_awkwardarrow_storage_types
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -48,13 +48,6 @@ def to_null_count(validbytes, count_nulls):
         return -1
     else:
         return len(validbytes) - numpy.count_nonzero(validbytes)
-
-
-def to_awkwardarrow_storage_types(arrowtype):
-    if isinstance(arrowtype, AwkwardArrowType):
-        return arrowtype, arrowtype.storage_type
-    else:
-        return None, arrowtype
 
 
 def node_parameters(awkwardarrow_type):

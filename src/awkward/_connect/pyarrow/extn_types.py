@@ -130,3 +130,10 @@ class AwkwardArrowType(pyarrow.ExtensionType):
 pyarrow.register_extension_type(
     AwkwardArrowType(pyarrow.null(), None, None, None, None, None, None)
 )
+
+
+def to_awkwardarrow_storage_types(arrowtype):
+    if isinstance(arrowtype, AwkwardArrowType):
+        return arrowtype, arrowtype.storage_type
+    else:
+        return None, arrowtype

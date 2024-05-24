@@ -4,8 +4,11 @@ import json
 
 import pyarrow
 
-from .conversions import to_awkwardarrow_storage_types
-from .extn_types import AwkwardArrowArray, AwkwardArrowType
+from .extn_types import (
+    AwkwardArrowArray,
+    AwkwardArrowType,
+    to_awkwardarrow_storage_types,
+)
 
 AWKWARD_INFO_KEY = b"awkward_array_metadata"  # metadata field in Table schema
 
@@ -146,7 +149,7 @@ def _fields_of_strg_type(typ: pyarrow.Type) -> list[pyarrow.Field]:
         if hasattr(typ, "value_field"):
             return [typ.value_field]
         elif hasattr(typ, "__iter__"):
-            return [f for f in typ]
+            return list(typ)
         raise TypeError(f"Cannot handle arrow type {typ}")
     else:
         return [typ.field(i) for i in range(typ.num_fields)]
