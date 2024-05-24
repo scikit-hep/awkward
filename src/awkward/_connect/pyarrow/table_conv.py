@@ -139,7 +139,17 @@ def _fields_of_strg_type(typ: pyarrow.Type) -> list[pyarrow.Field]:
         return [
             pyarrow.field("value", typ.value_type)
         ]  # Wrap in a field for consistency
-    return [typ.field(i) for i in range(typ.num_fields)]
+    elif typ.num_fields == 0:
+        return []
+    elif not hasattr(typ, "field"):
+        # Old versions of pyarrow have this quirk.
+        if hasattr(typ, "value_field"):
+            return [typ.value_field]
+        elif hasattr(typ, "__iter__"):
+            return [f for f in typ]
+        raise TypeError(f"Cannot handle arrow type {typ}")
+    else:
+        return [typ.field(i) for i in range(typ.num_fields)]
 
 
 def _make_pyarrow_type_like(
@@ -178,7 +188,7 @@ def replace_schema(table: pyarrow.Table, new_schema: pyarrow.Schema) -> pyarrow.
     new_batches = []
     for batch in table.to_batches():
         columns = []
-        for col, new_field in zip(batch.itercolumns(), new_schema):
+        for col, new_field in zip(batch.columns, new_schema):
             columns.append(array_with_replacement_type(col, new_field.type))
         new_batches.append(
             pyarrow.RecordBatch.from_arrays(arrays=columns, schema=new_schema)
@@ -206,13 +216,24 @@ def array_with_replacement_type(
     ]
     own_buffers = orig_array.buffers()[: orig_array.type.num_buffers]
     if isinstance(native_type, pyarrow.lib.DictionaryType):
-        native_dict = pyarrow.DictionaryArray.from_buffers(
-            type=native_type,
-            length=len(orig_array),
-            buffers=own_buffers,
+        # The following works with newer pyarrow versions, but not 7.0:
+        # native_dict = pyarrow.DictionaryArray.from_buffers(
+        #     type=native_type,
+        #     length=len(orig_array),
+        #     buffers=own_buffers,
+        #     dictionary=children_new[0],
+        #     null_count=orig_array.null_count,
+        #     offset=orig_array.offset,
+        # )
+        if isinstance(orig_array, AwkwardArrowArray):
+            native_orig = orig_array.storage
+        else:
+            native_orig = orig_array
+        native_dict = pyarrow.DictionaryArray.from_arrays(
+            indices=native_orig.indices,
             dictionary=children_new[0],
-            null_count=orig_array.null_count,
-            offset=orig_array.offset,
+            mask=own_buffers[0],
+            safe=False,
         )
         if isinstance(new_type, pyarrow.ExtensionType):
             return AwkwardArrowArray.from_storage(new_type, native_dict)
