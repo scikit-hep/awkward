@@ -1,3 +1,5 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 """
 Pyarrow extension classes: AwkwardArrowArray and AwkwardArrowType
 See: https://arrow.apache.org/docs/python/extending_types.html

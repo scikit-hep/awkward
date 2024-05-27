@@ -1,3 +1,4 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 # ruff: noqa: E402
 
 from __future__ import annotations
@@ -135,22 +136,6 @@ def test_array_conversions(akarray, as_dict):
     # And back to Awkward array
     rt_array = ak.from_arrow(as_extn, highlevel=True)
     assert to_list(rt_array) == to_list(akarray)
-
-    # Compare awkward types and parameters
-    # Topher 2024-05-23: This is failing on indexed and indexed_tuple,
-    # but it outside the scope of our Arrow table conversions.
-    # I don't *believe* this extra assertion adds any value, but...
-    #
-    # if not isinstance(akarray, ak.Array):
-    #     akarray = ak.Array(akarray)  # A possible issue but this provides .type.show()
-    # ak_type_str_orig = io.StringIO()
-    # ak_type_str_rtrp = io.StringIO()
-    # akarray.type.show(stream=ak_type_str_orig)
-    # rt_array.type.show(stream=ak_type_str_rtrp)
-    # if ak_type_str_orig.getvalue() != ak_type_str_rtrp.getvalue():
-    #     print("  Original type:", ak_type_str_orig.getvalue())
-    #     print("  Rnd-trip type:", ak_type_str_rtrp.getvalue())
-    # assert ak_type_str_orig.getvalue() == ak_type_str_rtrp.getvalue()
 
 
 def test_table_conversion():
