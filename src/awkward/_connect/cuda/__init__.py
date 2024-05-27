@@ -109,6 +109,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_MaskedArray_getitem_next_jagged_project",
         "awkward_UnionArray_nestedfill_tags_index",
         "awkward_NumpyArray_rearrange_shifted",
+        "awkward_ListArray_getitem_next_range_carrylength",
         "awkward_UnionArray_flatten_length",
         "awkward_UnionArray_flatten_combine",
         "awkward_UnionArray_project",
