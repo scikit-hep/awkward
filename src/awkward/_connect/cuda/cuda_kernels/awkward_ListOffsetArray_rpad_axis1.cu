@@ -32,10 +32,10 @@ awkward_ListOffsetArray_rpad_axis1(
         index = scan_in_array[thread_id - 1];
       }
 
-      for (int64_t j = 0; j < rangeval; j++) {
+      for (int64_t j = threadIdx.y; j < rangeval; j += blockDim.y) {
         toindex[index + j] = (T)fromoffsets[thread_id] + j;
       }
-      for (int64_t j = rangeval; j < target; j++) {
+      for (int64_t j = rangeval + threadIdx.y; j < target; j += blockDim.y) {
         toindex[index + j] = -1;
       }
     }

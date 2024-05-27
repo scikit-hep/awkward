@@ -42,7 +42,7 @@ awkward_ListArray_getitem_jagged_numvalid_a(
         if (slicestop > missinglength) {
           RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_NUMVALID_ERRORS::OFF_GET_CON)
         }
-        for (int64_t j = slicestart;  j < slicestop;  j++) {
+        for (int64_t j = slicestart + threadIdx.y;  j < slicestop;  j += blockDim.y) {
           scan_in_array[j] = missing[j] >= 0 ? 1 : 0;
         }
       }
