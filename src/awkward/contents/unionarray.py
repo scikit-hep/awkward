@@ -431,7 +431,7 @@ class UnionArray(UnionMeta[Content], Content):
             ]
 
         if len(contents) == 1:
-            next = contents[0]._carry(index, True)
+            next = contents[0]._carry(index, False)
             return next.copy(parameters=parameters_union(next._parameters, parameters))
 
         else:
@@ -702,7 +702,7 @@ class UnionArray(UnionMeta[Content], Content):
         nextcarry = ak.index.Index64(
             tmpcarry.data[: lenout[0]], nplike=self._backend.index_nplike
         )
-        return self._contents[index]._carry(nextcarry, True)
+        return self._contents[index]._carry(nextcarry, False)
 
     @staticmethod
     def regular_index(
