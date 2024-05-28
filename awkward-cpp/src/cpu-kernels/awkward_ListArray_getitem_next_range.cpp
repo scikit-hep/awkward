@@ -17,35 +17,26 @@ ERROR awkward_ListArray_getitem_next_range(
   int64_t step) {
   int64_t k = 0;
   tooffsets[0] = 0;
-  if (step > 0) {
-    for (int64_t i = 0;  i < lenstarts;  i++) {
-      int64_t length = fromstops[i] - fromstarts[i];
-      int64_t regular_start = start;
-      int64_t regular_stop = stop;
-      awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0,
-                                    start != kSliceNone, stop != kSliceNone,
-                                    length);
+  for (int64_t i = 0;  i < lenstarts;  i++) {
+    int64_t length = fromstops[i] - fromstarts[i];
+    int64_t regular_start = start;
+    int64_t regular_stop = stop;
+    awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0,
+                                start != kSliceNone, stop != kSliceNone,
+                                length);
+    if (step > 0) {
       for (int64_t j = regular_start;  j < regular_stop;  j += step) {
         tocarry[k] = fromstarts[i] + j;
         k++;
       }
-      tooffsets[i + 1] = (C)k;
     }
-  }
-  else {
-    for (int64_t i = 0;  i < lenstarts;  i++) {
-      int64_t length = fromstops[i] - fromstarts[i];
-      int64_t regular_start = start;
-      int64_t regular_stop = stop;
-      awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0,
-                                    start != kSliceNone, stop != kSliceNone,
-                                    length);
+    else {
       for (int64_t j = regular_start;  j > regular_stop;  j += step) {
         tocarry[k] = fromstarts[i] + j;
         k++;
       }
-      tooffsets[i + 1] = (C)k;
     }
+    tooffsets[i + 1] = (C)k;
   }
   return success();
 }

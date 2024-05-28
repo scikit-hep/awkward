@@ -1762,44 +1762,30 @@ kernels:
       ):
           k = 0
           tooffsets[0] = 0
-          if step > 0:
-              for i in range(lenstarts):
-                  length = fromstops[i] - fromstarts[i]
-                  regular_start = start
-                  regular_stop = stop
-                  regular_start, regular_stop = awkward_regularize_rangeslice(
-                      regular_start,
-                      regular_stop,
-                      step > 0,
-                      start != kSliceNone,
-                      stop != kSliceNone,
-                      length,
-                  )
-                  j = regular_start
+          for i in range(lenstarts):
+              length = fromstops[i] - fromstarts[i]
+              regular_start = start
+              regular_stop = stop
+              regular_start, regular_stop = awkward_regularize_rangeslice(
+                  regular_start,
+                  regular_stop,
+                  step > 0,
+                  start != kSliceNone,
+                  stop != kSliceNone,
+                  length,
+              )
+              j = regular_start
+              if step > 0:
                   while j < regular_stop:
                       tocarry[k] = fromstarts[i] + j
                       k = k + 1
                       j += step
-                  tooffsets[i + 1] = k
-          else:
-              for i in range(lenstarts):
-                  length = fromstops[i] - fromstarts[i]
-                  regular_start = start
-                  regular_stop = stop
-                  regular_start, regular_stop = awkward_regularize_rangeslice(
-                      regular_start,
-                      regular_stop,
-                      step > 0,
-                      start != kSliceNone,
-                      stop != kSliceNone,
-                      length,
-                  )
-                  j = regular_start
+              else:
                   while j > regular_stop:
                       tocarry[k] = fromstarts[i] + j
                       k = k + 1
                       j += step
-                  tooffsets[i + 1] = k
+              tooffsets[i + 1] = k
     automatic-tests: false
 
   - name: awkward_ListArray_getitem_next_range_carrylength

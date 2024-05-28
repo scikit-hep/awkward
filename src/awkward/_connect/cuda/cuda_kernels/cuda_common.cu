@@ -32,6 +32,9 @@ typedef unsigned long long uintmax_t;
   atomicMin(err_code,                  \
             invocation_index*(1 << ERROR_BITS) + (int)(ERROR_KERNEL_CODE));
 
+const int64_t  kMaxInt64  = 9223372036854775806;   // 2**63 - 2: see below
+const int64_t  kSliceNone = kMaxInt64 + 1;         // for Slice::none()
+
 void
 awkward_regularize_rangeslice(
     int64_t* start,
