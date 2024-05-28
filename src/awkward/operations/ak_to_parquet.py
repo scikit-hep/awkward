@@ -8,6 +8,8 @@ from os import fsdecode
 import fsspec
 
 import awkward as ak
+import awkward._connect.pyarrow
+from awkward._connect.pyarrow import convert_awkward_arrow_table_to_native
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -237,7 +239,6 @@ def _impl(
     write_iteratively,
 ):
     # Implementation
-    import awkward._connect.pyarrow
 
     data = array
 
@@ -401,6 +402,9 @@ def _impl(
             )
         parquet_byte_stream_split = [x for x, value in replacement.items() if value]
 
+    if extensionarray:
+        table = convert_awkward_arrow_table_to_native(table)
+
     if parquet_extra_options is None:
         parquet_extra_options = {}
 
@@ -444,6 +448,8 @@ def _impl(
                 # a `for` loop implicitly calls `next` and stops at `StopIteration`
                 for item in data:
                     layout, table = get_layout_and_table(item)
+                    if extensionarray:
+                        table = convert_awkward_arrow_table_to_native(table)
                     writer.write_table(table, row_group_size=row_group_size)
 
         finally:
