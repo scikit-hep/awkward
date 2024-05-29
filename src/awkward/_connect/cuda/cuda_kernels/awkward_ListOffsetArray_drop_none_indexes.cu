@@ -31,7 +31,7 @@ awkward_ListOffsetArray_drop_none_indexes_a(
         int64_t offset1 = fromoffsets[thread_id - 1];
       }
       int64_t offset2 = fromoffsets[thread_id];
-      for (int j = offset1; j < offset2; j++) {
+      for (int j = offset1 + threadIdx.y; j < offset2; j += blockDim.y) {
         if (noneindexes[j] < 0) {
           scan_in_array[j] = 1;
         }

@@ -48,7 +48,7 @@ awkward_ListArray_combinations_length_a(
           thisn = size - thisn;
         }
         combinationslen = size;
-        for (int64_t j = 2;  j <= thisn;  j++) {
+        for (int64_t j = 2 + threadIdx.y; j <= thisn; j += blockDim.y) {
           combinationslen *= (size - j + 1);
           combinationslen /= j;
         }

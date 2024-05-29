@@ -26,7 +26,7 @@ awkward_NumpyArray_rearrange_shifted_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < offsetslength - 1) {
-      for (int64_t j = 0; j < fromoffsets[thread_id + 1] - fromoffsets[thread_id]; j++) {
+      for (int64_t j = threadIdx.y; j < fromoffsets[thread_id + 1] - fromoffsets[thread_id]; j += blockDim.y) {
         int64_t idx = fromoffsets[thread_id] + j;
         toptr[idx] = toptr[idx] + fromoffsets[thread_id];
       }

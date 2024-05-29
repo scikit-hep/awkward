@@ -13813,12 +13813,207 @@
                         "fromstarts": [0, 2, 2, 3, 5],
                         "fromstops": [2, 2, 3, 5, 7],
                         "lenstarts": 5,
+                        "start": 7,
+                        "stop": 0,
+                        "step": -1
+                    },
+                    "outputs": {
+                        "carrylength": [3]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 2, 2, 3, 5],
+                        "fromstops": [2, 2, 3, 5, 7],
+                        "lenstarts": 5,
                         "start": 0,
                         "stop": 2,
                         "step": 0
                     },
                     "outputs": {
                         "carrylength": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 2, 2, 3, 5],
+                        "fromstops": [2, 2, 3, 5, 7],
+                        "lenstarts": 5,
+                        "start": 0,
+                        "stop": 6,
+                        "step": 2
+                    },
+                    "outputs": {
+                        "carrylength": [4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 2, 2, 3, 5],
+                        "fromstops": [2, 2, 3, 5, 7],
+                        "lenstarts": 5,
+                        "start": 7,
+                        "stop": 0,
+                        "step": -2
+                    },
+                    "outputs": {
+                        "carrylength": [3]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_ListArray_getitem_next_range",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [],
+                        "fromstops": [],
+                        "lenstarts": 0,
+                        "start": 0,
+                        "stop": 0,
+                        "step": 0
+                    },
+                    "outputs": {
+                        "tooffsets": [0],
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 2, 2, 3, 5],
+                        "fromstops": [2, 2, 3, 5, 7],
+                        "lenstarts": 5,
+                        "start": 0,
+                        "stop": 3,
+                        "step": 1
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 2, 2, 3, 5, 7],
+                        "tocarry": [0, 1, 2, 3, 4, 5, 6]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 2, 2, 3, 5],
+                        "fromstops": [2, 2, 3, 5, 7],
+                        "lenstarts": 5,
+                        "start": 7,
+                        "stop": 0,
+                        "step": -1
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 1, 1, 1, 2, 3],
+                        "tocarry": [1, 4, 6]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 2, 2, 3, 5],
+                        "fromstops": [2, 2, 3, 5, 7],
+                        "lenstarts": 5,
+                        "start": 0,
+                        "stop": 2,
+                        "step": 0
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 0, 0, 0, 0, 0],
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 3, 3, 5, 7, 9],
+                        "fromstops": [3, 3, 5, 7, 9, 11],
+                        "lenstarts": 6,
+                        "start": 0,
+                        "stop": 6,
+                        "step": 2
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 2, 2, 3, 4, 5, 6],
+                        "tocarry": [0, 2, 3, 5, 7, 9]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 3, 3, 5, 7, 9],
+                        "fromstops": [3, 3, 5, 7, 9, 11],
+                        "lenstarts": 6,
+                        "start": 2,
+                        "stop": 6,
+                        "step": 2
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 1, 1, 1, 1, 1, 1],
+                        "tocarry": [2]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 3, 3, 5, 7, 9],
+                        "fromstops": [3, 3, 5, 7, 9, 11],
+                        "lenstarts": 6,
+                        "start": 6,
+                        "stop": 2,
+                        "step": -2
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 0, 0, 0, 0, 0, 0],
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 3, 3, 5, 7, 9],
+                        "fromstops": [3, 3, 5, 7, 9, 11],
+                        "lenstarts": 6,
+                        "start": 0,
+                        "stop": 6,
+                        "step": -2
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 0, 0, 0, 0, 0, 0],
+                        "tocarry": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromstarts": [0, 2, 2, 3, 5],
+                        "fromstops": [2, 2, 3, 5, 7],
+                        "lenstarts": 5,
+                        "start": 7,
+                        "stop": 0,
+                        "step": -2
+                    },
+                    "outputs": {
+                        "tooffsets": [0, 1, 1, 1, 2, 3],
+                        "tocarry": [1, 4, 6]
                     }
                 }
             ]

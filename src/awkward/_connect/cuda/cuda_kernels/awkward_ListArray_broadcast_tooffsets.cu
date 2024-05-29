@@ -50,7 +50,7 @@ awkward_ListArray_broadcast_tooffsets_a(
       if (stop - start != count) {
         RAISE_ERROR(LISTARRAY_BROADCAST_TOOFFSETS_ERRORS::NESTED_ERR)
       }
-      for (int64_t j = start;  j < stop;  j++) {
+      for (int64_t j = start + threadIdx.y;  j < stop;  j += blockDim.y) {
         scan_in_array[fromoffsets[thread_id] + j - start] = 1;
       }
     }
@@ -87,7 +87,7 @@ awkward_ListArray_broadcast_tooffsets_b(
         RAISE_ERROR(LISTARRAY_BROADCAST_TOOFFSETS_ERRORS::NESTED_ERR)
       }
 
-      for (int64_t j = start;  j < stop;  j++) {
+      for (int64_t j = start + threadIdx.y;  j < stop;  j += blockDim.y) {
         tocarry[scan_in_array[fromoffsets[thread_id] + j - start] - 1] = (T)j;
       }
     }

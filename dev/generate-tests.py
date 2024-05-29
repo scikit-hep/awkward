@@ -845,6 +845,8 @@ cuda_kernels_tests = [
     "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_next_array",
     "awkward_ListArray_getitem_next_at",
+    "awkward_ListArray_getitem_next_range",
+    "awkward_ListArray_getitem_next_range_carrylength",
     "awkward_ListArray_getitem_next_range_counts",
     "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListArray_rpad_axis1",

@@ -132,6 +132,7 @@ filterwarnings = [
     "ignore:The NumPy module was reloaded:UserWarning",
     "ignore:.*np\\.MachAr.*:DeprecationWarning",
     "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
+    "ignore:Jitify is performing a one-time only warm-up",
 ]
 log_cli_level = "info"
 
