@@ -1149,8 +1149,7 @@ namespace awkward {
       /// returns the reference to the builder content.
       BUILDER&
       append_index() noexcept {
-        index_.append(content_.length());
-        return content_;
+        return append_index(content_.length());
       }
 
       /// @brief Inserts an explicit value in the `index` buffer and
@@ -1236,6 +1235,7 @@ namespace awkward {
           out << "Indexed node" << id_ << " has a negative index\n";
           error.append(out.str());
           return false;
+        } else if ((content_.length() == 0) && (max_index_ == 0)) { // catches empty object
         } else if (max_index_ >= content_.length()) {
           std::stringstream out;
           out << "Indexed node" << id_ << " has index " << max_index_
@@ -1453,7 +1453,8 @@ namespace awkward {
       /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
-        if (max_index_ >= content_.length()) {
+        if ((content_.length() == 0) && (max_index_ == 0)) { // catches empty object
+        } else if (max_index_ >= content_.length()) {
           std::stringstream out;
           out << "IndexedOption node" << id_ << " has index " << max_index_
               << " but content has length "

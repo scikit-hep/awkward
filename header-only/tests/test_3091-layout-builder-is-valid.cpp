@@ -53,7 +53,7 @@ test_Indexed_categorical_invalid_index() {
   subbuilder.append("two");
   builder.append_index(9);
   bool assertion = builder.is_valid(error) == !BUG_FIXED;
-  std::cout << error << std::endl;
+  // std::cout << error << std::endl;
   assert(assertion);
 }
 
@@ -71,7 +71,7 @@ test_IndexedOption_categorical() {
 
   std::string error;
   bool assertion = builder.is_valid(error);
-  std::cout << error << std::endl;
+  // std::cout << error << std::endl;
   assert(assertion);
 
   // index and content could have different lengths
@@ -95,15 +95,39 @@ test_IndexedOption_categorical_invalid_index() {
 
   std::string error;
   bool assertion = builder.is_valid(error);
-  std::cout << error << std::endl;
+  // std::cout << error << std::endl;
   assert(assertion);
 
   // index should be less than the length of content
   builder.append_valid(9);
   subbuilder.append("two");
   assertion = builder.is_valid(error) == !BUG_FIXED;
-  std::cout << error << std::endl;
+  // std::cout << error << std::endl;
   assert(assertion);
+}
+
+void
+test_Indexed_empty() {
+  IndexedBuilder<uint32_t, StringBuilder<double>> builder;
+  assert(builder.length() == 0);
+
+  // empty indexed builder should be valid
+  std::string error;
+  assert(builder.is_valid(error));
+}
+
+void
+test_IndexedOption_empty() {
+  IndexedOptionBuilder<uint32_t, StringBuilder<double>> builder;
+  assert(builder.length() == 0);
+
+  // empty indexed builder should be valid
+  std::string error;
+  assert(builder.is_valid(error));
+
+  // content has length 0 but still should be valid
+  builder.append_invalid();
+  assert(builder.is_valid(error));
 }
 
 int main(int /* argc */, char ** /* argv */) {
@@ -111,6 +135,8 @@ int main(int /* argc */, char ** /* argv */) {
   test_Indexed_categorical_invalid_index();
   test_IndexedOption_categorical();
   test_IndexedOption_categorical_invalid_index();
+  test_IndexedOption_empty();
+  test_Indexed_empty();
 
   return 0;
 }
