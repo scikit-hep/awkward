@@ -23348,7 +23348,7 @@
         },
         {
             "name": "awkward_reduce_argmax",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
@@ -25544,7 +25544,7 @@
         },
         {
             "name": "awkward_reduce_argmin",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
