@@ -886,6 +886,7 @@ cuda_kernels_tests = [
     "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",

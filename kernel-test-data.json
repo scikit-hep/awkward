@@ -18851,7 +18851,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_reduce_local_outoffsets_64",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
