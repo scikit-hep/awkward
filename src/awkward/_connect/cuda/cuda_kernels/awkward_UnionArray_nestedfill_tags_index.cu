@@ -31,7 +31,7 @@ awkward_UnionArray_nestedfill_tags_index_a(
     if (thread_id < length) {
       U start = tmpstarts[thread_id];
       V stop = start + fromcounts[thread_id];
-      for (int64_t j = start;  j < stop;  j++) {
+      for (int64_t j = start + threadIdx.y; j < stop; j += blockDim.y) {
         scan_in_array[j] += 1;
       }
     }
@@ -55,7 +55,7 @@ awkward_UnionArray_nestedfill_tags_index_b(
     if (thread_id < length) {
       U start = tmpstarts[thread_id];
       V stop = start + fromcounts[thread_id];
-      for (int64_t j = start;  j < stop;  j++) {
+      for (int64_t j = start + threadIdx.y; j < stop; j += blockDim.y) {
         totags[j] = tag;
         toindex[j] = (C)(scan_in_array[j] - 1);
       }

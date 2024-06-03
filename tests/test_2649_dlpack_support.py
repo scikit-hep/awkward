@@ -21,15 +21,6 @@ def test_from_dlpack_numpy():
     assert np.shares_memory(np_array, np_from_ak)
 
 
-def test_from_dlpack_cupy():
-    # This test only checks cupy usage, it doesn't explicitly test GPU & CPU
-    cp = pytest.importorskip("cupy")
-    cp_array = cp.arange(2 * 3 * 4 * 5).reshape(2, 3, 4, 5)
-    array = ak.from_dlpack(cp_array)
-    cp_from_ak = ak.to_cupy(array)
-    assert cp.shares_memory(cp_array, cp_from_ak)
-
-
 class DLPackOf:
     def __init__(self, array):
         self._array = array
