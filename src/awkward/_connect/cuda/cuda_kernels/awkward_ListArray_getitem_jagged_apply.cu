@@ -6,7 +6,6 @@
 //     scan_in_array = cupy.zeros(sliceouterlen + 1, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_apply_a", tooffsets.dtype, tocarry.dtype, slicestarts.dtype, slicestops.dtype, sliceindex.dtype, fromstarts.dtype, fromstops.dtype]))(grid, block, (tooffsets, tocarry, slicestarts, slicestops, sliceouterlen, sliceindex, sliceinnerlen, fromstarts, fromstops, contentlen, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
-//     print(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_getitem_jagged_apply_b", tooffsets.dtype, tocarry.dtype, slicestarts.dtype, slicestops.dtype, sliceindex.dtype, fromstarts.dtype, fromstops.dtype]))(grid, block, (tooffsets, tocarry, slicestarts, slicestops, sliceouterlen, sliceindex, sliceinnerlen, fromstarts, fromstops, contentlen, scan_in_array, invocation_index, err_code))
 // out["awkward_ListArray_getitem_jagged_apply_a", {dtype_specializations}] = None
 // out["awkward_ListArray_getitem_jagged_apply_b", {dtype_specializations}] = None
@@ -114,7 +113,6 @@ awkward_ListArray_getitem_jagged_apply_b(
             index += count;
           }
           tocarry[scan_in_array[thread_id] + j - slicestart] = start + index;
-          printf("%d, ", scan_in_array[thread_id] + j - slicestart);
         }
       }
     }
