@@ -23,7 +23,6 @@ awkward_ListOffsetArray_rpad_axis1_a(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    int64_t index = 0;
 
     if (thread_id < fromlength) {
       int64_t rangeval =
