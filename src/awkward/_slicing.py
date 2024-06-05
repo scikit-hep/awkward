@@ -550,7 +550,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
 
             # outindex fits into the lists; non-missing are sequential
             outindex = ak.index.Index64(
-                item_backend.index_nplike.full(nextoffsets.data[-1], -1, dtype=np.int64)
+                item_backend.index_nplike.full(nextoffsets[-1], -1, dtype=np.int64)
             )
             outindex.data[~isnegative[expanded]] = item_backend.index_nplike.arange(
                 nextcontent.shape[0], dtype=np.int64
