@@ -58,7 +58,6 @@ awkward_ListArray_getitem_jagged_apply_a(
         if (start != stop  &&  stop > contentlen) {
           RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_APPLY_ERRORS::STOP_GET_LEN)
         }
-        int64_t count = stop - start;
         scan_in_array[thread_id + 1] = slicestop - slicestart;
       }
     }
