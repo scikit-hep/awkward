@@ -7,7 +7,7 @@
 //         scan_in_array = cupy.zeros((length - 1) * (length - 2), dtype=cupy.int64)
 //     else:
 //         scan_in_array = cupy.zeros(0, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_subrange_equal", tmpptr.dtype, fromstarts.dtype, fromstops.dtype, bool_]))(grid, block, (tmpptr, fromstarts, fromstops, length, toequal, scan_in_array, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_subrange_equal", cupy.dtype(tmpptr.dtype).type, fromstarts.dtype, fromstops.dtype, bool_]))(grid, block, (tmpptr, fromstarts, fromstops, length, toequal, scan_in_array, invocation_index, err_code))
 //     toequal[0] = cupy.any(scan_in_array == True)
 // out["awkward_NumpyArray_subrange_equal", {dtype_specializations}] = None
 // END PYTHON
