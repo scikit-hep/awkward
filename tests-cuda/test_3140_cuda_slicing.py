@@ -401,22 +401,6 @@ def test_1904_drop_none_List_ByteMaskedArray_NumpyArray():
     )
 
 
-def test_1904_drop_none_ListOffsetArray_ByteMaskedArray_NumpyArray():
-    a = ak.contents.listoffsetarray.ListOffsetArray(
-        ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
-        ak.contents.bytemaskedarray.ByteMaskedArray(
-            ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
-            ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-            valid_when=True,
-        ),
-    )
-
-    cuda_a = ak.to_backend(a, "cuda")
-
-    assert to_list(cuda_a) == [[None, 3.3, None], [], [5.5], []]
-    assert to_list(ak.drop_none(cuda_a, axis=1)) == [[3.3], [], [5.5], []]
-
-
 def test_1904_drop_none_RegularArray_RecordArray_NumpyArray():
     index = ak.index.Index64(np.asarray([0, -1, 1, 2, 3, 4, -1, 6, 7, 8, -1, 10]))
     content = ak.contents.numpyarray.NumpyArray(
@@ -461,4 +445,226 @@ def test_1904_drop_none_RecordArray():
         [{"x": None, "y": None}],
         [{"x": [], "y": []}],
         [{"x": [11], "y": [[None]]}],
+    ]
+
+
+def test_2246_slice_not_packed():
+    index = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64([0, 3, 5]),
+            ak.contents.NumpyArray(
+                np.array([True, False, False, True, True, False, False], dtype=np.bool_)
+            ),
+        )
+    )
+    array = ak.Array([[0, 1, 2], [3, 4]])
+
+    cuda_index = ak.to_backend(index, "cuda")
+    cuda_array = ak.to_backend(array, "cuda")
+
+    result = cuda_array[cuda_index]
+    assert result.tolist() == [[0], [3, 4]]
+
+
+def test_0127_tomask_operation_ByteMaskedArray_jaggedslice0():
+    array = ak.operations.from_iter(
+        [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
+    )
+    index = ak.index.Index64(np.array([0, 1, 2, 3], dtype=np.int64))
+    indexedarray = ak.contents.IndexedOptionArray(index, array)
+
+    cuda_indexedarray = ak.to_backend(indexedarray, "cuda")
+
+    assert to_list(cuda_indexedarray) == [
+        [0.0, 1.1, 2.2],
+        [3.3, 4.4],
+        [5.5],
+        [6.6, 7.7, 8.8, 9.9],
+    ]
+    assert to_list(
+        cuda_indexedarray[
+            ak.highlevel.Array([[0, -1], [0], [], [1, 1]], backend="cuda")
+        ]
+    ) == [
+        [0.0, 2.2],
+        [3.3],
+        [],
+        [7.7, 7.7],
+    ]
+
+    mask = ak.index.Index8(np.array([0, 0, 0, 0], dtype=np.int8))
+    maskedarray = ak.contents.ByteMaskedArray(mask, array, valid_when=False)
+
+    cuda_maskedarray = ak.to_backend(maskedarray, "cuda")
+
+    assert to_list(cuda_maskedarray) == [
+        [0.0, 1.1, 2.2],
+        [3.3, 4.4],
+        [5.5],
+        [6.6, 7.7, 8.8, 9.9],
+    ]
+    assert to_list(
+        cuda_maskedarray[ak.highlevel.Array([[0, -1], [0], [], [1, 1]], backend="cuda")]
+    ) == [
+        [0.0, 2.2],
+        [3.3],
+        [],
+        [7.7, 7.7],
+    ]
+
+
+def test_0127_tomask_operation_ByteMaskedArray_jaggedslice1():
+    model = ak.highlevel.Array(
+        [
+            [0.0, 1.1, None, 2.2],
+            [],
+            [3.3, None, 4.4],
+            [5.5],
+            [6.6, 7.7, None, 8.8, 9.9],
+        ],
+        backend="cuda",
+    )
+    assert to_list(
+        model[
+            ak.highlevel.Array(
+                [[3, 2, 1, 1, 0], [], [1], [0, 0], [1, 2]], backend="cuda"
+            )
+        ]
+    ) == [
+        [2.2, None, 1.1, 1.1, 0.0],
+        [],
+        [None],
+        [5.5, 5.5],
+        [7.7, None],
+    ]
+
+    content = ak.contents.NumpyArray(
+        np.array([0.0, 1.1, 999, 2.2, 3.3, 123, 4.4, 5.5, 6.6, 7.7, 321, 8.8, 9.9])
+    )
+    mask = ak.index.Index8(
+        np.array([0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], dtype=np.int8)
+    )
+    maskedarray = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
+    offsets = ak.index.Index64(np.array([0, 4, 4, 7, 8, 13], dtype=np.int64))
+    listarray = ak.highlevel.Array(
+        ak.contents.ListOffsetArray(offsets, maskedarray), backend="cuda"
+    )
+
+    assert to_list(listarray) == to_list(model)
+    assert to_list(
+        listarray[
+            ak.highlevel.Array(
+                [[3, 2, 1, 1, 0], [], [1], [0, 0], [1, 2]], backend="cuda"
+            )
+        ]
+    ) == [[2.2, None, 1.1, 1.1, 0.0], [], [None], [5.5, 5.5], [7.7, None]]
+
+
+def test_0127_tomask_operation_ByteMaskedArray_jaggedslice2():
+    model = ak.highlevel.Array(
+        [
+            [[0.0, 1.1, None, 2.2], [], [3.3, None, 4.4]],
+            [],
+            [[5.5]],
+            [[6.6, 7.7, None, 8.8, 9.9]],
+        ],
+        backend="cuda",
+    )
+    assert to_list(
+        model[
+            ak.highlevel.Array(
+                [[[3, 2, 1, 1, 0], [], [1]], [], [[0, 0]], [[1, 2]]], backend="cuda"
+            )
+        ]
+    ) == [[[2.2, None, 1.1, 1.1, 0.0], [], [None]], [], [[5.5, 5.5]], [[7.7, None]]]
+
+    content = ak.contents.NumpyArray(
+        np.array([0.0, 1.1, 999, 2.2, 3.3, 123, 4.4, 5.5, 6.6, 7.7, 321, 8.8, 9.9])
+    )
+    mask = ak.index.Index8(
+        np.array([0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], dtype=np.int8)
+    )
+    maskedarray = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
+    offsets = ak.index.Index64(np.array([0, 4, 4, 7, 8, 13], dtype=np.int64))
+    sublistarray = ak.contents.ListOffsetArray(offsets, maskedarray)
+    offsets2 = ak.index.Index64(np.array([0, 3, 3, 4, 5], dtype=np.int64))
+    listarray = ak.highlevel.Array(
+        ak.contents.ListOffsetArray(offsets2, sublistarray), backend="cuda"
+    )
+    assert to_list(listarray) == to_list(model)
+    assert to_list(
+        listarray[
+            ak.highlevel.Array(
+                [[[3, 2, 1, 1, 0], [], [1]], [], [[0, 0]], [[1, 2]]], backend="cuda"
+            )
+        ]
+    ) == [[[2.2, None, 1.1, 1.1, 0.0], [], [None]], [], [[5.5, 5.5]], [[7.7, None]]]
+
+
+def test_0127_tomask_operation_ByteMaskedArray_jaggedslice3():
+    model = ak.highlevel.Array(
+        [
+            [[[0.0, 1.1, None, 2.2], [], [3.3, None, 4.4]], []],
+            [[[5.5]], [[6.6, 7.7, None, 8.8, 9.9]]],
+        ],
+        backend="cuda",
+    )
+    assert to_list(
+        model[
+            ak.highlevel.Array(
+                [[[[3, 2, 1, 1, 0], [], [1]], []], [[[0, 0]], [[1, 2]]]], backend="cuda"
+            )
+        ]
+    ) == [[[[2.2, None, 1.1, 1.1, 0.0], [], [None]], []], [[[5.5, 5.5]], [[7.7, None]]]]
+
+    content = ak.contents.NumpyArray(
+        np.array([0.0, 1.1, 999, 2.2, 3.3, 123, 4.4, 5.5, 6.6, 7.7, 321, 8.8, 9.9])
+    )
+    mask = ak.index.Index8(
+        np.array([0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], dtype=np.int8)
+    )
+    maskedarray = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
+    offsets = ak.index.Index64(np.array([0, 4, 4, 7, 8, 13], dtype=np.int64))
+    subsublistarray = ak.contents.ListOffsetArray(offsets, maskedarray)
+    offsets2 = ak.index.Index64(np.array([0, 3, 3, 4, 5], dtype=np.int64))
+    sublistarray = ak.contents.ListOffsetArray(offsets2, subsublistarray)
+    offsets3 = ak.index.Index64(np.array([0, 2, 4], dtype=np.int64))
+    listarray = ak.highlevel.Array(
+        ak.contents.ListOffsetArray(offsets3, sublistarray), backend="cuda"
+    )
+    assert to_list(listarray) == to_list(model)
+    assert to_list(
+        listarray[
+            ak.highlevel.Array(
+                [[[[3, 2, 1, 1, 0], [], [1]], []], [[[0, 0]], [[1, 2]]]], backend="cuda"
+            )
+        ]
+    ) == [[[[2.2, None, 1.1, 1.1, 0.0], [], [None]], []], [[[5.5, 5.5]], [[7.7, None]]]]
+
+
+def test_0127_tomask_operation():
+    array = ak.highlevel.Array(
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], backend="cuda"
+    )
+    mask1 = ak.highlevel.Array([True, True, False, False, True], backend="cuda")
+    assert to_list(array[mask1]) == [[0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9]]
+    assert to_list(ak.operations.mask(array, mask1)) == [
+        [0.0, 1.1, 2.2],
+        [],
+        None,
+        None,
+        [6.6, 7.7, 8.8, 9.9],
+    ]
+
+    mask2 = ak.highlevel.Array(
+        [[False, True, False], [], [True, True], [False], [True, False, False, True]],
+        backend="cuda",
+    )
+    assert to_list(array[mask2]) == [[1.1], [], [3.3, 4.4], [], [6.6, 9.9]]
+    assert to_list(ak.operations.mask(array, mask2)) == [
+        [None, 1.1, None],
+        [],
+        [3.3, 4.4],
+        [None],
+        [6.6, None, None, 9.9],
     ]
