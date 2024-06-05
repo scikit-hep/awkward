@@ -82,6 +82,8 @@ cuda_kernels_impl = [
     "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
     "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
+    "awkward_NumpyArray_subrange_equal",
+    "awkward_NumpyArray_subrange_equal_bool",
     "awkward_IndexedArray_flatten_nextcarry",
     "awkward_IndexedArray_flatten_none2empty",
     "awkward_IndexedArray_getitem_nextcarry",

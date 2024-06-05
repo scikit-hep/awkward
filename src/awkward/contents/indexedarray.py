@@ -838,9 +838,10 @@ class IndexedArray(IndexedMeta[Content], Content):
                 and parents.nplike is self._backend.index_nplike
                 and nextparents.nplike is self._backend.index_nplike
             )
+
             self._backend.maybe_kernel_error(
                 self._backend[
-                    "awkward_IndexedArray_local_preparenext",
+                    "awkward_IndexedArray_local_preparenext_64",
                     nextoutindex.dtype.type,
                     starts.dtype.type,
                     parents.dtype.type,
