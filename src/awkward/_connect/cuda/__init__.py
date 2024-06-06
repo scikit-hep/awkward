@@ -118,6 +118,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_sum_int32_bool_64",
         "awkward_reduce_sum_int64_bool_64",
         "awkward_reduce_sum_bool",
+        "awkward_reduce_prod",
         "awkward_reduce_prod_bool",
         "awkward_reduce_argmax",
         "awkward_reduce_argmin",

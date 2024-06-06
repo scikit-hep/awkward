@@ -9,19 +9,19 @@
 //     else:
 //         segment = 0
 //         grid_size = 1
-//     partial = cupy.zeros(outlength * grid_size, dtype=toptr.dtype)
-//     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int32_bool_64_a", int32, bool_, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int32_bool_64_b", int32, bool_, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int32_bool_64_c", int32, bool_, parents.dtype]))((segment,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
-// out["awkward_reduce_sum_int32_bool_64_a", {dtype_specializations}] = None
-// out["awkward_reduce_sum_int32_bool_64_b", {dtype_specializations}] = None
-// out["awkward_reduce_sum_int32_bool_64_c", {dtype_specializations}] = None
+//     partial = cupy.ones(outlength * grid_size, dtype=toptr.dtype)
+//     temp = cupy.ones(lenparents, dtype=toptr.dtype)
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((segment,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
+// out["awkward_reduce_prod_a", {dtype_specializations}] = None
+// out["awkward_reduce_prod_b", {dtype_specializations}] = None
+// out["awkward_reduce_prod_c", {dtype_specializations}] = None
 // END PYTHON
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_sum_int32_bool_64_a(
+awkward_reduce_prod_a(
     T* toptr,
     const C* fromptr,
     const U* parents,
@@ -35,14 +35,14 @@ awkward_reduce_sum_int32_bool_64_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      toptr[thread_id] = 0;
+      toptr[thread_id] = 1;
     }
   }
 }
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_sum_int32_bool_64_b(
+awkward_reduce_prod_b(
     T* toptr,
     const C* fromptr,
     const U* parents,
@@ -57,17 +57,17 @@ awkward_reduce_sum_int32_bool_64_b(
     int64_t thread_id = blockIdx.x * blockDim.x + idx;
 
     if (thread_id < lenparents) {
-      temp[idx] = (fromptr[thread_id] != 0) ? 1 : 0;;
+      temp[idx] = fromptr[thread_id];
     }
     __syncthreads();
 
     for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-      T val = 0;
+      T val = 1;
       if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
         val = temp[idx - stride];
       }
       __syncthreads();
-      temp[idx] += val;
+      temp[idx] *= val;
       __syncthreads();
     }
 
@@ -82,7 +82,7 @@ awkward_reduce_sum_int32_bool_64_b(
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_sum_int32_bool_64_c(
+awkward_reduce_prod_c(
     T* toptr,
     const C* fromptr,
     const U* parents,
@@ -96,12 +96,12 @@ awkward_reduce_sum_int32_bool_64_c(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      T sum = 0;
+      T prod = 1;
       int64_t blocks = (lenparents + blockDim.x - 1) / blockDim.x;
       for (int64_t i = 0; i < blocks; ++i) {
-        sum += partial[i * outlength + thread_id];
+        prod *= partial[i * outlength + thread_id];
       }
-      toptr[thread_id] = sum;
+      toptr[thread_id] = prod;
     }
   }
 }
