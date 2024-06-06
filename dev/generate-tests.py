@@ -953,6 +953,7 @@ def gencudakerneltests(specdict):
 
                 f.write(
                     "import cupy\n"
+                    "import cupy.testing as cpt\n"
                     "import pytest\n\n"
                     "import awkward as ak\n"
                     "import awkward._connect.cuda as ak_cu\n"
@@ -1022,7 +1023,7 @@ def gencudakerneltests(specdict):
                             if isinstance(val, list):
                                 f.write(
                                     " " * 4
-                                    + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                    + f"cpt.assert_allclose({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
                                 )
                             else:
                                 f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
@@ -1082,6 +1083,7 @@ def gencudaunittests(specdict):
                 f.write(
                     "import re\n"
                     "import cupy\n"
+                    "import cupy.testing as cpt\n"
                     "import pytest\n\n"
                     "import awkward as ak\n"
                     "import awkward._connect.cuda as ak_cu\n"
@@ -1218,7 +1220,7 @@ def gencudaunittests(specdict):
                                 if isinstance(val, list):
                                     f.write(
                                         " " * 4
-                                        + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                        + f"cpt.assert_allclose({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
                                     )
                                 else:
                                     f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
