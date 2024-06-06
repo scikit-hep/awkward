@@ -10,8 +10,6 @@
 //     else:
 //         segment = 0
 //         grid_size = 1
-//     print(block, grid_size)
-//     parents = cupy.sort(parents)
 //     partial = cupy.zeros(outlength * grid_size, dtype=outoffsets.dtype)
 //     temp = cupy.zeros(lenparents, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_a", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
@@ -66,7 +64,6 @@ awkward_ListOffsetArray_reduce_local_outoffsets_64_b(
     }
     __syncthreads();
 
-
     for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
         int64_t val = 0;
         if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
@@ -76,7 +73,6 @@ awkward_ListOffsetArray_reduce_local_outoffsets_64_b(
         temp[thread_id] += val;
         __syncthreads();
     }
-
 
     if (thread_id < lenparents) {
         int64_t parent = parents[thread_id];
