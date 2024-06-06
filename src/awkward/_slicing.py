@@ -498,7 +498,9 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             cumsum[1:] = item_backend.index_nplike.asarray(
                 item_backend.nplike.cumsum(flat_mask.data)
             )
-            nextoffsets = ak.index.Index(cumsum[item.offsets])
+
+            item_offsets = item_backend.index_nplike.asarray(item.offsets)
+            nextoffsets = ak.index.Index(cumsum[item_offsets])
 
         else:
             item._touch_data(recursive=False)
@@ -546,7 +548,8 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             cumsum = item_backend.nplike.empty(expanded.shape[0] + 1, dtype=np.int64)
             cumsum[0] = 0
             cumsum[1:] = item_backend.nplike.cumsum(expanded)
-            nextoffsets = ak.index.Index(cumsum[item.offsets])
+            item_offsets = item_backend.index_nplike.asarray(item.offsets)
+            nextoffsets = ak.index.Index(cumsum[item_offsets])
 
             # outindex fits into the lists; non-missing are sequential
             outindex = ak.index.Index64(
