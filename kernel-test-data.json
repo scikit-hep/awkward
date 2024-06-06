@@ -22933,7 +22933,7 @@
         },
         {
             "name": "awkward_reduce_sum_bool",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
@@ -23056,7 +23056,7 @@
         },
         {
             "name": "awkward_reduce_prod_bool",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
