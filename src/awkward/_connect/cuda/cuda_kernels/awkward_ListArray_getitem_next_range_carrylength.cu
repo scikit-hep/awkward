@@ -26,8 +26,6 @@ awkward_ListArray_getitem_next_range_carrylength_a(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    const int64_t  kMaxInt64  = 9223372036854775806;   // 2**63 - 2: see below
-    const int64_t  kSliceNone = kMaxInt64 + 1;         // for Slice::none()
     if (thread_id < lenstarts) {
       int64_t length = fromstops[thread_id] - fromstarts[thread_id];
       int64_t regular_start = start;
