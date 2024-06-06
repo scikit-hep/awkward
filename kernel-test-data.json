@@ -23510,7 +23510,7 @@
         },
         {
             "name": "awkward_reduce_max",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
@@ -24173,7 +24173,7 @@
         },
         {
             "name": "awkward_reduce_sum",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
@@ -25342,7 +25342,7 @@
         },
         {
             "name": "awkward_reduce_min",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
