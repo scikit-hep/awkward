@@ -10,7 +10,7 @@
 //         segment = 0
 //         grid_size = 1
 //     partial = cupy.full(outlength * grid_size, identity, dtype=toptr.dtype)
-//     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
+//     temp = cupy.full(lenparents, identity, dtype=toptr.dtype)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, identity, partial, temp, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, identity, partial, temp, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((segment,), block, (toptr, fromptr, parents, lenparents, outlength, identity, partial, temp, invocation_index, err_code))
@@ -27,7 +27,7 @@ awkward_reduce_max_a(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    T identity,
+    int64_t identity,
     T* partial,
     T* temp,
     uint64_t invocation_index,
@@ -36,7 +36,7 @@ awkward_reduce_max_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      toptr[thread_id] = identity;
+      toptr[thread_id] = static_cast<T>(identity);
     }
   }
 }
@@ -49,7 +49,7 @@ awkward_reduce_max_b(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    T identity,
+    int64_t identity,
     T* partial,
     T* temp,
     uint64_t invocation_index,
@@ -64,7 +64,7 @@ awkward_reduce_max_b(
     __syncthreads();
 
     for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-      T val = identity;
+      T val = static_cast<T>(identity);
       if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
         val = temp[idx - stride];
       }
@@ -90,7 +90,7 @@ awkward_reduce_max_c(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    T identity,
+    int64_t identity,
     T* partial,
     T* temp,
     uint64_t invocation_index,
@@ -99,7 +99,7 @@ awkward_reduce_max_c(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      T maximum = identity;
+      T maximum = static_cast<T>(identity);
       int64_t blocks = (lenparents + blockDim.x - 1) / blockDim.x;
       for (int64_t i = 0; i < blocks; ++i) {
         maximum = maximum > partial[i * outlength + thread_id] ? maximum : partial[i * outlength + thread_id];
