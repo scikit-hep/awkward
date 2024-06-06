@@ -3,7 +3,6 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (outoffsets, parents, lenparents, outlength, invocation_index, err_code) = args
-//     shared_mem_size = block[0] * outoffsets.dtype.itemsize
 //     if block[0] > 0:
 //         segment = math.floor((outlength + block[0] - 1) / block[0])
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
@@ -13,7 +12,7 @@
 //     partial = cupy.zeros(outlength * grid_size, dtype=outoffsets.dtype)
 //     temp = cupy.zeros(lenparents, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_a", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_b", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, partial, temp, invocation_index, err_code), shared_mem=shared_mem_size)
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_b", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
 //     scan_in_array = cupy.zeros(outlength, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_c", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((segment,), block, (outoffsets, parents, lenparents, outlength, partial, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
@@ -60,25 +59,25 @@ awkward_ListOffsetArray_reduce_local_outoffsets_64_b(
     int64_t thread_id = blockIdx.x * blockDim.x + idx;
 
     if (thread_id < lenparents) {
-        temp[thread_id] = 1;
+      temp[idx] = 1;
     }
     __syncthreads();
 
     for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-        int64_t val = 0;
-        if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-            val = temp[thread_id - stride];
-        }
-        __syncthreads();
-        temp[thread_id] += val;
-        __syncthreads();
+      int64_t val = 0;
+      if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
+        val = temp[idx - stride];
+      }
+      __syncthreads();
+      temp[idx] += val;
+      __syncthreads();
     }
 
     if (thread_id < lenparents) {
-        int64_t parent = parents[thread_id];
-        if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-            partial[blockIdx.x * outlength + parent] = temp[thread_id];
-        }
+      int64_t parent = parents[thread_id];
+      if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
+        partial[blockIdx.x * outlength + parent] = temp[idx];
+      }
     }
   }
 }
