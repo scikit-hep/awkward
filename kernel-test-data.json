@@ -23698,7 +23698,7 @@
         },
         {
             "name": "awkward_reduce_countnonzero",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
