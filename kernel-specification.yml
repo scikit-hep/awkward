@@ -543,7 +543,7 @@ kernels:
                       k = k + 1
     automatic-tests: true
 
-  - name: awkward_IndexedArray_local_preparenext
+  - name: awkward_IndexedArray_local_preparenext_64
     specializations:
       - name: awkward_IndexedArray_local_preparenext_64
         args:
@@ -555,7 +555,7 @@ kernels:
           - {name: nextlen, type: "Const[int64_t]", dir: in, role: default}
     description: null
     definition: |
-      def awkward_IndexedArray_local_preparenext(
+      def awkward_IndexedArray_local_preparenext_64(
         tocarry, starts, parents, parentslength, nextparents, nextlen
       ):
           j = 0
