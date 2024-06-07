@@ -4,16 +4,14 @@
 // def f(grid, block, args):
 //     (toptr, fromptr, parents, lenparents, outlength, invocation_index, err_code) = args
 //     if block[0] > 0:
-//         segment = math.floor((outlength + block[0] - 1) / block[0])
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
-//         segment = 0
 //         grid_size = 1
-//     partial = cupy.full(outlength * grid_size, -1, dtype=toptr.dtype)
+//     atomic_toptr = cupy.array(toptr, dtype=cupy.uint64)
 //     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmax_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmax_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmax_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((segment,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmax_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmax_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmax_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
 // out["awkward_reduce_argmax_a", {dtype_specializations}] = None
 // out["awkward_reduce_argmax_b", {dtype_specializations}] = None
 // out["awkward_reduce_argmax_c", {dtype_specializations}] = None
@@ -27,7 +25,7 @@ awkward_reduce_argmax_a(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    T* partial,
+    uint64_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -35,7 +33,7 @@ awkward_reduce_argmax_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      toptr[thread_id] = -1;
+      atomic_toptr[thread_id] = -1;
     }
   }
 }
@@ -48,7 +46,7 @@ awkward_reduce_argmax_b(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    T* partial,
+    uint64_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -76,7 +74,7 @@ awkward_reduce_argmax_b(
     if (thread_id < lenparents) {
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        partial[blockIdx.x * outlength + parent] = temp[idx];
+        atomicExch(&atomic_toptr[parent], temp[idx]);
       }
     }
   }
@@ -90,7 +88,7 @@ awkward_reduce_argmax_c(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    T* partial,
+    uint64_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -98,16 +96,7 @@ awkward_reduce_argmax_c(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      int64_t argmax = -1;
-      int64_t blocks = (lenparents + blockDim.x - 1) / blockDim.x;
-      for (int64_t i = 0; i < blocks; ++i) {
-        int64_t index = partial[i * outlength + thread_id];
-        if (index != -1 && (argmax == -1 || fromptr[index] > fromptr[argmax]) ||
-           (fromptr[index] == fromptr[argmax] && index < argmax)) {
-          argmax = index;
-        }
-      }
-      toptr[thread_id] = argmax;
+      toptr[thread_id] = static_cast<T>(atomic_toptr[thread_id]);
     }
   }
 }

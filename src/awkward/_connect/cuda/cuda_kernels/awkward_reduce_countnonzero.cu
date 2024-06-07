@@ -4,16 +4,14 @@
 // def f(grid, block, args):
 //     (toptr, fromptr, parents, lenparents, outlength, invocation_index, err_code) = args
 //     if block[0] > 0:
-//         segment = math.floor((outlength + block[0] - 1) / block[0])
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
-//         segment = 0
 //         grid_size = 1
-//     partial = cupy.zeros(outlength * grid_size, dtype=toptr.dtype)
+//     atomic_toptr = cupy.array(toptr, dtype=cupy.uint64)
 //     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_countnonzero_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_countnonzero_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_countnonzero_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((segment,), block, (toptr, fromptr, parents, lenparents, outlength, partial, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_countnonzero_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_countnonzero_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_countnonzero_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
 // out["awkward_reduce_countnonzero_a", {dtype_specializations}] = None
 // out["awkward_reduce_countnonzero_b", {dtype_specializations}] = None
 // out["awkward_reduce_countnonzero_c", {dtype_specializations}] = None
@@ -27,7 +25,7 @@ awkward_reduce_countnonzero_a(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    T* partial,
+    uint64_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -35,7 +33,7 @@ awkward_reduce_countnonzero_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      toptr[thread_id] = 0;
+      atomic_toptr[thread_id] = 0;
     }
   }
 }
@@ -48,7 +46,7 @@ awkward_reduce_countnonzero_b(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    T* partial,
+    uint64_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -74,7 +72,7 @@ awkward_reduce_countnonzero_b(
     if (thread_id < lenparents) {
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        partial[blockIdx.x * outlength + parent] = temp[idx];
+        atomicAdd(&atomic_toptr[parent], temp[idx]);
       }
     }
   }
@@ -88,7 +86,7 @@ awkward_reduce_countnonzero_c(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    T* partial,
+    uint64_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -96,12 +94,7 @@ awkward_reduce_countnonzero_c(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      int64_t count = 0;
-      int64_t blocks = (lenparents + blockDim.x - 1) / blockDim.x;
-      for (int64_t i = 0; i < blocks; ++i) {
-        count += partial[i * outlength + thread_id];
-      }
-      toptr[thread_id] = count;
+      toptr[thread_id] = static_cast<T>(atomic_toptr[thread_id]);
     }
   }
 }
