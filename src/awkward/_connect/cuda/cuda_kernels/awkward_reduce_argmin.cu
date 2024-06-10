@@ -96,7 +96,7 @@ awkward_reduce_argmin_c(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      toptr[thread_id] = static_cast<T>(atomic_toptr[thread_id]);
+      toptr[thread_id] = (T)(atomic_toptr[thread_id]);
     }
   }
 }

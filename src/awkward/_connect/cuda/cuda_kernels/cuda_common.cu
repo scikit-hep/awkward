@@ -176,22 +176,6 @@ __device__ __forceinline__ float atomicMax(float* addr, float value) {
 }
 
 
-typedef long long int64_t;
-
-
-template <typename T>
-struct is_int64_t {
-    static const bool value = false;
-};
-
-
-template <>
-struct is_int64_t<int64_t> {
-    static const bool value = true;
-};
-
-
-
 __device__ int64_t atomicAdd(int64_t* address, int64_t val) {
   uint64_t* address_as_ull = (uint64_t*)address;
   uint64_t old = *address_as_ull, assumed;
