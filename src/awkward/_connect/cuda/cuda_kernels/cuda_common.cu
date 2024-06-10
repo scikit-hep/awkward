@@ -33,6 +33,27 @@ typedef unsigned long long uintmax_t;
             invocation_index*(1 << ERROR_BITS) + (int)(ERROR_KERNEL_CODE));
 
 // BEGIN PYTHON
+// def min_max_type(dtype):
+//   supported_types = {
+//       'bool': cupy.int32,
+//       'int8': cupy.int32,
+//       'int16': cupy.int32,
+//       'int32': cupy.int32,
+//       'int64': cupy.int64,
+//       'uint8': cupy.uint32,
+//       'uint16': cupy.uint32,
+//       'uint32': cupy.uint32,
+//       'uint64': cupy.uint64,
+//       'float32': cupy.float32,
+//       'float64': cupy.float64
+//   }
+//   if str(dtype) in supported_types:
+//       return supported_types[str(dtype)]
+//   else:
+//       raise ValueError("Unsupported dtype.", dtype)
+// END PYTHON
+
+// BEGIN PYTHON
 // def inclusive_scan(grid, block, args):
 //     (d_in, invocation_index, err_code) = args
 //     import math
@@ -143,4 +164,40 @@ exclusive_scan_kernel(T* input,
       output[idx] = temp[tid];
     }
   }
+}
+
+__device__ __forceinline__ float atomicMin(float* addr, float value) {
+  float old; old = !signbit(value) ? __int_as_float(atomicMin((int*)addr, __float_as_int(value))) : __uint_as_float(atomicMax((unsigned int*)addr, __float_as_uint(value)));
+  return old;
+}
+__device__ __forceinline__ float atomicMax(float* addr, float value) {
+  float old; old = !signbit(value) ? __int_as_float(atomicMax((int*)addr, __float_as_int(value))) : __uint_as_float(atomicMin((unsigned int*)addr, __float_as_uint(value)));
+  return old;
+}
+
+
+typedef long long int64_t;
+
+
+template <typename T>
+struct is_int64_t {
+    static const bool value = false;
+};
+
+
+template <>
+struct is_int64_t<int64_t> {
+    static const bool value = true;
+};
+
+
+
+__device__ int64_t atomicAdd(int64_t* address, int64_t val) {
+  uint64_t* address_as_ull = (uint64_t*)address;
+  uint64_t old = *address_as_ull, assumed;
+  do {
+    assumed = old;
+    old = atomicCAS(address_as_ull, assumed, assumed + (uint64_t)val);
+  } while (assumed != old);
+  return (int64_t)old;
 }

@@ -7,14 +7,11 @@
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
-//     atomic_toptr = cupy.array(toptr, dtype=cupy.uint64)
 //     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int64_bool_64_a", int64, bool_, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int64_bool_64_b", int64, bool_, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int64_bool_64_c", int64, bool_, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int64_bool_64_a", int64, bool_, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int64_bool_64_b", int64, bool_, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, temp, invocation_index, err_code))
 // out["awkward_reduce_sum_int64_bool_64_a", {dtype_specializations}] = None
 // out["awkward_reduce_sum_int64_bool_64_b", {dtype_specializations}] = None
-// out["awkward_reduce_sum_int64_bool_64_c", {dtype_specializations}] = None
 // END PYTHON
 
 template <typename T, typename C, typename U>
@@ -25,7 +22,6 @@ awkward_reduce_sum_int64_bool_64_a(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint64_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -33,7 +29,7 @@ awkward_reduce_sum_int64_bool_64_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      atomic_toptr[thread_id] = 0;
+      toptr[thread_id] = 0;
     }
   }
 }
@@ -46,7 +42,6 @@ awkward_reduce_sum_int64_bool_64_b(
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint64_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -72,29 +67,8 @@ awkward_reduce_sum_int64_bool_64_b(
     if (thread_id < lenparents) {
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicAdd(&atomic_toptr[parent], temp[idx]);
+        atomicAdd(&toptr[parent], temp[idx]);
       }
-    }
-  }
-}
-
-template <typename T, typename C, typename U>
-__global__ void
-awkward_reduce_sum_int64_bool_64_c(
-    T* toptr,
-    const C* fromptr,
-    const U* parents,
-    int64_t lenparents,
-    int64_t outlength,
-    uint64_t* atomic_toptr,
-    T* temp,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
-  if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (thread_id < outlength) {
-      toptr[thread_id] = static_cast<T>(atomic_toptr[thread_id]);
     }
   }
 }
