@@ -12,6 +12,7 @@ from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.unionmeta import UnionMeta
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -430,7 +431,7 @@ class UnionArray(UnionMeta[Content], Content):
             ]
 
         if len(contents) == 1:
-            next = contents[0]._carry(index, True)
+            next = contents[0]._carry(index, False)
             return next.copy(parameters=parameters_union(next._parameters, parameters))
 
         else:
@@ -527,11 +528,11 @@ class UnionArray(UnionMeta[Content], Content):
         if isinstance(self._tags, PlaceholderArray) or isinstance(
             self._index, PlaceholderArray
         ):
-            return False
+            return True
         for content in self._contents:
             if content._is_getitem_at_placeholder():
-                return False
-        return True
+                return True
+        return False
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
@@ -701,7 +702,7 @@ class UnionArray(UnionMeta[Content], Content):
         nextcarry = ak.index.Index64(
             tmpcarry.data[: lenout[0]], nplike=self._backend.index_nplike
         )
-        return self._contents[index]._carry(nextcarry, True)
+        return self._contents[index]._carry(nextcarry, False)
 
     @staticmethod
     def regular_index(
@@ -878,11 +879,13 @@ class UnionArray(UnionMeta[Content], Content):
             )
             contents = []
 
+            keep_offsets = []
             for i in range(len(self._contents)):
                 offsets, flattened = self._contents[i]._offsets_and_flattened(
                     axis, depth
                 )
                 offsetsraws[i] = offsets.ptr
+                keep_offsets.append(offsets)
                 contents.append(flattened)
                 has_offsets = offsets.length != 0
 
@@ -895,23 +898,40 @@ class UnionArray(UnionMeta[Content], Content):
                     and self._tags.nplike is self._backend.index_nplike
                     and self._index.nplike is self._backend.index_nplike
                 )
-                self._backend.maybe_kernel_error(
-                    self._backend[
-                        "awkward_UnionArray_flatten_length",
-                        total_length.dtype.type,
-                        self._tags.dtype.type,
-                        self._index.dtype.type,
-                        np.int64,
-                    ](
-                        total_length.data,
-                        self._tags.data,
-                        self._index.data,
-                        self._tags.length,
-                        offsetsraws.ctypes.data_as(
-                            ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))
-                        ),
+                if self._backend.nplike == Numpy.instance():
+                    self._backend.maybe_kernel_error(
+                        self._backend[
+                            "awkward_UnionArray_flatten_length",
+                            total_length.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                            np.int64,
+                        ](
+                            total_length.data,
+                            self._tags.data,
+                            self._index.data,
+                            self._tags.length,
+                            offsetsraws.ctypes.data_as(
+                                ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))
+                            ),
+                        )
                     )
-                )
+                elif self._backend.nplike == Cupy.instance():
+                    self._backend.maybe_kernel_error(
+                        self._backend[
+                            "awkward_UnionArray_flatten_length",
+                            total_length.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                            np.int64,
+                        ](
+                            total_length.data,
+                            self._tags.data,
+                            self._index.data,
+                            self._tags.length,
+                            offsetsraws,
+                        )
+                    )
 
                 totags = ak.index.Index8.empty(
                     total_length[0], nplike=self._backend.index_nplike
@@ -930,28 +950,48 @@ class UnionArray(UnionMeta[Content], Content):
                     and self._tags.nplike is self._backend.index_nplike
                     and self._index.nplike is self._backend.index_nplike
                 )
-                self._backend.maybe_kernel_error(
-                    self._backend[
-                        "awkward_UnionArray_flatten_combine",
-                        totags.dtype.type,
-                        toindex.dtype.type,
-                        tooffsets.dtype.type,
-                        self._tags.dtype.type,
-                        self._index.dtype.type,
-                        np.int64,
-                    ](
-                        totags.data,
-                        toindex.data,
-                        tooffsets.data,
-                        self._tags.data,
-                        self._index.data,
-                        self._tags.length,
-                        offsetsraws.ctypes.data_as(
-                            ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))
-                        ),
+                if self._backend.nplike == Numpy.instance():
+                    self._backend.maybe_kernel_error(
+                        self._backend[
+                            "awkward_UnionArray_flatten_combine",
+                            totags.dtype.type,
+                            toindex.dtype.type,
+                            tooffsets.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                            np.int64,
+                        ](
+                            totags.data,
+                            toindex.data,
+                            tooffsets.data,
+                            self._tags.data,
+                            self._index.data,
+                            self._tags.length,
+                            offsetsraws.ctypes.data_as(
+                                ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))
+                            ),
+                        )
                     )
-                )
-
+                elif self._backend.nplike == Cupy.instance():
+                    self._backend.maybe_kernel_error(
+                        self._backend[
+                            "awkward_UnionArray_flatten_combine",
+                            totags.dtype.type,
+                            toindex.dtype.type,
+                            tooffsets.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                            np.int64,
+                        ](
+                            totags.data,
+                            toindex.data,
+                            tooffsets.data,
+                            self._tags.data,
+                            self._index.data,
+                            self._tags.length,
+                            offsetsraws,
+                        )
+                    )
                 return (
                     tooffsets,
                     UnionArray(
@@ -1479,7 +1519,8 @@ class UnionArray(UnionMeta[Content], Content):
         types = pyarrow.union(
             [
                 pyarrow.field(str(i), values[i].type).with_nullable(
-                    mask_node is not None or self._contents[i].is_option
+                    mask_node is not None
+                    or self._contents[i]._arrow_needs_option_type()
                 )
                 for i in range(len(values))
             ],

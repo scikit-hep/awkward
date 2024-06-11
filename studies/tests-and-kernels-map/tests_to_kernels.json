@@ -3698,7 +3698,6 @@
             "awkward_ListOffsetArray_reduce_local_nextparents_64",
             "awkward_sorting_ranges_length",
             "awkward_sort",
-            "awkward_unique",
             "awkward_sorting_ranges",
             "awkward_unique_ranges",
             "awkward_unique_offsets"
@@ -3711,7 +3710,6 @@
             "awkward_ListOffsetArray_reduce_local_nextparents_64",
             "awkward_sorting_ranges_length",
             "awkward_sort",
-            "awkward_unique",
             "awkward_sorting_ranges",
             "awkward_unique_ranges",
             "awkward_unique_offsets"
@@ -3724,7 +3722,6 @@
             "awkward_ListOffsetArray_reduce_local_nextparents_64",
             "awkward_sorting_ranges_length",
             "awkward_sort",
-            "awkward_unique",
             "awkward_sorting_ranges",
             "awkward_unique_ranges",
             "awkward_unique_offsets"
@@ -3737,7 +3734,6 @@
             "awkward_ListOffsetArray_reduce_local_nextparents_64",
             "awkward_sorting_ranges_length",
             "awkward_sort",
-            "awkward_unique",
             "awkward_sorting_ranges",
             "awkward_unique_ranges",
             "awkward_unique_offsets"
@@ -3753,7 +3749,6 @@
             "awkward_IndexedArray_reduce_next_64",
             "awkward_sort",
             "awkward_IndexedArray_unique_next_index_and_offsets_64",
-            "awkward_unique",
             "awkward_IndexedArray_numnull_parents",
             "awkward_IndexedArray_numnull",
             "awkward_IndexedArray_numnull_unique",
@@ -3771,7 +3766,6 @@
             "awkward_sorting_ranges_length",
             "awkward_IndexedArray_reduce_next_64",
             "awkward_sort",
-            "awkward_unique",
             "awkward_IndexedArray_numnull",
             "awkward_ListArray_compact_offsets",
             "awkward_IndexedArray_numnull_unique",
@@ -3792,7 +3786,6 @@
             "awkward_sorting_ranges_length",
             "awkward_IndexedArray_reduce_next_64",
             "awkward_sort",
-            "awkward_unique",
             "awkward_IndexedArray_numnull",
             "awkward_ListArray_compact_offsets",
             "awkward_IndexedArray_numnull_unique",
@@ -3813,7 +3806,6 @@
             "awkward_sorting_ranges_length",
             "awkward_IndexedArray_reduce_next_64",
             "awkward_sort",
-            "awkward_unique",
             "awkward_IndexedArray_numnull",
             "awkward_ListArray_compact_offsets",
             "awkward_IndexedArray_numnull_unique",
@@ -3832,10 +3824,8 @@
         "kernels": [
             "awkward_ListOffsetArray_reduce_local_nextparents_64",
             "awkward_sorting_ranges_length",
-            "awkward_unique_copy",
             "awkward_IndexedArray_reduce_next_64",
             "awkward_sort",
-            "awkward_unique",
             "awkward_IndexedArray_numnull",
             "awkward_ListArray_compact_offsets",
             "awkward_sorting_ranges",
@@ -3855,7 +3845,6 @@
             "awkward_NumpyArray_sort_asstrings_uint8",
             "awkward_sorting_ranges_length",
             "awkward_sort",
-            "awkward_unique",
             "awkward_ListArray_compact_offsets",
             "awkward_sorting_ranges",
             "awkward_NumpyArray_unique_strings_uint8",
@@ -3869,16 +3858,14 @@
     "test_0404_array_validity_check.py::test_NumpyArray": {
         "count": 2,
         "kernels": [
-            "awkward_sort",
-            "awkward_unique"
+            "awkward_sort"
         ],
         "status": false
     },
     "test_0404_array_validity_check.py::test_RecordArray": {
         "count": 2,
         "kernels": [
-            "awkward_sort",
-            "awkward_unique"
+            "awkward_sort"
         ],
         "status": false
     },
@@ -3890,7 +3877,6 @@
             "awkward_IndexedArray_reduce_next_64",
             "awkward_sort",
             "awkward_IndexedArray_unique_next_index_and_offsets_64",
-            "awkward_unique",
             "awkward_IndexedArray_numnull_parents",
             "awkward_IndexedArray_numnull",
             "awkward_IndexedArray_numnull_unique",
@@ -3909,7 +3895,6 @@
             "awkward_UnionArray_simplify_one",
             "awkward_sort",
             "awkward_ListArray_fill",
-            "awkward_unique",
             "awkward_ListArray_compact_offsets",
             "awkward_sorting_ranges",
             "awkward_ListArray_broadcast_tooffsets",
@@ -3921,8 +3906,7 @@
     "test_0404_array_validity_check.py::test_UnmaskedArray": {
         "count": 2,
         "kernels": [
-            "awkward_sort",
-            "awkward_unique"
+            "awkward_sort"
         ],
         "status": false
     },
@@ -3930,7 +3914,6 @@
         "count": 6,
         "kernels": [
             "awkward_NumpyArray_sort_asstrings_uint8",
-            "awkward_unique_copy",
             "awkward_IndexedArray_simplify",
             "awkward_ListArray_validity",
             "awkward_NumpyArray_unique_strings_uint8",
@@ -3943,7 +3926,6 @@
         "kernels": [
             "awkward_ListOffsetArray_reduce_local_nextparents_64",
             "awkward_NumpyArray_sort_asstrings_uint8",
-            "awkward_unique_copy",
             "awkward_ListOffsetArray_reduce_local_outoffsets_64",
             "awkward_reduce_count_64",
             "awkward_ListArray_compact_offsets",
@@ -3960,7 +3942,6 @@
             "awkward_ListOffsetArray_reduce_local_nextparents_64",
             "awkward_sorting_ranges_length",
             "awkward_sort",
-            "awkward_NumpyArray_fill",
             "awkward_sorting_ranges",
             "awkward_NumpyArray_subrange_equal"
         ],
@@ -7346,7 +7327,6 @@
         "kernels": [
             "awkward_sorting_ranges_length",
             "awkward_sort",
-            "awkward_unique",
             "awkward_sorting_ranges",
             "awkward_argsort"
         ],
@@ -7357,7 +7337,6 @@
         "kernels": [
             "awkward_sorting_ranges_length",
             "awkward_sort",
-            "awkward_unique",
             "awkward_sorting_ranges",
             "awkward_argsort"
         ],
@@ -10933,7 +10912,6 @@
         "count": 3,
         "kernels": [
             "awkward_sort",
-            "awkward_unique",
             "awkward_ListArray_validity"
         ],
         "status": false
@@ -11071,7 +11049,6 @@
         "kernels": [
             "awkward_UnionArray_simplify_one",
             "awkward_reduce_prod_complex",
-            "awkward_unique_copy",
             "awkward_reduce_countnonzero_complex",
             "awkward_ByteMaskedArray_reduce_next_64",
             "awkward_IndexedArray_fill",

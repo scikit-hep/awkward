@@ -647,7 +647,6 @@ class RegularArray(RegularMeta[Content], Content):
                         advanced.data,
                         regular_flathead.data,
                         self._length,
-                        regular_flathead.length,
                         self._size,
                     ),
                     slicer=head,
@@ -996,7 +995,7 @@ class RegularArray(RegularMeta[Content], Content):
             )
             self._backend.maybe_kernel_error(
                 self._backend[
-                    "awkward_RegularArray_reduce_nonlocal_preparenext",
+                    "awkward_RegularArray_reduce_nonlocal_preparenext_64",
                     nextcarry.dtype.type,
                     nextparents.dtype.type,
                     parents.dtype.type,
@@ -1067,7 +1066,7 @@ class RegularArray(RegularMeta[Content], Content):
             assert nextparents.nplike is index_nplike
             self._backend.maybe_kernel_error(
                 self._backend[
-                    "awkward_RegularArray_reduce_local_nextparents",
+                    "awkward_RegularArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                 ](
                     nextparents.data,
@@ -1336,7 +1335,7 @@ class RegularArray(RegularMeta[Content], Content):
             )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
-                akcontent.is_option
+                akcontent._arrow_needs_option_type()
             )
 
             return pyarrow.Array.from_buffers(

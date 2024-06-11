@@ -67,6 +67,10 @@ jobs:
     name: "Build wheel & sdist"
     runs-on: ubuntu-latest
     needs: [determine-source-date-epoch]
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     steps:
@@ -82,6 +86,11 @@ jobs:
 
     - name: Check metadata
       run: pipx run twine check dist/*
+
+    - name: Generate artifact attestation for sdist and wheel
+      uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
+      with:
+        subject-path: "dist/awkward-*"
 
     - uses: actions/upload-artifact@v4
       with:
@@ -112,6 +121,19 @@ jobs:
       with:
         name: distributions
         path: dist
+
+    - name: List distributions to be deployed
+      run: ls -l dist/
+
+    - name: Verify sdist artifact attestation
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh attestation verify dist/awkward-*.tar.gz --repo ${{ github.repository }}
+
+    - name: Verify wheel artifact attestation
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh attestation verify dist/awkward-*.whl --repo ${{ github.repository }}
 
     - uses: pypa/gh-action-pypi-publish@v1.8.14
 

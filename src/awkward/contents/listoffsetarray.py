@@ -680,7 +680,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                         regular_flathead.data,
                         advanced.data,
                         lenstarts,
-                        regular_flathead.length,
                         self._content.length,
                     ),
                     slicer=head,
@@ -769,7 +768,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                         self._offsets.data,
                         self._offsets.length,
                         inneroffsets.data,
-                        inneroffsets.length,
                     )
                 )
                 return (
@@ -1974,7 +1972,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
-                akcontent.is_option
+                akcontent._arrow_needs_option_type()
             )
 
             if issubclass(npoffsets.dtype.type, np.int32):

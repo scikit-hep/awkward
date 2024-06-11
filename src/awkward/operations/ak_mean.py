@@ -169,6 +169,7 @@ def nanmean(
         mask_identity,
         highlevel=highlevel,
         behavior=behavior,
+        attrs=attrs,
     )
 
 

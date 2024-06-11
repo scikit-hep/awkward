@@ -108,7 +108,7 @@ jobs:
           python -m build -w awkward-cpp
 
       - name: Find built wheel
-        uses: tj-actions/glob@v21
+        uses: tj-actions/glob@v22
         id: find-wheel
         with:
           files: |
@@ -139,15 +139,20 @@ jobs:
       - name: Test CPU kernels with explicitly defined values
         run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels-explicit
 
-      - name: Test non-kernels
+      - name: Test non-kernels (Python)
         run: >-
           python -m pytest -vv -rs tests --cov=awkward --cov-report=term
           --cov-report=xml
+        if: startsWith(matrix.python-version, '3.')
+
+      - name: Test non-kernels (PyPy)
+        run: >-
+          python -m pytest -vv -rs tests
+        if: startsWith(matrix.python-version, 'pypy')
 
       - name: Upload Codecov results
         if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')
         uses: codecov/codecov-action@v4
-
 
   Linux-ROOT:
     runs-on: ubuntu-20.04

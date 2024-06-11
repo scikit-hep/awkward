@@ -239,12 +239,17 @@ def getdtypes(args):
     return dtypes
 
 
+def gettype(arg, args):
+    typename = remove_const(
+        next(argument for argument in args if argument.name == arg).typename
+    )
+    return typename
+
+
 def checkuint(test_args, args):
     flag = True
     for arg, val in test_args:
-        typename = remove_const(
-            next(argument for argument in args if argument.name == arg).typename
-        )
+        typename = gettype(arg, args)
         if "List[uint" in typename and (any(n < 0 for n in val)):
             flag = False
     return flag
@@ -254,9 +259,7 @@ def checkintrange(test_args, error, args):
     flag = True
     if not error:
         for arg, val in test_args:
-            typename = remove_const(
-                next(argument for argument in args if argument.name == arg).typename
-            )
+            typename = gettype(arg, args)
             if "int" in typename or "uint" in typename:
                 dtype = gettypename(typename)
                 min_val, max_val = np.iinfo(dtype).min, np.iinfo(dtype).max
@@ -305,6 +308,35 @@ import numpy
 from numpy import uint8
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
+
+def awkward_regularize_rangeslice(
+    start, stop, posstep, hasstart, hasstop, length,
+):
+    if posstep:
+        if not hasstart:         start = 0
+        elif start < 0:          start += length
+        if start < 0:            start = 0
+        if start > length:       start = length
+
+        if not hasstop:          stop = length
+        elif stop < 0:           stop += length
+        if stop < 0:             stop = 0
+        if stop > length:        stop = length
+        if stop < start:         stop = start
+
+    else:
+        if not hasstart:         start = length - 1
+        elif start < 0:          start += length
+        if start < -1:           start = -1
+        if start > length - 1:   start = length - 1
+
+        if not hasstop:          stop = -1
+        elif stop < 0:           stop += length
+        if stop < -1:            stop = -1
+        if stop > length - 1:    stop = length - 1
+        if stop > start:         stop = start
+    return start, stop
+
 """
 
     tests_spec = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec")
@@ -486,7 +518,10 @@ def gencpukerneltests(specdict):
             )
 
             f.write(
-                "import ctypes\nimport pytest\n\nfrom awkward_cpp.cpu_kernels import lib\n\n"
+                "import ctypes\n"
+                "import numpy as np\n"
+                "import pytest\n\n"
+                "from awkward_cpp.cpu_kernels import lib\n\n"
             )
             num = 1
             if spec.tests == []:
@@ -503,11 +538,7 @@ def gencpukerneltests(specdict):
                 num += 1
                 for arg, val in test["inargs"].items():
                     f.write(" " * 4 + arg + " = " + str(val) + "\n")
-                    typename = remove_const(
-                        next(
-                            argument for argument in spec.args if argument.name == arg
-                        ).typename
-                    )
+                    typename = gettype(arg, spec.args)
                     if "List" in typename:
                         count = typename.count("List")
                         typename = gettypename(typename)
@@ -519,7 +550,29 @@ def gencpukerneltests(specdict):
                         elif count == 2:
                             f.write(
                                 " " * 4
-                                + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
+                                + f"{typename}Ptr = ctypes.POINTER(ctypes.c_{typename})\n"
+                                + " " * 4
+                                + f"{typename}PtrPtr = ctypes.POINTER({typename}Ptr)\n"
+                                + " " * 4
+                                + f"dim0 = len({arg})\n"
+                                + " " * 4
+                                + f"dim1 = len({arg}[0])\n"
+                                + " " * 4
+                                + f"{arg}_np_arr_2d = np.empty([dim0, dim1], dtype=np.{typename})\n"
+                                + " " * 4
+                                + "for i in range(dim0):\n"
+                                + " " * 8
+                                + "for j in range(dim1):\n"
+                                + " " * 12
+                                + f"{arg}_np_arr_2d[i][j] = {arg}[i][j]\n"
+                                + " " * 4
+                                + f"{arg}_ct_arr = np.ctypeslib.as_ctypes({arg}_np_arr_2d)\n"
+                                + " " * 4
+                                + f"{typename}PtrArr = {typename}Ptr * {arg}_ct_arr._length_\n"
+                                + " " * 4
+                                + f"{arg}_ct_ptr = ctypes.cast({typename}PtrArr(*(ctypes.cast(row, {typename}Ptr) for row in {arg}_ct_arr)), {typename}PtrPtr)\n"
+                                + " " * 4
+                                + f"{arg} = {arg}_ct_ptr\n"
                             )
                 f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
                 args = ""
@@ -593,6 +646,7 @@ def gencpuunittests(specdict):
 
                 f.write(
                     "import ctypes\n"
+                    "import numpy as np\n"
                     "import pytest\n\n"
                     "from awkward_cpp.cpu_kernels import lib\n\n"
                 )
@@ -609,13 +663,7 @@ def gencpuunittests(specdict):
                         num += 1
                         f.write(funcName)
                         for arg, val in test["outputs"].items():
-                            typename = remove_const(
-                                next(
-                                    argument
-                                    for argument in spec.args
-                                    if argument.name == arg
-                                ).typename
-                            )
+                            typename = gettype(arg, spec.args)
                             f.write(
                                 " " * 4
                                 + arg
@@ -634,17 +682,32 @@ def gencpuunittests(specdict):
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
+                                        + f"{typename}Ptr = ctypes.POINTER(ctypes.c_{typename})\n"
+                                        + " " * 4
+                                        + f"{typename}PtrPtr = ctypes.POINTER({typename}Ptr)\n"
+                                        + " " * 4
+                                        + f"dim0 = len({arg})\n"
+                                        + " " * 4
+                                        + f"dim1 = len({arg}[0])\n"
+                                        + " " * 4
+                                        + f"{arg}_np_arr_2d = np.empty([dim0, dim1], dtype=np.{typename})\n"
+                                        + " " * 4
+                                        + "for i in range(dim0):\n"
+                                        + " " * 8
+                                        + "for j in range(dim1):\n"
+                                        + " " * 12
+                                        + f"{arg}_np_arr_2d[i][j] = {arg}[i][j]\n"
+                                        + " " * 4
+                                        + f"{arg}_ct_arr = np.ctypeslib.as_ctypes({arg}_np_arr_2d)\n"
+                                        + " " * 4
+                                        + f"{typename}PtrArr = {typename}Ptr * {arg}_ct_arr._length_\n"
+                                        + " " * 4
+                                        + f"{arg}_ct_ptr = ctypes.cast({typename}PtrArr(*(ctypes.cast(row, {typename}Ptr) for row in {arg}_ct_arr)), {typename}PtrPtr)\n"
+                                        + " " * 4
+                                        + f"{arg} = {arg}_ct_ptr\n"
                                     )
                         for arg, val in test["inputs"].items():
-                            typename = remove_const(
-                                next(
-                                    argument
-                                    for argument in spec.args
-                                    if argument.name == arg
-                                ).typename
-                            )
-
+                            typename = gettype(arg, spec.args)
                             f.write(" " * 4 + arg + " = " + str(val) + "\n")
                             if "List" in typename:
                                 count = typename.count("List")
@@ -657,7 +720,29 @@ def gencpuunittests(specdict):
                                 elif count == 2:
                                     f.write(
                                         " " * 4
-                                        + f"{arg} = ctypes.pointer(ctypes.cast((ctypes.c_{typename}*len({arg}[0]))(*{arg}[0]),ctypes.POINTER(ctypes.c_{typename})))\n"
+                                        + f"{typename}Ptr = ctypes.POINTER(ctypes.c_{typename})\n"
+                                        + " " * 4
+                                        + f"{typename}PtrPtr = ctypes.POINTER({typename}Ptr)\n"
+                                        + " " * 4
+                                        + f"dim0 = len({arg})\n"
+                                        + " " * 4
+                                        + f"dim1 = len({arg}[0])\n"
+                                        + " " * 4
+                                        + f"{arg}_np_arr_2d = np.empty([dim0, dim1], dtype=np.{typename})\n"
+                                        + " " * 4
+                                        + "for i in range(dim0):\n"
+                                        + " " * 8
+                                        + "for j in range(dim1):\n"
+                                        + " " * 12
+                                        + f"{arg}_np_arr_2d[i][j] = {arg}[i][j]\n"
+                                        + " " * 4
+                                        + f"{arg}_ct_arr = np.ctypeslib.as_ctypes({arg}_np_arr_2d)\n"
+                                        + " " * 4
+                                        + f"{typename}PtrArr = {typename}Ptr * {arg}_ct_arr._length_\n"
+                                        + " " * 4
+                                        + f"{arg}_ct_ptr = ctypes.cast({typename}PtrArr(*(ctypes.cast(row, {typename}Ptr) for row in {arg}_ct_arr)), {typename}PtrPtr)\n"
+                                        + " " * 4
+                                        + f"{arg} = {arg}_ct_ptr\n"
                                     )
 
                         f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
@@ -672,6 +757,26 @@ def gencpuunittests(specdict):
                         if not test["error"]:
                             f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
                             for arg, val in test["outputs"].items():
+                                typename = gettype(arg, spec.args)
+                                if "bool" in typename:
+                                    output = []
+                                    if "List[List" in typename:
+                                        for row in val:
+                                            for data in row:
+                                                if data >= 1:
+                                                    data = 1
+                                                output.append(data)
+                                        val = output
+                                    elif "List" in typename:
+                                        for data in val:
+                                            if data >= 1:
+                                                data = 1
+                                            output.append(data)
+                                        val = output
+                                    else:
+                                        if val >= 1:
+                                            val = 1
+
                                 f.write(
                                     " " * 4 + "pytest_" + arg + " = " + str(val) + "\n"
                                 )
@@ -704,7 +809,6 @@ cuda_kernels_tests = [
     "awkward_IndexedArray_numnull",
     "awkward_IndexedArray_numnull_parents",
     "awkward_IndexedArray_numnull_unique_64",
-    "awkward_NumpyArray_fill",
     "awkward_ListArray_fill",
     "awkward_IndexedArray_fill",
     "awkward_IndexedArray_fill_count",
@@ -729,26 +833,32 @@ cuda_kernels_tests = [
     "awkward_RegularArray_getitem_next_range_spreadadvanced",
     "awkward_RegularArray_getitem_next_array",
     "awkward_RegularArray_getitem_next_array_regularize",
-    "awkward_RegularArray_reduce_local_nextparents",
-    "awkward_RegularArray_reduce_nonlocal_preparenext",
+    "awkward_RegularArray_reduce_local_nextparents_64",
+    "awkward_RegularArray_reduce_nonlocal_preparenext_64",
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_combinations_length",
+    "awkward_ListArray_getitem_jagged_apply",
     "awkward_ListArray_getitem_jagged_carrylen",
     "awkward_ListArray_getitem_jagged_descend",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_numvalid",
+    "awkward_ListArray_getitem_jagged_shrink",
     "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_next_array",
     "awkward_ListArray_getitem_next_at",
+    "awkward_ListArray_getitem_next_range",
+    "awkward_ListArray_getitem_next_range_carrylength",
     "awkward_ListArray_getitem_next_range_counts",
     "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListArray_rpad_axis1",
+    "awkward_UnionArray_regular_index",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     "awkward_ListArray_getitem_next_range_spreadadvanced",
     "awkward_ListArray_localindex",
     "awkward_NumpyArray_pad_zero_to_length",
     "awkward_NumpyArray_reduce_adjust_starts_64",
+    "awkward_NumpyArray_rearrange_shifted",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_RegularArray_getitem_next_at",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
@@ -760,6 +870,8 @@ cuda_kernels_tests = [
     "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
     "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
+    "awkward_NumpyArray_subrange_equal",
+    "awkward_NumpyArray_subrange_equal_bool",
     "awkward_IndexedArray_flatten_nextcarry",
     "awkward_IndexedArray_flatten_none2empty",
     "awkward_IndexedArray_getitem_nextcarry",
@@ -781,6 +893,9 @@ cuda_kernels_tests = [
     "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+    "awkward_UnionArray_flatten_length",
+    "awkward_UnionArray_flatten_combine",
+    "awkward_UnionArray_nestedfill_tags_index",
     "awkward_UnionArray_regular_index_getsize",
     "awkward_UnionArray_simplify",
     "awkward_UnionArray_simplify_one",
@@ -864,13 +979,7 @@ def gencudakerneltests(specdict):
                     num += 1
                     dtypes = []
                     for arg, val in test["inargs"].items():
-                        typename = remove_const(
-                            next(
-                                argument
-                                for argument in spec.args
-                                if argument.name == arg
-                            ).typename
-                        )
+                        typename = gettype(arg, spec.args)
                         if "List" not in typename:
                             f.write(" " * 4 + arg + " = " + str(val) + "\n")
                         if "List" in typename:
@@ -1003,13 +1112,7 @@ def gencudaunittests(specdict):
                             )
                         f.write(funcName)
                         for arg, val in test["outputs"].items():
-                            typename = remove_const(
-                                next(
-                                    argument
-                                    for argument in spec.args
-                                    if argument.name == arg
-                                ).typename
-                            )
+                            typename = gettype(arg, spec.args)
                             if "List" not in typename:
                                 f.write(" " * 4 + arg + " = " + str(val) + "\n")
                             if "List" in typename:
@@ -1028,15 +1131,13 @@ def gencudaunittests(specdict):
                                     f.write(
                                         " " * 4
                                         + f"{arg} = cupy.array({val}, dtype=cupy.{typename})\n"
+                                        + " " * 4
+                                        + f"{arg}_array = [cupy.array(row, dtype=cupy.{typename}) for row in {arg}]\n"
+                                        + " " * 4
+                                        + f"{arg} = cupy.array([row.data.ptr for row in {arg}_array])\n"
                                     )
                         for arg, val in test["inputs"].items():
-                            typename = remove_const(
-                                next(
-                                    argument
-                                    for argument in spec.args
-                                    if argument.name == arg
-                                ).typename
-                            )
+                            typename = gettype(arg, spec.args)
                             if "List" not in typename:
                                 f.write(" " * 4 + arg + " = " + str(val) + "\n")
                             if "List" in typename:
@@ -1055,6 +1156,10 @@ def gencudaunittests(specdict):
                                     f.write(
                                         " " * 4
                                         + f"{arg} = cupy.array({val}, dtype=cupy.{typename})\n"
+                                        + " " * 4
+                                        + f"{arg}_array = [cupy.array(row, dtype=cupy.{typename}) for row in {arg}]\n"
+                                        + " " * 4
+                                        + f"{arg} = cupy.array([row.data.ptr for row in {arg}_array])\n"
                                     )
                         cuda_string = (
                             "funcC = cupy_backend['"
@@ -1092,6 +1197,26 @@ def gencudaunittests(specdict):
 """
                             )
                             for arg, val in test["outputs"].items():
+                                typename = gettype(arg, spec.args)
+                                if "bool" in typename:
+                                    output = []
+                                    if "List[List" in typename:
+                                        for row in val:
+                                            for data in row:
+                                                if data >= 1:
+                                                    data = 1
+                                                output.append(data)
+                                        val = output
+                                    elif "List" in typename:
+                                        for data in val:
+                                            if data >= 1:
+                                                data = 1
+                                            output.append(data)
+                                        val = output
+                                    else:
+                                        if val >= 1:
+                                            val = 1
+
                                 f.write(
                                     " " * 4 + "pytest_" + arg + " = " + str(val) + "\n"
                                 )
@@ -1117,7 +1242,7 @@ def genunittests():
             os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit", func),
             "w",
         ) as file:
-            file.write("import pytest\nimport numpy\nimport kernels\n\n")
+            file.write("import pytest\n" "import numpy\n" "import kernels\n\n")
             for test in function["tests"]:
                 num += 1
                 funcName = "def test_" + function["name"] + "_" + str(num) + "():\n"
