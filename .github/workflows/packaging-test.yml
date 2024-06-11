@@ -62,6 +62,9 @@ jobs:
       with:
         submodules: true
 
+    - name: Setup uv
+      uses: yezz123/setup-uv@v4
+
     - name: Prepare build files
       run: pipx run nox -s prepare
 
