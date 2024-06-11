@@ -37,6 +37,6 @@ jobs:
     - name: Generate artifact attestation for sdist and wheel
       uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
       with:
-        subject-path: "dist/awkward-cpp-*"
+        subject-path: "dist/awkward*cpp-*"
 
     - uses: pypa/gh-action-pypi-publish@v1.8.14

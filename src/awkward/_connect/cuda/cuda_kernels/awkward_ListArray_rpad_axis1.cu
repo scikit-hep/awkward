@@ -58,12 +58,12 @@ awkward_ListArray_rpad_axis1_b(
       }
       tostarts[thread_id] = offset;
       int64_t rangeval = fromstops[thread_id] - fromstarts[thread_id];
-      for (int64_t j = 0; j < rangeval; j++) {
+      for (int64_t j = threadIdx.y; j < rangeval; j += blockDim.y) {
         toindex[offset + j] = fromstarts[thread_id] + j;
-       }
-       for (int64_t j = rangeval; j < target; j++) {
+      }
+      for (int64_t j = rangeval + threadIdx.y; j < target; j += blockDim.y) {
         toindex[offset + j] = -1;
-       }
+      }
       tostops[thread_id] = scan_in_array[thread_id];
     }
   }

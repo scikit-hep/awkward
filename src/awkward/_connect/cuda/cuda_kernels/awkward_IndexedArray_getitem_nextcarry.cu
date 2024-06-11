@@ -31,7 +31,7 @@ awkward_IndexedArray_getitem_nextcarry_a(
       C j = fromindex[thread_id];
       if (j < 0 || j >= lencontent) {
         RAISE_ERROR(INDEXEDARRAY_GETITEM_NEXTCARRY_ERRORS::IND_OUT_OF_RANGE)
-      } else if (j >= 0) {
+      } else {
         scan_in_array[thread_id] = 1;
       }
     }
@@ -55,7 +55,7 @@ awkward_IndexedArray_getitem_nextcarry_b(
       C j = fromindex[thread_id];
       if (j < 0 || j >= lencontent) {
         RAISE_ERROR(INDEXEDARRAY_GETITEM_NEXTCARRY_ERRORS::IND_OUT_OF_RANGE)
-      } else if (j >= 0) {
+      } else {
         tocarry[scan_in_array[thread_id] - 1] = j;
       }
     }

@@ -60,7 +60,7 @@ awkward_IndexedArray_getitem_nextcarry_outindex_b(
         RAISE_ERROR(
             INDEXEDARRAY_GETITEM_NEXTCARRY_OUTINDEX_ERRORS::IND_OUT_OF_RANGE)
       } else if (j < 0) {
-        toindex[thread_id] = -1;
+        toindex[thread_id] = (C)-1;
       } else {
         tocarry[scan_in_array[thread_id] - 1] = j;
         toindex[thread_id] = (C)(scan_in_array[thread_id] - 1);
