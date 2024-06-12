@@ -161,7 +161,8 @@ __device__ uint16_t atomicMin<uint16_t>(uint16_t* address, uint16_t val) {
 }
 
 // atomicMin() specialization for float
-__device__ __forceinline__ float atomicMin(float* addr, float value) {
+template <>
+__device__ float atomicMin<float>(float* addr, float value) {
   float old;
   old = !signbit(value) ? __int_as_float(atomicMin((int*)addr, __float_as_int(value)))
             : __uint_as_float(atomicMax((unsigned int*)addr, __float_as_uint(value)));
@@ -169,7 +170,8 @@ __device__ __forceinline__ float atomicMin(float* addr, float value) {
 }
 
 // atomicMin() specialization for double
-__device__ __forceinline__ double atomicMin(double* addr, double value) {
+template <>
+__device__ double atomicMin<double>(double* addr, double value) {
   double old;
   old = !signbit(value) ? __longlong_as_double(atomicMin((long long int*)addr, __double_as_longlong(value)))
             : __ull2double_rz(atomicMax((unsigned long long int*)addr, __double2ull_ru(value)));

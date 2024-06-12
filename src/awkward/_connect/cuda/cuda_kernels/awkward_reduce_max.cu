@@ -29,7 +29,7 @@ awkward_reduce_max_a(
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < outlength) {
-      toptr[thread_id] = static_cast<T>(identity);
+      toptr[thread_id] = identity;
     }
   }
 }
@@ -56,7 +56,7 @@ awkward_reduce_max_b(
     __syncthreads();
 
     for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-      T val = static_cast<T>(identity);
+      T val = identity;
 
       if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
         val = temp[idx - stride];
