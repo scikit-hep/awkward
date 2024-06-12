@@ -103,78 +103,81 @@ __device__ T atomicMin(T* address, T val);
 // atomicMin() specialization for int8_t
 template <>
 __device__ int8_t atomicMin<int8_t>(int8_t* address, int8_t val) {
-    unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
-    unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
-    unsigned int sel = selectors[(size_t)address & 3];
-    unsigned int old, assumed, min_, new_;
-    old = *base_address;
-    do {
-        assumed = old;
-        min_ = min(val, (int8_t)__byte_perm(old, 0, ((size_t)address & 3)));
-        new_ = __byte_perm(old, min_, sel);
-        old = atomicCAS(base_address, assumed, new_);
-    } while (assumed != old);
-    return old;
+  unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
+  unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
+  unsigned int sel = selectors[(size_t)address & 3];
+  unsigned int old, assumed, min_, new_;
+  old = *base_address;
+  do {
+    assumed = old;
+    min_ = min(val, (int8_t)__byte_perm(old, 0, ((size_t)address & 3)));
+    new_ = __byte_perm(old, min_, sel);
+    old = atomicCAS(base_address, assumed, new_);
+  } while (assumed != old);
+  return old;
 }
 
 // atomicMin() specialization for uint8_t
 template <>
 __device__ uint8_t atomicMin<uint8_t>(uint8_t* address, uint8_t val) {
-    unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
-    unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
-    unsigned int sel = selectors[(size_t)address & 3];
-    unsigned int old, assumed, min_, new_;
-    old = *base_address;
-    do {
-        assumed = old;
-        min_ = min(val, (uint8_t)__byte_perm(old, 0, ((size_t)address & 3)));
-        new_ = __byte_perm(old, min_, sel);
-        old = atomicCAS(base_address, assumed, new_);
-    } while (assumed != old);
-    return old;
+  unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
+  unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
+  unsigned int sel = selectors[(size_t)address & 3];
+  unsigned int old, assumed, min_, new_;
+  old = *base_address;
+  do {
+    assumed = old;
+    min_ = min(val, (uint8_t)__byte_perm(old, 0, ((size_t)address & 3)));
+    new_ = __byte_perm(old, min_, sel);
+    old = atomicCAS(base_address, assumed, new_);
+  } while (assumed != old);
+  return old;
 }
 
 // atomicMin() specialization for int16_t
 template <>
 __device__ int16_t atomicMin<int16_t>(int16_t* address, int16_t val) {
-   uint16_t* address_as_ush = reinterpret_cast<uint16_t*>(address);
-   uint16_t old = *address_as_ush, assumed;
-   do {
-       assumed = old;
-       int16_t temp = min(val, reinterpret_cast<int16_t&>(assumed));
-       old = atomicCAS(
-           address_as_ush, assumed, reinterpret_cast<uint16_t&>(temp)
-       );
-   } while (assumed != old);
-   return reinterpret_cast<int16_t&>(old);
+  uint16_t* address_as_ush = reinterpret_cast<uint16_t*>(address);
+  uint16_t old = *address_as_ush, assumed;
+  do {
+    assumed = old;
+    int16_t temp = min(val, reinterpret_cast<int16_t&>(assumed));
+    old = atomicCAS(
+        address_as_ush, assumed, reinterpret_cast<uint16_t&>(temp)
+    );
+  } while (assumed != old);
+  return reinterpret_cast<int16_t&>(old);
 }
 
 // atomicMin() specialization for uint16_t
 template <>
 __device__ uint16_t atomicMin<uint16_t>(uint16_t* address, uint16_t val) {
-    uint16_t old = *address, assumed;
-    do {
-        assumed = old;
-        old = atomicCAS(address, assumed, min(val, assumed));
-    } while (assumed != old);
-    return old;
+  uint16_t old = *address, assumed;
+  do {
+    assumed = old;
+    old = atomicCAS(address, assumed, min(val, assumed));
+  } while (assumed != old);
+  return old;
 }
 
 // atomicMin() specialization for float
 template <>
 __device__ float atomicMin<float>(float* addr, float value) {
-  float old;
-  old = !signbit(value) ? __int_as_float(atomicMin((int*)addr, __float_as_int(value)))
-            : __uint_as_float(atomicMax((unsigned int*)addr, __float_as_uint(value)));
-  return old;
+  int* address_as_i = (int*)addr;
+  int old = *address_as_i, assumed;
+  do {
+    assumed = old;
+    old = atomicCAS(address_as_i, assumed, __float_as_int(fminf(value, __int_as_float(assumed))));
+  } while (assumed != old);
+  return __int_as_float(old);
 }
 
 // atomicMin() specialization for double
 template <>
 __device__ double atomicMin<double>(double* addr, double value) {
   double old;
-  old = !signbit(value) ? __longlong_as_double(atomicMin((long long int*)addr, __double_as_longlong(value)))
-            : __ull2double_rz(atomicMax((unsigned long long int*)addr, __double2ull_ru(value)));
+  old = !signbit(value) ? __longlong_as_double(atomicMin((long long int*)addr, __double_as_longlong(value))) :
+      __ull2double_rz(atomicMax((unsigned long long int*)addr, __double2ull_ru(value)));
   return old;
 }
 
@@ -186,78 +189,77 @@ __device__ T atomicMax(T* address, T val);
 // atomicMax() specialization for int8_t
 template <>
 __device__ int8_t atomicMax<int8_t>(int8_t* address, int8_t val) {
-    unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
-    unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
-    unsigned int sel = selectors[(size_t)address & 3];
-    unsigned int old, assumed, max_, new_;
-    old = *base_address;
-    do {
-        assumed = old;
-        max_ = max(val, (int8_t)__byte_perm(old, 0, ((size_t)address & 3)));
-        new_ = __byte_perm(old, max_, sel);
-        old = atomicCAS(base_address, assumed, new_);
-    } while (assumed != old);
-    return old;
+  unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
+  unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
+  unsigned int sel = selectors[(size_t)address & 3];
+  unsigned int old, assumed, max_, new_;
+  old = *base_address;
+  do {
+    assumed = old;
+    max_ = max(val, (int8_t)__byte_perm(old, 0, ((size_t)address & 3)));
+    new_ = __byte_perm(old, max_, sel);
+    old = atomicCAS(base_address, assumed, new_);
+  } while (assumed != old);
+  return old;
 }
 
 // atomicMax() specialization for uint8_t
 template <>
 __device__ uint8_t atomicMax<uint8_t>(uint8_t* address, uint8_t val) {
-    unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
-    unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
-    unsigned int sel = selectors[(size_t)address & 3];
-    unsigned int old, assumed, max_, new_;
-    old = *base_address;
-    do {
-        assumed = old;
-        max_ = max(val, (uint8_t)__byte_perm(old, 0, ((size_t)address & 3)));
-        new_ = __byte_perm(old, max_, sel);
-        old = atomicCAS(base_address, assumed, new_);
-    } while (assumed != old);
-    return old;
+  unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
+  unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
+  unsigned int sel = selectors[(size_t)address & 3];
+  unsigned int old, assumed, max_, new_;
+  old = *base_address;
+  do {
+    assumed = old;
+    max_ = max(val, (uint8_t)__byte_perm(old, 0, ((size_t)address & 3)));
+    new_ = __byte_perm(old, max_, sel);
+    old = atomicCAS(base_address, assumed, new_);
+  } while (assumed != old);
+  return old;
 }
 
 // atomicMax() specialization for int16_t
 template <>
 __device__ int16_t atomicMax<int16_t>(int16_t* address, int16_t val) {
-   uint16_t* address_as_ush = reinterpret_cast<uint16_t*>(address);
-   uint16_t old = *address_as_ush, assumed;
-   do {
-       assumed = old;
-       int16_t temp = max(val, reinterpret_cast<int16_t&>(assumed));
-       old = atomicCAS(
-           address_as_ush, assumed, reinterpret_cast<uint16_t&>(temp)
-       );
-   } while (assumed != old);
-   return reinterpret_cast<int16_t&>(old);
+  uint16_t* address_as_ush = reinterpret_cast<uint16_t*>(address);
+  uint16_t old = *address_as_ush, assumed;
+  do {
+    assumed = old;
+    int16_t temp = max(val, reinterpret_cast<int16_t&>(assumed));
+    old = atomicCAS(
+        address_as_ush, assumed, reinterpret_cast<uint16_t&>(temp)
+    );
+  } while (assumed != old);
+  return reinterpret_cast<int16_t&>(old);
 }
 
 // atomicMax() specialization for uint16_t
 template <>
 __device__ uint16_t atomicMax<uint16_t>(uint16_t* address, uint16_t val) {
-    uint16_t old = *address, assumed;
-    do {
-        assumed = old;
-        old = atomicCAS(address, assumed, max(val, assumed));
-    } while (assumed != old);
-    return old;
+  uint16_t old = *address, assumed;
+  do {
+    assumed = old;
+    old = atomicCAS(address, assumed, max(val, assumed));
+  } while (assumed != old);
+  return old;
 }
 
 // atomicMax() specialization for float
 template <>
 __device__ float atomicMax<float>(float* addr, float value) {
   float old;
-  old = !signbit(value) ? __int_as_float(atomicMax((int*)addr, __float_as_int(value)))
-            : __uint_as_float(atomicMin((unsigned int*)addr, __float_as_uint(value)));
+  old = !signbit(value) ? __int_as_float(atomicMax((int*)addr, __float_as_int(value))) :
+      __uint_as_float(atomicMin((unsigned int*)addr, __float_as_uint(value)));
   return old;
 }
-
 // atomicMax() specialization for double
 template <>
 __device__ double atomicMax<double>(double* addr, double value) {
   double old;
-  old = !signbit(value) ? __longlong_as_double(atomicMax((long long int*)addr, __double_as_longlong(value)))
-            : __ull2double_rz(atomicMin((unsigned long long int*)addr, __double2ull_ru(value)));
+  old = !signbit(value) ? __longlong_as_double(atomicMax((long long int*)addr, __double_as_longlong(value))) :
+      __ull2double_rz(atomicMin((unsigned long long int*)addr, __double2ull_ru(value)));
   return old;
 }
 
@@ -282,70 +284,68 @@ __device__ T atomicMul(T* address, T val);
 // atomicMul() specialization for int32_t
 template <>
 __device__ int32_t atomicMul<int32_t>(int32_t* address, int32_t val) {
-    int32_t old = *address, assumed;
-    do {
-        assumed = old;
-        old = atomicCAS(address, assumed, assumed * val);
-    } while (assumed != old);
-    return old;
+  int32_t old = *address, assumed;
+  do {
+    assumed = old;
+    old = atomicCAS(address, assumed, assumed * val);
+  } while (assumed != old);
+  return old;
 }
 
 // atomicMul() specialization for uint32_t
 template <>
 __device__ uint32_t atomicMul<uint32_t>(uint32_t* address, uint32_t val) {
-    uint32_t old = *address, assumed;
-    do {
-        assumed = old;
-        old = atomicCAS(address, assumed, assumed * val);
-    } while (assumed != old);
-    return old;
+  uint32_t old = *address, assumed;
+  do {
+    assumed = old;
+    old = atomicCAS(address, assumed, assumed * val);
+  } while (assumed != old);
+  return old;
 }
 
 // atomicMul() specialization for int64_t
 template <>
 __device__ int64_t atomicMul<int64_t>(int64_t* address, int64_t val) {
-    uint64_t* address_as_uint64 = reinterpret_cast<uint64_t*>(address);
-    uint64_t old = *address_as_uint64, assumed;
-    uint64_t val_as_uint64 = *reinterpret_cast<uint64_t*>(&val);
-
-    do {
-        assumed = old;
-        old = atomicCAS(address_as_uint64, assumed, assumed * val_as_uint64);
-    } while (assumed != old);
-
-    return *reinterpret_cast<int64_t*>(&old);
+  uint64_t* address_as_uint64 = reinterpret_cast<uint64_t*>(address);
+  uint64_t old = *address_as_uint64, assumed;
+  uint64_t val_as_uint64 = *reinterpret_cast<uint64_t*>(&val);
+  do {
+    assumed = old;
+    old = atomicCAS(address_as_uint64, assumed, assumed * val_as_uint64);
+  } while (assumed != old);
+  return *reinterpret_cast<int64_t*>(&old);
 }
 
 // atomicMul() specialization for uint64_t
 template <>
 __device__ uint64_t atomicMul<uint64_t>(uint64_t* address, uint64_t val) {
-    uint64_t old = *address, assumed;
-    do {
-        assumed = old;
-        old = atomicCAS(address, assumed, assumed * val);
-    } while (assumed != old);
-    return old;
+  uint64_t old = *address, assumed;
+  do {
+    assumed = old;
+    old = atomicCAS(address, assumed, assumed * val);
+  } while (assumed != old);
+  return old;
 }
 
 // atomicMul() specialization for float
 template <>
 __device__ float atomicMul<float>(float* address, float val) {
-    float old = *address, assumed;
-    do {
-        assumed = old;
-        old = __int_as_float(atomicCAS((int*)address, __float_as_int(assumed), __float_as_int(assumed * val)));
-    } while (assumed != old);
-    return old;
+  float old = *address, assumed;
+  do {
+    assumed = old;
+    old = __int_as_float(atomicCAS((int*)address, __float_as_int(assumed), __float_as_int(assumed * val)));
+  } while (assumed != old);
+  return old;
 }
 
 // atomicMul() specialization for double
 template <>
 __device__ double atomicMul<double>(double* address, double val) {
-    uint64_t* address_as_ull = (uint64_t*)address;
-    uint64_t old = *address_as_ull, assumed;
-    do {
-        assumed = old;
-        old = atomicCAS(address_as_ull, assumed, __double_as_longlong(__longlong_as_double(assumed) * val));
-    } while (assumed != old);
-    return __longlong_as_double(old);
+  uint64_t* address_as_ull = (uint64_t*)address;
+  uint64_t old = *address_as_ull, assumed;
+  do {
+    assumed = old;
+    old = atomicCAS(address_as_ull, assumed, __double_as_longlong(__longlong_as_double(assumed) * val));
+  } while (assumed != old);
+  return __longlong_as_double(old);
 }
