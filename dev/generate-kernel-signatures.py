@@ -383,6 +383,8 @@ from numpy import (
 from awkward._connect.cuda import fetch_specialization
 from awkward._connect.cuda import import_cupy
 
+import math
+
 cupy = import_cupy("Awkward Arrays with CUDA")
 """
         )
