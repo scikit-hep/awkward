@@ -664,13 +664,7 @@ def gencpuunittests(specdict):
                         f.write(funcName)
                         for arg, val in test["outputs"].items():
                             typename = gettype(arg, spec.args)
-                            f.write(
-                                " " * 4
-                                + arg
-                                + " = "
-                                + str([gettypeval(typename)] * len(val))
-                                + "\n"
-                            )
+                            f.write(" " * 4 + arg + " = " + str(val) + "\n")
                             if "List" in typename:
                                 count = typename.count("List")
                                 typename = gettypename(typename)
@@ -904,7 +898,9 @@ cuda_kernels_tests = [
     "awkward_reduce_count_64",
     "awkward_reduce_max",
     "awkward_reduce_min",
+    "awkward_reduce_min_complex",
     "awkward_reduce_sum",
+    "awkward_reduce_sum_complex",
     "awkward_reduce_sum_int32_bool_64",
     "awkward_reduce_sum_int64_bool_64",
     "awkward_reduce_sum_bool",
