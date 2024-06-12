@@ -12953,6 +12953,76 @@
             ]
         },
         {
+            "name": "awkward_ListArray_combinations",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [],
+                        "length": 0,
+                        "n": 0,
+                        "replacement": false,
+                        "starts": [],
+                        "stops": []
+                    },
+                    "outputs": {
+                        "tocarry": [[0], [0]],
+                        "toindex": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0],
+                        "length": 1,
+                        "n": 2,
+                        "replacement": false,
+                        "starts": [0],
+                        "stops": [2]
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 1], [0, 1]],
+                        "toindex": [1, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 3, 3, 5, 7],
+                        "length": 5,
+                        "n": 2,
+                        "replacement": false,
+                        "starts": [0, 4, 4, 7, 8],
+                        "stops": [4, 4, 7, 8, 13]
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 6, 6, 9, 9, 19], [0, 6, 6, 9, 9, 19]],
+                        "toindex": [0, 6, 6, 9, 9, 19]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 4, 4, 7, 8],
+                        "length": 5,
+                        "n": 2,
+                        "replacement": false,
+                        "starts": [0, 3, 3, 10, 10],
+                        "stops": [3, 3, 5, 10, 13]
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 3, 3, 4, 4, 7], [0, 6, 6, 9, 9, 19]],
+                        "toindex": [0, 6, 6, 9, 9, 19]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_ListArray_combinations_length",
             "status": true,
             "tests": [
