@@ -8,18 +8,15 @@
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
-//     atomic_outoffsets = cupy.array(outoffsets, dtype=cupy.uint64)
 //     temp = cupy.zeros(lenparents, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_a", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, atomic_outoffsets, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_b", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, atomic_outoffsets, temp, invocation_index, err_code))
-//     scan_in_array = cupy.zeros(outlength, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_c", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, atomic_outoffsets, scan_in_array, invocation_index, err_code))
+//     scan_in_array = cupy.zeros(outlength, dtype=cupy.uint64)
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_a", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, scan_in_array, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_b", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, scan_in_array, temp, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_d", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, atomic_outoffsets, scan_in_array, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_reduce_local_outoffsets_64_c", cupy.dtype(outoffsets.dtype).type, parents.dtype]))((grid_size,), block, (outoffsets, parents, lenparents, outlength, scan_in_array, temp, invocation_index, err_code))
 // out["awkward_ListOffsetArray_reduce_local_outoffsets_64_a", {dtype_specializations}] = None
 // out["awkward_ListOffsetArray_reduce_local_outoffsets_64_b", {dtype_specializations}] = None
 // out["awkward_ListOffsetArray_reduce_local_outoffsets_64_c", {dtype_specializations}] = None
-// out["awkward_ListOffsetArray_reduce_local_outoffsets_64_d", {dtype_specializations}] = None
 // END PYTHON
 
 template <typename T, typename C>
@@ -29,7 +26,7 @@ awkward_ListOffsetArray_reduce_local_outoffsets_64_a(
     const C* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint64_t* atomic_outoffsets,
+    uint64_t* scan_in_array,
     int64_t* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -37,7 +34,7 @@ awkward_ListOffsetArray_reduce_local_outoffsets_64_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      atomic_outoffsets[thread_id] = 0;
+      outoffsets[thread_id] = 0;
     }
   }
 }
@@ -49,7 +46,7 @@ awkward_ListOffsetArray_reduce_local_outoffsets_64_b(
     const C* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint64_t* atomic_outoffsets,
+    uint64_t* scan_in_array,
     int64_t* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -58,24 +55,24 @@ awkward_ListOffsetArray_reduce_local_outoffsets_64_b(
     int64_t thread_id = blockIdx.x * blockDim.x + idx;
 
     if (thread_id < lenparents) {
-      temp[idx] = 1;
+      temp[thread_id] = 1;
     }
     __syncthreads();
 
     for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
       int64_t val = 0;
       if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-        val = temp[idx - stride];
+        val = temp[thread_id - stride];
       }
       __syncthreads();
-      temp[idx] += val;
+      temp[thread_id] += val;
       __syncthreads();
     }
 
     if (thread_id < lenparents) {
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicAdd(&atomic_outoffsets[parent], temp[idx]);
+        atomicAdd(&scan_in_array[parent], temp[thread_id]);
       }
     }
   }
@@ -88,28 +85,8 @@ awkward_ListOffsetArray_reduce_local_outoffsets_64_c(
     const C* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint64_t* atomic_outoffsets,
-    int64_t* scan_in_array,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
-  if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (thread_id < outlength) {
-      scan_in_array[thread_id] = atomic_outoffsets[thread_id];
-    }
-  }
-}
-
-template <typename T, typename C>
-__global__ void
-awkward_ListOffsetArray_reduce_local_outoffsets_64_d(
-    T* outoffsets,
-    const C* parents,
-    int64_t lenparents,
-    int64_t outlength,
-    uint64_t* atomic_outoffsets,
-    int64_t* scan_in_array,
+    uint64_t* scan_in_array,
+    int64_t* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
@@ -117,7 +94,7 @@ awkward_ListOffsetArray_reduce_local_outoffsets_64_d(
     outoffsets[0] = 0;
 
     if (thread_id < outlength) {
-      outoffsets[thread_id + 1] = static_cast<T>(scan_in_array[thread_id]);
+      outoffsets[thread_id + 1] = (T)(scan_in_array[thread_id]);
     }
   }
 }

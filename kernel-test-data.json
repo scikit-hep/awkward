@@ -13109,6 +13109,76 @@
             ]
         },
         {
+            "name": "awkward_ListArray_combinations",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [],
+                        "length": 0,
+                        "n": 0,
+                        "replacement": false,
+                        "starts": [],
+                        "stops": []
+                    },
+                    "outputs": {
+                        "tocarry": [[0], [0]],
+                        "toindex": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0],
+                        "length": 1,
+                        "n": 2,
+                        "replacement": false,
+                        "starts": [0],
+                        "stops": [2]
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 1], [0, 1]],
+                        "toindex": [1, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 3, 3, 5, 7],
+                        "length": 5,
+                        "n": 2,
+                        "replacement": false,
+                        "starts": [0, 4, 4, 7, 8],
+                        "stops": [4, 4, 7, 8, 13]
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 6, 6, 9, 9, 19], [0, 6, 6, 9, 9, 19]],
+                        "toindex": [0, 6, 6, 9, 9, 19]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 4, 4, 7, 8],
+                        "length": 5,
+                        "n": 2,
+                        "replacement": false,
+                        "starts": [0, 3, 3, 10, 10],
+                        "stops": [3, 3, 5, 10, 13]
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 3, 3, 4, 4, 7], [0, 6, 6, 9, 9, 19]],
+                        "toindex": [0, 6, 6, 9, 9, 19]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_ListArray_getitem_jagged_carrylen",
             "status": true,
             "tests": [
@@ -24367,6 +24437,64 @@
             ]
         },
         {
+            "name": "awkward_reduce_sum_complex",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [],
+                        "lenparents": 0,
+                        "outlength": 0,
+                        "parents": []
+                    },
+                    "outputs": {
+                        "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [0, 0],
+                        "lenparents": 1,
+                        "outlength": 2,
+                        "parents": [0]
+                    },
+                    "outputs": {
+                        "toptr": [0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [2, 2, 3, 3, 5, 5, 7, 7, 11, 11, 13, 13, 17, 17, 19, 19, 23, 23],
+                        "lenparents": 9,
+                        "outlength": 12,
+                        "parents": [0, 0, 0, 2, 2, 3, 4, 4, 5]
+                    },
+                    "outputs": {
+                        "toptr": [10, 10, 0, 0, 18, 18, 13, 13, 36, 36, 23, 23]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1],
+                        "lenparents": 6,
+                        "outlength": 8,
+                        "parents": [0, 0, 0, 2, 2, 3]
+                    },
+                    "outputs": {
+                        "toptr": [1, 3, 0, 0, 1, 2, 0, 1]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_reduce_sum",
             "status": true,
             "tests": [
@@ -26349,7 +26477,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromptr": [0, 4, 1, 3, 5, 6],
+                        "fromptr": [0, 4, 1, 1, 5, 6],
                         "identity": 9223372036854775807,
                         "lenparents": 6,
                         "outlength": 4,

@@ -275,7 +275,6 @@ def test_min():
         ak.min(array, axis=None, keepdims=True, initial=-100.0, mask_identity=False),
         ak.to_regular(ak.Array([[-100.0]], backend="cuda")),
     )
-
     assert ak.almost_equal(
         ak.min(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(

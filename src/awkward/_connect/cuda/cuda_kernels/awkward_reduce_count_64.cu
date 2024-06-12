@@ -48,24 +48,24 @@ awkward_reduce_count_64_b(
     int64_t thread_id = blockIdx.x * blockDim.x + idx;
 
     if (thread_id < lenparents) {
-      temp[idx] = 1;
+      temp[thread_id] = 1;
     }
     __syncthreads();
 
     for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
       int64_t val = 0;
       if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-        val = temp[idx - stride];
+        val = temp[thread_id - stride];
       }
       __syncthreads();
-      temp[idx] += val;
+      temp[thread_id] += val;
       __syncthreads();
     }
 
     if (thread_id < lenparents) {
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicAdd(&toptr[parent], temp[idx]);
+        atomicAdd(&toptr[parent], temp[thread_id]);
       }
     }
   }
