@@ -119,7 +119,6 @@ cuda_kernels_impl = [
     "awkward_reduce_count_64",
     "awkward_reduce_max",
     "awkward_reduce_min",
-    "awkward_reduce_min_complex",
     "awkward_reduce_sum",
     "awkward_reduce_sum_complex",
     "awkward_reduce_sum_int32_bool_64",
