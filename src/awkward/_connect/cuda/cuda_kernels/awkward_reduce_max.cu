@@ -8,8 +8,8 @@
 //     else:
 //         grid_size = 1
 //     temp = cupy.full(lenparents, identity, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, identity, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, identity, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, toptr.dtype.type(identity), temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, toptr.dtype.type(identity), temp, invocation_index, err_code))
 // out["awkward_reduce_max_a", {dtype_specializations}] = None
 // out["awkward_reduce_max_b", {dtype_specializations}] = None
 // END PYTHON

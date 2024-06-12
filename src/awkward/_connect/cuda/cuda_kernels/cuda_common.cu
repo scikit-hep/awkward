@@ -163,13 +163,10 @@ __device__ uint16_t atomicMin<uint16_t>(uint16_t* address, uint16_t val) {
 // atomicMin() specialization for float
 template <>
 __device__ float atomicMin<float>(float* addr, float value) {
-  int* address_as_i = (int*)addr;
-  int old = *address_as_i, assumed;
-  do {
-    assumed = old;
-    old = atomicCAS(address_as_i, assumed, __float_as_int(fminf(value, __int_as_float(assumed))));
-  } while (assumed != old);
-  return __int_as_float(old);
+  float old;
+  old = !signbit(value) ? __int_as_float(atomicMin((int*)addr, __float_as_int(value))) :
+      __uint_as_float(atomicMax((unsigned int*)addr, __float_as_uint(value)));
+  return old;
 }
 
 // atomicMin() specialization for double
