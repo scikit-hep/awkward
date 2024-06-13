@@ -8,6 +8,13 @@ import awkward as ak
 to_list = ak.operations.to_list
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
+
+
 def test_0835_argmin_argmax_axis_None():
     array = ak.highlevel.Array(
         [
