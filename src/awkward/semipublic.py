@@ -10,7 +10,7 @@ These functions are not available in the top-level `awkward` namespace.
 
 from __future__ import annotations
 
-from awkward import _prettyprint as prettyprint
+from awkward import prettyprint as prettyprint
 from awkward._do import remove_structure
 
 __all__ = ["remove_structure", "prettyprint"]
