@@ -52,9 +52,6 @@ behavior: dict = {}
 # operations
 from awkward.operations import *
 
-# semi-public functions
-from awkward import semipublic
-
 # version
 __all__ = [x for x in globals() if not x.startswith("_")]
 
