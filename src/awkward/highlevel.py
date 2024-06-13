@@ -31,10 +31,10 @@ from awkward._pickle import (
     unpickle_array_schema_1,
     unpickle_record_schema_1,
 )
-from awkward.prettyprint import Formatter
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
 from awkward._util import STDOUT
+from awkward.prettyprint import Formatter
 
 __all__ = ("Array", "ArrayBuilder", "Record")
 
