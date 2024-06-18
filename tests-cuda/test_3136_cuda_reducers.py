@@ -430,8 +430,7 @@ def test_2020_reduce_axis_none_std_no_mask_axis_none():
     out3 = ak.std(array[2], axis=None, mask_identity=True)
     assert out3 is None
     del array
-    del out1
-    del out2
+    del out1, out2, out3
 
 
 def test_2020_reduce_axis_none_std():
