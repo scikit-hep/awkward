@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import io
 import os
 
 import numpy as np
@@ -136,6 +137,22 @@ def test_array_conversions(akarray, as_dict):
     # And back to Awkward array
     rt_array = ak.from_arrow(as_extn, highlevel=True)
     assert to_list(rt_array) == to_list(akarray)
+
+    # Deeper test of types
+    akarray_high = ak.Array(akarray)
+    if akarray_high.type.content.parameters.get("__categorical__", False) == as_dict:
+        # as_dict is supposed to go hand-in-hand with __categorical__: True, and if it
+        #  does not, we do not round-trip perfectly. So only test when this is set correctly.
+        assert rt_array.type == akarray_high.type
+
+        ak_type_str_orig = io.StringIO()
+        ak_type_str_rtrp = io.StringIO()
+        akarray_high.type.show(stream=ak_type_str_orig)
+        rt_array.type.show(stream=ak_type_str_rtrp)
+        if ak_type_str_orig.getvalue() != ak_type_str_rtrp.getvalue():
+            print("  Original type:", ak_type_str_orig.getvalue())
+            print("  Rnd-trip type:", ak_type_str_rtrp.getvalue())
+        assert ak_type_str_orig.getvalue() == ak_type_str_rtrp.getvalue()
 
 
 def test_table_conversion():
