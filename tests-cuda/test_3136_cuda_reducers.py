@@ -24,7 +24,7 @@ def prod(xs):
     return out
 
 
-def test_sumprod_types():
+def test_0115_generic_reducer_operation_sumprod_types():
     array = np.array([[True, False, False], [True, False, False]])
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
@@ -41,7 +41,7 @@ def test_sumprod_types():
     del depth1
 
 
-def test_sumprod_types_1():
+def test_0115_generic_reducer_operation_sumprod_types_1():
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int8)
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
@@ -66,7 +66,7 @@ def test_sumprod_types_1():
     del depth1
 
 
-def test_sumprod_types_2():
+def test_0115_generic_reducer_operation_sumprod_types_2():
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint8)
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
@@ -91,7 +91,7 @@ def test_sumprod_types_2():
     del depth1
 
 
-def test_sumprod_types_3():
+def test_0115_generic_reducer_operation_sumprod_types_3():
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int16)
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
@@ -116,7 +116,7 @@ def test_sumprod_types_3():
     del depth1
 
 
-def test_sumprod_types_4():
+def test_0115_generic_reducer_operation_sumprod_types_4():
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint16)
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
@@ -140,7 +140,7 @@ def test_sumprod_types_4():
     )
 
 
-def test_sumprod_types_5():
+def test_0115_generic_reducer_operation_sumprod_types_5():
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int32)
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
@@ -165,7 +165,7 @@ def test_sumprod_types_5():
     del depth1
 
 
-def test_sumprod_types_6():
+def test_0115_generic_reducer_operation_sumprod_types_6():
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint32)
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
@@ -190,7 +190,7 @@ def test_sumprod_types_6():
     del depth1
 
 
-def test_sumprod_types_7():
+def test_0115_generic_reducer_operation_sumprod_types_7():
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int64)
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
@@ -215,7 +215,7 @@ def test_sumprod_types_7():
     del depth1
 
 
-def test_sumprod_types_8():
+def test_0115_generic_reducer_operation_sumprod_types_8():
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint64)
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
@@ -240,7 +240,7 @@ def test_sumprod_types_8():
     del depth1
 
 
-def test_sumprod_types_FIXME():
+def test_0115_generic_reducer_operation_sumprod_types_FIXME():
     array = np.array([[True, False, False], [True, False, False]])
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
@@ -258,7 +258,7 @@ def test_sumprod_types_FIXME():
     del depth1
 
 
-def test_sum():
+def test_2020_reduce_axis_none_sum():
     array = ak.Array(
         [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
     )
@@ -277,7 +277,7 @@ def test_sum():
     del array
 
 
-def test_prod():
+def test_2020_reduce_axis_none_prod():
     array = ak.Array(
         [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
     )
@@ -303,7 +303,7 @@ def test_prod():
     del array
 
 
-def test_min():
+def test_2020_reduce_axis_none_min():
     array = ak.Array(
         [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
     )
@@ -334,7 +334,7 @@ def test_min():
     del array
 
 
-def test_max():
+def test_2020_reduce_axis_none_max():
     array = ak.Array(
         [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
     )
@@ -365,7 +365,7 @@ def test_max():
     del array
 
 
-def test_count():
+def test_2020_reduce_axis_none_count():
     array = ak.Array(
         [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
     )
@@ -391,7 +391,7 @@ def test_count():
     del array
 
 
-def test_count_nonzero():
+def test_2020_reduce_axis_none_count_nonzero():
     array = ak.Array(
         [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
     )
@@ -417,7 +417,7 @@ def test_count_nonzero():
     del array
 
 
-def test_std_no_mask_axis_none():
+def test_2020_reduce_axis_none_std_no_mask_axis_none():
     array = ak.Array(
         [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
     )
@@ -427,9 +427,29 @@ def test_std_no_mask_axis_none():
     )
     assert ak.almost_equal(out1, out2)
 
-    # FIXME:
-    # out3 = ak.std(array[2], axis=None, mask_identity=True)
-    # assert out3 is None
+    out3 = ak.std(array[2], axis=None, mask_identity=True)
+    assert out3 is None
     del array
     del out1
     del out2
+
+
+def test_2020_reduce_axis_none_std():
+    array = ak.Array(
+        [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
+    )
+    cpt.assert_allclose(ak.std(array, axis=None), 3.139134700306227)
+    cpt.assert_allclose(
+        ak.std(array, axis=None, keepdims=True, mask_identity=False),
+        ak.to_regular([[3.139134700306227]]),
+    )
+    cpt.assert_allclose(
+        ak.std(array, axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(
+            ak.Array([[3.139134700306227]], backend="cuda").mask[
+                ak.Array([[True]], backend="cuda")
+            ]
+        ),
+    )
+    assert np.isnan(ak.std(array[2], axis=None, mask_identity=False))
+    del array
