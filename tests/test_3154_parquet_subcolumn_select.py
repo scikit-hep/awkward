@@ -38,4 +38,3 @@ def test_parquet_subcolumn_select(tmp_path):
         {"ids": [61, 62, 63, 64]},
     ]
     assert selection["b"].to_list() == ak_tbl["b"].to_list()
-    # return ak_tbl, selection
