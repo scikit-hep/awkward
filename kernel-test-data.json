@@ -24389,7 +24389,7 @@
                     "inputs": {
                         "fromptr": [0, 0],
                         "lenparents": 1,
-                        "outlength": 2,
+                        "outlength": 1,
                         "parents": [0]
                     },
                     "outputs": {
@@ -24402,7 +24402,7 @@
                     "inputs": {
                         "fromptr": [2, 2, 3, 3, 5, 5, 7, 7, 11, 11, 13, 13, 17, 17, 19, 19, 23, 23],
                         "lenparents": 9,
-                        "outlength": 12,
+                        "outlength": 6,
                         "parents": [0, 0, 0, 2, 2, 3, 4, 4, 5]
                     },
                     "outputs": {
@@ -24415,7 +24415,7 @@
                     "inputs": {
                         "fromptr": [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1],
                         "lenparents": 6,
-                        "outlength": 8,
+                        "outlength": 4,
                         "parents": [0, 0, 0, 2, 2, 3]
                     },
                     "outputs": {
