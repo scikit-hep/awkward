@@ -6,7 +6,7 @@ import json
 from collections.abc import Iterable, Mapping
 
 import awkward as ak
-import awkward._prettyprint
+import awkward.prettyprint
 from awkward._behavior import find_record_typestr
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._regularize import is_integer
@@ -115,7 +115,7 @@ class RecordType(Type):
 
             if name is not None:
                 if (
-                    not ak._prettyprint.is_identifier.match(name)
+                    not ak.prettyprint.is_identifier.match(name)
                     or name
                     in (
                         "unknown",
@@ -143,7 +143,7 @@ class RecordType(Type):
             if not self.is_tuple:
                 pairs = []
                 for k, v in zip(self._fields, children):
-                    if ak._prettyprint.is_identifier.match(k) is None:
+                    if ak.prettyprint.is_identifier.match(k) is None:
                         key_str = json.dumps(k)
                     else:
                         key_str = k
