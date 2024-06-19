@@ -1411,6 +1411,9 @@ def test_sumprod_types_FIXME():
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
     depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    
+    numpy_sum = np.sum(array, axis=-1).astype(np.int64)
+    
     assert (
         np.sum(array, axis=-1).dtype
         == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
@@ -1432,6 +1435,8 @@ def test_sumprod_types():
     content2 = ak.contents.NumpyArray(array.reshape(-1))
     offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
     depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+
+    numpy_sum = np.sum(array, axis=-1).astype(np.int64)
 
     assert sum(to_list(np.sum(array, axis=-1))) == sum(
         to_list(ak.sum(depth1, axis=-1, highlevel=False))
