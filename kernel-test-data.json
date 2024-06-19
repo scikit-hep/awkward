@@ -13024,6 +13024,22 @@
                     "error": false,
                     "message": "",
                     "inputs": {
+                        "fromindex": [0, 3, 3, 5, 7],
+                        "length": 5,
+                        "n": 3,
+                        "replacement": false,
+                        "starts": [0, 4, 4, 7, 8],
+                        "stops": [4, 4, 7, 8, 13]
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 0, 0, 1, 4, 8, 8, 8, 8, 8, 8, 9, 9, 9,  10], [1, 1, 2, 2, 5, 9, 9, 9, 10, 10, 11, 10, 10, 11, 11], [2, 3, 3, 3, 6, 10, 11, 12, 11, 12, 12, 11, 12, 12, 12]],
+                       "toindex": [15, 15, 15]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
                         "fromindex": [0, 4, 4, 7, 8],
                         "length": 5,
                         "n": 2,
@@ -13034,6 +13050,102 @@
                     "outputs": {
                         "tocarry": [[0, 0, 1, 3, 10, 10], [11, 2, 2, 4, 11, 12]],
                         "toindex": [7, 7]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_RegularArray_combinations_64",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [],
+                        "length": 0,
+                        "n": 0,
+                        "replacement": false,
+                        "size": 0
+                    },
+                    "outputs": {
+                        "tocarry": [[], []],
+                        "toindex": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0],
+                        "length": 1,
+                        "n": 2,
+                        "replacement": false,
+                        "size": 2
+                    },
+                    "outputs": {
+                        "tocarry": [[0], [1]],
+                        "toindex": [1, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 3, 5],
+                        "length": 3,
+                        "n": 2,
+                        "replacement": false,
+                        "size": 2
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 2, 4], [1, 3, 5]],
+                        "toindex": [3, 3]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 3, 3, 5, 7],
+                        "length": 5,
+                        "n": 3,
+                        "replacement": false,
+                        "size": 3
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 3, 6, 9, 12], [1, 4, 7, 10, 13], [2, 5, 8, 11, 14]],
+                        "toindex": [5, 5, 5]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 3, 3, 5, 7],
+                        "length": 5,
+                        "n": 2,
+                        "replacement": false,
+                        "size": 3
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 0, 1, 3, 3, 4, 6, 6, 7, 9, 9, 10, 12, 12, 13], [1, 2, 2, 4, 5, 5, 7, 8, 8, 10, 11, 11, 13, 14, 14]],
+                        "toindex": [15, 15]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 4, 4, 7, 8],
+                        "length": 5,
+                        "n": 2,
+                        "replacement": false,
+                        "size": 4
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 0, 0, 1, 1, 2, 4, 4, 4, 5, 5, 6, 8, 8, 8, 9, 9, 10, 12, 12, 12, 13, 13, 14, 16, 16, 16, 17, 17, 18], [1, 2, 3, 2, 3, 3, 5, 6, 7, 6, 7, 7, 9, 10, 11, 10, 11, 11, 13, 14, 15, 14, 15, 15, 17, 18, 19, 18, 19, 19]],
+                        "toindex": [30, 30]
                     }
                 }
             ]
