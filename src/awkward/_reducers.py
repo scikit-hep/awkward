@@ -62,24 +62,18 @@ class KernelReducer(Reducer):
         else:
             return dtype
 
-    _use32 = (ak._util.win or ak._util.bits32) and not ak._util.numpy2
+    _use32 = (ak._util.win or ak._util.bits32) and not ak._util.numpy2 and np.intp is np.int32
 
     @classmethod
     def _promote_integer_rank(cls, given_dtype: DTypeLike) -> DTypeLike:
         if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
-            # Typically, np.intp is used to represent the platform integer type
-            return np.int32 if cls._use32 else np.dtype(np.intp).type
+            return np.int32 if cls._use32 else np.int64
 
         elif given_dtype in (np.uint8, np.uint16, np.uint32):
-            return np.uint32 if cls._use32 else np.dtype(np.uintp).type
+            return np.uint32 if cls._use32 else np.uint64
 
         else:
             return given_dtype
-
-    def get_platform_integer_dtype():
-    # Typically, np.intp is used to represent the platform integer type
-        return np.dtype(np.intp)
-
 
 
 def apply_positional_corrections(
