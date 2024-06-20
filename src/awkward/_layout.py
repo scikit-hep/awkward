@@ -341,6 +341,11 @@ def from_arraylib(array, regulararray, recordarray):
     if array.dtype == np.dtype("O"):
         raise TypeError("Awkward Array does not support arrays with object dtypes.")
 
+    if array.ndim == 0:
+        raise TypeError(
+            "Encountered a scalar (ndarray), but scalar conversion is not allowed."
+        )
+
     if isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)
         array = numpy.ma.getdata(array)
