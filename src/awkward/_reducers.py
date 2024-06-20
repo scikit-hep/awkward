@@ -68,13 +68,18 @@ class KernelReducer(Reducer):
     def _promote_integer_rank(cls, given_dtype: DTypeLike) -> DTypeLike:
         if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
             # Typically, np.intp is used to represent the platform integer type
-            return np.int32 if cls._use32 else np.intp
+            return np.int32 if cls._use32 else np.dtype(np.intp).type
 
         elif given_dtype in (np.uint8, np.uint16, np.uint32):
-            return np.uint32 if cls._use32 else np.intp
+            return np.uint32 if cls._use32 else np.dtype(np.uintp).type
 
         else:
             return given_dtype
+
+    def get_platform_integer_dtype():
+    # Typically, np.intp is used to represent the platform integer type
+        return np.dtype(np.intp)
+
 
 
 def apply_positional_corrections(
