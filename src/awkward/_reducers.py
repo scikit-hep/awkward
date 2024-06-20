@@ -62,7 +62,9 @@ class KernelReducer(Reducer):
         else:
             return dtype
 
-    _use32 = (ak._util.win or ak._util.bits32) and not ak._util.numpy2 and np.intp is np.int32
+    _use32 = ((ak._util.win or ak._util.bits32) and not ak._util.numpy2) or (
+        ak._util.numpy2 and np.intp is np.int32
+    )
 
     @classmethod
     def _promote_integer_rank(cls, given_dtype: DTypeLike) -> DTypeLike:
