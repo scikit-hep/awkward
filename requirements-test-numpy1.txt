@@ -1,1 +1,4 @@
 numpy<2.0.0
+pytest>=6
+pytest-cov
+pytest-xdist
