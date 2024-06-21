@@ -1320,3 +1320,630 @@ def test_0115_generic_reducer_operation_IndexedOptionArray_4():
         == ak.prod(depth2, -3, highlevel=False).form
     )
     del depth2
+
+
+def test_0115_generic_reducer_operation_sum():
+    content2 = ak.contents.NumpyArray(
+        np.array([1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048], dtype=np.int64)
+    )
+    offsets3 = ak.index.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+
+    assert to_list(ak.sum(depth1, -1, highlevel=False)) == [
+        1 + 2 + 4 + 8,
+        16 + 32 + 64 + 128,
+        256 + 512 + 1024 + 2048,
+    ]
+    assert (
+        ak.sum(depth1.to_typetracer(), -1, highlevel=False).form
+        == ak.sum(depth1, -1, highlevel=False).form
+    )
+    assert to_list(ak.sum(depth1, 1, highlevel=False)) == [
+        1 + 2 + 4 + 8,
+        16 + 32 + 64 + 128,
+        256 + 512 + 1024 + 2048,
+    ]
+    assert (
+        ak.sum(depth1.to_typetracer(), 1, highlevel=False).form
+        == ak.sum(depth1, 1, highlevel=False).form
+    )
+
+    assert to_list(ak.sum(depth1, -2, highlevel=False)) == [
+        1 + 16 + 256,
+        2 + 32 + 512,
+        4 + 64 + 1024,
+        8 + 128 + 2048,
+    ]
+    assert (
+        ak.sum(depth1.to_typetracer(), -2, highlevel=False).form
+        == ak.sum(depth1, -2, highlevel=False).form
+    )
+    assert to_list(ak.sum(depth1, 0, highlevel=False)) == [
+        1 + 16 + 256,
+        2 + 32 + 512,
+        4 + 64 + 1024,
+        8 + 128 + 2048,
+    ]
+    assert (
+        ak.sum(depth1.to_typetracer(), 0, highlevel=False).form
+        == ak.sum(depth1, 0, highlevel=False).form
+    )
+    del depth1
+
+
+def test_0115_generic_reducer_operation_any():
+    content2 = ak.contents.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 0.0, 0.0, 0.0])
+    )
+    offsets3 = ak.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+
+    assert to_list(depth1) == [
+        [1.1, 2.2, 3.3],
+        [0.0, 2.2, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+    ]
+
+    assert to_list(ak.any(depth1, -1, highlevel=False)) == [True, True, False]
+    assert (
+        ak.any(depth1.to_typetracer(), -1, highlevel=False).form
+        == ak.any(depth1, -1, highlevel=False).form
+    )
+    assert to_list(ak.any(depth1, 1, highlevel=False)) == [True, True, False]
+    assert (
+        ak.any(depth1.to_typetracer(), 1, highlevel=False).form
+        == ak.any(depth1, 1, highlevel=False).form
+    )
+
+    assert to_list(ak.any(depth1, -2, highlevel=False)) == [True, True, True, False]
+    assert (
+        ak.any(depth1.to_typetracer(), -2, highlevel=False).form
+        == ak.any(depth1, -2, highlevel=False).form
+    )
+    assert to_list(ak.any(depth1, 0, highlevel=False)) == [True, True, True, False]
+    assert (
+        ak.any(depth1.to_typetracer(), 0, highlevel=False).form
+        == ak.any(depth1, 0, highlevel=False).form
+    )
+    del depth1
+
+
+def test_0115_generic_reducer_operation_all():
+    content2 = ak.contents.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
+    )
+    offsets3 = ak.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+
+    assert to_list(depth1) == [
+        [1.1, 2.2, 3.3],
+        [0.0, 2.2, 0.0],
+        [0.0, 2.2, 0.0, 4.4],
+    ]
+
+    assert to_list(ak.all(depth1, -1, highlevel=False)) == [True, False, False]
+    assert (
+        ak.all(depth1.to_typetracer(), -1, highlevel=False).form
+        == ak.all(depth1, -1, highlevel=False).form
+    )
+    assert to_list(ak.all(depth1, 1, highlevel=False)) == [True, False, False]
+    assert (
+        ak.all(depth1.to_typetracer(), 1, highlevel=False).form
+        == ak.all(depth1, 1, highlevel=False).form
+    )
+
+    assert to_list(ak.all(depth1, -2, highlevel=False)) == [False, True, False, True]
+    assert (
+        ak.all(depth1.to_typetracer(), -2, highlevel=False).form
+        == ak.all(depth1, -2, highlevel=False).form
+    )
+    assert to_list(ak.all(depth1, 0, highlevel=False)) == [False, True, False, True]
+    assert (
+        ak.all(depth1.to_typetracer(), 0, highlevel=False).form
+        == ak.all(depth1, 0, highlevel=False).form
+    )
+    del depth1
+
+
+def test_0115_generic_reducer_operation_count():
+    content2 = ak.contents.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
+    )
+    offsets3 = ak.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+
+    assert to_list(depth1) == [
+        [1.1, 2.2, 3.3],
+        [0.0, 2.2, 0.0],
+        [0.0, 2.2, 0.0, 4.4],
+    ]
+
+    assert to_list(ak.count(depth1, -1, highlevel=False)) == [3, 3, 4]
+    assert (
+        ak.count(depth1.to_typetracer(), -1, highlevel=False).form
+        == ak.count(depth1, -1, highlevel=False).form
+    )
+    assert to_list(ak.count(depth1, 1, highlevel=False)) == [3, 3, 4]
+    assert (
+        ak.count(depth1.to_typetracer(), 1, highlevel=False).form
+        == ak.count(depth1, 1, highlevel=False).form
+    )
+
+    assert to_list(ak.count(depth1, -2, highlevel=False)) == [3, 3, 3, 1]
+    assert (
+        ak.count(depth1.to_typetracer(), -2, highlevel=False).form
+        == ak.count(depth1, -2, highlevel=False).form
+    )
+    assert to_list(ak.count(depth1, 0, highlevel=False)) == [3, 3, 3, 1]
+    assert (
+        ak.count(depth1.to_typetracer(), 0, highlevel=False).form
+        == ak.count(depth1, 0, highlevel=False).form
+    )
+    del depth1
+
+
+def test_0115_generic_reducer_operation_count_nonzero():
+    content2 = ak.contents.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
+    )
+    offsets3 = ak.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+
+    assert to_list(depth1) == [
+        [1.1, 2.2, 3.3],
+        [0.0, 2.2, 0.0],
+        [0.0, 2.2, 0.0, 4.4],
+    ]
+
+    assert to_list(ak.count_nonzero(depth1, -1, highlevel=False)) == [3, 1, 2]
+    assert (
+        ak.count_nonzero(depth1.to_typetracer(), -1, highlevel=False).form
+        == ak.count_nonzero(depth1, -1, highlevel=False).form
+    )
+    assert to_list(ak.count_nonzero(depth1, 1, highlevel=False)) == [3, 1, 2]
+    assert (
+        ak.count_nonzero(depth1.to_typetracer(), 1, highlevel=False).form
+        == ak.count_nonzero(depth1, 1, highlevel=False).form
+    )
+
+    assert to_list(ak.count_nonzero(depth1, -2, highlevel=False)) == [1, 3, 1, 1]
+    assert (
+        ak.count_nonzero(depth1.to_typetracer(), -2, highlevel=False).form
+        == ak.count_nonzero(depth1, -2, highlevel=False).form
+    )
+    assert to_list(ak.count_nonzero(depth1, 0, highlevel=False)) == [1, 3, 1, 1]
+    assert (
+        ak.count_nonzero(depth1.to_typetracer(), 0, highlevel=False).form
+        == ak.count_nonzero(depth1, 0, highlevel=False).form
+    )
+    del depth1
+
+
+def test_0115_generic_reducer_operation_count_min_1():
+    content2 = ak.contents.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
+    )
+    offsets3 = ak.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+
+    assert to_list(depth1) == [
+        [1.1, 2.2, 3.3],
+        [0.0, 2.2, 0.0],
+        [0.0, 2.2, 0.0, 4.4],
+    ]
+
+    assert to_list(ak.min(depth1, -1, highlevel=False)) == [1.1, 0.0, 0.0]
+    assert (
+        ak.min(depth1.to_typetracer(), -1, highlevel=False).form
+        == ak.min(depth1, -1, highlevel=False).form
+    )
+    assert to_list(ak.min(depth1, 1, highlevel=False)) == [1.1, 0.0, 0.0]
+    assert (
+        ak.min(depth1.to_typetracer(), 1, highlevel=False).form
+        == ak.min(depth1, 1, highlevel=False).form
+    )
+
+    assert to_list(ak.min(depth1, -2, highlevel=False)) == [0.0, 2.2, 0.0, 4.4]
+    assert (
+        ak.min(depth1.to_typetracer(), -2, highlevel=False).form
+        == ak.min(depth1, -2, highlevel=False).form
+    )
+    assert to_list(ak.min(depth1, 0, highlevel=False)) == [0.0, 2.2, 0.0, 4.4]
+    assert (
+        ak.min(depth1.to_typetracer(), 0, highlevel=False).form
+        == ak.min(depth1, 0, highlevel=False).form
+    )
+    del depth1
+
+
+def test_0115_generic_reducer_operation_count_min_2():
+    content2 = ak.contents.NumpyArray(
+        np.array([True, True, True, False, True, False, False, True, False, True])
+    )
+    offsets3 = ak.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+
+    assert to_list(depth1) == [
+        [True, True, True],
+        [False, True, False],
+        [False, True, False, True],
+    ]
+
+    assert to_list(ak.min(depth1, -1, highlevel=False)) == [True, False, False]
+    assert (
+        ak.min(depth1.to_typetracer(), -1, highlevel=False).form
+        == ak.min(depth1, -1, highlevel=False).form
+    )
+    assert to_list(ak.min(depth1, 1, highlevel=False)) == [True, False, False]
+    assert (
+        ak.min(depth1.to_typetracer(), 1, highlevel=False).form
+        == ak.min(depth1, 1, highlevel=False).form
+    )
+
+    assert to_list(ak.min(depth1, -2, highlevel=False)) == [False, True, False, True]
+    assert (
+        ak.min(depth1.to_typetracer(), -2, highlevel=False).form
+        == ak.min(depth1, -2, highlevel=False).form
+    )
+    assert to_list(ak.min(depth1, 0, highlevel=False)) == [False, True, False, True]
+    assert (
+        ak.min(depth1.to_typetracer(), 0, highlevel=False).form
+        == ak.min(depth1, 0, highlevel=False).form
+    )
+    del depth1
+
+
+def test_0115_generic_reducer_operation_count_max_1():
+    content2 = ak.contents.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
+    )
+    offsets3 = ak.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+
+    assert to_list(depth1) == [
+        [1.1, 2.2, 3.3],
+        [0.0, 2.2, 0.0],
+        [0.0, 2.2, 0.0, 4.4],
+    ]
+
+    assert to_list(ak.max(depth1, -1, highlevel=False)) == [3.3, 2.2, 4.4]
+    assert (
+        ak.max(depth1.to_typetracer(), -1, highlevel=False).form
+        == ak.max(depth1, -1, highlevel=False).form
+    )
+    assert to_list(ak.max(depth1, 1, highlevel=False)) == [3.3, 2.2, 4.4]
+    assert (
+        ak.max(depth1.to_typetracer(), 1, highlevel=False).form
+        == ak.max(depth1, 1, highlevel=False).form
+    )
+
+    assert to_list(ak.max(depth1, -2, highlevel=False)) == [1.1, 2.2, 3.3, 4.4]
+    assert (
+        ak.max(depth1.to_typetracer(), -2, highlevel=False).form
+        == ak.max(depth1, -2, highlevel=False).form
+    )
+    assert to_list(ak.max(depth1, 0, highlevel=False)) == [1.1, 2.2, 3.3, 4.4]
+    assert (
+        ak.max(depth1.to_typetracer(), 0, highlevel=False).form
+        == ak.max(depth1, 0, highlevel=False).form
+    )
+    del depth1
+
+
+def test_0115_generic_reducer_operation_count_max_2():
+    content2 = ak.contents.NumpyArray(
+        np.array([False, True, True, False, True, False, False, False, False, False])
+    )
+    offsets3 = ak.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+
+    assert to_list(depth1) == [
+        [False, True, True],
+        [False, True, False],
+        [False, False, False, False],
+    ]
+
+    assert to_list(ak.max(depth1, -1, highlevel=False)) == [True, True, False]
+    assert (
+        ak.max(depth1.to_typetracer(), -1, highlevel=False).form
+        == ak.max(depth1, -1, highlevel=False).form
+    )
+    assert to_list(ak.max(depth1, 1, highlevel=False)) == [True, True, False]
+    assert (
+        ak.max(depth1.to_typetracer(), 1, highlevel=False).form
+        == ak.max(depth1, 1, highlevel=False).form
+    )
+
+    assert to_list(ak.max(depth1, -2, highlevel=False)) == [False, True, True, False]
+    assert (
+        ak.max(depth1.to_typetracer(), -2, highlevel=False).form
+        == ak.max(depth1, -2, highlevel=False).form
+    )
+    assert to_list(ak.max(depth1, 0, highlevel=False)) == [False, True, True, False]
+    assert (
+        ak.max(depth1.to_typetracer(), 0, highlevel=False).form
+        == ak.max(depth1, 0, highlevel=False).form
+    )
+    del depth1
+
+
+def test_0115_generic_reducer_operation_mask():
+    content = ak.contents.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 6, 6, 9], dtype=np.int64))
+    array = ak.contents.ListOffsetArray(offsets, content)
+    array = ak.to_backend(array, "cuda", highlevel=False)
+
+    assert to_list(ak.min(array, axis=-1, mask_identity=False, highlevel=False)) == [
+        1.1,
+        np.inf,
+        4.4,
+        6.6,
+        np.inf,
+        np.inf,
+        7.7,
+    ]
+    assert (
+        ak.min(
+            array.to_typetracer(), axis=-1, mask_identity=False, highlevel=False
+        ).form
+        == ak.min(array, axis=-1, mask_identity=False, highlevel=False).form
+    )
+    assert to_list(ak.min(array, axis=-1, mask_identity=True, highlevel=False)) == [
+        1.1,
+        None,
+        4.4,
+        6.6,
+        None,
+        None,
+        7.7,
+    ]
+    assert (
+        ak.min(array.to_typetracer(), axis=-1, mask_identity=True, highlevel=False).form
+        == ak.min(array, axis=-1, mask_identity=True, highlevel=False).form
+    )
+    del array
+
+
+def test_0115_generic_reducer_operation_ByteMaskedArray():
+    content = ak.operations.from_iter(
+        [
+            [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
+            [],
+            [[5.5]],
+            [[6.6, 9.9, 8.8, 7.7]],
+            [[], [12.2, 11.1, 10.0]],
+        ],
+        highlevel=False,
+    )
+    mask = ak.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    v2_array = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
+    v2_array = ak.to_backend(v2_array, "cuda", highlevel=False)
+
+    assert to_list(v2_array) == [
+        [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
+        [],
+        None,
+        None,
+        [[], [12.2, 11.1, 10.0]],
+    ]
+    assert to_list(ak.argmin(v2_array, axis=-1, highlevel=False)) == [
+        [1, None, 0],
+        [],
+        None,
+        None,
+        [None, 2],
+    ]
+    assert (
+        ak.argmin(v2_array.to_typetracer(), axis=-1, highlevel=False).form
+        == ak.argmin(v2_array, axis=-1, highlevel=False).form
+    )
+    del v2_array
+
+
+def test_0115_generic_reducer_operation_keepdims():
+    nparray = np.array(primes[: 2 * 3 * 5], dtype=np.int64).reshape(2, 3, 5)
+    content1 = ak.contents.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1 = ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
+    offsets2 = ak.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak.contents.ListOffsetArray(
+        offsets2, ak.contents.ListOffsetArray(offsets1, content1)
+    )
+    depth2 = ak.to_backend(depth2, "cuda", highlevel=False)
+
+    assert to_list(depth2) == [
+        [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
+        [[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]],
+    ]
+
+    assert to_list(
+        ak.prod(depth2, axis=-1, keepdims=False, highlevel=False)
+    ) == to_list(ak.prod(nparray, axis=-1, keepdims=False, highlevel=False))
+    assert (
+        ak.prod(depth2.to_typetracer(), axis=-1, keepdims=False, highlevel=False).form
+        == ak.prod(depth2, axis=-1, keepdims=False, highlevel=False).form
+    )
+    assert to_list(
+        ak.prod(depth2, axis=-2, keepdims=False, highlevel=False)
+    ) == to_list(ak.prod(nparray, axis=-2, keepdims=False, highlevel=False))
+    assert (
+        ak.prod(depth2.to_typetracer(), axis=-2, keepdims=False, highlevel=False).form
+        == ak.prod(depth2, axis=-2, keepdims=False, highlevel=False).form
+    )
+    assert to_list(
+        ak.prod(depth2, axis=-3, keepdims=False, highlevel=False)
+    ) == to_list(ak.prod(nparray, axis=-3, keepdims=False, highlevel=False))
+    assert (
+        ak.prod(depth2.to_typetracer(), axis=-3, keepdims=False, highlevel=False).form
+        == ak.prod(depth2, axis=-3, keepdims=False, highlevel=False).form
+    )
+
+    assert to_list(ak.prod(depth2, axis=-1, keepdims=True, highlevel=False)) == to_list(
+        ak.prod(nparray, axis=-1, keepdims=True, highlevel=False)
+    )
+    assert (
+        ak.prod(depth2.to_typetracer(), axis=-1, keepdims=True, highlevel=False).form
+        == ak.prod(depth2, axis=-1, keepdims=True, highlevel=False).form
+    )
+    assert to_list(ak.prod(depth2, axis=-2, keepdims=True, highlevel=False)) == to_list(
+        ak.prod(nparray, axis=-2, keepdims=True, highlevel=False)
+    )
+    assert (
+        ak.prod(depth2.to_typetracer(), axis=-2, keepdims=True, highlevel=False).form
+        == ak.prod(depth2, axis=-2, keepdims=True, highlevel=False).form
+    )
+    assert to_list(ak.prod(depth2, axis=-3, keepdims=True, highlevel=False)) == to_list(
+        ak.prod(nparray, axis=-3, keepdims=True, highlevel=False)
+    )
+    assert (
+        ak.prod(depth2.to_typetracer(), axis=-3, keepdims=True, highlevel=False).form
+        == ak.prod(depth2, axis=-3, keepdims=True, highlevel=False).form
+    )
+    del depth2
+
+
+def test_0115_generic_reducer_operation_highlevel_1():
+    array = ak.highlevel.Array(
+        [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]], check_valid=True
+    )
+    array = ak.to_backend(array, "cuda", highlevel=False)
+
+    assert ak.operations.count(array) == 9
+    assert to_list(ak.operations.count(array, axis=-1)) == [
+        [3, 0, 2, 1],
+        [],
+        [2, 1],
+    ]
+    assert to_list(ak.operations.count(array, axis=2)) == [
+        [3, 0, 2, 1],
+        [],
+        [2, 1],
+    ]
+    assert to_list(ak.operations.count(array, axis=-1, keepdims=True)) == [
+        [[3], [0], [2], [1]],
+        [],
+        [[2], [1]],
+    ]
+    assert to_list(ak.operations.count(array, axis=-2)) == [
+        [3, 2, 1],
+        [],
+        [2, 1],
+    ]
+    assert to_list(ak.operations.count(array, axis=1)) == [
+        [3, 2, 1],
+        [],
+        [2, 1],
+    ]
+    assert to_list(ak.operations.count(array, axis=-2, keepdims=True)) == [
+        [[3, 2, 1]],
+        [[]],
+        [[2, 1]],
+    ]
+
+    assert ak.operations.count_nonzero(array) == 9
+    assert to_list(ak.operations.count_nonzero(array, axis=-1)) == [
+        [3, 0, 2, 1],
+        [],
+        [2, 1],
+    ]
+    assert to_list(ak.operations.count_nonzero(array, axis=-2)) == [
+        [3, 2, 1],
+        [],
+        [2, 1],
+    ]
+
+    assert ak.operations.sum(array) == 2 + 3 + 5 + 7 + 11 + 13 + 17 + 19 + 23
+    assert to_list(ak.operations.sum(array, axis=-1)) == [
+        [2 + 3 + 5, 0, 7 + 11, 13],
+        [],
+        [17 + 19, 23],
+    ]
+    assert to_list(ak.operations.sum(array, axis=-2)) == [
+        [2 + 7 + 13, 3 + 11, 5],
+        [],
+        [17 + 23, 19],
+    ]
+
+    assert ak.operations.prod(array) == 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23
+    assert to_list(ak.operations.prod(array, axis=-1)) == [
+        [2 * 3 * 5, 1, 7 * 11, 13],
+        [],
+        [17 * 19, 23],
+    ]
+    assert to_list(ak.operations.prod(array, axis=-2)) == [
+        [2 * 7 * 13, 3 * 11, 5],
+        [],
+        [17 * 23, 19],
+    ]
+
+    assert ak.operations.min(array) == 2
+    assert to_list(ak.operations.min(array, axis=-1)) == [
+        [2, None, 7, 13],
+        [],
+        [17, 23],
+    ]
+    assert to_list(ak.operations.min(array, axis=-2)) == [
+        [2, 3, 5],
+        [],
+        [17, 19],
+    ]
+
+    assert ak.operations.max(array) == 23
+    assert to_list(ak.operations.max(array, axis=-1)) == [
+        [5, None, 11, 13],
+        [],
+        [19, 23],
+    ]
+    assert to_list(ak.operations.max(array, axis=-2)) == [
+        [13, 11, 5],
+        [],
+        [23, 19],
+    ]
+    del array
+
+
+def test_0115_generic_reducer_operation_highlevel_2():
+    array = ak.highlevel.Array(
+        [
+            [[True, False, True], [], [False, False], [True]],
+            [],
+            [[False, True], [True]],
+        ],
+        check_valid=True,
+    )
+    array = ak.to_backend(array, "cuda", highlevel=False)
+
+    assert ak.operations.any(array) is np.bool_(True)
+    assert to_list(ak.operations.any(array, axis=-1)) == [
+        [True, False, False, True],
+        [],
+        [True, True],
+    ]
+    assert to_list(ak.operations.any(array, axis=-2)) == [
+        [True, False, True],
+        [],
+        [True, True],
+    ]
+
+    assert ak.operations.all(array) is np.bool_(False)
+    assert to_list(ak.operations.all(array, axis=-1)) == [
+        [False, True, False, True],
+        [],
+        [False, True],
+    ]
+    assert to_list(ak.operations.all(array, axis=-2)) == [
+        [False, False, True],
+        [],
+        [False, True],
+    ]
+    del array
