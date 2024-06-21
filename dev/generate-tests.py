@@ -445,6 +445,7 @@ def genspectests(specdict):
 """
             )
             f.write("import pytest\nimport kernels\n\n")
+            f.write("import pytest\nimport numpy as np\nimport kernels\n\n")
             num = 1
             if spec.tests == []:
                 f.write(
@@ -904,6 +905,7 @@ cuda_kernels_tests = [
     "awkward_ListArray_getitem_next_range_counts",
     "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListArray_rpad_axis1",
+    "awkward_UnionArray_regular_index",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     "awkward_ListArray_getitem_next_range_spreadadvanced",
     "awkward_ListArray_localindex",
@@ -921,6 +923,8 @@ cuda_kernels_tests = [
     "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
     "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
+    "awkward_NumpyArray_subrange_equal",
+    "awkward_NumpyArray_subrange_equal_bool",
     "awkward_IndexedArray_flatten_nextcarry",
     "awkward_IndexedArray_flatten_none2empty",
     "awkward_IndexedArray_getitem_nextcarry",
