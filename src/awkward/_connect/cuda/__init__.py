@@ -116,6 +116,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_NumpyArray_rearrange_shifted",
         "awkward_reduce_count_64",
         "awkward_reduce_sum",
+        "awkward_reduce_sum_complex",
         "awkward_reduce_sum_int32_bool_64",
         "awkward_reduce_sum_int64_bool_64",
         "awkward_reduce_sum_bool",

@@ -120,6 +120,7 @@ cuda_kernels_impl = [
     "awkward_reduce_max",
     "awkward_reduce_min",
     "awkward_reduce_sum",
+    "awkward_reduce_sum_complex",
     "awkward_reduce_sum_int32_bool_64",
     "awkward_reduce_sum_int64_bool_64",
     "awkward_reduce_sum_bool",
@@ -380,6 +381,8 @@ from numpy import (
 
 from awkward._connect.cuda import fetch_specialization
 from awkward._connect.cuda import import_cupy
+
+import math
 
 cupy = import_cupy("Awkward Arrays with CUDA")
 """
