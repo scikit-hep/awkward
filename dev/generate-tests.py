@@ -424,6 +424,7 @@ def genspectests(specdict):
 
 """
             )
+
             f.write("import pytest\nimport numpy as np\nimport kernels\n\n")
             num = 1
             if spec.tests == []:
