@@ -56,17 +56,17 @@ awkward_reduce_min_b(
     }
     __syncthreads();
 
-    for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-      T val = identity;
-      if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-        val = temp[thread_id - stride];
-      }
-      __syncthreads();
-      temp[thread_id] = val < temp[thread_id] ? val : temp[thread_id];
-      __syncthreads();
-    }
-
     if (thread_id < lenparents) {
+      for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
+        T val = identity;
+        if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
+          val = temp[thread_id - stride];
+        }
+        __syncthreads();
+        temp[thread_id] = val < temp[thread_id] ? val : temp[thread_id];
+        __syncthreads();
+      }
+
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
         atomicMin(&toptr[parent], temp[thread_id]);
