@@ -37,7 +37,7 @@ jobs:
         runs-on:
           - windows-latest
           - ubuntu-latest
-          - macos-latest
+          - macos-12
         python-version:
           - '3.12'
           - '3.11'
