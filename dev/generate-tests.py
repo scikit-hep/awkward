@@ -961,6 +961,7 @@ def gencudakerneltests(specdict):
                 f.write(
                     "import cupy\n"
                     "import cupy.testing as cpt\n"
+                    "import numpy as np\n"
                     "import pytest\n\n"
                     "import awkward as ak\n"
                     "import awkward._connect.cuda as ak_cu\n"
