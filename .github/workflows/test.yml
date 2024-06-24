@@ -12,10 +12,8 @@ on:
       - docs/**
       - awkward-cpp/docs/**
       - studies/**
-
   schedule:
-    - cron: 0 12 1 * *
-
+    - cron: '0 12 1 * *'
   workflow_dispatch:
 
 concurrency:
@@ -23,9 +21,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Leverage reproducible builds by setting a constant SOURCE_DATE_EPOCH
-  # This will ensure that the hash of the awkward-cpp directory remains
-  # constant for unchanged files, meaning that it can be used for caching
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
@@ -76,12 +71,17 @@ jobs:
         with:
           submodules: true
 
-      - name: 'Python ${{ matrix.python-version }}'
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: '${{ matrix.python-version }}'
-          architecture: '${{ matrix.python-architecture }}'
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.python-architecture }}
           allow-prereleases: true
+
+      - name: Upgrade pip and install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install pipx
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
@@ -103,20 +103,18 @@ jobs:
         uses: tj-actions/glob@v22
         id: find-wheel
         with:
-          files: |
-            awkward-cpp/dist/*.whl
+          files: awkward-cpp/dist/*.whl
 
       - name: Install awkward, awkward-cpp, and dependencies
-        run: >-
+        run: |
           python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
-          -r "requirements-test-${{ matrix.dependencies-kind }}.txt"
+          -r requirements-test-${{ matrix.dependencies-kind }}.txt
 
       - name: Print versions
         run: python -m pip list
 
       - name: Check if kernel specification is sorted
-        # We don't need to run this all the time
-        if: (matrix.python-version == '3.12') && (matrix.runs-on == 'ubuntu-latest')
+        if: matrix.python-version == '3.12' && matrix.runs-on == 'ubuntu-latest'
         run: pipx run nox -s diagnostics -- --check-spec-sorted
 
       - name: Test specification
@@ -132,49 +130,47 @@ jobs:
         run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels-explicit
 
       - name: Test non-kernels (Python)
-        run: >-
+        run: |
           python -m pytest -vv -rs tests --cov=awkward --cov-report=term
           --cov-report=xml
         if: startsWith(matrix.python-version, '3.')
 
       - name: Test non-kernels (PyPy)
-        run: >-
-          python -m pytest -vv -rs tests
+        run: python -m pytest -vv -rs tests
         if: startsWith(matrix.python-version, 'pypy')
 
       - name: Upload Codecov results
-        if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')
+        if: matrix.python-version == '3.9' && matrix.runs-on == 'ubuntu-latest'
         uses: codecov/codecov-action@v4
 
   Linux-ROOT:
     runs-on: ubuntu-20.04
-
     env:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
-
     timeout-minutes: 30
-
-    # Required for miniconda to activate conda
     defaults:
       run:
         shell: "bash -l {0}"
 
     steps:
-      - uses: "actions/checkout@v4"
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: Setup Python via Conda
         uses: mamba-org/setup-micromamba@v1
         with:
-          # Cache invalidates daily by default
           cache-environment: true
           environment-name: awkward
-          # Need Python 3.8 for the cached wheels
-          create-args: >-
+          create-args: |
             python=3.8
             numpy
             root
+
+      - name: Upgrade pip and install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install pipx
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
@@ -193,7 +189,7 @@ jobs:
           python3 -m build -w ./awkward-cpp
 
       - name: Install awkward, awkward-cpp, and dependencies
-        run: >-
+        run: |
           python -m pip install --only-binary "numpy,pandas,pyarrow,numexpr"
           -v . ./awkward-cpp/dist/*.whl
           pytest-github-actions-annotate-failures
@@ -206,22 +202,23 @@ jobs:
         run: python -m pytest -vv -rs tests
 
   Linux-cppyy:
-    # TODO: remove this part of the workflow
-    # cppyy is not yet released. Let's load some pre-built wheels via docker (as a binary store)
     runs-on: ubuntu-22.04
-
     env:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
-
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: 'Python ${{ matrix.python-version }}'
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Upgrade pip and install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install pipx
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
@@ -247,7 +244,7 @@ jobs:
           destination: "/tmp/wheelhouse"
 
       - name: Install awkward, awkward-cpp, and dependencies
-        run: >-
+        run: |
           python -m pip install -v --only-binary "numpy,pandas,pyarrow,numexpr"
           ./ ./awkward-cpp/dist/*.whl /tmp/wheelhouse/* pytest-github-actions-annotate-failures
 
