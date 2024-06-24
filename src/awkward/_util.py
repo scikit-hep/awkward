@@ -111,6 +111,6 @@ def copy_behaviors(existing_class: typing.Any, new_class: typing.Any, behavior: 
             if isinstance(key, str) or "*" in key:
                 continue
             new_tuple = tuple(
-                [new_class.__name__ if k == existing_class.__name__ else k for k in key]
+                new_class.__name__ if k == existing_class.__name__ else k for k in key
             )
             behavior[new_tuple] = value
