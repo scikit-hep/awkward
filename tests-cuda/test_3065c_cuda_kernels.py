@@ -9,6 +9,13 @@ import awkward as ak
 to_list = ak.operations.to_list
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
+
+
 def test_0546_fill_none_replacement_value_type():
     array = ak.operations.values_astype(
         ak.highlevel.Array([1.1, 2.2, None, 3.3]), np.float32

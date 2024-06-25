@@ -11,6 +11,7 @@ from awkward._backends.backend import Backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Any, AxisMaybeNone, Literal
 from awkward.contents.content import ActionType, Content
+from awkward.contents.remove_structure import remove_structure
 from awkward.errors import AxisError
 from awkward.forms import form
 from awkward.record import Record
@@ -189,44 +190,6 @@ def pad_none(
     layout: Content, length: Integral, axis: Integral, clip: bool = False
 ) -> Content:
     return layout._pad_none(length, axis, 1, clip)
-
-
-def remove_structure(
-    layout: Content | Record,
-    backend: Backend | None = None,
-    flatten_records: bool = True,
-    function_name: str | None = None,
-    drop_nones: bool = True,
-    keepdims: bool = False,
-    allow_records: bool = False,
-    list_to_regular: bool = False,
-):
-    if isinstance(layout, Record):
-        return remove_structure(
-            layout._array[layout._at : layout._at + 1],
-            backend,
-            flatten_records,
-            function_name,
-            drop_nones,
-            keepdims,
-            allow_records,
-        )
-
-    else:
-        if backend is None:
-            backend = layout._backend
-        arrays = layout._remove_structure(
-            backend,
-            {
-                "flatten_records": flatten_records,
-                "function_name": function_name,
-                "drop_nones": drop_nones,
-                "keepdims": keepdims,
-                "allow_records": allow_records,
-                "list_to_regular": list_to_regular,
-            },
-        )
-        return tuple(arrays)
 
 
 def flatten(layout: Content, axis: int = 1) -> Content:
