@@ -1,4 +1,5 @@
 [tool.cibuildwheel]
+build-frontend = "build[uv]"
 test-requires = ["pytest>=6", "."]
 test-command = """
 pytest {project}/tests \
