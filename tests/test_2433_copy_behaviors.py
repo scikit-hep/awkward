@@ -88,7 +88,9 @@ def test():
 
     # instead of registering every operator again, just copy the behaviors of
     # another class to this class
-    ak._util.copy_behaviors(VectorTwoD, VectorTwoDAgain, ak.behavior)
+    ak.behavior.update(
+        ak._util.copy_behaviors(VectorTwoD, VectorTwoDAgain, ak.behavior)
+    )
     assert v + v == v_added
 
     # third sub-class
@@ -117,5 +119,7 @@ def test():
 
     # instead of registering every operator again, just copy the behaviors of
     # another class to this class
-    ak._util.copy_behaviors(VectorTwoDAgain, VectorTwoDAgainAgain, ak.behavior)
+    ak.behavior.update(
+        ak._util.copy_behaviors(VectorTwoDAgain, VectorTwoDAgainAgain, ak.behavior)
+    )
     assert v + v == v_added
