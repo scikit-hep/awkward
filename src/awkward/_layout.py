@@ -250,7 +250,12 @@ def maybe_highlevel_to_lowlevel(obj):
         return obj
 
 
-def from_arraylib(array, regulararray, recordarray):
+def from_arraylib(
+    array,
+    regulararray,
+    recordarray,
+    primitive_policy: Literal["error", "promote", "pass-through"] = "promote",
+):
     from awkward.contents import (
         ByteMaskedArray,
         ListArray,
@@ -340,6 +345,11 @@ def from_arraylib(array, regulararray, recordarray):
 
     if array.dtype == np.dtype("O"):
         raise TypeError("Awkward Array does not support arrays with object dtypes.")
+
+    if primitive_policy == "error" and array.ndim == 0:
+        raise TypeError(
+            f"Encountered a scalar ({type(array).__name__}), but scalar conversion/promotion is disabled"
+        )
 
     if isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)

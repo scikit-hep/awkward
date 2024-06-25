@@ -1,3 +1,5 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import json
@@ -128,11 +130,34 @@ def native_arrow_field_to_akarraytype(
     fields = _fields_of_strg_type(storage_type)
     if len(fields) > 0:
         # We need to replace storage_type with one that contains AwkwardArrowTypes.
-        awkwardized_fields = [
-            native_arrow_field_to_akarraytype(field, meta)  # Recurse
-            for field, meta in zip(fields, metadata["subfield_metadata"])
-        ]
+        sub_meta = metadata["subfield_metadata"]
+        awkwardized_fields = None  # Temporary
+        if len(sub_meta) == len(fields):
+            awkwardized_fields = [
+                native_arrow_field_to_akarraytype(field, meta)  # Recurse
+                for field, meta in zip(fields, metadata["subfield_metadata"])
+            ]
+        elif len(fields) < len(sub_meta):
+            # If a user has read a partial column, we can have fewer Arrow fields than the original.
+            sub_meta_dict = {sm["field_name"]: sm for sm in sub_meta}
+            awkwardized_fields = []
+            for field in fields:
+                if field.name in sub_meta_dict:
+                    awkwardized_fields.append(
+                        native_arrow_field_to_akarraytype(
+                            field, sub_meta_dict[field.name]
+                        )
+                    )
+                else:
+                    raise ValueError(
+                        f"Cannot find Awkward metadata for sub-field {field.name}"
+                    )
+        else:
+            raise ValueError(
+                f"Not enough fields in Awkward metadata. Have {len(sub_meta)} need at least {len(fields)}."
+            )
         storage_type = _make_pyarrow_type_like(storage_type, awkwardized_fields)
+
     ak_type = AwkwardArrowType._from_metadata_object(storage_type, metadata)
     return pyarrow.field(ntv_field.name, type=ak_type, nullable=ntv_field.nullable)
 
