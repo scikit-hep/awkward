@@ -8,6 +8,9 @@ on:
   workflow_dispatch:
   # Use from other workflows
   workflow_call:
+  pull_request:
+    paths:
+      - .github/workflows/build-wheels.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -91,10 +94,13 @@ jobs:
       with:
         submodules: true
 
-    - name: Python 3.11
+    - name: Python 3.12
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.12'
+
+    - name: Setup uv
+      uses: yezz123/setup-uv@v4
 
     - name: Prepare build files
       run: pipx run nox -s prepare
@@ -138,10 +144,13 @@ jobs:
       with:
         submodules: true
 
-    - name: Python 3.10
+    - name: Python 3.12
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.12'
+
+    - name: Setup uv
+      uses: yezz123/setup-uv@v4
 
     - name: Prepare build files
       run: pipx run nox -s prepare
@@ -182,11 +191,14 @@ jobs:
       with:
         submodules: true
 
+    - name: Setup uv
+      uses: yezz123/setup-uv@v4
+
     - name: Prepare build files
       run: pipx run nox -s prepare
 
     - name: Build distributions
-      run: pipx run build
+      run: pipx run build --installer uv
 
     - name: Check metadata
       run: pipx run twine check dist/*

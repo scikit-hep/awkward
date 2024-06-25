@@ -59,19 +59,19 @@ awkward_reduce_argmin_b(
     }
     __syncthreads();
 
-    for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-      int64_t index = -1;
-      if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-        index = temp[thread_id - stride];
-      }
-      if (index != -1 && (temp[thread_id] == -1 || fromptr[index] < fromptr[temp[thread_id]] ||
-         (fromptr[index] == fromptr[temp[thread_id]] && index < temp[thread_id]))) {
-        temp[thread_id] = index;
-      }
-      __syncthreads();
-    }
-
     if (thread_id < lenparents) {
+      for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
+        int64_t index = -1;
+        if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
+          index = temp[thread_id - stride];
+        }
+        if (index != -1 && (temp[thread_id] == -1 || fromptr[index] < fromptr[temp[thread_id]] ||
+          (fromptr[index] == fromptr[temp[thread_id]] && index < temp[thread_id]))) {
+          temp[thread_id] = index;
+        }
+        __syncthreads();
+      }
+
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
         atomicExch(&atomic_toptr[parent], temp[thread_id]);
