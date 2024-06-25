@@ -11,6 +11,13 @@ from awkward._nplikes.typetracer import TypeTracer
 to_list = ak.operations.to_list
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
+
+
 def test_0582_propagate_context_in_broadcast_and_apply_firsts():
     array = ak.Array([[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]]])
     cuda_array = ak.to_backend(array, "cuda")

@@ -9,6 +9,13 @@ import awkward as ak
 to_list = ak.operations.to_list
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
+
+
 def test_0111_jagged_and_masked_getitem_bitmaskedarray2b():
     array = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
@@ -36,6 +43,8 @@ def test_0111_jagged_and_masked_getitem_bitmaskedarray2b():
     ]
     assert maskedarray.to_typetracer()[cuda_array].form == maskedarray[cuda_array].form
 
+    del cuda_array
+
 
 def test_0111_jagged_and_masked_getitem_bytemaskedarray2b():
     array = ak.operations.from_iter(
@@ -62,6 +71,7 @@ def test_0111_jagged_and_masked_getitem_bytemaskedarray2b():
         [6.6, 9.9],
     ]
     assert maskedarray.to_typetracer()[cuda_array].form == maskedarray[cuda_array].form
+    del cuda_array
 
 
 def test_0111_jagged_and_masked_getitem_emptyarray():
@@ -112,6 +122,8 @@ def test_0111_jagged_and_masked_getitem_emptyarray():
 
     with pytest.raises(IndexError):
         cuda_listoffsetarray[cuda_array5]
+
+    del cuda_listoffsetarray
 
 
 def test_0111_jagged_and_masked_getitem_indexedarray():
@@ -248,6 +260,9 @@ def test_0111_jagged_and_masked_getitem_indexedarray():
         == cuda_indexedarray[cuda_array1].form
     )
 
+    del cuda_indexedarray
+    del cuda_array1
+
 
 def test_0111_jagged_and_masked_getitem_indexedarray2():
     array = ak.operations.from_iter(
@@ -275,6 +290,8 @@ def test_0111_jagged_and_masked_getitem_indexedarray2():
         cuda_indexedarray.to_typetracer()[cuda_array].form
         == cuda_indexedarray[cuda_array].form
     )
+    del cuda_indexedarray
+    del cuda_array
 
 
 def test_0111_jagged_and_masked_getitem_indexedarray2b():
@@ -303,6 +320,8 @@ def test_0111_jagged_and_masked_getitem_indexedarray2b():
         cuda_indexedarray.to_typetracer()[cuda_array].form
         == cuda_indexedarray[cuda_array].form
     )
+    del cuda_indexedarray
+    del cuda_array
 
 
 def test_0111_jagged_and_masked_getitem_indexedarray3():
@@ -381,6 +400,13 @@ def test_0111_jagged_and_masked_getitem_indexedarray3():
     with pytest.raises(IndexError):
         cuda_array[cuda_array6]
 
+    del cuda_array
+    del cuda_array2
+    del cuda_array3
+    del cuda_array4
+    del cuda_array5
+    del cuda_array6
+
 
 def test_0111_jagged_and_masked_getitem_jagged():
     array = ak.highlevel.Array(
@@ -401,6 +427,9 @@ def test_0111_jagged_and_masked_getitem_jagged():
         [8.8, 8.8, 8.8, 7.7],
     ]
     assert cuda_array.to_typetracer()[cuda_array2].form == cuda_array[cuda_array2].form
+
+    del cuda_array
+    del cuda_array2
 
 
 def test_0111_jagged_and_masked_getitem_double_jagged():
@@ -533,54 +562,53 @@ def test_0111_jagged_and_masked_getitem_array_boolean_to_int():
     b = ak._slicing._normalise_item_bool_to_int(cuda_a, backend=cuda_a.backend)
     assert to_list(b) == [[1, 2], [], [1], [], [1, 2, 3]]
 
-    # a = ak.operations.from_iter(
-    #     [[True, True, None], [], [True, None], [None], [True, True, True, None]],
-    #     highlevel=False,
-    # )
-    # cuda_a = ak.to_backend(a, "cuda", highlevel=False)
-    # # b = ak._slicing._normalise_item_bool_to_int(cuda_a, backend=cuda_a.backend)
-    # # error in _slicing line 553 - FIXME
-    # assert to_list(b) == [[0, 1, None], [], [0, None], [None], [0, 1, 2, None]]
-    # assert (
-    #     b.content.index.data[b.content.index.data >= 0].tolist()
-    #     == np.arange(6).tolist()  # kernels expect nonnegative entries to be arange
-    # )
+    a = ak.operations.from_iter(
+        [[True, True, None], [], [True, None], [None], [True, True, True, None]],
+        highlevel=False,
+    )
+    cuda_a = ak.to_backend(a, "cuda", highlevel=False)
+    b = ak._slicing._normalise_item_bool_to_int(cuda_a, backend=cuda_a.backend)
+    assert to_list(b) == [[0, 1, None], [], [0, None], [None], [0, 1, 2, None]]
+    assert (
+        b.content.index.data[b.content.index.data >= 0].tolist()
+        == np.arange(6).tolist()  # kernels expect nonnegative entries to be arange
+    )
 
-    # a = ak.operations.from_iter(
-    #     [[None, True, True], [], [None, True], [None], [None, True, True, True]],
-    #     highlevel=False,
-    # )
-    # cuda_a = ak.to_backend(a, "cuda", highlevel=False)
-    # b = ak._slicing._normalise_item_bool_to_int(cuda_a, backend=cuda_a.backend)
-    # assert to_list(b) == [[None, 1, 2], [], [None, 1], [None], [None, 1, 2, 3]]
-    # assert (
-    #     b.content.index.data[b.content.index.data >= 0].tolist()
-    #     == np.arange(6).tolist()  # kernels expect nonnegative entries to be arange
-    # )
+    a = ak.operations.from_iter(
+        [[None, True, True], [], [None, True], [None], [None, True, True, True]],
+        highlevel=False,
+    )
+    cuda_a = ak.to_backend(a, "cuda", highlevel=False)
+    b = ak._slicing._normalise_item_bool_to_int(cuda_a, backend=cuda_a.backend)
+    assert to_list(b) == [[None, 1, 2], [], [None, 1], [None], [None, 1, 2, 3]]
+    assert (
+        b.content.index.data[b.content.index.data >= 0].tolist()
+        == np.arange(6).tolist()  # kernels expect nonnegative entries to be arange
+    )
 
-    # a = ak.operations.from_iter(
-    #     [[False, True, None], [], [False, None], [None], [False, True, True, None]],
-    #     highlevel=False,
-    # )
-    # cuda_a = ak.to_backend(a, "cuda", highlevel=False)
-    # b = ak._slicing._normalise_item_bool_to_int(cuda_a, backend=cuda_a.backend)
-    # assert to_list(b) == [[1, None], [], [None], [None], [1, 2, None]]
-    # assert (
-    #     b.content.index.data[b.content.index.data >= 0].tolist()
-    #     == np.arange(3).tolist()  # kernels expect nonnegative entries to be arange
-    # )
+    a = ak.operations.from_iter(
+        [[False, True, None], [], [False, None], [None], [False, True, True, None]],
+        highlevel=False,
+    )
+    cuda_a = ak.to_backend(a, "cuda", highlevel=False)
+    b = ak._slicing._normalise_item_bool_to_int(cuda_a, backend=cuda_a.backend)
+    assert to_list(b) == [[1, None], [], [None], [None], [1, 2, None]]
+    assert (
+        b.content.index.data[b.content.index.data >= 0].tolist()
+        == np.arange(3).tolist()  # kernels expect nonnegative entries to be arange
+    )
 
-    # a = ak.operations.from_iter(
-    #     [[None, True, False], [], [None, False], [None], [None, True, True, False]],
-    #     highlevel=False,
-    # )
-    # cuda_a = ak.to_backend(a, "cuda", highlevel=False)
-    # b = ak._slicing._normalise_item_bool_to_int(cuda_a, backend=cuda_a.backend)
-    # assert to_list(b) == [[None, 1], [], [None], [None], [None, 1, 2]]
-    # assert (
-    #     b.content.index.data[b.content.index.data >= 0].tolist()
-    #     == np.arange(3).tolist()  # kernels expect nonnegative entries to be arange
-    # )
+    a = ak.operations.from_iter(
+        [[None, True, False], [], [None, False], [None], [None, True, True, False]],
+        highlevel=False,
+    )
+    cuda_a = ak.to_backend(a, "cuda", highlevel=False)
+    b = ak._slicing._normalise_item_bool_to_int(cuda_a, backend=cuda_a.backend)
+    assert to_list(b) == [[None, 1], [], [None], [None], [None, 1, 2]]
+    assert (
+        b.content.index.data[b.content.index.data >= 0].tolist()
+        == np.arange(3).tolist()  # kernels expect nonnegative entries to be arange
+    )
 
 
 def test_0111_jagged_and_masked_getitem_array_slice():
