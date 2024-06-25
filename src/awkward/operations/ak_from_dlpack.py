@@ -20,6 +20,7 @@ def from_dlpack(
     regulararray=False,
     highlevel=True,
     behavior=None,
+    primitive_policy="error",
     attrs=None,
 ):
     """
@@ -77,7 +78,7 @@ def from_dlpack(
 
     array = nplike.from_dlpack(array)
     return wrap_layout(
-        from_arraylib(array, regulararray, False),
+        from_arraylib(array, regulararray, False, primitive_policy=primitive_policy),
         highlevel=highlevel,
         behavior=behavior,
     )
