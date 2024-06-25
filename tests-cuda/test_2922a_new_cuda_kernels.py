@@ -16,6 +16,13 @@ from awkward.forms import (
 to_list = ak.operations.to_list
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
+
+
 def test_0184_concatenate_operation_records():
     one = ak.highlevel.Array([[1, 2, 3], [None, 4], None, [None, 5]]).layout
     two = ak.highlevel.Array([6, 7, 8]).layout

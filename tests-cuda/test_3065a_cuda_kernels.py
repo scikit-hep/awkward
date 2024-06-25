@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import cupy as cp
 import numpy as np
 import pytest
 
@@ -7,6 +8,13 @@ import awkward as ak
 from awkward.operations.ak_concatenate import enforce_concatenated_form
 
 to_list = ak.operations.to_list
+
+
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
 
 
 def test_0449_merge_many_arrays_in_one_pass_concatenate():

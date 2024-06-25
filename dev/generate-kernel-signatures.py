@@ -108,6 +108,7 @@ cuda_kernels_impl = [
     "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",
@@ -123,6 +124,7 @@ cuda_kernels_impl = [
     "awkward_reduce_sum_int32_bool_64",
     "awkward_reduce_sum_int64_bool_64",
     "awkward_reduce_sum_bool",
+    "awkward_reduce_prod",
     "awkward_reduce_prod_bool",
     "awkward_reduce_countnonzero",
     "awkward_sorting_ranges",
@@ -380,6 +382,8 @@ from numpy import (
 
 from awkward._connect.cuda import fetch_specialization
 from awkward._connect.cuda import import_cupy
+
+import math
 
 cupy = import_cupy("Awkward Arrays with CUDA")
 """

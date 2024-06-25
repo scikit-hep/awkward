@@ -7,25 +7,25 @@
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
-//     atomic_toptr = cupy.array(toptr, dtype=cupy.uint32)
+//     atomic_toptr = cupy.array(toptr, dtype=toptr.dtype)
 //     temp = cupy.ones(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_bool_a", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_bool_b", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_bool_c", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-// out["awkward_reduce_prod_bool_a", {dtype_specializations}] = None
-// out["awkward_reduce_prod_bool_b", {dtype_specializations}] = None
-// out["awkward_reduce_prod_bool_c", {dtype_specializations}] = None
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+// out["awkward_reduce_prod_a", {dtype_specializations}] = None
+// out["awkward_reduce_prod_b", {dtype_specializations}] = None
+// out["awkward_reduce_prod_c", {dtype_specializations}] = None
 // END PYTHON
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_prod_bool_a(
+awkward_reduce_prod_a(
     T* toptr,
     const C* fromptr,
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint32_t* atomic_toptr,
+    T* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -40,13 +40,13 @@ awkward_reduce_prod_bool_a(
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_prod_bool_b(
+awkward_reduce_prod_b(
     T* toptr,
     const C* fromptr,
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint32_t* atomic_toptr,
+    T* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -65,14 +65,14 @@ awkward_reduce_prod_bool_b(
         val = temp[thread_id - stride];
       }
       __syncthreads();
-      temp[thread_id] &= (val != 0);
+      temp[thread_id] *= val;
       __syncthreads();
     }
 
     if (thread_id < lenparents) {
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicAnd(&atomic_toptr[parent], temp[thread_id]);
+        atomicMul(&atomic_toptr[parent], temp[thread_id]);
       }
     }
   }
@@ -80,13 +80,13 @@ awkward_reduce_prod_bool_b(
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_prod_bool_c(
+awkward_reduce_prod_c(
     T* toptr,
     const C* fromptr,
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint32_t* atomic_toptr,
+    T* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
