@@ -358,7 +358,6 @@ class RegularArray(RegularMeta[Content], Content):
             nextcarry = ak.index.Index64.empty(
                 where.shape[0] * self._size, self._backend.index_nplike
             )
-
         assert nextcarry.nplike is self._backend.index_nplike
         self._maybe_index_error(
             self._backend[
@@ -472,6 +471,8 @@ class RegularArray(RegularMeta[Content], Content):
             nexthead, nexttail = ak._slicing.head_tail(tail)
             nextcarry = ak.index.Index64.empty(self._length, index_nplike)
             assert nextcarry.nplike is index_nplike
+            if ak.backend(head) == "cuda":
+                head = int(ak.to_backend(head, backend=self._backend)[0])
             self._maybe_index_error(
                 self._backend[
                     "awkward_RegularArray_getitem_next_at", nextcarry.dtype.type
