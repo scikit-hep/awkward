@@ -85,7 +85,7 @@ jobs:
           echo "export PATH=/opt/homebrew/opt/gettext/bin:$PATH" >> $GITHUB_ENV
           sudo mkdir -p /usr/local/opt/gettext/lib/
           sudo ln -sf /opt/homebrew/Cellar/gettext/0.22.5/lib/libintl.8.dylib /usr/local/opt/gettext/lib/libintl.8.dylib
-        
+
       - name: Verify Environment Variables
         if: runner.os == 'macOS'
         run: |
