@@ -84,7 +84,13 @@ jobs:
           echo "export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "export PATH=/opt/homebrew/opt/gettext/bin:$PATH" >> $GITHUB_ENV
 
+      - name: Verify Environment Variables
+        run: |
+          env | grep DYLD_LIBRARY_PATH
+          env | grep PATH
+        
       - name: Check for libintl.8.dylib
+        if: runner.os == 'macOS'
         run: |
           find /opt/homebrew -name libintl.8.dylib
           find /usr/local -name libintl.8.dylib
@@ -95,6 +101,11 @@ jobs:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
           allow-prereleases: true
+
+      - name: Upgrade pip
+        run: |
+          export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH
+          python -m ensurepip
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
