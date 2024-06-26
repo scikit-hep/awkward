@@ -81,6 +81,8 @@ jobs:
         run: |
           brew install gettext
           brew link --force gettext
+          echo "export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "export PATH=/opt/homebrew/opt/gettext/bin:$PATH" >> $GITHUB_ENV
 
       - name: 'Python ${{ matrix.python-version }}'
         uses: actions/setup-python@v5
