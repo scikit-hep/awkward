@@ -79,6 +79,7 @@ jobs:
       - name: Install dependencies on macOS
         if: runner.os == 'macOS'
         run: |
+          uname -m
           brew install gettext
           brew link --force gettext
           echo "export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
