@@ -75,13 +75,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-          
+
       - name: Install dependencies on macOS
         if: runner.os == 'macOS'
         run: |
           brew install gettext
           brew link --force gettext
-          
+
       - name: 'Python ${{ matrix.python-version }}'
         uses: actions/setup-python@v5
         with:
