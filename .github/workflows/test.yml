@@ -83,8 +83,11 @@ jobs:
           brew link --force gettext
           echo "export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "export PATH=/opt/homebrew/opt/gettext/bin:$PATH" >> $GITHUB_ENV
-
+          sudo mkdir -p /usr/local/opt/gettext/lib/
+          sudo ln -sf /opt/homebrew/Cellar/gettext/0.22.5/lib/libintl.8.dylib /usr/local/opt/gettext/lib/libintl.8.dylib
+        
       - name: Verify Environment Variables
+        if: runner.os == 'macOS'
         run: |
           env | grep DYLD_LIBRARY_PATH
           env | grep PATH
@@ -103,6 +106,7 @@ jobs:
           allow-prereleases: true
 
       - name: Upgrade pip
+        if: runner.os == 'macOS'
         run: |
           export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH
           python -m ensurepip
