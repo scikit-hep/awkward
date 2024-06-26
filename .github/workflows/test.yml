@@ -46,6 +46,8 @@ jobs:
           - '3.8'
         python-architecture:
           - x64
+        python-macos-architecture:
+          - arm64
         dependencies-kind:
           - full
         include:
@@ -99,7 +101,16 @@ jobs:
           find /opt/homebrew -name libintl.8.dylib
           find /usr/local -name libintl.8.dylib
 
+      - name: 'Python on MacOS ${{ matrix.python-version }}'
+        if: runner.os == 'macOS'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python-version }}'
+          architecture: '${{ matrix.python-macos-architecture }}'
+          allow-prereleases: true
+
       - name: 'Python ${{ matrix.python-version }}'
+        if: runner.os != 'macOS'
         uses: actions/setup-python@v5
         with:
           python-version: '${{ matrix.python-version }}'
