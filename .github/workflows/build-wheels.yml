@@ -74,6 +74,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         arch: [auto64]
         build: ["cp", "pp"]
+        type: [Universal]
 
         include:
         - os: macos-latest
