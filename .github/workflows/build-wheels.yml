@@ -71,7 +71,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-13]
         arch: [auto64]
         build: ["cp", "pp"]
         type: [Universal]
@@ -80,7 +80,7 @@ jobs:
         - os: macos-latest
           type: "Universal"
           arch: universal2
-          build: "cp"
+          build: "pp"
 
         - os: windows-latest
           arch: auto64
