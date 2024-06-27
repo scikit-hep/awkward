@@ -46,7 +46,6 @@ jobs:
           - '3.8'
         python-architecture:
           - x64
-        python-macos-architecture:
           - arm64
         dependencies-kind:
           - full
@@ -67,7 +66,10 @@ jobs:
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: pypy
-
+        exclude:
+          - runs-on: macos-latest
+            python-architecture: x64
+        
     runs-on: ${{ matrix.runs-on }}
 
     env:
@@ -83,7 +85,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '${{ matrix.python-version }}'
-          architecture: ${{ runner.os == 'macOS' && matrix.python-macos-architecture || matrix.python-architecture }}
+          architecture: '${{ matrix.python-architecture }}'
           allow-prereleases: true
 
       - name: Generate build files
