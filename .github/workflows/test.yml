@@ -81,7 +81,6 @@ jobs:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        if: runner.os != 'macOS'
         uses: actions/setup-python@v5
         with:
           python-version: '${{ matrix.python-version }}'
