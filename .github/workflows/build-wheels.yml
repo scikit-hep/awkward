@@ -158,6 +158,11 @@ jobs:
 
     - uses: docker/setup-qemu-action@v3.0.0
 
+    - uses: actions/setup-python@v5
+      with:
+        python-version: 3.8
+      if: runner.os == 'macOS' && runner.arch == 'ARM64'
+
     - uses: pypa/cibuildwheel@v2.19.1
       env:
         CIBW_BUILD: cp${{ matrix.python }}-*
