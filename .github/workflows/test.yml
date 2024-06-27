@@ -91,10 +91,6 @@ jobs:
           architecture: '${{ matrix.python-architecture }}'
           allow-prereleases: true
 
-      - name: Rebuild fastavro from source (MacOS)
-        if: runner.os == 'macOS'
-        run: pip install --no-binary :all: fastavro
-
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
 
