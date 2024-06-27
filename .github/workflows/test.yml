@@ -69,7 +69,7 @@ jobs:
         exclude:
           - runs-on: macos-latest
             python-architecture: x64
-        
+
     runs-on: ${{ matrix.runs-on }}
 
     env:
