@@ -67,6 +67,10 @@ jobs:
             runs-on: ubuntu-latest
             dependencies-kind: pypy
         exclude:
+          - runs-on: windows-latest
+            python-architecture: arm64
+          - runs-on: ubuntu-latest
+            python-architecture: arm64
           - runs-on: macos-latest
             python-architecture: x64
 
