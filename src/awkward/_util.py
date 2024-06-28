@@ -113,7 +113,7 @@ def copy_behaviors(existing_class: typing.Any, new_class: typing.Any, behavior: 
 
     for key, value in behavior.items():
         if oldname in key:
-            if not isinstance(key, str) and "*" not in key:
+            if not isinstance(key, str):
                 new_tuple = tuple(newname if k == oldname else k for k in key)
                 output[new_tuple] = value
 
