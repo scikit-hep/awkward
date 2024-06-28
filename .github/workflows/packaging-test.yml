@@ -68,6 +68,11 @@ jobs:
     - name: Prepare build files
       run: pipx run nox -s prepare
 
+    - uses: actions/setup-python@v5
+      with:
+        python-version: 3.8
+      if: runner.os == 'macOS' && runner.arch == 'ARM64'
+
     - uses: pypa/cibuildwheel@v2.19.1
       env:
         CIBW_ARCHS_MACOS: universal2
