@@ -1,5 +1,3 @@
-import numpy as np
-
 import cupy as cp
 
 def arg_helper(counts, absolute=False):
@@ -24,26 +22,32 @@ def arg_helper(counts, absolute=False):
         
     return i, j
 
-def argdistincts(counts):
+def argdistincts(starts, stops):
+    counts = stops - starts
     i, j = arg_helper(counts, absolute=False)
-    content = cp.vstack((i, j)).T
+    out = cp.vstack((i, j)).T
 
-    return content
+    return out
 
-def distincts(content, counts):
+def distincts(starts, stops, content):
+    counts = stops - starts
     i, j = arg_helper(counts, absolute=True)
 
     if max(i.max(), j.max()) >= len(content):
         raise IndexError("index exceeds the bounds of the content array.")
 
-    out_content = cp.vstack((content[i], content[j])).T
+    out = cp.vstack((content[i], content[j])).T
 
-    return out_content
+    return out
 
-content = cp.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
-counts = cp.array([2, 0, 4, 2])
+content = cp.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 
-result = argdistincts(counts)
+counts = cp.array([4, 0, 3, 1, 5])
+starts = cp.array([0, 4, 4, 7, 8])
+stops = cp.array([4, 4, 7, 8, 13])
+
+result = argdistincts(starts, stops)
 print("argcombinations:\n", result)
-result = distincts(content, counts)
-print("combinations:\n", result)
+
+result = distincts(starts, stops, content)
+print("\ncombinations:\n", result)
