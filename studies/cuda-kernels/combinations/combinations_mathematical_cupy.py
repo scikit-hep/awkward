@@ -1,7 +1,11 @@
 import cupy as cp
 
-def arg_helper(counts, absolute=False):
-    counts_comb = counts * (counts - 1) // 2
+def arg_helper(counts, absolute=False, replacement=False):
+    if replacement:
+        counts_comb = counts * (counts + 1) // 2
+    else:
+        counts_comb = counts * (counts - 1) // 2
+
     offsets_comb = cp.cumsum(cp.concatenate((cp.array([0]), counts_comb)))
     parents_comb = cp.zeros(int(offsets_comb[-1]), dtype=int)
 
@@ -11,9 +15,15 @@ def arg_helper(counts, absolute=False):
     local_indices = cp.arange(offsets_comb[-1]) - offsets_comb[parents_comb]
 
     n = counts[parents_comb]
-    b = 2 * n - 1
-    i = cp.floor((b - cp.sqrt(b * b - 8 * local_indices)) / 2).astype(counts_comb.dtype)
-    j = local_indices + i * (i - b + 2) // 2 + 1
+
+    if replacement:
+        b = 2 * n + 1
+        i = cp.floor((b - cp.sqrt(b * b - 8 * local_indices)) / 2).astype(counts_comb.dtype)
+        j = local_indices + i * (i - b + 2) // 2 
+    else:
+        b = 2 * n - 1
+        i = cp.floor((b - cp.sqrt(b * b - 8 * local_indices)) / 2).astype(counts_comb.dtype)
+        j = local_indices + i * (i - b + 2) // 2 + 1
 
     if absolute:
         starts_parents = cp.cumsum(cp.concatenate((cp.array([0]), counts)))[:-1][parents_comb]
@@ -22,16 +32,16 @@ def arg_helper(counts, absolute=False):
         
     return i, j
 
-def argdistincts(starts, stops):
+def argdistincts(starts, stops, replacement=False):
     counts = stops - starts
-    i, j = arg_helper(counts, absolute=False)
+    i, j = arg_helper(counts, absolute=False, replacement=replacement)
     out = cp.vstack((i, j)).T
 
     return out
 
-def distincts(starts, stops, content):
+def distincts(content, starts, stops, replacement=False):
     counts = stops - starts
-    i, j = arg_helper(counts, absolute=True)
+    i, j = arg_helper(counts, absolute=True, replacement=replacement)
 
     if max(i.max(), j.max()) >= len(content):
         raise IndexError("index exceeds the bounds of the content array.")
@@ -47,7 +57,13 @@ starts = cp.array([0, 4, 4, 7, 8])
 stops = cp.array([4, 4, 7, 8, 13])
 
 result = argdistincts(starts, stops)
-print("argcombinations:\n", result)
+print("argcombinations (without replacement) :\n", result)
 
-result = distincts(starts, stops, content)
-print("\ncombinations:\n", result)
+result = distincts(content, starts, stops)
+print("\ncombinations (without replacement) :\n", result)
+
+result = argdistincts(starts, stops, replacement=True)
+print("\nargcombinations (with replacement) :\n", result)
+
+result = distincts(content, starts, stops, replacement=True)
+print("\ncombinations (with replacement) :\n", result)
