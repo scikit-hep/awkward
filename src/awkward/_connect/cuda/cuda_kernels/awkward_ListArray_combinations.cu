@@ -10,16 +10,23 @@
 //     scan_in_array_local_indices = cupy.zeros(int(scan_in_array_offsets[length]), dtype=cupy.int64)
 //     for i in range(1, length + 1):
 //         scan_in_array_parents[scan_in_array_offsets[i - 1]:scan_in_array_offsets[i]] = i - 1
-//     block_size = int(scan_in_array_offsets[length])
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_b", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))(grid, (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_c", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))(grid, (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
+//     if int(scan_in_array_offsets[length]) < 1024:
+//         block_size = int(scan_in_array_offsets[length])
+//     else:
+//         block_size = 1024
+//     if block_size > 0:
+//         grid_size = math.floor((int(scan_in_array_offsets[length]) + block_size - 1) / block_size)
+//     else:
+//         grid_size = 1
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_b", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_c", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
 // out["awkward_ListArray_combinations_a", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_b", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_c", {dtype_specializations}] = None
 // END PYTHON
 
 enum class LISTARRAY_COMBINATIONS_ERRORS {
-  NOT_IMPLEMENTED,  // message: "not implemented for given n"
+  N_NOT_IMPLEMENTED,  // message: "not implemented for given n"
 };
 
 template <typename T, typename C, typename U, typename V, typename W>
@@ -40,7 +47,7 @@ awkward_ListArray_combinations_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < length) {
       if (n != 2) {
-        RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::NOT_IMPLEMENTED)
+        RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::N_NOT_IMPLEMENTED)
       }
       int64_t counts = stops[thread_id] - starts[thread_id];
       if (replacement) {
@@ -74,7 +81,7 @@ awkward_ListArray_combinations_b(
 
     if (thread_id < offsetslength) {
       if (n != 2) {
-        RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::NOT_IMPLEMENTED)
+        RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::N_NOT_IMPLEMENTED)
       }
       scan_in_array_local_indices[thread_id] = thread_id - scan_in_array_offsets[scan_in_array_parents[thread_id]];
     }
@@ -99,26 +106,26 @@ awkward_ListArray_combinations_c(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+    int64_t offsetslength = scan_in_array_offsets[length];
     int64_t i = 0;
     int64_t j = 0;
-    int64_t offsetslength = scan_in_array_offsets[length];
 
     if (thread_id < offsetslength) {
       if (n != 2) {
-        RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::NOT_IMPLEMENTED)
+        RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::N_NOT_IMPLEMENTED)
       }
 
       int64_t n = stops[scan_in_array_parents[thread_id]] - starts[scan_in_array_parents[thread_id]];
 
       if (replacement) {
         int64_t b = 2 * n + 1;
-        float sq_term = my_sqrt(b * b - 8 * scan_in_array_local_indices[thread_id]);
-        i = (int64_t)((b - sq_term) / 2);
+        float discriminant = sqrtf(b * b - 8 * scan_in_array_local_indices[thread_id]);
+        i = (int64_t)((b - discriminant) / 2);
         j = scan_in_array_local_indices[thread_id] + i * (i - b + 2) / 2;
       } else {
         int64_t b = 2 * n - 1;
-        float sq_term = my_sqrt(b * b - 8 * scan_in_array_local_indices[thread_id]);
-        i = (int64_t)((b - sq_term) / 2);
+        float discriminant = sqrtf(b * b - 8 * scan_in_array_local_indices[thread_id]);
+        i = (int64_t)((b - discriminant) / 2);
         j = scan_in_array_local_indices[thread_id] + i * (i - b + 2) / 2 + 1;
       }
 

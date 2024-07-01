@@ -1316,7 +1316,15 @@ def genunittests():
                 funcName = "def test_" + function["name"] + "_" + str(num) + "():\n"
                 file.write(funcName)
                 for key, value in test["outputs"].items():
-                    file.write("\t" + key + " = " + str([123] * len(value)) + "\n")
+                    if all(isinstance(elem, list) for elem in value) and value:
+                        file.write("\t" + key + " = [")
+                        for size in range(len(value)):
+                            if size != 0:
+                                file.write(", ")
+                            file.write(str([123] * len(value[0])))
+                        file.write("]\n")
+                    else:
+                        file.write("\t" + key + " = " + str([123] * len(value)) + "\n")
                 for key, value in test["inputs"].items():
                     file.write("\t" + key + " = " + str(value) + "\n")
                 file.write("\tfuncPy = getattr(kernels, '" + function["name"] + "')\n")

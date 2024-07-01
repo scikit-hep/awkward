@@ -346,3 +346,15 @@ __device__ double atomicMul<double>(double* address, double val) {
   } while (assumed != old);
   return __longlong_as_double(old);
 }
+
+
+__device__ float my_sqrt(float x) {
+  float result = x;
+  float delta;
+  do {
+      float old = result;
+      result = 0.5f * (result + x / result);
+      delta = old - result;
+  } while (delta > 1e-6f || delta < -1e-6f);
+  return result;
+}

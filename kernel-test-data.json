@@ -12977,7 +12977,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromindex": [0],
+                        "fromindex": [0, 0],
                         "length": 1,
                         "n": 2,
                         "replacement": false,
@@ -12993,8 +12993,8 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromindex": [0, 3, 5],
-                        "length": 3,
+                        "fromindex": [0, 0, 0],
+                        "length": 2,
                         "n": 2,
                         "replacement": false,
                         "starts": [0, 2],
@@ -13009,7 +13009,23 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromindex": [0, 3, 3, 5, 7],
+                        "fromindex": [0, 0, 0],
+                        "length": 2,
+                        "n": 2,
+                        "replacement": true,
+                        "starts": [0, 2],
+                        "stops": [2, 3]
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 0, 1, 2], [0, 1, 1, 2]],
+                        "toindex": [4, 4]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 0, 0, 0, 0, 0],
                         "length": 5,
                         "n": 2,
                         "replacement": false,
@@ -13025,7 +13041,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromindex": [0, 3, 3, 5, 7],
+                        "fromindex": [0, 0, 0, 0, 0, 0],
                         "length": 5,
                         "n": 2,
                         "replacement": true,
@@ -13041,7 +13057,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromindex": [0, 4, 4, 7, 8],
+                        "fromindex": [0, 0, 0, 0, 0, 0],
                         "length": 5,
                         "n": 2,
                         "replacement": false,
@@ -13078,7 +13094,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromindex": [0],
+                        "fromindex": [0, 0],
                         "length": 1,
                         "n": 2,
                         "replacement": false,
@@ -13093,7 +13109,22 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromindex": [0, 3, 5],
+                        "fromindex": [0, 0],
+                        "length": 1,
+                        "n": 2,
+                        "replacement": true,
+                        "size": 2
+                    },
+                    "outputs": {
+                        "tocarry": [[0, 0, 1], [0, 1, 1]],
+                        "toindex": [3, 3]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromindex": [0, 0, 0, 0],
                         "length": 3,
                         "n": 2,
                         "replacement": false,
@@ -13108,7 +13139,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromindex": [0, 3, 3, 5, 7],
+                        "fromindex": [0, 0, 0, 0, 0, 0],
                         "length": 5,
                         "n": 2,
                         "replacement": true,
@@ -13123,7 +13154,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromindex": [0, 3, 3, 5, 7],
+                        "fromindex": [0, 0, 0, 0, 0, 0],
                         "length": 5,
                         "n": 2,
                         "replacement": false,
@@ -13138,7 +13169,7 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "fromindex": [0, 4, 4, 7, 8],
+                        "fromindex": [0, 0, 0, 0, 0, 0],
                         "length": 5,
                         "n": 2,
                         "replacement": false,
@@ -17019,51 +17050,6 @@
                     },
                     "outputs": {
                         "toindex": [3, 0, 1, 2]
-                    }
-                }
-            ]
-        },
-        {
-            "name": "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
-            "status": true,
-            "tests": [
-                {
-                    "error": false,
-                    "message": "",
-                    "inputs": {
-                        "outlength": 0,
-                        "parents": [],
-                        "lenparents": 0
-                    },
-                    "outputs": {
-                        "outoffsets": [0],
-                        "outcarry": []
-                    }
-                },
-                {
-                    "error": false,
-                    "message": "",
-                    "inputs": {
-                        "outlength": 6,
-                        "parents": [0, 1, 2, 5],
-                        "lenparents": 4
-                    },
-                    "outputs": {
-                        "outoffsets": [0, 1, 2, 3, 4, 4, 4],
-                        "outcarry": [0, 1, 2, 4, 5, 3]
-                    }
-                },
-                {
-                    "error": false,
-                    "message": "",
-                    "inputs": {
-                        "outlength": 5,
-                        "parents": [0, 0, 1, 1, 1, 2, 3, 3, 4, 4],
-                        "lenparents": 10
-                    },
-                    "outputs": {
-                        "outoffsets": [0, 2, 5, 6, 8, 10],
-                        "outcarry": [0, 1, 2, 3, 4]
                     }
                 }
             ]
