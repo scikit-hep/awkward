@@ -890,6 +890,8 @@ cuda_kernels_tests = [
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_combinations_length",
+    "awkward_ListArray_combinations",
+    "awkward_RegularArray_combinations_64",
     "awkward_ListArray_getitem_jagged_apply",
     "awkward_ListArray_getitem_jagged_carrylen",
     "awkward_ListArray_getitem_jagged_descend",
@@ -1278,10 +1280,19 @@ def gencudaunittests(specdict):
                                     " " * 4 + "pytest_" + arg + " = " + str(val) + "\n"
                                 )
                                 if isinstance(val, list):
-                                    f.write(
-                                        " " * 4
-                                        + f"cpt.assert_allclose({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
-                                    )
+                                    count = typename.count("List")
+                                    if count == 1:
+                                        f.write(
+                                            " " * 4
+                                            + f"cpt.assert_allclose({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                        )
+                                    elif count == 2:
+                                        f.write(
+                                            " " * 4
+                                            + f"for row1, row2 in zip(pytest_{arg}, {arg}_array[:len(pytest_{arg})]):\n"
+                                            + " " * 8
+                                            + "cpt.assert_allclose(row1, row2)\n"
+                                        )
                                 else:
                                     f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                         f.write("\n")
