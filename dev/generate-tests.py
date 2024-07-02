@@ -888,6 +888,7 @@ cuda_kernels_tests = [
     "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",
@@ -904,6 +905,7 @@ cuda_kernels_tests = [
     "awkward_reduce_sum_int32_bool_64",
     "awkward_reduce_sum_int64_bool_64",
     "awkward_reduce_sum_bool",
+    "awkward_reduce_prod",
     "awkward_reduce_prod_bool",
     "awkward_reduce_countnonzero",
     "awkward_sorting_ranges",
@@ -954,6 +956,8 @@ def gencudakerneltests(specdict):
 
                 f.write(
                     "import cupy\n"
+                    "import cupy.testing as cpt\n"
+                    "import numpy as np\n"
                     "import pytest\n\n"
                     "import awkward as ak\n"
                     "import awkward._connect.cuda as ak_cu\n"
@@ -1023,7 +1027,7 @@ def gencudakerneltests(specdict):
                             if isinstance(val, list):
                                 f.write(
                                     " " * 4
-                                    + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                    + f"cpt.assert_allclose({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
                                 )
                             else:
                                 f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
@@ -1083,6 +1087,7 @@ def gencudaunittests(specdict):
                 f.write(
                     "import re\n"
                     "import cupy\n"
+                    "import cupy.testing as cpt\n"
                     "import pytest\n\n"
                     "import awkward as ak\n"
                     "import awkward._connect.cuda as ak_cu\n"
@@ -1219,7 +1224,7 @@ def gencudaunittests(specdict):
                                 if isinstance(val, list):
                                     f.write(
                                         " " * 4
-                                        + f"assert cupy.array_equal({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                        + f"cpt.assert_allclose({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
                                     )
                                 else:
                                     f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")

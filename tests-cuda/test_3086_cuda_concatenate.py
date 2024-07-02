@@ -10,6 +10,13 @@ from awkward.types import ArrayType, ListType, NumpyType, OptionType, RegularTyp
 to_list = ak.operations.to_list
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
+
+
 def test_0184_concatenate_number():
     a1 = ak.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout
     a2 = ak.highlevel.Array([[[1.1], [2.2, 3.3]], [[]], [[4.4], [5.5]]]).layout

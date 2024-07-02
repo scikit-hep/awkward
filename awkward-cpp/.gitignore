@@ -8,3 +8,4 @@ include/awkward/kernels.h
 src/awkward_cpp/_kernel_signatures.py
 
 dist
+.venv
