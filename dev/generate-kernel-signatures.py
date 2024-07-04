@@ -24,7 +24,6 @@ cuda_kernels_impl = [
     "awkward_IndexedArray_numnull",
     "awkward_IndexedArray_numnull_parents",
     "awkward_IndexedArray_numnull_unique_64",
-    "awkward_IndexedArray_local_preparenext_64",
     "awkward_ListArray_fill",
     "awkward_IndexedArray_fill",
     "awkward_IndexedArray_fill_count",
