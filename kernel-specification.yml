@@ -4221,6 +4221,11 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_countnonzero_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i] = 0
+          for i in range(lenparents):
+              toptr[parents[i]] += fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0
     automatic-tests: false
 
   - name: awkward_reduce_max
@@ -4700,6 +4705,11 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_prod_bool_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i] = 1
+          for i in range(lenparents):
+              toptr[parents[i]] = fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0
     automatic-tests: false
 
   - name: awkward_reduce_sum
@@ -4958,6 +4968,11 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_sum_bool_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i] = 0
+          for i in range(lenparents):
+              toptr[parents[i]] |= fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0
     automatic-tests: false
 
   - name: awkward_reduce_sum_int32_bool_64

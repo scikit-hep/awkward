@@ -8,18 +8,18 @@
 //     else:
 //         grid_size = 1
 //     atomic_toptr = cupy.array(toptr, dtype=cupy.uint32)
-//     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_a", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_b", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_c", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-// out["awkward_reduce_sum_bool_a", {dtype_specializations}] = None
-// out["awkward_reduce_sum_bool_b", {dtype_specializations}] = None
-// out["awkward_reduce_sum_bool_c", {dtype_specializations}] = None
+//     temp = cupy.ones(lenparents, dtype=toptr.dtype)
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_bool_complex_a", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_bool_complex_b", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_bool_complex_c", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+// out["awkward_reduce_prod_bool_complex_a", {dtype_specializations}] = None
+// out["awkward_reduce_prod_bool_complex_b", {dtype_specializations}] = None
+// out["awkward_reduce_prod_bool_complex_c", {dtype_specializations}] = None
 // END PYTHON
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_sum_bool_a(
+awkward_reduce_prod_bool_complex_a(
     T* toptr,
     const C* fromptr,
     const U* parents,
@@ -33,14 +33,14 @@ awkward_reduce_sum_bool_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      atomic_toptr[thread_id] = 0;
+      atomic_toptr[thread_id] = 1;
     }
   }
 }
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_sum_bool_b(
+awkward_reduce_prod_bool_complex_b(
     T* toptr,
     const C* fromptr,
     const U* parents,
@@ -55,24 +55,24 @@ awkward_reduce_sum_bool_b(
     int64_t thread_id = blockIdx.x * blockDim.x + idx;
 
     if (thread_id < lenparents) {
-      temp[thread_id] = (fromptr[thread_id] != 0) ? 1 : 0;
+      temp[thread_id] = (fromptr[thread_id * 2] != 0  ||  fromptr[thread_id * 2 + 1] != 0);
     }
     __syncthreads();
 
     if (thread_id < lenparents) {
       for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-        T val = 0;
+        T val = 1;
         if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
           val = temp[thread_id - stride];
         }
         __syncthreads();
-        temp[thread_id] |= val;
+        temp[thread_id] &= (val != 0);
         __syncthreads();
       }
 
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicOr(&atomic_toptr[parent], temp[thread_id]);
+        atomicAnd(&atomic_toptr[parent], temp[thread_id]);
       }
     }
   }
@@ -80,7 +80,7 @@ awkward_reduce_sum_bool_b(
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_sum_bool_c(
+awkward_reduce_prod_bool_complex_c(
     T* toptr,
     const C* fromptr,
     const U* parents,

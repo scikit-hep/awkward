@@ -69,7 +69,7 @@ def test_block_boundary_all():
 
 def test_block_boundary_sum_bool():
     np.random.seed(42)
-    content = ak.contents.NumpyArray(np.random.randint(2, size=3000))
+    content = ak.contents.NumpyArray(np.random.randint(2, size=3000), dtype=np.bool_)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
     assert ak.sum(cuda_content, -1, highlevel=False) == ak.sum(
         content, -1, highlevel=False
@@ -156,6 +156,23 @@ def test_block_boundary_prod():
     np.random.seed(42)
     primes = [x for x in range(2, 30000) if all(x % n != 0 for n in range(2, x))]
     content = ak.contents.NumpyArray(primes)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.prod(cuda_content, -1, highlevel=False) == ak.prod(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.prod(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.prod(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_bool():
+    np.random.seed(42)
+    content = ak.contents.NumpyArray(np.random.randint(2, size=3000, dtype=np.bool_))
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
     assert ak.prod(cuda_content, -1, highlevel=False) == ak.prod(
         content, -1, highlevel=False
