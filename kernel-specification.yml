@@ -3993,6 +3993,15 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_argmax_complex(toptr, fromptr, parents, lenparents, outlength):
+          for k in range(outlength):
+              toptr[k] = -1
+          for i in range(lenparents):
+              parent = parents[i]
+              if (toptr[parent] == -1  or (fromptr[i * 2] > fromptr[toptr[parent] * 2] or
+                 (fromptr[i * 2] == fromptr[toptr[parent] * 2]  and
+                  fromptr[i * 2 + 1] > fromptr[toptr[parent] * 2 + 1]))):
+                  toptr[parent] = i
     automatic-tests: false
 
   - name: awkward_reduce_argmin
@@ -4096,6 +4105,15 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_argmin_complex(toptr, fromptr, parents, lenparents, outlength):
+          for k in range(outlength):
+              toptr[k] = -1
+          for i in range(lenparents):
+              parent = parents[i]
+              if (toptr[parent] == -1  or (fromptr[i * 2] < fromptr[toptr[parent] * 2] or
+                 (fromptr[i * 2] == fromptr[toptr[parent] * 2]  and
+                  fromptr[i * 2 + 1] < fromptr[toptr[parent] * 2 + 1]))):
+                  toptr[parent] = i
     automatic-tests: false
 
   - name: awkward_reduce_count_64
