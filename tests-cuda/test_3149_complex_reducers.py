@@ -203,6 +203,69 @@ def test_block_boundary_sum_complex():
     del cuda_content, cuda_depth1
 
 
+def test_block_boundary_any_complex():
+    np.random.seed(42)
+    array = np.random.randint(6000, size=6000)
+    complex_array = np.vectorize(complex)(
+        array[0 : len(array) : 2], array[1 : len(array) : 2]
+    )
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.any(cuda_content, -1, highlevel=False) == ak.any(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.any(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.any(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_all_complex():
+    np.random.seed(42)
+    array = np.random.randint(6000, size=6000)
+    complex_array = np.vectorize(complex)(
+        array[0 : len(array) : 2], array[1 : len(array) : 2]
+    )
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.all(cuda_content, -1, highlevel=False) == ak.all(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.all(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.all(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_sum_bool_complex():
+    np.random.seed(42)
+    array = np.random.randint(2, size=6000, dtype=np.bool_)
+    complex_array = np.vectorize(complex)(
+        array[0 : len(array) : 2], array[1 : len(array) : 2]
+    )
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.sum(cuda_content, -1, highlevel=False) == ak.sum(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.sum(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.sum(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
 def test_block_boundary_countnonzero_complex_1():
     np.random.seed(42)
     array = np.random.randint(6000, size=6000)
