@@ -3993,6 +3993,15 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_argmax_complex(toptr, fromptr, parents, lenparents, outlength):
+          for k in range(outlength):
+              toptr[k] = -1
+          for i in range(lenparents):
+              parent = parents[i]
+              if (toptr[parent] == -1  or (fromptr[i * 2] > fromptr[toptr[parent * 2]] or
+                 (fromptr[i * 2] == fromptr[toptr[parent * 2]]  and
+                  fromptr[i * 2 + 1] > fromptr[toptr[parent * 2 + 1]]))):
+                  toptr[parent] = i
     automatic-tests: false
 
   - name: awkward_reduce_argmin
@@ -4096,6 +4105,15 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_argmin_complex(toptr, fromptr, parents, lenparents, outlength):
+          for k in range(outlength):
+              toptr[k] = -1
+          for i in range(lenparents):
+              parent = parents[i]
+              if (toptr[parent] == -1  or (fromptr[i * 2] < fromptr[toptr[parent * 2]] or
+                 (fromptr[i * 2] == fromptr[toptr[parent * 2]]  and
+                  fromptr[i * 2 + 1] < fromptr[toptr[parent * 2 + 1]]))):
+                  toptr[parent] = i
     automatic-tests: false
 
   - name: awkward_reduce_count_64
@@ -4340,6 +4358,17 @@ kernels:
           - {name: identity, type: "double", dir: in, role: reducer-identity}
     description: null
     definition: |
+      def awkward_reduce_max_complex(toptr, fromptr, parents, lenparents, outlength, identity):
+          for i in range(outlength):
+              toptr[i * 2] = identity
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              x = fromptr[i * 2]
+              y = fromptr[i * 2 + 1]
+              parent = parents[i]
+              if x > toptr[parent * 2] or (x == toptr[parent * 2]  and  y > toptr[parent * 2 + 1]):
+                  toptr[parent * 2] = x
+                  toptr[parent * 2 + 1] = y
     automatic-tests: false
 
   - name: awkward_reduce_min
@@ -4454,6 +4483,17 @@ kernels:
           - {name: identity, type: "double", dir: in, role: reducer-identity}
     description: null
     definition: |
+      def awkward_reduce_min_complex(toptr, fromptr, parents, lenparents, outlength, identity):
+          for i in range(outlength):
+              toptr[i * 2] = identity
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              x = fromptr[i * 2]
+              y = fromptr[i * 2 + 1]
+              parent = parents[i]
+              if x < toptr[parent * 2] or (x == toptr[parent * 2]  and  y < toptr[parent * 2 + 1]):
+                  toptr[parent * 2] = x
+                  toptr[parent * 2 + 1] = y
     automatic-tests: false
 
   - name: awkward_reduce_prod
@@ -4597,6 +4637,16 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_prod_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i * 2] = 1
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              parent = parents[i]
+              real = toptr[parent * 2] * fromptr[i * 2] - toptr[parent * 2 + 1] * fromptr[i * 2 + 1]
+              imag = toptr[parent * 2] * fromptr[i * 2 + 1] + toptr[parent * 2 + 1] * fromptr[i * 2]
+              toptr[parents[i] * 2] = real
+              toptr[parents[i] * 2 + 1] = imag
     automatic-tests: false
 
   - name: awkward_reduce_prod_bool

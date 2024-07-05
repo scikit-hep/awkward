@@ -24651,6 +24651,242 @@
             ]
         },
         {
+            "name": "awkward_reduce_min_complex",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "identity": 9223372036854775807,
+                        "fromptr": [],
+                        "lenparents": 0,
+                        "outlength": 0,
+                        "parents": []
+                    },
+                    "outputs": {
+                        "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "identity": 9223372036854775807,
+                        "fromptr": [0, 0],
+                        "lenparents": 1,
+                        "outlength": 1,
+                        "parents": [0]
+                    },
+                    "outputs": {
+                        "toptr": [0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "identity": 9223372036854775807,
+                        "fromptr": [1, 0, 0, 1],
+                        "lenparents": 2,
+                        "outlength": 1,
+                        "parents": [0, 0]
+                    },
+                    "outputs": {
+                        "toptr": [0, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "identity": 9223372036854775807,
+                        "fromptr": [2, 2, 3, 3, 5, 5, 7, 7, 11, 11, 13, 13, 17, 17, 19, 19, 23, 23],
+                        "lenparents": 9,
+                        "outlength": 6,
+                        "parents": [0, 0, 0, 2, 2, 3, 4, 4, 5]
+                    },
+                    "outputs": {
+                        "toptr": [2, 2, 9223372036854775807, 0, 7, 7, 13, 13, 17, 17, 23, 23]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "identity": 9223372036854775807,
+                        "fromptr": [1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1],
+                        "lenparents": 6,
+                        "outlength": 4,
+                        "parents": [0, 0, 0, 2, 2, 3]
+                    },
+                    "outputs": {
+                        "toptr": [0, 0, 9223372036854775807, 0, 0, 1, 0, 1]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_reduce_max_complex",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "identity": -9223372036854775808,
+                        "fromptr": [],
+                        "lenparents": 0,
+                        "outlength": 0,
+                        "parents": []
+                    },
+                    "outputs": {
+                        "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "identity": -9223372036854775808,
+                        "fromptr": [0, 0],
+                        "lenparents": 1,
+                        "outlength": 1,
+                        "parents": [0]
+                    },
+                    "outputs": {
+                        "toptr": [0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "identity": -9223372036854775808,
+                        "fromptr": [1, 0, 0, 1],
+                        "lenparents": 2,
+                        "outlength": 1,
+                        "parents": [0, 0]
+                    },
+                    "outputs": {
+                        "toptr": [1, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "identity": -9223372036854775808,
+                        "fromptr": [2, 2, 3, 3, 5, 5, 7, 7, 11, 11, 13, 13, 17, 17, 19, 19, 23, 23],
+                        "lenparents": 9,
+                        "outlength": 6,
+                        "parents": [0, 0, 0, 2, 2, 3, 4, 4, 5]
+                    },
+                    "outputs": {
+                        "toptr": [5, 5, -9223372036854775808, 0, 11, 11, 13, 13, 19, 19, 23, 23]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "identity": -9223372036854775808,
+                        "fromptr": [1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1],
+                        "lenparents": 6,
+                        "outlength": 4,
+                        "parents": [0, 0, 0, 2, 2, 3]
+                    },
+                    "outputs": {
+                        "toptr": [1, 1, -9223372036854775808, 0, 1, 1, 0, 1]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "awkward_reduce_prod_complex",
+            "status": true,
+            "tests": [
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [],
+                        "lenparents": 0,
+                        "outlength": 0,
+                        "parents": []
+                    },
+                    "outputs": {
+                        "toptr": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [0, 0],
+                        "lenparents": 1,
+                        "outlength": 1,
+                        "parents": [0]
+                    },
+                    "outputs": {
+                        "toptr": [0, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [1, 0],
+                        "lenparents": 1,
+                        "outlength": 1,
+                        "parents": [0]
+                    },
+                    "outputs": {
+                        "toptr": [1, 0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [1, 0, 0, 1],
+                        "lenparents": 2,
+                        "outlength": 1,
+                        "parents": [0, 0]
+                    },
+                    "outputs": {
+                        "toptr": [0, 1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [2, 2, 3, 3, 5, 5, 7, 7, 11, 11, 13, 13, 17, 17, 19, 19, 23, 23],
+                        "lenparents": 9,
+                        "outlength": 6,
+                        "parents": [0, 0, 0, 2, 2, 3, 4, 4, 5]
+                    },
+                    "outputs": {
+                        "toptr": [-60, 60, 1, 0, 0, 154, 13, 13, 0, 646, 23, 23]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "fromptr": [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1],
+                        "lenparents": 6,
+                        "outlength": 4,
+                        "parents": [0, 0, 0, 2, 2, 3]
+                    },
+                    "outputs": {
+                        "toptr": [-1, -1, 1, 0, -1, 1, 0, 1]
+                    }
+                }
+            ]
+        },
+        {
             "name": "awkward_reduce_sum",
             "status": true,
             "tests": [
