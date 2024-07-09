@@ -69,7 +69,7 @@ def test_block_boundary_all():
 
 def test_block_boundary_sum_bool():
     np.random.seed(42)
-    content = ak.contents.NumpyArray(np.random.randint(2, size=3000), dtype=np.bool_)
+    content = ak.contents.NumpyArray(np.random.randint(2, size=3000, dtype=np.bool_))
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
     assert ak.sum(cuda_content, -1, highlevel=False) == ak.sum(
         content, -1, highlevel=False
