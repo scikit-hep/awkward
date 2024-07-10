@@ -6,7 +6,7 @@ import awkward as ak
 from awkward.operations import to_list
 
 
-def test_ak_where_with_optional_values():
+def test_ak_where_with_optional_unknowns():
     """
     This is the example from the Issue.
     In the two cases we fail, the not-selected value has type ?unknown, value None of course.
@@ -37,7 +37,7 @@ def test_ak_where_with_optional_values():
     assert ak.where(~opt_true_cond, opt_zero_alternative, 1).to_list() == [1]
 
 
-def test_ak_with_no_optionals():
+def test_ak_where_with_optionals():
     """
     It turns out that we don't need to use ?unknown arrays to trigger this issue.
     We only need a None (masked value) in an element that is selected against.
@@ -90,3 +90,36 @@ def test_ak_with_no_optionals():
             ak.Array([4, 5, 6]),
         )
     ) == [1, 5, None]  # ATOW we get [1, None, None]
+
+
+def test_ak_where_with_optionals_multidim():
+    # This needs to continue to work:
+    assert to_list(
+        ak.where(
+            ak.Array([True, False]),
+            ak.Array([[1, 2], [3, 4]]),
+            ak.Array([[10, 11], [12, 13]]),
+        )
+    ) == [[1, 2], [12, 13]]
+
+    # Option types only in X, not condition
+    assert to_list(
+        ak.where(
+            ak.Array([[True, True], [False, False]]),
+            ak.Array([[1, 2], None]),
+            ak.Array([[10, 11], [12, 13]]),
+        )
+    ) == [[1, 2], [12, 13]]
+
+    # Option types in condition and X, only one level of depth
+    assert to_list(
+        ak.where(
+            ak.Array([[True, True], [False, False], [True, False], None]),
+            ak.Array([[1, 2], None, None, [7, 8]]),
+            ak.Array([[11, 12], [13, 14], [15, 16], [17, 18]]),
+        )
+    ) == [[1, 2], [13, 14], [None, 16], None]
+
+    # TODO: Create bitmasked arrays, bytemasked arrays with both valid_when options
+    # TODO: Different depths of condition and x/y
+    # TODO: Try with UnmaskedArray

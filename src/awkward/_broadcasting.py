@@ -34,6 +34,7 @@ from awkward.contents.recordarray import RecordArray
 from awkward.contents.regulararray import RegularArray
 from awkward.contents.unionarray import UnionArray
 from awkward.contents.unmaskedarray import UnmaskedArray
+from awkward.forms import ByteMaskedForm
 from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
     Index8,
     Index64,
@@ -701,6 +702,8 @@ def apply_step(
             )
 
     def broadcast_any_option():
+        if options["function_name"] == "ak.where":
+            return broadcast_any_option_akwhere()
         mask = None
         for x in contents:
             if x.is_option:
@@ -753,6 +756,90 @@ def apply_step(
 
         return tuple(
             IndexedOptionArray.simplified(index, x, parameters=p)
+            for x, p in zip(outcontent, parameters)
+        )
+
+    def broadcast_any_option_akwhere():
+        unmasked = []  # Contents of inputs-as-ByteMaskedArrays or non-Content-type
+        masks: List[Index8] = []
+        nextparameters = []
+        # Here we chose the convention that elements are masked when mask==1
+        # And byte masks (not bits) so we can pass them as (x,y) to ak_where's action()
+        for xyc in inputs:  # from ak_where, inputs are (x, y, condition)
+            if not isinstance(xyc, Content):
+                unmasked.append(xyc)
+                masks.append(
+                    NumpyArray(backend.nplike.zeros(len(inputs[2]), dtype=np.int8))
+                )
+                nextparameters.append(NO_PARAMETERS)
+            elif not xyc.is_option:
+                unmasked.append(xyc)
+                masks.append(
+                    NumpyArray(backend.nplike.zeros(len(inputs[2]), dtype=np.int8))
+                )
+                nextparameters.append(xyc._parameters)
+            elif xyc.is_indexed:
+                # Indexed arrays have no array elements where None, which is a problem for us.
+                # We don't care what the element's value is when masked. Just that there *is* a value.
+                # TODO: This approach fails optional Unknown types. Find a workaround.
+                xyc_as_masked = xyc.to_ByteMaskedArray(valid_when=False)
+                unmasked.append(xyc_as_masked.content)
+                masks.append(NumpyArray(xyc_as_masked.mask.data))
+                nextparameters.append(xyc._parameters)
+            elif not isinstance(xyc.form, ByteMaskedForm) or xyc.form.valid_when:
+                # BitMaskedArrays are IndexU8, not Index8. TODO: Is this the best way to disambiguate?
+                xyc_as_bytemasked = xyc.to_ByteMaskedArray(valid_when=False)
+                unmasked.append(xyc_as_bytemasked.content)
+                masks.append(NumpyArray(xyc_as_bytemasked.mask.data))
+                nextparameters.append(xyc._parameters)
+            else:
+                unmasked.append(xyc.content)
+                masks.append(NumpyArray(xyc.mask.data))
+                nextparameters.append(xyc._parameters)
+            # TODO: Make sure UnmaskedArray types work.
+
+        # print(f"{unmasked =}")
+        # print(f"{masks =}")
+
+        outcontent = apply_step(
+            backend,
+            unmasked,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            options,
+        )
+        assert isinstance(outcontent, tuple) and len(outcontent) == 1
+        parameters = parameters_factory(nextparameters, len(outcontent))
+        # print(f"{outcontent =}")
+        which_mask = (
+            masks[0],  # Now x is the x-mask
+            masks[1],  # y-mask
+            unmasked[2],  # But same condition as previous
+        )
+        # print(f"{which_mask =}")
+
+        outmasks = apply_step(
+            backend,
+            which_mask,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            options,
+        )
+        assert len(outmasks) == 1
+        # print(f"{outmasks =}")
+        # print(f"{type(outmasks[0]) =}")
+
+        # Return None when condition is None or selected element is None
+        # TODO: Make this work when the condition mask and selection mask have different shapes.
+        # TODO: numpy vs backend.nplike?
+        mask = Index8(numpy.logical_or(outmasks[0].data, masks[2].data))
+
+        return tuple(
+            ByteMaskedArray(mask, x, valid_when=False, parameters=p)
             for x, p in zip(outcontent, parameters)
         )
 
