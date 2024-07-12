@@ -763,7 +763,7 @@ def apply_step(
         unmasked = []  # Contents of inputs-as-ByteMaskedArrays or non-Content-type
         masks: List[Index8] = []
         nextparameters = []
-        # Here we chose the convention that elements are masked when mask==1
+        # Here we choose the convention that elements are masked when mask==1
         # And byte masks (not bits) so we can pass them as (x,y) to ak_where's action()
         for xyc in inputs:  # from ak_where, inputs are (x, y, condition)
             if not isinstance(xyc, Content):
@@ -782,7 +782,12 @@ def apply_step(
                 # Indexed arrays have no array elements where None, which is a problem for us.
                 # We don't care what the element's value is when masked. Just that there *is* a value.
                 # TODO: This approach fails optional Unknown types. Find a workaround.
-                xyc_as_masked = xyc.to_ByteMaskedArray(valid_when=False)
+                if xyc.content.is_unknown:
+                    raise ValueError("ak.where cannot handle Unknown content yet")
+                    # TODO: create a stand-in array of similar shape and any dtype
+                    # xyc_as_masked = ...
+                else:
+                    xyc_as_masked = xyc.to_ByteMaskedArray(valid_when=False)
                 unmasked.append(xyc_as_masked.content)
                 masks.append(NumpyArray(xyc_as_masked.mask.data))
                 nextparameters.append(xyc._parameters)
@@ -812,7 +817,7 @@ def apply_step(
         )
         assert isinstance(outcontent, tuple) and len(outcontent) == 1
         parameters = parameters_factory(nextparameters, len(outcontent))
-        # print(f"{outcontent =}")
+        # print(f"{outcontent[0] =}")
         which_mask = (
             masks[0],  # Now x is the x-mask
             masks[1],  # y-mask
@@ -830,18 +835,46 @@ def apply_step(
             options,
         )
         assert len(outmasks) == 1
-        # print(f"{outmasks =}")
+        # print(f"{outmasks[0] =}")
         # print(f"{type(outmasks[0]) =}")
 
         # Return None when condition is None or selected element is None
-        # TODO: Make this work when the condition mask and selection mask have different shapes.
-        # TODO: numpy vs backend.nplike?
-        mask = Index8(numpy.logical_or(outmasks[0].data, masks[2].data))
+        def action_logical_or(inputs, backend, **kwargs):
+            m1, m2 = inputs
+            if all(isinstance(x, NumpyArray) for x in inputs):
+                out = NumpyArray(backend.nplike.logical_or(m1.data, m2.data))
+                return (out,)
+            else:
+                return None
 
-        return tuple(
-            ByteMaskedArray(mask, x, valid_when=False, parameters=p)
-            for x, p in zip(outcontent, parameters)
-        )
+        out_mask = outmasks[0]
+        cond_mask = masks[2]
+        mask = broadcast_and_apply((out_mask, cond_mask), action_logical_or)[0]
+
+        # print(f"{mask =}")
+        # if hasattr(mask, 'content'):
+        #     mask = Index8(mask.content.data)
+        # else:
+        #     mask = Index8(mask.data)
+
+        # Now apply the mask
+        # TODO:
+        def apply_mask_action(inputs, backend, **kwargs):
+            if all(x.is_leaf for x in inputs):
+                content, mask = inputs
+                if hasattr(mask, "content"):
+                    mask_as_idx = Index8(mask.content.data)
+                else:
+                    mask_as_idx = Index8(mask.data)
+                out = ByteMaskedArray(
+                    mask_as_idx, content, valid_when=False, parameters=parameters[0]
+                )
+                return (out,)
+            else:
+                return None
+
+        masked = broadcast_and_apply((outcontent[0], mask), apply_mask_action)
+        return masked
 
     def broadcast_any_union():
         nextparameters = []

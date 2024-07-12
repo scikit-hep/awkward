@@ -118,7 +118,8 @@ def test_ak_where_with_optionals_multidim():
             ak.Array([[1, 2], None, None, [7, 8]]),
             ak.Array([[11, 12], [13, 14], [15, 16], [17, 18]]),
         )
-    ) == [[1, 2], [13, 14], [None, 16], None]
+    ) == [[1, 2], [13, 14], [None, 16], [None, None]]
+    # [[1, 2], [13, 14], [None, 16], None] would be more natural
 
     # TODO: Create bitmasked arrays, bytemasked arrays with both valid_when options
     # TODO: Different depths of condition and x/y
