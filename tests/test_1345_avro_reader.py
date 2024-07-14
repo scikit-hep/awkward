@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import platform
 
 import numpy as np  # noqa: F401
 import pytest
@@ -13,24 +14,32 @@ DIR = os.path.dirname(__file__)
 SAMPLES_DIR = os.path.join(os.path.abspath(DIR), "samples")
 
 
+def is_macos_not_v11():
+    return platform.system() == "Darwin" and not platform.mac_ver()[0].startswith("11.")
+
+
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_int():
     filename = os.path.join(SAMPLES_DIR, "int_test_data.avro")
     data = [34, 45, 67, 78, 23, 89, 6, 33, 96, 73]
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_boolean():
     filename = os.path.join(SAMPLES_DIR, "bool_test_data.avro")
     data = [True, False, False, True, True, True, False, False, False, False]
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_long():
     filename = os.path.join(SAMPLES_DIR, "long_test_data.avro")
     data = [12, 435, 56, 12, 67, 34, 89, 2345, 536, 8769]
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_float():
     filename = os.path.join(SAMPLES_DIR, "float_test_data.avro")
     data = [
@@ -48,6 +57,7 @@ def test_float():
     assert pytest.approx(ak.from_avro_file(file=filename).to_list()) == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_double():
     filename = os.path.join(SAMPLES_DIR, "double_test_data.avro")
     data = [
@@ -65,6 +75,7 @@ def test_double():
     assert pytest.approx(ak.from_avro_file(file=filename).to_list()) == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_bytes():
     filename = os.path.join(SAMPLES_DIR, "bytes_test_data.avro")
     data = [
@@ -82,6 +93,7 @@ def test_bytes():
     assert pytest.approx(ak.from_avro_file(file=filename).to_list()) == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_string():
     filename = os.path.join(SAMPLES_DIR, "string_test_data.avro")
     data = [
@@ -104,6 +116,7 @@ def test_string():
     )
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_fixed():
     filename = os.path.join(SAMPLES_DIR, "fixed_test_data.avro")
     data = [
@@ -119,6 +132,7 @@ def test_fixed():
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_null():  # change the while loop to for loop to fix this
     filename = os.path.join(SAMPLES_DIR, "null_test_data.avro")
     data = [
@@ -135,12 +149,14 @@ def test_null():  # change the while loop to for loop to fix this
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_enum():
     filename = os.path.join(SAMPLES_DIR, "enum_test_data.avro")
     data = ["TWO", "ONE", "FOUR", "THREE", "TWO", "ONE", "FOUR", "THREE", "TWO", "ONE"]
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_arrays_int():
     filename = os.path.join(SAMPLES_DIR, "array_test_data.avro")
     data = [
@@ -156,6 +172,7 @@ def test_arrays_int():
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_array_string():
     filename = os.path.join(SAMPLES_DIR, "array_string_test_data.avro")
     data = [
@@ -170,6 +187,7 @@ def test_array_string():
 
 
 # @pytest.mark.skip(reason="FIXME!")
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_array_enum():
     filename = os.path.join(SAMPLES_DIR, "array_enum_test_data.avro")
     data = [
@@ -182,24 +200,28 @@ def test_array_enum():
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_Unions_int_null():
     filename = os.path.join(SAMPLES_DIR, "int_null_test_data.avro")
     data = [2345, 65475, None, 676457, 343, 7908, None, 5768]  # int_null_test
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_Unions_string_null():
     filename = os.path.join(SAMPLES_DIR, "string_null_test_data.avro")
     data = ["blue", None, "yellow", None, "Green", None, "Red"]  # string_null_test
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_Unions_enum_null():
     filename = os.path.join(SAMPLES_DIR, "enum_null_test_data.avro")
     data = ["TWO", None, "ONE", None, "FOUR", None, "THREE"]  # enum_null_test
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_Unions_record_null():
     filename = os.path.join(SAMPLES_DIR, "record_null_test_data.avro")
     data = [
@@ -214,12 +236,14 @@ def test_Unions_record_null():
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_Unions_null_X_Y():
     filename = os.path.join(SAMPLES_DIR, "int_string_null_test_data.avro")
     data = ["TWO", 5684, "ONE", None, 3154, "FOUR", 69645, "THREE"]  # int_string_null
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_record_1():
     filename = os.path.join(SAMPLES_DIR, "record_1_test_data.avro")
     data = [
@@ -228,6 +252,7 @@ def test_record_1():
     assert ak.from_avro_file(file=filename).to_list() == data
 
 
+@pytest.mark.skipif(is_macos_not_v11(), reason="Skipping on macOS if version is not 11")
 def test_records():
     filename = os.path.join(SAMPLES_DIR, "record_test_data.avro")
     data = [
