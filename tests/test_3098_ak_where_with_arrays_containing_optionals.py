@@ -133,7 +133,15 @@ def test_ak_where_with_optionals_multidim():
     ) == [[1, None], [2, None]]
 
 
-def test_ak_where_more_optnl_types():
+def test_ak_where_more_option_types():
+    assert to_list(
+        ak.where(
+            ak.Array([False, True, None]),
+            ak.Array(["this", None, "that"]),
+            ak.Array(["foo", "bar", "baz"])
+        )
+    ) == ["foo", None, None]
+
     bitmasked5 = ak.contents.BitMaskedArray(
         mask=ak.index.Index(
             np.array(
@@ -147,15 +155,16 @@ def test_ak_where_more_optnl_types():
         valid_when=False,
         length=5,
         lsb_order=True,
+        parameters={"_my_param": "boysenberry"},
     )  # [0, 1, None, 3, None]
     unmasked5 = ak.contents.UnmaskedArray(
         ak.contents.NumpyArray(np.arange(10, 15))
     )  # [10, 11, 12, 13, 14]
     union5 = ak.Array([True, None, "two", 3, 4.4])
 
-    assert to_list(
-        ak.where(ak.Array([True, None, True, False, True]), bitmasked5, unmasked5)
-    ) == [0, None, None, 13, None]
+    mixed_result = ak.where(ak.Array([True, None, True, False, True]), bitmasked5, unmasked5)
+    assert to_list(mixed_result) == [0, None, None, 13, None]
+    assert mixed_result.layout.parameters.get("_my_param") is None  # Params not preserved.
 
     assert to_list(
         ak.where(ak.Array([True, True, True, False, None]), union5, unmasked5)

@@ -764,7 +764,6 @@ def apply_step(
         """
         unmasked = []  # Contents of inputs-as-ByteMaskedArrays or non-Content-type
         masks: List[Index8] = []
-        nextparameters = []
         # Here we choose the convention that elements are masked when mask==1
         # And byte masks (not bits) so we can pass them as (x,y) to ak_where's action()
         for xyc in inputs:  # from ak_where, inputs are (x, y, condition)
@@ -773,47 +772,37 @@ def apply_step(
                 masks.append(
                     NumpyArray(backend.nplike.zeros(len(inputs[2]), dtype=np.int8))
                 )
-                nextparameters.append(NO_PARAMETERS)
             elif not xyc.is_option:
                 unmasked.append(xyc)
                 masks.append(
                     NumpyArray(backend.nplike.zeros(xyc.length, dtype=np.int8))
                 )
-                nextparameters.append(xyc._parameters)
             elif xyc.is_indexed:
                 # Indexed arrays have no array elements where None, which is a problem for us.
                 # We don't care what the element's value is when masked. Just that there *is* a value.
                 if xyc.content.is_unknown:
                     # Unknown arrays cannot use to_ByteMaskedArray.
                     # Create a stand-in array of similar shape and any dtype (we use bool here)
-                    unused_unmasked = NumpyArray(
-                        backend.nplike.zeros(xyc.length, dtype=np.bool_)
-                    )
+                    unused_unmasked = NumpyArray(backend.nplike.zeros(xyc.length, dtype=np.bool_))
                     unmasked.append(unused_unmasked)
-                    all_masked = NumpyArray(
-                        backend.nplike.ones(xyc.length, dtype=np.int8)
-                    )
+                    all_masked = NumpyArray(backend.nplike.ones(xyc.length, dtype=np.int8))
                     masks.append(all_masked)
                 else:
                     xyc_as_masked = xyc.to_ByteMaskedArray(valid_when=False)
                     unmasked.append(xyc_as_masked.content)
                     masks.append(NumpyArray(xyc_as_masked.mask.data))
-                nextparameters.append(xyc._parameters)
             elif not isinstance(xyc.form, ByteMaskedForm) or xyc.form.valid_when:
                 # Must make existing mask conform to our convention
                 xyc_as_bytemasked = xyc.to_ByteMaskedArray(valid_when=False)
                 unmasked.append(xyc_as_bytemasked.content)
                 masks.append(NumpyArray(xyc_as_bytemasked.mask.data))
-                nextparameters.append(xyc._parameters)
             else:
                 unmasked.append(xyc.content)
                 masks.append(NumpyArray(xyc.mask.data))
-                nextparameters.append(xyc._parameters)
-            # TODO: Make sure UnmaskedArray types work.
 
-        # print("\n  Here in broadcast_any_option_akwhere")
-        # print(f"{unmasked =}")
-        # print(f"{masks =}")
+        print("\n  Here in broadcast_any_option_akwhere")
+        print(f"{unmasked =}")
+        print(f"{masks =}")
         # (1) Apply ak_where action to unmasked inputs
         outcontent = apply_step(
             backend,
@@ -826,8 +815,7 @@ def apply_step(
         )
         assert isinstance(outcontent, tuple) and len(outcontent) == 1
         xy_unmasked = outcontent[0]
-        parameters = parameters_factory(nextparameters, 1)
-        # print(f"Unmasked selection: {xy_unmasked}")
+        print(f"Unmasked selection: {xy_unmasked}")
 
         # (2) Now apply ak_where action to unmasked condition and mask arrays for x and y
         which_mask = (
@@ -866,8 +854,8 @@ def apply_step(
                 return (out,)
 
         cond_mask = masks[2]
-        # print(f"{xy_mask =}")
-        # print(f"{cond_mask =}")
+        print(f"{xy_mask =}")
+        print(f"{cond_mask =}")
         mask = apply_step(
             backend,
             (xy_mask, cond_mask),
@@ -880,18 +868,18 @@ def apply_step(
 
         # (4) Apply mask to unmasked selection results, recursively
         def apply_mask_action(inputs, backend, **kwargs):
-            if all(x.is_leaf for x in inputs):
+            if all(x.is_leaf or (x.branch_depth == (False, 1) and is_string_like(x)) for x in inputs):
                 content, mask = inputs
                 if hasattr(mask, "content"):
                     mask_as_idx = Index8(mask.content.data)
                 else:
                     mask_as_idx = Index8(mask.data)
                 out = ByteMaskedArray(
-                    mask_as_idx, content, valid_when=False, parameters=parameters[0]
+                    mask_as_idx, content, valid_when=False,
                 )
                 return (out,)
 
-        # print(f"{mask =}")
+        print(f"{mask =}")
         masked = apply_step(
             backend,
             (xy_unmasked, mask),
