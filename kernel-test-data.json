@@ -20484,7 +20484,7 @@
         },
         {
             "name": "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
-            "status": false,
+            "status": true,
             "tests": [
                 {
                     "error": false,
@@ -20497,6 +20497,32 @@
                     "outputs": {
                         "outstarts": [],
                         "outstops": []
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "distincts": [],
+                        "lendistincts": 0,
+                        "outlength": 1
+                    },
+                    "outputs": {
+                        "outstarts": [0],
+                        "outstops": [0]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "distincts": [0, 0, 0, 0, 0, -1, -1, -1, -1, -1, 2, 2, 2, 2, 2],
+                        "lendistincts": 15,
+                        "outlength": 3
+                    },
+                    "outputs": {
+                        "outstarts": [0, 5, 10],
+                        "outstops": [5, 5, 15]
                     }
                 },
                 {
