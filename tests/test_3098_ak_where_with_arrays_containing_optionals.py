@@ -138,7 +138,7 @@ def test_ak_where_more_option_types():
         ak.where(
             ak.Array([False, True, None]),
             ak.Array(["this", None, "that"]),
-            ak.Array(["foo", "bar", "baz"])
+            ak.Array(["foo", "bar", "baz"]),
         )
     ) == ["foo", None, None]
 
@@ -162,9 +162,13 @@ def test_ak_where_more_option_types():
     )  # [10, 11, 12, 13, 14]
     union5 = ak.Array([True, None, "two", 3, 4.4])
 
-    mixed_result = ak.where(ak.Array([True, None, True, False, True]), bitmasked5, unmasked5)
+    mixed_result = ak.where(
+        ak.Array([True, None, True, False, True]), bitmasked5, unmasked5
+    )
     assert to_list(mixed_result) == [0, None, None, 13, None]
-    assert mixed_result.layout.parameters.get("_my_param") is None  # Params not preserved.
+    assert (
+        mixed_result.layout.parameters.get("_my_param") is None
+    )  # Params not preserved.
 
     assert to_list(
         ak.where(ak.Array([True, True, True, False, None]), union5, unmasked5)

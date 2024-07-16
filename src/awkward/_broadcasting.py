@@ -783,9 +783,13 @@ def apply_step(
                 if xyc.content.is_unknown:
                     # Unknown arrays cannot use to_ByteMaskedArray.
                     # Create a stand-in array of similar shape and any dtype (we use bool here)
-                    unused_unmasked = NumpyArray(backend.nplike.zeros(xyc.length, dtype=np.bool_))
+                    unused_unmasked = NumpyArray(
+                        backend.nplike.zeros(xyc.length, dtype=np.bool_)
+                    )
                     unmasked.append(unused_unmasked)
-                    all_masked = NumpyArray(backend.nplike.ones(xyc.length, dtype=np.int8))
+                    all_masked = NumpyArray(
+                        backend.nplike.ones(xyc.length, dtype=np.int8)
+                    )
                     masks.append(all_masked)
                 else:
                     xyc_as_masked = xyc.to_ByteMaskedArray(valid_when=False)
@@ -800,9 +804,6 @@ def apply_step(
                 unmasked.append(xyc.content)
                 masks.append(NumpyArray(xyc.mask.data))
 
-        print("\n  Here in broadcast_any_option_akwhere")
-        print(f"{unmasked =}")
-        print(f"{masks =}")
         # (1) Apply ak_where action to unmasked inputs
         outcontent = apply_step(
             backend,
@@ -815,7 +816,6 @@ def apply_step(
         )
         assert isinstance(outcontent, tuple) and len(outcontent) == 1
         xy_unmasked = outcontent[0]
-        print(f"Unmasked selection: {xy_unmasked}")
 
         # (2) Now apply ak_where action to unmasked condition and mask arrays for x and y
         which_mask = (
@@ -854,8 +854,6 @@ def apply_step(
                 return (out,)
 
         cond_mask = masks[2]
-        print(f"{xy_mask =}")
-        print(f"{cond_mask =}")
         mask = apply_step(
             backend,
             (xy_mask, cond_mask),
@@ -868,18 +866,22 @@ def apply_step(
 
         # (4) Apply mask to unmasked selection results, recursively
         def apply_mask_action(inputs, backend, **kwargs):
-            if all(x.is_leaf or (x.branch_depth == (False, 1) and is_string_like(x)) for x in inputs):
+            if all(
+                x.is_leaf or (x.branch_depth == (False, 1) and is_string_like(x))
+                for x in inputs
+            ):
                 content, mask = inputs
                 if hasattr(mask, "content"):
                     mask_as_idx = Index8(mask.content.data)
                 else:
                     mask_as_idx = Index8(mask.data)
                 out = ByteMaskedArray(
-                    mask_as_idx, content, valid_when=False,
+                    mask_as_idx,
+                    content,
+                    valid_when=False,
                 )
                 return (out,)
 
-        print(f"{mask =}")
         masked = apply_step(
             backend,
             (xy_unmasked, mask),
