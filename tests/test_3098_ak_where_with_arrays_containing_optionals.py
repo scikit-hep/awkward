@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import numpy as np
+
 import awkward as ak
 from awkward.operations import to_list
 
@@ -32,7 +34,7 @@ def test_ak_where_with_optional_unknowns():
     # Like the first three assertions, The first one here fails.
     # This demonstrates that the problem is symmetric w/rt X and Y arrays.
     assert ak.where(~opt_true_cond, none_alternative, 1).to_list() == [1]
-    # Avobe fails at time of writing. We're getting [None] again.
+    # Above fails at time of writing. We're getting [None] again.
     assert ak.where(~opt_true_cond, zero_alternative, 1).to_list() == [1]
     assert ak.where(~opt_true_cond, opt_zero_alternative, 1).to_list() == [1]
 
@@ -119,8 +121,42 @@ def test_ak_where_with_optionals_multidim():
             ak.Array([[11, 12], [13, 14], [15, 16], [17, 18]]),
         )
     ) == [[1, 2], [13, 14], [None, 16], [None, None]]
-    # [[1, 2], [13, 14], [None, 16], None] would be more natural
+    # Note: [[1, 2], [13, 14], [None, 16], None] might seem more natural,
+    #       but broadcasting expands these arrays out.
 
-    # TODO: Create bitmasked arrays, bytemasked arrays with both valid_when options
-    # TODO: Different depths of condition and x/y
-    # TODO: Try with UnmaskedArray
+    assert to_list(
+        ak.where(
+            ak.Array([[True, False], [True, None]]),
+            ak.Array([1, 2]),
+            ak.Array([None, 12]),
+        )
+    ) == [[1, None], [2, None]]
+
+
+def test_ak_where_more_optnl_types():
+    bitmasked5 = ak.contents.BitMaskedArray(
+        mask=ak.index.Index(
+            np.array(
+                [
+                    0b10100,
+                ],
+                dtype=np.uint8,
+            )
+        ),
+        content=ak.contents.NumpyArray(np.arange(5)),
+        valid_when=False,
+        length=5,
+        lsb_order=True,
+    )  # [0, 1, None, 3, None]
+    unmasked5 = ak.contents.UnmaskedArray(
+        ak.contents.NumpyArray(np.arange(10, 15))
+    )  # [10, 11, 12, 13, 14]
+    union5 = ak.Array([True, None, "two", 3, 4.4])
+
+    assert to_list(
+        ak.where(ak.Array([True, None, True, False, True]), bitmasked5, unmasked5)
+    ) == [0, None, None, 13, None]
+
+    assert to_list(
+        ak.where(ak.Array([True, True, True, False, None]), union5, unmasked5)
+    ) == [True, None, "two", 13, None]

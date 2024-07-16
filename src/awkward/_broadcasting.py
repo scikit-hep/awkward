@@ -702,8 +702,6 @@ def apply_step(
             )
 
     def broadcast_any_option():
-        if options["function_name"] == "ak.where":
-            return broadcast_any_option_akwhere()
         mask = None
         for x in contents:
             if x.is_option:
@@ -760,6 +758,10 @@ def apply_step(
         )
 
     def broadcast_any_option_akwhere():
+        """
+        ak_where is a bit like the ternary operator. Due to asymmetries in the three
+        inputs (their roles are distinct), special handling is required for option-types.
+        """
         unmasked = []  # Contents of inputs-as-ByteMaskedArrays or non-Content-type
         masks: List[Index8] = []
         nextparameters = []
@@ -775,24 +777,30 @@ def apply_step(
             elif not xyc.is_option:
                 unmasked.append(xyc)
                 masks.append(
-                    NumpyArray(backend.nplike.zeros(len(inputs[2]), dtype=np.int8))
+                    NumpyArray(backend.nplike.zeros(xyc.length, dtype=np.int8))
                 )
                 nextparameters.append(xyc._parameters)
             elif xyc.is_indexed:
                 # Indexed arrays have no array elements where None, which is a problem for us.
                 # We don't care what the element's value is when masked. Just that there *is* a value.
-                # TODO: This approach fails optional Unknown types. Find a workaround.
                 if xyc.content.is_unknown:
-                    raise ValueError("ak.where cannot handle Unknown content yet")
-                    # TODO: create a stand-in array of similar shape and any dtype
-                    # xyc_as_masked = ...
+                    # Unknown arrays cannot use to_ByteMaskedArray.
+                    # Create a stand-in array of similar shape and any dtype (we use bool here)
+                    unused_unmasked = NumpyArray(
+                        backend.nplike.zeros(xyc.length, dtype=np.bool_)
+                    )
+                    unmasked.append(unused_unmasked)
+                    all_masked = NumpyArray(
+                        backend.nplike.ones(xyc.length, dtype=np.int8)
+                    )
+                    masks.append(all_masked)
                 else:
                     xyc_as_masked = xyc.to_ByteMaskedArray(valid_when=False)
-                unmasked.append(xyc_as_masked.content)
-                masks.append(NumpyArray(xyc_as_masked.mask.data))
+                    unmasked.append(xyc_as_masked.content)
+                    masks.append(NumpyArray(xyc_as_masked.mask.data))
                 nextparameters.append(xyc._parameters)
             elif not isinstance(xyc.form, ByteMaskedForm) or xyc.form.valid_when:
-                # BitMaskedArrays are IndexU8, not Index8. TODO: Is this the best way to disambiguate?
+                # Must make existing mask conform to our convention
                 xyc_as_bytemasked = xyc.to_ByteMaskedArray(valid_when=False)
                 unmasked.append(xyc_as_bytemasked.content)
                 masks.append(NumpyArray(xyc_as_bytemasked.mask.data))
@@ -803,9 +811,10 @@ def apply_step(
                 nextparameters.append(xyc._parameters)
             # TODO: Make sure UnmaskedArray types work.
 
+        # print("\n  Here in broadcast_any_option_akwhere")
         # print(f"{unmasked =}")
         # print(f"{masks =}")
-
+        # (1) Apply ak_where action to unmasked inputs
         outcontent = apply_step(
             backend,
             unmasked,
@@ -816,15 +825,16 @@ def apply_step(
             options,
         )
         assert isinstance(outcontent, tuple) and len(outcontent) == 1
-        parameters = parameters_factory(nextparameters, len(outcontent))
-        # print(f"{outcontent[0] =}")
+        xy_unmasked = outcontent[0]
+        parameters = parameters_factory(nextparameters, 1)
+        # print(f"Unmasked selection: {xy_unmasked}")
+
+        # (2) Now apply ak_where action to unmasked condition and mask arrays for x and y
         which_mask = (
             masks[0],  # Now x is the x-mask
             masks[1],  # y-mask
             unmasked[2],  # But same condition as previous
         )
-        # print(f"{which_mask =}")
-
         outmasks = apply_step(
             backend,
             which_mask,
@@ -835,30 +845,40 @@ def apply_step(
             options,
         )
         assert len(outmasks) == 1
-        # print(f"{outmasks[0] =}")
-        # print(f"{type(outmasks[0]) =}")
+        xy_mask = outmasks[0]
 
-        # Return None when condition is None or selected element is None
+        simple_options = BroadcastOptions(
+            allow_records=True,
+            left_broadcast=True,
+            right_broadcast=True,
+            numpy_to_regular=True,
+            regular_to_jagged=False,
+            function_name=None,
+            broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
+        )
+
+        # (3) Since condition may be tree-like, use apply_step to OR condition and result masks
         def action_logical_or(inputs, backend, **kwargs):
+            # Return None when condition is None or selected element is None
             m1, m2 = inputs
             if all(isinstance(x, NumpyArray) for x in inputs):
                 out = NumpyArray(backend.nplike.logical_or(m1.data, m2.data))
                 return (out,)
-            else:
-                return None
 
-        out_mask = outmasks[0]
         cond_mask = masks[2]
-        mask = broadcast_and_apply((out_mask, cond_mask), action_logical_or)[0]
+        # print(f"{xy_mask =}")
+        # print(f"{cond_mask =}")
+        mask = apply_step(
+            backend,
+            (xy_mask, cond_mask),
+            action_logical_or,
+            0,
+            None,
+            lateral_context,
+            simple_options,
+        )[0]
 
-        # print(f"{mask =}")
-        # if hasattr(mask, 'content'):
-        #     mask = Index8(mask.content.data)
-        # else:
-        #     mask = Index8(mask.data)
-
-        # Now apply the mask
-        # TODO:
+        # (4) Apply mask to unmasked selection results, recursively
         def apply_mask_action(inputs, backend, **kwargs):
             if all(x.is_leaf for x in inputs):
                 content, mask = inputs
@@ -870,10 +890,17 @@ def apply_step(
                     mask_as_idx, content, valid_when=False, parameters=parameters[0]
                 )
                 return (out,)
-            else:
-                return None
 
-        masked = broadcast_and_apply((outcontent[0], mask), apply_mask_action)
+        # print(f"{mask =}")
+        masked = apply_step(
+            backend,
+            (xy_unmasked, mask),
+            apply_mask_action,
+            0,
+            None,
+            lateral_context,
+            simple_options,
+        )
         return masked
 
     def broadcast_any_union():
@@ -1028,7 +1055,10 @@ def apply_step(
 
         # Any option-types?
         elif any(x.is_option for x in contents):
-            return broadcast_any_option()
+            if options["function_name"] == "ak.where":
+                return broadcast_any_option_akwhere()
+            else:
+                return broadcast_any_option()
 
         # Any non-string list-types?
         elif any(x.is_list and not is_string_like(x) for x in contents):
