@@ -1,10 +1,19 @@
 from __future__ import annotations
 
+import cupy as cp
 import numpy as np
+import pytest
 
 import awkward as ak
 
 to_list = ak.operations.to_list
+
+
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
 
 
 def test_0315_integerindex_null_more():

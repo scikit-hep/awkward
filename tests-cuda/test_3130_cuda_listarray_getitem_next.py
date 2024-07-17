@@ -19,6 +19,13 @@ stops2 = ak.index.IndexU32(np.array([2, 3, 3, 5], np.uint32))
 offsets2 = ak.index.IndexU32(np.array([0, 2, 3, 3, 5], np.uint32))
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
+
+
 def tests_0020_support_unsigned_indexes_listarray_ellipsis():
     array1 = ak.contents.ListArray(starts1, stops1, content)
     array2 = ak.contents.ListArray(starts2, stops2, array1)
