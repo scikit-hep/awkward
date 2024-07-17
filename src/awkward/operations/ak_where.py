@@ -90,8 +90,6 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
     def action(inputs, backend, **kwargs):
         x, y, condition = inputs
         if isinstance(condition, ak.contents.NumpyArray):
-            # print(f"ak_where action: we're a go! {condition =}")
-            # print(f"{x =}\n{y =}")
             npcondition = backend.index_nplike.asarray(condition.data)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
@@ -105,7 +103,6 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
                         backend.nplike.shape_item_as_index(tags.length),
                     )
                 )
-                # print(f"x coerced into {x =}")
             if not isinstance(y, ak.contents.Content):
                 y = ak.contents.NumpyArray(
                     backend.nplike.repeat(
@@ -113,7 +110,6 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
                         backend.nplike.shape_item_as_index(tags.length),
                     )
                 )
-                # print(f"y coerced into {y =}")
             return (
                 ak.contents.UnionArray.simplified(
                     tags,
@@ -123,7 +119,6 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
                 ),
             )
         else:
-            # print(f"ak_where action: we're no-go. {condition =}")
             return None
 
     out = ak._broadcasting.broadcast_and_apply(
