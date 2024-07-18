@@ -118,6 +118,42 @@ def test_block_boundary_min():
     del cuda_content, cuda_depth1
 
 
+@pytest.mark.xfail(reason="awkward_reduce_argmin is not implemented")
+def test_block_boundary_argmin():
+    np.random.seed(42)
+    content = ak.contents.NumpyArray(np.random.randint(3000, size=3000))
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.argmin(cuda_content, -1, highlevel=False) == ak.argmin(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.argmin(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.argmin(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+@pytest.mark.xfail(reason="awkward_reduce_argmax is not implemented")
+def test_block_boundary_argmax():
+    np.random.seed(42)
+    content = ak.contents.NumpyArray(np.random.randint(3000, size=3000))
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.argmax(cuda_content, -1, highlevel=False) == ak.argmax(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.argmax(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.argmax(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
 def test_block_boundary_count():
     np.random.seed(42)
     content = ak.contents.NumpyArray(np.random.randint(3000, size=3000))

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import cupy as cp
+import cupy.testing as cpt
 import numpy as np
 import pytest
 
@@ -254,18 +255,18 @@ def test_0652_reducers():
     array = ak.to_backend(array, "cuda", highlevel=False)
 
     assert ak.operations.sum(array) == 6 + 6j
-    # assert ak.operations.prod(array) == -12 + 12j
+    assert ak.operations.prod(array) == -12 + 12j
 
     assert ak.operations.sum(array, axis=1).to_list() == [
         3 + 3j,
         0 + 0j,
         3 + 3j,
     ]
-    # assert ak.operations.prod(array, axis=1).to_list() == [
-    #     0 + 4j,
-    #     1 + 0j,
-    #     3 + 3j,
-    # ]
+    assert ak.operations.prod(array, axis=1).to_list() == [
+        0 + 4j,
+        1 + 0j,
+        3 + 3j,
+    ]
 
     assert ak.operations.count(array, axis=1).to_list() == [2, 0, 1]
     assert ak.operations.count_nonzero(array, axis=1).to_list() == [2, 0, 1]
@@ -297,9 +298,6 @@ def test_0652_minmax():
         None,
         3 + 3j,
     ]
-
-    # assert ak.operations.argmin(array, axis=1).to_list() == [0, None, 0]
-    # assert ak.operations.argmax(array, axis=1).to_list() == [1, None, 0]
     del array
 
 
@@ -320,6 +318,263 @@ def test_block_boundary_sum_complex():
     cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
     assert to_list(ak.sum(cuda_depth1, -1, highlevel=False)) == to_list(
         ak.sum(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex1():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1000, 0), np.full(1000, 1))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.prod(cuda_content, -1, highlevel=False) == ak.prod(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 996, 1000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.prod(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.prod(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex2():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1001, 0), np.full(1001, 1))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.prod(cuda_content, -1, highlevel=False) == ak.prod(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 996, 1001], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.prod(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.prod(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex3():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1002, 0), np.full(1002, 1))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.prod(cuda_content, -1, highlevel=False) == ak.prod(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 999, 1002], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.prod(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.prod(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex4():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1000, 0), np.full(1000, 1.01))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        ak.prod(cuda_content, -1, highlevel=False),
+        ak.prod(content, -1, highlevel=False),
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 996, 1000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        to_list(ak.prod(cuda_depth1, -1, highlevel=False)),
+        to_list(ak.prod(depth1, -1, highlevel=False)),
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex5():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1001, 0), np.full(1001, 1.01))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        ak.prod(cuda_content, -1, highlevel=False),
+        ak.prod(content, -1, highlevel=False),
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 996, 1001], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        to_list(ak.prod(cuda_depth1, -1, highlevel=False)),
+        to_list(ak.prod(depth1, -1, highlevel=False)),
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex6():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1002, 0), np.full(1002, 1.01))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        ak.prod(cuda_content, -1, highlevel=False),
+        ak.prod(content, -1, highlevel=False),
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 998, 1002], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        to_list(ak.prod(cuda_depth1, -1, highlevel=False)),
+        to_list(ak.prod(depth1, -1, highlevel=False)),
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex7():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1000, 0), np.full(1000, 0.99))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        ak.prod(cuda_content, -1, highlevel=False),
+        ak.prod(content, -1, highlevel=False),
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 996, 1000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        to_list(ak.prod(cuda_depth1, -1, highlevel=False)),
+        to_list(ak.prod(depth1, -1, highlevel=False)),
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex8():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1001, 0), np.full(1001, 0.99))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        ak.prod(cuda_content, -1, highlevel=False),
+        ak.prod(content, -1, highlevel=False),
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 996, 1001], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        to_list(ak.prod(cuda_depth1, -1, highlevel=False)),
+        to_list(ak.prod(depth1, -1, highlevel=False)),
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex9():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1002, 0), np.full(1002, 0.99))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        ak.prod(cuda_content, -1, highlevel=False),
+        ak.prod(content, -1, highlevel=False),
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 999, 1002], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        to_list(ak.prod(cuda_depth1, -1, highlevel=False)),
+        to_list(ak.prod(depth1, -1, highlevel=False)),
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex10():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1000, 0), np.full(1000, 1.1))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        ak.prod(cuda_content, -1, highlevel=False),
+        ak.prod(content, -1, highlevel=False),
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 996, 1000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        to_list(ak.prod(cuda_depth1, -1, highlevel=False)),
+        to_list(ak.prod(depth1, -1, highlevel=False)),
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex11():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1001, 0), np.full(1001, 1.1))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        ak.prod(cuda_content, -1, highlevel=False),
+        ak.prod(content, -1, highlevel=False),
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 996, 1001], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        to_list(ak.prod(cuda_depth1, -1, highlevel=False)),
+        to_list(ak.prod(depth1, -1, highlevel=False)),
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex12():
+    np.random.seed(42)
+    complex_array = np.vectorize(complex)(np.full(1002, 0), np.full(1002, 1.1))
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        ak.prod(cuda_content, -1, highlevel=False),
+        ak.prod(content, -1, highlevel=False),
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 996, 1002], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        to_list(ak.prod(cuda_depth1, -1, highlevel=False)),
+        to_list(ak.prod(depth1, -1, highlevel=False)),
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_prod_complex13():
+    np.random.seed(42)
+    array = np.random.randint(50, size=1000)
+    complex_array = np.vectorize(complex)(
+        array[0 : len(array) : 2], array[1 : len(array) : 2]
+    )
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        ak.prod(cuda_content, -1, highlevel=False),
+        ak.prod(content, -1, highlevel=False),
+    )
+
+    offsets = ak.index.Index64(np.array([0, 5, 996, 1000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    cpt.assert_allclose(
+        to_list(ak.prod(cuda_depth1, -1, highlevel=False)),
+        to_list(ak.prod(depth1, -1, highlevel=False)),
     )
     del cuda_content, cuda_depth1
 
@@ -511,5 +766,93 @@ def test_block_boundary_countnonzero_complex_2():
 
     assert to_list(ak.count_nonzero(cuda_depth1, -1, highlevel=False)) == to_list(
         ak.count_nonzero(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+@pytest.mark.xfail(reason="awkward_reduce_argmax_complex is not implemented")
+def test_block_boundary_argmax_complex1():
+    np.random.seed(42)
+    array = np.random.randint(5, size=6000)
+    complex_array = np.vectorize(complex)(
+        array[0 : len(array) : 2], array[1 : len(array) : 2]
+    )
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.argmax(cuda_content, -1, highlevel=False) == ak.argmax(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.argmax(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.argmax(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+@pytest.mark.xfail(reason="awkward_reduce_argmax_complex is not implemented")
+def test_block_boundary_argmax_complex2():
+    np.random.seed(42)
+    array = np.random.randint(6000, size=6000)
+    complex_array = np.vectorize(complex)(
+        array[0 : len(array) : 2], array[1 : len(array) : 2]
+    )
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.argmax(cuda_content, -1, highlevel=False) == ak.argmax(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.argmax(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.argmax(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+@pytest.mark.xfail(reason="awkward_reduce_argmin_complex is not implemented")
+def test_block_boundary_argmin_complex1():
+    np.random.seed(42)
+    array = np.random.randint(5, size=6000)
+    complex_array = np.vectorize(complex)(
+        array[0 : len(array) : 2], array[1 : len(array) : 2]
+    )
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.argmin(cuda_content, -1, highlevel=False) == ak.argmin(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.argmin(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.argmin(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+@pytest.mark.xfail(reason="awkward_reduce_argmin_complex is not implemented")
+def test_block_boundary_argmin_complex2():
+    np.random.seed(42)
+    array = np.random.randint(6000, size=6000)
+    complex_array = np.vectorize(complex)(
+        array[0 : len(array) : 2], array[1 : len(array) : 2]
+    )
+    content = ak.contents.NumpyArray(complex_array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.argmin(cuda_content, -1, highlevel=False) == ak.argmin(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.argmin(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.argmin(depth1, -1, highlevel=False)
     )
     del cuda_content, cuda_depth1

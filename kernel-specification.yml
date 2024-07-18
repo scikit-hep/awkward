@@ -2902,7 +2902,7 @@ kernels:
 
           # Close open sublist
           if lenparents > 0:
-              outoffsets[k_sublist + 1] = j
+              outoffsets[k_sublist + 1] = j + 1
               outcarry[parents[i]] = k_sublist
               k_sublist += 1
 
