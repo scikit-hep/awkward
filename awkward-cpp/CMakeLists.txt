@@ -11,6 +11,10 @@ project(
 message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
+if(APPLE)
+  set(CMAKE_LINKER_TYPE APPLE_CLASSIC)
+endif()
+
 # Check for header-only libraries
 if(NOT (EXISTS "header-only" AND EXISTS "include/awkward/kernels.h"))
   message(
