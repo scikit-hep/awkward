@@ -11,7 +11,8 @@ project(
 message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
-if(CMAKE_CXX_COMPILER_ID MATCHES AppleClang AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15)
+if(CMAKE_CXX_COMPILER_ID MATCHES AppleClang AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL
+                                                15)
   if(CMAKE_VERSION VERSION_LESS 3.29)
     message(WARNING "CMake should be 3.29+ to support AppleClang 15+. Trying anyway.")
   endif()
