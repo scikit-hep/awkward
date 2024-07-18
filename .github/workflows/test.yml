@@ -256,3 +256,13 @@ jobs:
 
       - name: Test
         run: python -m pytest -vv -rs tests -k cppyy
+
+
+  pass-tests:
+    if: always()
+    needs: [ run-tests, Linux-ROOT, Linux-cppyy ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
