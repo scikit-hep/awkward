@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "scikit-build-core[pyproject]>=0.2.0",
+    "scikit-build-core>=0.9",
     "pybind11",
 ]
 build-backend = "scikit_build_core.build"
@@ -59,7 +59,7 @@ Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 
 
 [tool.scikit-build]
-minimum-version = "0.2"
+minimum-version = "0.9"
 build-dir = "build/{cache_tag}"
 sdist.reproducible = true
 sdist.include = [
@@ -71,3 +71,7 @@ sdist.include = [
     "tests-cpu-kernels",
     "tests-cpu-kernels-explicit"
 ]
+
+[[tool.scikit-build.overrides]]
+if.platform-system = "darwin"
+cmake.version = ">=3.29"
