@@ -15,7 +15,6 @@
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_RecordArray_reduce_nonlocal_outoffsets_64_b", outoffsets.dtype, outcarry.dtype, parents.dtype]))((grid_size,), block, (outoffsets, outcarry, parents, lenparents, outlength, temp, scan_in_array, scan_in_array_outoffsets, invocation_index, err_code))
 //     scan_in_array_outoffsets = cupy.cumsum(scan_in_array_outoffsets)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_RecordArray_reduce_nonlocal_outoffsets_64_c", outoffsets.dtype, outcarry.dtype, parents.dtype]))((grid_size,), block, (outoffsets, outcarry, parents, lenparents, outlength, temp, scan_in_array, scan_in_array_outoffsets, invocation_index, err_code))
-//     print(scan_in_array_outoffsets)
 // out["awkward_RecordArray_reduce_nonlocal_outoffsets_64_a", {dtype_specializations}] = None
 // out["awkward_RecordArray_reduce_nonlocal_outoffsets_64_b", {dtype_specializations}] = None
 // out["awkward_RecordArray_reduce_nonlocal_outoffsets_64_c", {dtype_specializations}] = None

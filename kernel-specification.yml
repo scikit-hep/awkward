@@ -3804,7 +3804,22 @@ kernels:
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_argsort(
+        toptr, fromptr, length, offsets, offsetslength, ascending, stable
+      ):
+          result = []
+          indices = list(range(length))
+          for i in range(offsetslength - 1):
+              sub_indices = indices[offsets[i]:offsets[i+1]]
+              sorted_indices = sorted(
+                  sub_indices,
+                  key=lambda x: fromptr[x],
+                  reverse=not ascending
+              )
+              local_sorted_indices = [idx - offsets[i] for idx in sorted_indices]
+              result.extend(local_sorted_indices)
+          for i in range(length):
+              toptr[i] = result[i]
     automatic-tests: false
 
   - name: awkward_index_rpad_and_clip_axis0

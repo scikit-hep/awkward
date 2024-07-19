@@ -70,9 +70,6 @@ awkward_reduce_prod_complex_b(
         T new_imag = temp[thread_id * 2] * imag + temp[thread_id * 2 + 1] * real;
         temp[thread_id * 2] = new_real;
         temp[thread_id * 2 + 1] = new_imag;
-        if (parents[thread_id] == 2) {
-          printf("\nr %lf, i %lf", temp[thread_id * 2], temp[thread_id * 2 + 1]);
-        }
         __syncthreads();
       }
 
