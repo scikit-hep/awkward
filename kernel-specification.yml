@@ -4038,9 +4038,9 @@ kernels:
               toptr[k] = -1
           for i in range(lenparents):
               parent = parents[i]
-              if (toptr[parent] == -1  or (fromptr[i * 2] > fromptr[toptr[parent * 2]] or
-                 (fromptr[i * 2] == fromptr[toptr[parent * 2]]  and
-                  fromptr[i * 2 + 1] > fromptr[toptr[parent * 2 + 1]]))):
+              if (toptr[parent] == -1  or (fromptr[i * 2] > fromptr[toptr[parent] * 2] or
+                 (fromptr[i * 2] == fromptr[toptr[parent] * 2]  and
+                  fromptr[i * 2 + 1] > fromptr[toptr[parent] * 2 + 1]))):
                   toptr[parent] = i
     automatic-tests: false
 
@@ -4150,9 +4150,9 @@ kernels:
               toptr[k] = -1
           for i in range(lenparents):
               parent = parents[i]
-              if (toptr[parent] == -1  or (fromptr[i * 2] < fromptr[toptr[parent * 2]] or
-                 (fromptr[i * 2] == fromptr[toptr[parent * 2]]  and
-                  fromptr[i * 2 + 1] < fromptr[toptr[parent * 2 + 1]]))):
+              if (toptr[parent] == -1  or (fromptr[i * 2] < fromptr[toptr[parent] * 2] or
+                 (fromptr[i * 2] == fromptr[toptr[parent] * 2]  and
+                  fromptr[i * 2 + 1] < fromptr[toptr[parent] * 2 + 1]))):
                   toptr[parent] = i
     automatic-tests: false
 
