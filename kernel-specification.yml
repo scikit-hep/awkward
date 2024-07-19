@@ -1156,7 +1156,20 @@ kernels:
           - {name: length, type: "int64_t", dir: in}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_ListArray_combinations(
+          tocarry, toindex, fromindex, n, replacement, starts, stops, length
+      ):
+          for j in range(n):
+              toindex[j] = 0
+
+          for i in range(length):
+              start = int(starts[i])
+              stop = int(stops[i])
+              fromindex[0] = start
+              awkward_ListArray_combinations_step(
+                  tocarry, toindex, fromindex, 0, stop, n, replacement
+              )
+
     automatic-tests: false
 
   - name: awkward_ListArray_combinations_length
@@ -2902,7 +2915,7 @@ kernels:
 
           # Close open sublist
           if lenparents > 0:
-              outoffsets[k_sublist + 1] = j
+              outoffsets[k_sublist + 1] = j + 1
               outcarry[parents[i]] = k_sublist
               k_sublist += 1
 
@@ -2931,7 +2944,19 @@ kernels:
           - {name: length, type: "int64_t", dir: in}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_RegularArray_combinations_64(
+          tocarry, toindex, fromindex, n, replacement, size, length
+      ):
+          for j in range(n):
+              toindex[j] = 0
+
+          for i in range(length):
+              start = size * i
+              stop = start + size
+              fromindex[0] = start
+              awkward_ListArray_combinations_step(
+                  tocarry, toindex, fromindex, 0, stop, n, replacement
+              )
     automatic-tests: false
 
   - name: awkward_RegularArray_getitem_carry
@@ -3804,7 +3829,22 @@ kernels:
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_argsort(
+        toptr, fromptr, length, offsets, offsetslength, ascending, stable
+      ):
+          result = []
+          indices = list(range(length))
+          for i in range(offsetslength - 1):
+              sub_indices = indices[offsets[i]:offsets[i+1]]
+              sorted_indices = sorted(
+                  sub_indices,
+                  key=lambda x: fromptr[x],
+                  reverse=not ascending
+              )
+              local_sorted_indices = [idx - offsets[i] for idx in sorted_indices]
+              result.extend(local_sorted_indices)
+          for i in range(length):
+              toptr[i] = result[i]
     automatic-tests: false
 
   - name: awkward_index_rpad_and_clip_axis0
@@ -3993,6 +4033,15 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_argmax_complex(toptr, fromptr, parents, lenparents, outlength):
+          for k in range(outlength):
+              toptr[k] = -1
+          for i in range(lenparents):
+              parent = parents[i]
+              if (toptr[parent] == -1  or (fromptr[i * 2] > fromptr[toptr[parent * 2]] or
+                 (fromptr[i * 2] == fromptr[toptr[parent * 2]]  and
+                  fromptr[i * 2 + 1] > fromptr[toptr[parent * 2 + 1]]))):
+                  toptr[parent] = i
     automatic-tests: false
 
   - name: awkward_reduce_argmin
@@ -4096,6 +4145,15 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_argmin_complex(toptr, fromptr, parents, lenparents, outlength):
+          for k in range(outlength):
+              toptr[k] = -1
+          for i in range(lenparents):
+              parent = parents[i]
+              if (toptr[parent] == -1  or (fromptr[i * 2] < fromptr[toptr[parent * 2]] or
+                 (fromptr[i * 2] == fromptr[toptr[parent * 2]]  and
+                  fromptr[i * 2 + 1] < fromptr[toptr[parent * 2 + 1]]))):
+                  toptr[parent] = i
     automatic-tests: false
 
   - name: awkward_reduce_count_64
@@ -4221,6 +4279,11 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_countnonzero_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i] = 0
+          for i in range(lenparents):
+              toptr[parents[i]] += fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0
     automatic-tests: false
 
   - name: awkward_reduce_max
@@ -4335,6 +4398,17 @@ kernels:
           - {name: identity, type: "double", dir: in, role: reducer-identity}
     description: null
     definition: |
+      def awkward_reduce_max_complex(toptr, fromptr, parents, lenparents, outlength, identity):
+          for i in range(outlength):
+              toptr[i * 2] = identity
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              x = fromptr[i * 2]
+              y = fromptr[i * 2 + 1]
+              parent = parents[i]
+              if x > toptr[parent * 2] or (x == toptr[parent * 2]  and  y > toptr[parent * 2 + 1]):
+                  toptr[parent * 2] = x
+                  toptr[parent * 2 + 1] = y
     automatic-tests: false
 
   - name: awkward_reduce_min
@@ -4449,6 +4523,17 @@ kernels:
           - {name: identity, type: "double", dir: in, role: reducer-identity}
     description: null
     definition: |
+      def awkward_reduce_min_complex(toptr, fromptr, parents, lenparents, outlength, identity):
+          for i in range(outlength):
+              toptr[i * 2] = identity
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              x = fromptr[i * 2]
+              y = fromptr[i * 2 + 1]
+              parent = parents[i]
+              if x < toptr[parent * 2] or (x == toptr[parent * 2]  and  y < toptr[parent * 2 + 1]):
+                  toptr[parent * 2] = x
+                  toptr[parent * 2 + 1] = y
     automatic-tests: false
 
   - name: awkward_reduce_prod
@@ -4592,6 +4677,16 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_prod_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i * 2] = 1
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              parent = parents[i]
+              real = toptr[parent * 2] * fromptr[i * 2] - toptr[parent * 2 + 1] * fromptr[i * 2 + 1]
+              imag = toptr[parent * 2] * fromptr[i * 2 + 1] + toptr[parent * 2 + 1] * fromptr[i * 2]
+              toptr[parents[i] * 2] = real
+              toptr[parents[i] * 2 + 1] = imag
     automatic-tests: false
 
   - name: awkward_reduce_prod_bool
@@ -4700,6 +4795,11 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_prod_bool_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i] = 1
+          for i in range(lenparents):
+              toptr[parents[i]] = fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0
     automatic-tests: false
 
   - name: awkward_reduce_sum
@@ -4843,6 +4943,13 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_sum_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i * 2] = 0
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              toptr[parents[i] * 2] += fromptr[i * 2]
+              toptr[parents[i] * 2 + 1] += fromptr[i * 2 + 1]
     automatic-tests: false
 
   - name: awkward_reduce_sum_bool
@@ -4951,6 +5058,11 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_sum_bool_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i] = 0
+          for i in range(lenparents):
+              toptr[parents[i]] |= fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0
     automatic-tests: false
 
   - name: awkward_reduce_sum_int32_bool_64
