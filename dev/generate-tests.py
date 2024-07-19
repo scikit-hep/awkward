@@ -337,6 +337,26 @@ def awkward_regularize_rangeslice(
         if stop > start:         stop = start
     return start, stop
 
+def awkward_ListArray_combinations_step(
+    tocarry, toindex, fromindex, j, stop, n, replacement
+):
+    while fromindex[j] < stop:
+        if replacement:
+            for k in range(j + 1, n):
+                fromindex[k] = fromindex[j]
+        else:
+            for k in range(j + 1, n):
+                fromindex[k] = fromindex[j] + (k - j)
+
+        if j + 1 == n:
+            for k in range(n):
+                tocarry[k][toindex[k]] = fromindex[k]
+                toindex[k] += 1
+        else:
+            awkward_ListArray_combinations_step(tocarry, toindex, fromindex, j + 1, stop, n, replacement)
+
+        fromindex[j] += 1
+
 """
 
     tests_spec = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec")
@@ -589,10 +609,19 @@ def gencpukerneltests(specdict):
                     for arg, val in test["outargs"].items():
                         f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
                         if isinstance(val, list):
-                            f.write(
-                                " " * 4
-                                + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
-                            )
+                            count = typename.count("List")
+                            if count == 1:
+                                f.write(
+                                    " " * 4
+                                    + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
+                                )
+                            elif count == 2:
+                                f.write(
+                                    " " * 4
+                                    + f"for row1, row2 in zip(pytest_{arg}, {arg}_np_arr_2d[:len(pytest_{arg})]):\n"
+                                    + " " * 8
+                                    + "assert row1 == pytest.approx(row2)\n"
+                                )
                         else:
                             f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                     f.write(" " * 4 + "assert not ret_pass.str\n")
@@ -672,9 +701,22 @@ def gencpuunittests(specdict):
                                 if count == 1:
                                     f.write(
                                         " " * 4
+                                        + arg
+                                        + " = "
+                                        + str([gettypeval(dtype)] * len(val))
+                                        + "\n"
+                                    )
+                                    f.write(
+                                        " " * 4
                                         + f"{arg} = (ctypes.c_{typename}*len({arg}))(*{arg})\n"
                                     )
                                 elif count == 2:
+                                    f.write(" " * 4 + arg + " = [")
+                                    for size, arr in enumerate(val):
+                                        if size != 0:
+                                            f.write(", ")
+                                        f.write(str([gettypeval(dtype)] * len(arr)))
+                                    f.write("]\n")
                                     f.write(
                                         " " * 4
                                         + f"{typename}Ptr = ctypes.POINTER(ctypes.c_{typename})\n"
@@ -701,6 +743,14 @@ def gencpuunittests(specdict):
                                         + " " * 4
                                         + f"{arg} = {arg}_ct_ptr\n"
                                     )
+                            else:
+                                f.write(
+                                    " " * 4
+                                    + arg
+                                    + " = "
+                                    + str([gettypeval(dtype)] * len(val))
+                                    + "\n"
+                                )
                         for arg, val in test["inputs"].items():
                             typename = gettype(arg, spec.args)
                             f.write(" " * 4 + arg + " = " + str(val) + "\n")
@@ -776,10 +826,19 @@ def gencpuunittests(specdict):
                                     " " * 4 + "pytest_" + arg + " = " + str(val) + "\n"
                                 )
                                 if isinstance(val, list):
-                                    f.write(
-                                        " " * 4
-                                        + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
-                                    )
+                                    count = typename.count("List")
+                                    if count == 1:
+                                        f.write(
+                                            " " * 4
+                                            + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
+                                        )
+                                    elif count == 2:
+                                        f.write(
+                                            " " * 4
+                                            + f"for row1, row2 in zip(pytest_{arg}, {arg}_np_arr_2d[:len(pytest_{arg})]):\n"
+                                            + " " * 8
+                                            + "assert row1 == pytest.approx(row2)\n"
+                                        )
                                 else:
                                     f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                             f.write(" " * 4 + "assert not ret_pass.str\n")
@@ -833,6 +892,8 @@ cuda_kernels_tests = [
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_combinations_length",
+    "awkward_ListArray_combinations",
+    "awkward_RegularArray_combinations_64",
     "awkward_ListArray_getitem_jagged_apply",
     "awkward_ListArray_getitem_jagged_carrylen",
     "awkward_ListArray_getitem_jagged_descend",
@@ -1229,10 +1290,19 @@ def gencudaunittests(specdict):
                                     " " * 4 + "pytest_" + arg + " = " + str(val) + "\n"
                                 )
                                 if isinstance(val, list):
-                                    f.write(
-                                        " " * 4
-                                        + f"cpt.assert_allclose({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
-                                    )
+                                    count = typename.count("List")
+                                    if count == 1:
+                                        f.write(
+                                            " " * 4
+                                            + f"cpt.assert_allclose({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                        )
+                                    elif count == 2:
+                                        f.write(
+                                            " " * 4
+                                            + f"for row1, row2 in zip(pytest_{arg}, {arg}_array[:len(pytest_{arg})]):\n"
+                                            + " " * 8
+                                            + "cpt.assert_allclose(row1, row2)\n"
+                                        )
                                 else:
                                     f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                         f.write("\n")
@@ -1256,7 +1326,15 @@ def genunittests():
                 funcName = "def test_" + function["name"] + "_" + str(num) + "():\n"
                 file.write(funcName)
                 for key, value in test["outputs"].items():
-                    file.write("\t" + key + " = " + str([123] * len(value)) + "\n")
+                    if all(isinstance(elem, list) for elem in value) and value:
+                        file.write("\t" + key + " = [")
+                        for size in range(len(value)):
+                            if size != 0:
+                                file.write(", ")
+                            file.write(str([123] * len(value[0])))
+                        file.write("]\n")
+                    else:
+                        file.write("\t" + key + " = " + str([123] * len(value)) + "\n")
                 for key, value in test["inputs"].items():
                     file.write("\t" + key + " = " + str(value) + "\n")
                 file.write("\tfuncPy = getattr(kernels, '" + function["name"] + "')\n")
