@@ -7,25 +7,25 @@
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
-//     atomic_toptr = cupy.array(toptr, dtype=cupy.uint64)
+//     atomic_toptr = cupy.array(toptr, dtype=cupy.uint32)
 //     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-// out["awkward_reduce_argmin_a", {dtype_specializations}] = None
-// out["awkward_reduce_argmin_b", {dtype_specializations}] = None
-// out["awkward_reduce_argmin_c", {dtype_specializations}] = None
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_complex_a", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_complex_b", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_complex_c", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+// out["awkward_reduce_sum_bool_complex_a", {dtype_specializations}] = None
+// out["awkward_reduce_sum_bool_complex_b", {dtype_specializations}] = None
+// out["awkward_reduce_sum_bool_complex_c", {dtype_specializations}] = None
 // END PYTHON
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_argmin_a(
+awkward_reduce_sum_bool_complex_a(
     T* toptr,
     const C* fromptr,
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint64_t* atomic_toptr,
+    uint32_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -33,20 +33,20 @@ awkward_reduce_argmin_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      atomic_toptr[thread_id] = -1;
+      atomic_toptr[thread_id] = 0;
     }
   }
 }
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_argmin_b(
+awkward_reduce_sum_bool_complex_b(
     T* toptr,
     const C* fromptr,
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint64_t* atomic_toptr,
+    uint32_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -55,26 +55,24 @@ awkward_reduce_argmin_b(
     int64_t thread_id = blockIdx.x * blockDim.x + idx;
 
     if (thread_id < lenparents) {
-      temp[thread_id] = thread_id;
+      temp[thread_id] = (fromptr[thread_id * 2] != 0  ||  fromptr[thread_id * 2 + 1] != 0);
     }
     __syncthreads();
 
     if (thread_id < lenparents) {
       for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-        int64_t index = -1;
+        T val = 0;
         if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-          index = temp[thread_id - stride];
+          val = temp[thread_id - stride];
         }
-        if (index != -1 && (temp[thread_id] == -1 || fromptr[index] < fromptr[temp[thread_id]] ||
-          (fromptr[index] == fromptr[temp[thread_id]] && index < temp[thread_id]))) {
-          temp[thread_id] = index;
-        }
+        __syncthreads();
+        temp[thread_id] |= val;
         __syncthreads();
       }
 
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicExch(&atomic_toptr[parent], temp[thread_id]);
+        atomicOr(&atomic_toptr[parent], temp[thread_id]);
       }
     }
   }
@@ -82,13 +80,13 @@ awkward_reduce_argmin_b(
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_argmin_c(
+awkward_reduce_sum_bool_complex_c(
     T* toptr,
     const C* fromptr,
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
-    uint64_t* atomic_toptr,
+    uint32_t* atomic_toptr,
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
