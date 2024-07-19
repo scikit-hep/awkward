@@ -693,11 +693,10 @@ def gencpuunittests(specdict):
                         num += 1
                         f.write(funcName)
                         for arg, val in test["outputs"].items():
-                            typename = gettype(arg, spec.args)
-                            f.write(" " * 4 + arg + " = " + str(val) + "\n")
-                            if "List" in typename:
-                                count = typename.count("List")
-                                typename = gettypename(typename)
+                            dtype = gettype(arg, spec.args)
+                            if "List" in dtype:
+                                count = dtype.count("List")
+                                typename = gettypename(dtype)
                                 if count == 1:
                                     f.write(
                                         " " * 4
