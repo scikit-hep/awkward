@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (index, fromstarts, fromstops, length, tostarts, tostops, tolength, invocation_index, err_code) = args
-//     scan_in_array = cupy.zeros_like(index, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(length + 1, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_ranges_next_64_a", index.dtype, fromstarts.dtype, fromstops.dtype, tostarts.dtype, tostops.dtype, tolength.dtype]))(grid, block, (index, fromstarts, fromstops, length, tostarts, tostops, tolength, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_ranges_next_64_b", index.dtype, fromstarts.dtype, fromstops.dtype, tostarts.dtype, tostops.dtype, tolength.dtype]))(grid, block, (index, fromstarts, fromstops, length, tostarts, tostops, tolength, scan_in_array, invocation_index, err_code))
@@ -26,15 +26,17 @@ awkward_IndexedArray_ranges_next_64_a(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+    int64_t k = 0;
     int64_t stride = 0;
 
     if (thread_id < length) {
       stride = fromstops[thread_id] - fromstarts[thread_id];
       for (int64_t j = threadIdx.y; j < stride; j += blockDim.y) {
         if (!(index[fromstarts[thread_id] + j] < 0)) {
-          scan_in_array[fromstarts[thread_id] + j] = 1;
+          k++;
         }
       }
+      scan_in_array[thread_id + 1] = k;
     }
   }
 }
@@ -56,12 +58,12 @@ awkward_IndexedArray_ranges_next_64_b(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     int64_t stride = 0;
 
-    *tolength = length > 0 ? scan_in_array[fromstops[length - 1] - 1] : 0;
+    *tolength = length > 0 ? scan_in_array[length] : 0;
 
     if (thread_id < length) {
       stride = fromstops[thread_id] - fromstarts[thread_id];
-      tostarts[thread_id] = scan_in_array[fromstarts[thread_id] - 1];
-      tostops[thread_id] = scan_in_array[fromstops[thread_id] - 1];
+      tostarts[thread_id] = scan_in_array[thread_id];
+      tostops[thread_id] = scan_in_array[thread_id + 1];
     }
   }
 }
