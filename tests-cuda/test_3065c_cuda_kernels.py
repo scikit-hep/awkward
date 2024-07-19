@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from itertools import product
+
 import cupy as cp
 import numpy as np
 import pytest
@@ -1431,3 +1433,126 @@ def test_2678_same_backend_where():
     )
 
     assert ak.backend(result) == "cuda"
+
+
+behavior_1 = {"foo": "bar"}
+behavior_2 = {"baz": "bargh!"}
+behavior = {**behavior_1, **behavior_2}
+
+
+@pytest.mark.parametrize(
+    ("func", "axis"),
+    [
+        (ak.std, -1),
+        (ak.var, -1),
+        (ak.softmax, -1),
+        *product(
+            (
+                ak.any,
+                ak.min,
+                ak.sum,
+                ak.ptp,
+                ak.count_nonzero,
+                lambda *args, **kwargs: ak.moment(*args, **kwargs, n=3),
+                ak.all,
+                ak.mean,
+                ak.max,
+                ak.prod,
+                ak.count,
+            ),
+            ([-1]),
+        ),
+    ],
+)
+def test_2754_highlevel_behavior_missing_reducers(axis, func):
+    array = ak.Array([[1, 2, 3, 4], [5], [10]])
+    cuda_array = ak.to_backend(array, "cuda", behavior=behavior_1)
+
+    assert (
+        func(
+            cuda_array,
+            axis=axis,
+            highlevel=True,
+            behavior=behavior_2,
+        ).behavior
+        == behavior_2
+    )
+    assert (
+        func(
+            cuda_array,
+            axis=axis,
+            highlevel=True,
+        ).behavior
+        == behavior_1
+    )
+    del cuda_array
+
+
+def test_BitMaskedArray():
+    content = ak.contents.NumpyArray(np.arange(13))
+    mask = ak.index.IndexU8(np.array([58, 59], dtype=np.uint8))
+    array = ak.contents.BitMaskedArray(
+        mask, content, valid_when=False, length=13, lsb_order=False
+    )
+    array = ak.to_backend(array, "cuda", highlevel=False)
+    assert cp.asarray(array.mask_as_bool(valid_when=True)).tolist() == [
+        True,
+        True,
+        False,
+        False,
+        False,
+        True,
+        False,
+        True,
+        True,
+        True,
+        False,
+        False,
+        False,
+    ]
+    assert cp.asarray(array.to_ByteMaskedArray().mask).tolist() == [
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+    ]
+    assert cp.asarray(array.to_IndexedOptionArray64().index).tolist() == [
+        0,
+        1,
+        -1,
+        -1,
+        -1,
+        5,
+        -1,
+        7,
+        8,
+        9,
+        -1,
+        -1,
+        -1,
+    ]
+    assert to_list(array) == [
+        0,
+        1,
+        None,
+        None,
+        None,
+        5,
+        None,
+        7,
+        8,
+        9,
+        None,
+        None,
+        None,
+    ]
+    del array

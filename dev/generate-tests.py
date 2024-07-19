@@ -444,6 +444,7 @@ def genspectests(specdict):
 
 """
             )
+
             f.write("import pytest\nimport numpy as np\nimport kernels\n\n")
             num = 1
             if spec.tests == []:
@@ -931,6 +932,7 @@ cuda_kernels_tests = [
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
     "awkward_IndexedArray_index_of_nulls",
+    "awkward_IndexedArray_local_preparenext_64",
     "awkward_IndexedArray_ranges_next_64",
     "awkward_IndexedArray_ranges_carry_next_64",
     "awkward_IndexedArray_reduce_next_64",
@@ -947,6 +949,7 @@ cuda_kernels_tests = [
     "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+    "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
@@ -954,18 +957,24 @@ cuda_kernels_tests = [
     "awkward_UnionArray_regular_index_getsize",
     "awkward_UnionArray_simplify",
     "awkward_UnionArray_simplify_one",
-    "awkward_reduce_argmax",
-    "awkward_reduce_argmin",
+    "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
     "awkward_reduce_count_64",
     "awkward_reduce_max",
+    "awkward_reduce_max_complex",
     "awkward_reduce_min",
+    "awkward_reduce_min_complex",
     "awkward_reduce_sum",
+    "awkward_reduce_sum_bool",
+    "awkward_reduce_sum_bool_complex",
+    "awkward_reduce_sum_complex",
     "awkward_reduce_sum_int32_bool_64",
     "awkward_reduce_sum_int64_bool_64",
-    "awkward_reduce_sum_bool",
     "awkward_reduce_prod",
     "awkward_reduce_prod_bool",
+    "awkward_reduce_prod_bool_complex",
+    "awkward_reduce_prod_complex",
     "awkward_reduce_countnonzero",
+    "awkward_reduce_countnonzero_complex",
     "awkward_sorting_ranges",
     "awkward_sorting_ranges_length",
 ]
