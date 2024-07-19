@@ -121,6 +121,8 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
         else:
             return None
 
-    out = ak._broadcasting.broadcast_and_apply(layouts, action, numpy_to_regular=True)
+    out = ak._broadcasting.broadcast_and_apply(
+        layouts, action, numpy_to_regular=True, function_name="ak.where"
+    )
 
     return ctx.wrap(out[0], highlevel=highlevel)
