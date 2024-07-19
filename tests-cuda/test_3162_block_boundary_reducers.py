@@ -118,7 +118,7 @@ def test_block_boundary_min():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.xfail(reason="awkward_reduce_argmin is not implemented")
+@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_block_boundary_argmin():
     np.random.seed(42)
     content = ak.contents.NumpyArray(np.random.randint(3000, size=3000))
@@ -136,7 +136,7 @@ def test_block_boundary_argmin():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.xfail(reason="awkward_reduce_argmax is not implemented")
+@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_block_boundary_argmax():
     np.random.seed(42)
     content = ak.contents.NumpyArray(np.random.randint(3000, size=3000))
