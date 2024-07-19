@@ -55,7 +55,7 @@ awkward_reduce_sum_bool_b(
     int64_t thread_id = blockIdx.x * blockDim.x + idx;
 
     if (thread_id < lenparents) {
-      temp[thread_id] = fromptr[thread_id];
+      temp[thread_id] = (fromptr[thread_id] != 0) ? 1 : 0;
     }
     __syncthreads();
 
@@ -66,7 +66,7 @@ awkward_reduce_sum_bool_b(
           val = temp[thread_id - stride];
         }
         __syncthreads();
-        temp[thread_id] |= (val != 0);
+        temp[thread_id] |= val;
         __syncthreads();
       }
 

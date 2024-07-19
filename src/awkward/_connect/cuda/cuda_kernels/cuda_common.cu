@@ -251,6 +251,7 @@ __device__ float atomicMax<float>(float* addr, float value) {
       __uint_as_float(atomicMin((unsigned int*)addr, __float_as_uint(value)));
   return old;
 }
+
 // atomicMax() specialization for double
 template <>
 __device__ double atomicMax<double>(double* addr, double value) {
@@ -345,4 +346,134 @@ __device__ double atomicMul<double>(double* address, double val) {
     old = atomicCAS(address_as_ull, assumed, __double_as_longlong(__longlong_as_double(assumed) * val));
   } while (assumed != old);
   return __longlong_as_double(old);
+}
+
+
+// atomicMinComplex() specialization for float
+__device__ void atomicMinComplex(float* result_real, float* result_imag, float data_real, float data_imag) {
+  unsigned int* real_addr = reinterpret_cast<unsigned int*>(result_real);
+  unsigned int* imag_addr = reinterpret_cast<unsigned int*>(result_imag);
+
+  unsigned int val_real_int = __float_as_uint(data_real);
+  unsigned int val_imag_int = __float_as_uint(data_imag);
+  unsigned int old_real_int = atomicCAS(real_addr, *real_addr, *real_addr);
+
+  while (true) {
+      unsigned int assumed_real = old_real_int;
+      float old_real = __uint_as_float(old_real_int);
+
+      if (data_real < old_real || (data_real == old_real && data_imag < __uint_as_float(atomicCAS(imag_addr, *imag_addr, *imag_addr)))) {
+          old_real_int = atomicCAS(real_addr, assumed_real, val_real_int);
+          if (old_real_int == assumed_real) {
+              atomicCAS(imag_addr, *imag_addr, val_imag_int);
+              break;
+          }
+      } else {
+          break;
+      }
+  }
+}
+
+// atomicMinComplex() specialization for double
+__device__ void atomicMinComplex(double* result_real, double* result_imag, double data_real, double data_imag) {
+  unsigned long long* real_addr = reinterpret_cast<unsigned long long*>(result_real);
+  unsigned long long* imag_addr = reinterpret_cast<unsigned long long*>(result_imag);
+
+  unsigned long long val_real_ll = __double_as_longlong(data_real);
+  unsigned long long val_imag_ll = __double_as_longlong(data_imag);
+  unsigned long long old_real_ll = atomicCAS(real_addr, *real_addr, *real_addr);
+
+  while (true) {
+      unsigned long long assumed_real = old_real_ll;
+      double old_real = __longlong_as_double(old_real_ll);
+
+      if (data_real < old_real || (data_real == old_real && data_imag < __longlong_as_double(atomicCAS(imag_addr, *imag_addr, *imag_addr)))) {
+          old_real_ll = atomicCAS(real_addr, assumed_real, val_real_ll);
+          if (old_real_ll == assumed_real) {
+              atomicCAS(imag_addr, *imag_addr, val_imag_ll);
+              break;
+          }
+      } else {
+          break;
+      }
+  }
+}
+
+// atomicMinComplex() specialization for float
+__device__ void atomicMaxComplex(float* result_real, float* result_imag, float data_real, float data_imag) {
+  unsigned int* real_addr = reinterpret_cast<unsigned int*>(result_real);
+  unsigned int* imag_addr = reinterpret_cast<unsigned int*>(result_imag);
+
+  unsigned int val_real_int = __float_as_uint(data_real);
+  unsigned int val_imag_int = __float_as_uint(data_imag);
+  unsigned int old_real_int = atomicCAS(real_addr, *real_addr, *real_addr);
+
+  while (true) {
+      unsigned int assumed_real = old_real_int;
+      float old_real = __uint_as_float(old_real_int);
+
+      if (data_real > old_real || (data_real == old_real && data_imag > __uint_as_float(atomicCAS(imag_addr, *imag_addr, *imag_addr)))) {
+          old_real_int = atomicCAS(real_addr, assumed_real, val_real_int);
+          if (old_real_int == assumed_real) {
+              atomicCAS(imag_addr, *imag_addr, val_imag_int);
+              break;
+          }
+      } else {
+          break;
+      }
+  }
+}
+
+// atomicMinComplex() specialization for double
+__device__ void atomicMaxComplex(double* result_real, double* result_imag, double data_real, double data_imag) {
+  unsigned long long* real_addr = reinterpret_cast<unsigned long long*>(result_real);
+  unsigned long long* imag_addr = reinterpret_cast<unsigned long long*>(result_imag);
+
+  unsigned long long val_real_ll = __double_as_longlong(data_real);
+  unsigned long long val_imag_ll = __double_as_longlong(data_imag);
+  unsigned long long old_real_ll = atomicCAS(real_addr, *real_addr, *real_addr);
+
+  while (true) {
+      unsigned long long assumed_real = old_real_ll;
+      double old_real = __longlong_as_double(old_real_ll);
+
+      if (data_real > old_real || (data_real == old_real && data_imag > __longlong_as_double(atomicCAS(imag_addr, *imag_addr, *imag_addr)))) {
+          old_real_ll = atomicCAS(real_addr, assumed_real, val_real_ll);
+          if (old_real_ll == assumed_real) {
+              atomicCAS(imag_addr, *imag_addr, val_imag_ll);
+              break;
+          }
+      } else {
+          break;
+      }
+  }
+}
+
+
+// atomicMulComplex() specialization for float
+__device__ void atomicMulComplex(float* addr_real, float* addr_imag, float val_real, float val_imag) {
+  unsigned int* addr_real_int = (unsigned int*)addr_real;
+  unsigned int* addr_imag_int = (unsigned int*)addr_imag;
+
+  unsigned int old_real, old_imag, new_real, new_imag;
+  do {
+      old_real = *addr_real_int;
+      old_imag = *addr_imag_int;
+
+      new_real = __float_as_int(__int_as_float(old_real) * val_real - __int_as_float(old_imag) * val_imag);
+      new_imag = __float_as_int(__int_as_float(old_real) * val_imag + __int_as_float(old_imag) * val_real);
+  } while (atomicCAS(addr_real_int, old_real, new_real) != old_real ||
+           atomicCAS(addr_imag_int, old_imag, new_imag) != old_imag);
+}
+
+// atomicMulComplex() specialization for double
+__device__ void atomicMulComplex(double* addr_real, double* addr_imag, double val_real, double val_imag) {
+  unsigned long long int old_real, old_imag, new_real, new_imag;
+  do {
+      old_real = __double_as_longlong(*addr_real);
+      old_imag = __double_as_longlong(*addr_imag);
+      new_real = __double_as_longlong(__longlong_as_double(old_real) * val_real - __longlong_as_double(old_imag) * val_imag);
+      new_imag = __double_as_longlong(__longlong_as_double(old_real) * val_imag + __longlong_as_double(old_imag) * val_real);
+  } while (atomicCAS((unsigned long long int*)addr_real, old_real, new_real) != old_real ||
+           atomicCAS((unsigned long long int*)addr_imag, old_imag, new_imag) != old_imag);
 }

@@ -337,6 +337,26 @@ def awkward_regularize_rangeslice(
         if stop > start:         stop = start
     return start, stop
 
+def awkward_ListArray_combinations_step(
+    tocarry, toindex, fromindex, j, stop, n, replacement
+):
+    while fromindex[j] < stop:
+        if replacement:
+            for k in range(j + 1, n):
+                fromindex[k] = fromindex[j]
+        else:
+            for k in range(j + 1, n):
+                fromindex[k] = fromindex[j] + (k - j)
+
+        if j + 1 == n:
+            for k in range(n):
+                tocarry[k][toindex[k]] = fromindex[k]
+                toindex[k] += 1
+        else:
+            awkward_ListArray_combinations_step(tocarry, toindex, fromindex, j + 1, stop, n, replacement)
+
+        fromindex[j] += 1
+
 """
 
     tests_spec = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec")
@@ -424,6 +444,7 @@ def genspectests(specdict):
 
 """
             )
+
             f.write("import pytest\nimport numpy as np\nimport kernels\n\n")
             num = 1
             if spec.tests == []:
@@ -588,10 +609,19 @@ def gencpukerneltests(specdict):
                     for arg, val in test["outargs"].items():
                         f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
                         if isinstance(val, list):
-                            f.write(
-                                " " * 4
-                                + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
-                            )
+                            count = typename.count("List")
+                            if count == 1:
+                                f.write(
+                                    " " * 4
+                                    + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
+                                )
+                            elif count == 2:
+                                f.write(
+                                    " " * 4
+                                    + f"for row1, row2 in zip(pytest_{arg}, {arg}_np_arr_2d[:len(pytest_{arg})]):\n"
+                                    + " " * 8
+                                    + "assert row1 == pytest.approx(row2)\n"
+                                )
                         else:
                             f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                     f.write(" " * 4 + "assert not ret_pass.str\n")
@@ -663,23 +693,29 @@ def gencpuunittests(specdict):
                         num += 1
                         f.write(funcName)
                         for arg, val in test["outputs"].items():
-                            typename = gettype(arg, spec.args)
-                            f.write(
-                                " " * 4
-                                + arg
-                                + " = "
-                                + str([gettypeval(typename)] * len(val))
-                                + "\n"
-                            )
-                            if "List" in typename:
-                                count = typename.count("List")
-                                typename = gettypename(typename)
+                            dtype = gettype(arg, spec.args)
+                            if "List" in dtype:
+                                count = dtype.count("List")
+                                typename = gettypename(dtype)
                                 if count == 1:
+                                    f.write(
+                                        " " * 4
+                                        + arg
+                                        + " = "
+                                        + str([gettypeval(dtype)] * len(val))
+                                        + "\n"
+                                    )
                                     f.write(
                                         " " * 4
                                         + f"{arg} = (ctypes.c_{typename}*len({arg}))(*{arg})\n"
                                     )
                                 elif count == 2:
+                                    f.write(" " * 4 + arg + " = [")
+                                    for size, arr in enumerate(val):
+                                        if size != 0:
+                                            f.write(", ")
+                                        f.write(str([gettypeval(dtype)] * len(arr)))
+                                    f.write("]\n")
                                     f.write(
                                         " " * 4
                                         + f"{typename}Ptr = ctypes.POINTER(ctypes.c_{typename})\n"
@@ -706,6 +742,14 @@ def gencpuunittests(specdict):
                                         + " " * 4
                                         + f"{arg} = {arg}_ct_ptr\n"
                                     )
+                            else:
+                                f.write(
+                                    " " * 4
+                                    + arg
+                                    + " = "
+                                    + str([gettypeval(dtype)] * len(val))
+                                    + "\n"
+                                )
                         for arg, val in test["inputs"].items():
                             typename = gettype(arg, spec.args)
                             f.write(" " * 4 + arg + " = " + str(val) + "\n")
@@ -781,10 +825,19 @@ def gencpuunittests(specdict):
                                     " " * 4 + "pytest_" + arg + " = " + str(val) + "\n"
                                 )
                                 if isinstance(val, list):
-                                    f.write(
-                                        " " * 4
-                                        + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
-                                    )
+                                    count = typename.count("List")
+                                    if count == 1:
+                                        f.write(
+                                            " " * 4
+                                            + f"assert {arg}[:len(pytest_{arg})] == pytest.approx(pytest_{arg})\n"
+                                        )
+                                    elif count == 2:
+                                        f.write(
+                                            " " * 4
+                                            + f"for row1, row2 in zip(pytest_{arg}, {arg}_np_arr_2d[:len(pytest_{arg})]):\n"
+                                            + " " * 8
+                                            + "assert row1 == pytest.approx(row2)\n"
+                                        )
                                 else:
                                     f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                             f.write(" " * 4 + "assert not ret_pass.str\n")
@@ -838,6 +891,8 @@ cuda_kernels_tests = [
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_combinations_length",
+    "awkward_ListArray_combinations",
+    "awkward_RegularArray_combinations_64",
     "awkward_ListArray_getitem_jagged_apply",
     "awkward_ListArray_getitem_jagged_carrylen",
     "awkward_ListArray_getitem_jagged_descend",
@@ -877,6 +932,7 @@ cuda_kernels_tests = [
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
     "awkward_IndexedArray_index_of_nulls",
+    "awkward_IndexedArray_local_preparenext_64",
     "awkward_IndexedArray_ranges_next_64",
     "awkward_IndexedArray_ranges_carry_next_64",
     "awkward_IndexedArray_reduce_next_64",
@@ -893,6 +949,7 @@ cuda_kernels_tests = [
     "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+    "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
@@ -900,18 +957,24 @@ cuda_kernels_tests = [
     "awkward_UnionArray_regular_index_getsize",
     "awkward_UnionArray_simplify",
     "awkward_UnionArray_simplify_one",
-    "awkward_reduce_argmax",
-    "awkward_reduce_argmin",
+    "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
     "awkward_reduce_count_64",
     "awkward_reduce_max",
+    "awkward_reduce_max_complex",
     "awkward_reduce_min",
+    "awkward_reduce_min_complex",
     "awkward_reduce_sum",
+    "awkward_reduce_sum_bool",
+    "awkward_reduce_sum_bool_complex",
+    "awkward_reduce_sum_complex",
     "awkward_reduce_sum_int32_bool_64",
     "awkward_reduce_sum_int64_bool_64",
-    "awkward_reduce_sum_bool",
     "awkward_reduce_prod",
     "awkward_reduce_prod_bool",
+    "awkward_reduce_prod_bool_complex",
+    "awkward_reduce_prod_complex",
     "awkward_reduce_countnonzero",
+    "awkward_reduce_countnonzero_complex",
     "awkward_sorting_ranges",
     "awkward_sorting_ranges_length",
 ]
@@ -1226,10 +1289,19 @@ def gencudaunittests(specdict):
                                     " " * 4 + "pytest_" + arg + " = " + str(val) + "\n"
                                 )
                                 if isinstance(val, list):
-                                    f.write(
-                                        " " * 4
-                                        + f"cpt.assert_allclose({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
-                                    )
+                                    count = typename.count("List")
+                                    if count == 1:
+                                        f.write(
+                                            " " * 4
+                                            + f"cpt.assert_allclose({arg}[:len(pytest_{arg})], cupy.array(pytest_{arg}))\n"
+                                        )
+                                    elif count == 2:
+                                        f.write(
+                                            " " * 4
+                                            + f"for row1, row2 in zip(pytest_{arg}, {arg}_array[:len(pytest_{arg})]):\n"
+                                            + " " * 8
+                                            + "cpt.assert_allclose(row1, row2)\n"
+                                        )
                                 else:
                                     f.write(" " * 4 + f"assert {arg} == pytest_{arg}\n")
                         f.write("\n")
@@ -1253,7 +1325,15 @@ def genunittests():
                 funcName = "def test_" + function["name"] + "_" + str(num) + "():\n"
                 file.write(funcName)
                 for key, value in test["outputs"].items():
-                    file.write("\t" + key + " = " + str([123] * len(value)) + "\n")
+                    if all(isinstance(elem, list) for elem in value) and value:
+                        file.write("\t" + key + " = [")
+                        for size in range(len(value)):
+                            if size != 0:
+                                file.write(", ")
+                            file.write(str([123] * len(value[0])))
+                        file.write("]\n")
+                    else:
+                        file.write("\t" + key + " = " + str([123] * len(value)) + "\n")
                 for key, value in test["inputs"].items():
                     file.write("\t" + key + " = " + str(value) + "\n")
                 file.write("\tfuncPy = getattr(kernels, '" + function["name"] + "')\n")
