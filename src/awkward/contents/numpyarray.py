@@ -188,9 +188,14 @@ class NumpyArray(NumpyMeta, Content):
         return to_nplike(self.data, nplike, from_nplike=self._backend.nplike)
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> NumpyForm:
+        if hasattr(self._data, "inner_shape"):
+            inner_shape = self._data.inner_shape
+        else:
+            inner_shape = self._data.shape[1:]
+
         return self.form_cls(
             ak.types.numpytype.dtype_to_primitive(self._data.dtype),
-            self._data.shape[1:],
+            inner_shape,
             parameters=self._parameters,
             form_key=getkey(self),
         )
