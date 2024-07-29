@@ -4,6 +4,7 @@ from __future__ import annotations
 import cupy as cp
 import numpy as np
 import pytest
+from numpy.exceptions import AxisError
 
 import awkward as ak
 from awkward.forms import (
@@ -269,7 +270,7 @@ def test_1904_drop_none_all_axes():
     assert (
         ak.is_none(array, axis=-2).tolist() == ak.is_none(cuda_array, axis=-2).tolist()
     )
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.drop_none(array, axis=-2).tolist()
         ak.drop_none(cuda_array, axis=-2).tolist()
 
@@ -289,7 +290,7 @@ def test_1904_drop_none_all_axes():
         ak.is_none(array2, axis=-2).tolist()
         == ak.is_none(cuda_array2, axis=-2).tolist()
     )
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.drop_none(array2, axis=-2).tolist()
         ak.drop_none(cuda_array2, axis=-2).tolist()
 
@@ -314,7 +315,7 @@ def test_1914_improved_axis_to_posaxis_is_none():
 
     assert ak.is_none(array, axis=2).tolist() == ak.is_none(cuda_array, axis=2).tolist()
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.is_none(array, axis=3)
         ak.is_none(cuda_array, axis=3)
 
@@ -326,7 +327,7 @@ def test_1914_improved_axis_to_posaxis_is_none():
         ak.is_none(array, axis=-2).tolist() == ak.is_none(cuda_array, axis=-2).tolist()
     )
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.is_none(array, axis=-3)
         ak.is_none(cuda_array, axis=-3)
 
@@ -360,7 +361,7 @@ def test_1914_improved_axis_to_posaxis_singletons():
         == ak.singletons(cuda_array, axis=2).tolist()
     )
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.singletons(array, axis=3)
         ak.singletons(cuda_array, axis=3)
 
@@ -374,7 +375,7 @@ def test_1914_improved_axis_to_posaxis_singletons():
         == ak.singletons(cuda_array, axis=-2).tolist()
     )
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.singletons(array, axis=-3)
         ak.singletons(cuda_array, axis=-3)
 
