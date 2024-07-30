@@ -6,7 +6,6 @@ import base64
 import os
 import struct
 import sys
-import typing
 from collections.abc import Collection
 
 import numpy as np  # noqa: TID251
@@ -105,16 +104,16 @@ def unique_list(items: Collection[T]) -> list[T]:
     return result
 
 
-def copy_behaviors(existing_class: typing.Any, new_class: typing.Any, behavior: dict):
+def copy_behaviors(from_name: str, to_name: str, behavior: dict):
     output = {}
 
-    oldname = existing_class.__name__
-    newname = new_class.__name__
-
     for key, value in behavior.items():
-        if oldname in key:
-            if not isinstance(key, str) and "*" not in key:
-                new_tuple = tuple(newname if k == oldname else k for k in key)
+        if isinstance(key, str):
+            if key == from_name:
+                output[to_name] = value
+        else:
+            if from_name in key:
+                new_tuple = tuple(to_name if k == from_name else k for k in key)
                 output[new_tuple] = value
 
     return output
