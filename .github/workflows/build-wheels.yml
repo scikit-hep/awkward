@@ -155,7 +155,7 @@ jobs:
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: docker/setup-qemu-action@v3.1.0
+    - uses: docker/setup-qemu-action@v3.2.0
 
     - uses: pypa/cibuildwheel@v2.19
       env:
