@@ -20,8 +20,6 @@ except ImportError:
 def test():
     v2_array = ak.Array([1, 2, 3, 4, 5]).layout
 
-    stream = cp.cuda.Stream(non_blocking=True)
-
     v2_array_cuda = ak.to_backend(v2_array, "cuda")
     with cp.cuda.Stream() as stream:
         v2_array_cuda[10,]
