@@ -62,6 +62,12 @@ def test():
     ak.behavior[numpy.add, "VectorTwoD", "VectorTwoD"] = lambda v1, v2: v1.add(v2)
     assert v + v == v_added
 
+    # instead of registering every operator again, just copy the behaviors of
+    # another class to this class
+    ak.behavior.update(
+        ak._util.copy_behaviors("VectorTwoD", "VectorTwoDAgain", ak.behavior)
+    )
+
     # second sub-class
     @ak.mixin_class(ak.behavior)
     class VectorTwoDAgain(VectorTwoD):
@@ -81,17 +87,14 @@ def test():
         with_name="VectorTwoDAgain",
         behavior=ak.behavior,
     )
-    # add method works but the binary operator does not
     assert v.add(v) == v_added
-    with pytest.raises(TypeError):
-        v + v
+    assert v + v == v_added
 
     # instead of registering every operator again, just copy the behaviors of
     # another class to this class
     ak.behavior.update(
-        ak._util.copy_behaviors(VectorTwoD, VectorTwoDAgain, ak.behavior)
+        ak._util.copy_behaviors("VectorTwoDAgain", "VectorTwoDAgainAgain", ak.behavior)
     )
-    assert v + v == v_added
 
     # third sub-class
     @ak.mixin_class(ak.behavior)
@@ -112,14 +115,5 @@ def test():
         with_name="VectorTwoDAgainAgain",
         behavior=ak.behavior,
     )
-    # add method works but the binary operator does not
     assert v.add(v) == v_added
-    with pytest.raises(TypeError):
-        v + v
-
-    # instead of registering every operator again, just copy the behaviors of
-    # another class to this class
-    ak.behavior.update(
-        ak._util.copy_behaviors(VectorTwoDAgain, VectorTwoDAgainAgain, ak.behavior)
-    )
     assert v + v == v_added
