@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import os
 
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
+
+pytest.importorskip("pyarrow.parquet")
 
 
 def test(tmp_path):
