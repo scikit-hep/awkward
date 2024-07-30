@@ -626,6 +626,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             if isinstance(
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
+                array = array._trim()
                 parameters = parameters_intersect(parameters, array._parameters)
 
                 contents.append(array.content)
@@ -1177,3 +1178,16 @@ class IndexedArray(IndexedMeta[Content], Content):
                 other.content, index_dtype, numpyarray, all_parameters
             )
         )
+
+    def _trim(self) -> Self:
+        if self._index.length == 0:
+            return self
+
+        min_idx = self._backend.index_nplike.min(self._index.data)
+        max_idx = self._backend.index_nplike.max(self._index.data)
+
+        index = Index(self._index.data - min_idx)
+
+        # left and right trim
+        content = self._content._getitem_range(min_idx, max_idx + 1)
+        return IndexedArray(index, content, parameters=self._parameters)

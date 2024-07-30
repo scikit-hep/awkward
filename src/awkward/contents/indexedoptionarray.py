@@ -761,6 +761,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             if isinstance(
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
+                array = array._trim()
                 # If we're merging an option, then merge parameters before pulling out `content`
                 parameters = parameters_intersect(parameters, array._parameters)
                 contents.append(array.content)
@@ -1766,6 +1767,21 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 other.content, index_dtype, numpyarray, all_parameters
             )
         )
+
+    def _trim(self) -> Self:
+        if self._index.length == 0:
+            return self
+
+        data = self._index.data
+        only_positive = data >= 0
+
+        min_idx = self._backend.index_nplike.min(data[only_positive])
+        max_idx = self._backend.index_nplike.max(data[only_positive])
+
+        index = Index(self._index.data - min_idx)
+        # left and right trim
+        content = self._content._getitem_range(min_idx, max_idx + 1)
+        return IndexedOptionArray(index, content, parameters=self._parameters)
 
 
 def create_missing_data(dtype, backend):
