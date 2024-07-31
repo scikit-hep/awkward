@@ -314,7 +314,7 @@ def _impl(
     else:
         column_prefix = ()
 
-    if isinstance(data, ak.Record):
+    if isinstance(layout, ak.record.Record):
         form = layout.array.form
     else:
         form = layout.form
