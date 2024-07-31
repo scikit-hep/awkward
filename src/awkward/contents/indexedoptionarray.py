@@ -761,7 +761,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             if isinstance(
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
-                array = array._trim()
+                array = array._trim() # see: #3185 and #3119
                 # If we're merging an option, then merge parameters before pulling out `content`
                 parameters = parameters_intersect(parameters, array._parameters)
                 contents.append(array.content)
@@ -1772,13 +1772,14 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         if self._index.length == 0:
             return self
 
-        data = self._index.data
-        only_positive = data >= 0
+        nplike = self._backend.index_nplike
+        idx_buf = nplike.asarray(self._index.data, copy=True)
+        only_positive = idx_buf >= 0
+        min_idx = nplike.min(idx_buf[only_positive])
+        max_idx = nplike.max(idx_buf[only_positive])
+        idx_buf[only_positive] -= min_idx
+        index = Index(idx_buf)
 
-        min_idx = self._backend.index_nplike.min(data[only_positive])
-        max_idx = self._backend.index_nplike.max(data[only_positive])
-
-        index = Index(self._index.data - min_idx)
         # left and right trim
         content = self._content._getitem_range(min_idx, max_idx + 1)
         return IndexedOptionArray(index, content, parameters=self._parameters)
