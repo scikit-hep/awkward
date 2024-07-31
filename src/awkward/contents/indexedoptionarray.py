@@ -1769,12 +1769,18 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         )
 
     def _trim(self) -> Self:
-        if self._index.length == 0:
+        nplike = self._backend.index_nplike
+
+        if not nplike.known_data or self._index.length == 0:
             return self
 
-        nplike = self._backend.index_nplike
         idx_buf = nplike.asarray(self._index.data, copy=True)
         only_positive = idx_buf >= 0
+
+        # no positive index at all
+        if not nplike.any(only_positive):
+            return self
+
         min_idx = nplike.min(idx_buf[only_positive])
         max_idx = nplike.max(idx_buf[only_positive])
         idx_buf[only_positive] -= min_idx
