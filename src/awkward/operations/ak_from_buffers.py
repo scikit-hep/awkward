@@ -136,6 +136,9 @@ def _impl(
     elif isinstance(form, dict):
         form = ak.forms.from_dict(form)
 
+    if isinstance(length, np.integer):
+        length = int(length)
+
     if not (is_integer(length) and length >= 0):
         raise TypeError("'length' argument must be a non-negative integer")
 
