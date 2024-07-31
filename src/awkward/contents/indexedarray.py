@@ -626,7 +626,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             if isinstance(
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
-                array = array._trim() # see: #3185 and #3119
+                array = array._trim()  # see: #3185 and #3119
                 parameters = parameters_intersect(parameters, array._parameters)
 
                 contents.append(array.content)

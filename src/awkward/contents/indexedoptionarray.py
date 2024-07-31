@@ -761,7 +761,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             if isinstance(
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
-                array = array._trim() # see: #3185 and #3119
+                array = array._trim()  # see: #3185 and #3119
                 # If we're merging an option, then merge parameters before pulling out `content`
                 parameters = parameters_intersect(parameters, array._parameters)
                 contents.append(array.content)
