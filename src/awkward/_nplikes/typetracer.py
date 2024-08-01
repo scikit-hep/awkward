@@ -321,6 +321,12 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._shape
 
     @property
+    def inner_shape(self) -> tuple[ShapeItem, ...]:
+        if len(self._shape) > 1:
+            self.touch_shape()
+        return self._shape[1:]
+
+    @property
     def form_key(self) -> str | None:
         return self._form_key
 
@@ -1332,8 +1338,8 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         for x in arrays:
             assert isinstance(x, TypeTracerArray)
             if inner_shape is None:
-                inner_shape = x.shape[1:]
-            elif inner_shape != x.shape[1:]:
+                inner_shape = x.inner_shape
+            elif inner_shape != x.inner_shape:
                 raise ValueError(
                     f"inner dimensions don't match in concatenate: {inner_shape} vs {x.shape[1:]}"
                 )
