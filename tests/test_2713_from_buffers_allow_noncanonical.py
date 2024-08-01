@@ -122,8 +122,8 @@ def test_union_simplification():
     )
 
     assert projected.layout.form.to_dict(verbose=False) == {
-        "class": "RecordArray",
-        "fields": ["x"],
-        "contents": ["int64"],
+        "class": "IndexedArray",
+        "index": "i64",
+        "content": {"class": "RecordArray", "fields": ["x"], "contents": ["int64"]},
     }
     assert ak.almost_equal(array[["x"]], projected)
