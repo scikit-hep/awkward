@@ -4,8 +4,6 @@
 
 #include <pybind11/pybind11.h>
 
-#include "awkward/python/content.h"
-#include "awkward/python/io.h"
 #include "awkward/python/forth.h"
 
 namespace py = pybind11;
@@ -15,15 +13,6 @@ PYBIND11_MODULE(_ext, m) {
 #else
   m.attr("__version__") = "dev";
 #endif
-
-  ////////// content.h
-
-  make_ArrayBuilder(m, "ArrayBuilder");
-
-  ////////// io.h
-
-  make_fromjsonobj(m, "fromjsonobj");
-  make_fromjsonobj_schema(m, "fromjsonobj_schema");
 
   ////////// forth.h
 
