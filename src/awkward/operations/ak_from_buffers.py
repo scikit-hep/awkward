@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-import numbers
 
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
@@ -137,11 +136,9 @@ def _impl(
     elif isinstance(form, dict):
         form = ak.forms.from_dict(form)
 
-    if isinstance(length, numbers.Integral):
-        length = int(length)
-
     if not (is_integer(length) and length >= 0):
         raise TypeError("'length' argument must be a non-negative integer")
+    length = int(length)
 
     if not isinstance(form, ak.forms.Form):
         raise TypeError(
