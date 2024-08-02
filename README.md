@@ -224,6 +224,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="http://blog.jling.dev"><img src="https://avatars.githubusercontent.com/u/5306213?v=4?s=100" width="100px;" alt="Jerry Ling"/><br /><sub><b>Jerry Ling</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Moelf" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/lobis"><img src="https://avatars.githubusercontent.com/u/35803280?v=4?s=100" width="100px;" alt="Luis Antonio Obis Aparicio"/><br /><sub><b>Luis Antonio Obis Aparicio</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=lobis" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/tcawlfield"><img src="https://avatars.githubusercontent.com/u/4094385?v=4?s=100" width="100px;" alt="Topher Cawlfield"/><br /><sub><b>Topher Cawlfield</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=tcawlfield" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/maxgalli"><img src="https://avatars.githubusercontent.com/u/26309531?v=4?s=100" width="100px;" alt="Massimiliano Galli"/><br /><sub><b>Massimiliano Galli</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=maxgalli" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
