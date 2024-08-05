@@ -298,14 +298,14 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                 counts = backend.index_nplike.zeros(
                     nextinputs[0].length, dtype=np.int64
                 )
-                all_counts = []
+                # all_counts = []
                 all_flatten = []
 
                 for x in nextinputs:
-                    o, f = x._offsets_and_flattened(1, 1)
+                    o, f = x._offsets_and_flattened(1, 1)  # axis=1, depth=1
                     c = o.data[1:] - o.data[:-1]
                     backend.index_nplike.add(counts, c, maybe_out=counts)
-                    all_counts.append(c)
+                    # all_counts.append(c)
                     all_flatten.append(f)
 
                 offsets = backend.index_nplike.empty(
@@ -316,17 +316,11 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
 
                 offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
 
-                tags, index = ak.contents.UnionArray.nested_tags_index(
-                    offsets,
-                    [ak.index.Index64(x) for x in all_counts],
-                    backend=backend,
+                as_unionarray = ak.contents.UnionArray.batch_simplified(
+                    all_flatten, mergebool=mergebool
                 )
 
-                inner = ak.contents.UnionArray.simplified(
-                    tags, index, all_flatten, mergebool=mergebool
-                )
-
-                return (ak.contents.ListOffsetArray(offsets, inner),)
+                return (ak.contents.ListOffsetArray(offsets, as_unionarray),)
 
             else:
                 return None
