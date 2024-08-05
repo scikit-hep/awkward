@@ -68,7 +68,7 @@ jobs:
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v2.19
+    - uses: pypa/cibuildwheel@v2.20
       env:
         CIBW_ARCHS_MACOS: universal2
         CIBW_BUILD: cp39-win_amd64 cp310-manylinux_x86_64 cp38-macosx_universal2
@@ -76,7 +76,7 @@ jobs:
         config-file: cibuildwheel.toml
         package-dir: awkward-cpp
 
-    - uses: pypa/cibuildwheel@v2.19
+    - uses: pypa/cibuildwheel@v2.20
       if: matrix.os == 'ubuntu-latest'
       env:
         CIBW_BUILD: cp312-manylinux_x86_64
