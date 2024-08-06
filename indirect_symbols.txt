@@ -1,0 +1,336 @@
+/Users/yana/anaconda3/envs/ak_numpy2/lib/python3.12/site-packages/awkward_cpp/lib/libawkward.dylib:
+Indirect symbols for (__TEXT,__stubs) 143 entries
+address            index name
+0x0000000000051b92   680 __Unwind_Resume
+0x0000000000051b98     7 awkward::ForthMachineOf<int, int>::internal_run(bool, long long)
+0x0000000000051b9e    15 awkward::ForthMachineOf<int, int>::run(std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::shared_ptr<awkward::ForthInputBuffer>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, std::__1::shared_ptr<awkward::ForthInputBuffer> > > > const&)
+0x0000000000051ba4    18 awkward::ForthMachineOf<int, int>::call(long long)
+0x0000000000051baa    20 awkward::ForthMachineOf<int, int>::begin(std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::shared_ptr<awkward::ForthInputBuffer>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, std::__1::shared_ptr<awkward::ForthInputBuffer> > > > const&)
+0x0000000000051bb0    22 awkward::ForthMachineOf<int, int>::parse(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > const&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&, long long, long long, std::__1::vector<int, std::__1::allocator<int> >&, std::__1::vector<std::__1::vector<int, std::__1::allocator<int> >, std::__1::allocator<std::__1::vector<int, std::__1::allocator<int> > > >&, long long, long long)
+0x0000000000051bb6    23 awkward::ForthMachineOf<int, int>::reset()
+0x0000000000051bbc    25 awkward::ForthMachineOf<int, int>::compile(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > const&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&)
+0x0000000000051bc2    26 awkward::ForthMachineOf<int, int>::tokenize(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > >&)
+0x0000000000051bc8    29 awkward::ForthMachineOf<int, int>::ForthMachineOf(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, long long, long long, long long, long long, double)
+0x0000000000051bce    31 awkward::ForthMachineOf<int, int>::~ForthMachineOf()
+0x0000000000051bd4    38 awkward::ForthMachineOf<long long, int>::internal_run(bool, long long)
+0x0000000000051bda    46 awkward::ForthMachineOf<long long, int>::run(std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::shared_ptr<awkward::ForthInputBuffer>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, std::__1::shared_ptr<awkward::ForthInputBuffer> > > > const&)
+0x0000000000051be0    49 awkward::ForthMachineOf<long long, int>::call(long long)
+0x0000000000051be6    51 awkward::ForthMachineOf<long long, int>::begin(std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::shared_ptr<awkward::ForthInputBuffer>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, std::__1::shared_ptr<awkward::ForthInputBuffer> > > > const&)
+0x0000000000051bec    53 awkward::ForthMachineOf<long long, int>::parse(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > const&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&, long long, long long, std::__1::vector<int, std::__1::allocator<int> >&, std::__1::vector<std::__1::vector<int, std::__1::allocator<int> >, std::__1::allocator<std::__1::vector<int, std::__1::allocator<int> > > >&, long long, long long)
+0x0000000000051bf2    54 awkward::ForthMachineOf<long long, int>::reset()
+0x0000000000051bf8    56 awkward::ForthMachineOf<long long, int>::compile(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > const&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&)
+0x0000000000051bfe    57 awkward::ForthMachineOf<long long, int>::tokenize(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > >&)
+0x0000000000051c04    60 awkward::ForthMachineOf<long long, int>::ForthMachineOf(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, long long, long long, long long, long long, double)
+0x0000000000051c0a    62 awkward::ForthMachineOf<long long, int>::~ForthMachineOf()
+0x0000000000051c10    92 awkward::ForthOutputBufferOf<signed char>::maybe_resize(long long)
+0x0000000000051c16   116 awkward::ForthOutputBufferOf<signed char>::ForthOutputBufferOf(long long, double)
+0x0000000000051c1c   117 awkward::ForthOutputBufferOf<signed char>::ForthOutputBufferOf(long long, double)
+0x0000000000051c22   126 awkward::ForthOutputBufferOf<bool>::maybe_resize(long long)
+0x0000000000051c28   150 awkward::ForthOutputBufferOf<bool>::ForthOutputBufferOf(long long, double)
+0x0000000000051c2e   151 awkward::ForthOutputBufferOf<bool>::ForthOutputBufferOf(long long, double)
+0x0000000000051c34   160 awkward::ForthOutputBufferOf<double>::maybe_resize(long long)
+0x0000000000051c3a   184 awkward::ForthOutputBufferOf<double>::ForthOutputBufferOf(long long, double)
+0x0000000000051c40   185 awkward::ForthOutputBufferOf<double>::ForthOutputBufferOf(long long, double)
+0x0000000000051c46   194 awkward::ForthOutputBufferOf<float>::maybe_resize(long long)
+0x0000000000051c4c   218 awkward::ForthOutputBufferOf<float>::ForthOutputBufferOf(long long, double)
+0x0000000000051c52   219 awkward::ForthOutputBufferOf<float>::ForthOutputBufferOf(long long, double)
+0x0000000000051c58   228 awkward::ForthOutputBufferOf<unsigned char>::maybe_resize(long long)
+0x0000000000051c5e   252 awkward::ForthOutputBufferOf<unsigned char>::ForthOutputBufferOf(long long, double)
+0x0000000000051c64   253 awkward::ForthOutputBufferOf<unsigned char>::ForthOutputBufferOf(long long, double)
+0x0000000000051c6a   262 awkward::ForthOutputBufferOf<int>::maybe_resize(long long)
+0x0000000000051c70   286 awkward::ForthOutputBufferOf<int>::ForthOutputBufferOf(long long, double)
+0x0000000000051c76   287 awkward::ForthOutputBufferOf<int>::ForthOutputBufferOf(long long, double)
+0x0000000000051c7c   296 awkward::ForthOutputBufferOf<unsigned int>::maybe_resize(long long)
+0x0000000000051c82   320 awkward::ForthOutputBufferOf<unsigned int>::ForthOutputBufferOf(long long, double)
+0x0000000000051c88   321 awkward::ForthOutputBufferOf<unsigned int>::ForthOutputBufferOf(long long, double)
+0x0000000000051c8e   330 awkward::ForthOutputBufferOf<short>::maybe_resize(long long)
+0x0000000000051c94   354 awkward::ForthOutputBufferOf<short>::ForthOutputBufferOf(long long, double)
+0x0000000000051c9a   355 awkward::ForthOutputBufferOf<short>::ForthOutputBufferOf(long long, double)
+0x0000000000051ca0   364 awkward::ForthOutputBufferOf<unsigned short>::maybe_resize(long long)
+0x0000000000051ca6   388 awkward::ForthOutputBufferOf<unsigned short>::ForthOutputBufferOf(long long, double)
+0x0000000000051cac   389 awkward::ForthOutputBufferOf<unsigned short>::ForthOutputBufferOf(long long, double)
+0x0000000000051cb2   398 awkward::ForthOutputBufferOf<long long>::maybe_resize(long long)
+0x0000000000051cb8   422 awkward::ForthOutputBufferOf<long long>::ForthOutputBufferOf(long long, double)
+0x0000000000051cbe   423 awkward::ForthOutputBufferOf<long long>::ForthOutputBufferOf(long long, double)
+0x0000000000051cc4   432 awkward::ForthOutputBufferOf<unsigned long long>::maybe_resize(long long)
+0x0000000000051cca   456 awkward::ForthOutputBufferOf<unsigned long long>::ForthOutputBufferOf(long long, double)
+0x0000000000051cd0   457 awkward::ForthOutputBufferOf<unsigned long long>::ForthOutputBufferOf(long long, double)
+0x0000000000051cd6   462 awkward::ForthMachineOf<int, int>::is_defined(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051cdc   463 awkward::ForthMachineOf<int, int>::is_integer(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, long long&) const
+0x0000000000051ce2   467 awkward::ForthMachineOf<int, int>::err_linecol(std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&, long long, long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051ce8   469 awkward::ForthMachineOf<int, int>::is_variable(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051cee   477 awkward::ForthMachineOf<int, int>::decompiled_at(long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051cf4   494 awkward::ForthMachineOf<int, int>::decompiled_segment(long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, bool) const
+0x0000000000051cfa   515 awkward::ForthMachineOf<int, int>::is_nbit(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int&) const
+0x0000000000051d00   517 awkward::ForthMachineOf<int, int>::is_input(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051d06   521 awkward::ForthMachineOf<int, int>::is_output(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051d0c   528 awkward::ForthMachineOf<long long, int>::is_defined(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051d12   529 awkward::ForthMachineOf<long long, int>::is_integer(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, long long&) const
+0x0000000000051d18   533 awkward::ForthMachineOf<long long, int>::err_linecol(std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&, long long, long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051d1e   535 awkward::ForthMachineOf<long long, int>::is_variable(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051d24   543 awkward::ForthMachineOf<long long, int>::decompiled_at(long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051d2a   560 awkward::ForthMachineOf<long long, int>::decompiled_segment(long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, bool) const
+0x0000000000051d30   581 awkward::ForthMachineOf<long long, int>::is_nbit(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int&) const
+0x0000000000051d36   583 awkward::ForthMachineOf<long long, int>::is_input(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051d3c   587 awkward::ForthMachineOf<long long, int>::is_output(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000051d42   682 std::__1::locale::use_facet(std::__1::locale::id&) const
+0x0000000000051d48   683 std::__1::ios_base::getloc() const
+0x0000000000051d4e   684 std::logic_error::logic_error(char const*)
+0x0000000000051d54   685 std::logic_error::logic_error(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0x0000000000051d5a   688 std::runtime_error::runtime_error(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0x0000000000051d60   691 std::bad_array_new_length::bad_array_new_length()
+0x0000000000051d66   693 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::append(char const*)
+0x0000000000051d6c   694 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::append(char const*, unsigned long)
+0x0000000000051d72   695 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::assign(char const*)
+0x0000000000051d78   696 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::insert(unsigned long, char const*)
+0x0000000000051d7e   697 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::insert(unsigned long, char const*, unsigned long)
+0x0000000000051d84   698 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::resize(unsigned long, char)
+0x0000000000051d8a   699 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::replace(unsigned long, unsigned long, char const*)
+0x0000000000051d90   700 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::push_back(char)
+0x0000000000051d96   701 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::basic_string(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0x0000000000051d9c   702 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::basic_string(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, unsigned long, unsigned long, std::__1::allocator<char> const&)
+0x0000000000051da2   703 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::operator=(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0x0000000000051da8   706 std::__1::basic_ostream<char, std::__1::char_traits<char> >::put(char)
+0x0000000000051dae   707 std::__1::basic_ostream<char, std::__1::char_traits<char> >::flush()
+0x0000000000051db4   708 std::__1::basic_ostream<char, std::__1::char_traits<char> >::sentry::sentry(std::__1::basic_ostream<char, std::__1::char_traits<char> >&)
+0x0000000000051dba   709 std::__1::basic_ostream<char, std::__1::char_traits<char> >::sentry::~sentry()
+0x0000000000051dc0   712 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(bool)
+0x0000000000051dc6   713 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(double)
+0x0000000000051dcc   714 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(float)
+0x0000000000051dd2   715 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(int)
+0x0000000000051dd8   716 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(unsigned int)
+0x0000000000051dde   717 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(short)
+0x0000000000051de4   718 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(unsigned short)
+0x0000000000051dea   719 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(long long)
+0x0000000000051df0   720 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(unsigned long long)
+0x0000000000051df6   723 std::__1::basic_iostream<char, std::__1::char_traits<char> >::~basic_iostream()
+0x0000000000051dfc   731 std::__1::basic_streambuf<char, std::__1::char_traits<char> >::basic_streambuf()
+0x0000000000051e02   732 std::__1::basic_streambuf<char, std::__1::char_traits<char> >::~basic_streambuf()
+0x0000000000051e08   733 std::__1::__shared_weak_count::__release_weak()
+0x0000000000051e0e   734 std::__1::__shared_weak_count::~__shared_weak_count()
+0x0000000000051e14   735 std::__1::stoi(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, unsigned long*, int)
+0x0000000000051e1a   737 std::__1::stoul(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, unsigned long*, int)
+0x0000000000051e20   738 std::__1::chrono::steady_clock::now()
+0x0000000000051e26   739 std::__1::locale::~locale()
+0x0000000000051e2c   740 std::__1::ios_base::__set_badbit_and_consider_rethrow()
+0x0000000000051e32   741 std::__1::ios_base::init(void*)
+0x0000000000051e38   742 std::__1::ios_base::clear(unsigned int)
+0x0000000000051e3e   743 std::__1::basic_ios<char, std::__1::char_traits<char> >::~basic_ios()
+0x0000000000051e44   744 std::__1::to_string(int)
+0x0000000000051e4a   745 std::__1::to_string(long long)
+0x0000000000051e50   746 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > std::__1::operator+<char, std::__1::char_traits<char>, std::__1::allocator<char> >(char const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0x0000000000051e56   747 std::terminate()
+0x0000000000051e5c   771 operator delete[](void*)
+0x0000000000051e62   772 operator delete(void*)
+0x0000000000051e68   773 operator new[](unsigned long)
+0x0000000000051e6e   774 operator new(unsigned long)
+0x0000000000051e74   775 ___bzero
+0x0000000000051e7a   776 ___cxa_allocate_exception
+0x0000000000051e80   777 ___cxa_atexit
+0x0000000000051e86   778 ___cxa_begin_catch
+0x0000000000051e8c   779 ___cxa_end_catch
+0x0000000000051e92   780 ___cxa_free_exception
+0x0000000000051e98   782 ___cxa_rethrow
+0x0000000000051e9e   783 ___cxa_throw
+0x0000000000051ea4   785 ___stack_chk_fail
+0x0000000000051eaa   787 _free
+0x0000000000051eb0   788 _memchr
+0x0000000000051eb6   789 _memcmp
+0x0000000000051ebc   790 _memcpy
+0x0000000000051ec2   791 _memmove
+0x0000000000051ec8   792 _memset
+0x0000000000051ece   793 _printf
+0x0000000000051ed4   794 _putchar
+0x0000000000051eda   795 _realloc
+0x0000000000051ee0   796 _strlen
+0x0000000000051ee6   797 _strncmp
+Indirect symbols for (__DATA_CONST,__got) 43 entries
+address            index name
+0x000000000005c000   686 std::length_error::~length_error()
+0x000000000005c008   687 std::out_of_range::~out_of_range()
+0x000000000005c010   689 std::runtime_error::~runtime_error()
+0x000000000005c018   690 std::invalid_argument::~invalid_argument()
+0x000000000005c020   692 std::bad_array_new_length::~bad_array_new_length()
+0x000000000005c028   736 std::__1::ctype<char>::id
+0x000000000005c030 LOCAL
+0x000000000005c038   753 typeinfo for std::length_error
+0x000000000005c040   754 typeinfo for std::out_of_range
+0x000000000005c048   755 typeinfo for std::runtime_error
+0x000000000005c050   756 typeinfo for std::invalid_argument
+0x000000000005c058   757 typeinfo for std::bad_array_new_length
+0x000000000005c060   655 typeinfo name for awkward::util::array_deleter<signed char>
+0x000000000005c068   656 typeinfo name for awkward::util::array_deleter<bool>
+0x000000000005c070   657 typeinfo name for awkward::util::array_deleter<double>
+0x000000000005c078   658 typeinfo name for awkward::util::array_deleter<float>
+0x000000000005c080   659 typeinfo name for awkward::util::array_deleter<unsigned char>
+0x000000000005c088   660 typeinfo name for awkward::util::array_deleter<int>
+0x000000000005c090   661 typeinfo name for awkward::util::array_deleter<unsigned int>
+0x000000000005c098   662 typeinfo name for awkward::util::array_deleter<short>
+0x000000000005c0a0   663 typeinfo name for awkward::util::array_deleter<unsigned short>
+0x000000000005c0a8   664 typeinfo name for awkward::util::array_deleter<long long>
+0x000000000005c0b0   665 typeinfo name for awkward::util::array_deleter<unsigned long long>
+0x000000000005c0b8 LOCAL
+0x000000000005c0c0   669 vtable for awkward::ForthOutputBufferOf<signed char>
+0x000000000005c0c8   670 vtable for awkward::ForthOutputBufferOf<bool>
+0x000000000005c0d0   671 vtable for awkward::ForthOutputBufferOf<double>
+0x000000000005c0d8   672 vtable for awkward::ForthOutputBufferOf<float>
+0x000000000005c0e0   673 vtable for awkward::ForthOutputBufferOf<unsigned char>
+0x000000000005c0e8   674 vtable for awkward::ForthOutputBufferOf<int>
+0x000000000005c0f0   675 vtable for awkward::ForthOutputBufferOf<unsigned int>
+0x000000000005c0f8   676 vtable for awkward::ForthOutputBufferOf<short>
+0x000000000005c100   677 vtable for awkward::ForthOutputBufferOf<unsigned short>
+0x000000000005c108   678 vtable for awkward::ForthOutputBufferOf<long long>
+0x000000000005c110   679 vtable for awkward::ForthOutputBufferOf<unsigned long long>
+0x000000000005c118 LOCAL
+0x000000000005c120 LOCAL
+0x000000000005c128   760 vtable for std::length_error
+0x000000000005c130   761 vtable for std::out_of_range
+0x000000000005c138   762 vtable for std::invalid_argument
+0x000000000005c140   784 ___gxx_personality_v0
+0x000000000005c148   786 ___stack_chk_guard
+0x000000000005c150   798 dyld_stub_binder
+Indirect symbols for (__DATA,__la_symbol_ptr) 143 entries
+address            index name
+0x0000000000060000   680 __Unwind_Resume
+0x0000000000060008     7 awkward::ForthMachineOf<int, int>::internal_run(bool, long long)
+0x0000000000060010    15 awkward::ForthMachineOf<int, int>::run(std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::shared_ptr<awkward::ForthInputBuffer>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, std::__1::shared_ptr<awkward::ForthInputBuffer> > > > const&)
+0x0000000000060018    18 awkward::ForthMachineOf<int, int>::call(long long)
+0x0000000000060020    20 awkward::ForthMachineOf<int, int>::begin(std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::shared_ptr<awkward::ForthInputBuffer>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, std::__1::shared_ptr<awkward::ForthInputBuffer> > > > const&)
+0x0000000000060028    22 awkward::ForthMachineOf<int, int>::parse(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > const&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&, long long, long long, std::__1::vector<int, std::__1::allocator<int> >&, std::__1::vector<std::__1::vector<int, std::__1::allocator<int> >, std::__1::allocator<std::__1::vector<int, std::__1::allocator<int> > > >&, long long, long long)
+0x0000000000060030    23 awkward::ForthMachineOf<int, int>::reset()
+0x0000000000060038    25 awkward::ForthMachineOf<int, int>::compile(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > const&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&)
+0x0000000000060040    26 awkward::ForthMachineOf<int, int>::tokenize(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > >&)
+0x0000000000060048    29 awkward::ForthMachineOf<int, int>::ForthMachineOf(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, long long, long long, long long, long long, double)
+0x0000000000060050    31 awkward::ForthMachineOf<int, int>::~ForthMachineOf()
+0x0000000000060058    38 awkward::ForthMachineOf<long long, int>::internal_run(bool, long long)
+0x0000000000060060    46 awkward::ForthMachineOf<long long, int>::run(std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::shared_ptr<awkward::ForthInputBuffer>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, std::__1::shared_ptr<awkward::ForthInputBuffer> > > > const&)
+0x0000000000060068    49 awkward::ForthMachineOf<long long, int>::call(long long)
+0x0000000000060070    51 awkward::ForthMachineOf<long long, int>::begin(std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::shared_ptr<awkward::ForthInputBuffer>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const, std::__1::shared_ptr<awkward::ForthInputBuffer> > > > const&)
+0x0000000000060078    53 awkward::ForthMachineOf<long long, int>::parse(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > const&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&, long long, long long, std::__1::vector<int, std::__1::allocator<int> >&, std::__1::vector<std::__1::vector<int, std::__1::allocator<int> >, std::__1::allocator<std::__1::vector<int, std::__1::allocator<int> > > >&, long long, long long)
+0x0000000000060080    54 awkward::ForthMachineOf<long long, int>::reset()
+0x0000000000060088    56 awkward::ForthMachineOf<long long, int>::compile(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > const&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&)
+0x0000000000060090    57 awkward::ForthMachineOf<long long, int>::tokenize(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >&, std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > >&)
+0x0000000000060098    60 awkward::ForthMachineOf<long long, int>::ForthMachineOf(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, long long, long long, long long, long long, double)
+0x00000000000600a0    62 awkward::ForthMachineOf<long long, int>::~ForthMachineOf()
+0x00000000000600a8    92 awkward::ForthOutputBufferOf<signed char>::maybe_resize(long long)
+0x00000000000600b0   116 awkward::ForthOutputBufferOf<signed char>::ForthOutputBufferOf(long long, double)
+0x00000000000600b8   117 awkward::ForthOutputBufferOf<signed char>::ForthOutputBufferOf(long long, double)
+0x00000000000600c0   126 awkward::ForthOutputBufferOf<bool>::maybe_resize(long long)
+0x00000000000600c8   150 awkward::ForthOutputBufferOf<bool>::ForthOutputBufferOf(long long, double)
+0x00000000000600d0   151 awkward::ForthOutputBufferOf<bool>::ForthOutputBufferOf(long long, double)
+0x00000000000600d8   160 awkward::ForthOutputBufferOf<double>::maybe_resize(long long)
+0x00000000000600e0   184 awkward::ForthOutputBufferOf<double>::ForthOutputBufferOf(long long, double)
+0x00000000000600e8   185 awkward::ForthOutputBufferOf<double>::ForthOutputBufferOf(long long, double)
+0x00000000000600f0   194 awkward::ForthOutputBufferOf<float>::maybe_resize(long long)
+0x00000000000600f8   218 awkward::ForthOutputBufferOf<float>::ForthOutputBufferOf(long long, double)
+0x0000000000060100   219 awkward::ForthOutputBufferOf<float>::ForthOutputBufferOf(long long, double)
+0x0000000000060108   228 awkward::ForthOutputBufferOf<unsigned char>::maybe_resize(long long)
+0x0000000000060110   252 awkward::ForthOutputBufferOf<unsigned char>::ForthOutputBufferOf(long long, double)
+0x0000000000060118   253 awkward::ForthOutputBufferOf<unsigned char>::ForthOutputBufferOf(long long, double)
+0x0000000000060120   262 awkward::ForthOutputBufferOf<int>::maybe_resize(long long)
+0x0000000000060128   286 awkward::ForthOutputBufferOf<int>::ForthOutputBufferOf(long long, double)
+0x0000000000060130   287 awkward::ForthOutputBufferOf<int>::ForthOutputBufferOf(long long, double)
+0x0000000000060138   296 awkward::ForthOutputBufferOf<unsigned int>::maybe_resize(long long)
+0x0000000000060140   320 awkward::ForthOutputBufferOf<unsigned int>::ForthOutputBufferOf(long long, double)
+0x0000000000060148   321 awkward::ForthOutputBufferOf<unsigned int>::ForthOutputBufferOf(long long, double)
+0x0000000000060150   330 awkward::ForthOutputBufferOf<short>::maybe_resize(long long)
+0x0000000000060158   354 awkward::ForthOutputBufferOf<short>::ForthOutputBufferOf(long long, double)
+0x0000000000060160   355 awkward::ForthOutputBufferOf<short>::ForthOutputBufferOf(long long, double)
+0x0000000000060168   364 awkward::ForthOutputBufferOf<unsigned short>::maybe_resize(long long)
+0x0000000000060170   388 awkward::ForthOutputBufferOf<unsigned short>::ForthOutputBufferOf(long long, double)
+0x0000000000060178   389 awkward::ForthOutputBufferOf<unsigned short>::ForthOutputBufferOf(long long, double)
+0x0000000000060180   398 awkward::ForthOutputBufferOf<long long>::maybe_resize(long long)
+0x0000000000060188   422 awkward::ForthOutputBufferOf<long long>::ForthOutputBufferOf(long long, double)
+0x0000000000060190   423 awkward::ForthOutputBufferOf<long long>::ForthOutputBufferOf(long long, double)
+0x0000000000060198   432 awkward::ForthOutputBufferOf<unsigned long long>::maybe_resize(long long)
+0x00000000000601a0   456 awkward::ForthOutputBufferOf<unsigned long long>::ForthOutputBufferOf(long long, double)
+0x00000000000601a8   457 awkward::ForthOutputBufferOf<unsigned long long>::ForthOutputBufferOf(long long, double)
+0x00000000000601b0   462 awkward::ForthMachineOf<int, int>::is_defined(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x00000000000601b8   463 awkward::ForthMachineOf<int, int>::is_integer(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, long long&) const
+0x00000000000601c0   467 awkward::ForthMachineOf<int, int>::err_linecol(std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&, long long, long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x00000000000601c8   469 awkward::ForthMachineOf<int, int>::is_variable(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x00000000000601d0   477 awkward::ForthMachineOf<int, int>::decompiled_at(long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x00000000000601d8   494 awkward::ForthMachineOf<int, int>::decompiled_segment(long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, bool) const
+0x00000000000601e0   515 awkward::ForthMachineOf<int, int>::is_nbit(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int&) const
+0x00000000000601e8   517 awkward::ForthMachineOf<int, int>::is_input(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x00000000000601f0   521 awkward::ForthMachineOf<int, int>::is_output(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x00000000000601f8   528 awkward::ForthMachineOf<long long, int>::is_defined(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000060200   529 awkward::ForthMachineOf<long long, int>::is_integer(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, long long&) const
+0x0000000000060208   533 awkward::ForthMachineOf<long long, int>::err_linecol(std::__1::vector<std::__1::pair<long long, long long>, std::__1::allocator<std::__1::pair<long long, long long> > > const&, long long, long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000060210   535 awkward::ForthMachineOf<long long, int>::is_variable(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000060218   543 awkward::ForthMachineOf<long long, int>::decompiled_at(long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000060220   560 awkward::ForthMachineOf<long long, int>::decompiled_segment(long long, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, bool) const
+0x0000000000060228   581 awkward::ForthMachineOf<long long, int>::is_nbit(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int&) const
+0x0000000000060230   583 awkward::ForthMachineOf<long long, int>::is_input(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000060238   587 awkward::ForthMachineOf<long long, int>::is_output(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) const
+0x0000000000060240   682 std::__1::locale::use_facet(std::__1::locale::id&) const
+0x0000000000060248   683 std::__1::ios_base::getloc() const
+0x0000000000060250   684 std::logic_error::logic_error(char const*)
+0x0000000000060258   685 std::logic_error::logic_error(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0x0000000000060260   688 std::runtime_error::runtime_error(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0x0000000000060268   691 std::bad_array_new_length::bad_array_new_length()
+0x0000000000060270   693 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::append(char const*)
+0x0000000000060278   694 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::append(char const*, unsigned long)
+0x0000000000060280   695 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::assign(char const*)
+0x0000000000060288   696 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::insert(unsigned long, char const*)
+0x0000000000060290   697 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::insert(unsigned long, char const*, unsigned long)
+0x0000000000060298   698 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::resize(unsigned long, char)
+0x00000000000602a0   699 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::replace(unsigned long, unsigned long, char const*)
+0x00000000000602a8   700 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::push_back(char)
+0x00000000000602b0   701 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::basic_string(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0x00000000000602b8   702 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::basic_string(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, unsigned long, unsigned long, std::__1::allocator<char> const&)
+0x00000000000602c0   703 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::operator=(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0x00000000000602c8   706 std::__1::basic_ostream<char, std::__1::char_traits<char> >::put(char)
+0x00000000000602d0   707 std::__1::basic_ostream<char, std::__1::char_traits<char> >::flush()
+0x00000000000602d8   708 std::__1::basic_ostream<char, std::__1::char_traits<char> >::sentry::sentry(std::__1::basic_ostream<char, std::__1::char_traits<char> >&)
+0x00000000000602e0   709 std::__1::basic_ostream<char, std::__1::char_traits<char> >::sentry::~sentry()
+0x00000000000602e8   712 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(bool)
+0x00000000000602f0   713 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(double)
+0x00000000000602f8   714 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(float)
+0x0000000000060300   715 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(int)
+0x0000000000060308   716 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(unsigned int)
+0x0000000000060310   717 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(short)
+0x0000000000060318   718 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(unsigned short)
+0x0000000000060320   719 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(long long)
+0x0000000000060328   720 std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(unsigned long long)
+0x0000000000060330   723 std::__1::basic_iostream<char, std::__1::char_traits<char> >::~basic_iostream()
+0x0000000000060338   731 std::__1::basic_streambuf<char, std::__1::char_traits<char> >::basic_streambuf()
+0x0000000000060340   732 std::__1::basic_streambuf<char, std::__1::char_traits<char> >::~basic_streambuf()
+0x0000000000060348   733 std::__1::__shared_weak_count::__release_weak()
+0x0000000000060350   734 std::__1::__shared_weak_count::~__shared_weak_count()
+0x0000000000060358   735 std::__1::stoi(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, unsigned long*, int)
+0x0000000000060360   737 std::__1::stoul(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, unsigned long*, int)
+0x0000000000060368   738 std::__1::chrono::steady_clock::now()
+0x0000000000060370   739 std::__1::locale::~locale()
+0x0000000000060378   740 std::__1::ios_base::__set_badbit_and_consider_rethrow()
+0x0000000000060380   741 std::__1::ios_base::init(void*)
+0x0000000000060388   742 std::__1::ios_base::clear(unsigned int)
+0x0000000000060390   743 std::__1::basic_ios<char, std::__1::char_traits<char> >::~basic_ios()
+0x0000000000060398   744 std::__1::to_string(int)
+0x00000000000603a0   745 std::__1::to_string(long long)
+0x00000000000603a8   746 std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > std::__1::operator+<char, std::__1::char_traits<char>, std::__1::allocator<char> >(char const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0x00000000000603b0   747 std::terminate()
+0x00000000000603b8   771 operator delete[](void*)
+0x00000000000603c0   772 operator delete(void*)
+0x00000000000603c8   773 operator new[](unsigned long)
+0x00000000000603d0   774 operator new(unsigned long)
+0x00000000000603d8   775 ___bzero
+0x00000000000603e0   776 ___cxa_allocate_exception
+0x00000000000603e8   777 ___cxa_atexit
+0x00000000000603f0   778 ___cxa_begin_catch
+0x00000000000603f8   779 ___cxa_end_catch
+0x0000000000060400   780 ___cxa_free_exception
+0x0000000000060408   782 ___cxa_rethrow
+0x0000000000060410   783 ___cxa_throw
+0x0000000000060418   785 ___stack_chk_fail
+0x0000000000060420   787 _free
+0x0000000000060428   788 _memchr
+0x0000000000060430   789 _memcmp
+0x0000000000060438   790 _memcpy
+0x0000000000060440   791 _memmove
+0x0000000000060448   792 _memset
+0x0000000000060450   793 _printf
+0x0000000000060458   794 _putchar
+0x0000000000060460   795 _realloc
+0x0000000000060468   796 _strlen
+0x0000000000060470   797 _strncmp

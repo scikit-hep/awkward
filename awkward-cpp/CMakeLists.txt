@@ -11,14 +11,6 @@ project(
 message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
-if(CMAKE_CXX_COMPILER_ID MATCHES AppleClang AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL
-                                                15)
-  if(CMAKE_VERSION VERSION_LESS 3.29)
-    message(WARNING "CMake should be 3.29+ to support AppleClang 15+. Trying anyway.")
-  endif()
-  set(CMAKE_LINKER_TYPE APPLE_CLASSIC)
-endif()
-
 # Check for header-only libraries
 if(NOT (EXISTS "header-only" AND EXISTS "include/awkward/kernels.h"))
   message(
@@ -42,7 +34,6 @@ endif()
 
 # Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)],
 # libawkward (C++), and Python modules.
-file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp")
 file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 
 # Shared properties
@@ -57,15 +48,6 @@ target_include_directories(awkward-parent INTERFACE rapidjson/include)
 # C++ dependencies (header-only): GrowableBuffer
 add_subdirectory(header-only EXCLUDE_FROM_ALL)
 target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
-
-# First tier: cpu-kernels
-add_library(awkward-cpu-kernels SHARED ${CPU_KERNEL_SOURCES})
-target_link_libraries(awkward-cpu-kernels PUBLIC awkward-parent)
-set_target_properties(
-  awkward-cpu-kernels
-  PROPERTIES CXX_VISIBILITY_PRESET hidden
-             VISIBILITY_INLINES_HIDDEN ON
-             CXX_EXTENSIONS NO)
 
 # Second tier: libawkward
 add_library(awkward SHARED ${LIBAWKWARD_SOURCES})
@@ -109,7 +91,7 @@ set_target_properties(
 file(GLOB_RECURSE PYTHON_SOURCES "src/${SKBUILD_PROJECT_NAME}/*.py")
 
 install(
-  TARGETS awkward awkward-parent awkward-cpu-kernels _ext
+  TARGETS awkward awkward-parent _ext
   LIBRARY DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
   RUNTIME DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
   ARCHIVE DESTINATION "${SKBUILD_PROJECT_NAME}/lib")
