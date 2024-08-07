@@ -308,7 +308,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                 all_flatten = []
 
                 for x in nextinputs:
-                    o, f = x._offsets_and_flattened(1, 1)  # axis=1, depth=1
+                    o, f = x._offsets_and_flattened(axis=1, depth=1)
                     c = o.data[1:] - o.data[:-1]
                     backend.index_nplike.add(counts, c, maybe_out=counts)
                     all_counts.append(c)
