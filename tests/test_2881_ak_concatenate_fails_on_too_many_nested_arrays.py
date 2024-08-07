@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import awkward as ak
+
 # from awkward.operations import to_list
 
 
@@ -15,10 +16,19 @@ def test_concatenate_as_reported():
     assert a_concat_129.to_list() == [[1] * 129]
 
 
-def test_concatenate_inner_union():
+def test_concatenate_inner_union_simplify_one():
     a = ak.Array([[99]])
-    astr = ak.Array(['a b c d'.split()])
+    astr = ak.Array(["a b c d".split()])
     aa = [a for i in range(129)] + [astr]
 
     cu = ak.concatenate(aa, axis=1)
-    assert cu.to_list() == [[99] * 129 + ['a', 'b', 'c', 'd']]
+    assert cu.to_list() == [[99] * 129 + ["a", "b", "c", "d"]]
+
+
+def test_concatenate_inner_union_simplify():
+    a = ak.Array([[99]])
+    amulti = ak.Array([[1, 2, "a", "b"]])
+    aa = [a for i in range(129)] + [amulti]
+
+    cu = ak.concatenate(aa, axis=1)
+    assert cu.to_list() == [[99] * 129 + [1, 2, "a", "b"]]

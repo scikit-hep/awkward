@@ -275,7 +275,7 @@ class UnionArray(UnionMeta[Content], Content):
                                     "awkward_UnionArray_simplify",
                                     tags.dtype.type,
                                     index.dtype.type,
-                                    self_tags.dtype.type,  # TPH: hardcode I8?
+                                    self_tags.dtype.type,
                                     self_index.dtype.type,
                                     innertags.dtype.type,
                                     innerindex.dtype.type,
@@ -394,6 +394,7 @@ class UnionArray(UnionMeta[Content], Content):
                     contents.append(self_cont)
 
         if len(contents) > 2**7:
+            # TODO: Catch this condition in the loops above.
             raise NotImplementedError(
                 "FIXME: handle UnionArray with more than 127 contents"
             )
@@ -441,63 +442,6 @@ class UnionArray(UnionMeta[Content], Content):
                 contents,
                 parameters=parameters,
             )
-
-    @classmethod
-    def batch_simplified(
-        cls,
-        contents,
-        parameters=None,
-        mergebool=False,
-    ):
-        """
-        Developed for ak.concatenate, this assumes that contents are all instances
-        of akcontents.Content, and all have the same backend.
-        """
-        # Get backend (simplify or use _layout.ensure_same_backend)
-        backend = None
-        for content in contents:
-            if backend is None:
-                backend = content.backend
-            elif backend is not content.backend:
-                raise TypeError(
-                    f"{cls.__name__} 'contents' must use the same array library (backend): {type(backend).__name__} vs {type(content.backend).__name__}"
-                )
-
-        batches = [[contents[0]]]
-        for x in contents[1:]:
-            batch = batches[-1]
-            if ak._do.mergeable(batch[0], x, mergebool=mergebool):
-                batch.append(x)
-            else:
-                batches.append([x])
-
-        contents = [ak._do.mergemany(b) if len(b) > 0 else b for b in batches]
-        if len(contents) == 1:
-            return contents[0]
-
-        length = sum(c.length for c in contents)
-        first = contents[0]
-        tags = ak.index.Index8.empty(length, first.backend.index_nplike)
-        index = ak.index.Index64.empty(length, first.backend.index_nplike)
-
-        offset = 0
-        for i, content in enumerate(contents):
-            content.backend.maybe_kernel_error(
-                content.backend["awkward_UnionArray_filltags_const", tags.dtype.type](
-                    tags.data, offset, content.length, i
-                )
-            )
-            content.backend.maybe_kernel_error(
-                content.backend["awkward_UnionArray_fillindex_count", index.dtype.type](
-                    index.data, offset, content.length
-                )
-            )
-            offset += content.length
-
-        out = ak.contents.UnionArray.simplified(
-            tags, index, contents, parameters=parameters
-        )
-        return out
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> UnionForm:
         form_key = getkey(self)

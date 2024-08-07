@@ -55,3 +55,13 @@ ERROR awkward_UnionArray8_64_nestedfill_tags_index_64(
   return awkward_UnionArray_nestedfill_tags_index<int8_t, int64_t, int64_t>(
     totags, toindex, tmpstarts, tag, fromcounts, length);
 }
+ERROR awkward_UnionArray64_64_nestedfill_tags_index_64(
+  int64_t* totags,
+  int64_t* toindex,
+  int64_t* tmpstarts,
+  int64_t tag,
+  const int64_t* fromcounts,
+  int64_t length) {
+  return awkward_UnionArray_nestedfill_tags_index<int64_t, int64_t, int64_t>(
+    totags, toindex, tmpstarts, tag, fromcounts, length);
+}
