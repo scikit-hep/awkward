@@ -152,7 +152,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
         batches = [[content_or_others[0]]]
         for x in content_or_others[1:]:
             batch = batches[-1]
-            if ak._do.mergeable(batch[0], x, mergebool=mergebool):
+            if ak._do.mergeable(batch[-1], x, mergebool=mergebool):
                 batch.append(x)
             else:
                 batches.append([x])
