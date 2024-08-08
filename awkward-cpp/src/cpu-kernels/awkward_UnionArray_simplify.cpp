@@ -258,3 +258,28 @@ ERROR awkward_UnionArray8_64_simplify8_64_to8_64(
     length,
     base);
 }
+ERROR awkward_UnionArray64_64_simplify8_64_to8_64(
+  int8_t* totags,
+  int64_t* toindex,
+  const int64_t* outertags,
+  const int64_t* outerindex,
+  const int8_t* innertags,
+  const int64_t* innerindex,
+  int64_t towhich,
+  int64_t innerwhich,
+  int64_t outerwhich,
+  int64_t length,
+  int64_t base) {
+  return awkward_UnionArray_simplify<int64_t, int64_t, int8_t, int64_t, int8_t, int64_t>(
+    totags,
+    toindex,
+    outertags,
+    outerindex,
+    innertags,
+    innerindex,
+    towhich,
+    innerwhich,
+    outerwhich,
+    length,
+    base);
+}
