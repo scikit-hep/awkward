@@ -364,11 +364,12 @@ class EmptyArray(EmptyMeta, Content):
         if options["emptyarray_to"] is None:
             return pyarrow.Array.from_buffers(
                 ak._connect.pyarrow.to_awkwardarrow_type(
-                    pyarrow.null(),
-                    options["extensionarray"],
-                    options["record_is_scalar"],
-                    mask_node,
-                    self,
+                    storage_type=pyarrow.null(),
+                    use_extensionarray=options["extensionarray"],
+                    record_is_scalar=options["record_is_scalar"],
+                    mask=mask_node,
+                    node=self,
+                    is_nonnullable_nulltype=mask_node is None,
                 ),
                 length,
                 [
@@ -394,6 +395,10 @@ class EmptyArray(EmptyMeta, Content):
             backend=self._backend,
         )
         return next._to_cudf(cudf, None, 0)
+
+    @classmethod
+    def _arrow_needs_option_type(cls):
+        return True  # This overrides Content._arrow_needs_option_type
 
     def _to_backend_array(self, allow_missing, backend):
         return backend.nplike.empty(0, dtype=np.float64)

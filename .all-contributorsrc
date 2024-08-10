@@ -447,6 +447,24 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "maxgalli",
+      "name": "Massimiliano Galli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/26309531?v=4",
+      "profile": "https://github.com/maxgalli",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "pfackeldey",
+      "name": "Peter Fackeldey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18463582?v=4",
+      "profile": "https://github.com/pfackeldey",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

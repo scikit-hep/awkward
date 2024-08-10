@@ -12,7 +12,6 @@ import itertools
 import keyword
 import pickle
 import re
-import sys
 from collections.abc import Iterable, Mapping, Sequence, Sized
 
 from awkward_cpp.lib import _ext
@@ -32,9 +31,11 @@ from awkward._pickle import (
     unpickle_array_schema_1,
     unpickle_record_schema_1,
 )
-from awkward._prettyprint import Formatter
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
+from awkward._util import STDOUT
+from awkward.prettyprint import Formatter
+from awkward.prettyprint import valuestr as prettyprint_valuestr
 
 __all__ = ("Array", "ArrayBuilder", "Record")
 
@@ -1291,16 +1292,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         )
 
     def __str__(self):
-        import awkward._prettyprint
-
-        return awkward._prettyprint.valuestr(self, 1, 80)
+        return prettyprint_valuestr(self, 1, 80)
 
     def __repr__(self):
         return self._repr(80)
 
     def _repr(self, limit_cols):
-        import awkward._prettyprint
-
         try:
             pytype = super().__getattribute__("__name__")
         except AttributeError:
@@ -1322,7 +1319,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     limit_cols - len(pytype) - len(" type='...'") - 3,
                 ),
             )
-        valuestr = valuestr + " " + awkward._prettyprint.valuestr(self, 1, strwidth)
+        valuestr = valuestr + " " + prettyprint_valuestr(self, 1, strwidth)
 
         length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
@@ -1337,7 +1334,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         limit_rows=20,
         limit_cols=80,
         type=False,
-        stream=sys.stdout,
+        stream=STDOUT,
         *,
         formatter=None,
         precision=3,
@@ -1363,11 +1360,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
         string values, falling back upon `"str_kind"`.
         """
-        import awkward._prettyprint
-
         formatter_impl = Formatter(formatter, precision=precision)
 
-        valuestr = awkward._prettyprint.valuestr(
+        valuestr = prettyprint_valuestr(
             self, limit_rows, limit_cols, formatter=formatter_impl
         )
         if type:
@@ -1380,6 +1375,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if stream is None:
             return out
         else:
+            if stream is STDOUT:
+                stream = STDOUT.stream
             stream.write(out + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
@@ -2159,16 +2156,12 @@ class Record(NDArrayOperatorsMixin):
         )
 
     def __str__(self):
-        import awkward._prettyprint
-
-        return awkward._prettyprint.valuestr(self, 1, 80)
+        return prettyprint_valuestr(self, 1, 80)
 
     def __repr__(self):
         return self._repr(80)
 
     def _repr(self, limit_cols):
-        import awkward._prettyprint
-
         pytype = type(self).__name__
 
         typestr = repr(str(self.type))[1:-1]
@@ -2187,7 +2180,7 @@ class Record(NDArrayOperatorsMixin):
                     limit_cols - len(pytype) - len(" type='...'") - 3,
                 ),
             )
-        valuestr = valuestr + " " + awkward._prettyprint.valuestr(self, 1, strwidth)
+        valuestr = valuestr + " " + prettyprint_valuestr(self, 1, strwidth)
 
         length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
@@ -2202,7 +2195,7 @@ class Record(NDArrayOperatorsMixin):
         limit_rows=20,
         limit_cols=80,
         type=False,
-        stream=sys.stdout,
+        stream=STDOUT,
         *,
         formatter=None,
         precision=3,
@@ -2227,10 +2220,8 @@ class Record(NDArrayOperatorsMixin):
         key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
         string values, falling back upon `"str_kind"`.
         """
-        import awkward._prettyprint
-
         formatter_impl = Formatter(formatter, precision=precision)
-        valuestr = awkward._prettyprint.valuestr(
+        valuestr = prettyprint_valuestr(
             self, limit_rows, limit_cols, formatter=formatter_impl
         )
         if type:
@@ -2243,6 +2234,8 @@ class Record(NDArrayOperatorsMixin):
         if stream is None:
             return out
         else:
+            if stream is STDOUT:
+                stream = STDOUT.stream
             stream.write(out + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
@@ -2651,7 +2644,7 @@ class ArrayBuilder(Sized):
         limit_rows=20,
         limit_cols=80,
         type=False,
-        stream=sys.stdout,
+        stream=STDOUT,
         *,
         formatter=None,
         precision=3,

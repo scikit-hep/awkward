@@ -138,6 +138,7 @@ def _impl(
 
     if not (is_integer(length) and length >= 0):
         raise TypeError("'length' argument must be a non-negative integer")
+    length = int(length)
 
     if not isinstance(form, ak.forms.Form):
         raise TypeError(

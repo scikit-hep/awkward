@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import awkward as ak
-from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -11,7 +10,6 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 __all__ = ("where",)
 
 np = NumpyMetadata.instance()
-cpu = NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("where")
@@ -123,6 +121,8 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
         else:
             return None
 
-    out = ak._broadcasting.broadcast_and_apply(layouts, action, numpy_to_regular=True)
+    out = ak._broadcasting.broadcast_and_apply(
+        layouts, action, numpy_to_regular=True, function_name="ak.where"
+    )
 
     return ctx.wrap(out[0], highlevel=highlevel)

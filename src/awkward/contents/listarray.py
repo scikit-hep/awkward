@@ -985,7 +985,6 @@ class ListArray(ListMeta[Content], Content):
                         regular_flathead.data,
                         advanced.data,
                         lenstarts,
-                        regular_flathead.length,
                         self._content.length,
                     ),
                     slicer=head,

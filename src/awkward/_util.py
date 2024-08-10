@@ -86,6 +86,9 @@ class Sentinel:
 
 UNSET = Sentinel("UNSET", __name__)
 
+STDOUT = Sentinel("STDOUT", __name__)
+STDOUT.stream = sys.stdout
+
 
 T = TypeVar("T")
 
@@ -99,3 +102,18 @@ def unique_list(items: Collection[T]) -> list[T]:
         seen.add(item)
         result.append(item)
     return result
+
+
+def copy_behaviors(from_name: str, to_name: str, behavior: dict):
+    output = {}
+
+    for key, value in behavior.items():
+        if isinstance(key, str):
+            if key == from_name:
+                output[to_name] = value
+        else:
+            if from_name in key:
+                new_tuple = tuple(to_name if k == from_name else k for k in key)
+                output[new_tuple] = value
+
+    return output

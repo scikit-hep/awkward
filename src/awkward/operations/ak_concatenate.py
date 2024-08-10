@@ -6,7 +6,6 @@ from itertools import permutations
 
 import awkward as ak
 from awkward._backends.dispatch import backend_of_obj
-from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._do import mergeable
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
@@ -22,7 +21,6 @@ from awkward.types.numpytype import primitive_to_dtype
 __all__ = ("concatenate",)
 
 np = NumpyMetadata.instance()
-cpu = NumpyBackend.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
@@ -194,7 +192,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                 nextinputs = []
                 for x in inputs:
                     if x.is_option and x.content.is_list:
-                        nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
+                        empty = ak.to_backend([], backend)
+                        nextinputs.append(fill_none(x, empty, axis=0, highlevel=False))
                     else:
                         nextinputs.append(x)
                 inputs = nextinputs
@@ -247,7 +246,12 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                     prototype[start : start + size] = tag
                     start += size
 
-                tags = ak.index.Index8(
+                if len(regulararrays) < 2**7:
+                    tags_cls = ak.index.Index8
+                else:
+                    tags_cls = ak.index.Index64
+
+                tags = tags_cls(
                     backend.index_nplike.reshape(
                         backend.index_nplike.broadcast_to(
                             prototype, (length, prototype.size)
@@ -266,10 +270,9 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                 return (ak.contents.RegularArray(inner, prototype.size),)
 
             elif all(
-                isinstance(x, ak.contents.Content)
-                and x.is_list
-                or (isinstance(x, ak.contents.NumpyArray) and x.data.ndim > 1)
-                or not isinstance(x, ak.contents.Content)
+                (isinstance(x, ak.contents.Content) and x.is_list)  # Case 1
+                or (isinstance(x, ak.contents.NumpyArray) and x.data.ndim > 1)  # Case 2
+                or not isinstance(x, ak.contents.Content)  # Case 3: scalar value
                 for x in inputs
             ):
                 nextinputs = []
@@ -277,6 +280,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                     if isinstance(x, ak.contents.Content):
                         nextinputs.append(x)
                     else:
+                        # Treat non-content inputs as scalars.
+                        # These become arrays of matching length.
                         nextinputs.append(
                             ak.contents.ListOffsetArray(
                                 ak.index.Index64(
@@ -303,7 +308,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                 all_flatten = []
 
                 for x in nextinputs:
-                    o, f = x._offsets_and_flattened(1, 1)
+                    o, f = x._offsets_and_flattened(axis=1, depth=1)
                     c = o.data[1:] - o.data[:-1]
                     backend.index_nplike.add(counts, c, maybe_out=counts)
                     all_counts.append(c)
@@ -317,10 +322,15 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
 
                 offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
 
+                if len(nextinputs) < 2**7:
+                    tags_cls = ak.index.Index8
+                else:
+                    tags_cls = ak.index.Index64
                 tags, index = ak.contents.UnionArray.nested_tags_index(
                     offsets,
                     [ak.index.Index64(x) for x in all_counts],
                     backend=backend,
+                    tags_cls=tags_cls,
                 )
 
                 inner = ak.contents.UnionArray.simplified(

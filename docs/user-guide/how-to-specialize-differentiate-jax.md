@@ -24,23 +24,21 @@ JAX, amongst other things, is a powerful tool for computing derivatives of nativ
 How to differentiate Awkward Arrays?
 ------------------------------------
 
-Before using JAX on functions which deal with Awkward Arrays we need to configure JAX to use only the CPU
+For this notebook (which is evaluated on a CPU), we need to configure JAX to use only the CPU.
 
 ```{code-cell}
 import jax
-
 jax.config.update("jax_platform_name", "cpu")
 ```
 
-Next, we must call {func}`ak.jax.register_and_check()` to register Awkward's JAX integration
+Next, we must call {func}`ak.jax.register_and_check()` to register Awkward's JAX integration.
 
 ```{code-cell}
 import awkward as ak
-
 ak.jax.register_and_check()
 ```
 
-Let's define a simple function that accepts an Awkward Array
+Let's define a simple function that accepts an Awkward Array.
 
 ```{code-cell}
 def reverse_sum(array):

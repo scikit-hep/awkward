@@ -28,7 +28,7 @@ awkward_IndexedArray_ranges_carry_next_64_a(
 
     if (thread_id < length) {
       stride = fromstops[thread_id] - fromstarts[thread_id];
-      for (int64_t j = 0; j < stride; j++) {
+      for (int64_t j = threadIdx.y; j < stride; j += blockDim.y) {
         if (!(index[fromstarts[thread_id] + j] < 0)) {
           scan_in_array[fromstarts[thread_id] + j] = 1;
         }
@@ -54,7 +54,7 @@ awkward_IndexedArray_ranges_carry_next_64_b(
 
     if (thread_id < length) {
       stride = fromstops[thread_id] - fromstarts[thread_id];
-      for (int64_t j = 0; j < stride; j++) {
+      for (int64_t j = threadIdx.y; j < stride; j += blockDim.y) {
         if (!(index[fromstarts[thread_id] + j] < 0)) {
           tocarry[scan_in_array[fromstarts[thread_id] + j] - 1] = index[fromstarts[thread_id] + j];
         }

@@ -626,6 +626,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             if isinstance(
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
+                array = array._trim()  # see: #3185 and #3119
                 parameters = parameters_intersect(parameters, array._parameters)
 
                 contents.append(array.content)
@@ -750,37 +751,17 @@ class IndexedArray(IndexedMeta[Content], Content):
                 )
             )
 
-            assert (
-                next.nplike is self._backend.index_nplike
-                and length.nplike is self._backend.index_nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend["awkward_unique", next.dtype.type, length.dtype.type](
-                    next.data,
-                    self._index.length,
-                    length.data,
-                )
-            )
+        assert (
+            self._index.nplike is self._backend.index_nplike
+            and next.nplike is self._backend.index_nplike
+            and length.nplike is self._backend.index_nplike
+        )
 
-        else:
-            assert (
-                self._index.nplike is self._backend.index_nplike
-                and next.nplike is self._backend.index_nplike
-                and length.nplike is self._backend.index_nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_unique_copy",
-                    self._index.dtype.type,
-                    next.dtype.type,
-                    length.dtype.type,
-                ](
-                    self._index.data,
-                    next.data,
-                    self._index.length,
-                    length.data,
-                )
-            )
+        next = ak.index.Index64(
+            self._backend.index_nplike.unique_values(self._index),
+            nplike=self._backend.index_nplike,
+        )
+        length[0] = next.data.size
 
         return next[0 : length[0]]
 
@@ -858,9 +839,10 @@ class IndexedArray(IndexedMeta[Content], Content):
                 and parents.nplike is self._backend.index_nplike
                 and nextparents.nplike is self._backend.index_nplike
             )
+
             self._backend.maybe_kernel_error(
                 self._backend[
-                    "awkward_IndexedArray_local_preparenext",
+                    "awkward_IndexedArray_local_preparenext_64",
                     nextoutindex.dtype.type,
                     starts.dtype.type,
                     parents.dtype.type,
@@ -1206,3 +1188,19 @@ class IndexedArray(IndexedMeta[Content], Content):
                 other.content, index_dtype, numpyarray, all_parameters
             )
         )
+
+    def _trim(self) -> Self:
+        nplike = self._backend.index_nplike
+
+        if not nplike.known_data or self._index.length == 0:
+            return self
+
+        idx_buf = nplike.asarray(self._index.data, copy=True)
+        min_idx = nplike.min(idx_buf)
+        max_idx = nplike.max(idx_buf)
+        idx_buf -= min_idx
+        index = Index(idx_buf)
+
+        # left and right trim
+        content = self._content._getitem_range(min_idx, max_idx + 1)
+        return IndexedArray(index, content, parameters=self._parameters)

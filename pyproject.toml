@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.6.3"
+version = "2.6.7"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.8"
@@ -40,7 +40,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==32",
+    "awkward_cpp==37",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.18.0",
     "packaging",
@@ -132,6 +132,7 @@ filterwarnings = [
     "ignore:The NumPy module was reloaded:UserWarning",
     "ignore:.*np\\.MachAr.*:DeprecationWarning",
     "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
+    "ignore:Jitify is performing a one-time only warm-up",
 ]
 log_cli_level = "info"
 

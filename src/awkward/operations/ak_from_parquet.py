@@ -5,6 +5,7 @@ from __future__ import annotations
 import fsspec.parquet
 
 import awkward as ak
+import awkward._connect.pyarrow
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._regularize import is_integer
@@ -62,7 +63,6 @@ def from_parquet(
 
     See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
-    import awkward._connect.pyarrow  # noqa: F401
 
     parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta = metadata(
         path,
@@ -95,8 +95,6 @@ def metadata(
     ignore_metadata=False,
     scan_files=True,
 ):
-    import awkward._connect.pyarrow
-
     # early exit if missing deps
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.from_parquet")
 
@@ -277,7 +275,7 @@ def _read_parquet_file(
     generate_bitmasks,
     metadata=None,
 ):
-    import pyarrow.parquet as pyarrow_parquet
+    pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.from_parquet")
 
     with _open_file(
         path,
@@ -296,6 +294,7 @@ def _read_parquet_file(
         else:
             arrow_table = parquetfile.read_row_groups(row_groups, parquet_columns)
 
+    arrow_table = ak._connect.pyarrow.convert_native_arrow_table_to_awkward(arrow_table)
     return ak.operations.ak_from_arrow._impl(
         arrow_table,
         generate_bitmasks,

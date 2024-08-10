@@ -61,12 +61,16 @@ jobs:
         run: pipx run build --sdist awkward-cpp
 
       - name: Check sdist matches PyPI
-        run: pipx run nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward-cpp*.tar.gz
+        run: pipx run nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward_cpp*.tar.gz
 
   build:
     name: "Build wheel & sdist"
     runs-on: ubuntu-latest
     needs: [determine-source-date-epoch]
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     steps:
@@ -82,6 +86,11 @@ jobs:
 
     - name: Check metadata
       run: pipx run twine check dist/*
+
+    - name: Generate artifact attestation for sdist and wheel
+      uses: actions/attest-build-provenance@5e9cb68e95676991667494a6a4e59b8a2f13e1d0 # v1.3.3
+      with:
+        subject-path: "dist/awkward-*"
 
     - uses: actions/upload-artifact@v4
       with:
@@ -113,7 +122,20 @@ jobs:
         name: distributions
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.14
+    - name: List distributions to be deployed
+      run: ls -l dist/
+
+    - name: Verify sdist artifact attestation
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh attestation verify dist/awkward-*.tar.gz --repo ${{ github.repository }}
+
+    - name: Verify wheel artifact attestation
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh attestation verify dist/awkward-*.whl --repo ${{ github.repository }}
+
+    - uses: pypa/gh-action-pypi-publish@v1.9.0
 
   publish-headers:
     name: "Publish header-only libraries alongside release"

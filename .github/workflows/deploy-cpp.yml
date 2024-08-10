@@ -18,6 +18,8 @@ jobs:
     if: inputs.publish-pypi
     permissions:
       id-token: write
+      attestations: write
+      contents: read
     environment:
       name: "pypi"
       url: "https://pypi.org/project/awkward-cpp/"
@@ -32,4 +34,9 @@ jobs:
     - name: List distributions to be deployed
       run: ls -l dist/
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.14
+    - name: Generate artifact attestation for sdist and wheel
+      uses: actions/attest-build-provenance@5e9cb68e95676991667494a6a4e59b8a2f13e1d0 # v1.3.3
+      with:
+        subject-path: "dist/awkward*cpp-*"
+
+    - uses: pypa/gh-action-pypi-publish@v1.9.0

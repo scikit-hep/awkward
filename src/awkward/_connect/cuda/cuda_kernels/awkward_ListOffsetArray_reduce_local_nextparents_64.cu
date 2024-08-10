@@ -13,9 +13,9 @@ awkward_ListOffsetArray_reduce_local_nextparents_64(
 
     if (thread_id < length) {
       int64_t initialoffset = (int64_t)(offsets[0]);
-      for (int64_t j = (int64_t)(offsets[thread_id]) - initialoffset;
-            j < offsets[thread_id + 1] - initialoffset;
-            j++) {
+      int64_t start = (int64_t)(offsets[thread_id]) - initialoffset;
+      int64_t stop = (int64_t)offsets[thread_id + 1] - initialoffset;
+      for (int64_t j = start + threadIdx.y; j < stop; j += blockDim.y) {
         nextparents[j] = thread_id;
       }
     }

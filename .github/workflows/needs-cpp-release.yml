@@ -46,4 +46,4 @@ jobs:
         run: pipx run build --sdist awkward-cpp
 
       - name: Check sdist matches PyPI
-        run: pipx run nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward-cpp*.tar.gz
+        run: pipx run nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward_cpp*.tar.gz

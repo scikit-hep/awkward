@@ -8,7 +8,6 @@ awkward_RegularArray_getitem_next_array_advanced(
     const U* fromadvanced,
     const V* fromarray,
     int64_t length,
-    int64_t lenarray,
     int64_t size,
     uint64_t invocation_index,
     uint64_t* err_code) {

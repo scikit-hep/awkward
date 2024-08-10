@@ -82,3 +82,22 @@ ERROR awkward_UnionArray8_64_simplify_one_to8_64(
     length,
     base);
 }
+ERROR awkward_UnionArray64_64_simplify_one_to8_64(
+  int8_t* totags,
+  int64_t* toindex,
+  const int64_t* fromtags,
+  const int64_t* fromindex,
+  int64_t towhich,
+  int64_t fromwhich,
+  int64_t length,
+  int64_t base) {
+  return awkward_UnionArray_simplify_one<int64_t, int64_t, int8_t, int64_t>(
+    totags,
+    toindex,
+    fromtags,
+    fromindex,
+    towhich,
+    fromwhich,
+    length,
+    base);
+}
