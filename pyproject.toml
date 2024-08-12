@@ -45,8 +45,7 @@ dependencies = [
     "numpy>=1.18.0",
     "packaging",
     "typing_extensions>=4.1.0; python_version < \"3.11\"",
-    "fsspec>=2022.11.0",
-    "tensorflow>=1.15.0"
+    "fsspec>=2022.11.0"
 ]
 dynamic = [
     "readme"
