@@ -64,7 +64,7 @@ def _recursive_call(layout, offsets_arr):
         # recursively gather all of the offsets of an array
         offsets_arr += (layout.offsets.data,)
 
-    except:
+    except AttributeError:
         # at the last iteration form a ragged tensor from the
         # accumulated offsets and flattened values of the array
         return layout.data, offsets_arr
