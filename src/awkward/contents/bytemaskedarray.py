@@ -1053,14 +1053,13 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
-        cupy = Cupy.instance()
-        np = Numpy.instance()._module
+        cp = Cupy.instance()._module
 
         assert mask is None  # this class has its own mask
-        m = np.packbits(self._mask, bitorder="little")
+        m = cp.packbits(cp.asarray(self._mask), bitorder="little")
         if m.nbytes % 64:
-            m.resize(((m.nbytes // 64) + 1) * 64)
-        m = cudf.core.buffer.as_buffer(cupy.asarray(m))
+            m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
+        m = cudf.core.buffer.as_buffer(m)
         inner = self._content._to_cudf(cudf, mask=None, length=length)
         inner.set_base_mask(m)
         return inner

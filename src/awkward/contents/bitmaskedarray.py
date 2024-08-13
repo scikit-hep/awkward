@@ -689,20 +689,17 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
-        cupy = Cupy.instance()
-        np = (
-            Numpy.instance()._module
-        )  # flip and resize are not in the arraylike instance
+        cp = Cupy.instance()._module
 
         assert mask is None  # this class has its own mask
         if not self.lsb_order:
-            m = np.flip(np.packbits(np.flip(np.unpackbits(self._mask.data))))
+            m = cp.flip(cp.packbits(cp.flip(cp.unpackbits(cp.asarray(self._mask.data)))))
         else:
             m = self._mask.data
 
         if m.nbytes % 64:
-            m = np.resize(m, ((m.nbytes // 64) + 1) * 64)
-        m = cudf.core.buffer.as_buffer(cupy.asarray(m))
+            m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
+        m = cudf.core.buffer.as_buffer(m)
         inner = self._content._to_cudf(cudf, mask=None, length=length)
         inner.set_base_mask(m)
         return inner
