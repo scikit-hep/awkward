@@ -75,7 +75,6 @@ class ErrorContext:
             self._slate.__dict__["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        return
         try:
             # Handle caught exception
             if (
