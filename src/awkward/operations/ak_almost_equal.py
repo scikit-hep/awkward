@@ -71,6 +71,9 @@ def _impl(
     dtype_exact: bool = True,
     check_parameters: bool = True,
     check_regular: bool = True,
+    exact_eq: bool = False,
+    same_content_types: bool = False,
+    equal_nan: bool = False,
 ):
     # Implementation
     left_behavior = behavior_of(left)
@@ -102,6 +105,10 @@ def _impl(
         return layout.content[layout.offsets[0] : layout.offsets[-1]]
 
     def visitor(left, right) -> bool:
+        # Most firstly, check same_content_types before any transformations
+        if same_content_types and left.__class__ != right.__class__:
+            return False
+
         # First, erase indexed types!
         if left.is_indexed and not left.is_option:
             left = left.project()
@@ -172,12 +179,26 @@ def _impl(
                     and backend.nplike.all(left.data == right.data)
                     and left.shape == right.shape
                 )
+            elif exact_eq:
+                return (
+                    is_approx_dtype(left.dtype, right.dtype)
+                    and backend.nplike.array_equal(
+                        left.data,
+                        right.data,
+                        equal_nan=equal_nan,
+                    )
+                    and left.shape == right.shape
+                )
             else:
                 return (
                     is_approx_dtype(left.dtype, right.dtype)
                     and backend.nplike.all(
                         backend.nplike.isclose(
-                            left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+                            left.data,
+                            right.data,
+                            rtol=rtol,
+                            atol=atol,
+                            equal_nan=equal_nan,
                         )
                     )
                     and left.shape == right.shape
