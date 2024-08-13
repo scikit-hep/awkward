@@ -1,4 +1,5 @@
-import numpy as np
+from __future__ import annotations
+
 import pytest
 
 import awkward as ak
@@ -15,10 +16,15 @@ def test_jagged():
 
 
 def test_nested():
-    arr = ak.Array([{"a": 0, "b": 1., "c": {"d": 0}}, {"a": 1, "b": 0., "c": {"d": 1}}])
+    arr = ak.Array(
+        [{"a": 0, "b": 1.0, "c": {"d": 0}}, {"a": 1, "b": 0.0, "c": {"d": 1}}]
+    )
     out = ak.to_cudf(arr)
     assert isinstance(out, cudf.Series)
-    assert out.to_arrow().tolist() == [{"a": 0, "b": 1., "c": {"d": 0}}, {"a": 1, "b": 0., "c": {"d": 1}}]
+    assert out.to_arrow().tolist() == [
+        {"a": 0, "b": 1.0, "c": {"d": 0}},
+        {"a": 1, "b": 0.0, "c": {"d": 1}},
+    ]
 
 
 def test_null():
