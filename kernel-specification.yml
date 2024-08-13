@@ -3372,6 +3372,14 @@ kernels:
 
   - name: awkward_UnionArray_nestedfill_tags_index
     specializations:
+      - name: awkward_UnionArray64_64_nestedfill_tags_index_64
+        args:
+          - {name: totags, type: "List[int64_t]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: tmpstarts, type: "List[int64_t]", dir: out}
+          - {name: tag, type: "int64_t", dir: in, role: default}
+          - {name: fromcounts, type: "Const[List[int64_t]]", dir: in, role: default}
+          - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_32_nestedfill_tags_index_64
         args:
           - {name: totags, type: "List[int8_t]", dir: out}
@@ -3503,6 +3511,19 @@ kernels:
 
   - name: awkward_UnionArray_simplify
     specializations:
+      - name: awkward_UnionArray64_64_simplify8_64_to8_64
+        args:
+          - {name: totags, type: "List[int8_t]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: outertags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: outerindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: innertags, type: "Const[List[int8_t]]", dir: in, role: UnionArray2-tags}
+          - {name: innerindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray2-index}
+          - {name: towhich, type: "int64_t", dir: in, role: default}
+          - {name: innerwhich, type: "int64_t", dir: in, role: UnionArray1-which}
+          - {name: outerwhich, type: "int64_t", dir: in, role: UnionArray2-which}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: base, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_32_simplify8_32_to8_64
         args:
           - {name: totags, type: "List[int8_t]", dir: out}
@@ -3645,6 +3666,16 @@ kernels:
 
   - name: awkward_UnionArray_simplify_one
     specializations:
+      - name: awkward_UnionArray64_64_simplify_one_to8_64
+        args:
+          - {name: totags, type: "List[int8_t]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: fromindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: towhich, type: "int64_t", dir: in, role: default}
+          - {name: fromwhich, type: "int64_t", dir: in, role: UnionArray-which}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: base, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_32_simplify_one_to8_64
         args:
           - {name: totags, type: "List[int8_t]", dir: out}

@@ -48,6 +48,7 @@ if TYPE_CHECKING:
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
+MAX_UNION_CONTENTS = 2**7  # We use int8 tags, 0-127
 
 
 @final
@@ -230,6 +231,10 @@ class UnionArray(UnionMeta[Content], Content):
         parameters=None,
         mergebool=False,
     ):
+        # Note: to help merge more than 128 arrays, tags *can* have type ak.index.Index64.
+        # This is only supported when index is also Index64,
+        # and all indexed contents are also Index64.
+        # We still require that this reduces to no more than 128 variants.
         self_index = index
         self_tags = tags
         self_contents = contents
@@ -299,6 +304,10 @@ class UnionArray(UnionMeta[Content], Content):
 
                     # Did we fail to merge any of the final outer contents with this inner union content?
                     if unmerged:
+                        if len(contents) >= MAX_UNION_CONTENTS:
+                            raise ValueError(
+                                "UnionArray does not support more than 128 content types"
+                            )
                         backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify",
@@ -373,6 +382,10 @@ class UnionArray(UnionMeta[Content], Content):
                         break
 
                 if unmerged:
+                    if len(contents) >= MAX_UNION_CONTENTS:
+                        raise ValueError(
+                            "UnionArray does not support more than 128 content types"
+                        )
                     backend.maybe_kernel_error(
                         backend[
                             "awkward_UnionArray_simplify_one",
@@ -392,11 +405,6 @@ class UnionArray(UnionMeta[Content], Content):
                         )
                     )
                     contents.append(self_cont)
-
-        if len(contents) > 2**7:
-            raise NotImplementedError(
-                "FIXME: handle UnionArray with more than 127 contents"
-            )
 
         # If any contents are non-categorical index types, we can merge them into the union
         # This is safe, because any remaining index types at this point in the routine are not considered
@@ -431,7 +439,7 @@ class UnionArray(UnionMeta[Content], Content):
             ]
 
         if len(contents) == 1:
-            next = contents[0]._carry(index, False)
+            next = contents[0]._carry(index, True)
             return next.copy(parameters=parameters_union(next._parameters, parameters))
 
         else:
@@ -702,7 +710,7 @@ class UnionArray(UnionMeta[Content], Content):
         nextcarry = ak.index.Index64(
             tmpcarry.data[: lenout[0]], nplike=self._backend.index_nplike
         )
-        return self._contents[index]._carry(nextcarry, False)
+        return self._contents[index]._carry(nextcarry, True)
 
     @staticmethod
     def regular_index(
@@ -1107,8 +1115,8 @@ class UnionArray(UnionMeta[Content], Content):
             )
         )
 
-        if len(contents) > 2**7:
-            raise AssertionError("FIXME: handle UnionArray with more than 127 contents")
+        if len(contents) > MAX_UNION_CONTENTS:
+            raise ValueError("UnionArray cannot have more than 128 content types")
 
         return ak.contents.UnionArray.simplified(
             tags, index, contents, parameters=self._parameters
@@ -1236,8 +1244,8 @@ class UnionArray(UnionMeta[Content], Content):
 
                 nextcontents.append(array)
 
-        if len(nextcontents) > 127:
-            raise ValueError("FIXME: handle UnionArray with more than 127 contents")
+        if len(nextcontents) > MAX_UNION_CONTENTS:
+            raise ValueError("UnionArray cannot have more than 128 content types")
 
         next = ak.contents.UnionArray.simplified(
             nexttags,
