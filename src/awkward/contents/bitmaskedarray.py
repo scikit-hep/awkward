@@ -690,7 +690,9 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         cupy = Cupy.instance()
-        np = Numpy.instance()._module  # flip and resize are not in the arraylike instance
+        np = (
+            Numpy.instance()._module
+        )  # flip and resize are not in the arraylike instance
 
         assert mask is None  # this class has its own mask
         if not self.lsb_order:
