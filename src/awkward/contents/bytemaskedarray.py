@@ -1054,7 +1054,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         cupy = Cupy.instance()
-        np = Numpy.instance()
+        np = Numpy.instance()._module
 
         assert mask is None  # this class has its own mask
         m = np.packbits(self._mask, bitorder="little")
