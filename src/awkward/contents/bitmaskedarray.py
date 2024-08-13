@@ -693,7 +693,9 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
         assert mask is None  # this class has its own mask
         if not self.lsb_order:
-            m = cp.flip(cp.packbits(cp.flip(cp.unpackbits(cp.asarray(self._mask.data)))))
+            m = cp.flip(
+                cp.packbits(cp.flip(cp.unpackbits(cp.asarray(self._mask.data))))
+            )
         else:
             m = self._mask.data
 
