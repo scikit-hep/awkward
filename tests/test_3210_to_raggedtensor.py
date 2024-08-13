@@ -28,22 +28,38 @@ outeroffsets = ak.index.Index64(np.array([0, 3, 6]))
 def test():
     # a test for ListArray -> RaggedTensor
     array1 = ak.contents.ListArray(starts1, stops1, content)
-    assert to_raggedtensor(array1).to_list() == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert to_raggedtensor(array1).to_list() == [
+        [1.1, 2.2, 3.3],
+        [],
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
 
     # a test for awkward.highlevel.Array -> RaggedTensor
     array2 = ak.Array(array1)
-    assert to_raggedtensor(array2).to_list() == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert to_raggedtensor(array2).to_list() == [
+        [1.1, 2.2, 3.3],
+        [],
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
 
     # a test for NumpyArray -> RaggedTensor
     array3 = content
-    assert to_raggedtensor(array3).to_list() == [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]]
+    assert to_raggedtensor(array3).to_list() == [
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+    ]
 
     # a test for RegularArray -> RaggedTensor
     array4 = ak.contents.RegularArray(content, size=2)
-    assert to_raggedtensor(array4).to_list() == [[1.1, 2.2],
-                                                 [3.3, 4.4],
-                                                 [5.5, 6.6],
-                                                 [7.7, 8.8]]
+    assert to_raggedtensor(array4).to_list() == [
+        [1.1, 2.2],
+        [3.3, 4.4],
+        [5.5, 6.6],
+        [7.7, 8.8],
+    ]
 
     # try a single line awkward array
     array5 = ak.Array([3, 1, 4, 1, 9, 2, 6])
@@ -57,20 +73,20 @@ def test():
     array7 = ak.contents.ListOffsetArray(
         outeroffsets, ak.contents.ListOffsetArray(inneroffsets, content2)
     )
-    assert to_raggedtensor(array7).to_list() == [[[0, 1, 2, 3, 4],
-                                                  [5, 6, 7, 8, 9],
-                                                  [10, 11, 12, 13, 14]],
-
-                                                 [[15, 16, 17, 18, 19],
-                                                  [20, 21, 22, 23, 24],
-                                                  [25, 26, 27, 28, 29]]]
+    assert to_raggedtensor(array7).to_list() == [
+        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+    ]
 
     # try a list array inside a list array
 
     array8 = ak.contents.ListArray(
         starts2, stops2, ak.contents.ListArray(starts1, stops1, content)
     )
-    assert to_raggedtensor(array8).to_list() == [[[1.1, 2.2, 3.3], [], [4.4, 5.5]], [[6.6], [7.7, 8.8, 9.9]]]
+    assert to_raggedtensor(array8).to_list() == [
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
+        [[6.6], [7.7, 8.8, 9.9]],
+    ]
 
     # try just a python list
     array9 = [3, 1, 4, 1, 9, 2, 6]
