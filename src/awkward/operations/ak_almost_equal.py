@@ -52,6 +52,26 @@ def almost_equal(
     # Dispatch
     yield left, right
 
+    return _impl(
+        left,
+        right,
+        rtol=rtol,
+        atol=atol,
+        dtype_exact=dtype_exact,
+        check_parameters=check_parameters,
+        check_regular=check_regular,
+    )
+
+
+def _impl(
+    left,
+    right,
+    rtol: float = 1e-5,
+    atol: float = 1e-8,
+    dtype_exact: bool = True,
+    check_parameters: bool = True,
+    check_regular: bool = True,
+):
     # Implementation
     left_behavior = behavior_of(left)
     right_behavior = behavior_of(right)
