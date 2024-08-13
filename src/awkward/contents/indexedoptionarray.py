@@ -49,7 +49,6 @@ if TYPE_CHECKING:
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
-cupy = Cupy.instance()
 
 
 @final
@@ -1579,13 +1578,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
-        from awkward._connect.pyarrow import and_validbytes
-        index = cupy.asarray(self._index.data, copy=True)
-        this_validbytes = self.mask_as_bool(valid_when=True)
-        index[~this_validbytes] = 0
-        next = ak.contents.IndexedArray(ak.index.Index(index), self._content)
-        mask = and_validbytes(mask, this_validbytes)
-        return next._to_cudf(cudf, mask, len(next))
+        return self.to_ByteMaskedArray(True)._to_cudf(cudf, mask, length)
 
     def _to_backend_array(self, allow_missing, backend):
         nplike = backend.nplike

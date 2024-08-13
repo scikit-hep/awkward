@@ -2007,9 +2007,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         ind_buf = cudf.core.column.numerical.NumericalColumn(
             buf, index.dtype, None, size=len(index)
         )
-        ind_buf = cudf.core.column.numerical.NumericalColumn(
-            buf, index.dtype, None, size=len(index)
-        )
         cont = self._content._to_cudf(cudf, None, len(self._content))
         return cudf.core.column.lists.ListColumn(
             length,

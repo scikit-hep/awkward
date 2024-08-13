@@ -1223,13 +1223,20 @@ class NumpyArray(NumpyMeta, Content):
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         cupy = Cupy.instance()
+        np = Numpy.instance()
 
         assert self._backend.nplike.known_data
         data = cupy.asarray(self._data)
-        mask = mask._to_cupy(cudf, None, length) if mask is not None else None
+        if mask is not None:
+            m = np.packbits(mask, bitorder="little")
+            if m.nbytes % 64:
+                m.resize(((m.nbytes // 64) + 1) * 64)
+            m = cudf.core.buffer.as_buffer(cupy.asarray(m))
+        else:
+            m = None
         buf = cudf.core.buffer.as_buffer(data)
         return cudf.core.column.numerical.NumericalColumn(
-            buf, data.dtype, mask=mask, size=length
+            buf, data.dtype, mask=m, size=length
         )
 
     def _to_backend_array(self, allow_missing, backend):

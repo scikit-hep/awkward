@@ -12,6 +12,7 @@ from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.bytemaskedmeta import ByteMaskedMeta
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -1052,9 +1053,17 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
-        validbytes = self.mask_as_bool(valid_when=True)
+        cupy = Cupy.instance()
+        np = Numpy.instance()
 
-        return self._content._to_cudf(cudf, validbytes, length)
+        assert mask is None  # this class has its own mask
+        m = np.packbits(self._mask, bitorder="little")
+        if m.nbytes % 64:
+            m.resize(((m.nbytes // 64) + 1) * 64)
+        m = cudf.core.buffer.as_buffer(cupy.asarray(m))
+        inner = self._content._to_cudf(cudf, mask=None, length=length)
+        inner.set_base_mask(m)
+        return inner
 
     def _to_backend_array(self, allow_missing, backend):
         return self.to_IndexedOptionArray64()._to_backend_array(allow_missing, backend)
