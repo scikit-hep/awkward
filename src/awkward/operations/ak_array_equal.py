@@ -45,7 +45,7 @@ def array_equal(
         a2,
         equal_nan=equal_nan,
         dtype_exact=dtype_exact,
-        same_content_types=same_content_types,
+        same_content_types=same_content_types and check_regular,
         check_parameters=check_parameters,
         check_regular=check_regular,
         exact_eq=True,

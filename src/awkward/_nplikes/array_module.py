@@ -173,12 +173,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> bool:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
-        if equal_nan:
-            both_nan = self._module.logical_and(x1 == np.nan, x2 == np.nan)
-            both_equal = x1 == x2
-            return self._module.all(self._module.logical_or(both_equal, both_nan))
-        else:
-            return self._module.array_equal(x1, x2)
+        return self._module.array_equal(x1, x2, equal_nan=equal_nan)
 
     def searchsorted(
         self,
