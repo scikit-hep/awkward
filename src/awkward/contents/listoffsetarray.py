@@ -304,6 +304,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         return isinstance(self._offsets, PlaceholderArray)
 
     def _getitem_at(self, where: IndexType):
+        print("\nListOffsetArray::_getitem_at", self, where)
+
         # Wrap `where` by length
         if not is_unknown_scalar(where) and where < 0:
             length_index = self._backend.index_nplike.shape_item_as_index(self.length)
@@ -319,6 +321,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         return self._content._getitem_range(start, stop)
 
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
+        print("\nListOffsetArray::_getitem_range", self, start, stop)
+
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
             return self
@@ -350,6 +354,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         )
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
+        print("\nListOffsetArray::_carry", self, carry, allow_lazy)
+
         assert isinstance(carry, ak.index.Index)
 
         try:
@@ -417,6 +423,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
     def _getitem_next_jagged(
         self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
     ) -> Content:
+        print("\nListOffsetArray::_getitem_next_jagged", self, head, tail, advanced)
+
         out = ak.contents.ListArray(
             self.starts, self.stops, self._content, parameters=self._parameters
         )
@@ -428,6 +436,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
+        print("\nListOffsetArray::_getitem_next", self, head, tail, advanced)
+
         if head is NO_HEAD:
             return self
 

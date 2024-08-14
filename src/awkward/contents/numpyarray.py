@@ -310,6 +310,8 @@ class NumpyArray(NumpyMeta, Content):
         return isinstance(self._data, PlaceholderArray)
 
     def _getitem_at(self, where: IndexType):
+        print("\nNumpyArray::_getitem_at", self, where)
+
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             self._touch_data(recursive=False)
             return TypeTracerArray._new(self._data.dtype, shape=())
@@ -325,6 +327,8 @@ class NumpyArray(NumpyMeta, Content):
             return out
 
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
+        print("\nNumpyArray::_getitem_range", self, start, stop)
+
         try:
             out = self._data[start:stop]
         except IndexError as err:
@@ -345,6 +349,8 @@ class NumpyArray(NumpyMeta, Content):
         raise ak._errors.index_error(self, where, "not an array of records")
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
+        print("\nNumpyArray::_carry", self, carry, allow_lazy)
+
         assert isinstance(carry, ak.index.Index)
         try:
             nextdata = self._data[carry.data]
@@ -355,6 +361,8 @@ class NumpyArray(NumpyMeta, Content):
     def _getitem_next_jagged(
         self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
     ) -> Content:
+        print("\nNumpyArray::_getitem_next_jagged", self, head, tail, advanced)
+
         if self._data.ndim == 1:
             raise ak._errors.index_error(
                 self,
@@ -375,6 +383,8 @@ class NumpyArray(NumpyMeta, Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
+        print("\nNumpyArray::_getitem_next", self, head, tail, advanced)
+
         if head is NO_HEAD:
             return self
 
