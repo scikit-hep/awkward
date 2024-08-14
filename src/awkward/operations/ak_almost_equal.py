@@ -106,7 +106,7 @@ def _impl(
 
     def visitor(left, right) -> bool:
         # Most firstly, check same_content_types before any transformations
-        if same_content_types and left.__class__ != right.__class__:
+        if same_content_types and left.__class__ is right.__class__:
             return False
 
         # First, erase indexed types!
