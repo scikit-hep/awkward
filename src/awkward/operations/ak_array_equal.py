@@ -43,8 +43,8 @@ def array_equal(
     return ak.operations.ak_almost_equal._impl(
         a1,
         a2,
-        rtol=0.,
-        atol=0.,
+        rtol=0.0,
+        atol=0.0,
         dtype_exact=dtype_exact,
         check_parameters=check_parameters,
         check_regular=check_regular,
