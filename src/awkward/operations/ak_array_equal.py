@@ -43,10 +43,12 @@ def array_equal(
     return ak.operations.ak_almost_equal._impl(
         a1,
         a2,
-        equal_nan=equal_nan,
+        rtol=0.,
+        atol=0.,
         dtype_exact=dtype_exact,
-        same_content_types=same_content_types and check_regular,
         check_parameters=check_parameters,
         check_regular=check_regular,
         exact_eq=True,
+        same_content_types=same_content_types and check_regular,
+        equal_nan=equal_nan,
     )

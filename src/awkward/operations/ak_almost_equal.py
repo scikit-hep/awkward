@@ -60,20 +60,23 @@ def almost_equal(
         dtype_exact=dtype_exact,
         check_parameters=check_parameters,
         check_regular=check_regular,
+        exact_eq=False,
+        same_content_types=False,
+        equal_nan=False,
     )
 
 
 def _impl(
     left,
     right,
-    rtol: float = 1e-5,
-    atol: float = 1e-8,
-    dtype_exact: bool = True,
-    check_parameters: bool = True,
-    check_regular: bool = True,
-    exact_eq: bool = False,
-    same_content_types: bool = False,
-    equal_nan: bool = False,
+    rtol: float,
+    atol: float,
+    dtype_exact: bool,
+    check_parameters: bool,
+    check_regular: bool,
+    exact_eq: bool,
+    same_content_types: bool,
+    equal_nan: bool,
 ):
     # Implementation
     left_behavior = behavior_of(left)
