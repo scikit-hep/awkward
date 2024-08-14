@@ -512,7 +512,7 @@ class Content(Meta):
         return self._getitem(where)
 
     def _getitem(self, where):
-        print("\nContent::_getitem", self, where)
+        print("\nContent::_getitem", self, where)  # noqa: T201
 
         if is_integer_like(where):
             return self._getitem_at(ak._slicing.normalize_integer_like(where))

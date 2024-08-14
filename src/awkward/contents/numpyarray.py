@@ -310,7 +310,7 @@ class NumpyArray(NumpyMeta, Content):
         return isinstance(self._data, PlaceholderArray)
 
     def _getitem_at(self, where: IndexType):
-        print("\nNumpyArray::_getitem_at", self, where)
+        print("\nNumpyArray::_getitem_at", self, where)  # noqa: T201
 
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
             self._touch_data(recursive=False)
@@ -327,7 +327,7 @@ class NumpyArray(NumpyMeta, Content):
             return out
 
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
-        print("\nNumpyArray::_getitem_range", self, start, stop)
+        print("\nNumpyArray::_getitem_range", self, start, stop)  # noqa: T201
 
         try:
             out = self._data[start:stop]
@@ -349,7 +349,7 @@ class NumpyArray(NumpyMeta, Content):
         raise ak._errors.index_error(self, where, "not an array of records")
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
-        print("\nNumpyArray::_carry", self, carry, allow_lazy)
+        print("\nNumpyArray::_carry", self, carry, allow_lazy)  # noqa: T201
 
         assert isinstance(carry, ak.index.Index)
         try:
@@ -361,7 +361,13 @@ class NumpyArray(NumpyMeta, Content):
     def _getitem_next_jagged(
         self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
     ) -> Content:
-        print("\nNumpyArray::_getitem_next_jagged", self, head, tail, advanced)
+        print(  # noqa: T201
+            "\nNumpyArray::_getitem_next_jagged",
+            self,
+            slicestarts,
+            slicestops,
+            slicecontent,
+        )
 
         if self._data.ndim == 1:
             raise ak._errors.index_error(
@@ -383,7 +389,7 @@ class NumpyArray(NumpyMeta, Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        print("\nNumpyArray::_getitem_next", self, head, tail, advanced)
+        print("\nNumpyArray::_getitem_next", self, head, tail, advanced)  # noqa: T201
 
         if head is NO_HEAD:
             return self

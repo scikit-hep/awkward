@@ -307,7 +307,7 @@ class ListArray(ListMeta[Content], Content):
         )
 
     def _getitem_at(self, where: IndexType):
-        print("\nListArray::_getitem_at", self, where)
+        print("\nListArray::_getitem_at", self, where)  # noqa: T201
 
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
@@ -321,7 +321,7 @@ class ListArray(ListMeta[Content], Content):
         return self._content._getitem_range(start, stop)
 
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
-        print("\nListArray::_getitem_range", self, start, stop)
+        print("\nListArray::_getitem_range", self, start, stop)  # noqa: T201
 
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
@@ -355,7 +355,7 @@ class ListArray(ListMeta[Content], Content):
         )
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
-        print("\nListArray::_carry", self, carry, allow_lazy)
+        print("\nListArray::_carry", self, carry, allow_lazy)  # noqa: T201
 
         assert isinstance(carry, ak.index.Index)
 
@@ -452,7 +452,13 @@ class ListArray(ListMeta[Content], Content):
     def _getitem_next_jagged(
         self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
     ) -> Content:
-        print("\nListArray::_getitem_next_jagged", self, head, tail, advanced)
+        print(  # noqa: T201
+            "\nListArray::_getitem_next_jagged",
+            self,
+            slicestarts,
+            slicestops,
+            slicecontent,
+        )
 
         slicestarts = slicestarts.to_nplike(self._backend.index_nplike)
         slicestops = slicestops.to_nplike(self._backend.index_nplike)
@@ -712,7 +718,7 @@ class ListArray(ListMeta[Content], Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        print("\nListArray::_getitem_next", self, head, tail, advanced)
+        print("\nListArray::_getitem_next", self, head, tail, advanced)  # noqa: T201
 
         if head is NO_HEAD:
             return self
@@ -722,7 +728,7 @@ class ListArray(ListMeta[Content], Content):
             nexthead, nexttail = ak._slicing.head_tail(tail)
             lenstarts = self._starts.length
             nextcarry = ak.index.Index64.empty(lenstarts, self._backend.index_nplike)
-            print(f"    {lenstarts = }")
+            print(f"    {lenstarts = }")  # noqa: T201
             assert (
                 nextcarry.nplike is self._backend.index_nplike
                 and self._starts.nplike is self._backend.index_nplike
@@ -743,7 +749,7 @@ class ListArray(ListMeta[Content], Content):
                 ),
                 slicer=head,
             )
-            print(f"    {nextcarry = }")
+            print(f"    {nextcarry = }")  # noqa: T201
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 

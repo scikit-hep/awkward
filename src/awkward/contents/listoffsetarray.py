@@ -304,7 +304,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         return isinstance(self._offsets, PlaceholderArray)
 
     def _getitem_at(self, where: IndexType):
-        print("\nListOffsetArray::_getitem_at", self, where)
+        print("\nListOffsetArray::_getitem_at", self, where)  # noqa: T201
 
         # Wrap `where` by length
         if not is_unknown_scalar(where) and where < 0:
@@ -321,7 +321,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         return self._content._getitem_range(start, stop)
 
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
-        print("\nListOffsetArray::_getitem_range", self, start, stop)
+        print("\nListOffsetArray::_getitem_range", self, start, stop)  # noqa: T201
 
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
@@ -354,7 +354,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         )
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
-        print("\nListOffsetArray::_carry", self, carry, allow_lazy)
+        print("\nListOffsetArray::_carry", self, carry, allow_lazy)  # noqa: T201
 
         assert isinstance(carry, ak.index.Index)
 
@@ -423,7 +423,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
     def _getitem_next_jagged(
         self, slicestarts: Index, slicestops: Index, slicecontent: Content, tail
     ) -> Content:
-        print("\nListOffsetArray::_getitem_next_jagged", self, head, tail, advanced)
+        print(  # noqa: T201
+            "\nListOffsetArray::_getitem_next_jagged",
+            self,
+            slicestarts,
+            slicestops,
+            slicecontent,
+        )
 
         out = ak.contents.ListArray(
             self.starts, self.stops, self._content, parameters=self._parameters
@@ -436,7 +442,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        print("\nListOffsetArray::_getitem_next", self, head, tail, advanced)
+        print("\nListOffsetArray::_getitem_next", self, head, tail, advanced)  # noqa: T201
 
         if head is NO_HEAD:
             return self
