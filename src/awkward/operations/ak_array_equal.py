@@ -28,7 +28,7 @@ def array_equal(
             Whether to count NaN values as equal to each other.
         dtype_exact: bool (default=True) whether the dtypes must be exactly the same, or just the
             same family.
-        same_content_types: bool (default=False)
+        same_content_types: bool (default=True)
             Whether to require all content classes to match
         check_parameters: bool (default=True) whether to compare parameters.
         check_regular: bool (default=True) whether to consider ragged and regular dimensions as
