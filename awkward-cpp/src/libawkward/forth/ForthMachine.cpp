@@ -3075,7 +3075,7 @@ namespace awkward {
             uint64_t tmp;
             uint8_t tmpbyte;
 
-            if (items_remaining != 0) {
+            if (items_remaining > 0) {
               tmpbyte = input->read_byte(current_error_);
               if (current_error_ != util::ForthError::none) {
                 return;
@@ -3087,7 +3087,7 @@ namespace awkward {
               }
               data = tmp;
             }
-            while (items_remaining != 0) {
+            while (items_remaining > 0) {
               if (bits_wnd_r >= 8) {
                 bits_wnd_r -= 8;
                 bits_wnd_l -= 8;
@@ -3230,6 +3230,7 @@ namespace awkward {
                 break;                                                         \
               }
 
+            if (num_items < 0) num_items = 0;
             switch (format) {
               case READ_BOOL:    WRITE_DIRECTLY(bool, bool)
               case READ_INT8:    WRITE_DIRECTLY(int8_t, int8)
@@ -3311,6 +3312,7 @@ namespace awkward {
                 break;                                                         \
               }
 
+            if (num_items < 0) num_items = 0;
             switch (format) {
               case READ_BOOL:    WRITE_TO_STACK(bool)
               case READ_INT8:    WRITE_TO_STACK(int8_t)
