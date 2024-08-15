@@ -45,3 +45,13 @@ def test_null():
     out = ak.to_cudf(arr3)
     assert isinstance(out, cudf.Series)
     assert out.to_arrow().tolist() == [12, None, 21, 12]
+
+
+def test_strings():
+    arr = ak.Array(["hey", "hi", "hum"])
+    out = ak.to_cudf(arr)
+    assert out.to_arrow().tolist() == ["hey", "hi", "hum"]
+
+    arr = ak.Array(["hey", "hi", None, "hum"])
+    out = ak.to_cudf(arr)
+    assert out.to_arrow().tolist() == ["hey", "hi", None, "hum"]

@@ -2008,9 +2008,26 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             buf, index.dtype, None, size=len(index)
         )
         cont = self._content._to_cudf(cudf, None, len(self._content))
+        if mask is not None:
+            m = np._module.packbits(mask, bitorder="little")
+            if m.nbytes % 64:
+                m = cupy.resize(m, ((m.nbytes // 64) + 1) * 64)
+            m = cudf.core.buffer.as_buffer(cupy.asarray(m))
+        else:
+            m = None
+        if self.parameters.get("__array__") == "string":
+            from cudf.core.column.string import StringColumn
+            data = cudf.core.buffer.as_buffer(cupy.asarray(self._content.data))
+            # docs for StringColumn says there should be two children instead of a data=
+            return StringColumn(
+                data=data,
+                children=(ind_buf, ),
+                mask=m,
+            )
+
         return cudf.core.column.lists.ListColumn(
             length,
-            mask=mask._to_cudf(cudf) if mask is not None else None,
+            mask=m,
             children=(ind_buf, cont),
             dtype=cudf.core.dtypes.ListDtype(cont.dtype),
         )
