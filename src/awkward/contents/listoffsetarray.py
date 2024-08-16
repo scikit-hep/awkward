@@ -2017,11 +2017,12 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             m = None
         if self.parameters.get("__array__") == "string":
             from cudf.core.column.string import StringColumn
+
             data = cudf.core.buffer.as_buffer(cupy.asarray(self._content.data))
             # docs for StringColumn says there should be two children instead of a data=
             return StringColumn(
                 data=data,
-                children=(ind_buf, ),
+                children=(ind_buf,),
                 mask=m,
             )
 
