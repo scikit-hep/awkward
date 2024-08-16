@@ -52,6 +52,32 @@ def almost_equal(
     # Dispatch
     yield left, right
 
+    return _impl(
+        left,
+        right,
+        rtol=rtol,
+        atol=atol,
+        dtype_exact=dtype_exact,
+        check_parameters=check_parameters,
+        check_regular=check_regular,
+        exact_eq=False,
+        same_content_types=False,
+        equal_nan=False,
+    )
+
+
+def _impl(
+    left,
+    right,
+    rtol: float,
+    atol: float,
+    dtype_exact: bool,
+    check_parameters: bool,
+    check_regular: bool,
+    exact_eq: bool,
+    same_content_types: bool,
+    equal_nan: bool,
+):
     # Implementation
     left_behavior = behavior_of(left)
     right_behavior = behavior_of(right)
@@ -82,6 +108,10 @@ def almost_equal(
         return layout.content[layout.offsets[0] : layout.offsets[-1]]
 
     def visitor(left, right) -> bool:
+        # Most firstly, check same_content_types before any transformations
+        if same_content_types and left.__class__ is not right.__class__:
+            return False
+
         # First, erase indexed types!
         if left.is_indexed and not left.is_option:
             left = left.project()
@@ -152,12 +182,26 @@ def almost_equal(
                     and backend.nplike.all(left.data == right.data)
                     and left.shape == right.shape
                 )
+            elif exact_eq:
+                return (
+                    is_approx_dtype(left.dtype, right.dtype)
+                    and backend.nplike.array_equal(
+                        left.data,
+                        right.data,
+                        equal_nan=equal_nan,
+                    )
+                    and left.shape == right.shape
+                )
             else:
                 return (
                     is_approx_dtype(left.dtype, right.dtype)
                     and backend.nplike.all(
                         backend.nplike.isclose(
-                            left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+                            left.data,
+                            right.data,
+                            rtol=rtol,
+                            atol=atol,
+                            equal_nan=equal_nan,
                         )
                     )
                     and left.shape == right.shape
