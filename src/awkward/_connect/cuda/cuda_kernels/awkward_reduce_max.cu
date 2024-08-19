@@ -68,9 +68,7 @@ awkward_reduce_max_b(
       }
 
       int64_t parent = parents[thread_id];
-      if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicMax(&toptr[parent], temp[thread_id]);
-      }
+      atomicMax(&toptr[parent], temp[thread_id]);
     }
   }
 }
