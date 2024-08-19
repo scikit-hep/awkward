@@ -10,9 +10,16 @@ __all__ = ("to_raggedtensor",)
 
 @high_level_function()
 def to_raggedtensor(ak_arr):
-    """A function that transforms
-    ListOffsetArray, ListArray, RegularArray and NumpyArray
-    data types into RaggedTensor
+    """
+    Args:
+        ak_arr: Array-like data. May be a high level #ak.Array,
+        or low-level #ak.contents.ListOffsetArray, #ak.contents.ListArray,
+        #ak.contents.RegularArray, #ak.contents.NumpyArray
+
+    Converts `ak_arr` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
+    into a ragged tensor, if possible.
+
+    If `ak_arr` contains any other data types (RecordArray for example) the function raises an error.
     """
 
     # Dispatch
