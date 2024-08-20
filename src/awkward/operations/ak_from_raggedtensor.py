@@ -29,14 +29,6 @@ def from_raggedtensor(tf_arr):
 
 def _impl(tf_arr):
     try:
-        import tensorflow as tf
-    except ImportError as err:
-        raise ImportError(
-            """install the 'tensorflow' package with:
-        pip install tensorflow"""
-        ) from err
-
-    try:
         # get the flat values
         content = tf_arr.flat_values.numpy()
     except AttributeError as err:
@@ -56,9 +48,7 @@ def _impl(tf_arr):
 
     # if a tensor has one *ragged dimension*
     if len(offsets_arr) == 1:
-        return ak.contents.ListOffsetArray(
-            offsets_arr[0], content
-        )
+        return ak.contents.ListOffsetArray(offsets_arr[0], content)
 
     # if a tensor has multiple *ragged dimensions*
     return _recursive_call(content, offsets_arr, 0)
@@ -67,7 +57,8 @@ def _impl(tf_arr):
 def _recursive_call(content, offsets_arr, count):
     if count == len(offsets_arr) - 2:
         return ak.contents.ListOffsetArray(
-            offsets_arr[count], ak.contents.ListOffsetArray(offsets_arr[count + 1], content)
+            offsets_arr[count],
+            ak.contents.ListOffsetArray(offsets_arr[count + 1], content),
         )
     else:
         return ak.contents.ListOffsetArray(
