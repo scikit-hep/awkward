@@ -43,6 +43,7 @@ from awkward.operations.ak_from_jax import *
 from awkward.operations.ak_from_json import *
 from awkward.operations.ak_from_numpy import *
 from awkward.operations.ak_from_parquet import *
+from awkward.operations.ak_from_raggedtensor import *
 from awkward.operations.ak_from_rdataframe import *
 from awkward.operations.ak_from_regular import *
 from awkward.operations.ak_full_like import *

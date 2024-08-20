@@ -8,6 +8,7 @@ import pytest
 import awkward as ak
 
 to_raggedtensor = ak.operations.to_raggedtensor
+from_raggedtensor = ak.operations.from_raggedtensor
 
 tf = pytest.importorskip("tensorflow")
 
@@ -25,7 +26,7 @@ inneroffsets = ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
 outeroffsets = ak.index.Index64(np.array([0, 3, 6]))
 
 
-def test():
+def convert_to_raggedtensor():
     # a test for ListArray -> RaggedTensor
     array1 = ak.contents.ListArray(starts1, stops1, content)
     assert to_raggedtensor(array1).to_list() == [
@@ -91,3 +92,26 @@ def test():
     # try just a python list
     array9 = [3, 1, 4, 1, 9, 2, 6]
     assert to_raggedtensor(array9).to_list() == [[3, 1, 4, 1, 9, 2, 6]]
+
+np_array1 = np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float32)
+
+offsets1 = ak.index.Index64(np.array([0, 2, 3, 3, 5]))
+content1 = ak.contents.NumpyArray(np_array1)
+
+def convert_from_raggedtensor():
+    tf_array1 = tf.RaggedTensor.from_row_splits(
+        values=[1.1, 2.2, 3.3, 4.4, 5.5],
+        row_splits=[0, 2, 3, 3, 5])
+
+    ak_array1 = ak.contents.ListOffsetArray(
+      offsets1, content1
+    )
+    assert (from_raggedtensor(tf_array1).content.data == np_array1).all()
+    assert (from_raggedtensor(tf_array1).offsets.data == [0, 2, 3, 3, 5]).all()
+    assert from_raggedtensor(tf_array1).to_list() == ak_array1.to_list()
+
+
+    tf_array2 = tf.RaggedTensor.from_nested_row_splits(
+        flat_values=[3, 1, 4, 1, 5, 9, 2, 6],
+        nested_row_splits=([0, 3, 3, 5], [0, 4, 4, 7, 8, 8]))
+    assert from_raggedtensor(tf_array2).to_list() == [[[3, 1, 4, 1], [], [5, 9, 2]], [], [[6], []]]
