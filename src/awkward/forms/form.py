@@ -437,6 +437,19 @@ class Form(Meta):
     def select_columns(
         self, specifier, expand_braces=True, *, prune_unions_and_records: bool = True
     ):
+        """
+        select_columns returns a new Form with only columns and sub-columns selected.
+        Returns an empty Form if no columns matched the specifier(s).
+
+        `specifier` can be a `str | Iterator[str | list[str] | tuple[str]]`.
+        Strings may include shell-globbing-style wildcards "*" and "?".
+        If `expand_braces` is `True` (the default), strings may include alternatives in braces.
+        For example, `["a.{b,c}.d"]` is equivalent to `["a.b.d", "a.c.d"]`.
+        Glob-style matching would also suit this single-character instance: `"a.[bc].d"`.
+        If specifier is a list which contains a list/tuple, that inner list will be interpreted as
+        column and subcolumn specifiers. They *may* contain wildcards, but "." will not be
+        interpreted as a `<field>.<subfield>` pattern.
+        """
         if isinstance(specifier, str):
             specifier = {specifier}
 
