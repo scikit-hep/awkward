@@ -333,7 +333,7 @@ class _SpecifierMatcher:
             has_matched = True
             next_specifiers.extend(self._match_to_next_specifiers[field])
 
-        # Fixed-strings are an O(n) lookup
+        # Patterns are an O(n) lookup
         for pattern in self._patterns:
             if fnmatchcase(field, pattern):
                 has_matched = True
@@ -442,24 +442,41 @@ class Form(Meta):
 
         # Only take unique specifiers
         for item in specifier:
-            if not isinstance(item, str):
+            if isinstance(item, str):
+                if item == "":
+                    raise ValueError(
+                        "A column-selection specifier cannot be an empty string"
+                    )
+            elif isinstance(item, (tuple, list)):
+                for field in item:
+                    if not isinstance(field, str):
+                        raise ValueError("A sub-column specifier must be a string")
+            else:
                 raise TypeError(
-                    "a column-selection specifier must be a list of non-empty strings"
-                )
-            if not item:
-                raise ValueError(
-                    "a column-selection specifier must be a list of non-empty strings"
+                    "A column-selection specifier must be a list of strings, lists, or tuples"
                 )
 
         if expand_braces:
             next_specifier = []
             for item in specifier:
-                for result in _expand_braces(item):
-                    next_specifier.append(result)
+                if isinstance(item, str):
+                    for result in _expand_braces(item):
+                        next_specifier.append(result)
+                else:
+                    next_specifier.append(item)
             specifier = next_specifier
 
-        specifier = [[] if item == "" else item.split(".") for item in set(specifier)]
-        match_specifier = _SpecifierMatcher(specifier, match_if_empty=False)
+        # specifier = set(specifier)
+        specifier_lists: list[list[str]] = []
+        for item in specifier:
+            if isinstance(item, str):
+                if item == "":
+                    specifier_lists.append([])
+                else:
+                    specifier_lists.append(item.split("."))
+            else:
+                specifier_lists.append(item)
+        match_specifier = _SpecifierMatcher(specifier_lists, match_if_empty=False)
         selection = self._select_columns(match_specifier)
         assert selection is not None, "top-level selections always return a Form"
 
