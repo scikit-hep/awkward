@@ -9,27 +9,27 @@ __all__ = ("to_raggedtensor",)
 
 
 @high_level_function()
-def to_raggedtensor(ak_arr):
+def to_raggedtensor(array):
     """
     Args:
-        ak_arr: Array-like data. May be a high level #ak.Array,
+        array: Array-like data. May be a high level #ak.Array,
         or low-level #ak.contents.ListOffsetArray, #ak.contents.ListArray,
         #ak.contents.RegularArray, #ak.contents.NumpyArray
 
-    Converts `ak_arr` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
+    Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
     into a ragged tensor, if possible.
 
-    If `ak_arr` contains any other data types (RecordArray for example) the function raises an error.
+    If `array` contains any other data types (RecordArray for example) the function raises an error.
     """
 
     # Dispatch
-    yield (ak_arr,)
+    yield (array,)
 
     # Implementation
-    return _impl(ak_arr)
+    return _impl(array)
 
 
-def _impl(ak_arr):
+def _impl(array):
     try:
         import tensorflow as tf
     except ImportError as err:
@@ -41,14 +41,14 @@ def _impl(ak_arr):
 
     # unwrap the awkward array if it was made with ak.Array function
     # also transforms a python list to awkward array
-    ak_arr = ak.to_layout(ak_arr, allow_record=False)
+    array = ak.to_layout(array, allow_record=False)
 
-    if isinstance(ak_arr, ak.contents.numpyarray.NumpyArray):
+    if isinstance(array, ak.contents.numpyarray.NumpyArray):
         return tf.RaggedTensor.from_row_splits(
-            values=ak_arr.data, row_splits=[0, ak_arr.__len__()]
+            values=array.data, row_splits=[0, array.__len__()]
         )
     else:
-        flat_values, nested_row_splits = _recursive_call(ak_arr, ())
+        flat_values, nested_row_splits = _recursive_call(array, ())
 
         return tf.RaggedTensor.from_nested_row_splits(flat_values, nested_row_splits)
 
