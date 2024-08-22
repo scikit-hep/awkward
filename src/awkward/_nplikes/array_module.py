@@ -174,7 +174,10 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         if equal_nan:
-            both_nan = self._module.logical_and(x1 == np.nan, x2 == np.nan)
+            # Only newer numpy.array_equal supports the equal_nan parameter.
+            both_nan = self._module.logical_and(
+                self._module.isnan(x1), self._module.isnan(x2)
+            )
             both_equal = x1 == x2
             return self._module.all(self._module.logical_or(both_equal, both_nan))
         else:

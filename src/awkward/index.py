@@ -136,10 +136,16 @@ class Index:
 
     @property
     def ptr(self):
-        if self._nplike == Numpy.instance():
+        if isinstance(self._nplike, Numpy):
             return self._data.ctypes.data
-        elif self._nplike == Cupy.instance():
+        elif isinstance(self._nplike, Cupy):
             return self._data.data.ptr
+        elif isinstance(self._nplike, TypeTracer):
+            return 0
+        else:
+            raise NotImplementedError(
+                f"this function hasn't been implemented for the {type(self._nplike).__name__} backend"
+            )
 
     @property
     def length(self) -> ShapeItem:

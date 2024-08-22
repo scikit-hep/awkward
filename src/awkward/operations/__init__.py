@@ -12,6 +12,7 @@ from awkward.operations.ak_argcombinations import *
 from awkward.operations.ak_argmax import *
 from awkward.operations.ak_argmin import *
 from awkward.operations.ak_argsort import *
+from awkward.operations.ak_array_equal import *
 from awkward.operations.ak_backend import *
 from awkward.operations.ak_broadcast_arrays import *
 from awkward.operations.ak_broadcast_fields import *
