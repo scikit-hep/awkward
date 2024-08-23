@@ -26,7 +26,7 @@ inneroffsets = ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
 outeroffsets = ak.index.Index64(np.array([0, 3, 6]))
 
 
-def convert_to_raggedtensor():
+def test_convert_to_raggedtensor():
     # a test for ListArray -> RaggedTensor
     array1 = ak.contents.ListArray(starts1, stops1, content)
     assert to_raggedtensor(array1).to_list() == [
@@ -100,7 +100,7 @@ offsets1 = ak.index.Index64(np.array([0, 2, 3, 3, 5]))
 content1 = ak.contents.NumpyArray(np_array1)
 
 
-def convert_from_raggedtensor():
+def test_convert_from_raggedtensor():
     tf_array1 = tf.RaggedTensor.from_row_splits(
         values=[1.1, 2.2, 3.3, 4.4, 5.5], row_splits=[0, 2, 3, 3, 5]
     )
