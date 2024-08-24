@@ -14,6 +14,12 @@
 // out["awkward_reduce_max_b", {dtype_specializations}] = None
 // END PYTHON
 
+template <typename T>
+__host__ __device__ inline T max(T x, T y)
+{
+    return (x >= y) ? x : y;
+}
+
 template <typename T, typename C, typename U>
 __global__ void
 awkward_reduce_max_a(
@@ -56,14 +62,16 @@ awkward_reduce_max_b(
     __syncthreads();
 
     if (thread_id < lenparents) {
+      temp[thread_id] = fromptr[thread_id];
       for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
         T val = identity;
 
-        if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
+        if (idx % stride == 0 && 
+            parents[thread_id] == parents[thread_id - stride]) {
           val = temp[idx - stride];
         }
         __syncthreads();
-        temp[thread_id] = val > temp[thread_id] ? val : temp[thread_id];
+        temp[thread_id] = max(val, temp[thread_id]);
         __syncthreads();
       }
 

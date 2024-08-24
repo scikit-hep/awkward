@@ -15,11 +15,11 @@ enum class INDEXEDARRAY_GETITEM_NEXTCARRY_ERRORS {
 // out["awkward_IndexedArray_getitem_nextcarry_b", {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C>
+template <typename FROM, typename TO>
 __global__ void
 awkward_IndexedArray_getitem_nextcarry_a(
-    T* tocarry,
-    const C* fromindex,
+    TO* tocarry,
+    const FROM* fromindex,
     int64_t lenindex,
     int64_t lencontent,
     int64_t* scan_in_array,
@@ -28,7 +28,7 @@ awkward_IndexedArray_getitem_nextcarry_a(
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < lenindex) {
-      C j = fromindex[thread_id];
+      FROM j = fromindex[thread_id];
       if (j < 0 || j >= lencontent) {
         RAISE_ERROR(INDEXEDARRAY_GETITEM_NEXTCARRY_ERRORS::IND_OUT_OF_RANGE)
       } else {
@@ -38,11 +38,11 @@ awkward_IndexedArray_getitem_nextcarry_a(
   }
 }
 
-template <typename T, typename C>
+template <typename FROM, typename TO>
 __global__ void
 awkward_IndexedArray_getitem_nextcarry_b(
-    T* tocarry,
-    const C* fromindex,
+    TO* tocarry,
+    const FROM* fromindex,
     int64_t lenindex,
     int64_t lencontent,
     int64_t* scan_in_array,
@@ -52,7 +52,7 @@ awkward_IndexedArray_getitem_nextcarry_b(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < lenindex) {
-      C j = fromindex[thread_id];
+      FROM j = fromindex[thread_id];
       if (j < 0 || j >= lencontent) {
         RAISE_ERROR(INDEXEDARRAY_GETITEM_NEXTCARRY_ERRORS::IND_OUT_OF_RANGE)
       } else {

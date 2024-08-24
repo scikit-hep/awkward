@@ -35,9 +35,7 @@ awkward_IndexedArray_flatten_none2empty_a(
 
     if (thread_id < outindexlength) {
       C idx = outindex[thread_id];
-      if (idx < 0) {
-        scan_in_array_k[thread_id] = 1;
-      } else if (idx + 1 >= offsetslength) {
+      if (idx + 1 >= offsetslength) {
         RAISE_ERROR(INDEXEDARRAY_FLATTEN_NONE2EMPTY_ERRORS::OFF_OUT_OF_RANGE)
       } else {
           T count =
@@ -67,9 +65,7 @@ awkward_IndexedArray_flatten_none2empty_b(
 
     if (thread_id < outindexlength) {
       C idx = outindex[thread_id];
-      if (idx < 0) {
-        outoffsets[scan_in_array_k[thread_id]] = scan_in_array_outoffsets[thread_id + 1];
-      } else if (idx + 1 >= offsetslength) {
+      if (idx + 1 >= offsetslength) {
         RAISE_ERROR(INDEXEDARRAY_FLATTEN_NONE2EMPTY_ERRORS::OFF_OUT_OF_RANGE)
       } else {
         outoffsets[scan_in_array_k[thread_id]] = scan_in_array_outoffsets[thread_id + 1];

@@ -4,18 +4,18 @@
 // def f(grid, block, args):
 //     (numnull, fromindex, lenindex, invocation_index, err_code) = args
 //     scan_in_array = cupy.zeros(lenindex, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_IndexedArray_numnull_a', numnull.dtype, fromindex.dtype]))(grid, block, (numnull, fromindex, lenindex, scan_in_array, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_IndexedArray_numnull_a', fromindex.dtype, numnull.dtype]))(grid, block, (numnull, fromindex, lenindex, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_IndexedArray_numnull_b', numnull.dtype, fromindex.dtype]))(grid, block, (numnull, fromindex, lenindex, scan_in_array, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_IndexedArray_numnull_b', fromindex.dtype, numnull.dtype]))(grid, block, (numnull, fromindex, lenindex, scan_in_array, invocation_index, err_code))
 // out["awkward_IndexedArray_numnull_a", {dtype_specializations}] = None
 // out["awkward_IndexedArray_numnull_b", {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C>
+template <typename FROM, typename TO>
 __global__ void
 awkward_IndexedArray_numnull_a(
-    T* numnull,
-    const C* fromindex,
+    TO* numnull,
+    const FROM* fromindex,
     int64_t lenindex,
     int64_t* scan_in_array,
     uint64_t invocation_index,
@@ -31,11 +31,11 @@ awkward_IndexedArray_numnull_a(
   }
 }
 
-template <typename T, typename C>
+template <typename FROM, typename TO>
 __global__ void
 awkward_IndexedArray_numnull_b(
-    T* numnull,
-    const C* fromindex,
+    TO* numnull,
+    const FROM* fromindex,
     int64_t lenindex,
     int64_t* scan_in_array,
     uint64_t invocation_index,

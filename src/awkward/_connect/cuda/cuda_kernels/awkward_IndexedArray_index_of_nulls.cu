@@ -11,11 +11,11 @@
 // out["awkward_IndexedArray_index_of_nulls_b", {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C, typename U, typename V>
+template <typename FROM, typename TO, typename U, typename V>
 __global__ void
 awkward_IndexedArray_index_of_nulls_a(
-    T* toindex,
-    const C* fromindex,
+    TO* toindex,
+    const FROM* fromindex,
     int64_t lenindex,
     const U* parents,
     const V* starts,
@@ -33,11 +33,11 @@ awkward_IndexedArray_index_of_nulls_a(
   }
 }
 
-template <typename T, typename C, typename U, typename V>
+template <typename FROM, typename TO, typename U, typename V>
 __global__ void
 awkward_IndexedArray_index_of_nulls_b(
-    T* toindex,
-    const C* fromindex,
+    TO* toindex,
+    const FROM* fromindex,
     int64_t lenindex,
     const U* parents,
     const V* starts,

@@ -35,6 +35,7 @@ awkward_ListArray_getitem_jagged_apply_a(
     int64_t* scan_in_array,
     uint64_t invocation_index,
     uint64_t* err_code) {
+  std::cout << "awkward_ListArray_getitem_jagged_apply_a\n";
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     scan_in_array[0] = 0;
