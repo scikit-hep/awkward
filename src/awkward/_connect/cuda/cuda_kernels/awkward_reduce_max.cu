@@ -66,7 +66,7 @@ awkward_reduce_max_b(
       for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
         T val = identity;
 
-        if (idx % stride == 0 && 
+        if (idx % stride == 0 &&
             parents[thread_id] == parents[thread_id - stride]) {
           val = temp[idx - stride];
         }
