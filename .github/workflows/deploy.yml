@@ -88,7 +88,7 @@ jobs:
       run: pipx run twine check dist/*
 
     - name: Generate artifact attestation for sdist and wheel
-      uses: actions/attest-build-provenance@5e9cb68e95676991667494a6a4e59b8a2f13e1d0 # v1.3.3
+      uses: actions/attest-build-provenance@6149ea5740be74af77f260b9db67e633f6b0a9a1 # v1.4.2
       with:
         subject-path: "dist/awkward-*"
 
