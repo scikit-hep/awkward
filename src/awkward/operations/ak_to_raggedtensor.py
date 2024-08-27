@@ -34,9 +34,11 @@ def _impl(array):
         import tensorflow as tf
     except ImportError as err:
         raise ImportError(
-            """install the 'tensorflow' package with:
+            """to use ak.to_raggedtensor, you must install the 'tensorflow' package with:
 
-        pip install tensorflow"""
+        pip install tensorflow
+or
+        conda install tensorflow"""
         ) from err
 
     # unwrap the awkward array if it was made with ak.Array function
@@ -60,8 +62,12 @@ def _recursive_call(layout, offsets_arr):
             layout = layout.to_ListOffsetArray64()
         elif isinstance(layout, ak.contents.regulararray.RegularArray):
             layout = layout.to_ListOffsetArray64()
-        elif (not isinstance(layout, ak.contents.listoffsetarray.ListOffsetArray)) and (
-            not isinstance(layout, ak.contents.numpyarray.NumpyArray)
+        elif not isinstance(
+            layout,
+            (
+                ak.contents.listoffsetarray.ListOffsetArray,
+                ak.contents.numpyarray.NumpyArray,
+            ),
         ):
             raise TypeError(
                 "Only arrays containing variable-length lists (var *) or"
