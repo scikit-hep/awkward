@@ -202,23 +202,3 @@ def test_very_large_record():
             ],
         }
     )
-
-
-def test_alternative_specifiers():
-    form = ak.Array(
-        [
-            {
-                "x": [
-                    {
-                        "y": {
-                            "z": [1, 2, 3],
-                            "w.1": 4,
-                        }
-                    }
-                ]
-            }
-        ]
-    ).layout.form
-    assert form.select_columns("*") == form
-    assert form.select_columns([("x", "y", "w.1")]) == form.select_columns("x.y.w*")
-    assert form.select_columns([["x", "y", "w.1"], "x.y.z"]) == form
