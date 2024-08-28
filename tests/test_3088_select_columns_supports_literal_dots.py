@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 from __future__ import annotations
+
 import os
 
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 
@@ -53,17 +54,19 @@ def test_columns_with_dots_from_parquet(tmp_path):
         }
     ]
 
-    ambig_array = ak.Array([
-        {
-            'crazy': {
-                'dot': [11, 12, 13],
-            },
-            'crazy.dot': [21, 22, 23],
-        }
-    ])
+    ambig_array = ak.Array(
+        [
+            {
+                "crazy": {
+                    "dot": [11, 12, 13],
+                },
+                "crazy.dot": [21, 22, 23],
+            }
+        ]
+    )
     parquet_file_ambig = os.path.join(tmp_path, "test_3088_array_ambig.parquet")
     ak.to_parquet(ambig_array, parquet_file_ambig)
-    ambig_selected = ak.from_parquet(parquet_file_ambig, columns=[("crazy.dot", )])
+    ambig_selected = ak.from_parquet(parquet_file_ambig, columns=[("crazy.dot",)])
     # Note: Currently, pyarrow.parquet cannot distinguish dots as separators
     # from dots as field names. It builds a dict of all possible indices,
     # and returns those. Even so, we still need the ability within Awkward to
