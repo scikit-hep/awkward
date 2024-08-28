@@ -8,6 +8,7 @@ from awkward._dispatch import high_level_function
 __all__ = ("array_equal",)
 
 
+@ak._connect.numpy.implements("array_equal")
 @high_level_function()
 def array_equal(
     a1,
