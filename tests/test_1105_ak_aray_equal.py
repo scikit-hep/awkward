@@ -88,3 +88,10 @@ def test_array_equal_with_params():
     )
     assert not ak.array_equal(a1, a2)
     assert ak.array_equal(a1, a2, check_parameters=False)
+
+
+def test_array_equal_numpy_override():
+    assert np.array_equal(
+        ak.Array([[1, 2], [], [3, 4, 5]]),
+        ak.Array([[1, 2], [], [3, 4, 5]]),
+    )
