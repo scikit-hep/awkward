@@ -32,7 +32,7 @@ def from_parquet(
     Args:
         path (str): Local filename or remote URL, passed to fsspec for resolution.
             May contain glob patterns.
-        columns (None, str, or list of (str or list of str)): Glob pattern(s) including bash-like curly
+        columns (None, str, or iterable of (str or iterable of str)): Glob pattern(s) including bash-like curly
             brackets for matching column names. Nested records are separated by dots.
             If a list of patterns, the logical-or is matched. If None, all columns
             are read. A list of lists can be provided to select columns with literal dots

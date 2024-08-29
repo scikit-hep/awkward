@@ -441,7 +441,7 @@ class Form(Meta):
         select_columns returns a new Form with only columns and sub-columns selected.
         Returns an empty Form if no columns matched the specifier(s).
 
-        `specifier` can be a `str | Iterator[str | list[str] | tuple[str]]`.
+        `specifier` can be a `str | Iterable[str | Iterable[str]]`.
         Strings may include shell-globbing-style wildcards "*" and "?".
         If `expand_braces` is `True` (the default), strings may include alternatives in braces.
         For example, `["a.{b,c}.d"]` is equivalent to `["a.b.d", "a.c.d"]`.
@@ -458,15 +458,15 @@ class Form(Meta):
             if isinstance(item, str):
                 if item == "":
                     raise ValueError(
-                        "A column-selection specifier cannot be an empty string"
+                        "a column-selection specifier cannot be an empty string"
                     )
-            elif isinstance(item, (tuple, list)):
+            elif isinstance(item, Iterable):
                 for field in item:
                     if not isinstance(field, str):
-                        raise ValueError("A sub-column specifier must be a string")
+                        raise ValueError("a sub-column specifier must be a string")
             else:
                 raise TypeError(
-                    "A column-selection specifier must be a list of strings, lists, or tuples"
+                    "a column specifier must be a string or an iterable of strings"
                 )
 
         if expand_braces:
