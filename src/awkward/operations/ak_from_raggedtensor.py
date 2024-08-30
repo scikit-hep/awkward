@@ -13,7 +13,7 @@ def from_raggedtensor(array):
     """
     Args:
         array: (`tensorflow.RaggedTensor`):
-        RaggedTensor to convert into an  Awkward Array.
+            RaggedTensor to convert into an  Awkward Array.
 
     Converts a TensorFlow RaggedTensor into an Awkward Array.
 

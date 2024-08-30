@@ -13,8 +13,8 @@ def to_raggedtensor(array):
     """
     Args:
         array: Array-like data. May be a high level #ak.Array,
-        or low-level #ak.contents.ListOffsetArray, #ak.contents.ListArray,
-        #ak.contents.RegularArray, #ak.contents.NumpyArray
+            or low-level #ak.contents.ListOffsetArray, #ak.contents.ListArray,
+            #ak.contents.RegularArray, #ak.contents.NumpyArray
 
     Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
     into a ragged tensor, if possible.
