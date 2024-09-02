@@ -302,8 +302,8 @@ def test_0652_minmax():
 
 
 def test_block_boundary_sum_complex():
-    np.random.seed(42)
-    array = np.random.randint(6000, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(6000, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -323,7 +323,6 @@ def test_block_boundary_sum_complex():
 
 
 def test_block_boundary_prod_complex1():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1000, 0), np.full(1000, 1))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -341,7 +340,6 @@ def test_block_boundary_prod_complex1():
 
 
 def test_block_boundary_prod_complex2():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1001, 0), np.full(1001, 1))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -359,7 +357,6 @@ def test_block_boundary_prod_complex2():
 
 
 def test_block_boundary_prod_complex3():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1002, 0), np.full(1002, 1))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -377,7 +374,6 @@ def test_block_boundary_prod_complex3():
 
 
 def test_block_boundary_prod_complex4():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1000, 0), np.full(1000, 1.01))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -397,7 +393,6 @@ def test_block_boundary_prod_complex4():
 
 
 def test_block_boundary_prod_complex5():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1001, 0), np.full(1001, 1.01))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -417,7 +412,6 @@ def test_block_boundary_prod_complex5():
 
 
 def test_block_boundary_prod_complex6():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1002, 0), np.full(1002, 1.01))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -437,7 +431,6 @@ def test_block_boundary_prod_complex6():
 
 
 def test_block_boundary_prod_complex7():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1000, 0), np.full(1000, 0.99))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -457,7 +450,6 @@ def test_block_boundary_prod_complex7():
 
 
 def test_block_boundary_prod_complex8():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1001, 0), np.full(1001, 0.99))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -477,7 +469,6 @@ def test_block_boundary_prod_complex8():
 
 
 def test_block_boundary_prod_complex9():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1002, 0), np.full(1002, 0.99))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -497,7 +488,6 @@ def test_block_boundary_prod_complex9():
 
 
 def test_block_boundary_prod_complex10():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1000, 0), np.full(1000, 1.1))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -517,7 +507,6 @@ def test_block_boundary_prod_complex10():
 
 
 def test_block_boundary_prod_complex11():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1001, 0), np.full(1001, 1.1))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -537,7 +526,6 @@ def test_block_boundary_prod_complex11():
 
 
 def test_block_boundary_prod_complex12():
-    np.random.seed(42)
     complex_array = np.vectorize(complex)(np.full(1002, 0), np.full(1002, 1.1))
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
@@ -557,8 +545,8 @@ def test_block_boundary_prod_complex12():
 
 
 def test_block_boundary_prod_complex13():
-    np.random.seed(42)
-    array = np.random.randint(50, size=1000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(50, size=1000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -580,8 +568,8 @@ def test_block_boundary_prod_complex13():
 
 
 def test_block_boundary_any_complex():
-    np.random.seed(42)
-    array = np.random.randint(6000, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(6000, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -601,8 +589,8 @@ def test_block_boundary_any_complex():
 
 
 def test_block_boundary_all_complex():
-    np.random.seed(42)
-    array = np.random.randint(6000, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(6000, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -622,8 +610,8 @@ def test_block_boundary_all_complex():
 
 
 def test_block_boundary_min_complex1():
-    np.random.seed(42)
-    array = np.random.randint(5, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(5, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -643,8 +631,8 @@ def test_block_boundary_min_complex1():
 
 
 def test_block_boundary_min_complex2():
-    np.random.seed(42)
-    array = np.random.randint(6000, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(6000, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -664,8 +652,8 @@ def test_block_boundary_min_complex2():
 
 
 def test_block_boundary_max_complex1():
-    np.random.seed(42)
-    array = np.random.randint(5, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(5, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -685,8 +673,8 @@ def test_block_boundary_max_complex1():
 
 
 def test_block_boundary_max_complex2():
-    np.random.seed(42)
-    array = np.random.randint(6000, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(6000, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -706,8 +694,8 @@ def test_block_boundary_max_complex2():
 
 
 def test_block_boundary_sum_bool_complex():
-    np.random.seed(42)
-    array = np.random.randint(2, size=6000, dtype=np.bool_)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(2, size=6000, dtype=np.bool_)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -727,8 +715,8 @@ def test_block_boundary_sum_bool_complex():
 
 
 def test_block_boundary_countnonzero_complex_1():
-    np.random.seed(42)
-    array = np.random.randint(6000, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(6000, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -749,8 +737,8 @@ def test_block_boundary_countnonzero_complex_1():
 
 
 def test_block_boundary_countnonzero_complex_2():
-    np.random.seed(42)
-    array = np.random.randint(2, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(2, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -772,8 +760,8 @@ def test_block_boundary_countnonzero_complex_2():
 
 @pytest.mark.skip(reason="awkward_reduce_argmax_complex is not implemented")
 def test_block_boundary_argmax_complex1():
-    np.random.seed(42)
-    array = np.random.randint(5, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(5, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -794,8 +782,8 @@ def test_block_boundary_argmax_complex1():
 
 @pytest.mark.skip(reason="awkward_reduce_argmax_complex is not implemented")
 def test_block_boundary_argmax_complex2():
-    np.random.seed(42)
-    array = np.random.randint(6000, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(6000, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -816,8 +804,8 @@ def test_block_boundary_argmax_complex2():
 
 @pytest.mark.skip(reason="awkward_reduce_argmin_complex is not implemented")
 def test_block_boundary_argmin_complex1():
-    np.random.seed(42)
-    array = np.random.randint(5, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(5, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
@@ -838,8 +826,8 @@ def test_block_boundary_argmin_complex1():
 
 @pytest.mark.skip(reason="awkward_reduce_argmin_complex is not implemented")
 def test_block_boundary_argmin_complex2():
-    np.random.seed(42)
-    array = np.random.randint(6000, size=6000)
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(6000, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
