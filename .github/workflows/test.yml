@@ -107,6 +107,11 @@ jobs:
           files: |
             awkward-cpp/dist/*.whl
 
+      - name: Add workaround for 3.13 + cramjam
+        if: matrix.python-version == '3.13'
+        run: echo 'PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1' >> $GITHUB_ENV
+        shell: bash
+
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
           python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
