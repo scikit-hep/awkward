@@ -21,7 +21,3 @@ build-verbosity = 1
 
 [tool.cibuildwheel.environment]
 PIP_ONLY_BINARY = "cmake,numpy"
-
-[[tool.cibuildwheel.overrides]]
-select = "cp313*"
-before-test = 'uv pip install --only-binary=:all: "numpy>=2.1.0rc1"'
