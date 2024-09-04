@@ -66,9 +66,8 @@ awkward_reduce_max_b(
       for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
         T val = identity;
 
-        if (idx % stride == 0 &&
-            parents[thread_id] == parents[thread_id - stride]) {
-          val = temp[idx - stride];
+        if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
+          val = temp[thread_id - stride];
         }
         __syncthreads();
         temp[thread_id] = max(val, temp[thread_id]);

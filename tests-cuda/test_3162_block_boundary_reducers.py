@@ -93,6 +93,8 @@ def test_block_boundary_max():
     array = rng.integers(3000, size=3000)
     content = ak.contents.NumpyArray(array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    print(ak.max(content, -1, highlevel=False))
+    print(ak.max(cuda_content, -1, highlevel=False))
     assert ak.max(cuda_content, -1, highlevel=False) == ak.max(
         content, -1, highlevel=False
     )
@@ -109,6 +111,24 @@ def test_block_boundary_max():
 def test_block_boundary_min():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(3000, size=3000)
+    content = ak.contents.NumpyArray(array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+    assert ak.min(cuda_content, -1, highlevel=False) == ak.min(
+        content, -1, highlevel=False
+    )
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+    assert to_list(ak.min(cuda_depth1, -1, highlevel=False)) == to_list(
+        ak.min(depth1, -1, highlevel=False)
+    )
+    del cuda_content, cuda_depth1
+
+
+def test_block_boundary_negative_min():
+    rng = np.random.default_rng(seed=42)
+    array = rng.integers(3000, size=3000) * -1
     content = ak.contents.NumpyArray(array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
     assert ak.min(cuda_content, -1, highlevel=False) == ak.min(
