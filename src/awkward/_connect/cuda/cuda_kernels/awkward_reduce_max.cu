@@ -60,7 +60,7 @@ awkward_reduce_max_b(
         T val = identity;
 
         if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-          val = temp[idx - stride];
+          val = temp[thread_id - stride];
         }
         __syncthreads();
         temp[thread_id] = val > temp[thread_id] ? val : temp[thread_id];
