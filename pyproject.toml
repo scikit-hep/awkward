@@ -136,7 +136,7 @@ filterwarnings = [
 ]
 log_cli_level = "info"
 
-[tool.pylint.master]
+[tool.pylint]
 py-version = "3.8"
 jobs = "0"
 ignore-paths = [
@@ -251,7 +251,6 @@ ignore_errors = true
 ignore_missing_imports = true
 
 [tool.ruff]
-src = ["src"]
 extend-exclude = [
     "studies",
     "pybind11",
@@ -288,10 +287,6 @@ ignore = [
     "PLW0603", # Using the global statement to update is discouraged
     "PLC1901", # x == "" can be simplified to not x (empty string is falsey)
     "ISC001",  # Conflicts with the formatter in 0.1.2
-]
-unfixable = [
-    "T20",  # Removes print statements
-    "F841", # Removes unused variables
 ]
 typing-modules = ["awkward._typing"]
 external = []
