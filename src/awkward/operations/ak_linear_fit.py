@@ -97,7 +97,7 @@ def linear_fit(
 
 def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     out_named_axis = None
-    if _supports_named_axis(array) and not is_integer(axis):
+    if _supports_named_axis(x) and not is_integer(axis):
         # Named axis handling
         raise NotImplementedError()
 

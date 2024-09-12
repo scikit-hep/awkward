@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._namedaxis import AxisMapping, AxisTuple
+from awkward._namedaxis import AxisMapping, AxisTuple, _set_named_axis_to_attrs, _supports_named_axis, _NamedAxisKey
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("with_named_axis",)
@@ -53,7 +53,34 @@ def with_named_axis(
 
 
 def _impl(array, named_axis, highlevel, behavior, attrs):
-    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+    if not named_axis: # no-op, e.g. if named_axis is None or () or {}
+        return array
 
-    return ctx.wrap(layout, highlevel=highlevel, named_axis=named_axis)
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False)
+
+    # Named axis handling
+    ndim = layout.purelist_depth
+    if isinstance(named_axis, dict):
+        _named_axis = tuple(named_axis.get(i, None) for i in range(ndim))
+        for k, i in named_axis.items():
+            if not isinstance(i, int):
+                raise TypeError(f"named_axis must map axis name to integer, not {i}")
+            if i < 0: # handle negative axis index
+                i += ndim
+            if i < 0 or i >= ndim:
+                raise ValueError(f"named_axis index out of range: {i} not in [0, {ndim})")
+            _named_axis = _named_axis[:i] + (k,) + _named_axis[i+1:]
+    elif isinstance(named_axis, tuple):
+        _named_axis = named_axis
+    else:
+        raise TypeError(f"named_axis must be a mapping or a tuple, got {named_axis}")
+
+    attrs = _set_named_axis_to_attrs(ctx.attrs or {}, _named_axis)
+    if len(attrs[_NamedAxisKey]) != ndim:
+        raise ValueError(
+            f"named_axis {_named_axis} {attrs[_NamedAxisKey]=} must have the same length as the number of dimensions ({ndim})"
+        )
+
+    out_ctx = HighLevelContext(behavior=ctx.behavior, attrs=attrs).finalize()
+    return out_ctx.wrap(layout, highlevel=highlevel)

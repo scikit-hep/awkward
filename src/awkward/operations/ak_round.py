@@ -68,4 +68,4 @@ def _impl(array, decimals, highlevel, behavior, attrs):
             return None
 
     out = ak._do.recursively_apply(layout, action)
-    return ctx.wrap(out, highlevel=highlevel)
+    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)

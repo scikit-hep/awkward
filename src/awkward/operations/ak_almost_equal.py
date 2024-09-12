@@ -97,10 +97,8 @@ def _impl(
     backend = backend_of(left_layout)
 
     if check_named_axis and _supports_named_axis(left) and _supports_named_axis(right):
-        if left.named_axes != right.named_axes:
-            raise ValueError(
-                f"Named axes are not equal: {left.named_axes} != {right.named_axes}"
-            )
+        if left.named_axis != right.named_axis:
+            return False
 
     if not backend.nplike.known_data:
         raise NotImplementedError(

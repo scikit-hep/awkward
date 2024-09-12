@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import awkward._typing as tp
+from awkward._regularize import is_integer
 
 if tp.TYPE_CHECKING:
     from awkward.highlevel import Array
+    from awkward._layout import HighLevelContext
 
 
 # axis names are hashables, mostly strings,
@@ -18,7 +20,7 @@ AxisTuple = tuple[
 _NamedAxisKey: str = "__named_axis__"
 
 
-def _supports_named_axis(array: Array) -> bool:
+def _supports_named_axis(array: Array | HighLevelContext) -> bool:
     """Check if the given array supports named axis.
 
     Args:
@@ -27,7 +29,7 @@ def _supports_named_axis(array: Array) -> bool:
     Returns:
         bool: True if the array supports named axis, False otherwise.
     """
-    return bool(getattr(array, "attrs", {}).get(_NamedAxisKey, {}))
+    return bool((getattr(array, "attrs", {}) or {}).get(_NamedAxisKey, {}))
 
 
 class TmpNamedAxisMarker:
@@ -39,9 +41,14 @@ class TmpNamedAxisMarker:
 
 
 def _check_valid_axis(axis: AxisName) -> AxisName:
-    if not isinstance(axis, AxisName):
-        raise ValueError(f"Axis names must be hashable, got {axis!r}")
+    if not isinstance(axis, AxisName) and not is_integer(axis):
+        raise ValueError(f"Axis names must be hashable and not int, got {axis!r}")
     return axis
+
+
+def _check_axis_mapping_unique_values(axis_mapping: AxisMapping) -> None:
+    if len(set(axis_mapping.values())) != len(axis_mapping):
+        raise ValueError(f"Named axis mapping must be unique for each positional axis, got: {axis_mapping}")
 
 
 def _axis_tuple_to_mapping(axis_tuple: AxisTuple) -> AxisMapping:
@@ -67,6 +74,7 @@ def _axis_tuple_to_mapping(axis_tuple: AxisTuple) -> AxisMapping:
 def _axis_mapping_to_tuple(axis_mapping: AxisMapping) -> AxisTuple:
     """
     Converts a dictionary mapping of axis names to their positions to a tuple of axis names.
+    Does not allow the same values to be repeated in the mapping.
 
     Args:
         axis_mapping (AxisMapping): A dictionary mapping axis names to their positions.
@@ -79,8 +87,14 @@ def _axis_mapping_to_tuple(axis_mapping: AxisMapping) -> AxisTuple:
         ("x", "y", None)
         >>> _axis_mapping_to_tuple({"x": 0, "y": -1, TmpNamedAxisMarker(): 1})
         ("x", None, "y")
+        >>> _axis_mapping_to_tuple({"x": 0, "y": 0, TmpNamedAxisMarker(): 1})
+        Traceback (most recent call last):
+        ...
+        ValueError: Axis positions must be unique, got: {"x": 0, "y": 0, TmpNamedAxisMarker(): 1}
     """
-    axis_list: list[AxisName] = [None] * len(axis_mapping)
+    _check_axis_mapping_unique_values(axis_mapping)
+
+    axis_list: list[AxisName | None] = [None] * len(axis_mapping)
     for ax, pos in axis_mapping.items():
         if isinstance(ax, TmpNamedAxisMarker):
             axis_list[pos] = None
@@ -154,10 +168,10 @@ def _one_axis_to_positional_axis(
 
 
 def _set_named_axis_to_attrs(
-    attrs: dict,
+    attrs: tp.Mapping,
     named_axis: AxisTuple | AxisMapping,
     overwrite: bool = True,
-) -> dict:
+) -> tp.Mapping:
     """
     Sets the named axis mapping into the given attributes dictionary.
 
@@ -185,6 +199,7 @@ def _set_named_axis_to_attrs(
     if isinstance(named_axis, tuple):
         named_axis_mapping = _axis_tuple_to_mapping(named_axis)
     elif isinstance(named_axis, dict):
+        _check_axis_mapping_unique_values(named_axis)
         named_axis_mapping = {**attrs.get(_NamedAxisKey, {}), **named_axis}
     else:
         raise TypeError(f"named_axis must be a tuple or dict, not {named_axis}")

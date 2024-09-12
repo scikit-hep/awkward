@@ -113,7 +113,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
         # Named axis handling
         raise NotImplementedError()
 
-    axis = regularize_axis(axis[0])
+    axis = regularize_axis(axis)
 
     if isinstance(arrays, Mapping):
         index_arrays = {n: ak.local_index(x, axis) for n, x in arrays.items()}
