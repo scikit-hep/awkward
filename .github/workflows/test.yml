@@ -66,6 +66,10 @@ jobs:
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: pypy
+          - python-version: '3.11'
+            python-architecture: x64
+            runs-on: ubuntu-latest
+            dependencies-kind: ml
 
     runs-on: ${{ matrix.runs-on }}
 

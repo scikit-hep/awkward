@@ -206,3 +206,12 @@ def test_selective_parquet(tmp_path):
     ak.to_parquet(ak_tbl, filename)
     tbl_tr = ak.from_parquet(filename, columns=["struct_array", "indexed"])
     assert to_list(tbl_tr["struct_array"]) == to_list(ak_tbl["struct_array"])
+
+
+@pytest.mark.parametrize("doit", [False, True])
+def test_empty(tmp_path, doit):
+    filename = os.path.join(tmp_path, "whatever.parquet")
+
+    ak.to_parquet(ak.Array([{"x": 1, "y": 1.1}])[0:0], filename, extensionarray=doit)
+
+    assert str(ak.from_parquet(filename).type) == "0 * {x: int64, y: float64}"
