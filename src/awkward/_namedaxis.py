@@ -4,8 +4,8 @@ import awkward._typing as tp
 from awkward._regularize import is_integer
 
 if tp.TYPE_CHECKING:
-    from awkward.highlevel import Array
     from awkward._layout import HighLevelContext
+    from awkward.highlevel import Array
 
 
 # axis names are hashables, mostly strings,
@@ -48,7 +48,9 @@ def _check_valid_axis(axis: AxisName) -> AxisName:
 
 def _check_axis_mapping_unique_values(axis_mapping: AxisMapping) -> None:
     if len(set(axis_mapping.values())) != len(axis_mapping):
-        raise ValueError(f"Named axis mapping must be unique for each positional axis, got: {axis_mapping}")
+        raise ValueError(
+            f"Named axis mapping must be unique for each positional axis, got: {axis_mapping}"
+        )
 
 
 def _axis_tuple_to_mapping(axis_tuple: AxisTuple) -> AxisMapping:

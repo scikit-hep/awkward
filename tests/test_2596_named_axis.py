@@ -6,8 +6,10 @@ import pytest  # noqa: F401
 
 import awkward as ak
 
+
 def test_with_named_axis():
     from dataclasses import dataclass
+
     from awkward._namedaxis import _supports_named_axis
 
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
@@ -62,18 +64,36 @@ def test_named_axis_ak_all():
     assert ak.all(ak.all(array < 4, axis=1) == ak.all(named_array < 4, axis="jets"))
 
     # check that result axis names are correctly propagated
-    assert ak.all(named_array < 4, axis=0).named_axis == ak.all(named_array < 4, axis="events").named_axis == ("jets",)
-    assert ak.all(named_array < 4, axis=1).named_axis == ak.all(named_array < 4, axis="jets").named_axis == ("events",)
+    assert (
+        ak.all(named_array < 4, axis=0).named_axis
+        == ak.all(named_array < 4, axis="events").named_axis
+        == ("jets",)
+    )
+    assert (
+        ak.all(named_array < 4, axis=1).named_axis
+        == ak.all(named_array < 4, axis="jets").named_axis
+        == ("events",)
+    )
     assert ak.all(named_array < 4, axis=None).named_axis == (None,)
 
 
 def test_named_axis_ak_almost_equal():
     array1 = array2 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
-    named_array1 = named_array2 = ak.with_named_axis(array1, named_axis=("events", "jets"))
+    named_array1 = named_array2 = ak.with_named_axis(
+        array1, named_axis=("events", "jets")
+    )
 
-    assert ak.almost_equal(array1, array2, check_named_axis=False) == ak.almost_equal(named_array1, named_array2, check_named_axis=False) == True
-    assert ak.almost_equal(array1, array2, check_named_axis=True) == ak.almost_equal(named_array1, named_array2, check_named_axis=True) == True
+    assert (
+        ak.almost_equal(array1, array2, check_named_axis=False)
+        == ak.almost_equal(named_array1, named_array2, check_named_axis=False)
+        == True
+    )
+    assert (
+        ak.almost_equal(array1, array2, check_named_axis=True)
+        == ak.almost_equal(named_array1, named_array2, check_named_axis=True)
+        == True
+    )
 
     assert ak.almost_equal(named_array1, array1, check_named_axis=False) == True
     assert ak.almost_equal(named_array1, array1, check_named_axis=True) == True
@@ -105,8 +125,16 @@ def test_named_axis_ak_any():
     assert ak.all(ak.any(array < 4, axis=1) == ak.any(named_array < 4, axis="jets"))
 
     # check that result axis names are correctly propagated
-    assert ak.any(named_array < 4, axis=0).named_axis == ak.any(named_array < 4, axis="events").named_axis == ("jets",)
-    assert ak.any(named_array < 4, axis=1).named_axis == ak.any(named_array < 4, axis="jets").named_axis == ("events",)
+    assert (
+        ak.any(named_array < 4, axis=0).named_axis
+        == ak.any(named_array < 4, axis="events").named_axis
+        == ("jets",)
+    )
+    assert (
+        ak.any(named_array < 4, axis=1).named_axis
+        == ak.any(named_array < 4, axis="jets").named_axis
+        == ("events",)
+    )
     assert ak.any(named_array < 4, axis=None).named_axis == (None,)
 
 
@@ -126,15 +154,40 @@ def test_named_axis_ak_argmax():
     # first check that they work the same
     assert ak.all(ak.argmax(array, axis=0) == ak.argmax(named_array, axis="events"))
     assert ak.all(ak.argmax(array, axis=1) == ak.argmax(named_array, axis="jets"))
-    assert ak.all(ak.argmax(array, axis=0, keepdims=True) == ak.argmax(named_array, axis="events", keepdims=True))
-    assert ak.all(ak.argmax(array, axis=1, keepdims=True) == ak.argmax(named_array, axis="jets", keepdims=True))
+    assert ak.all(
+        ak.argmax(array, axis=0, keepdims=True)
+        == ak.argmax(named_array, axis="events", keepdims=True)
+    )
+    assert ak.all(
+        ak.argmax(array, axis=1, keepdims=True)
+        == ak.argmax(named_array, axis="jets", keepdims=True)
+    )
     assert ak.all(ak.argmax(array, axis=None) == ak.argmax(named_array, axis=None))
 
     # check that result axis names are correctly propagated
-    assert ak.argmax(named_array, axis=0).named_axis == ak.argmax(named_array, axis="events").named_axis == ("jets",)
-    assert ak.argmax(named_array, axis=1).named_axis == ak.argmax(named_array, axis="jets").named_axis == ("events",)
-    assert ak.argmax(named_array, axis=0, keepdims=True).named_axis == ak.argmax(named_array, axis="events", keepdims=True).named_axis == ("events", "jets",)
-    assert ak.argmax(named_array, axis=1, keepdims=True).named_axis == ak.argmax(named_array, axis="jets", keepdims=True).named_axis == ("events", "jets")
+    assert (
+        ak.argmax(named_array, axis=0).named_axis
+        == ak.argmax(named_array, axis="events").named_axis
+        == ("jets",)
+    )
+    assert (
+        ak.argmax(named_array, axis=1).named_axis
+        == ak.argmax(named_array, axis="jets").named_axis
+        == ("events",)
+    )
+    assert (
+        ak.argmax(named_array, axis=0, keepdims=True).named_axis
+        == ak.argmax(named_array, axis="events", keepdims=True).named_axis
+        == (
+            "events",
+            "jets",
+        )
+    )
+    assert (
+        ak.argmax(named_array, axis=1, keepdims=True).named_axis
+        == ak.argmax(named_array, axis="jets", keepdims=True).named_axis
+        == ("events", "jets")
+    )
     assert ak.argmax(named_array, axis=None).named_axis == (None,)
 
 
@@ -146,15 +199,40 @@ def test_named_axis_ak_argmin():
     # first check that they work the same
     assert ak.all(ak.argmin(array, axis=0) == ak.argmin(named_array, axis="events"))
     assert ak.all(ak.argmin(array, axis=1) == ak.argmin(named_array, axis="jets"))
-    assert ak.all(ak.argmin(array, axis=0, keepdims=True) == ak.argmin(named_array, axis="events", keepdims=True))
-    assert ak.all(ak.argmin(array, axis=1, keepdims=True) == ak.argmin(named_array, axis="jets", keepdims=True))
+    assert ak.all(
+        ak.argmin(array, axis=0, keepdims=True)
+        == ak.argmin(named_array, axis="events", keepdims=True)
+    )
+    assert ak.all(
+        ak.argmin(array, axis=1, keepdims=True)
+        == ak.argmin(named_array, axis="jets", keepdims=True)
+    )
     assert ak.all(ak.argmin(array, axis=None) == ak.argmin(named_array, axis=None))
 
     # check that result axis names are correctly propagated
-    assert ak.argmin(named_array, axis=0).named_axis == ak.argmin(named_array, axis="events").named_axis == ("jets",)
-    assert ak.argmin(named_array, axis=1).named_axis == ak.argmin(named_array, axis="jets").named_axis == ("events",)
-    assert ak.argmin(named_array, axis=0, keepdims=True).named_axis == ak.argmin(named_array, axis="events", keepdims=True).named_axis == ("events", "jets",)
-    assert ak.argmin(named_array, axis=1, keepdims=True).named_axis == ak.argmin(named_array, axis="jets", keepdims=True).named_axis == ("events", "jets")
+    assert (
+        ak.argmin(named_array, axis=0).named_axis
+        == ak.argmin(named_array, axis="events").named_axis
+        == ("jets",)
+    )
+    assert (
+        ak.argmin(named_array, axis=1).named_axis
+        == ak.argmin(named_array, axis="jets").named_axis
+        == ("events",)
+    )
+    assert (
+        ak.argmin(named_array, axis=0, keepdims=True).named_axis
+        == ak.argmin(named_array, axis="events", keepdims=True).named_axis
+        == (
+            "events",
+            "jets",
+        )
+    )
+    assert (
+        ak.argmin(named_array, axis=1, keepdims=True).named_axis
+        == ak.argmin(named_array, axis="jets", keepdims=True).named_axis
+        == ("events", "jets")
+    )
     assert ak.argmin(named_array, axis=None).named_axis == (None,)
 
 
@@ -168,17 +246,35 @@ def test_named_axis_ak_argsort():
     assert ak.all(ak.argsort(array, axis=1) == ak.argsort(named_array, axis="jets"))
 
     # check that result axis names are correctly propagated
-    assert ak.argsort(named_array, axis=0).named_axis == ak.argsort(named_array, axis="events").named_axis == ("events", "jets")
-    assert ak.argsort(named_array, axis=1).named_axis == ak.argsort(named_array, axis="jets").named_axis == ("events", "jets")
+    assert (
+        ak.argsort(named_array, axis=0).named_axis
+        == ak.argsort(named_array, axis="events").named_axis
+        == ("events", "jets")
+    )
+    assert (
+        ak.argsort(named_array, axis=1).named_axis
+        == ak.argsort(named_array, axis="jets").named_axis
+        == ("events", "jets")
+    )
 
 
 def test_named_axis_ak_array_equal():
     array1 = array2 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
-    named_array1 = named_array2 = ak.with_named_axis(array1, named_axis=("events", "jets"))
+    named_array1 = named_array2 = ak.with_named_axis(
+        array1, named_axis=("events", "jets")
+    )
 
-    assert ak.array_equal(array1, array2, check_named_axis=False) == ak.array_equal(named_array1, named_array2, check_named_axis=False) == True
-    assert ak.array_equal(array1, array2, check_named_axis=True) == ak.array_equal(named_array1, named_array2, check_named_axis=True) == True
+    assert (
+        ak.array_equal(array1, array2, check_named_axis=False)
+        == ak.array_equal(named_array1, named_array2, check_named_axis=False)
+        == True
+    )
+    assert (
+        ak.array_equal(array1, array2, check_named_axis=True)
+        == ak.array_equal(named_array1, named_array2, check_named_axis=True)
+        == True
+    )
 
     assert ak.array_equal(named_array1, array1, check_named_axis=False) == True
     assert ak.array_equal(named_array1, array1, check_named_axis=True) == True
@@ -382,8 +478,16 @@ def test_named_axis_ak_max():
     assert ak.all(ak.max(array, axis=1) == ak.max(named_array, axis="jets"))
 
     # check that result axis names are correctly propagated
-    assert ak.max(named_array, axis=0).named_axis == ak.max(named_array, axis="events").named_axis == ("jets",)
-    assert ak.max(named_array, axis=1).named_axis == ak.max(named_array, axis="jets").named_axis == ("events",)
+    assert (
+        ak.max(named_array, axis=0).named_axis
+        == ak.max(named_array, axis="events").named_axis
+        == ("jets",)
+    )
+    assert (
+        ak.max(named_array, axis=1).named_axis
+        == ak.max(named_array, axis="jets").named_axis
+        == ("events",)
+    )
     assert ak.max(named_array, axis=None).named_axis == (None,)
 
 

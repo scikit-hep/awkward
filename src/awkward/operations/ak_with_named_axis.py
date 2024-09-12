@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._namedaxis import AxisMapping, AxisTuple, _set_named_axis_to_attrs, _supports_named_axis, _NamedAxisKey
+from awkward._namedaxis import (
+    AxisMapping,
+    AxisTuple,
+    _NamedAxisKey,
+    _set_named_axis_to_attrs,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("with_named_axis",)
@@ -53,7 +58,7 @@ def with_named_axis(
 
 
 def _impl(array, named_axis, highlevel, behavior, attrs):
-    if not named_axis: # no-op, e.g. if named_axis is None or () or {}
+    if not named_axis:  # no-op, e.g. if named_axis is None or () or {}
         return array
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
@@ -66,11 +71,13 @@ def _impl(array, named_axis, highlevel, behavior, attrs):
         for k, i in named_axis.items():
             if not isinstance(i, int):
                 raise TypeError(f"named_axis must map axis name to integer, not {i}")
-            if i < 0: # handle negative axis index
+            if i < 0:  # handle negative axis index
                 i += ndim
             if i < 0 or i >= ndim:
-                raise ValueError(f"named_axis index out of range: {i} not in [0, {ndim})")
-            _named_axis = _named_axis[:i] + (k,) + _named_axis[i+1:]
+                raise ValueError(
+                    f"named_axis index out of range: {i} not in [0, {ndim})"
+                )
+            _named_axis = _named_axis[:i] + (k,) + _named_axis[i + 1 :]
     elif isinstance(named_axis, tuple):
         _named_axis = named_axis
     else:

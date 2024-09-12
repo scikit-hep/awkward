@@ -23,7 +23,12 @@ from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
-from awkward._namedaxis import _axis_tuple_to_mapping, _axis_mapping_to_tuple, AxisMapping, AxisTuple, _NamedAxisKey, _set_named_axis_to_attrs, _supports_named_axis
+from awkward._namedaxis import (
+    AxisTuple,
+    _axis_mapping_to_tuple,
+    _NamedAxisKey,
+    _supports_named_axis,
+)
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin

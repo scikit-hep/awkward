@@ -6,9 +6,14 @@ import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._namedaxis import _one_axis_to_positional_axis, _remove_named_axis, _supports_named_axis, _identity_named_axis, _check_valid_axis
+from awkward._namedaxis import (
+    _check_valid_axis,
+    _identity_named_axis,
+    _one_axis_to_positional_axis,
+    _remove_named_axis,
+    _supports_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer
 
 __all__ = ("max", "nanmax")
 

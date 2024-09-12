@@ -6,9 +6,14 @@ import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._namedaxis import _supports_named_axis, _check_valid_axis, _one_axis_to_positional_axis, _remove_named_axis, _identity_named_axis
+from awkward._namedaxis import (
+    _check_valid_axis,
+    _identity_named_axis,
+    _one_axis_to_positional_axis,
+    _remove_named_axis,
+    _supports_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
 
 __all__ = ("argmin", "nanargmin")
 
@@ -137,7 +142,9 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     if _supports_named_axis(ctx or {}) and _check_valid_axis(axis):
         # Handle named axis
         # Step 1: Normalize named axis to positional axis
-        axis = _one_axis_to_positional_axis(axis, array.named_axis, array.positional_axis)
+        axis = _one_axis_to_positional_axis(
+            axis, array.named_axis, array.positional_axis
+        )
 
     # Step 2: propagate named axis from input to output,
     #   keepdims=True: use strategy "keep all" (see: awkward._namedaxis)
