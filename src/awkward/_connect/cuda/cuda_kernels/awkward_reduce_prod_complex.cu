@@ -30,8 +30,8 @@ awkward_reduce_prod_complex_a(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < outlength) {
-      toptr[thread_id * 2] = (T)1.0f;
-      toptr[thread_id * 2 + 1] = (T)0.0f;
+      toptr[thread_id * 2] = (T)1;
+      toptr[thread_id * 2 + 1] = (T)0;
     }
   }
 }
