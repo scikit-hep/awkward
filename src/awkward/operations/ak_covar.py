@@ -9,8 +9,9 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
 )
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
+from awkward._regularize import regularize_axis, is_integer
 
 __all__ = ("covar",)
 
@@ -83,6 +84,11 @@ def covar(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
+    out_named_axis = None
+    if _supports_named_axis(x) and not is_integer(axis):
+        # Named axis handling
+        raise NotImplementedError()
+
     axis = regularize_axis(axis)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:

@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 
@@ -98,6 +99,11 @@ def run_lengths(array, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, highlevel, behavior, attrs):
+    out_named_axis = None
+    if _supports_named_axis(array):
+        # Named axis handling
+        raise NotImplementedError()
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
@@ -224,4 +230,4 @@ def _impl(array, highlevel, behavior, attrs):
             return None
 
     out = ak._do.recursively_apply(layout, action)
-    return ctx.wrap(out, highlevel=highlevel)
+    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)

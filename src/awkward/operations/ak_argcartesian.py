@@ -6,8 +6,9 @@ from collections.abc import Mapping
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
+from awkward._regularize import regularize_axis, is_integer
 
 __all__ = ("argcartesian",)
 
@@ -107,7 +108,12 @@ def argcartesian(
 
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
+    out_named_axis = None
+    if _supports_named_axis(arrays[0]) and not is_integer(axis):
+        # Named axis handling
+        raise NotImplementedError()
+
+    axis = regularize_axis(axis[0])
 
     if isinstance(arrays, Mapping):
         index_arrays = {n: ak.local_index(x, axis) for n, x in arrays.items()}

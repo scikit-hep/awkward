@@ -12,11 +12,10 @@ from awkward._typing import (
     Self,
     SupportsIndex,
     overload,
+    EllipsisType,
 )
 
 if TYPE_CHECKING:
-    from types import EllipsisType
-
     from numpy.typing import DTypeLike
 
 

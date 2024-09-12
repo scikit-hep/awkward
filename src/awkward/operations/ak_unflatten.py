@@ -6,10 +6,11 @@ import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
-from awkward._regularize import is_integer_like, regularize_axis
+from awkward._regularize import is_integer_like, regularize_axis, is_integer
 
 __all__ = ("unflatten",)
 
@@ -91,6 +92,11 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=Non
 
 
 def _impl(array, counts, axis, highlevel, behavior, attrs):
+    out_named_axis = None
+    if _supports_named_axis(array) and not is_integer(axis):
+        # Named axis handling
+        raise NotImplementedError()
+
     axis = regularize_axis(axis)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
@@ -292,4 +298,4 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
             f"at axis={axis}"
         )
 
-    return ctx.wrap(out, highlevel=highlevel)
+    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)

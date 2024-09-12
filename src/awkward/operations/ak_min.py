@@ -6,8 +6,9 @@ import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._namedaxis import _one_axis_to_positional_axis, _remove_named_axis, _supports_named_axis, _identity_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
+from awkward._regularize import regularize_axis, is_integer
 
 __all__ = ("min", "nanmin")
 
@@ -142,7 +143,23 @@ def nanmin(
 
 
 def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
+    out_named_axis = None
+    if _supports_named_axis(array) and not is_integer(axis):
+        # Handle named axis
+        # Step 1: Normalize named axis to positional axis
+        axis = _one_axis_to_positional_axis(axis, array.named_axis, array.positional_axis)
+
+        # Step 2: propagate named axis from input to output,
+        #    use strategy "remove one" (see: awkward._namedaxis)
+        out_named_axis = _identity_named_axis(array.named_axis)
+        if not keepdims:
+            out_named_axis = _remove_named_axis(axis, out_named_axis)
+
+    if not isinstance(axis, int):
+        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
+
+    # axis = regularize_axis(axis) # <- is this really needed?
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     reducer = ak._reducers.Min(initial)
@@ -155,7 +172,12 @@ def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior, at
         keepdims=keepdims,
         behavior=ctx.behavior,
     )
-    return ctx.wrap(out, highlevel=highlevel, allow_other=True)
+    return ctx.wrap(
+        out,
+        highlevel=highlevel,
+        allow_other=True,
+        named_axis=out_named_axis,
+    )
 
 
 @ak._connect.numpy.implements("amin")

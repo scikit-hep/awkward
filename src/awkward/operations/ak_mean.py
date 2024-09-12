@@ -11,8 +11,9 @@ from awkward._layout import (
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
 )
+from awkward._namedaxis import _one_axis_to_positional_axis, _remove_named_axis, _supports_named_axis, _identity_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
+from awkward._regularize import regularize_axis, is_integer
 
 __all__ = ("mean", "nanmean")
 
@@ -174,7 +175,28 @@ def nanmean(
 
 
 def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
+    out_named_axis = None
+    if _supports_named_axis(x) and not is_integer(axis):
+        # Handle named axis
+        # Step 1: Convert named axis to positional axis
+        xaxis = _one_axis_to_positional_axis(axis, x.named_axis, x.positional_axis)
+        waxis = xaxis
+        if weight is not None and _supports_named_axis(weight):
+            waxis = _one_axis_to_positional_axis(axis, weight.named_axis, weight.positional_axis)
+        if xaxis != waxis:
+            raise ValueError(
+                f"ak.mean require the same axis for x and weight, got {xaxis} and {waxis}"
+            )
+        axis = xaxis
+
+        # Step 2: Propagate named axis from input to output using "remove one" strategy
+        out_named_axis = _identity_named_axis(x.named_axis)
+        if not keepdims:
+            # Remove the axis that we are reducing
+            out_named_axis = _remove_named_axis(axis, out_named_axis)
+
+    if not isinstance(axis, int):
+        raise TypeError(f"'axis' must be an integer (or a named axis that maps to an integer) by now, not {axis!r}")
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, weight_layout = ensure_same_backend(
@@ -252,7 +274,10 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
         return ctx.wrap(
-            maybe_highlevel_to_lowlevel(out), highlevel=highlevel, allow_other=True
+            maybe_highlevel_to_lowlevel(out),
+            highlevel=highlevel,
+            allow_other=True,
+            named_axis=out_named_axis,
         )
 
 

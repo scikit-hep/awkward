@@ -9,8 +9,10 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
 )
+from awkward._namedaxis import AxisName, _one_axis_to_positional_axis, _remove_named_axis, _supports_named_axis, _identity_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
+from awkward._regularize import is_integer, regularize_axis
+from awkward._typing import Mapping
 
 __all__ = ("moment",)
 
@@ -22,13 +24,13 @@ def moment(
     x,
     n,
     weight=None,
-    axis=None,
+    axis: AxisName = None,
     *,
-    keepdims=False,
-    mask_identity=False,
-    highlevel=True,
-    behavior=None,
-    attrs=None,
+    keepdims: bool = False,
+    mask_identity: bool = False,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
 ):
     """
     Args:
@@ -86,8 +88,39 @@ def moment(
     )
 
 
-def _impl(x, n, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
+def _impl(
+    x,
+    n,
+    weight,
+    axis: AxisName,
+    keepdims: bool,
+    mask_identity: bool,
+    highlevel: bool,
+    behavior: Mapping | None,
+    attrs: Mapping | None,
+):
+    out_named_axis = None
+    if _supports_named_axis(x) and not is_integer(axis):
+        # Handle named axis
+        # Step 1: Convert named axis to positional axis
+        xaxis = _one_axis_to_positional_axis(axis, x.named_axis, x.positional_axis)
+        waxis = xaxis
+        if weight is not None and _supports_named_axis(weight):
+            waxis = _one_axis_to_positional_axis(axis, weight.named_axis, weight.positional_axis)
+        if xaxis != waxis:
+            raise ValueError(
+                f"ak.mean require the same axis for x and weight, got {xaxis} and {waxis}"
+            )
+        axis = xaxis
+
+        # Step 2: Propagate named axis from input to output using "remove one" strategy
+        out_named_axis = _identity_named_axis(x.named_axis)
+        if not keepdims:
+            # Remove the axis that we are reducing
+            out_named_axis = _remove_named_axis(axis, out_named_axis)
+
+    if not isinstance(axis, int):
+        raise TypeError(f"'axis' must be an integer (or a named axis that maps to an integer) by now, not {axis!r}")
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, weight_layout = ensure_same_backend(
@@ -147,4 +180,5 @@ def _impl(x, n, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
             maybe_highlevel_to_lowlevel(sumwxn / sumw),
             highlevel=highlevel,
             allow_other=True,
+            named_axis=out_named_axis,
         )

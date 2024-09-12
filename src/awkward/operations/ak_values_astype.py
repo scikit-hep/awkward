@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("values_astype",)
@@ -70,8 +71,13 @@ def values_astype(
 
 
 def _impl(array, to, including_unknown, highlevel, behavior, attrs):
+    out_named_axis = None
+    if _supports_named_axis(array):
+        # Named axis handling
+        raise NotImplementedError()
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     to_str = ak.types.numpytype.dtype_to_primitive(np.dtype(to))
     out = ak._do.numbers_to_type(layout, to_str, including_unknown)
-    return ctx.wrap(out, highlevel=highlevel)
+    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)

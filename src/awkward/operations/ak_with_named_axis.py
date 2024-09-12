@@ -5,21 +5,21 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._namedaxis import AxisTuple, AxisMapping
 
-__all__ = ("with_name",)
+__all__ = ("with_named_axis",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def with_name(array, name, *, highlevel=True, behavior=None, attrs=None):
+def with_named_axis(array, named_axis: AxisTuple | AxisMapping, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        name (str or None): Name to give to the records or tuples; this assigns
-            the `"__record__"` parameter. If None, any existing name is unset.
+        named_axis: AxisTuple | AxisMapping: Names to give to the array axis; this assigns
+            the `"__named_axis__"` attr. If None, any existing name is unset.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -43,29 +43,11 @@ def with_name(array, name, *, highlevel=True, behavior=None, attrs=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, name, highlevel, behavior, attrs)
+    return _impl(array, named_axis, highlevel, behavior, attrs)
 
 
-def _impl(array, name, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(array):
-        # Named axis handling
-        raise NotImplementedError()
-
+def _impl(array, named_axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
-    def action(layout, **ignore):
-        if isinstance(layout, ak.contents.RecordArray):
-            return ak.contents.RecordArray(
-                layout._contents,
-                layout._fields,
-                layout._length,
-                parameters={**layout.parameters, "__record__": name},
-            )
-        else:
-            return None
-
-    out = ak._do.recursively_apply(layout, action)
-
-    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)
+    return ctx.wrap(layout, highlevel=highlevel, named_axis=named_axis)

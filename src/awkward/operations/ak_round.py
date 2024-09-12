@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("round",)
@@ -51,6 +52,11 @@ def round(
 
 
 def _impl(array, decimals, highlevel, behavior, attrs):
+    out_named_axis = None
+    if _supports_named_axis(array):
+        # Named axis handling
+        raise NotImplementedError()
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 

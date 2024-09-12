@@ -6,8 +6,9 @@ import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
+from awkward._regularize import regularize_axis, is_integer
 
 __all__ = ("any",)
 
@@ -67,7 +68,13 @@ def any(
 
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
+    out_named_axis = None
+    if _supports_named_axis(array) and not is_integer(axis):
+        # Named axis handling
+        raise NotImplementedError()
+
     axis = regularize_axis(axis)
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     reducer = ak._reducers.Any()
@@ -80,7 +87,12 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
         keepdims=keepdims,
         behavior=ctx.behavior,
     )
-    return ctx.wrap(out, highlevel=highlevel, allow_other=True)
+    return ctx.wrap(
+        out,
+        highlevel=highlevel,
+        allow_other=True,
+        named_axis=out_named_axis,
+    )
 
 
 @ak._connect.numpy.implements("any")

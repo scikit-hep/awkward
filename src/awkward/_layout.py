@@ -12,6 +12,7 @@ from awkward._backends.dispatch import (
 )
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of
+from awkward._namedaxis import AxisMapping, AxisTuple
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -154,7 +155,12 @@ class HighLevelContext:
         )
 
     def wrap(
-        self, obj: Any, *, highlevel: bool = True, allow_other: bool = False
+        self,
+        obj: Any,
+        *,
+        highlevel: bool = True,
+        allow_other: bool = False,
+        named_axis: AxisMapping | AxisTuple | None = None,
     ) -> Any:
         self._ensure_finalized()
 
@@ -164,6 +170,7 @@ class HighLevelContext:
             attrs=self._attrs,
             behavior=self._behavior,
             allow_other=allow_other,
+            named_axis=named_axis,
         )
 
 
@@ -198,6 +205,7 @@ def wrap_layout(
     like: Any = None,
     allow_other: bool = False,
     attrs: Mapping | None = None,
+    named_axis: AxisMapping | AxisTuple | None = None,
 ) -> T | Array | HighLevelRecord:
     import awkward.highlevel
     from awkward.contents import Content
@@ -211,7 +219,7 @@ def wrap_layout(
             behavior = behavior_of(like)
 
         if isinstance(content, Content):
-            return awkward.highlevel.Array(content, behavior=behavior, attrs=attrs)
+            return awkward.highlevel.Array(content, behavior=behavior, attrs=attrs, named_axis=named_axis)
         elif isinstance(content, Record):
             return awkward.highlevel.Record(content, behavior=behavior, attrs=attrs)
         elif allow_other:

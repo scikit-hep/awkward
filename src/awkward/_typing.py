@@ -26,6 +26,7 @@ __all__ = list(
         "Literal",
         "SupportsIndex",
         "ParamSpec",
+        "EllipsisType",
         *typing.__all__,
     }
 )
@@ -46,6 +47,8 @@ if sys.version_info < (3, 11):
         TypeGuard,
         Unpack,
     )
+
+    EllipsisType = type(...)
 else:
     from typing import (
         ClassVar,
@@ -62,6 +65,7 @@ else:
         final,
         runtime_checkable,
     )
+    from types import EllipsisType
 
 
 JSONSerializable: TypeAlias = (

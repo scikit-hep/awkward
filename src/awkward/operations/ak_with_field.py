@@ -7,6 +7,7 @@ import copy
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
 
@@ -49,6 +50,11 @@ def with_field(array, what, where=None, *, highlevel=True, behavior=None, attrs=
 
 
 def _impl(base, what, where, highlevel, behavior, attrs):
+    out_named_axis = None
+    if _supports_named_axis(base):
+        # Named axis handling
+        raise NotImplementedError()
+
     if not (
         where is None
         or isinstance(where, str)
@@ -161,4 +167,4 @@ def _impl(base, what, where, highlevel, behavior, attrs):
 
         assert isinstance(out, tuple) and len(out) == 1
 
-        return ctx.wrap(out[0], highlevel=highlevel)
+        return ctx.wrap(out[0], highlevel=highlevel, named_axis=out_named_axis)

@@ -15,6 +15,7 @@ from awkward._broadcasting import (
 )
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import _supports_named_axis
 
 __all__ = ("transform",)
 
@@ -468,6 +469,11 @@ def _impl(
     highlevel,
     attrs,
 ):
+    out_named_axis = None
+    if _supports_named_axis(array):
+        # Named axis handling
+        raise NotImplementedError()
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layouts = ensure_same_backend(
             ctx.unwrap(
@@ -602,6 +608,6 @@ def _impl(
                 "or tuple of Contents, but instead only returned None."
             )
         elif len(out) == 1:
-            return ctx.wrap(out[0], highlevel=highlevel)
+            return ctx.wrap(out[0], highlevel=highlevel, named_axis=out_named_axis)
         else:
-            return tuple(ctx.wrap(x, highlevel=highlevel) for x in out)
+            return tuple(ctx.wrap(x, highlevel=highlevel, named_axis=out_named_axis) for x in out)

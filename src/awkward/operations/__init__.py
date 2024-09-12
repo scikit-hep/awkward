@@ -111,6 +111,7 @@ from awkward.operations.ak_var import *
 from awkward.operations.ak_where import *
 from awkward.operations.ak_with_field import *
 from awkward.operations.ak_with_name import *
+from awkward.operations.ak_with_named_axis import *
 from awkward.operations.ak_with_parameter import *
 from awkward.operations.ak_without_field import *
 from awkward.operations.ak_without_parameters import *

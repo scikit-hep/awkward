@@ -33,11 +33,10 @@ from awkward._typing import (
     TypeGuard,
     TypeVar,
     cast,
+    EllipsisType,
 )
 
 if TYPE_CHECKING:
-    from types import EllipsisType
-
     from numpy.typing import DTypeLike
 
     from awkward.contents.content import Content

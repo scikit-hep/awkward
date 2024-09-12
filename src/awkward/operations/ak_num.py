@@ -5,8 +5,10 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
+from awkward._namedaxis import AxisName, _NamedAxisKey, _one_axis_to_positional_axis, _remove_named_axis, _identity_named_axis, _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
+from awkward._typing import Mapping
 from awkward.errors import AxisError
 
 __all__ = ("num",)
@@ -15,11 +17,18 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def num(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
+def num(
+    array,
+    axis: AxisName = 1,
+    *,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (int): The dimension at which this operation is applied. The
+        axis (AxisName): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
@@ -83,8 +92,29 @@ def num(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
     return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
+def _impl(
+    array,
+    axis: AxisName,
+    highlevel: bool,
+    behavior: Mapping | None,
+    attrs: Mapping | None,
+):
+    out_named_axis = None
+    if _supports_named_axis(array) and not is_integer(axis):
+        # Handle named axis
+        # Step 1: Normalize named axis to positional axis
+        axis = _one_axis_to_positional_axis(axis, array.named_axis, array.positional_axis)
+
+        # Step 2: propagate named axis from input to output,
+        #    use strategy "remove one" (see: awkward._namedaxis)
+        out_named_axis = _remove_named_axis(axis, _identity_named_axis(array.named_axis))
+
+    if not isinstance(axis, int):
+        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
+
+    # axis = regularize_axis(axis) # <- is this really needed?
+
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
@@ -109,4 +139,4 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
     out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return ctx.wrap(out, highlevel=highlevel)
+    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)

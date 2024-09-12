@@ -5,8 +5,9 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
+from awkward._regularize import regularize_axis, is_integer
 from awkward.errors import AxisError
 
 __all__ = ("fill_none",)
@@ -69,6 +70,11 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=Non
 
 
 def _impl(array, value, axis, highlevel, behavior, attrs):
+    out_named_axis = None
+    if _supports_named_axis(array) and not is_integer(axis):
+        # Named axis handling
+        raise NotImplementedError()
+
     axis = regularize_axis(axis)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
@@ -125,4 +131,4 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
                 )
 
     out = ak._do.recursively_apply(array_layout, action)
-    return ctx.wrap(out, highlevel=highlevel)
+    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)

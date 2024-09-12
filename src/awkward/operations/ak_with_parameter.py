@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("with_parameter",)
@@ -44,8 +45,13 @@ def with_parameter(
 
 
 def _impl(array, parameter, value, highlevel, behavior, attrs):
+    out_named_axis = None
+    if _supports_named_axis(array):
+        # Named axis handling
+        raise NotImplementedError()
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
 
     out = layout.with_parameter(parameter, value)
-    return ctx.wrap(out, highlevel=highlevel)
+    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)

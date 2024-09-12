@@ -9,10 +9,11 @@ from awkward._backends.dispatch import backend_of_obj
 from awkward._dispatch import high_level_function
 from awkward._do import mergeable
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
+from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
-from awkward._regularize import regularize_axis
+from awkward._regularize import regularize_axis, is_integer
 from awkward._typing import Sequence
 from awkward.contents import Content
 from awkward.operations.ak_fill_none import fill_none
@@ -92,7 +93,13 @@ def _merge_as_union(
 
 
 def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
+    out_named_axis = None
+    if _supports_named_axis(arrays[0]) and not is_integer(axis):
+        # Named axis handling
+        raise NotImplementedError()
+
     axis = regularize_axis(axis)
+
     # Simple single-array, axis=0 fast-path
     if (
         # Is an array with a known backend
