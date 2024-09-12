@@ -59,8 +59,8 @@ awkward_reduce_prod_complex_b(
 
     if (thread_id < lenparents) {
       for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-        T real = (T)1.0f;
-        T imag = (T)0.0f;
+        T real = (T)1;
+        T imag = (T)0;
         if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
           real = temp[(idx - stride) * 2];
           imag = temp[(idx - stride) * 2 + 1];
