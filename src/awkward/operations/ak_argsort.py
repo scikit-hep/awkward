@@ -8,7 +8,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis, is_integer
+from awkward._regularize import is_integer, regularize_axis
 
 __all__ = ("argsort",)
 
@@ -77,7 +77,6 @@ def _impl(array, axis, ascending, stable, highlevel, behavior, attrs):
         raise NotImplementedError()
 
     axis = regularize_axis(axis)
-
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")

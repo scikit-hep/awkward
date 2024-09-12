@@ -610,4 +610,6 @@ def _impl(
         elif len(out) == 1:
             return ctx.wrap(out[0], highlevel=highlevel, named_axis=out_named_axis)
         else:
-            return tuple(ctx.wrap(x, highlevel=highlevel, named_axis=out_named_axis) for x in out)
+            return tuple(
+                ctx.wrap(x, highlevel=highlevel, named_axis=out_named_axis) for x in out
+            )

@@ -219,7 +219,9 @@ def wrap_layout(
             behavior = behavior_of(like)
 
         if isinstance(content, Content):
-            return awkward.highlevel.Array(content, behavior=behavior, attrs=attrs, named_axis=named_axis)
+            return awkward.highlevel.Array(
+                content, behavior=behavior, attrs=attrs, named_axis=named_axis
+            )
         elif isinstance(content, Record):
             return awkward.highlevel.Record(content, behavior=behavior, attrs=attrs)
         elif allow_other:

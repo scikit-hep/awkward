@@ -7,7 +7,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis, is_integer
+from awkward._regularize import is_integer, regularize_axis
 from awkward.errors import AxisError
 
 __all__ = ("fill_none",)

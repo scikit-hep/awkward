@@ -11,7 +11,9 @@ if tp.TYPE_CHECKING:
 AxisName = tp.Hashable
 
 AxisMapping = tp.Mapping[AxisName, int]  # e.g.: {"x": 0, "y": 1, "z": 2}
-AxisTuple = tuple[AxisName | int | None, ...] # e.g.: ("x", "y", None) where None is a wildcard
+AxisTuple = tuple[
+    AxisName | int | None, ...
+]  # e.g.: ("x", "y", None) where None is a wildcard
 
 _NamedAxisKey: str = "__named_axis__"
 
@@ -56,7 +58,10 @@ def _axis_tuple_to_mapping(axis_tuple: AxisTuple) -> AxisMapping:
         >>> _axis_tuple_to_mapping(("x", "y", None))
         {"x": 0, "y": 1, TmpNamedAxisMarker(): 2}
     """
-    return {(_check_valid_axis(axis) if axis is not None else TmpNamedAxisMarker()): i for i, axis in enumerate(axis_tuple)}
+    return {
+        (_check_valid_axis(axis) if axis is not None else TmpNamedAxisMarker()): i
+        for i, axis in enumerate(axis_tuple)
+    }
 
 
 def _axis_mapping_to_tuple(axis_mapping: AxisMapping) -> AxisTuple:
@@ -111,8 +116,7 @@ def _any_axis_to_positional_axis(
     """
     if isinstance(axis, (tuple, list)):
         return tuple(
-            _one_axis_to_positional_axis(ax, named_axis, positional_axis)
-            for ax in axis
+            _one_axis_to_positional_axis(ax, named_axis, positional_axis) for ax in axis
         )
     else:
         return _one_axis_to_positional_axis(axis, named_axis, positional_axis)
@@ -149,7 +153,6 @@ def _one_axis_to_positional_axis(
         raise ValueError(f"Invalid axis '{axis}'")
 
 
-
 def _set_named_axis_to_attrs(
     attrs: dict,
     named_axis: AxisTuple | AxisMapping,
@@ -178,7 +181,7 @@ def _set_named_axis_to_attrs(
         >>> _set_named_axis_to_attrs(attrs, named_axis)
         {"other_key": "other_value", "__named_axis__": {"x": 0, "y": 1, "z": 2}}
     """
-    attrs = dict(attrs) # copy
+    attrs = dict(attrs)  # copy
     if isinstance(named_axis, tuple):
         named_axis_mapping = _axis_tuple_to_mapping(named_axis)
     elif isinstance(named_axis, dict):
@@ -187,7 +190,9 @@ def _set_named_axis_to_attrs(
         raise TypeError(f"named_axis must be a tuple or dict, not {named_axis}")
 
     if _NamedAxisKey in attrs and not overwrite:
-        raise KeyError(f"Can't set named axis mapping into attrs with key {_NamedAxisKey}, have {attrs=}.")
+        raise KeyError(
+            f"Can't set named axis mapping into attrs with key {_NamedAxisKey}, have {attrs=}."
+        )
 
     attrs[_NamedAxisKey] = named_axis_mapping
     return attrs
@@ -206,6 +211,7 @@ def _set_named_axis_to_attrs(
 # - "permute" (_permute_named_axis): Permute the named axis in the output array, e.g.: `ak.transpose` (does this exist?)
 # - "contract" (_contract_named_axis): Contract the named axis in the output array, e.g.: `matmul` (does this exist?)
 # - "adding" (_adding_named_axis): Add a new named axis to the output array, e.g.: `ak.concatenate` (not clear yet...)
+
 
 def _identity_named_axis(
     named_axis: AxisTuple,
@@ -248,9 +254,7 @@ def _remove_named_axis(
     """
     if axis is None:
         return (None,)
-    return tuple(
-        name for i, name in enumerate(named_axis) if i != axis
-    )
+    return tuple(name for i, name in enumerate(named_axis) if i != axis)
 
 
 def _permute_named_axis(
@@ -362,5 +366,6 @@ class Slicer:
         >>> ak_slice[:]
         slice(None)
     """
+
     def __getitem__(self, where):
         return where

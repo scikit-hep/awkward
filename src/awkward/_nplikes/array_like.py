@@ -8,11 +8,11 @@ from awkward._nplikes.shape import ShapeItem
 from awkward._typing import (
     TYPE_CHECKING,
     DType,
+    EllipsisType,
     Protocol,
     Self,
     SupportsIndex,
     overload,
-    EllipsisType,
 )
 
 if TYPE_CHECKING:

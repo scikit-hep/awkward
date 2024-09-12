@@ -54,7 +54,16 @@ def nan_to_num(
     return _impl(array, copy, nan, posinf, neginf, highlevel, behavior, attrs)
 
 
-def _impl(array, copy: bool, nan, posinf, neginf, highlevel: bool, behavior: Mapping | None, attrs: Mapping | None):
+def _impl(
+    array,
+    copy: bool,
+    nan,
+    posinf,
+    neginf,
+    highlevel: bool,
+    behavior: Mapping | None,
+    attrs: Mapping | None,
+):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout, nan_layout, posinf_layout, neginf_layout = ensure_same_backend(
             ctx.unwrap(array),
@@ -144,11 +153,12 @@ def _impl(array, copy: bool, nan, posinf, neginf, highlevel: bool, behavior: Map
         assert isinstance(out, tuple) and len(out) == 1
         out = out[0]
 
-
     return ctx.wrap(
         out,
         highlevel=highlevel,
-        named_axis=_identity_named_axis(array.named_axis), # strategy: "keep all" (see: awkward._namedaxis)
+        named_axis=_identity_named_axis(
+            array.named_axis
+        ),  # strategy: "keep all" (see: awkward._namedaxis)
     )
 
 

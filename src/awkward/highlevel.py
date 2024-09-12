@@ -23,7 +23,13 @@ from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
-from awkward._namedaxis import _axis_tuple_to_mapping, _axis_mapping_to_tuple, AxisMapping, AxisTuple, _NamedAxisKey, _set_named_axis_to_attrs
+from awkward._namedaxis import (
+    AxisMapping,
+    AxisTuple,
+    _axis_mapping_to_tuple,
+    _NamedAxisKey,
+    _set_named_axis_to_attrs,
+)
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
@@ -331,7 +337,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if attrs is not None and not isinstance(attrs, dict):
             raise TypeError("attrs must be None or a mapping")
 
-
         # Named axis handling
         ndim = layout.purelist_depth
         if named_axis is None:
@@ -340,16 +345,22 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             _named_axis = tuple(named_axis.get(i, None) for i in range(ndim))
             for k, i in named_axis.items():
                 if not isinstance(i, int):
-                    raise TypeError(f"named_axis must map axis name to integer, not {i}")
-                if i < 0: # handle negative axis index
+                    raise TypeError(
+                        f"named_axis must map axis name to integer, not {i}"
+                    )
+                if i < 0:  # handle negative axis index
                     i += ndim
                 if i < 0 or i >= ndim:
-                    raise ValueError(f"named_axis index out of range: {i} not in [0, {ndim})")
-                _named_axis = _named_axis[:i] + (k,) + _named_axis[i+1:]
+                    raise ValueError(
+                        f"named_axis index out of range: {i} not in [0, {ndim})"
+                    )
+                _named_axis = _named_axis[:i] + (k,) + _named_axis[i + 1 :]
         elif isinstance(named_axis, tuple):
             _named_axis = named_axis
         else:
-            raise TypeError(f"named_axis must be a mapping or a tuple, got {named_axis}")
+            raise TypeError(
+                f"named_axis must be a mapping or a tuple, got {named_axis}"
+            )
 
         attrs = _set_named_axis_to_attrs(attrs or {}, _named_axis)
         if len(attrs[_NamedAxisKey]) != ndim:

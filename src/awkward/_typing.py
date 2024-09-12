@@ -50,6 +50,7 @@ if sys.version_info < (3, 11):
 
     EllipsisType = type(...)
 else:
+    from types import EllipsisType
     from typing import (
         ClassVar,
         Final,
@@ -65,7 +66,6 @@ else:
         final,
         runtime_checkable,
     )
-    from types import EllipsisType
 
 
 JSONSerializable: TypeAlias = (

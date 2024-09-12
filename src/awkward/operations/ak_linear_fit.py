@@ -8,7 +8,7 @@ from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis, is_integer
+from awkward._regularize import is_integer, regularize_axis
 
 __all__ = ("linear_fit",)
 
@@ -102,7 +102,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
         raise NotImplementedError()
 
     axis = regularize_axis(axis)
-
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, y_layout, weight_layout = ensure_same_backend(

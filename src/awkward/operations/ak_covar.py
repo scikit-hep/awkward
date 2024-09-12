@@ -11,7 +11,7 @@ from awkward._layout import (
 )
 from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis, is_integer
+from awkward._regularize import is_integer, regularize_axis
 
 __all__ = ("covar",)
 

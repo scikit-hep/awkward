@@ -26,6 +26,7 @@ from awkward._typing import (
     TYPE_CHECKING,
     Any,
     DType,
+    EllipsisType,
     Final,
     Literal,
     Self,
@@ -33,7 +34,6 @@ from awkward._typing import (
     TypeGuard,
     TypeVar,
     cast,
-    EllipsisType,
 )
 
 if TYPE_CHECKING:

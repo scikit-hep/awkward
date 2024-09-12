@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._namedaxis import AxisMapping, AxisTuple
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._namedaxis import AxisTuple, AxisMapping
 
 __all__ = ("with_named_axis",)
 
@@ -14,7 +13,14 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def with_named_axis(array, named_axis: AxisTuple | AxisMapping, *, highlevel=True, behavior=None, attrs=None):
+def with_named_axis(
+    array,
+    named_axis: AxisTuple | AxisMapping,
+    *,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).

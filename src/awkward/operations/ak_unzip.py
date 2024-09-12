@@ -73,8 +73,18 @@ def _impl(array, highlevel, behavior, attrs):
     ak._do.recursively_apply(layout, check_for_union, return_array=False)
 
     if len(fields) == 0:
-        return (ctx.wrap(layout, highlevel=highlevel, allow_other=True, named_axis=out_named_axis),)
+        return (
+            ctx.wrap(
+                layout, highlevel=highlevel, allow_other=True, named_axis=out_named_axis
+            ),
+        )
     else:
         return tuple(
-            ctx.wrap(layout[n], highlevel=highlevel, allow_other=True, named_axis=out_named_axis) for n in fields
+            ctx.wrap(
+                layout[n],
+                highlevel=highlevel,
+                allow_other=True,
+                named_axis=out_named_axis,
+            )
+            for n in fields
         )

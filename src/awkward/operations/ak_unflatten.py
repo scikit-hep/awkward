@@ -10,7 +10,7 @@ from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
-from awkward._regularize import is_integer_like, regularize_axis, is_integer
+from awkward._regularize import is_integer, is_integer_like, regularize_axis
 
 __all__ = ("unflatten",)
 

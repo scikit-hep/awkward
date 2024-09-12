@@ -67,5 +67,7 @@ def _impl(array, highlevel: bool, behavior: Mapping | None, attrs: Mapping | Non
     return ctx.wrap(
         out,
         highlevel=highlevel,
-        named_axis=_identity_named_axis(array.named_axis), # strategy: "keep all" (see: awkward._namedaxis)
+        named_axis=_identity_named_axis(
+            array.named_axis
+        ),  # strategy: "keep all" (see: awkward._namedaxis)
     )

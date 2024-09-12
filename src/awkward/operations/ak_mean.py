@@ -11,9 +11,14 @@ from awkward._layout import (
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
 )
-from awkward._namedaxis import _one_axis_to_positional_axis, _remove_named_axis, _supports_named_axis, _identity_named_axis
+from awkward._namedaxis import (
+    _identity_named_axis,
+    _one_axis_to_positional_axis,
+    _remove_named_axis,
+    _supports_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis, is_integer
+from awkward._regularize import is_integer
 
 __all__ = ("mean", "nanmean")
 
@@ -182,7 +187,9 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
         xaxis = _one_axis_to_positional_axis(axis, x.named_axis, x.positional_axis)
         waxis = xaxis
         if weight is not None and _supports_named_axis(weight):
-            waxis = _one_axis_to_positional_axis(axis, weight.named_axis, weight.positional_axis)
+            waxis = _one_axis_to_positional_axis(
+                axis, weight.named_axis, weight.positional_axis
+            )
         if xaxis != waxis:
             raise ValueError(
                 f"ak.mean require the same axis for x and weight, got {xaxis} and {waxis}"
@@ -196,7 +203,9 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
             out_named_axis = _remove_named_axis(axis, out_named_axis)
 
     if not isinstance(axis, int):
-        raise TypeError(f"'axis' must be an integer (or a named axis that maps to an integer) by now, not {axis!r}")
+        raise TypeError(
+            f"'axis' must be an integer (or a named axis that maps to an integer) by now, not {axis!r}"
+        )
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, weight_layout = ensure_same_backend(

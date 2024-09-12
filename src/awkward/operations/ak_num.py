@@ -5,9 +5,15 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
-from awkward._namedaxis import AxisName, _NamedAxisKey, _one_axis_to_positional_axis, _remove_named_axis, _identity_named_axis, _supports_named_axis
+from awkward._namedaxis import (
+    AxisName,
+    _identity_named_axis,
+    _one_axis_to_positional_axis,
+    _remove_named_axis,
+    _supports_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._regularize import is_integer
 from awkward._typing import Mapping
 from awkward.errors import AxisError
 
@@ -103,17 +109,20 @@ def _impl(
     if _supports_named_axis(array) and not is_integer(axis):
         # Handle named axis
         # Step 1: Normalize named axis to positional axis
-        axis = _one_axis_to_positional_axis(axis, array.named_axis, array.positional_axis)
+        axis = _one_axis_to_positional_axis(
+            axis, array.named_axis, array.positional_axis
+        )
 
         # Step 2: propagate named axis from input to output,
         #    use strategy "remove one" (see: awkward._namedaxis)
-        out_named_axis = _remove_named_axis(axis, _identity_named_axis(array.named_axis))
+        out_named_axis = _remove_named_axis(
+            axis, _identity_named_axis(array.named_axis)
+        )
 
     if not isinstance(axis, int):
         raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
 
     # axis = regularize_axis(axis) # <- is this really needed?
-
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
