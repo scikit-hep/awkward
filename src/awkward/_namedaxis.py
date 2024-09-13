@@ -12,8 +12,8 @@ if tp.TYPE_CHECKING:
 # except for integers, which are reserved for positional axis.
 AxisName: tp.TypeAlias = tp.Hashable
 
-AxisMapping = tp.Mapping[AxisName, int]  # e.g.: {"x": 0, "y": 1, "z": 2}
-AxisTuple = tuple[AxisName, ...]  # e.g.: ("x", "y", None) where None is a wildcard
+AxisMapping: tp.TypeAlias = tp.Mapping[AxisName, int]  # e.g.: {"x": 0, "y": 1, "z": 2}
+AxisTuple: tp.TypeAlias = tp.Tuple[AxisName, ...]  # e.g.: ("x", "y", None) where None is a wildcard
 
 _NamedAxisKey: str = "__named_axis__"
 
