@@ -5,7 +5,12 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
-from awkward._namedaxis import _supports_named_axis
+from awkward._namedaxis import (
+    _check_valid_axis,
+    _keep_named_axis,
+    _one_axis_to_positional_axis,
+    _supports_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
 from awkward.errors import AxisError
@@ -57,18 +62,25 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, axis, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(array) and not is_integer(axis):
-        # Named axis handling
-        raise NotImplementedError()
-
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False)
 
+    out_named_axis = None
+    if _supports_named_axis(ctx) and _check_valid_axis(axis):
+        # Handle named axis
+        # Step 1: Normalize named axis to positional axis
+        axis = _one_axis_to_positional_axis(
+            axis, array.named_axis, array.positional_axis
+        )
+
+    # Step 2: propagate named axis from input to output,
+    #   use strategy "keep one" (see: awkward._namedaxis)
+    out_named_axis = _keep_named_axis(array.named_axis, axis)
+
+    axis = regularize_axis(axis)
+
     if not is_integer(axis):
-        raise TypeError(f"'axis' must be an integer, not {axis!r}")
+        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
 
     if maybe_posaxis(layout, axis, 1) == 0:
         # specialized logic; it's tested in test_0582-propagate-context-in-broadcast_and_apply.py
@@ -110,9 +122,19 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
         out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return ctx.wrap(
+    wrapped_out = ctx.wrap(
         out,
         highlevel=highlevel,
         allow_other=True,
-        named_axis=out_named_axis,
     )
+
+    if out_named_axis:
+        # propagate named axis to output
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped_out,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+    return wrapped_out

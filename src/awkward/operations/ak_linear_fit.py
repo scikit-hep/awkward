@@ -5,10 +5,8 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
-from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
 
 __all__ = ("linear_fit",)
 
@@ -96,13 +94,6 @@ def linear_fit(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(x) and not is_integer(axis):
-        # Named axis handling
-        raise NotImplementedError()
-
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, y_layout, weight_layout = ensure_same_backend(
             ctx.unwrap(x, allow_record=False, primitive_policy="error"),

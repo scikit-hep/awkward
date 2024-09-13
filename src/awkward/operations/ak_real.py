@@ -5,7 +5,6 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("real",)
@@ -38,16 +37,11 @@ def real(array, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(array):
-        # Named axis handling
-        raise NotImplementedError()
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     out = ak._do.recursively_apply(layout, _action_real)
-    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)
+    return ctx.wrap(out, highlevel=highlevel)
 
 
 def _action_real(layout, backend, **kwargs):

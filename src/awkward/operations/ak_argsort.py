@@ -13,6 +13,7 @@ from awkward._namedaxis import (
     _supports_named_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._regularize import is_integer, regularize_axis
 
 __all__ = ("argsort",)
 
@@ -90,8 +91,10 @@ def _impl(array, axis, ascending, stable, highlevel, behavior, attrs):
     #   use strategy "keep all" (see: awkward._namedaxis)
     out_named_axis = _identity_named_axis(array.named_axis)
 
-    if not isinstance(axis, int) and axis is not None:
-        raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
+    axis = regularize_axis(axis)
+
+    if not is_integer(axis):
+        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
 
     out = ak._do.argsort(layout, axis, ascending, stable)
 

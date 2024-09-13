@@ -222,6 +222,8 @@ def _set_named_axis_to_attrs(
 #
 # The strategies are:
 # - "keep all" (_identity_named_axis): Keep all named axes in the output array, e.g.: `ak.drop_none`
+# - "keep one" (_keep_named_axis): Keep one named axes in the output array, e.g.: `ak.firsts`
+# - "remove all" (_remove_all_named_axis): Removes all named axis, e.g.: `ak.categories
 # - "remove one" (_remove_named_axis): Remove the named axis from the output array, e.g.: `ak.sum`
 # - "unify" (_unify_named_axis): Unify the named axis in the output array given two input arrays, e.g.: `__add__`
 # - "collapse" (_collapse_named_axis): Collapse multiple named axis to None in the output array, e.g.: `ak.flatten`
@@ -248,6 +250,54 @@ def _identity_named_axis(
         ("x", "y", "z")
     """
     return tuple(named_axis)
+
+
+def _keep_named_axis(
+    named_axis: AxisTuple,
+    axis: int | None = None,
+) -> AxisTuple:
+    """
+    Determines the new named axis after keeping the specified axis. This is useful, for example,
+    when applying an operation that keeps only one axis.
+
+    Args:
+        named_axis (AxisTuple): The current named axis.
+        axis (int | None, optional): The index of the axis to keep. If None, all axes are kept. Default is None.
+
+    Returns:
+        AxisTuple: The new named axis after keeping the specified axis.
+
+    Examples:
+        >>> _keep_named_axis(("x", "y", "z"), 1)
+        ("y",)
+        >>> _keep_named_axis(("x", "y", "z"))
+        ("x", "y", "z")
+    """
+    return tuple(named_axis) if axis is None else (named_axis[axis],)
+
+
+def _remove_all_named_axis(
+    named_axis: AxisTuple,
+    n: int | None = None,
+) -> AxisTuple:
+    """
+    Determines the new named axis after removing all axes. This is useful, for example,
+    when applying an operation that removes all axes.
+
+    Args:
+        named_axis (AxisTuple): The current named axis.
+        n (int | None, optional): The number of axes to remove. If None, all axes are removed. Default is None.
+
+    Returns:
+        AxisTuple: The new named axis after removing all axes. All elements will be None.
+
+    Examples:
+        >>> _remove_all_named_axis(("x", "y", "z"))
+        (None, None, None)
+        >>> _remove_all_named_axis(("x", "y", "z"), 2)
+        (None, None)
+    """
+    return (None,) * (len(named_axis) if n is None else n)
 
 
 def _remove_named_axis(

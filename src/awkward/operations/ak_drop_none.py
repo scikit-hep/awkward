@@ -5,7 +5,11 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
-from awkward._namedaxis import _supports_named_axis
+from awkward._namedaxis import (
+    _check_valid_axis,
+    _one_axis_to_positional_axis,
+    _supports_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
 from awkward.errors import AxisError
@@ -66,15 +70,20 @@ def _drop_none_if_list(layout):
 
 
 def _impl(array, axis, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(array) and not is_integer(axis):
-        # Named axis handling
-        raise NotImplementedError()
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
+    if _supports_named_axis(ctx) and _check_valid_axis(axis):
+        # Handle named axis
+        # Step 1: Normalize named axis to positional axis
+        axis = _one_axis_to_positional_axis(
+            axis, array.named_axis, array.positional_axis
+        )
 
     axis = regularize_axis(axis)
 
-    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+    if not is_integer(axis) and axis is not None:
+        raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
 
     if axis is None:
         # if the outer layout is_option, drop_nones without affecting offsets
@@ -130,5 +139,4 @@ def _impl(array, axis, highlevel, behavior, attrs):
     return ctx.wrap(
         out,
         highlevel=highlevel,
-        named_axis=out_named_axis,
     )

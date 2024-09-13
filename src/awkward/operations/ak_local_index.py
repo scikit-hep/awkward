@@ -5,7 +5,12 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._namedaxis import _supports_named_axis
+from awkward._namedaxis import (
+    _check_valid_axis,
+    _keep_named_axis,
+    _one_axis_to_positional_axis,
+    _supports_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
 
@@ -89,14 +94,40 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, axis, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
     out_named_axis = None
-    if _supports_named_axis(array) and not is_integer(axis):
-        # Named axis handling
-        raise NotImplementedError()
+    if _supports_named_axis(ctx) and _check_valid_axis(axis):
+        # Handle named axis
+        # Step 1: Normalize named axis to positional axis
+        axis = _one_axis_to_positional_axis(
+            axis, array.named_axis, array.positional_axis
+        )
 
     axis = regularize_axis(axis)
 
-    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+    if not is_integer(axis):
+        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
+
+    # Step 2: propagate named axis from input to output,
+    #   "keep all" up to the positional axis dim (see: awkward._namedaxis)
+    out_named_axis = _keep_named_axis(array.named_axis, None)[: axis + 1]
+
     out = ak._do.local_index(layout, axis)
-    return ctx.wrap(out, highlevel=highlevel)
+
+    wrapped_out = ctx.wrap(
+        out,
+        highlevel=highlevel,
+    )
+
+    if out_named_axis:
+        # propagate named axis to output
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped_out,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+    return wrapped_out

@@ -5,7 +5,11 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
-from awkward._namedaxis import _supports_named_axis
+from awkward._namedaxis import (
+    _check_valid_axis,
+    _one_axis_to_positional_axis,
+    _supports_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
 from awkward.errors import AxisError
@@ -70,13 +74,6 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=Non
 
 
 def _impl(array, value, axis, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(array) and not is_integer(axis):
-        # Named axis handling
-        raise NotImplementedError()
-
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         array_layout, value_layout = ensure_same_backend(
             ctx.unwrap(array, allow_record=True, allow_unknown=False),
@@ -89,6 +86,18 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
                 string_policy="pass-through",
             ),
         )
+
+    if _supports_named_axis(ctx) and _check_valid_axis(axis):
+        # Handle named axis
+        # Step 1: Normalize named axis to positional axis
+        axis = _one_axis_to_positional_axis(
+            axis, array.named_axis, array.positional_axis
+        )
+
+    axis = regularize_axis(axis)
+
+    if not is_integer(axis) and axis is not None:
+        raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
 
     if isinstance(value_layout, ak.record.Record):
         value_layout = value_layout.array[value_layout.at : value_layout.at + 1]
@@ -131,4 +140,4 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
                 )
 
     out = ak._do.recursively_apply(array_layout, action)
-    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)
+    return ctx.wrap(out, highlevel=highlevel)

@@ -5,7 +5,6 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("unzip",)
@@ -50,13 +49,9 @@ def unzip(array, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(array):
-        # Named axis handling
-        raise NotImplementedError()
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
+
     fields = ak.operations.fields(layout)
 
     def check_for_union(layout, **kwargs):
@@ -73,18 +68,13 @@ def _impl(array, highlevel, behavior, attrs):
     ak._do.recursively_apply(layout, check_for_union, return_array=False)
 
     if len(fields) == 0:
-        return (
-            ctx.wrap(
-                layout, highlevel=highlevel, allow_other=True, named_axis=out_named_axis
-            ),
-        )
+        return (ctx.wrap(layout, highlevel=highlevel, allow_other=True),)
     else:
         return tuple(
             ctx.wrap(
                 layout[n],
                 highlevel=highlevel,
                 allow_other=True,
-                named_axis=out_named_axis,
             )
             for n in fields
         )

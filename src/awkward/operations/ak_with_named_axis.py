@@ -58,14 +58,13 @@ def with_named_axis(
 
 
 def _impl(array, named_axis, highlevel, behavior, attrs):
-    if not named_axis:  # no-op, e.g. if named_axis is None or () or {}
-        return array
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False)
 
     # Named axis handling
     ndim = layout.purelist_depth
+    if not named_axis:  # no-op, e.g. named_axis is None, (), {}
+        named_axis = (None,) * ndim
     if isinstance(named_axis, dict):
         _named_axis = tuple(named_axis.get(i, None) for i in range(ndim))
         for k, i in named_axis.items():
@@ -90,4 +89,4 @@ def _impl(array, named_axis, highlevel, behavior, attrs):
         )
 
     out_ctx = HighLevelContext(behavior=ctx.behavior, attrs=attrs).finalize()
-    return out_ctx.wrap(layout, highlevel=highlevel)
+    return out_ctx.wrap(layout, highlevel=highlevel, allow_other=True)

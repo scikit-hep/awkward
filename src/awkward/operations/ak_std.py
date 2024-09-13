@@ -11,10 +11,9 @@ from awkward._layout import (
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
 )
-from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._regularize import regularize_axis
 
 __all__ = ("std", "nanstd")
 
@@ -166,11 +165,6 @@ def nanstd(
 
 
 def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(x) and not is_integer(axis):
-        # Named axis handling
-        raise NotImplementedError()
-
     axis = regularize_axis(axis)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
@@ -225,7 +219,6 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
             maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,
-            named_axis=out_named_axis,
         )
 
 

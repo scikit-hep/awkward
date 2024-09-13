@@ -234,7 +234,7 @@ def maybe_highlevel_to_lowlevel(obj):
     Args:
         obj: an object
 
-    Calls #ak.to_layout and returns the result iff. the object is a high-level
+    Calls #ak.to_layout and returns the result if the object is a high-level
     Awkward object, otherwise the object is returned as-is.
 
     This function should be removed once scalars are properly handled by `to_layout`.

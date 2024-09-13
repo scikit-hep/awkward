@@ -9,10 +9,8 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
 )
-from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
 
 __all__ = ("corr",)
 
@@ -87,13 +85,6 @@ def corr(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(x) and not is_integer(axis):
-        # Named axis handling
-        raise NotImplementedError()
-
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, y_layout, weight_layout = ensure_same_backend(
             ctx.unwrap(x, allow_record=False, primitive_policy="error"),
@@ -190,8 +181,13 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-        return ctx.wrap(
-            maybe_highlevel_to_lowlevel(sumwxy / ufuncs.sqrt(sumwxx * sumwyy)),
+
+        # propagate named axis to output
+        out = sumwxy / ufuncs.sqrt(sumwxx * sumwyy)
+        out_ctx = HighLevelContext(behavior=out.behavior, attrs=out.attrs).finalize()
+
+        return out_ctx.wrap(
+            maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,
         )

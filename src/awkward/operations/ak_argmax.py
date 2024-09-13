@@ -14,6 +14,7 @@ from awkward._namedaxis import (
     _supports_named_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._regularize import is_integer, regularize_axis
 
 __all__ = ("argmax", "nanargmax")
 
@@ -156,7 +157,9 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     if not keepdims:
         out_named_axis = _remove_named_axis(axis, out_named_axis)
 
-    if not isinstance(axis, int) and axis is not None:
+    axis = regularize_axis(axis)
+
+    if not is_integer(axis) and axis is not None:
         raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
 
     # axis = regularize_axis(axis)

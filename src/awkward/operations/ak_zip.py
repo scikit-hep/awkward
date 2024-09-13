@@ -7,7 +7,6 @@ from collections.abc import Mapping
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
-from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("zip",)
@@ -176,11 +175,6 @@ def _impl(
     if depth_limit is not None and depth_limit <= 0:
         raise ValueError("depth_limit must be None or at least 1")
 
-    out_named_axis = None
-    if _supports_named_axis(array):
-        # Named axis handling
-        raise NotImplementedError()
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         if isinstance(arrays, Mapping):
             layouts = ensure_same_backend(
@@ -255,4 +249,4 @@ def _impl(
         out = out[0]
         assert isinstance(out, ak.record.Record)
 
-    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)
+    return ctx.wrap(out, highlevel=highlevel)

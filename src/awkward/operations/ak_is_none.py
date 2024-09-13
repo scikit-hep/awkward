@@ -6,12 +6,12 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._namedaxis import (
-    _identity_named_axis,
+    _check_valid_axis,
     _one_axis_to_positional_axis,
     _supports_named_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer
+from awkward._regularize import is_integer, regularize_axis
 from awkward.errors import AxisError
 
 __all__ = ("is_none",)
@@ -46,28 +46,20 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, axis, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(array) and not is_integer(axis):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
+    if _supports_named_axis(ctx) and _check_valid_axis(axis):
         # Handle named axis
         # Step 1: Normalize named axis to positional axis
         axis = _one_axis_to_positional_axis(
             axis, array.named_axis, array.positional_axis
         )
 
-        # Step 2: propagate named axis from input to output,
-        #    use strategy "remove one" (see: awkward._namedaxis)
-        out_named_axis = _identity_named_axis(array.named_axis)
-
-    if not isinstance(axis, int):
-        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
-
-    # axis = regularize_axis(axis) # <- is this really needed?
-
-    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+    axis = regularize_axis(axis)
 
     if not is_integer(axis):
-        raise TypeError(f"'axis' must be an integer, not {axis!r}")
+        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
 
     def action(layout, depth, backend, lateral_context, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
@@ -89,4 +81,4 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
     out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)
+    return ctx.wrap(out, highlevel=highlevel)

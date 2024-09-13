@@ -5,9 +5,8 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
-from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._regularize import regularize_axis
 
 __all__ = ("flatten",)
 
@@ -174,11 +173,6 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, axis, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(array) and not is_integer(axis):
-        # Named axis handling
-        raise NotImplementedError()
-
     axis = regularize_axis(axis)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
@@ -241,4 +235,4 @@ def _impl(array, axis, highlevel, behavior, attrs):
         out = apply(layout)
     else:
         out = ak._do.flatten(layout, axis)
-    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)
+    return ctx.wrap(out, highlevel=highlevel)

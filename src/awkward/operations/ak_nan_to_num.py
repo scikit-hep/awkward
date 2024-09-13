@@ -5,7 +5,6 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
-from awkward._namedaxis import _identity_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Mapping
 
@@ -153,13 +152,7 @@ def _impl(
         assert isinstance(out, tuple) and len(out) == 1
         out = out[0]
 
-    return ctx.wrap(
-        out,
-        highlevel=highlevel,
-        named_axis=_identity_named_axis(
-            array.named_axis
-        ),  # strategy: "keep all" (see: awkward._namedaxis)
-    )
+    return ctx.wrap(out, highlevel=highlevel)
 
 
 @ak._connect.numpy.implements("nan_to_num")

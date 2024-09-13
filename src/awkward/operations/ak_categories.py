@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._namedaxis import _remove_all_named_axis
 
 __all__ = ("categories",)
 
@@ -49,6 +50,19 @@ def _impl(array, highlevel, behavior, attrs):
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
     ak._do.recursively_apply(layout, action)
 
-    return ctx.wrap(output, highlevel=highlevel)
+    wrapped_out = ctx.wrap(output, highlevel=highlevel)
+
+    # propagate named axis from input to output,
+    #   use strategy "drop all" (see: awkward._namedaxis)
+    out_named_axis = _remove_all_named_axis(wrapped_out.named_axis, n=wrapped_out.ndim)
+
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

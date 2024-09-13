@@ -7,13 +7,14 @@ from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._namedaxis import (
+    _check_valid_axis,
     _identity_named_axis,
     _one_axis_to_positional_axis,
     _remove_named_axis,
     _supports_named_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer
+from awkward._regularize import is_integer, regularize_axis
 
 __all__ = ("min", "nanmin")
 
@@ -148,27 +149,29 @@ def nanmin(
 
 
 def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior, attrs):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
     out_named_axis = None
-    if _supports_named_axis(array) and not is_integer(axis):
+    if _supports_named_axis(ctx) and _check_valid_axis(axis):
         # Handle named axis
         # Step 1: Normalize named axis to positional axis
         axis = _one_axis_to_positional_axis(
             axis, array.named_axis, array.positional_axis
         )
 
-        # Step 2: propagate named axis from input to output,
-        #    use strategy "remove one" (see: awkward._namedaxis)
-        out_named_axis = _identity_named_axis(array.named_axis)
-        if not keepdims:
-            out_named_axis = _remove_named_axis(axis, out_named_axis)
+    # Step 2: propagate named axis from input to output,
+    #   keepdims=True: use strategy "keep all" (see: awkward._namedaxis)
+    #   keepdims=False: use strategy "remove one" (see: awkward._namedaxis)
+    out_named_axis = _identity_named_axis(array.named_axis)
+    if not keepdims:
+        out_named_axis = _remove_named_axis(axis, out_named_axis)
 
-    if not isinstance(axis, int):
-        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
+    axis = regularize_axis(axis)
 
-    # axis = regularize_axis(axis) # <- is this really needed?
+    if not is_integer(axis) and axis is not None:
+        raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
 
-    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     reducer = ak._reducers.Min(initial)
 
     out = ak._do.reduce(
@@ -179,12 +182,23 @@ def _impl(array, axis, keepdims, initial, mask_identity, highlevel, behavior, at
         keepdims=keepdims,
         behavior=ctx.behavior,
     )
-    return ctx.wrap(
+
+    wrapped_out = ctx.wrap(
         out,
         highlevel=highlevel,
         allow_other=True,
-        named_axis=out_named_axis,
     )
+
+    if out_named_axis:
+        # propagate named axis to output
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped_out,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+    return wrapped_out
 
 
 @ak._connect.numpy.implements("amin")

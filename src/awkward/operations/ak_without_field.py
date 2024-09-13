@@ -7,7 +7,6 @@ from collections.abc import Sequence
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._namedaxis import _supports_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("without_field",)
@@ -47,11 +46,6 @@ def without_field(array, where, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(base, where, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(base):
-        # Named axis handling
-        raise NotImplementedError()
-
     if isinstance(where, str):
         where = [where]
     elif not (isinstance(where, Sequence) and all(isinstance(x, str) for x in where)):
@@ -101,4 +95,4 @@ def _impl(base, where, highlevel, behavior, attrs):
             return None
 
     out = ak._do.recursively_apply(base, action, depth_context={"where": where})
-    return ctx.wrap(out, highlevel=highlevel, named_axis=out_named_axis)
+    return ctx.wrap(out, highlevel=highlevel)
