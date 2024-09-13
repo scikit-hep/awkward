@@ -10,12 +10,10 @@ if tp.TYPE_CHECKING:
 
 # axis names are hashables, mostly strings,
 # except for integers, which are reserved for positional axis.
-AxisName = tp.Hashable
+AxisName: tp.TypeAlias = tp.Hashable
 
 AxisMapping = tp.Mapping[AxisName, int]  # e.g.: {"x": 0, "y": 1, "z": 2}
-AxisTuple = tuple[
-    AxisName | int | None, ...
-]  # e.g.: ("x", "y", None) where None is a wildcard
+AxisTuple = tuple[AxisName, ...]  # e.g.: ("x", "y", None) where None is a wildcard
 
 _NamedAxisKey: str = "__named_axis__"
 
@@ -40,8 +38,12 @@ class TmpNamedAxisMarker:
     """
 
 
+def _is_valid_named_axis(axis: AxisName) -> bool:
+    return isinstance(axis, AxisName) and not is_integer(axis)
+
+
 def _check_valid_axis(axis: AxisName) -> AxisName:
-    if not isinstance(axis, AxisName) and not is_integer(axis):
+    if not _is_valid_named_axis(axis):
         raise ValueError(f"Axis names must be hashable and not int, got {axis!r}")
     return axis
 
@@ -106,10 +108,10 @@ def _axis_mapping_to_tuple(axis_mapping: AxisMapping) -> AxisTuple:
 
 
 def _any_axis_to_positional_axis(
-    axis: int | AxisName | AxisTuple | None,
+    axis: AxisName | AxisTuple,
     named_axis: AxisTuple,
     positional_axis: tuple[int, ...],
-) -> int | AxisTuple | None:
+) -> AxisTuple | int | None:
     """
     Converts any axis (int, AxisName, AxisTuple, or None) to a positional axis (int or AxisTuple).
 
@@ -139,7 +141,7 @@ def _any_axis_to_positional_axis(
 
 
 def _one_axis_to_positional_axis(
-    axis: int | AxisName | None,
+    axis: AxisName | None,
     named_axis: AxisTuple,
     positional_axis: tuple[int, ...],
 ) -> int | None:

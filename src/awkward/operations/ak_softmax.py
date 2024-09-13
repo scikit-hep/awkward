@@ -80,6 +80,7 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout = ctx.unwrap(x, allow_record=False, primitive_policy="error")
+
     x = ctx.wrap(x_layout)
 
     if maybe_posaxis(x_layout, axis, 1) != maybe_posaxis(x_layout, -1, 1):

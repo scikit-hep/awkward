@@ -6,8 +6,8 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._namedaxis import (
-    _check_valid_axis,
-    _identity_named_axis,
+    _is_valid_named_axis,
+    _keep_named_axis,
     _one_axis_to_positional_axis,
     _remove_named_axis,
     _supports_named_axis,
@@ -79,19 +79,20 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     out_named_axis = None
-    if _supports_named_axis(ctx) and _check_valid_axis(axis):
-        # Handle named axis
-        # Step 1: Normalize named axis to positional axis
-        axis = _one_axis_to_positional_axis(
-            axis, array.named_axis, array.positional_axis
-        )
+    if _supports_named_axis(ctx):
+        if _is_valid_named_axis(axis):
+            # Handle named axis
+            # Step 1: Normalize named axis to positional axis
+            axis = _one_axis_to_positional_axis(
+                axis, array.named_axis, array.positional_axis
+            )
 
-    # Step 2: propagate named axis from input to output,
-    #   keepdims=True: use strategy "keep all" (see: awkward._namedaxis)
-    #   keepdims=False: use strategy "remove one" (see: awkward._namedaxis)
-    out_named_axis = _identity_named_axis(array.named_axis)
-    if not keepdims:
-        out_named_axis = _remove_named_axis(axis, out_named_axis)
+        # Step 2: propagate named axis from input to output,
+        #   keepdims=True: use strategy "keep all" (see: awkward._namedaxis)
+        #   keepdims=False: use strategy "remove one" (see: awkward._namedaxis)
+        out_named_axis = _keep_named_axis(array.named_axis, None)
+        if not keepdims:
+            out_named_axis = _remove_named_axis(axis, out_named_axis)
 
     axis = regularize_axis(axis)
 

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
+from awkward._behavior import behavior_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import (
     HighLevelContext,
@@ -161,7 +163,10 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
 
         # propagate named axis to output
         out = sumwxy / sumw
-        out_ctx = HighLevelContext(behavior=out.behavior, attrs=out.attrs).finalize()
+        out_ctx = HighLevelContext(
+            behavior=behavior_of_obj(out),
+            attrs=attrs_of_obj(out),
+        ).finalize()
 
         return out_ctx.wrap(
             maybe_highlevel_to_lowlevel(out),

@@ -117,6 +117,7 @@ def _impl(array, target, axis, clip, highlevel, behavior, attrs):
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
     out = ak._do.pad_none(layout, target, axis, clip=clip)
 
     return ctx.wrap(out, highlevel=highlevel)

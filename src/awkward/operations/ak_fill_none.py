@@ -6,7 +6,7 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._namedaxis import (
-    _check_valid_axis,
+    _is_valid_named_axis,
     _one_axis_to_positional_axis,
     _supports_named_axis,
 )
@@ -87,12 +87,13 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
             ),
         )
 
-    if _supports_named_axis(ctx) and _check_valid_axis(axis):
-        # Handle named axis
-        # Step 1: Normalize named axis to positional axis
-        axis = _one_axis_to_positional_axis(
-            axis, array.named_axis, array.positional_axis
-        )
+    if _supports_named_axis(ctx):
+        if _is_valid_named_axis(axis):
+            # Handle named axis
+            # Step 1: Normalize named axis to positional axis
+            axis = _one_axis_to_positional_axis(
+                axis, array.named_axis, array.positional_axis
+            )
 
     axis = regularize_axis(axis)
 

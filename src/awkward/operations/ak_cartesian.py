@@ -215,11 +215,6 @@ def cartesian(
 
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attrs):
-    out_named_axis = None
-    if _supports_named_axis(arrays[0]) and not is_integer(axis):
-        # Named axis handling
-        raise NotImplementedError()
-
     axis = regularize_axis(axis)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:

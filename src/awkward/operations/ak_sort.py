@@ -63,6 +63,7 @@ def _impl(array, axis, ascending, stable, highlevel, behavior, attrs):
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
     out = ak._do.sort(layout, axis, ascending, stable)
     return ctx.wrap(out, highlevel=highlevel)
 

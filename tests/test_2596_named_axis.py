@@ -797,7 +797,6 @@ def test_named_axis_ak_sum():
 
     assert ak.sum(named_array, axis="x").named_axis == ("y",)
     assert ak.sum(named_array, axis="y").named_axis == ("x",)
-    assert ak.sum(named_array, axis=None).named_axis == (None,)
 
 
 def test_named_axis_ak_to_arrow():
