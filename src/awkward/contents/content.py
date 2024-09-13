@@ -1010,6 +1010,10 @@ class Content(Meta):
     ):
         raise NotImplementedError
 
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        # prototype abstract signature
+        raise NotImplementedError
+
     def to_backend_array(
         self, allow_missing: bool = True, *, backend: Backend | str | None = None
     ):
