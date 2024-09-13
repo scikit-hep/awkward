@@ -299,11 +299,12 @@
     generated/ak.backend
 
 .. toctree::
-    :caption: Approximation
+    :caption: Approximation and comparison
 
     generated/ak.round
     generated/ak.isclose
     generated/ak.almost_equal
+    generated/ak.array_equal
 
 .. toctree::
     :caption: NumPy compatibility

@@ -12,6 +12,7 @@ from awkward.operations.ak_argcombinations import *
 from awkward.operations.ak_argmax import *
 from awkward.operations.ak_argmin import *
 from awkward.operations.ak_argsort import *
+from awkward.operations.ak_array_equal import *
 from awkward.operations.ak_backend import *
 from awkward.operations.ak_broadcast_arrays import *
 from awkward.operations.ak_broadcast_fields import *
@@ -43,6 +44,7 @@ from awkward.operations.ak_from_jax import *
 from awkward.operations.ak_from_json import *
 from awkward.operations.ak_from_numpy import *
 from awkward.operations.ak_from_parquet import *
+from awkward.operations.ak_from_raggedtensor import *
 from awkward.operations.ak_from_rdataframe import *
 from awkward.operations.ak_from_regular import *
 from awkward.operations.ak_full_like import *
@@ -97,6 +99,7 @@ from awkward.operations.ak_to_packed import *
 from awkward.operations.ak_to_parquet import *
 from awkward.operations.ak_to_parquet_dataset import *
 from awkward.operations.ak_to_parquet_row_groups import *
+from awkward.operations.ak_to_raggedtensor import *
 from awkward.operations.ak_to_rdataframe import *
 from awkward.operations.ak_to_regular import *
 from awkward.operations.ak_transform import *

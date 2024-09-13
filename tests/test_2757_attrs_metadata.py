@@ -42,7 +42,8 @@ def test_serialise_with_nonserialisable_attrs(array_pickler):
     attrs = {**SOME_ATTRS, "non_transient_key": lambda: None}
     array = ak.Array([1, 2, 3], attrs=attrs)
     with pytest.raises(
-        (AttributeError, array_pickler.PicklingError), match=r"Can't pickle"
+        (AttributeError, array_pickler.PicklingError),
+        match=r"(pickle|local object)",
     ):
         array_pickler.loads(array_pickler.dumps(array))
 
