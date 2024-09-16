@@ -85,7 +85,7 @@ def _impl(array, named_axis, highlevel, behavior, attrs):
     attrs = _set_named_axis_to_attrs(ctx.attrs or {}, _named_axis)
     if len(attrs[_NamedAxisKey]) != ndim:
         raise ValueError(
-            f"named_axis {_named_axis} {attrs[_NamedAxisKey]=} must have the same length as the number of dimensions ({ndim})"
+            f"{_named_axis=} must have the same length as the number of dimensions ({ndim})"
         )
 
     out_ctx = HighLevelContext(behavior=ctx.behavior, attrs=attrs).finalize()

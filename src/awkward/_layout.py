@@ -29,6 +29,7 @@ numpy_backend = NumpyBackend.instance()
 T = TypeVar("T")
 
 if TYPE_CHECKING:
+    from awkward._namedaxis import AttrsNamedAxisMapping
     from awkward.highlevel import Array
     from awkward.highlevel import Record as HighLevelRecord
 
@@ -56,9 +57,7 @@ def merge_mappings(
 
 
 class HighLevelContext:
-    def __init__(
-        self, behavior: Mapping | None = None, attrs: Mapping[str, Any] | None = None
-    ):
+    def __init__(self, behavior: Mapping | None = None, attrs: Mapping | None = None):
         self._behavior = behavior
         self._attrs = attrs
         self._is_finalized = False
@@ -81,8 +80,10 @@ class HighLevelContext:
             raise RuntimeError("HighLevelContext has already been finalized")
 
     @property
-    def attrs(self) -> Mapping[str, Any] | None:
+    def attrs(self) -> Mapping | AttrsNamedAxisMapping:
         self._ensure_finalized()
+        if self._attrs is None:
+            self._attrs = {}
         return self._attrs
 
     @property

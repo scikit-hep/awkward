@@ -7,6 +7,7 @@ from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._namedaxis import (
+    _get_named_axis,
     _is_valid_named_axis,
     _keep_named_axis,
     _one_axis_to_positional_axis,
@@ -85,12 +86,13 @@ def _impl(array, axis, ascending, stable, highlevel, behavior, attrs):
             # Handle named axis
             # Step 1: Normalize named axis to positional axis
             axis = _one_axis_to_positional_axis(
-                axis, array.named_axis, array.positional_axis
+                axis,
+                _get_named_axis(ctx),
             )
 
         # Step 2: propagate named axis from input to output,
         #   use strategy "keep all" (see: awkward._namedaxis)
-        out_named_axis = _keep_named_axis(array.named_axis, None)
+        out_named_axis = _keep_named_axis(_get_named_axis(ctx), None)
 
     axis = regularize_axis(axis)
 

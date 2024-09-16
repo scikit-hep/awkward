@@ -4,32 +4,94 @@ import awkward._typing as tp
 from awkward._regularize import is_integer
 
 if tp.TYPE_CHECKING:
-    from awkward._layout import HighLevelContext
-    from awkward.highlevel import Array
+    pass
 
 
 # axis names are hashables, mostly strings,
 # except for integers, which are reserved for positional axis.
 AxisName: tp.TypeAlias = tp.Hashable
 
-AxisMapping: tp.TypeAlias = tp.Mapping[AxisName, int]  # e.g.: {"x": 0, "y": 1, "z": 2}
-AxisTuple: tp.TypeAlias = tp.Tuple[
-    AxisName, ...
-]  # e.g.: ("x", "y", None) where None is a wildcard
-
-_NamedAxisKey: str = "__named_axis__"
+# e.g.: {"x": 0, "y": 1, "z": 2}
+AxisMapping: tp.TypeAlias = tp.Mapping[AxisName, int]
+# e.g.: ("x", "y", None) where None is a wildcard
+AxisTuple: tp.TypeAlias = tp.Tuple[AxisName, ...]
 
 
-def _supports_named_axis(array: Array | HighLevelContext) -> bool:
-    """Check if the given array supports named axis.
+_NamedAxisKey: str = "__named_axis__"  # reserved for named axis
+
+
+class AttrsNamedAxisMapping(tp.TypedDict, total=False):
+    _NamedAxisKey: AxisMapping
+
+
+@tp.runtime_checkable
+class MaybeSupportsNamedAxis(tp.Protocol):
+    @property
+    def attrs(self) -> tp.Mapping | AttrsNamedAxisMapping: ...
+
+
+def _get_named_axis(
+    ctx: MaybeSupportsNamedAxis | AttrsNamedAxisMapping | tp.Mapping,
+) -> AxisTuple:
+    """
+    Retrieves the named axis from the given context. The context can be an object that supports named axis
+    or a dictionary that includes a named axis mapping.
 
     Args:
-        array (Array): The array to check.
+        ctx (MaybeSupportsNamedAxis | AttrsNamedAxisMapping): The context from which to retrieve the named axis.
 
     Returns:
-        bool: True if the array supports named axis, False otherwise.
+        AxisTuple: The named axis retrieved from the context. If the context does not include a named axis,
+            an empty tuple is returned.
+
+    Examples:
+        >>> class Test(MaybeSupportsNamedAxis):
+        ...     @property
+        ...     def attrs(self):
+        ...         return {_NamedAxisKey: {"x": 0, "y": 1, "z": 2}}
+        ...
+        >>> _get_named_axis(Test())
+        ("x", "y", "z")
+        >>> _get_named_axis({_NamedAxisKey: {"x": 0, "y": 1, "z": 2}})
+        ("x", "y", "z")
+        >>> _get_named_axis({"other_key": "other_value"})
+        ()
     """
-    return bool((getattr(array, "attrs", {}) or {}).get(_NamedAxisKey, {}))
+    if isinstance(ctx, MaybeSupportsNamedAxis):
+        return _get_named_axis(ctx.attrs)
+    elif isinstance(ctx, tp.Mapping) and _NamedAxisKey in ctx:
+        return _axis_mapping_to_tuple(ctx[_NamedAxisKey])
+    else:
+        return ()
+
+
+def _supports_named_axis(ctx: MaybeSupportsNamedAxis | AttrsNamedAxisMapping) -> bool:
+    """Check if the given ctx supports named axis.
+
+    Args:
+        ctx (SupportsNamedAxis or AttrsNamedAxisMapping): The ctx to check.
+
+    Returns:
+        bool: True if the ctx supports named axis, False otherwise.
+    """
+    return bool(_get_named_axis(ctx))
+
+
+def _positional_axis_from_named_axis(named_axis: AxisTuple) -> tuple[int, ...]:
+    """
+    Converts a named axis to a positional axis.
+
+    Args:
+        named_axis (AxisTuple): The named axis to convert.
+
+    Returns:
+        tuple[int, ...]: The positional axis corresponding to the named axis.
+
+    Examples:
+        >>> _positional_axis_from_named_axis(("x", "y", "z"))
+        (0, 1, 2)
+    """
+    return tuple(range(len(named_axis)))
 
 
 class TmpNamedAxisMarker:
@@ -41,16 +103,67 @@ class TmpNamedAxisMarker:
 
 
 def _is_valid_named_axis(axis: AxisName) -> bool:
+    """
+    Checks if the given axis is a valid named axis. A valid named axis is a hashable object that is not an integer.
+
+    Args:
+        axis (AxisName): The axis to check.
+
+    Returns:
+        bool: True if the axis is a valid named axis, False otherwise.
+
+    Examples:
+        >>> _is_valid_named_axis("x")
+        True
+        >>> _is_valid_named_axis(1)
+        False
+    """
     return isinstance(axis, AxisName) and not is_integer(axis)
 
 
 def _check_valid_axis(axis: AxisName) -> AxisName:
+    """
+    Checks if the given axis is a valid named axis. If not, raises a ValueError.
+
+    Args:
+        axis (AxisName): The axis to check.
+
+    Returns:
+        AxisName: The axis if it is a valid named axis.
+
+    Raises:
+        ValueError: If the axis is not a valid named axis.
+
+    Examples:
+        >>> _check_valid_axis("x")
+        "x"
+        >>> _check_valid_axis(1)
+        Traceback (most recent call last):
+        ...
+        ValueError: Axis names must be hashable and not int, got 1
+    """
     if not _is_valid_named_axis(axis):
         raise ValueError(f"Axis names must be hashable and not int, got {axis!r}")
     return axis
 
 
 def _check_axis_mapping_unique_values(axis_mapping: AxisMapping) -> None:
+    """
+    Checks if the values in the given axis mapping are unique. If not, raises a ValueError.
+
+    Args:
+        axis_mapping (AxisMapping): The axis mapping to check.
+
+    Raises:
+        ValueError: If the values in the axis mapping are not unique.
+
+    Examples:
+        >>> _check_axis_mapping_unique_values({"x": 0, "y": 1, "z": 2})
+        >>> _check_axis_mapping_unique_values({"x": 0, "y": 0, "z": 2})
+        Traceback (most recent call last):
+        ...
+        ValueError: Named axis mapping must be unique for each positional axis, got: {"x": 0, "y": 0, "z": 2}
+    """
     if len(set(axis_mapping.values())) != len(axis_mapping):
         raise ValueError(
             f"Named axis mapping must be unique for each positional axis, got: {axis_mapping}"
@@ -112,7 +225,6 @@ def _axis_mapping_to_tuple(axis_mapping: AxisMapping) -> AxisTuple:
 def _any_axis_to_positional_axis(
     axis: AxisName | AxisTuple,
     named_axis: AxisTuple,
-    positional_axis: tuple[int, ...],
 ) -> AxisTuple | int | None:
     """
     Converts any axis (int, AxisName, AxisTuple, or None) to a positional axis (int or AxisTuple).
@@ -120,7 +232,6 @@ def _any_axis_to_positional_axis(
     Args:
         axis (int | AxisName | AxisTuple | None): The axis to convert. Can be an integer, an AxisName, an AxisTuple, or None.
         named_axis (AxisTuple): The named axis mapping to use for conversion.
-        positional_axis (tuple[int, ...]): The positional axis mapping to use for conversion.
 
     Returns:
         int | AxisTuple | None: The converted axis. Will be an integer, an AxisTuple, or None.
@@ -129,23 +240,20 @@ def _any_axis_to_positional_axis(
         ValueError: If the axis is not found in the named axis mapping.
 
     Examples:
-        >>> _any_axis_to_positional_axis("x", ("x", "y", "z"), (0, 1, 2))
+        >>> _any_axis_to_positional_axis("x", ("x", "y", "z"))
         0
-        >>> _any_axis_to_positional_axis(("x", "z"), ("x", "y", "z"), (0, 1, 2))
+        >>> _any_axis_to_positional_axis(("x", "z"), ("x", "y", "z"))
         (0, 2)
     """
     if isinstance(axis, (tuple, list)):
-        return tuple(
-            _one_axis_to_positional_axis(ax, named_axis, positional_axis) for ax in axis
-        )
+        return tuple(_one_axis_to_positional_axis(ax, named_axis) for ax in axis)
     else:
-        return _one_axis_to_positional_axis(axis, named_axis, positional_axis)
+        return _one_axis_to_positional_axis(axis, named_axis)
 
 
 def _one_axis_to_positional_axis(
     axis: AxisName | None,
     named_axis: AxisTuple,
-    positional_axis: tuple[int, ...],
 ) -> int | None:
     """
     Converts a single axis (int, AxisName, or None) to a positional axis (int or None).
@@ -153,7 +261,6 @@ def _one_axis_to_positional_axis(
     Args:
         axis (int | AxisName | None): The axis to convert. Can be an integer, an AxisName, or None.
         named_axis (AxisTuple): The named axis mapping to use for conversion.
-        positional_axis (tuple[int, ...]): The positional axis mapping to use for conversion.
 
     Returns:
         int | None: The converted axis. Will be an integer or None.
@@ -162,9 +269,10 @@ def _one_axis_to_positional_axis(
         ValueError: If the axis is not found in the named axis mapping.
 
     Examples:
-        >>> _one_axis_to_positional_axis("x", ("x", "y", "z"), (0, 1, 2))
+        >>> _one_axis_to_positional_axis("x", ("x", "y", "z"))
         0
     """
+    positional_axis = _positional_axis_from_named_axis(named_axis)
     if isinstance(axis, int) or axis is None:
         return axis
     elif axis in named_axis:
@@ -229,11 +337,11 @@ def _set_named_axis_to_attrs(
 # - "keep one" (_keep_named_axis): Keep one named axes in the output array, e.g.: `ak.firsts`
 # - "remove all" (_remove_all_named_axis): Removes all named axis, e.g.: `ak.categories
 # - "remove one" (_remove_named_axis): Remove the named axis from the output array, e.g.: `ak.sum`
+# - "add one" (_add_named_axis): Add a new named axis to the output array, e.g.: `ak.concatenate, ak.singletons` (not clear yet...)
 # - "unify" (_unify_named_axis): Unify the named axis in the output array given two input arrays, e.g.: `__add__`
 # - "collapse" (_collapse_named_axis): Collapse multiple named axis to None in the output array, e.g.: `ak.flatten`
 # - "permute" (_permute_named_axis): Permute the named axis in the output array, e.g.: `ak.transpose` (does this exist?)
 # - "contract" (_contract_named_axis): Contract the named axis in the output array, e.g.: `matmul` (does this exist?)
-# - "adding" (_adding_named_axis): Add a new named axis to the output array, e.g.: `ak.concatenate` (not clear yet...)
 
 
 def _identity_named_axis(
@@ -326,6 +434,27 @@ def _remove_named_axis(
     if axis is None:
         return (None,)
     return tuple(name for i, name in enumerate(named_axis) if i != axis)
+
+
+def _add_named_axis(
+    axis: int,
+    named_axis: AxisTuple,
+) -> AxisTuple:
+    """
+    Adds a wildcard named axis (None) to the named_axis after the position of the specified axis.
+
+    Args:
+        axis (int): The index after which to add the wildcard named axis.
+        named_axis (AxisTuple): The current named axis.
+
+    Returns:
+        AxisTuple: The new named axis after adding the wildcard named axis.
+
+    Examples:
+        >>> _add_named_axis(1, ("x", "y", "z"))
+        ("x", "y", None, "z")
+    """
+    return named_axis[: axis + 1] + (None,) + named_axis[axis + 1 :]
 
 
 def _permute_named_axis(

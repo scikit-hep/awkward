@@ -11,9 +11,15 @@ from awkward._layout import (
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
 )
+from awkward._namedaxis import (
+    _get_named_axis,
+    _is_valid_named_axis,
+    _one_axis_to_positional_axis,
+    _supports_named_axis,
+)
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
+from awkward._regularize import is_integer, regularize_axis
 
 __all__ = ("std", "nanstd")
 
@@ -165,8 +171,6 @@ def nanstd(
 
 
 def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, weight_layout = ensure_same_backend(
             ctx.unwrap(x, allow_record=False, primitive_policy="error"),
@@ -181,6 +185,17 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
 
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
+
+    if _supports_named_axis(ctx):
+        if _is_valid_named_axis(axis):
+            # Handle named axis
+            # Step 1: Normalize named axis to positional axis
+            axis = _one_axis_to_positional_axis(axis, _get_named_axis(ctx))
+
+    axis = regularize_axis(axis)
+
+    if not is_integer(axis) and axis is not None:
+        raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
 
     with np.errstate(invalid="ignore", divide="ignore"):
         out = ufuncs.sqrt(
@@ -215,6 +230,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
+        # TODO: propagate named axis once slicing is implemented!
         return ctx.wrap(
             maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,

@@ -24,9 +24,9 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._namedaxis import (
+    AttrsNamedAxisMapping,
     AxisTuple,
-    _axis_mapping_to_tuple,
-    _NamedAxisKey,
+    _get_named_axis,
     _supports_named_axis,
 )
 from awkward._nplikes.numpy import Numpy
@@ -363,7 +363,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         self.__class__ = get_array_class(self._layout, self._behavior)
 
     @property
-    def attrs(self) -> Mapping[str, Any]:
+    def attrs(self) -> Mapping | AttrsNamedAxisMapping:
         """
         The mutable mapping containing top-level metadata, which is serialised
         with the array during pickling.
@@ -466,10 +466,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return tuple(range(self.ndim))
 
     @property
-    def named_axis(self) -> AxisTuple:
+    def named_axis(self) -> AxisTuple | None:
         if _supports_named_axis(self):
-            named_axis_mapping = self.attrs[_NamedAxisKey]
-            return _axis_mapping_to_tuple(named_axis_mapping)
+            return _get_named_axis(self)
         else:
             return (None,) * self.ndim
 

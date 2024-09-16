@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
+from awkward._behavior import behavior_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import (
     HighLevelContext,
@@ -13,7 +15,6 @@ from awkward._namedaxis import (
     AxisName,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
 from awkward._typing import Mapping
 
 __all__ = ("moment",)
@@ -101,8 +102,6 @@ def _impl(
     behavior: Mapping | None,
     attrs: Mapping | None,
 ):
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, weight_layout = ensure_same_backend(
             ctx.unwrap(x, allow_record=False, primitive_policy="error"),
@@ -157,8 +156,16 @@ def _impl(
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-        return ctx.wrap(
-            maybe_highlevel_to_lowlevel(sumwxn / sumw),
+
+        # propagate named axis to output
+        out = sumwxn / sumw
+        out_ctx = HighLevelContext(
+            behavior=behavior_of_obj(out),
+            attrs=attrs_of_obj(out),
+        ).finalize()
+
+        return out_ctx.wrap(
+            maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,
         )

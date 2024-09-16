@@ -62,5 +62,6 @@ def _impl(array, highlevel: bool, behavior: Mapping | None, attrs: Mapping | Non
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
     out = ak._do.recursively_apply(layout, action)
     return ctx.wrap(out, highlevel=highlevel)

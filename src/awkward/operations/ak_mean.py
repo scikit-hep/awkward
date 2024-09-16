@@ -12,6 +12,7 @@ from awkward._layout import (
     maybe_posaxis,
 )
 from awkward._namedaxis import (
+    _get_named_axis,
     _is_valid_named_axis,
     _keep_named_axis,
     _one_axis_to_positional_axis,
@@ -201,12 +202,12 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
         if _is_valid_named_axis(axis):
             # Handle named axis
             # Step 1: Normalize named axis to positional axis
-            axis = _one_axis_to_positional_axis(axis, x.named_axis, x.positional_axis)
+            axis = _one_axis_to_positional_axis(axis, _get_named_axis(ctx))
 
         # Step 2: propagate named axis from input to output,
         #   keepdims=True: use strategy "keep all" (see: awkward._namedaxis)
         #   keepdims=False: use strategy "remove one" (see: awkward._namedaxis)
-        out_named_axis = _keep_named_axis(x.named_axis, None)
+        out_named_axis = _keep_named_axis(_get_named_axis(ctx), None)
         if not keepdims:
             out_named_axis = _remove_named_axis(axis, out_named_axis)
 
