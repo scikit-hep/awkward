@@ -498,6 +498,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
     ):
         return self._content._to_arrow(pyarrow, self, None, length, options)
 
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        return self._content._to_cudf(cudf, mask, length)
+
     def _to_backend_array(self, allow_missing, backend):
         content = self.content._to_backend_array(allow_missing, backend)
         if allow_missing:

@@ -228,6 +228,8 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/pfackeldey"><img src="https://avatars.githubusercontent.com/u/18463582?v=4?s=100" width="100px;" alt="Peter Fackeldey"/><br /><sub><b>Peter Fackeldey</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=pfackeldey" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.ariostas.com"><img src="https://avatars.githubusercontent.com/u/7596837?v=4?s=100" width="100px;" alt="Andres Rios Tascon"/><br /><sub><b>Andres Rios Tascon</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=ariostas" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/maxymnaumchyk"><img src="https://avatars.githubusercontent.com/u/70752300?v=4?s=100" width="100px;" alt="maxymnaumchyk"/><br /><sub><b>maxymnaumchyk</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=maxymnaumchyk" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

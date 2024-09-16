@@ -465,6 +465,24 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "ariostas",
+      "name": "Andres Rios Tascon",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7596837?v=4",
+      "profile": "http://www.ariostas.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "maxymnaumchyk",
+      "name": "maxymnaumchyk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70752300?v=4",
+      "profile": "https://github.com/maxymnaumchyk",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
