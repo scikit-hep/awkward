@@ -1079,11 +1079,27 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         have the same dimension as the array being indexed.
         """
         with ak._errors.SlicingErrorContext(self, where):
-            return wrap_layout(
-                prepare_layout(self._layout[where]),
-                self._behavior,
-                allow_other=True,
-                attrs=self._attrs,
+            # normalize for potential named axis
+            from awkward._namedaxis import _normalize_slice, _get_named_axis, _supports_named_axis
+
+            out_named_axis=None
+            if _supports_named_axis(self):
+                named_axis = _get_named_axis(self)
+
+                # Step 1: normalize the slice
+                where = _normalize_slice(where, named_axis)
+
+                # Step 2: propagate named axis to the output array
+                out_named_axis = named_axis
+
+            return ak.with_named_axis(
+                array=wrap_layout(
+                    prepare_layout(self._layout[where]),
+                    self._behavior,
+                    allow_other=True,
+                    attrs=self._attrs,
+                ),
+                named_axis=out_named_axis,
             )
 
     def __bytes__(self) -> bytes:

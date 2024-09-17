@@ -569,3 +569,92 @@ class Slicer:
 
     def __getitem__(self, where):
         return where
+
+
+
+# Define a type alias for a slice or int (can be a single axis or a sequence of axes)
+AxisSlice: tp.TypeAlias = tp.Union[tuple, slice, int, tp.EllipsisType, None]
+NamedAxisSlice: tp.TypeAlias = tp.Dict[AxisName, AxisSlice]
+
+
+def _normalize_slice(
+    where: AxisSlice | NamedAxisSlice | tuple[AxisSlice | NamedAxisSlice],
+    named_axis: AxisTuple,
+) -> AxisSlice:
+    """
+    Normalizes the given slice based on the named axis. The slice can be a dictionary mapping axis names to slices,
+    a tuple of slices, an ellipsis, or a single slice. The named axis is a tuple of axis names.
+
+    Args:
+        where (AxisSlice | NamedAxisSlice | tuple[AxisSlice | NamedAxisSlice]): The slice to normalize.
+        named_axis (AxisTuple): The named axis.
+
+    Returns:
+        AxisSlice: The normalized slice.
+
+    Examples:
+        >>> _normalize_slice({"x": slice(1, 5)}, ("x", "y", "z"))
+        (slice(1, 5, None), slice(None, None, None),  slice(None, None, None))
+
+        >>> _normalize_slice((slice(1, 5), slice(2, 10)), ("x", "y", "z"))
+        (slice(1, 5, None), slice(2, 10, None))
+
+        >>> _normalize_slice(..., ("x", "y", "z"))
+        (slice(None, None, None), slice(None, None, None), slice(None, None, None))
+
+        >>> _normalize_slice(slice(1, 5), ("x", "y", "z"))
+        slice(1, 5, None)
+    """
+    if isinstance(where, dict):
+        return tuple(where.get(axis, slice(None)) for axis in named_axis)
+    elif isinstance(where, tuple):
+        raise NotImplementedError()
+    return where
+
+
+def _propagate_named_axis_through_slice(
+    where: AxisSlice,
+    named_axis: AxisTuple,
+) -> AxisTuple:
+    """
+    Propagate named axis based on where slice to output array.
+
+    Examples:
+        >>> _propagate_named_axis_through_slice(None, ("x", "y", "z"))
+        (None, "x", "y", "z")
+
+        >>> _propagate_named_axis_through_slice((..., None), ("x", "y", "z"))
+        ("x", "y", "z", None)
+
+        >>> _propagate_named_axis_through_slice(0, ("x", "y", "z"))
+        ("y", "z")
+
+        >>> _propagate_named_axis_through_slice(1, ("x", "y", "z"))
+        ("x", "z")
+
+        >>> _propagate_named_axis_through_slice(2, ("x", "y", "z"))
+        ("x", "y")
+
+        >>> _propagate_named_axis_through_slice(..., ("x", "y", "z"))
+        ("x", "y", "z")
+
+        >>> _propagate_named_axis_through_slice(slice(0, 1), ("x", "y", "z"))
+        ("x", "y", "z")
+
+        >>> _propagate_named_axis_through_slice((0, slice(0, 1)), ("x", "y", "z"))
+        ("y", "z")
+    """
+    if where is None:
+        return (None,) + named_axis
+    elif where is (..., None):
+        return named_axis + (None,)
+    elif where is Ellipsis:
+        return named_axis
+    elif isinstance(where, int):
+        return named_axis[:where] + named_axis[where+1:]
+    elif isinstance(where, slice):
+        return named_axis
+    elif isinstance(where, tuple):
+        return tuple(_propagate_named_axis_through_slice(w, named_axis) for w in where)
+    else:
+        raise ValueError("Invalid slice type")
