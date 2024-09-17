@@ -44,7 +44,6 @@ def to_jaggedtensor(
 
 def _impl(array, padded, padding_value, max_lengths, keep_regular):
     try:
-        import fbgemm_gpu
         import torch
     except ImportError as err:
         raise ImportError(
