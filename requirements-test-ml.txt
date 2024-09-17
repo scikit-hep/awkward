@@ -1,7 +1,7 @@
+fbgemm-gpu-cpu >= 0.8.0
 fsspec>=2022.11.0;sys_platform != "win32"
 pytest>=6
 pytest-cov
 pytest-xdist
 tensorflow >= 2.12
 torch >= 2.4.0
-fbgemm-gpu-cpu >= 0.8.0
