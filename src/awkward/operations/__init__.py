@@ -90,6 +90,7 @@ from awkward.operations.ak_to_cudf import *
 from awkward.operations.ak_to_cupy import *
 from awkward.operations.ak_to_dataframe import *
 from awkward.operations.ak_to_feather import *
+from awkward.operations.ak_to_jaggedtensor import *
 from awkward.operations.ak_to_jax import *
 from awkward.operations.ak_to_json import *
 from awkward.operations.ak_to_layout import *
