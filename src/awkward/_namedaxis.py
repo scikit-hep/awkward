@@ -571,7 +571,6 @@ class Slicer:
         return where
 
 
-
 # Define a type alias for a slice or int (can be a single axis or a sequence of axes)
 AxisSlice: tp.TypeAlias = tp.Union[tuple, slice, int, tp.EllipsisType, None]
 NamedAxisSlice: tp.TypeAlias = tp.Dict[AxisName, AxisSlice]
@@ -646,12 +645,12 @@ def _propagate_named_axis_through_slice(
     """
     if where is None:
         return (None,) + named_axis
-    elif where is (..., None):
+    elif where == (..., None):
         return named_axis + (None,)
     elif where is Ellipsis:
         return named_axis
     elif isinstance(where, int):
-        return named_axis[:where] + named_axis[where+1:]
+        return named_axis[:where] + named_axis[where + 1 :]
     elif isinstance(where, slice):
         return named_axis
     elif isinstance(where, tuple):

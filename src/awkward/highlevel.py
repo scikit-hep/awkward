@@ -1080,9 +1080,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.SlicingErrorContext(self, where):
             # normalize for potential named axis
-            from awkward._namedaxis import _normalize_slice, _get_named_axis, _supports_named_axis
+            from awkward._namedaxis import (
+                _get_named_axis,
+                _normalize_slice,
+                _supports_named_axis,
+            )
 
-            out_named_axis=None
+            out_named_axis = None
             if _supports_named_axis(self):
                 named_axis = _get_named_axis(self)
 
