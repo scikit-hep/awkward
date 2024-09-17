@@ -4,8 +4,13 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("to_jaggedtensor",)
+
+numpy = Numpy.instance()
+np = NumpyMetadata.instance()
 
 
 @high_level_function()

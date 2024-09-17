@@ -9,8 +9,8 @@ import awkward as ak
 
 to_jaggedtensor = ak.operations.to_jaggedtensor
 
-tf = pytest.importorskip("torch")
-tf = pytest.importorskip("fbgemm_gpu")
+torch = pytest.importorskip("torch")
+fbgemm_gpu = pytest.importorskip("fbgemm_gpu")
 
 content = ak.contents.NumpyArray(
     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
