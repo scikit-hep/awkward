@@ -4,3 +4,4 @@ pytest-cov
 pytest-xdist
 tensorflow >= 2.12
 torch >= 2.4.0
+fbgemm-gpu-cpu >= 0.8.0
