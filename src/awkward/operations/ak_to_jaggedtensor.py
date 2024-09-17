@@ -14,7 +14,9 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def to_jaggedtensor(array, padded=False, padding_value=0, max_lengths=None, keep_regular=True):
+def to_jaggedtensor(
+    array, padded=False, padding_value=0, max_lengths=None, keep_regular=True
+):
     """
     Args:
         array: Array-like data. May be a high level #ak.Array,
@@ -42,8 +44,8 @@ def to_jaggedtensor(array, padded=False, padding_value=0, max_lengths=None, keep
 
 def _impl(array, padded, padding_value, max_lengths, keep_regular):
     try:
-        import torch
         import fbgemm_gpu
+        import torch
     except ImportError as err:
         raise ImportError(
             """to use ak.to_jaggedtensor, you must install 'torch' and 'fbgemm_gpu' packages with:
@@ -59,19 +61,24 @@ def _impl(array, padded, padding_value, max_lengths, keep_regular):
     if isinstance(array, ak.contents.numpyarray.NumpyArray):
         return torch.tensor(array.data)
     else:
-
-        if not padded and not (isinstance(array, ak.contents.regulararray.RegularArray)):
+        if not padded and not (
+            isinstance(array, ak.contents.regulararray.RegularArray)
+        ):
             flat_values, nested_row_splits = _recursive_call(array, [], keep_regular)
 
         else:
             # create a list of max lengths for each jagged dimension
             max_lengths = _count_max_lengths(array, max_lengths)
-            flat_values, nested_row_splits = _recursive_call(array, [], keep_regular=False)
+            flat_values, nested_row_splits = _recursive_call(
+                array, [], keep_regular=False
+            )
 
         # since "jagged_to_padded_dense" not implemented for '64-bit floating point' convert float64 -> float32
         if isinstance(flat_values.dtype, type(np.dtype(np.float64))):
             try:
-                dense_test = torch.tensor([[[1, 1], [0, 0]], [[2, 2], [3, 3]]], dtype=torch.float64)
+                dense_test = torch.tensor(
+                    [[[1, 1], [0, 0]], [[2, 2], [3, 3]]], dtype=torch.float64
+                )
                 offsets_test = torch.tensor([0, 1, 3], dtype=torch.float64)
                 torch.ops.fbgemm.dense_to_jagged(dense_test, [offsets_test])
             except RuntimeError as error:
@@ -83,11 +90,15 @@ def _impl(array, padded, padding_value, max_lengths, keep_regular):
         # convert a 'list of numpy' to a 'list of tensors'
         offsets = [torch.from_numpy(item) for item in nested_row_splits]
 
-        if not padded and not (isinstance(array, ak.contents.regulararray.RegularArray)):
+        if not padded and not (
+            isinstance(array, ak.contents.regulararray.RegularArray)
+        ):
             return (dense, offsets)
         else:
             # create a padded dense tensor using torch function
-            dense_tensor = torch.ops.fbgemm.jagged_to_padded_dense(dense, offsets, max_lengths, padding_value)
+            dense_tensor = torch.ops.fbgemm.jagged_to_padded_dense(
+                dense, offsets, max_lengths, padding_value
+            )
             return dense_tensor
 
 
@@ -109,11 +120,11 @@ def _recursive_call(layout, offsets_arr, keep_regular):
                     )
             layout = layout.to_ListOffsetArray64()
         elif not isinstance(
-                layout,
-                (
-                        ak.contents.listoffsetarray.ListOffsetArray,
-                        ak.contents.numpyarray.NumpyArray,
-                ),
+            layout,
+            (
+                ak.contents.listoffsetarray.ListOffsetArray,
+                ak.contents.numpyarray.NumpyArray,
+            ),
         ):
             raise TypeError(
                 "Only arrays containing variable-length lists (var *) or"
