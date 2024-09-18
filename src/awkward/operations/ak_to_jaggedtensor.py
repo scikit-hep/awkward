@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import importlib
+import sys
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -47,7 +47,7 @@ def to_jaggedtensor(
 def _impl(array, padded, padding_value, max_lengths, keep_regular):
     try:
         # check if a fbgemm is installed
-        importlib.util.find_spec("fbgemm_gpu")
+        if 'fbgemm_gpu' not in sys.modules: raise ImportError
         import torch
     except ImportError as err:
         raise ImportError(
