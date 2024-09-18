@@ -17,7 +17,12 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_jaggedtensor(
-        array, padded=False, padding_value=0, max_lengths=None, keep_regular=True, backend=None
+    array,
+    padded=False,
+    padding_value=0,
+    max_lengths=None,
+    keep_regular=True,
+    backend=None,
 ):
     """
     Args:
