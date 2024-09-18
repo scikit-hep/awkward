@@ -17,7 +17,12 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_jaggedtensor(
-    array, padded=False, padding_value=0, max_lengths=None, keep_regular=True
+    array,
+    padded=False,
+    padding_value=0,
+    max_lengths=None,
+    keep_regular=True,
+    backend=None,
 ):
     """
     Args:
@@ -27,27 +32,29 @@ def to_jaggedtensor(
         padded (bool): if True, return a padded tensor using a `jagged_to_padded_dense` function
             from PyTorch; otherwise return a jagged tensor.
         padding_value (float): if `padded` = True, sets a value for padding.
-        max_lengths (int[]): if `padded` = True, sets a length to be padded to, for each jagged dimension.
+        max_lengths (list of int): if `padded` = True, sets a length to be padded to, for each jagged dimension.
         keep_regular (bool): if True, tries to keep the regular structure in the output.
             If False, automatically converts all RegularArrays to ListOffsetArray.
 
     Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
-    into a jagged tensor, if possible. Jagged tensor structure looks like this: Tuple(torch.Tensor, List[torch.Tensor])
+    into a PyTorch jagged tensor, if possible. The data type of a Torch "jagged tensor" is a 2-tuple of a `torch.Tensor` and a list of `torch.Tensors`.
+    The first `torch.Tensor` is the numerical contents of the array and the list of integer-valued `torch.Tensors` are offsets indicating where variable-length lists start and end.
 
-    If `array` contains any other data types (RecordArray for example) the function raises an error.
+    If `array` contains any other data types (RecordArray for example) the function raises a TypeError.
     """
 
     # Dispatch
     yield (array,)
 
     # Implementation
-    return _impl(array, padded, padding_value, max_lengths, keep_regular)
+    return _impl(array, padded, padding_value, max_lengths, keep_regular, backend)
 
 
-def _impl(array, padded, padding_value, max_lengths, keep_regular):
+def _impl(array, padded, padding_value, max_lengths, keep_regular, backend):
     try:
         # check if a fbgemm is installed
-        if 'fbgemm_gpu' not in sys.modules: raise ImportError
+        if "fbgemm_gpu" not in sys.modules:
+            raise ImportError
         import torch
     except ImportError as err:
         raise ImportError(
@@ -61,12 +68,20 @@ def _impl(array, padded, padding_value, max_lengths, keep_regular):
     # also transforms a python list to awkward array
     array = ak.to_layout(array, allow_record=False)
 
+    # keep the resulting tensor on the same device as input
+    device = ak.backend(array)
+    if backend is not None:
+        device = torch.device("cuda") if (backend == "cuda") else torch.device("cpu")
+
     if isinstance(array, ak.contents.numpyarray.NumpyArray):
         return torch.tensor(array.data)
+    elif isinstance(array, ak.contents.regulararray.RegularArray) and keep_regular:
+        # since a jagged tensor can't function with an empty offsets array
+        raise TypeError(
+            "RegularArrays cannot be converted into a PyTorch JaggedTensor. Please use ak.from_regular() or set keep_regular = False"
+        )
     else:
-        if not padded and not (
-            isinstance(array, ak.contents.regulararray.RegularArray)
-        ):
+        if not padded:
             flat_values, nested_row_splits = _recursive_call(array, [], keep_regular)
 
         else:
@@ -88,14 +103,12 @@ def _impl(array, padded, padding_value, max_lengths, keep_regular):
                 raise error
 
         # convert numpy to a torch tensor
-        dense = torch.from_numpy(flat_values)
+        dense = torch.from_numpy(flat_values).to(device)
 
         # convert a 'list of numpy' to a 'list of tensors'
-        offsets = [torch.from_numpy(item) for item in nested_row_splits]
+        offsets = [torch.from_numpy(item).to(device) for item in nested_row_splits]
 
-        if not padded and not (
-            isinstance(array, ak.contents.regulararray.RegularArray)
-        ):
+        if not padded:
             return (dense, offsets)
         else:
             # create a padded dense tensor using torch function
