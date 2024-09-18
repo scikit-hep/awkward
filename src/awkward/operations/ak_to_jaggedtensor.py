@@ -17,12 +17,7 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_jaggedtensor(
-    array,
-    padded=False,
-    padding_value=0,
-    max_lengths=None,
-    keep_regular=True,
-    backend=None,
+        array, padded=False, padding_value=0, max_lengths=None, keep_regular=True, backend=None
 ):
     """
     Args:
@@ -35,9 +30,12 @@ def to_jaggedtensor(
         max_lengths (list of int): if `padded` = True, sets a length to be padded to, for each jagged dimension.
         keep_regular (bool): if True, tries to keep the regular structure in the output.
             If False, automatically converts all RegularArrays to ListOffsetArray.
+        backend (None, `"cpu"`, `"cuda"`): If `"cpu"`, the `array` will be placed in
+            main memory; if `"cuda"` the `array` will be placed in GPU global memory using CUDA;
+            if None the backend of the `array` will be preserved.
 
     Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
-    into a PyTorch jagged tensor, if possible. The data type of a Torch "jagged tensor" is a 2-tuple of a `torch.Tensor` and a list of `torch.Tensors`.
+    into a PyTorch "jagged tensor", if possible. The data type of a PyTorch "jagged tensor" is a 2-tuple of a `torch.Tensor` and a list of `torch.Tensors`.
     The first `torch.Tensor` is the numerical contents of the array and the list of integer-valued `torch.Tensors` are offsets indicating where variable-length lists start and end.
 
     If `array` contains any other data types (RecordArray for example) the function raises a TypeError.
@@ -61,7 +59,14 @@ def _impl(array, padded, padding_value, max_lengths, keep_regular, backend):
             """to use ak.to_jaggedtensor, you must install 'torch' and 'fbgemm_gpu' packages with:
 
         pip install torch or conda install pytorch
-        pip install fbgemm-gpu-cpu or pip install fbgemm-gpu"""
+
+        For CPU-Only Release:
+        pip install fbgemm-gpu-cpu
+
+        or
+
+        For CUDA Release:
+        pip install fbgemm-gpu"""
         ) from err
 
     # unwrap the awkward array if it was made with ak.Array function
