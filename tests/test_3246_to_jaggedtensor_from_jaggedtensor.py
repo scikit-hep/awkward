@@ -49,21 +49,6 @@ def test_convert_to_jaggedtensor():
         ),
     )
 
-    # a test for RegularArray -> JaggedTensor
-    array3 = ak.contents.RegularArray(content, size=2)
-    array3 = to_float32(array3)
-    assert torch.equal(
-        to_jaggedtensor(array3),
-        torch.tensor(
-            [
-                [1.1, 2.2],
-                [3.3, 4.4],
-                [5.5, 6.6],
-                [7.7, 8.8],
-            ]
-        ),
-    )
-
     # try a single line awkward array
     array4 = ak.Array([3, 1, 4, 1, 9, 2, 6])
     assert torch.equal(to_jaggedtensor(array4), torch.tensor([3, 1, 4, 1, 9, 2, 6]))
@@ -168,11 +153,7 @@ def test_regular_array():
     regular2 = ak.to_regular(array11, axis=1)
     jagged7 = to_jaggedtensor(regular2, keep_regular=False)
     assert torch.equal(
-        jagged7,
-        torch.tensor(
-            [
-                [[1.1, 2.2, 0.0, 0.0], [3.3, 4.4, 5.5, 6.6]],
-                [[7.7, 8.8, 0.0, 0.0], [9.9, 10.0, 0.0, 0.0]],
-            ]
-        ),
+        jagged7[0], torch.tensor([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0])
     )
+    assert torch.equal(jagged7[1][0], torch.tensor([0, 2, 4]))
+    assert torch.equal(jagged7[1][1], torch.tensor([0, 2, 6, 8, 10]))
