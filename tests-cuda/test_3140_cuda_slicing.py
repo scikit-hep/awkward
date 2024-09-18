@@ -677,3 +677,21 @@ def test_0127_tomask_operation():
         [None],
         [6.6, None, None, 9.9],
     ]
+
+arrg_cpu = ak.Array([[1, 2, 3], [0], [4, 5]])
+arrg_gpu = ak.Array([[1, 2, 3], [0], [4, 5]], backend="cuda")
+
+def test_simple_slice_cpu():
+    print("slice on CPU")
+    out = arrg_cpu[:, 0]
+    expected = [1, 0, 4]
+    result = out.tolist()
+    cp.testing.assert_array_list_equal(result, expected, err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}")
+
+
+def test_simple_slice_gpu():
+    print("slice on GPU")
+    out = arrg_gpu[:, 0]
+    expected = [1, 0, 4]
+    result = out.tolist()
+    cp.testing.assert_array_list_equal(result, expected, err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}")
