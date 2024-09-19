@@ -58,9 +58,7 @@ def _impl(array, backend):
     # keep the resulting tensor on the same device as input
     device = ak.backend(array)
     if backend is not None:
-        if (backend == "cuda"): device = torch.device("cuda")
-        elif (backend == "cpu"): device = torch.device("cpu")
-        else: raise ValueError("No such backend '" + str(backend) + "' exists.")
+        torch.device(backend)
 
     if isinstance(array, ak.contents.numpyarray.NumpyArray):
         return torch.tensor(array.data)
