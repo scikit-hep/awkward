@@ -679,12 +679,8 @@ def test_0127_tomask_operation():
     ]
 
 
-arrg_cpu = ak.Array([[1, 2, 3], [0], [4, 5]])
-arrg_gpu = ak.Array([[1, 2, 3], [0], [4, 5]], backend="cuda")
-
-
 def test_simple_slice_cpu():
-    print("slice on CPU")
+    arrg_cpu = ak.Array([[1, 2, 3], [0], [4, 5]])
     out = arrg_cpu[:, 0]
     expected = [1, 0, 4]
     result = out.tolist()
@@ -696,7 +692,7 @@ def test_simple_slice_cpu():
 
 
 def test_simple_slice_gpu():
-    print("slice on GPU")
+    arrg_gpu = ak.Array([[1, 2, 3], [0], [4, 5]], backend="cuda")
     out = arrg_gpu[:, 0]
     expected = [1, 0, 4]
     result = out.tolist()
