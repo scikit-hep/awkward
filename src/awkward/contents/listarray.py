@@ -729,7 +729,7 @@ class ListArray(ListMeta[Content], Content):
                     self._starts.data,
                     self._stops.data,
                     lenstarts,
-                    head,
+                    head.item(),
                 ),
                 slicer=head,
             )
