@@ -147,13 +147,4 @@ def test_regular_array():
     )
     assert torch.equal(jagged6[1][0], torch.tensor([0, 3, 5]))
 
-    # otherwise (if RegularArray contains ListArray or ListOffsetArray) convert to padded tensor (if keep_regular = False)
-    array11 = ak.Array([[[1.1, 2.2], [3.3, 4.4, 5.5, 6.6]], [[7.7, 8.8], [9.9, 10]]])
-    array11 = to_float32(array11, highlevel=True)
-    regular2 = ak.to_regular(array11, axis=1)
-    jagged7 = to_jaggedtensor(regular2, keep_regular=False)
-    assert torch.equal(
-        jagged7[0], torch.tensor([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0])
-    )
-    assert torch.equal(jagged7[1][0], torch.tensor([0, 2, 4]))
-    assert torch.equal(jagged7[1][1], torch.tensor([0, 2, 6, 8, 10]))
+    # otherwise (if RegularArray contains ListArray or ListOffsetArray) raise a TypeError

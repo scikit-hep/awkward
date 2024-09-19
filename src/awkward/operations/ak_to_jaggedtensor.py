@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import sys
-
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy import Numpy
@@ -18,10 +16,6 @@ np = NumpyMetadata.instance()
 @high_level_function()
 def to_jaggedtensor(
     array,
-    padded=False,
-    padding_value=0,
-    max_lengths=None,
-    keep_regular=True,
     backend=None,
 ):
     """
@@ -29,12 +23,6 @@ def to_jaggedtensor(
         array: Array-like data. May be a high level #ak.Array,
             or low-level #ak.contents.ListOffsetArray, #ak.contents.ListArray,
             #ak.contents.RegularArray, #ak.contents.NumpyArray
-        padded (bool): if True, return a padded tensor using a `jagged_to_padded_dense` function
-            from PyTorch; otherwise return a jagged tensor.
-        padding_value (float): if `padded` = True, sets a value for padding.
-        max_lengths (list of int): if `padded` = True, sets a length to be padded to, for each jagged dimension.
-        keep_regular (bool): if True, tries to keep the regular structure in the output.
-            If False, automatically converts all RegularArrays to ListOffsetArray.
         backend (None, `"cpu"`, `"cuda"`): If `"cpu"`, the `array` will be placed in
             main memory; if `"cuda"` the `array` will be placed in GPU global memory using CUDA;
             if None the backend of the `array` will be preserved.
@@ -50,28 +38,17 @@ def to_jaggedtensor(
     yield (array,)
 
     # Implementation
-    return _impl(array, padded, padding_value, max_lengths, keep_regular, backend)
+    return _impl(array, backend)
 
 
-def _impl(array, padded, padding_value, max_lengths, keep_regular, backend):
+def _impl(array, backend):
     try:
-        # check if a fbgemm is installed
-        if "fbgemm_gpu" not in sys.modules:
-            raise ImportError
         import torch
     except ImportError as err:
         raise ImportError(
-            """to use ak.to_jaggedtensor, you must install 'torch' and 'fbgemm_gpu' packages with:
+            """to use ak.to_jaggedtensor, you must install 'torch' package with:
 
-        pip install torch or conda install pytorch
-
-        For CPU-Only Release:
-        pip install fbgemm-gpu-cpu
-
-        or
-
-        For CUDA Release:
-        pip install fbgemm-gpu"""
+        pip install torch or conda install pytorch"""
         ) from err
 
     # unwrap the awkward array if it was made with ak.Array function
@@ -85,21 +62,13 @@ def _impl(array, padded, padding_value, max_lengths, keep_regular, backend):
 
     if isinstance(array, ak.contents.numpyarray.NumpyArray):
         return torch.tensor(array.data)
-    elif isinstance(array, ak.contents.regulararray.RegularArray) and keep_regular:
+    elif isinstance(array, ak.contents.regulararray.RegularArray):
         # since a jagged tensor can't function with an empty offsets array
         raise TypeError(
-            "RegularArrays cannot be converted into a PyTorch JaggedTensor. Please use ak.from_regular() or set keep_regular = False"
+            "RegularArrays cannot be converted into a PyTorch JaggedTensor. Try using ak.from_regular() if you still want to use this function."
         )
     else:
-        if not padded:
-            flat_values, nested_row_splits = _recursive_call(array, [], keep_regular)
-
-        else:
-            # create a list of max lengths for each jagged dimension
-            max_lengths = _count_max_lengths(array, max_lengths)
-            flat_values, nested_row_splits = _recursive_call(
-                array, [], keep_regular=False
-            )
+        flat_values, nested_row_splits = _recursive_call(array, [], keep_regular=True)
 
         # since "jagged_to_padded_dense" not implemented for '64-bit floating point' convert float64 -> float32
         if isinstance(flat_values.dtype, type(np.dtype(np.float64))):
@@ -118,14 +87,7 @@ def _impl(array, padded, padding_value, max_lengths, keep_regular, backend):
         # convert a 'list of numpy' to a 'list of tensors'
         offsets = [torch.from_numpy(item).to(device) for item in nested_row_splits]
 
-        if not padded:
-            return (dense, offsets)
-        else:
-            # create a padded dense tensor using torch function
-            dense_tensor = torch.ops.fbgemm.jagged_to_padded_dense(
-                dense, offsets, max_lengths, padding_value
-            )
-            return dense_tensor
+        return (dense, offsets)
 
 
 def _recursive_call(layout, offsets_arr, keep_regular):
@@ -142,7 +104,7 @@ def _recursive_call(layout, offsets_arr, keep_regular):
                 else:
                     raise TypeError(
                         "RegularArrays containing ListArray or ListOffsetArray cannot be converted"
-                        " into a PyTorch JaggedTensor. Please use ak.from_regular() or set keep_regular = False"
+                        " into a PyTorch JaggedTensor. Try using ak.from_regular() if you still want to use this function."
                     )
             layout = layout.to_ListOffsetArray64()
         elif not isinstance(
@@ -165,14 +127,3 @@ def _recursive_call(layout, offsets_arr, keep_regular):
         # accumulated offsets and flattened values of the array
         return layout.data, offsets_arr
     return _recursive_call(layout.content, offsets_arr, keep_regular)
-
-
-def _count_max_lengths(array, max_lengths):
-    if max_lengths is None:
-        _, max_depth = array.minmax_depth
-        max_lengths = []
-        for i in range(1, max_depth):
-            max_lengths.append(ak.max(ak.num(array, i)))
-        return max_lengths
-    else:
-        return max_lengths
