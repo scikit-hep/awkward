@@ -705,63 +705,95 @@ def test_simple_slice_gpu():
 
 def test_simple_slice_cpu1():
     arr = ak.Array([[1, 2, 3], [0], [4, 5]])
-    out = arr[:,1:]
-    expected = [[2, 3], [], [5]] 
+    out = arr[:, 1:]
+    expected = [[2, 3], [], [5]]
     result = out.tolist()
-    cp.testing.assert_array_list_equal(result, expected, err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}")
+    cp.testing.assert_array_list_equal(
+        result,
+        expected,
+        err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}",
+    )
 
 
 def test_simple_slice_gpu1():
     arr = ak.Array([[1, 2, 3], [0], [4, 5]], backend="cuda")
-    out = arr[:,1:]
-    expected = [[2, 3], [], [5]] 
+    out = arr[:, 1:]
+    expected = [[2, 3], [], [5]]
     result = out.tolist()
-    cp.testing.assert_array_list_equal(result, expected, err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}")
+    cp.testing.assert_array_list_equal(
+        result,
+        expected,
+        err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}",
+    )
 
 
 def test_simple_slice_cpu2():
     arr = ak.Array([[1, 2, 3], [0], [4, 5]])
-    out = arr[:,:1]
+    out = arr[:, :1]
     expected = [[1], [0], [4]]
     result = out.tolist()
-    cp.testing.assert_array_list_equal(result, expected, err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}")
+    cp.testing.assert_array_list_equal(
+        result,
+        expected,
+        err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}",
+    )
 
 
 def test_simple_slice_gpu2():
     arr = ak.Array([[1, 2, 3], [0], [4, 5]], backend="cuda")
-    out = arr[:,:1]
+    out = arr[:, :1]
     expected = [[1], [0], [4]]
     result = out.tolist()
-    cp.testing.assert_array_list_equal(result, expected, err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}")
+    cp.testing.assert_array_list_equal(
+        result,
+        expected,
+        err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}",
+    )
 
 
 def test_simple_slice_cpu3():
     arr = ak.Array([[1, 2, 3], [0], [4, 5]])
-    out = arr[:,1::2]
+    out = arr[:, 1::2]
     expected = [[2], [], [5]]
     result = out.tolist()
-    cp.testing.assert_array_list_equal(result, expected, err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}")
+    cp.testing.assert_array_list_equal(
+        result,
+        expected,
+        err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}",
+    )
 
 
 def test_simple_slice_gpu3():
     arr = ak.Array([[1, 2, 3], [0], [4, 5]], backend="cuda")
-    out = arr[:,1::2]
+    out = arr[:, 1::2]
     expected = [[2], [], [5]]
     result = out.tolist()
-    cp.testing.assert_array_list_equal(result, expected, err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}")
+    cp.testing.assert_array_list_equal(
+        result,
+        expected,
+        err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}",
+    )
 
 
 def test_simple_slice_cpu4():
     arr = ak.Array([[1, 2, 3], [0], [4, 5]])
-    out = arr[:,::-1]
+    out = arr[:, ::-1]
     expected = [[3, 2, 1], [0], [5, 4]]
     result = out.tolist()
-    cp.testing.assert_array_list_equal(result, expected, err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}")
+    cp.testing.assert_array_list_equal(
+        result,
+        expected,
+        err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}",
+    )
 
 
 def test_simple_slice_gpu4():
     arr = ak.Array([[1, 2, 3], [0], [4, 5]], backend="cuda")
-    out = arr[:,::-1]
+    out = arr[:, ::-1]
     expected = [[3, 2, 1], [0], [5, 4]]
     result = out.tolist()
-    cp.testing.assert_array_list_equal(result, expected, err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}")
+    cp.testing.assert_array_list_equal(
+        result,
+        expected,
+        err_msg=f"Slice of [[1, 2, 3], [0], [4, 5]] should be {expected}, but got {result}",
+    )
