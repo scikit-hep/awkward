@@ -712,6 +712,7 @@ class ListArray(ListMeta[Content], Content):
             nexthead, nexttail = ak._slicing.head_tail(tail)
             lenstarts = self._starts.length
             nextcarry = ak.index.Index64.empty(lenstarts, self._backend.index_nplike)
+            head = ak._slicing.normalize_integer_like(head)
             assert (
                 nextcarry.nplike is self._backend.index_nplike
                 and self._starts.nplike is self._backend.index_nplike
@@ -728,9 +729,7 @@ class ListArray(ListMeta[Content], Content):
                     self._starts.data,
                     self._stops.data,
                     lenstarts,
-                    int(
-                        head
-                    ),  # NOTE: when 'at' is an integer it is always 'int64' for both CPU and GPU kernels
+                    head,
                 ),
                 slicer=head,
             )
