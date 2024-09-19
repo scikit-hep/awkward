@@ -728,7 +728,7 @@ class ListArray(ListMeta[Content], Content):
                     self._starts.data,
                     self._stops.data,
                     lenstarts,
-                    head,
+                    int(head), # NOTE: when 'at' is an integer it is always 'int64' for both CPU and GPU kernels
                 ),
                 slicer=head,
             )
