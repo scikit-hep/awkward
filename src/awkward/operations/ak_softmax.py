@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._attrs import attrs_of_obj
-from awkward._behavior import behavior_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import (
     HighLevelContext,
@@ -14,8 +13,8 @@ from awkward._layout import (
 from awkward._namedaxis import (
     _get_named_axis,
     _is_valid_named_axis,
-    _one_axis_to_positional_axis,
-    _supports_named_axis,
+    _named_axis_to_positional_axis,
+    _NamedAxisKey,
 )
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -87,11 +86,11 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout = ctx.unwrap(x, allow_record=False, primitive_policy="error")
 
-    if _supports_named_axis(ctx):
+    # Handle named axis
+    if named_axis := _get_named_axis(ctx):
         if _is_valid_named_axis(axis):
-            # Handle named axis
             # Step 1: Normalize named axis to positional axis
-            axis = _one_axis_to_positional_axis(axis, _get_named_axis(ctx))
+            axis = _named_axis_to_positional_axis(named_axis, axis)
 
     axis = regularize_axis(axis)
 
@@ -114,14 +113,16 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
             attrs=ctx.attrs,
         )
 
-        # propagate named axis to output
         out = expx / denom
-        out_ctx = HighLevelContext(
-            behavior=behavior_of_obj(out),
-            attrs=attrs_of_obj(out),
-        ).finalize()
 
-        return out_ctx.wrap(
+        # propagate named axis to output
+        if out_named_axis := _get_named_axis(attrs_of_obj(out) or {}):
+            ctx = ctx.with_attr(
+                key=_NamedAxisKey,
+                value=out_named_axis,
+            )
+
+        return ctx.wrap(
             maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,

@@ -114,6 +114,7 @@ from awkward.operations.ak_with_name import *
 from awkward.operations.ak_with_named_axis import *
 from awkward.operations.ak_with_parameter import *
 from awkward.operations.ak_without_field import *
+from awkward.operations.ak_without_named_axis import *
 from awkward.operations.ak_without_parameters import *
 from awkward.operations.ak_zeros_like import *
 from awkward.operations.ak_zip import *

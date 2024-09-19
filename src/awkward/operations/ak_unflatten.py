@@ -9,8 +9,7 @@ from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._namedaxis import (
     _get_named_axis,
     _is_valid_named_axis,
-    _one_axis_to_positional_axis,
-    _supports_named_axis,
+    _named_axis_to_positional_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
@@ -109,15 +108,11 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
             ),
         )
 
-    if _supports_named_axis(ctx):
+    # Handle named axis
+    if named_axis := _get_named_axis(ctx):
         if _is_valid_named_axis(axis):
-            # Handle named axis
             # Step 1: Normalize named axis to positional axis
-            axis = _one_axis_to_positional_axis(axis, _get_named_axis(ctx))
-
-    # Step 2: propagate named axis from input to output,
-    #   use strategy "remove all" (see: awkward._namedaxis)
-    out_named_axis = None
+            axis = _named_axis_to_positional_axis(named_axis, axis)
 
     axis = regularize_axis(axis)
 
@@ -316,10 +311,10 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
         highlevel=highlevel,
     )
 
-    # propagate named axis to output
-    return ak.operations.ak_with_named_axis._impl(
+    # Step 2: propagate named axis from input to output,
+    #   use strategy "remove all" (see: awkward._namedaxis)
+    return ak.operations.ak_without_named_axis._impl(
         wrapped_out,
-        named_axis=out_named_axis,
         highlevel=highlevel,
         behavior=ctx.behavior,
         attrs=ctx.attrs,

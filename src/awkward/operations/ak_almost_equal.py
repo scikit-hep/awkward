@@ -7,7 +7,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._dispatch import high_level_function
 from awkward._layout import ensure_same_backend
-from awkward._namedaxis import _supports_named_axis
+from awkward._namedaxis import _get_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
@@ -96,7 +96,7 @@ def _impl(
     right_layout = layouts[1].to_packed()
     backend = backend_of(left_layout)
 
-    if check_named_axis and _supports_named_axis(left) and _supports_named_axis(right):
+    if check_named_axis and _get_named_axis(left) and _get_named_axis(right):
         if left.named_axis != right.named_axis:
             return False
 

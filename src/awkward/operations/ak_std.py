@@ -14,8 +14,7 @@ from awkward._layout import (
 from awkward._namedaxis import (
     _get_named_axis,
     _is_valid_named_axis,
-    _one_axis_to_positional_axis,
-    _supports_named_axis,
+    _named_axis_to_positional_axis,
 )
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -186,11 +185,11 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
-    if _supports_named_axis(ctx):
+    # Handle named axis
+    if named_axis := _get_named_axis(ctx):
         if _is_valid_named_axis(axis):
-            # Handle named axis
             # Step 1: Normalize named axis to positional axis
-            axis = _one_axis_to_positional_axis(axis, _get_named_axis(ctx))
+            axis = _named_axis_to_positional_axis(named_axis, axis)
 
     axis = regularize_axis(axis)
 

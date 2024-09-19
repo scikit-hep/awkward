@@ -18,6 +18,13 @@ from awkward._behavior import get_array_class, get_record_class
 from awkward._kernels import KernelError
 from awkward._layout import wrap_layout
 from awkward._meta.meta import Meta
+from awkward._namedaxis import (
+    NamedAxis,
+    _add_named_axis,
+    _keep_named_axis,
+    _remove_named_axis,
+    _remove_named_axis_by_name,
+)
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
@@ -27,7 +34,12 @@ from awkward._parameters import (
     parameters_are_equal,
     type_parameters_equal,
 )
-from awkward._regularize import is_integer_like, is_sized_iterable
+from awkward._regularize import (
+    is_array_like,
+    is_integer,
+    is_integer_like,
+    is_sized_iterable,
+)
 from awkward._slicing import normalize_slice
 from awkward._typing import (
     TYPE_CHECKING,
@@ -38,6 +50,7 @@ from awkward._typing import (
     Protocol,
     Self,
     SupportsIndex,
+    Type,
     TypeAlias,
     TypedDict,
 )
@@ -509,10 +522,14 @@ class Content(Meta):
             )
 
     def __getitem__(self, where):
-        return self._getitem(where)
+        return self._getitem(where, NamedAxis)
 
-    def _getitem(self, where):
+    def _getitem(self, where, named_axis: Type[NamedAxis]):
         if is_integer_like(where):
+            # propagate named_axis to output
+            named_axis.mapping = _remove_named_axis(
+                named_axis.mapping, where, self.purelist_depth
+            )
             return self._getitem_at(ak._slicing.normalize_integer_like(where))
 
         elif isinstance(where, slice) and where.step is None:
@@ -523,20 +540,24 @@ class Content(Meta):
             return self._getitem_range(start, stop)
 
         elif isinstance(where, slice):
-            return self._getitem((where,))
+            return self._getitem((where,), named_axis)
 
         elif isinstance(where, str):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
-            return self._getitem((where,))
+            return self._getitem((where,), named_axis)
 
         elif where is Ellipsis:
-            return self._getitem((where,))
+            return self._getitem((where,), named_axis)
 
         elif isinstance(where, tuple):
             if len(where) == 0:
                 return self
+
+            n_ellipsis = where.count(...)
+            if n_ellipsis > 1:
+                raise IndexError("an index can only have a single ellipsis ('...')")
 
             # Backend may change if index contains typetracers
             backend = backend_of(self, *where, coerce_to_common=True)
@@ -546,6 +567,44 @@ class Content(Meta):
             items = ak._slicing.normalise_items(where, backend)
             # Prepare items for advanced indexing (e.g. via broadcasting)
             nextwhere = ak._slicing.prepare_advanced_indexing(items, backend)
+
+            # Handle named axis
+            # first expand the ellipsis to colons in nextwhere,
+            # copy nextwhere to not pollute the original
+            _nextwhere = tuple(nextwhere)
+            if n_ellipsis == 1:
+                # collect the ellipsis index
+                ellipsis_at = _nextwhere.index(...)
+                # calculate how many slice(None) we need to add
+                n_newaxis = _nextwhere.count(np.newaxis)
+                n_total = self.purelist_depth
+                n_slice_none = n_total - (len(_nextwhere) - n_newaxis - 1)
+                # insert (slice(None),) * n_slice_none at the ellipsis index
+                _nextwhere = (
+                    _nextwhere[:ellipsis_at]
+                    + (slice(None),) * n_slice_none
+                    + _nextwhere[ellipsis_at + 1 :]
+                )
+                # assert len(_nextwhere) == n_total + n_newaxis
+
+            # now propagate named axis
+            _named_axis = _keep_named_axis(named_axis.mapping, None)
+            iter_named_axis = iter(dict(_named_axis).items())
+            for i, nw in enumerate(_nextwhere):
+                name = None
+                for _name, pos in iter_named_axis:
+                    if pos == i:
+                        name = _name
+                        break
+                if is_integer(nw) or (is_array_like(nw) and nw.ndim == 0):
+                    _named_axis = _remove_named_axis_by_name(
+                        _named_axis, name, self.purelist_depth
+                    )
+                elif nw is None:
+                    _named_axis = _add_named_axis(_named_axis, i)
+
+            # set propagated named axis
+            named_axis.mapping = _named_axis
 
             next = ak.contents.RegularArray(
                 this,
@@ -562,7 +621,7 @@ class Content(Meta):
                 return out._getitem_at(0)
 
         elif isinstance(where, ak.highlevel.Array):
-            return self._getitem(where.layout)
+            return self._getitem(where.layout, named_axis)
 
         # Convert between nplikes of different backends
         elif (
@@ -570,7 +629,9 @@ class Content(Meta):
             and where.backend is not self._backend
         ):
             backend = backend_of(self, where, coerce_to_common=True)
-            return self.to_backend(backend)._getitem(where.to_backend(backend))
+            return self.to_backend(backend)._getitem(
+                where.to_backend(backend), named_axis
+            )
 
         elif isinstance(where, ak.contents.NumpyArray):
             data_as_index = to_nplike(
@@ -621,9 +682,9 @@ class Content(Meta):
         elif isinstance(where, ak.contents.RegularArray):
             maybe_numpy = where.maybe_to_NumpyArray()
             if maybe_numpy is None:
-                return self._getitem((where,))
+                return self._getitem((where,), named_axis)
             else:
-                return self._getitem(maybe_numpy)
+                return self._getitem(maybe_numpy, named_axis)
 
         # Awkward Array of strings
         elif (
@@ -637,7 +698,7 @@ class Content(Meta):
             return where.to_NumpyArray(np.int64)
 
         elif isinstance(where, Content):
-            return self._getitem((where,))
+            return self._getitem((where,), named_axis)
 
         elif is_sized_iterable(where):
             # Do we have an array
@@ -654,7 +715,7 @@ class Content(Meta):
                     primitive_policy="error",
                     string_policy="as-characters",
                 )
-                return self._getitem(layout)
+                return self._getitem(layout, named_axis)
 
             elif len(where) == 0:
                 return self._carry(
@@ -682,7 +743,7 @@ class Content(Meta):
                     ),
                     self._backend,
                 )
-                return self._getitem(layout)
+                return self._getitem(layout, named_axis)
 
         else:
             raise TypeError(

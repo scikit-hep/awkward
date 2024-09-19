@@ -65,6 +65,22 @@ class HighLevelContext:
         self._attrs_from_objects = []
         self._behavior_from_objects = []
 
+    def with_attr(self, key, value) -> Self:
+        self._ensure_finalized()
+        return type(self)(
+            behavior=self.behavior,
+            attrs={**self.attrs, key: value},
+        ).finalize()
+
+    def without_attr(self, key) -> Self:
+        self._ensure_finalized()
+        attrs = dict(self.attrs)
+        attrs.pop(key, None)
+        return type(self)(
+            behavior=self.behavior,
+            attrs=attrs,
+        ).finalize()
+
     def __enter__(self):
         return self
 

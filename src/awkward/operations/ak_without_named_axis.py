@@ -5,22 +5,18 @@ from __future__ import annotations
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._namedaxis import (
-    AxisMapping,
-    AxisTuple,
-    _axis_tuple_to_mapping,
     _NamedAxisKey,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 
-__all__ = ("with_named_axis",)
+__all__ = ("without_named_axis",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def with_named_axis(
+def without_named_axis(
     array,
-    named_axis: AxisTuple | AxisMapping,
     *,
     highlevel=True,
     behavior=None,
@@ -54,35 +50,14 @@ def with_named_axis(
     yield (array,)
 
     # Implementation
-    return _impl(array, named_axis, highlevel, behavior, attrs)
+    return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl(array, named_axis, highlevel, behavior, attrs):
+def _impl(array, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False)
 
-    # Named axis handling
-    if not named_axis:  # no-op, e.g. named_axis is None, (), {}
-        _named_axis = {}
-    elif isinstance(named_axis, tuple):
-        ndim = layout.purelist_depth
-        if len(named_axis) != ndim:
-            raise ValueError(
-                f"{named_axis=} must have the same length as the number of dimensions ({ndim})"
-            )
-        _named_axis = _axis_tuple_to_mapping(named_axis)
-    elif isinstance(named_axis, dict):
-        _named_axis = named_axis
-    else:
-        raise TypeError(f"named_axis must be a mapping or a tuple, got {named_axis}")
-
-    if _named_axis:
-        ctx = ctx.with_attr(
-            key=_NamedAxisKey,
-            value=_named_axis,
-        )
-
-    return ctx.wrap(
+    return ctx.without_attr(key=_NamedAxisKey).wrap(
         layout,
         highlevel=highlevel,
         allow_other=True,

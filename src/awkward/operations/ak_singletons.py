@@ -9,8 +9,7 @@ from awkward._namedaxis import (
     _add_named_axis,
     _get_named_axis,
     _is_valid_named_axis,
-    _one_axis_to_positional_axis,
-    _supports_named_axis,
+    _named_axis_to_positional_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
@@ -66,16 +65,16 @@ def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
+    # Handle named axis
     out_named_axis = None
-    if _supports_named_axis(ctx):
+    if named_axis := _get_named_axis(ctx):
         if _is_valid_named_axis(axis):
-            # Handle named axis
             # Step 1: Normalize named axis to positional axis
-            axis = _one_axis_to_positional_axis(axis, _get_named_axis(ctx))
+            axis = _named_axis_to_positional_axis(named_axis, axis)
 
         # Step 2: propagate named axis from input to output,
         #   use strategy "add one" (see: awkward._namedaxis)
-        out_named_axis = _add_named_axis(axis, _get_named_axis(ctx))
+        out_named_axis = _add_named_axis(named_axis, axis)
 
     axis = regularize_axis(axis)
 

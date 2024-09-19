@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._attrs import attrs_of_obj
-from awkward._behavior import behavior_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import (
     HighLevelContext,
@@ -13,6 +12,8 @@ from awkward._layout import (
 )
 from awkward._namedaxis import (
     AxisName,
+    _get_named_axis,
+    _NamedAxisKey,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Mapping
@@ -157,14 +158,16 @@ def _impl(
                 attrs=ctx.attrs,
             )
 
-        # propagate named axis to output
         out = sumwxn / sumw
-        out_ctx = HighLevelContext(
-            behavior=behavior_of_obj(out),
-            attrs=attrs_of_obj(out),
-        ).finalize()
 
-        return out_ctx.wrap(
+        # propagate named axis to output
+        if out_named_axis := _get_named_axis(attrs_of_obj(out) or {}):
+            ctx = ctx.with_attr(
+                key=_NamedAxisKey,
+                value=out_named_axis,
+            )
+
+        return ctx.wrap(
             maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,

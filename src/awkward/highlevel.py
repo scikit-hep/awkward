@@ -25,9 +25,11 @@ from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._namedaxis import (
     AttrsNamedAxisMapping,
-    AxisTuple,
+    AxisMapping,
+    NamedAxis,
     _get_named_axis,
-    _supports_named_axis,
+    _make_positional_axis_tuple,
+    _normalize_named_slice,
 )
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -463,14 +465,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     @property
     def positional_axis(self) -> tuple[int, ...]:
-        return tuple(range(self.ndim))
+        return _make_positional_axis_tuple(self.ndim)
 
     @property
-    def named_axis(self) -> AxisTuple | None:
-        if _supports_named_axis(self):
-            return _get_named_axis(self)
-        else:
-            return (None,) * self.ndim
+    def named_axis(self) -> AxisMapping:
+        return _get_named_axis(self)
 
     class Mask:
         def __init__(self, array):
@@ -1079,32 +1078,30 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         have the same dimension as the array being indexed.
         """
         with ak._errors.SlicingErrorContext(self, where):
-            # normalize for potential named axis
-            from awkward._namedaxis import (
-                _get_named_axis,
-                _normalize_slice,
-                _supports_named_axis,
+            # Handle named axis
+            if named_axis := _get_named_axis(self):
+                where = _normalize_named_slice(
+                    named_axis, where, self._layout.purelist_depth
+                )
+
+            NamedAxis.mapping = named_axis
+
+            out = wrap_layout(
+                prepare_layout(self._layout._getitem(where, NamedAxis)),
+                self._behavior,
+                allow_other=True,
+                attrs=self._attrs,
             )
 
-            out_named_axis = None
-            if _supports_named_axis(self):
-                named_axis = _get_named_axis(self)
-
-                # Step 1: normalize the slice
-                where = _normalize_slice(where, named_axis)
-
-                # Step 2: propagate named axis to the output array
-                out_named_axis = named_axis
-
-            return ak.with_named_axis(
-                array=wrap_layout(
-                    prepare_layout(self._layout[where]),
-                    self._behavior,
-                    allow_other=True,
+            if NamedAxis.mapping:
+                out = ak.operations.ak_with_named_axis._impl(
+                    out,
+                    named_axis=NamedAxis.mapping,
+                    highlevel=True,
+                    behavior=self._behavior,
                     attrs=self._attrs,
-                ),
-                named_axis=out_named_axis,
-            )
+                )
+            return out
 
     def __bytes__(self) -> bytes:
         if isinstance(self._layout, ak.contents.NumpyArray) and self._layout.parameter(
