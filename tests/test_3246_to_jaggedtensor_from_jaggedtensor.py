@@ -8,6 +8,7 @@ import pytest
 import awkward as ak
 
 to_jaggedtensor = ak.operations.to_jaggedtensor
+from_jaggedtensor = ak.operations.from_jaggedtensor
 
 torch = pytest.importorskip("torch")
 fbgemm_gpu = pytest.importorskip("fbgemm_gpu")
@@ -148,3 +149,21 @@ def test_regular_array():
     assert torch.equal(jagged6[1][0], torch.tensor([0, 3, 5]))
 
     # otherwise (if RegularArray contains ListArray or ListOffsetArray) raise a TypeError
+
+
+def test_convert_from_jaggedtensor():
+    # check a simple jagged array created with "dense_to_jagged"
+    dense = torch.tensor([[[1, 1], [0, 0], [0, 0]], [[2, 2], [3, 3], [0, 0]]])
+    x_offsets = torch.tensor([0, 1, 3])
+    jagged_tensor = torch.ops.fbgemm.dense_to_jagged(dense, [x_offsets])
+
+    assert from_jaggedtensor(jagged_tensor).to_list() == [[[1, 1]], [[2, 2], [3, 3]]]
+
+    # test on manually generated tuple
+    desne1 = torch.tensor([1.1, 2.2, 3.3, 4.4, 5.5])
+    offsets = [torch.tensor([0, 2, 2, 3]), torch.tensor([0, 2, 3, 5])]
+    jagged_tensor2 = (desne1, offsets)
+    awkward_array = ak.Array([[[1.1, 2.2], [3.3]], [], [[4.4, 5.5]]])
+    awkward_array = ak.values_astype(awkward_array, np.float32)
+
+    assert ak.all(from_jaggedtensor(jagged_tensor2) == awkward_array)
