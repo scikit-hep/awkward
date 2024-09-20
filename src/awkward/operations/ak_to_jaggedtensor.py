@@ -4,12 +4,10 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("to_jaggedtensor",)
 
-numpy = Numpy.instance()
 np = NumpyMetadata.instance()
 
 
@@ -60,9 +58,9 @@ def _impl(array):
             "RegularArrays cannot be converted into a PyTorch JaggedTensor. Try using ak.from_regular() if you still want to use this function."
         )
     else:
-        flat_values, nested_row_splits = _recursive_call(array, [], keep_regular=True)
+        flat_values, nested_row_splits = _recursive_call(array, [])
 
-        # since "jagged_to_padded_dense" not implemented for '64-bit floating point' convert float64 -> float32
+        # since "jagged_to_padded_dense" not implemented for '64-bit floating point' raise an error if float64
         if isinstance(flat_values.dtype, type(np.dtype(np.float64))):
             try:
                 dense_test = torch.tensor(
@@ -89,23 +87,21 @@ def _impl(array):
         return (dense, offsets)
 
 
-def _recursive_call(layout, offsets_arr, keep_regular):
+def _recursive_call(layout, offsets_arr):
     try:
         # change all the possible layout types to ListOffsetArray
         if isinstance(layout, ak.contents.listarray.ListArray):
             layout = layout.to_ListOffsetArray64()
         elif isinstance(layout, ak.contents.regulararray.RegularArray):
-            if keep_regular:
-                # if RegularArray does not contain ListArrays or ListOffsetArrays return NumpyArray and accumulated offsets
-                numpy_arr = layout.maybe_to_NumpyArray()
-                if numpy_arr is not None:
-                    return ak.to_numpy(numpy_arr), offsets_arr
-                else:
-                    raise TypeError(
-                        "RegularArrays containing ListArray or ListOffsetArray cannot be converted"
-                        " into a PyTorch JaggedTensor. Try using ak.from_regular() if you still want to use this function."
-                    )
-            layout = layout.to_ListOffsetArray64()
+            # if RegularArray does not contain ListArrays or ListOffsetArrays return NumpyArray and accumulated offsets
+            numpy_arr = layout.maybe_to_NumpyArray()
+            if numpy_arr is not None:
+                return ak.to_numpy(numpy_arr), offsets_arr
+            else:
+                raise TypeError(
+                    "RegularArrays containing ListArray or ListOffsetArray cannot be converted"
+                    " into a PyTorch JaggedTensor. Try using ak.from_regular() if you still want to use this function."
+                )
         elif not isinstance(
             layout,
             (
@@ -125,4 +121,4 @@ def _recursive_call(layout, offsets_arr, keep_regular):
         # at the last iteration form a ragged tensor from the
         # accumulated offsets and flattened values of the array
         return layout.data, offsets_arr
-    return _recursive_call(layout.content, offsets_arr, keep_regular)
+    return _recursive_call(layout.content, offsets_arr)

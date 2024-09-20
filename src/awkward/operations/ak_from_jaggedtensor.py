@@ -40,6 +40,7 @@ def _impl(array):
             cp = Cupy.instance()
         except (ModuleNotFoundError, ImportError) as err:
             raise err
+
         content_cp = cp.asarray(array[0])
         content = ak.contents.NumpyArray(content_cp)
 
