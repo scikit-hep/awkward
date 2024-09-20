@@ -562,9 +562,6 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         if isinstance(value, TypeTracerArray) and value.ndim > existing_value.ndim:
             raise ValueError("cannot assign shape larger than destination")
 
-    def item(self):
-        return self
-
     def copy(self):
         self.touch_data()
         return self
