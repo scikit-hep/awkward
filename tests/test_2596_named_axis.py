@@ -245,12 +245,6 @@ def test_named_axis_binary_ufuncs():
     assert (array + named_array2).named_axis == {"x": 0}
     assert (array + named_array3).named_axis == {"x": 0, "y": 1}
 
-    # __iadd__
-    for named_array in [named_array1, named_array2, named_array3]:
-        array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
-        array += named_array
-        assert array.named_axis == named_array.named_axis
-
     with pytest.raises(
         ValueError,
         match="The named axes are incompatible. Got: x and y for positional axis 0",

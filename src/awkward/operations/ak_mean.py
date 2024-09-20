@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import (
@@ -14,9 +15,8 @@ from awkward._layout import (
 from awkward._namedaxis import (
     _get_named_axis,
     _is_valid_named_axis,
-    _keep_named_axis,
     _named_axis_to_positional_axis,
-    _remove_named_axis,
+    _NamedAxisKey,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
@@ -197,22 +197,10 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     weight = ctx.wrap(weight_layout, allow_other=True)
 
     # Handle named axis
-    out_named_axis = None
     if named_axis := _get_named_axis(ctx):
         if _is_valid_named_axis(axis):
             # Step 1: Normalize named axis to positional axis
             axis = _named_axis_to_positional_axis(named_axis, axis)
-
-        # Step 2: propagate named axis from input to output,
-        #   keepdims=True: use strategy "keep all" (see: awkward._namedaxis)
-        #   keepdims=False: use strategy "remove one" (see: awkward._namedaxis)
-        out_named_axis = _keep_named_axis(named_axis, None)
-        if not keepdims:
-            out_named_axis = _remove_named_axis(
-                named_axis=out_named_axis,
-                axis=axis,
-                total=x_layout.purelist_depth,
-            )
 
     axis = regularize_axis(axis)
 
@@ -279,22 +267,18 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        wrapped_out = ctx.wrap(
+        # propagate named axis to output
+        if out_named_axis := _get_named_axis(attrs_of_obj(out) or {}):
+            ctx = ctx.with_attr(
+                key=_NamedAxisKey,
+                value=out_named_axis,
+            )
+
+        return ctx.wrap(
             maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,
         )
-
-        if out_named_axis:
-            # propagate named axis to output
-            return ak.operations.ak_with_named_axis._impl(
-                wrapped_out,
-                named_axis=out_named_axis,
-                highlevel=highlevel,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-        return wrapped_out
 
 
 @ak._connect.numpy.implements("mean")
