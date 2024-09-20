@@ -14,18 +14,12 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def to_jaggedtensor(
-    array,
-    backend=None,
-):
+def to_jaggedtensor(array):
     """
     Args:
         array: Array-like data. May be a high level #ak.Array,
             or low-level #ak.contents.ListOffsetArray, #ak.contents.ListArray,
             #ak.contents.RegularArray, #ak.contents.NumpyArray
-        backend (None, `"cpu"`, `"cuda"`): If `"cpu"`, the `array` will be placed in
-            main memory; if `"cuda"` the `array` will be placed in GPU global memory using CUDA;
-            if None the backend of the `array` will be preserved.
 
     Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
     into a PyTorch "jagged tensor", if possible. The data type of a PyTorch "jagged tensor" is a 2-tuple of a `torch.Tensor` and a list of `torch.Tensors`.
@@ -38,10 +32,10 @@ def to_jaggedtensor(
     yield (array,)
 
     # Implementation
-    return _impl(array, backend)
+    return _impl(array)
 
 
-def _impl(array, backend):
+def _impl(array):
     try:
         import torch
     except ImportError as err:
@@ -57,8 +51,6 @@ def _impl(array, backend):
 
     # keep the resulting tensor on the same device as input
     device = ak.backend(array)
-    if backend is not None:
-        device = torch.device(backend)
 
     if isinstance(array, ak.contents.numpyarray.NumpyArray):
         return torch.tensor(array.data)
