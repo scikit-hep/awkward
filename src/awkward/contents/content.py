@@ -555,7 +555,15 @@ class Content(Meta):
             if len(where) == 0:
                 return self
 
-            n_ellipsis = where.count(...)
+            # count number of ellipsis
+            # fun fact:
+            #   where.count(Ellipsis) does not work, because it will do a == comparison against Ellipsis,
+            #   but luckily we can use the fact that Ellipsis is a singleton and use the 'is' operator
+            n_ellipsis = 0
+            for w in where:
+                if w is ...:
+                    n_ellipsis += 1
+
             if n_ellipsis > 1:
                 raise IndexError("an index can only have a single ellipsis ('...')")
 
@@ -574,12 +582,10 @@ class Content(Meta):
             _nextwhere = tuple(nextwhere)
             if n_ellipsis == 1:
                 # collect the ellipsis index
-                # fun fact:
-                #   nextwhere.index(...) does not work, because it will do a == comparison and that fails with typetracers that compare against ...,
-                #   but luckily we can use the fact that ... is a singleton and use the 'is' operator
+                # same fun fact as above for `nextwhere.index(...)`
                 (ellipsis_at,) = tuple(i for i, x in enumerate(nextwhere) if x is ...)
                 # calculate how many slice(None) we need to add
-                # same fun fact as above...
+                # same fun fact as above for `nextwhere.count(None)`
                 n_newaxis = 0
                 for x in nextwhere:
                     if x is np.newaxis or x is None:

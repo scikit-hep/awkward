@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import (
@@ -15,6 +16,7 @@ from awkward._namedaxis import (
     _get_named_axis,
     _is_valid_named_axis,
     _named_axis_to_positional_axis,
+    _NamedAxisKey,
 )
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -229,7 +231,13 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        # TODO: propagate named axis once slicing is implemented!
+        # propagate named axis to output
+        if out_named_axis := _get_named_axis(attrs_of_obj(out) or {}):
+            ctx = ctx.with_attr(
+                key=_NamedAxisKey,
+                value=out_named_axis,
+            )
+
         return ctx.wrap(
             maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,

@@ -1212,19 +1212,17 @@ def test_named_axis_ak_sort():
 
 
 def test_named_axis_ak_std():
-    # TODO: once slicing is implemented
-    # array = ak.Array([[1, 2], [3], [4, 5, 6]])
+    array = ak.Array([[1, 2], [3], [4, 5, 6]])
 
-    # named_array = ak.with_named_axis(array, ("x", "y"))
+    named_array = ak.with_named_axis(array, ("x", "y"))
 
-    # assert ak.all(ak.std(array, axis=0) == ak.std(named_array, axis="x"))
-    # assert ak.all(ak.std(array, axis=1) == ak.std(named_array, axis="y"))
-    # assert ak.std(array, axis=None) == ak.std(named_array, axis=None)
+    assert ak.all(ak.std(array, axis=0) == ak.std(named_array, axis="x"))
+    assert ak.all(ak.std(array, axis=1) == ak.std(named_array, axis="y"))
+    assert ak.std(array, axis=None) == ak.std(named_array, axis=None)
 
-    # assert ak.std(named_array, axis="x").named_axis == ("y",)
-    # assert ak.std(named_array, axis="y").named_axis == ("x",)
-    # assert ak.std(named_array, axis=None).named_axis == (None,)
-    assert True
+    assert ak.std(named_array, axis="x").named_axis == {"y": 0}
+    assert ak.std(named_array, axis="y").named_axis == {"x": 0}
+    assert not _get_named_axis(ak.std(named_array, axis=None))
 
 
 def test_named_axis_ak_strings_astype():
@@ -1405,7 +1403,17 @@ def test_named_axis_ak_values_astype():
 
 
 def test_named_axis_ak_var():
-    assert True
+    array = ak.Array([[1, 2], [3], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, ("x", "y"))
+
+    assert ak.all(ak.var(array, axis=0) == ak.var(named_array, axis="x"))
+    assert ak.all(ak.var(array, axis=1) == ak.var(named_array, axis="y"))
+    assert ak.var(array, axis=None) == ak.var(named_array, axis=None)
+
+    assert ak.var(named_array, axis="x").named_axis == {"y": 0}
+    assert ak.var(named_array, axis="y").named_axis == {"x": 0}
+    assert not _get_named_axis(ak.var(named_array, axis=None))
 
 
 def test_named_axis_ak_where():
