@@ -1498,6 +1498,9 @@ class ListArray(ListMeta[Content], Content):
             pyarrow, mask_node, validbytes, length, options
         )
 
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        return self.to_ListOffsetArray64(False)._to_cudf(cudf, mask, length)
+
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
