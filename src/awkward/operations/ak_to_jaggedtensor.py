@@ -58,7 +58,7 @@ def _impl(array, backend):
     # keep the resulting tensor on the same device as input
     device = ak.backend(array)
     if backend is not None:
-        torch.device(backend)
+        device = torch.device(backend)
 
     if isinstance(array, ak.contents.numpyarray.NumpyArray):
         return torch.tensor(array.data)
@@ -81,11 +81,18 @@ def _impl(array, backend):
             except RuntimeError as error:
                 raise error
 
-        # convert numpy to a torch tensor
-        dense = torch.from_numpy(flat_values).to(device)
-
-        # convert a 'list of numpy' to a 'list of tensors'
-        offsets = [torch.from_numpy(item).to(device) for item in nested_row_splits]
+        # check if cupy or numpy
+        if isinstance(flat_values, np.ndarray):
+            # convert numpy to a torch tensor
+            dense = torch.from_numpy(flat_values).to(device)
+            # convert a 'list of numpy' to a 'list of tensors'
+            offsets = [torch.from_numpy(item).to(device) for item in nested_row_splits]
+        else:
+            # if cupy
+            dense = torch.as_tensor(flat_values, device=device)
+            offsets = [
+                torch.as_tensor(item, device=device) for item in nested_row_splits
+            ]
 
         return (dense, offsets)
 
