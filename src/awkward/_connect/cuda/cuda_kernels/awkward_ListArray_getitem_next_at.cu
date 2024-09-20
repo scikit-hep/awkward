@@ -11,7 +11,7 @@ awkward_ListArray_getitem_next_at(
     const C* fromstarts,
     const U* fromstops,
     int64_t lenstarts,
-    int64_t at,
+    int64_t* at,
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
@@ -19,7 +19,7 @@ awkward_ListArray_getitem_next_at(
 
     if (thread_id < lenstarts) {
       int64_t length = fromstops[thread_id] - fromstarts[thread_id];
-      int64_t regular_at = at;
+      int64_t regular_at = at[0];
       if (regular_at < 0) {
         regular_at += length;
       }
