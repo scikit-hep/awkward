@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 from awkward._namedaxis import _get_named_axis
@@ -210,6 +210,62 @@ def test_named_axis_indexing():
         == named_array[{"x": slice(0, 1), "y": 0}].named_axis
         == {"x": 0, "z": 1}
     )
+
+
+def test_named_axis_unary_ufuncs():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis=("x", "y"))
+
+    assert (-named_array).named_axis == named_array.named_axis
+    assert (+named_array).named_axis == named_array.named_axis
+    assert (~named_array).named_axis == named_array.named_axis
+    assert abs(named_array).named_axis == named_array.named_axis
+
+
+def test_named_axis_binary_ufuncs():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array1 = ak.with_named_axis(array, named_axis=(None, "y"))
+    named_array2 = ak.with_named_axis(array, named_axis=("x", None))
+    named_array3 = ak.with_named_axis(array, named_axis=("x", "y"))
+
+    # just for addition, the rest is the same
+    # __add__
+    assert (array + array).named_axis == {}
+    assert (named_array1 + array).named_axis == {"y": 1}
+    assert (named_array2 + array).named_axis == {"x": 0}
+    assert (named_array3 + array).named_axis == {"x": 0, "y": 1}
+
+    assert (named_array1 + named_array2).named_axis == {"x": 0, "y": 1}
+    assert (named_array3 + named_array3).named_axis == {"x": 0, "y": 1}
+
+    # __radd__
+    assert (array + named_array1).named_axis == {"y": 1}
+    assert (array + named_array2).named_axis == {"x": 0}
+    assert (array + named_array3).named_axis == {"x": 0, "y": 1}
+
+    # __iadd__
+    for named_array in [named_array1, named_array2, named_array3]:
+        array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+        array += named_array
+        assert array.named_axis == named_array.named_axis
+
+    with pytest.raises(
+        ValueError,
+        match="The named axes are incompatible. Got: x and y for positional axis 0",
+    ):
+        a = ak.with_named_axis(array, named_axis=("x", None))
+        b = ak.with_named_axis(array, named_axis=("y", None))
+        _ = a + b
+
+    with pytest.raises(
+        ValueError,
+        match="The named axes are incompatible. Got: x and y for positional axis 1",
+    ):
+        a = ak.with_named_axis(array, named_axis=(None, "x"))
+        b = ak.with_named_axis(array, named_axis=(None, "y"))
+        _ = a + b
 
 
 def test_named_axis_ak_all():
@@ -485,7 +541,53 @@ def test_named_axis_ak_combinations():
 
 
 def test_named_axis_ak_concatenate():
-    assert True
+    array1 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+    array2 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+    array3 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+    array4 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    all_arrays = [array1, array2, array3, array4]
+
+    named_array1 = ak.with_named_axis(array1, named_axis=(None, None))
+    named_array2 = ak.with_named_axis(array1, named_axis=(None, "y"))
+    named_array3 = ak.with_named_axis(array1, named_axis=("x", None))
+    named_array4 = ak.with_named_axis(array1, named_axis=("x", "y"))
+
+    all_named_arrays = [named_array1, named_array2, named_array3, named_array4]
+
+    assert ak.all(
+        ak.concatenate(all_arrays, axis=0) == ak.concatenate(all_named_arrays, axis="x")
+    )
+    assert ak.all(
+        ak.concatenate(all_arrays, axis=1) == ak.concatenate(all_named_arrays, axis="y")
+    )
+
+    assert ak.concatenate(all_named_arrays, axis="x").named_axis == {"x": 0, "y": 1}
+    assert ak.concatenate(all_named_arrays, axis="y").named_axis == {"x": 0, "y": 1}
+
+    with pytest.raises(
+        ValueError,
+        match="The named axes are incompatible. Got: x and y for positional axis 0",
+    ):
+        ak.concatenate(
+            [
+                ak.with_named_axis(array1, named_axis=("x", None)),
+                ak.with_named_axis(array2, named_axis=("y", None)),
+            ],
+            axis=0,
+        )
+
+    with pytest.raises(
+        ValueError,
+        match="The named axes are incompatible. Got: x and y for positional axis 1",
+    ):
+        ak.concatenate(
+            [
+                ak.with_named_axis(array1, named_axis=(None, "x")),
+                ak.with_named_axis(array2, named_axis=(None, "y")),
+            ],
+            axis=1,
+        )
 
 
 def test_named_axis_ak_copy():
@@ -635,12 +737,24 @@ def test_named_axis_ak_firsts():
     assert ak.all(ak.firsts(array, axis=0) == ak.firsts(named_array, axis="x"))
     assert ak.all(ak.firsts(array, axis=1) == ak.firsts(named_array, axis="y"))
 
-    assert ak.firsts(named_array, axis="x").named_axis == {"x": 0}
-    assert ak.firsts(named_array, axis="y").named_axis == {"y": 0}
+    assert ak.firsts(named_array, axis="x").named_axis == {"y": 0}
+    assert ak.firsts(named_array, axis="y").named_axis == {"x": 0}
 
 
 def test_named_axis_ak_flatten():
-    assert True
+    array = ak.Array([[[1.1, 2.2]], [[]], [[3.3]], [[]], [[]], [[4.4, 5.5]]])
+
+    named_array = ak.with_named_axis(array, ("x", "y", "z"))
+
+    assert ak.all(ak.flatten(array, axis=0) == ak.flatten(named_array, axis="x"))
+    assert ak.all(ak.flatten(array, axis=1) == ak.flatten(named_array, axis="y"))
+    assert ak.all(ak.flatten(array, axis=0) == ak.flatten(named_array, axis="x"))
+    assert ak.all(ak.flatten(array, axis=None) == ak.flatten(named_array, axis=None))
+
+    assert ak.flatten(named_array, axis="x").named_axis == {"x": 0, "y": 1, "z": 2}
+    assert ak.flatten(named_array, axis="y").named_axis == {"x": 0, "z": 1}
+    assert ak.flatten(named_array, axis="z").named_axis == {"x": 0, "y": 1}
+    assert not _get_named_axis(ak.flatten(named_array, axis=None))
 
 
 def test_named_axis_ak_from_arrow():
@@ -1064,12 +1178,11 @@ def test_named_axis_ak_singletons():
 
     named_array = ak.with_named_axis(array, ("x", "y"))
 
-    assert ak.all(ak.singletons(array, axis=0) == ak.singletons(named_array, axis=0))
-    assert ak.all(ak.singletons(array, axis=1) == ak.singletons(named_array, axis=1))
+    assert ak.all(ak.singletons(array, axis=0) == ak.singletons(named_array, axis="x"))
+    assert ak.all(ak.singletons(array, axis=1) == ak.singletons(named_array, axis="y"))
 
-    # TODO: What should this be?
-    # assert ak.singletons(named_array, axis=0).named_axis == {"x": 0, "y": 2}
-    # assert ak.singletons(named_array, axis=1).named_axis == {"x": 0, "y": 2}
+    assert ak.singletons(named_array, axis=0).named_axis == {"x": 0, "y": 2}
+    assert ak.singletons(named_array, axis=1).named_axis == {"x": 0, "y": 1}
 
 
 def test_named_axis_ak_softmax():

@@ -8,8 +8,8 @@ from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._namedaxis import (
     _get_named_axis,
     _is_valid_named_axis,
-    _keep_named_axis,
     _named_axis_to_positional_axis,
+    _remove_named_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
@@ -73,8 +73,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
             axis = _named_axis_to_positional_axis(named_axis, axis)
 
         # Step 2: propagate named axis from input to output,
-        #   use strategy "keep one" (see: awkward._namedaxis)
-        out_named_axis = _keep_named_axis(named_axis, axis)
+        #   use strategy "remove one" (see: awkward._namedaxis)
+        out_named_axis = _remove_named_axis(named_axis, axis, layout.purelist_depth)
 
     axis = regularize_axis(axis)
 

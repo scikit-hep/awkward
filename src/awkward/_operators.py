@@ -35,6 +35,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from awkward._typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from awkward._namedaxis import AxisMapping
+
 
 def _disables_array_ufunc(obj):
     """True when __array_ufunc__ is set to None."""
@@ -44,13 +49,36 @@ def _disables_array_ufunc(obj):
         return False
 
 
+def _merge_named_axis(left, right) -> AxisMapping:
+    from awkward._namedaxis import _get_named_axis, _unify_named_axis
+
+    # propagate named axis
+    named_axis_left = _get_named_axis(left)
+    named_axis_right = _get_named_axis(right)
+
+    unified_named_axis = {}
+    if named_axis_left and not named_axis_right:
+        unified_named_axis = named_axis_left
+    elif not named_axis_left and named_axis_right:
+        unified_named_axis = named_axis_right
+    elif named_axis_left and named_axis_right:
+        unified_named_axis = _unify_named_axis(named_axis_left, named_axis_right)
+    return unified_named_axis
+
+
 def _binary_method(ufunc, name):
     """Implement a forward binary method with a ufunc, e.g., __add__."""
 
     def func(self, other):
+        from awkward.operations.ak_with_named_axis import with_named_axis
+
         if _disables_array_ufunc(other):
             return NotImplemented
-        return ufunc(self, other)
+
+        out = ufunc(self, other)
+        if out_named_axis := _merge_named_axis(self, other):
+            out = with_named_axis(out, out_named_axis)
+        return out
 
     func.__name__ = f"__{name}__"
     return func
@@ -60,9 +88,14 @@ def _reflected_binary_method(ufunc, name):
     """Implement a reflected binary method with a ufunc, e.g., __radd__."""
 
     def func(self, other):
+        from awkward.operations.ak_with_named_axis import with_named_axis
+
         if _disables_array_ufunc(other):
             return NotImplemented
-        return ufunc(other, self)
+        out = ufunc(other, self)
+        if out_named_axis := _merge_named_axis(other, self):
+            out = with_named_axis(out, out_named_axis)
+        return out
 
     func.__name__ = f"__r{name}__"
     return func
@@ -72,7 +105,12 @@ def _inplace_binary_method(ufunc, name):
     """Implement an in-place binary method with a ufunc, e.g., __iadd__."""
 
     def func(self, other):
-        return ufunc(self, other, out=(self,))
+        from awkward.operations.ak_with_named_axis import with_named_axis
+
+        out = ufunc(self, other, out=(self,))
+        if out_named_axis := _merge_named_axis(self, other):
+            out = with_named_axis(out, out_named_axis)
+        return out
 
     func.__name__ = f"__i{name}__"
     return func

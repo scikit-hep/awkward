@@ -524,7 +524,7 @@ class Content(Meta):
     def __getitem__(self, where):
         return self._getitem(where, NamedAxis)
 
-    def _getitem(self, where, named_axis: Type[NamedAxis]):
+    def _getitem(self, where, named_axis: Type[NamedAxis] = NamedAxis):
         if is_integer_like(where):
             # propagate named_axis to output
             named_axis.mapping = _remove_named_axis(
@@ -574,9 +574,16 @@ class Content(Meta):
             _nextwhere = tuple(nextwhere)
             if n_ellipsis == 1:
                 # collect the ellipsis index
-                ellipsis_at = _nextwhere.index(...)
+                # fun fact:
+                #   nextwhere.index(...) does not work, because it will do a == comparison and that fails with typetracers that compare against ...,
+                #   but luckily we can use the fact that ... is a singleton and use the 'is' operator
+                (ellipsis_at,) = tuple(i for i, x in enumerate(nextwhere) if x is ...)
                 # calculate how many slice(None) we need to add
-                n_newaxis = _nextwhere.count(np.newaxis)
+                # same fun fact as above...
+                n_newaxis = 0
+                for x in nextwhere:
+                    if x is np.newaxis or x is None:
+                        n_newaxis += 1
                 n_total = self.purelist_depth
                 n_slice_none = n_total - (len(_nextwhere) - n_newaxis - 1)
                 # insert (slice(None),) * n_slice_none at the ellipsis index
@@ -663,7 +670,7 @@ class Content(Meta):
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
                     wheres = self._backend.index_nplike.nonzero(data_as_index)
-                    return self._getitem(wheres)
+                    return self._getitem(wheres, named_axis)
             else:
                 raise TypeError(
                     "array slice must be an array of integers or booleans, not\n\n    {}".format(

@@ -559,7 +559,7 @@ def _unify_named_axis(
         if axis_name1 is not None and axis_name2 is not None:
             if axis_name1 != axis_name2:
                 raise ValueError(
-                    f"The named axes are different. Got: {axis_name1} and {axis_name2} for positional axis {position}"
+                    f"The named axes are incompatible. Got: {axis_name1} and {axis_name2} for positional axis {position}"
                 )
             unified_named_axis[axis_name1] = position
         elif axis_name1 is not None:  # axis_name2 is None

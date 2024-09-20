@@ -74,7 +74,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
         # Step 2: propagate named axis from input to output,
         #   use strategy "add one" (see: awkward._namedaxis)
-        out_named_axis = _add_named_axis(named_axis, axis)
+        out_named_axis = _add_named_axis(named_axis, axis + 1)
 
     axis = regularize_axis(axis)
 

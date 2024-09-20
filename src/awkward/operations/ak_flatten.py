@@ -5,6 +5,13 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
+from awkward._namedaxis import (
+    _get_named_axis,
+    _is_valid_named_axis,
+    _keep_named_axis,
+    _named_axis_to_positional_axis,
+    _remove_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -173,10 +180,28 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, axis, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
+    # Handle named axis
+    out_named_axis = None
+    if named_axis := _get_named_axis(ctx):
+        if _is_valid_named_axis(axis):
+            # Step 1: Normalize named axis to positional axis
+            axis = _named_axis_to_positional_axis(named_axis, axis)
+
+        # Step 2: propagate named axis from input to output,
+        #   if axis == None: use strategy "remove all" (see: awkward._namedaxis)
+        #   if axis == 0: use strategy "keep all" (see: awkward._namedaxis)
+        #   if axis != 0: use strategy "remove one" (see: awkward._namedaxis)
+        if axis is None:
+            out_named_axis = _remove_named_axis(named_axis, None)
+        elif axis == 0 or maybe_posaxis(layout, axis, 1) == 0:
+            out_named_axis = _keep_named_axis(named_axis, None)
+        else:
+            out_named_axis = _remove_named_axis(named_axis, axis, layout.purelist_depth)
+
+    axis = regularize_axis(axis)
 
     if axis is None:
         out = ak._do.remove_structure(layout, function_name="ak.flatten")
@@ -235,4 +260,26 @@ def _impl(array, axis, highlevel, behavior, attrs):
         out = apply(layout)
     else:
         out = ak._do.flatten(layout, axis)
-    return ctx.wrap(out, highlevel=highlevel)
+
+    wrapped_out = ctx.wrap(
+        out,
+        highlevel=highlevel,
+    )
+
+    # propagate named axis to output
+    if out_named_axis:
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped_out,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+    else:
+        return ak.operations.ak_without_named_axis._impl(
+            wrapped_out,
+            highlevel=highlevel,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+    return wrapped_out
