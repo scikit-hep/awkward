@@ -429,7 +429,10 @@ def by_signature(cuda_kernel_templates):
                 special = [repr(spec["name"])]
                 [type_to_pytype(x["type"], special) for x in childfunc["args"]]
                 dirlist = [repr(x["dir"]) for x in childfunc["args"]]
-                ispointerlist = [repr("List" in x["type"] or 'ListArray-at' == x.get('role', None)) for x in childfunc["args"]]
+                ispointerlist = [
+                    repr("List" in x["type"] or "ListArray-at" == x.get("role", None))
+                    for x in childfunc["args"]
+                ]
                 if spec["name"] in cuda_kernels_impl:
                     with open(
                         os.path.join(
