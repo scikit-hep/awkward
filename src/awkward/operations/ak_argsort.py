@@ -79,6 +79,8 @@ def _impl(array, axis, ascending, stable, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
+    axis = regularize_axis(axis)
+
     # Handle named axis
     out_named_axis = None
     if named_axis := _get_named_axis(ctx):
@@ -89,8 +91,6 @@ def _impl(array, axis, ascending, stable, highlevel, behavior, attrs):
         # Step 2: propagate named axis from input to output,
         #   use strategy "keep all" (see: awkward._namedaxis)
         out_named_axis = _keep_named_axis(named_axis, None)
-
-    axis = regularize_axis(axis)
 
     if not is_integer(axis):
         raise TypeError(f"'axis' must be an integer by now, not {axis!r}")

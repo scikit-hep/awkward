@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import (
@@ -13,8 +14,8 @@ from awkward._layout import (
 from awkward._namedaxis import (
     _get_named_axis,
     _is_valid_named_axis,
-    _keep_named_axis,
     _named_axis_to_positional_axis,
+    _NamedAxisKey,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_integer, regularize_axis
@@ -92,20 +93,14 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
+    axis = regularize_axis(axis)
+
     # Handle named axis
     out_named_axis = None
     if named_axis := _get_named_axis(ctx):
         if _is_valid_named_axis(axis):
             # Step 1: Normalize named axis to positional axis
             axis = _named_axis_to_positional_axis(named_axis, axis)
-
-        # Step 2: propagate named axis from input to output,
-        #   axis: int = use strategy "keep one" (see: awkward._namedaxis)
-        #   axis: None = use strategy "remove all" (see: awkward._namedaxis)
-        if axis is not None:
-            out_named_axis = _keep_named_axis(named_axis, axis)
-
-    axis = regularize_axis(axis)
 
     if not is_integer(axis) and axis is not None:
         raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
@@ -149,20 +144,18 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        wrapped_out = ctx.wrap(
-            maybe_highlevel_to_lowlevel(out), highlevel=highlevel, allow_other=True
-        )
-
-        if out_named_axis:
-            # propagate named axis to output
-            return ak.operations.ak_with_named_axis._impl(
-                wrapped_out,
-                named_axis=out_named_axis,
-                highlevel=highlevel,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
+        # propagate named axis to output
+        if out_named_axis := _get_named_axis(attrs_of_obj(out) or {}):
+            ctx = ctx.with_attr(
+                key=_NamedAxisKey,
+                value=out_named_axis,
             )
-        return wrapped_out
+
+        return ctx.wrap(
+            maybe_highlevel_to_lowlevel(out),
+            highlevel=highlevel,
+            allow_other=True,
+        )
 
 
 @ak._connect.numpy.implements("ptp")

@@ -58,14 +58,15 @@ def with_named_axis(
 
 
 def _impl(array, named_axis, highlevel, behavior, attrs):
-    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False)
-
     # Named axis handling
     if not named_axis:  # no-op, e.g. named_axis is None, (), {}
-        _named_axis = {}
-    elif isinstance(named_axis, tuple):
-        ndim = layout.purelist_depth
+        return array
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=True)
+
+    if isinstance(named_axis, tuple):
+        (_, ndim) = layout.minmax_depth
         if len(named_axis) != ndim:
             raise ValueError(
                 f"{named_axis=} must have the same length as the number of dimensions ({ndim})"
@@ -76,13 +77,10 @@ def _impl(array, named_axis, highlevel, behavior, attrs):
     else:
         raise TypeError(f"named_axis must be a mapping or a tuple, got {named_axis}")
 
-    if _named_axis:
-        ctx = ctx.with_attr(
-            key=_NamedAxisKey,
-            value=_named_axis,
-        )
-
-    return ctx.wrap(
+    return ctx.with_attr(
+        key=_NamedAxisKey,
+        value=_named_axis,
+    ).wrap(
         layout,
         highlevel=highlevel,
         allow_other=True,

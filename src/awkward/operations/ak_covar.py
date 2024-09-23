@@ -12,6 +12,7 @@ from awkward._layout import (
 )
 from awkward._namedaxis import _get_named_axis, _NamedAxisKey
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._regularize import regularize_axis
 
 __all__ = ("covar",)
 
@@ -84,6 +85,8 @@ def covar(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
+    axis = regularize_axis(axis)
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, y_layout, weight_layout = ensure_same_backend(
             ctx.unwrap(x, allow_record=False, primitive_policy="error"),

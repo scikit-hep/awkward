@@ -465,7 +465,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     @property
     def positional_axis(self) -> tuple[int, ...]:
-        return _make_positional_axis_tuple(self.ndim)
+        (_, ndim) = self._layout.minmax_depth
+        return _make_positional_axis_tuple(ndim)
 
     @property
     def named_axis(self) -> AxisMapping:
@@ -1079,10 +1080,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.SlicingErrorContext(self, where):
             # Handle named axis
+            (_, ndim) = self._layout.minmax_depth
             if named_axis := _get_named_axis(self):
-                where = _normalize_named_slice(
-                    named_axis, where, self._layout.purelist_depth
-                )
+                where = _normalize_named_slice(named_axis, where, ndim)
 
             NamedAxis.mapping = named_axis
 

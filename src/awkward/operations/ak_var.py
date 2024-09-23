@@ -19,6 +19,7 @@ from awkward._namedaxis import (
     _NamedAxisKey,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._regularize import regularize_axis
 
 __all__ = ("var", "nanvar")
 
@@ -190,6 +191,8 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
 
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
+
+    axis = regularize_axis(axis)
 
     # Handle named axis
     if named_axis := _get_named_axis(ctx):

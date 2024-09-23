@@ -97,14 +97,14 @@ def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
+    axis = regularize_axis(axis)
+
     # Handle named axis
     out_named_axis = None
     if named_axis := _get_named_axis(ctx):
         if _is_valid_named_axis(axis):
             # Step 1: Normalize named axis to positional axis
             axis = _named_axis_to_positional_axis(named_axis, axis)
-
-    axis = regularize_axis(axis)
 
     if not is_integer(axis):
         raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
@@ -123,13 +123,11 @@ def _impl(array, axis, highlevel, behavior, attrs):
         highlevel=highlevel,
     )
 
-    if out_named_axis:
-        # propagate named axis to output
-        return ak.operations.ak_with_named_axis._impl(
-            wrapped_out,
-            named_axis=out_named_axis,
-            highlevel=highlevel,
-            behavior=ctx.behavior,
-            attrs=ctx.attrs,
-        )
-    return wrapped_out
+    # propagate named axis to output
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

@@ -7,7 +7,7 @@ import os
 from collections.abc import Iterable, Sequence, Sized
 
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._typing import AxisMaybeNone, SupportsInt
+from awkward._typing import Any
 
 np = NumpyMetadata.instance()
 
@@ -51,8 +51,11 @@ def is_non_string_like_sequence(obj) -> bool:
     return not isinstance(obj, (str, bytes)) and isinstance(obj, Sequence)
 
 
-def regularize_axis(axis: SupportsInt | None) -> AxisMaybeNone:
-    if axis is None:
-        return None
-    else:
+def regularize_axis(axis: Any) -> int | Any:
+    """
+    This function's purpose is to convert "0" to 0, "1" to 1, etc., but leave any other value as it is.
+    """
+    try:
         return int(axis)
+    except (TypeError, ValueError):
+        return axis

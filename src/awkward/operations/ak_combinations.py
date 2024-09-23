@@ -5,6 +5,11 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._namedaxis import (
+    _get_named_axis,
+    _is_valid_named_axis,
+    _named_axis_to_positional_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -214,7 +219,16 @@ def _impl(
     behavior,
     attrs,
 ):
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
     axis = regularize_axis(axis)
+
+    # Handle named axis
+    if named_axis := _get_named_axis(ctx):
+        if _is_valid_named_axis(axis):
+            # Step 1: Normalize named axis to positional axis
+            axis = _named_axis_to_positional_axis(named_axis, axis)
 
     if with_name is None:
         pass
@@ -223,8 +237,6 @@ def _impl(
     else:
         parameters = {**parameters, "__record__": with_name}
 
-    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     out = ak._do.combinations(
         layout,
         n,

@@ -127,6 +127,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
             )
         )
 
+    axis = regularize_axis(axis)
+
     # Handle named axis
     # propagate named axis from input to output,
     #   use strategy "unify" (see: awkward._namedaxis)
@@ -135,8 +137,6 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
         if _is_valid_named_axis(axis):
             # normalize named axis to positional axis
             axis = _named_axis_to_positional_axis(out_named_axis, axis)
-
-    axis = regularize_axis(axis)
 
     contents = [x for x in content_or_others if isinstance(x, ak.contents.Content)]
     if len(contents) == 0:

@@ -16,6 +16,7 @@ from awkward._namedaxis import (
     _NamedAxisKey,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._regularize import regularize_axis
 from awkward._typing import Mapping
 
 __all__ = ("moment",)
@@ -103,6 +104,8 @@ def _impl(
     behavior: Mapping | None,
     attrs: Mapping | None,
 ):
+    axis = regularize_axis(axis)
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, weight_layout = ensure_same_backend(
             ctx.unwrap(x, allow_record=False, primitive_policy="error"),

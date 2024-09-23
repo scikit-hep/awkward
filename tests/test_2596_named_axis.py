@@ -245,20 +245,20 @@ def test_named_axis_binary_ufuncs():
     assert (array + named_array2).named_axis == {"x": 0}
     assert (array + named_array3).named_axis == {"x": 0, "y": 1}
 
+    a = ak.with_named_axis(array, named_axis=("x", None))
+    b = ak.with_named_axis(array, named_axis=("y", None))
     with pytest.raises(
         ValueError,
         match="The named axes are incompatible. Got: x and y for positional axis 0",
     ):
-        a = ak.with_named_axis(array, named_axis=("x", None))
-        b = ak.with_named_axis(array, named_axis=("y", None))
         _ = a + b
 
+    a = ak.with_named_axis(array, named_axis=(None, "x"))
+    b = ak.with_named_axis(array, named_axis=(None, "y"))
     with pytest.raises(
         ValueError,
         match="The named axes are incompatible. Got: x and y for positional axis 1",
     ):
-        a = ak.with_named_axis(array, named_axis=(None, "x"))
-        b = ak.with_named_axis(array, named_axis=(None, "y"))
         _ = a + b
 
 
@@ -361,11 +361,42 @@ def test_named_axis_ak_any():
 
 
 def test_named_axis_ak_argcartesian():
-    assert True
+    one = ak.Array([[1], [2], [3]])
+    two = ak.Array([[4, 5]])
+    three = ak.Array([[6, 7]])
+
+    named_one = ak.with_named_axis(one, named_axis=("x", "y"))
+    named_two = ak.with_named_axis(two, named_axis=("x", "y"))
+    named_three = ak.with_named_axis(three, named_axis=("x", "y"))
+
+    assert ak.argcartesian(
+        [named_one, named_two, named_three], axis="x", nested=False
+    ).named_axis == {"x": 0, "y": 1}
+    assert ak.argcartesian(
+        [named_one, named_two, named_three], axis="x", nested=True
+    ).named_axis == {"x": 1, "y": 2}
+    assert ak.argcartesian(
+        [named_one, named_two, named_three], axis="x", nested=[0]
+    ).named_axis == {"x": 1, "y": 2}
+    assert ak.argcartesian(
+        [named_one, named_two, named_three], axis="x", nested=[1]
+    ).named_axis == {"x": 0, "y": 2}
+    assert ak.argcartesian(
+        [named_one, named_two, named_three], axis="x", nested=[0, 1]
+    ).named_axis == {"x": 2, "y": 3}
 
 
 def test_named_axis_ak_argcombinations():
-    assert True
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis=("x", "y"))
+
+    assert (
+        ak.argcombinations(named_array, 2, axis=0).named_axis == named_array.named_axis
+    )
+    assert (
+        ak.argcombinations(named_array, 2, axis=1).named_axis == named_array.named_axis
+    )
 
 
 def test_named_axis_ak_argmax():
@@ -511,7 +542,29 @@ def test_named_axis_ak_broadcast_fields():
 
 
 def test_named_axis_ak_cartesian():
-    assert True
+    one = ak.Array([[1], [2], [3]])
+    two = ak.Array([[4, 5]])
+    three = ak.Array([[6, 7]])
+
+    named_one = ak.with_named_axis(one, named_axis=("x", "y"))
+    named_two = ak.with_named_axis(two, named_axis=("x", "y"))
+    named_three = ak.with_named_axis(three, named_axis=("x", "y"))
+
+    assert ak.cartesian(
+        [named_one, named_two, named_three], axis="x", nested=False
+    ).named_axis == {"x": 0, "y": 1}
+    assert ak.cartesian(
+        [named_one, named_two, named_three], axis="x", nested=True
+    ).named_axis == {"x": 1, "y": 2}
+    assert ak.cartesian(
+        [named_one, named_two, named_three], axis="x", nested=[0]
+    ).named_axis == {"x": 1, "y": 2}
+    assert ak.cartesian(
+        [named_one, named_two, named_three], axis="x", nested=[1]
+    ).named_axis == {"x": 0, "y": 2}
+    assert ak.cartesian(
+        [named_one, named_two, named_three], axis="x", nested=[0, 1]
+    ).named_axis == {"x": 2, "y": 3}
 
 
 def test_named_axis_ak_categories():
@@ -531,7 +584,12 @@ def test_named_axis_ak_categories():
 
 
 def test_named_axis_ak_combinations():
-    assert True
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis=("x", "y"))
+
+    assert ak.combinations(named_array, 2, axis=0).named_axis == named_array.named_axis
+    assert ak.combinations(named_array, 2, axis=1).named_axis == named_array.named_axis
 
 
 def test_named_axis_ak_concatenate():
@@ -983,13 +1041,27 @@ def test_named_axis_ak_mean():
 
 
 def test_named_axis_ak_merge_option_of_records():
-    # skip
-    assert True
+    array = ak.Array([None, {"a": 1}, {"a": 2}])
+
+    named_array = ak.with_named_axis(array, named_axis=("x",))
+
+    # assert ak.all(ak.merge_option_of_records(array, axis=0) == ak.merge_option_of_records(named_array, axis="x"))
+    assert (
+        ak.merge_option_of_records(named_array, axis="x").named_axis
+        == named_array.named_axis
+    )
 
 
 def test_named_axis_ak_merge_union_of_records():
-    # skip
-    assert True
+    array = ak.concatenate(([{"a": 1}], [{"b": 2}]))
+
+    named_array = ak.with_named_axis(array, named_axis=("x",))
+
+    # assert ak.all(ak.merge_union_of_records(array, axis=0) == ak.merge_union_of_records(named_array, axis="x"))
+    assert (
+        ak.merge_union_of_records(named_array, axis="x").named_axis
+        == named_array.named_axis
+    )
 
 
 def test_named_axis_ak_metadata_from_parquet():
@@ -1124,8 +1196,8 @@ def test_named_axis_ak_ptp():
     assert ak.all(ak.ptp(array, axis=1) == ak.ptp(named_array, axis="y"))
     assert ak.ptp(array, axis=None) == ak.ptp(named_array, axis=None)
 
-    assert ak.ptp(named_array, axis="x").named_axis == {"x": 0}
-    assert ak.ptp(named_array, axis="y").named_axis == {"y": 0}
+    assert ak.ptp(named_array, axis="x").named_axis == {"y": 0}
+    assert ak.ptp(named_array, axis="y").named_axis == {"x": 0}
     assert not _get_named_axis(ak.ptp(named_array, axis=None))
 
 

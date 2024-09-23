@@ -86,13 +86,13 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout = ctx.unwrap(x, allow_record=False, primitive_policy="error")
 
+    axis = regularize_axis(axis)
+
     # Handle named axis
     if named_axis := _get_named_axis(ctx):
         if _is_valid_named_axis(axis):
             # Step 1: Normalize named axis to positional axis
             axis = _named_axis_to_positional_axis(named_axis, axis)
-
-    axis = regularize_axis(axis)
 
     x = ctx.wrap(x_layout)
 

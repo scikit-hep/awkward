@@ -78,6 +78,8 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
+    axis = regularize_axis(axis)
+
     # Handle named axis
     out_named_axis = None
     if named_axis := _get_named_axis(ctx):
@@ -93,10 +95,8 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
             out_named_axis = _remove_named_axis(
                 named_axis=out_named_axis,
                 axis=axis,
-                total=layout.purelist_depth,
+                total=layout.minmax_depth[1],
             )
-
-    axis = regularize_axis(axis)
 
     if not is_integer(axis) and axis is not None:
         raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
@@ -120,16 +120,14 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
         allow_other=True,
     )
 
-    if out_named_axis:
-        # propagate named axis to output
-        return ak.operations.ak_with_named_axis._impl(
-            wrapped_out,
-            named_axis=out_named_axis,
-            highlevel=highlevel,
-            behavior=ctx.behavior,
-            attrs=ctx.attrs,
-        )
-    return wrapped_out
+    # propagate named axis to output
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )
 
 
 @ak._connect.numpy.implements("count_nonzero")
