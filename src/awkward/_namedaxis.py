@@ -580,36 +580,48 @@ def _unify_named_axis(
 
 class Slicer:
     """
-    Provides a more convenient syntax for slicing.
+    The Slicer class provides a more convenient syntax for creating slices.
+
+    This class overloads the __getitem__ method to return the slice object directly,
+    allowing for a more intuitive syntax when creating slices.
 
     Examples:
-        Create a Slicer object:
+        To create a Slicer object:
 
         >>> ak_slice = Slicer()
 
-        Use the Slicer object to create slices:
+        To use the Slicer object to create slices:
 
         >>> ak_slice[1:5]
-        slice(1, 5)
+        slice(1, 5, None)
 
         >>> ak_slice[1:5:2]
         slice(1, 5, 2)
 
-        Create a tuple of slices:
+        To create a tuple of slices:
 
         >>> ak_slice[1:5:2, 2:10]
-        (slice(1, 5, 2), slice(2, 10))
+        (slice(1, 5, 2), slice(2, 10, None))
 
-        Use the Slicer object to create a slice that includes all elements:
+        To use the Slicer object to create a slice that includes all elements:
 
         >>> ak_slice[...]
-        slice(None)
+        Ellipsis
 
         >>> ak_slice[:]
-        slice(None)
+        slice(None, None, None)
     """
 
     def __getitem__(self, where):
+        """
+        Overloads the __getitem__ method to return the slice object directly.
+
+        Args:
+            where (slice): The slice object.
+
+        Returns:
+            slice: The input slice object.
+        """
         return where
 
 
