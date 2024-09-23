@@ -55,7 +55,7 @@ def without_named_axis(
 
 def _impl(array, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False)
+        layout = ctx.unwrap(array, allow_record=True)
 
     return ctx.without_attr(key=_NamedAxisKey).wrap(
         layout,
