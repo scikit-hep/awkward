@@ -147,11 +147,44 @@ def _check_valid_axis(axis: AxisName) -> AxisName:
         >>> _check_valid_axis(1)
         Traceback (most recent call last):
         ...
-        ValueError: Axis names must be hashable and not int, got 1
+        ValueError: Axis names must be hashable and not int, got 1 [type(axis)=<class 'int'>]
     """
     if not _is_valid_named_axis(axis):
-        raise ValueError(f"Axis names must be hashable and not int, got {axis!r}")
+        raise ValueError(
+            f"Axis names must be hashable and not int, got {axis!r} [{type(axis)=}]"
+        )
     return axis
+
+
+def _check_valid_named_axis_mapping(named_axis: AxisMapping) -> AxisMapping:
+    """
+    Checks if the given named axis mapping is valid. A valid named axis mapping is a dictionary where the keys are valid named axes
+    (hashable objects that are not integers) and the values are integers.
+
+    Args:
+        named_axis (AxisMapping): The named axis mapping to check.
+
+    Raises:
+        ValueError: If any of the keys in the named axis mapping is not a valid named axis or if any of the values is not an integer.
+
+    Examples:
+        >>> _check_valid_named_axis_mapping({"x": 0, "y": 1, "z": 2})  # No exception is raised
+        >>> _check_valid_named_axis_mapping({"x": 0, "y": 1, "z": "2"})
+        Traceback (most recent call last):
+        ...
+        ValueError: Named axis mapping values must be integers, got '2' [type(axis)=<class 'str'>]
+        >>> _check_valid_named_axis_mapping({"x": 0, 1: 1, "z": 2})
+        Traceback (most recent call last):
+        ...
+        ValueError: Axis names must be hashable and not int, got 1 [type(axis)=<class 'int'>]
+    """
+    for name, axis in named_axis.items():
+        _check_valid_axis(name)
+        if not is_integer(axis):
+            raise ValueError(
+                f"Named axis mapping values must be integers, got {axis!r} [{type(axis)=}]"
+            )
+    return named_axis
 
 
 def _axis_tuple_to_mapping(axis_tuple: AxisTuple) -> AxisMapping:

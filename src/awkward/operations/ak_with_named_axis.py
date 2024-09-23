@@ -8,6 +8,7 @@ from awkward._namedaxis import (
     AxisMapping,
     AxisTuple,
     _axis_tuple_to_mapping,
+    _check_valid_named_axis_mapping,
     _NamedAxisKey,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -79,7 +80,7 @@ def _impl(array, named_axis, highlevel, behavior, attrs):
 
     return ctx.with_attr(
         key=_NamedAxisKey,
-        value=_named_axis,
+        value=_check_valid_named_axis_mapping(_named_axis),
     ).wrap(
         layout,
         highlevel=highlevel,
