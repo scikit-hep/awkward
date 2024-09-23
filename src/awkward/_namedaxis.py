@@ -70,18 +70,6 @@ def _get_named_axis(
         return {}
 
 
-def _supports_named_axis(ctx: MaybeSupportsNamedAxis | AttrsNamedAxisMapping) -> bool:
-    """Check if the given ctx supports named axis.
-
-    Args:
-        ctx (SupportsNamedAxis or AttrsNamedAxisMapping): The ctx to check.
-
-    Returns:
-        bool: True if the ctx supports named axis, False otherwise.
-    """
-    return bool(_get_named_axis(ctx))
-
-
 def _make_positional_axis_tuple(n: int) -> tuple[int, ...]:
     """
     Generates a positional axis tuple of length n.
@@ -111,8 +99,6 @@ def _is_valid_named_axis(axis: AxisName) -> bool:
 
     Examples:
         >>> _is_valid_named_axis("x")
-        True
-        >>> _is_valid_named_axis(NamedAxisMarker())
         True
         >>> _is_valid_named_axis(1)
         False
@@ -288,9 +274,6 @@ def _set_named_axis_to_attrs(
 # - "remove one" (_remove_named_axis): Remove the named axis from the output array, e.g.: `ak.sum`
 # - "add one" (_add_named_axis): Add a new named axis to the output array, e.g.: `ak.concatenate, ak.singletons` (not clear yet...)
 # - "unify" (_unify_named_axis): Unify the named axis in the output array given two input arrays, e.g.: `__add__`
-# - "collapse" (_collapse_named_axis): Collapse multiple named axis to None in the output array, e.g.: `ak.flatten`
-# - "permute" (_permute_named_axis): Permute the named axis in the output array, e.g.: `ak.transpose` (does this exist?)
-# - "contract" (_contract_named_axis): Contract the named axis in the output array, e.g.: `matmul` (does this exist?)
 
 
 def _keep_named_axis(
@@ -525,13 +508,6 @@ def _add_named_axis(
     return out
 
 
-def _permute_named_axis(
-    axis: int,
-    named_axis: AxisTuple,
-) -> AxisTuple:
-    raise NotImplementedError()
-
-
 def _unify_named_axis(
     named_axis1: AxisMapping,
     named_axis2: AxisMapping,
@@ -600,24 +576,6 @@ def _unify_named_axis(
         elif axis_name2 is not None:  # axis_name1 is None
             unified_named_axis[axis_name2] = position
     return unified_named_axis
-
-
-def _collapse_named_axis(
-    named_axis: AxisMapping,
-    axis: tuple[int, ...] | int | None,
-) -> AxisMapping:
-    """
-    Determines the new named axis after collapsing the specified axis. This is useful, for example,
-    when applying a flatten operation along an axis.
-
-    Args:
-        axis (tuple[int, ...] | int | None): The index of the axis to collapse. If None, all axes are collapsed.
-        named_axis (AxisMapping): The current named axis.
-
-    Returns:
-        AxisMapping: The new named axis after collapsing the specified axis.
-    """
-    raise NotImplementedError()
 
 
 class Slicer:

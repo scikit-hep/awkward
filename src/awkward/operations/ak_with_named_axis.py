@@ -41,15 +41,7 @@ def with_named_axis(
 
     Returns an #ak.Array or #ak.Record (or low-level equivalent, if
     `highlevel=False`) with a new name. This function does not change the
-    array in-place. If the new name is None, then an array without a name is
-    returned.
-
-    The records or tuples may be nested within multiple levels of nested lists.
-    If records are nested within records, only the outermost are affected.
-
-    Setting the `"__record__"` parameter makes it possible to add behaviors
-    to the data; see #ak.Array and #ak.behavior for a more complete
-    description.
+    array in-place. If the new name is None, then the array is returned as it is.
     """
     # Dispatch
     yield (array,)

@@ -25,8 +25,6 @@ def without_named_axis(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        named_axis: AxisTuple | AxisMapping: Names to give to the array axis; this assigns
-            the `"__named_axis__"` attr. If None, any existing name is unset.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -35,16 +33,8 @@ def without_named_axis(
             high-level.
 
     Returns an #ak.Array or #ak.Record (or low-level equivalent, if
-    `highlevel=False`) with a new name. This function does not change the
-    array in-place. If the new name is None, then an array without a name is
-    returned.
-
-    The records or tuples may be nested within multiple levels of nested lists.
-    If records are nested within records, only the outermost are affected.
-
-    Setting the `"__record__"` parameter makes it possible to add behaviors
-    to the data; see #ak.Array and #ak.behavior for a more complete
-    description.
+    `highlevel=False`) without named axes. This function does not change the
+    array in-place.
     """
     # Dispatch
     yield (array,)
