@@ -701,6 +701,36 @@ def apply_step(
                 for x, p in zip(outcontent, parameters)
             )
 
+    def broadcast_any_option_all_UnmaskedArray():
+        nextinputs = []
+        nextparameters = []
+        for x in inputs:
+            if isinstance(x, UnmaskedArray):
+                nextinputs.append(x.content)
+                nextparameters.append(x._parameters)
+            elif isinstance(x, Content):
+                nextinputs.append(x)
+                nextparameters.append(x._parameters)
+            else:
+                nextinputs.append(x)
+                nextparameters.append(NO_PARAMETERS)
+
+        outcontent = apply_step(
+            backend,
+            nextinputs,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            options,
+        )
+        assert isinstance(outcontent, tuple)
+        parameters = parameters_factory(nextparameters, len(outcontent))
+
+        return tuple(
+            UnmaskedArray(x, parameters=p) for x, p in zip(outcontent, parameters)
+        )
+
     def broadcast_any_option():
         mask = None
         for x in contents:
@@ -1045,7 +1075,9 @@ def apply_step(
 
         # Any option-types?
         elif any(x.is_option for x in contents):
-            if options["function_name"] == "ak.where":
+            if all(not x.is_option or isinstance(x, UnmaskedArray) for x in contents):
+                return broadcast_any_option_all_UnmaskedArray()
+            elif options["function_name"] == "ak.where":
                 return broadcast_any_option_akwhere()
             else:
                 return broadcast_any_option()
