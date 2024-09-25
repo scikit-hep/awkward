@@ -4,9 +4,9 @@
 // def f(grid, block, args):
 //     (tmpptr, fromstarts, fromstops, length, toequal, invocation_index, err_code) = args
 //     if length > 1:
-//         scan_in_array = cupy.full((length - 1) * (length - 2), 0, dtype=cupy.int64)
+//         scan_in_array = cupy.full((length - 1) * (length - 2), cupy.array(0), dtype=cupy.int64)
 //     else:
-//         scan_in_array = cupy.full(0, 0, dtype=cupy.int64)
+//         scan_in_array = cupy.full(0, cupy.array(0), dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_subrange_equal_bool", bool_, fromstarts.dtype, fromstops.dtype, bool_]))(grid, block, (tmpptr, fromstarts, fromstops, length, toequal, scan_in_array, invocation_index, err_code))
 //     toequal[0] = cupy.any(scan_in_array == True)
 // out["awkward_NumpyArray_subrange_equal_bool", {dtype_specializations}] = None
