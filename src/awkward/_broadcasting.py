@@ -742,7 +742,7 @@ def apply_step(
                     mask = backend.index_nplike.logical_or(mask, m, maybe_out=mask)
 
         nextmask = Index8(mask.view(np.int8))
-        index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
+        index = backend.index_nplike.full(mask.shape[0], np.int64(-1), dtype=np.int64)
         index[~mask] = backend.index_nplike.arange(
             backend.index_nplike.shape_item_as_index(mask.shape[0])
             - backend.index_nplike.count_nonzero(mask),
