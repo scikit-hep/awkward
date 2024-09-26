@@ -387,6 +387,15 @@ class EmptyArray(EmptyMeta, Content):
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        dtype = np.dtype("float64")
+        next = ak.contents.NumpyArray(
+            numpy.empty(length, dtype=dtype),
+            parameters=self._parameters,
+            backend=self._backend,
+        )
+        return next._to_cudf(cudf, None, 0)
+
     @classmethod
     def _arrow_needs_option_type(cls):
         return True  # This overrides Content._arrow_needs_option_type

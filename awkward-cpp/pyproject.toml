@@ -1,13 +1,13 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.9",
+    "scikit-build-core>=0.10",
     "pybind11",
 ]
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "37"
+version = "38"
 dependencies = [
     "numpy>=1.18.0",
     "importlib_resources;python_version < \"3.9\""
@@ -59,7 +59,7 @@ Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 
 
 [tool.scikit-build]
-minimum-version = "0.9"
+minimum-version = "build-system.requires"
 build-dir = "build/{cache_tag}"
 sdist.reproducible = true
 sdist.include = [
