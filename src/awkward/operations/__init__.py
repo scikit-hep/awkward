@@ -102,6 +102,7 @@ from awkward.operations.ak_to_parquet_row_groups import *
 from awkward.operations.ak_to_raggedtensor import *
 from awkward.operations.ak_to_rdataframe import *
 from awkward.operations.ak_to_regular import *
+from awkward.operations.ak_to_torch import *
 from awkward.operations.ak_transform import *
 from awkward.operations.ak_type import *
 from awkward.operations.ak_unflatten import *
