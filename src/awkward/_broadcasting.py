@@ -701,6 +701,36 @@ def apply_step(
                 for x, p in zip(outcontent, parameters)
             )
 
+    def broadcast_any_option_all_UnmaskedArray():
+        nextinputs = []
+        nextparameters = []
+        for x in inputs:
+            if isinstance(x, UnmaskedArray):
+                nextinputs.append(x.content)
+                nextparameters.append(x._parameters)
+            elif isinstance(x, Content):
+                nextinputs.append(x)
+                nextparameters.append(x._parameters)
+            else:
+                nextinputs.append(x)
+                nextparameters.append(NO_PARAMETERS)
+
+        outcontent = apply_step(
+            backend,
+            nextinputs,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            options,
+        )
+        assert isinstance(outcontent, tuple)
+        parameters = parameters_factory(nextparameters, len(outcontent))
+
+        return tuple(
+            UnmaskedArray(x, parameters=p) for x, p in zip(outcontent, parameters)
+        )
+
     def broadcast_any_option():
         mask = None
         for x in contents:
@@ -712,7 +742,7 @@ def apply_step(
                     mask = backend.index_nplike.logical_or(mask, m, maybe_out=mask)
 
         nextmask = Index8(mask.view(np.int8))
-        index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
+        index = backend.index_nplike.full(mask.shape[0], np.int64(-1), dtype=np.int64)
         index[~mask] = backend.index_nplike.arange(
             backend.index_nplike.shape_item_as_index(mask.shape[0])
             - backend.index_nplike.count_nonzero(mask),
@@ -1045,7 +1075,9 @@ def apply_step(
 
         # Any option-types?
         elif any(x.is_option for x in contents):
-            if options["function_name"] == "ak.where":
+            if all(not x.is_option or isinstance(x, UnmaskedArray) for x in contents):
+                return broadcast_any_option_all_UnmaskedArray()
+            elif options["function_name"] == "ak.where":
                 return broadcast_any_option_akwhere()
             else:
                 return broadcast_any_option()
