@@ -47,6 +47,7 @@ from awkward.operations.ak_from_parquet import *
 from awkward.operations.ak_from_raggedtensor import *
 from awkward.operations.ak_from_rdataframe import *
 from awkward.operations.ak_from_regular import *
+from awkward.operations.ak_from_torch import *
 from awkward.operations.ak_full_like import *
 from awkward.operations.ak_imag import *
 from awkward.operations.ak_is_categorical import *

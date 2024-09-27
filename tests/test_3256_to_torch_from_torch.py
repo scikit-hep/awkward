@@ -53,3 +53,20 @@ def test_to_torch():
     # try just a python list
     array3 = [3, 1, 4, 1, 9, 2, 6]
     assert to_torch(array3).tolist() == [3, 1, 4, 1, 9, 2, 6]
+
+
+array1 = torch.tensor([[1.0, -1.0], [1.0, -1.0]], dtype=torch.float32)
+array2 = torch.tensor(np.array([[1, 2, 3], [4, 5, 6]]))
+
+
+def test_from_torch():
+    # Awkward.to_list() == Tensor.tolist()
+    assert from_torch(array1).to_list() == array1.tolist()
+
+    assert from_torch(array2).to_list() == array2.tolist()
+
+    # test that the data types are remaining the same (int64 in this case)
+    assert from_torch(array1).layout.dtype.name in str(array1.dtype)
+
+    # test that the data types are remaining the same (float32 in this case)
+    assert from_torch(array2).layout.dtype.name in str(array2.dtype)
