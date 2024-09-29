@@ -35,7 +35,7 @@ def _impl(array):
             """to use ak.from_torch, you must install 'torch' package with:
 
          pip install torch
-         
+
 or
 
         conda install pytorch"""
@@ -51,6 +51,7 @@ or
     # convert tensors to cupy if they are on cuda
     if device == "cuda":
         from awkward._nplikes.cupy import Cupy
+
         cp = Cupy.instance()
 
         # zero-copy data exchange through DLPack
