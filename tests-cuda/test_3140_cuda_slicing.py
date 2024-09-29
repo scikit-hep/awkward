@@ -457,6 +457,12 @@ def test_1904_drop_none_RecordArray():
     ]
 
 
+def test_simple_slice():
+    arrg = ak.Array([[1, 2, 3], [0], [4, 5]], backend="cuda")
+    out = arrg[:, 0]
+    assert out.tolist() == [1, 0, 4]
+
+
 def test_2246_slice_not_packed():
     index = ak.Array(
         ak.contents.ListOffsetArray(
