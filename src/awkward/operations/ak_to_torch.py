@@ -39,7 +39,11 @@ def _impl(array):
         raise ImportError(
             """to use ak.to_torch, you must install 'torch' package with:
 
-        pip install torch or conda install pytorch"""
+         pip install torch
+         
+or
+
+        conda install pytorch"""
         ) from err
 
     # useful function that handles all possible input arrays
@@ -48,20 +52,23 @@ def _impl(array):
     # get the device array is on
     device = ak.backend(array)
 
+    if device not in ['cuda', 'cpu']:
+        raise ValueError("Only 'cpu' and 'cuda' backend conversions are allowed")
+
     # convert to numpy or cupy if `array` on gpu
     try:
-        np_array = array.to_backend_array(allow_missing=False)
+        backend_array = array.to_backend_array(allow_missing=False)
     except ValueError as err:
         raise TypeError(
-            "Only arrays containing regular-length lists (# *) of numbers can be converted into a PyTorch Tensor"
+            "Only arrays containing equal-length lists of numbers can be converted into a PyTorch Tensor"
         ) from err
 
     # check if cupy or numpy
-    if isinstance(np_array, np.ndarray):
+    if isinstance(backend_array, np.ndarray):
         # convert numpy to a torch tensor
-        tensor = torch.from_numpy(np_array).to(device)
+        tensor = torch.from_numpy(backend_array)
     else:
         # cupy -> torch tensor
-        tensor = torch.as_tensor(np_array, device=device)
+        tensor = torch.utils.dlpack.from_dlpack(backend_array.toDlpack())
 
     return tensor

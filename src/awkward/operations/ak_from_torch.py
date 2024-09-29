@@ -34,7 +34,11 @@ def _impl(array):
         raise ImportError(
             """to use ak.from_torch, you must install 'torch' package with:
 
-        pip install torch or conda install pytorch"""
+         pip install torch
+         
+or
+
+        conda install pytorch"""
         ) from err
 
     # check if array is a Tensor
@@ -46,12 +50,8 @@ def _impl(array):
 
     # convert tensors to cupy if they are on cuda
     if device == "cuda":
-        try:
-            from awkward._nplikes.cupy import Cupy
-
-            cp = Cupy.instance()
-        except (ModuleNotFoundError, ImportError) as err:
-            raise err
+        from awkward._nplikes.cupy import Cupy
+        cp = Cupy.instance()
 
         # zero-copy data exchange through DLPack
         cp_array = cp.from_dlpack(array)
