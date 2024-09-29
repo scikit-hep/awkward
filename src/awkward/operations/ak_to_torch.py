@@ -40,7 +40,7 @@ def _impl(array):
             """to use ak.to_torch, you must install 'torch' package with:
 
          pip install torch
-         
+
 or
 
         conda install pytorch"""
@@ -52,7 +52,7 @@ or
     # get the device array is on
     device = ak.backend(array)
 
-    if device not in ['cuda', 'cpu']:
+    if device not in ["cuda", "cpu"]:
         raise ValueError("Only 'cpu' and 'cuda' backend conversions are allowed")
 
     # convert to numpy or cupy if `array` on gpu
