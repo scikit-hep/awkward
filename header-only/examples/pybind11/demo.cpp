@@ -51,9 +51,16 @@ py::object snapshot_builder(const T &builder) {
     for (auto name_nbytes : names_nbytes) {
       int nbytes = name_nbytes.second;
 
-      py::object array = np.attr("empty")(nbytes, dtype_u1);
+      py::object array = np.attr("ones")(nbytes, dtype_u1);
 
-      py::module::import("builtins").attr("print")(array);
+      size_t pointer = py::cast<size_t>(array.attr("ctypes").attr("data"));
+      void* raw_data = (void*)pointer;
+
+      int c0 = ((unsigned char*)raw_data)[0];
+      int c1 = ((unsigned char*)raw_data)[1];
+      int c2 = ((unsigned char*)raw_data)[2];
+
+      std::cout << "pointer = " << pointer << " raw data = " << c0 << " " << c1 << " " << c2 << std::endl;
 
     }
 
