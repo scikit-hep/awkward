@@ -34,17 +34,27 @@ using MyBuilder = RecordBuilder<
  */
 template<typename T>
 py::object snapshot_builder(const T &builder) {
+    // We need NumPy (to allocate arrays) and Awkward Array (ak.from_buffers).
+    // pybind11 will raise a ModuleNotFoundError if they aren't installed.
+    auto np = py::module::import("numpy");
+    auto ak = py::module::import("awkward");
 
-    // // How much memory to allocate?
-    // std::map <std::string, size_t> names_nbytes = {};
-    // builder.buffer_nbytes(names_nbytes);
+    auto dtype_u1 = np.attr("dtype")("u1");
 
-    // // Allocate memory
-    // std::map<std::string, void *> buffers = {};
-    // for (auto it: names_nbytes) {
-    //     uint8_t *ptr = new uint8_t[it.second];
-    //     buffers[it.first] = (void *) ptr;
-    // }
+    // How much memory to allocate?
+    std::map<std::string, size_t> names_nbytes;
+    builder.buffer_nbytes(names_nbytes);
+
+    // Ask NumPy to allocate memory and get pointers to the raw buffers.
+    py::dict py_container;
+    std::map<std::string, void*> cpp_container;
+    for (auto name_nbytes : names_nbytes) {
+      int nbytes = name_nbytes.second;
+      std::cout << "nbytes = " << nbytes << std::endl;
+    }
+
+
+
 
     // // Write non-contiguous contents to memory
     // builder.to_buffers(buffers);
