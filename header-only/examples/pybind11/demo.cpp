@@ -59,12 +59,12 @@ py::object snapshot_builder(const T &builder) {
       cpp_container[name_nbytes.first] = raw_data;
     }
 
+    // Write non-contiguous contents to memory.
+    builder.to_buffers(cpp_container);
+
     py::module::import("builtins").attr("print")(py_container);
 
-
-    // // Write non-contiguous contents to memory
-    // builder.to_buffers(buffers);
-    // auto from_buffers = py::module::import("awkward").attr("from_buffers");
+    // ak.attr("from_buffers")(py_container);
 
     // // Build Python dictionary containing arrays
     // // dtypes not important here as long as they match the underlying buffer
