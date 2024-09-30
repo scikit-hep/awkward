@@ -62,32 +62,8 @@ py::object snapshot_builder(const T &builder) {
     // Write non-contiguous contents to memory.
     builder.to_buffers(cpp_container);
 
-    py::module::import("builtins").attr("print")(py_container);
-
-    // ak.attr("from_buffers")(py_container);
-
-    // // Build Python dictionary containing arrays
-    // // dtypes not important here as long as they match the underlying buffer
-    // // as Awkward Array calls `frombuffer` to convert to the correct type
-    // py::dict container;
-    // for (auto it: buffers) {
-
-    //     py::capsule free_when_done(it.second, [](void *data) {
-    //         uint8_t *dataPtr = reinterpret_cast<uint8_t *>(data);
-    //         delete[] dataPtr;
-    //     });
-
-    //     uint8_t *data = reinterpret_cast<uint8_t *>(it.second);
-    //     container[py::str(it.first)] = py::array_t<uint8_t>(
-    //             {names_nbytes[it.first]},
-    //             {sizeof(uint8_t)},
-    //             data,
-    //             free_when_done
-    //     );
-    // }
-    // return from_buffers(builder.form(), builder.length(), container);
-
-  return py::none();
+    // Build Python dictionary containing arrays.
+    return ak.attr("from_buffers")(builder.form(), builder.length(), py_container);
 }
 
 
