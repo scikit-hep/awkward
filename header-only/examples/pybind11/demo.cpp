@@ -34,42 +34,44 @@ using MyBuilder = RecordBuilder<
  */
 template<typename T>
 py::object snapshot_builder(const T &builder) {
-    // How much memory to allocate?
-    std::map <std::string, size_t> names_nbytes = {};
-    builder.buffer_nbytes(names_nbytes);
 
-    // Allocate memory
-    std::map<std::string, void *> buffers = {};
-    for (auto it: names_nbytes) {
-        uint8_t *ptr = new uint8_t[it.second];
-        buffers[it.first] = (void *) ptr;
-    }
+    // // How much memory to allocate?
+    // std::map <std::string, size_t> names_nbytes = {};
+    // builder.buffer_nbytes(names_nbytes);
 
-    // Write non-contiguous contents to memory
-    builder.to_buffers(buffers);
-    auto from_buffers = py::module::import("awkward").attr("from_buffers");
+    // // Allocate memory
+    // std::map<std::string, void *> buffers = {};
+    // for (auto it: names_nbytes) {
+    //     uint8_t *ptr = new uint8_t[it.second];
+    //     buffers[it.first] = (void *) ptr;
+    // }
 
-    // Build Python dictionary containing arrays
-    // dtypes not important here as long as they match the underlying buffer
-    // as Awkward Array calls `frombuffer` to convert to the correct type
-    py::dict container;
-    for (auto it: buffers) {
+    // // Write non-contiguous contents to memory
+    // builder.to_buffers(buffers);
+    // auto from_buffers = py::module::import("awkward").attr("from_buffers");
 
-        py::capsule free_when_done(it.second, [](void *data) {
-            uint8_t *dataPtr = reinterpret_cast<uint8_t *>(data);
-            delete[] dataPtr;
-        });
+    // // Build Python dictionary containing arrays
+    // // dtypes not important here as long as they match the underlying buffer
+    // // as Awkward Array calls `frombuffer` to convert to the correct type
+    // py::dict container;
+    // for (auto it: buffers) {
 
-        uint8_t *data = reinterpret_cast<uint8_t *>(it.second);
-        container[py::str(it.first)] = py::array_t<uint8_t>(
-                {names_nbytes[it.first]},
-                {sizeof(uint8_t)},
-                data,
-                free_when_done
-        );
-    }
-    return from_buffers(builder.form(), builder.length(), container);
+    //     py::capsule free_when_done(it.second, [](void *data) {
+    //         uint8_t *dataPtr = reinterpret_cast<uint8_t *>(data);
+    //         delete[] dataPtr;
+    //     });
 
+    //     uint8_t *data = reinterpret_cast<uint8_t *>(it.second);
+    //     container[py::str(it.first)] = py::array_t<uint8_t>(
+    //             {names_nbytes[it.first]},
+    //             {sizeof(uint8_t)},
+    //             data,
+    //             free_when_done
+    //     );
+    // }
+    // return from_buffers(builder.form(), builder.length(), container);
+
+  return py::none();
 }
 
 
