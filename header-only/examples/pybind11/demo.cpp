@@ -50,7 +50,11 @@ py::object snapshot_builder(const T &builder) {
     std::map<std::string, void*> cpp_container;
     for (auto name_nbytes : names_nbytes) {
       int nbytes = name_nbytes.second;
-      std::cout << "nbytes = " << nbytes << std::endl;
+
+      py::object array = np.attr("empty")(nbytes, dtype_u1);
+
+      py::module::import("builtins").attr("print")(array);
+
     }
 
 
