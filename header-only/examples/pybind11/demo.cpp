@@ -49,22 +49,17 @@ py::object snapshot_builder(const T &builder) {
     py::dict py_container;
     std::map<std::string, void*> cpp_container;
     for (auto name_nbytes : names_nbytes) {
-      int nbytes = name_nbytes.second;
-
-      py::object array = np.attr("ones")(nbytes, dtype_u1);
+      py::object array = np.attr("empty")(name_nbytes.second, dtype_u1);
 
       size_t pointer = py::cast<size_t>(array.attr("ctypes").attr("data"));
       void* raw_data = (void*)pointer;
 
-      int c0 = ((unsigned char*)raw_data)[0];
-      int c1 = ((unsigned char*)raw_data)[1];
-      int c2 = ((unsigned char*)raw_data)[2];
-
-      std::cout << "pointer = " << pointer << " raw data = " << c0 << " " << c1 << " " << c2 << std::endl;
-
+      py::str py_name(name_nbytes.first);
+      py_container[py_name] = array;
+      cpp_container[name_nbytes.first] = raw_data;
     }
 
-
+    py::module::import("builtins").attr("print")(py_container);
 
 
     // // Write non-contiguous contents to memory
