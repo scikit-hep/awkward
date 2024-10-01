@@ -50,13 +50,13 @@ or
 
     # keep the same device
     ak_device = ak.backend(array)
-    if ak_device not in ['cuda', 'cpu']:
+    if ak_device not in ["cuda", "cpu"]:
         raise ValueError("""Only 'cpu' and 'cuda' backend conversions are allowed""")
 
-    if ak_device == 'cpu':
-        device = 'CPU:0'
+    if ak_device == "cpu":
+        device = "CPU:0"
     else:
-        device = 'GPU:0'
+        device = "GPU:0"
 
     with tf.device(device):
         if isinstance(array, ak.contents.numpyarray.NumpyArray):
@@ -66,21 +66,26 @@ or
                 values = _cupy_to_tensor(values)
 
             return tf.RaggedTensor.from_row_splits(
-            values=values, row_splits=[0, array.__len__()]
+                values=values, row_splits=[0, array.__len__()]
             )
 
         else:
             flat_values, nested_row_splits = _recursive_call(array, ())
 
-            ragged_tensor = tf.RaggedTensor.from_nested_row_splits(flat_values, nested_row_splits)
-            print(ragged_tensor[0][0].device)
+            ragged_tensor = tf.RaggedTensor.from_nested_row_splits(
+                flat_values, nested_row_splits
+            )
+            # print(ragged_tensor[0][0].device)
             return ragged_tensor
+
 
 def _cupy_to_tensor(cupy):
     # converts cupy directly to tensor,
     # since `tf.RaggedTensor.from_nested_row_splits` can not work with Cupy arrays
     import tensorflow as tf
+
     return tf.experimental.dlpack.from_dlpack(cupy.toDlpack())
+
 
 def _recursive_call(layout, offsets_arr):
     try:
