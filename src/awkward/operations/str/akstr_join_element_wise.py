@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+from functools import reduce
+
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._backends.typetracer import TypeTracerBackend
+from awkward._behavior import behavior_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import NamedAxesWithDims, _NamedAxisKey, _unify_named_axis
 
 __all__ = ("join_element_wise",)
 
@@ -66,6 +71,22 @@ def _impl(arrays, highlevel, behavior, attrs):
         ):
             return (_apply_through_arrow(pc.binary_join_element_wise, *layouts),)
 
-    (out,) = ak._broadcasting.broadcast_and_apply(layouts, action)
+    depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(arrays)
+    (out,) = ak._broadcasting.broadcast_and_apply(
+        layouts,
+        action,
+        depth_context=depth_context,
+        lateral_context=lateral_context,
+    )
 
-    return ctx.wrap(out, highlevel=highlevel)
+    out_named_axis = reduce(
+        _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+    )
+    wrapped = ctx.wrap(out, highlevel=highlevel)
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=behavior_of_obj(wrapped),
+        attrs=attrs_of_obj(wrapped),
+    )

@@ -10,10 +10,12 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._namedaxis import (
+    NamedAxesWithDims,
     _add_named_axis,
     _get_named_axis,
     _is_valid_named_axis,
     _named_axis_to_positional_axis,
+    _NamedAxisKey,
     _unify_named_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -424,17 +426,40 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
             else:
                 return None
 
+        depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+            list(arrays.values()) if isinstance(arrays, Mapping) else list(arrays)
+        )
         out = ak._broadcasting.broadcast_and_apply(
-            new_layouts, apply_build_record, right_broadcast=False
+            new_layouts,
+            apply_build_record,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            right_broadcast=False,
         )
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
 
+        # Unify named axes propagated through the broadcast
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+        )
+        wrapped_out = ctx.wrap(result, highlevel=highlevel)
+        # propagate named axis to output
+        result = ak.operations.ak_with_named_axis._impl(
+            wrapped_out,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+
         # Remove surplus dimensions, iterating from smallest to greatest
         for axis_to_flatten in axes_to_flatten:
             result = ak.operations.flatten(
-                result, axis=axis_to_flatten, highlevel=False, behavior=behavior
+                result, axis=axis_to_flatten, highlevel=highlevel, behavior=behavior
             )
+
+        return result
 
     wrapped_out = ctx.wrap(result, highlevel=highlevel)
 

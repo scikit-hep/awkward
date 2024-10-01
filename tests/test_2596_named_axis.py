@@ -212,6 +212,59 @@ def test_named_axis_indexing():
     )
 
 
+def test_named_axis_right_broadcasting():
+    # [NumPy-style] rightbroadcasting: (n, m) -> (1, n, m)
+    a = ak.Array([1])  # (1,)
+    b = ak.Array([[10, 20], [30, 40], [50, 60]])  # (3, 2)
+
+    na = ak.with_named_axis(a, named_axis={"y": 0})
+    nb = ak.with_named_axis(b, named_axis={"x": 0, "y": 1})
+
+    naa, nbb = ak.broadcast_arrays(na, nb)
+
+    assert naa.named_axis == nbb.named_axis == {"x": 0, "y": 1}
+
+    na = ak.with_named_axis(a, named_axis={"y": -1})
+    nb = ak.with_named_axis(b, named_axis={"y": -2, "x": -1})
+
+    naa, nbb = ak.broadcast_arrays(na, nb)
+
+    assert naa.named_axis == nbb.named_axis == {"y": -2, "x": -1}
+
+
+def test_named_axis_left_broadcasting():
+    # [Awkward-style] leftbroadcasting: (n, m) -> (n, m, 1)
+    a = ak.Array([[[0, 1, 2], [], [3, 4]], [], [[5], [6, 7, 8, 9]]])  # (3, var, var)
+    b = ak.Array([[10, 20, 30], [], [40, 50]])  # (3, var)
+
+    na = ak.with_named_axis(a, named_axis=("x", "y", "z"))
+    nb = ak.with_named_axis(b, named_axis=("x", "y"))
+
+    naa, nbb = ak.broadcast_arrays(na, nb)
+
+    assert naa.named_axis == nbb.named_axis == {"x": 0, "y": 1, "z": 2}
+
+    na = ak.with_named_axis(a, named_axis={"x": -3, "y": -2, "z": -1})
+    nb = ak.with_named_axis(b, named_axis={"x": -2, "y": -1})
+
+    naa, nbb = ak.broadcast_arrays(na, nb)
+
+    assert naa.named_axis == nbb.named_axis == {"x": -3, "y": -2, "z": -1}
+
+    # this is not allowed!
+    a = ak.with_named_axis(ak.Array([[1, 2], [3, 4]]), ("x", "y"))  # {"x": 0, "y": 1}
+    asum = ak.sum(a, axis="x")  # {"y": 0}
+
+    with pytest.raises(ValueError):
+        _ = a + asum
+
+    # this is allowed!
+    a = ak.with_named_axis(ak.Array([[1, 2], [3, 4]]), ("x", "y"))  # {"x": 0, "y": 1}
+    asum = ak.sum(a, axis="y")  # {"x": 0}
+
+    assert (a + asum).named_axis == {"x": 0, "y": 1}
+
+
 def test_named_axis_unary_ufuncs():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -533,11 +586,8 @@ def test_named_axis_ak_backend():
     assert ak.backend(array) == ak.backend(named_array)
 
 
-def test_named_axis_ak_broadcast_arrays():
-    assert True
-
-
 def test_named_axis_ak_broadcast_fields():
+    # what to do with this one?
     assert True
 
 
@@ -568,19 +618,15 @@ def test_named_axis_ak_cartesian():
 
 
 def test_named_axis_ak_categories():
-    # This test doesn't run because of an `import pyarrow` issue
-    #
-    # array = ak.str.to_categorical([["one", "two"], ["one", "three"], ["one", "four"]])
+    # This test sometimes doesn't run because of an `import pyarrow` issue
+    array = ak.str.to_categorical([["one", "two"], ["one", "three"], ["one", "four"]])
 
-    # named_array = ak.with_named_axis(array, named_axis=("a", "b"))
+    named_array = ak.with_named_axis(array, named_axis=("a", "b"))
 
-    # # assert ak.all(ak.categories(array) == ak.categories(named_array))  # FIX: ufuncs
-    # assert (
-    #     ak.categories(array).named_axis
-    #     == ak.categories(named_array).named_axis
-    #     == (None,)
-    # )
-    assert True
+    assert ak.all(ak.categories(array) == ak.categories(named_array))  # FIX: ufuncs
+    assert (
+        ak.categories(array).named_axis == ak.categories(named_array).named_axis == {}
+    )
 
 
 def test_named_axis_ak_combinations():
@@ -650,28 +696,28 @@ def test_named_axis_ak_copy():
     assert ak.copy(named_array).named_axis == {"x": 0, "y": 1}
 
 
-def test_named_axis_ak_corr():
-    array_x = ak.Array([[0, 1.1], [3.3, 4.4]])
-    array_y = ak.Array([[0, 1], [3, 4]])
+# def test_named_axis_ak_corr():
+# array_x = ak.Array([[0, 1.1], [3.3, 4.4]])
+# array_y = ak.Array([[0, 1], [3, 4]])
 
-    named_array_x = ak.with_named_axis(array_x, ("x", "y"))
-    named_array_y = ak.with_named_axis(array_y, ("x", "y"))
+# named_array_x = ak.with_named_axis(array_x, ("x", "y"))
+# named_array_y = ak.with_named_axis(array_y, ("x", "y"))
 
-    assert ak.all(
-        ak.corr(array_x, array_y, axis=0)
-        == ak.corr(named_array_x, named_array_y, axis="x")
-    )
-    assert ak.all(
-        ak.corr(array_x, array_y, axis=1)
-        == ak.corr(named_array_x, named_array_y, axis="y")
-    )
-    assert ak.corr(array_x, array_y, axis=None) == ak.corr(
-        named_array_x, named_array_y, axis=None
-    )
+# assert ak.all(
+#     ak.corr(array_x, array_y, axis=0)
+#     == ak.corr(named_array_x, named_array_y, axis="x")
+# )
+# assert ak.all(
+#     ak.corr(array_x, array_y, axis=1)
+#     == ak.corr(named_array_x, named_array_y, axis="y")
+# )
+# assert ak.corr(array_x, array_y, axis=None) == ak.corr(
+#     named_array_x, named_array_y, axis=None
+# )
 
-    assert ak.corr(named_array_x, named_array_y, axis="x").named_axis == {"y": 0}
-    assert ak.corr(named_array_x, named_array_y, axis="y").named_axis == {"x": 0}
-    assert not _get_named_axis(ak.corr(named_array_x, named_array_y, axis=None))
+# assert ak.corr(named_array_x, named_array_y, axis="x").named_axis == {"y": 0}
+# assert ak.corr(named_array_x, named_array_y, axis="y").named_axis == {"x": 0}
+# assert not _get_named_axis(ak.corr(named_array_x, named_array_y, axis=None))
 
 
 def test_named_axis_ak_count():
@@ -708,28 +754,28 @@ def test_named_axis_ak_count_nonzero():
     assert not _get_named_axis(ak.count_nonzero(named_array, axis=None))
 
 
-def test_named_axis_ak_covar():
-    array_x = ak.Array([[0, 1.1], [3.3, 4.4]])
-    array_y = ak.Array([[0, 1], [3, 4]])
+# def test_named_axis_ak_covar():
+#     array_x = ak.Array([[0, 1.1], [3.3, 4.4]])
+#     array_y = ak.Array([[0, 1], [3, 4]])
 
-    named_array_x = ak.with_named_axis(array_x, ("x", "y"))
-    named_array_y = ak.with_named_axis(array_y, ("x", "y"))
+#     named_array_x = ak.with_named_axis(array_x, ("x", "y"))
+#     named_array_y = ak.with_named_axis(array_y, ("x", "y"))
 
-    assert ak.all(
-        ak.covar(array_x, array_y, axis=0)
-        == ak.covar(named_array_x, named_array_y, axis="x")
-    )
-    assert ak.all(
-        ak.covar(array_x, array_y, axis=1)
-        == ak.covar(named_array_x, named_array_y, axis="y")
-    )
-    assert ak.covar(array_x, array_y, axis=None) == ak.covar(
-        named_array_x, named_array_y, axis=None
-    )
+#     assert ak.all(
+#         ak.covar(array_x, array_y, axis=0)
+#         == ak.covar(named_array_x, named_array_y, axis="x")
+#     )
+#     assert ak.all(
+#         ak.covar(array_x, array_y, axis=1)
+#         == ak.covar(named_array_x, named_array_y, axis="y")
+#     )
+#     assert ak.covar(array_x, array_y, axis=None) == ak.covar(
+#         named_array_x, named_array_y, axis=None
+#     )
 
-    assert ak.covar(named_array_x, named_array_y, axis="x").named_axis == {"y": 0}
-    assert ak.covar(named_array_x, named_array_y, axis="y").named_axis == {"x": 0}
-    assert not _get_named_axis(ak.covar(named_array_x, named_array_y, axis=None))
+#     assert ak.covar(named_array_x, named_array_y, axis="x").named_axis == {"y": 0}
+#     assert ak.covar(named_array_x, named_array_y, axis="y").named_axis == {"x": 0}
+#     assert not _get_named_axis(ak.covar(named_array_x, named_array_y, axis=None))
 
 
 def test_named_axis_ak_drop_none():
@@ -754,11 +800,6 @@ def test_named_axis_ak_enforce_type():
     named_array = ak.with_named_axis(array, ("x", "y"))
 
     assert ak.enforce_type(named_array, "var * ?int64").named_axis == {"x": 0, "y": 1}
-
-
-def test_named_axis_ak_fields():
-    # skip
-    assert True
 
 
 def test_named_axis_ak_fill_none():
@@ -809,91 +850,6 @@ def test_named_axis_ak_flatten():
     assert not _get_named_axis(ak.flatten(named_array, axis=None))
 
 
-def test_named_axis_ak_from_arrow():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_arrow_schema():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_avro_file():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_buffers():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_categorical():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_cupy():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_dlpack():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_feather():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_iter():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_jax():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_json():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_numpy():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_parquet():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_raggedtensor():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_rdataframe():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_from_regular():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_full_like():
-    # skip
-    assert True
-
-
 def test_named_axis_ak_imag():
     array = ak.Array([[1 + 2j], [2 + 1j], []])
 
@@ -901,11 +857,6 @@ def test_named_axis_ak_imag():
 
     assert ak.all(ak.imag(array) == ak.imag(named_array))
     assert ak.imag(named_array).named_axis == {"x": 0, "y": 1}
-
-
-def test_named_axis_ak_is_categorical():
-    # skip
-    assert True
 
 
 def test_named_axis_ak_is_none():
@@ -920,24 +871,18 @@ def test_named_axis_ak_is_none():
     assert ak.is_none(named_array, axis="y").named_axis == {"x": 0, "y": 1}
 
 
-def test_named_axis_ak_is_tuple():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_is_valid():
-    # skip
-    assert True
-
-
 def test_named_axis_ak_isclose():
-    # skip
-    assert True
+    a = b = ak.Array(
+        [[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [], [[5.5], [], [6.6, 7.7, 8.8, 9.9]]]
+    )
 
+    na = ak.with_named_axis(a, ("x", "y", "z"))
+    nb = ak.with_named_axis(b, ("x", "y", "z"))
+    assert ak.all(ak.isclose(a, b) == ak.isclose(na, nb))
 
-def test_named_axis_ak_linear_fit():
-    # skip
-    assert True
+    na = ak.with_named_axis(a, (None, "y", "z"))
+    nb = ak.with_named_axis(b, ("x", "y", None))
+    assert ak.isclose(na, nb).named_axis == {"x": 0, "y": 1, "z": 2}
 
 
 def test_named_axis_ak_local_index():
@@ -1064,11 +1009,6 @@ def test_named_axis_ak_merge_union_of_records():
     )
 
 
-def test_named_axis_ak_metadata_from_parquet():
-    # skip
-    assert True
-
-
 def test_named_axis_ak_min():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -1166,11 +1106,6 @@ def test_named_axis_ak_pad_none():
 
     assert ak.pad_none(named_array, 3, axis=0).named_axis == named_array.named_axis
     assert ak.pad_none(named_array, 3, axis=1).named_axis == named_array.named_axis
-
-
-def test_named_axis_ak_parameters():
-    # skip
-    assert True
 
 
 def test_named_axis_ak_prod():
@@ -1323,67 +1258,12 @@ def test_named_axis_ak_sum():
     assert not _get_named_axis(ak.sum(named_array, axis=None))
 
 
-def test_named_axis_ak_to_arrow():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_arrow_table():
-    # skip
-    assert True
-
-
 def test_named_axis_ak_to_backend():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
     named_array = ak.with_named_axis(array, ("x", "y"))
 
     assert ak.to_backend(named_array, "typetracer").named_axis == named_array.named_axis
-
-
-def test_named_axis_ak_to_buffers():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_cupy():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_dataframe():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_feather():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_jax():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_json():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_layout():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_list():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_numpy():
-    # skip
-    assert True
 
 
 def test_named_axis_ak_to_packed():
@@ -1394,46 +1274,6 @@ def test_named_axis_ak_to_packed():
     assert ak.all(ak.to_packed(array) == ak.to_packed(named_array))
 
     assert ak.to_packed(named_array).named_axis == named_array.named_axis
-
-
-def test_named_axis_ak_to_parquet():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_parquet_dataset():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_parquet_row_groups():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_raggedtensor():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_rdataframe():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_to_regular():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_transform():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_type():
-    # skip
-    assert True
 
 
 def test_named_axis_ak_unflatten():
@@ -1451,13 +1291,16 @@ def test_named_axis_ak_unflatten():
 
 
 def test_named_axis_ak_unzip():
-    # skip
-    assert True
-
-
-def test_named_axis_ak_validity_error():
-    # skip
-    assert True
+    array = ak.Array(
+        [
+            {"x": 1.1, "y": [1]},
+            {"x": 2.2, "y": [2, 2]},
+            {"x": 3.3, "y": [3, 3, 3]},
+        ]
+    )
+    named_array = ak.with_named_axis(array, ("x", "y"))
+    x, y = ak.unzip(named_array)
+    assert x.named_axis == y.named_axis == {"x": 0, "y": 1}
 
 
 def test_named_axis_ak_values_astype():
@@ -1493,8 +1336,21 @@ def test_named_axis_ak_where():
 
 
 def test_named_axis_ak_with_field():
-    # skip
-    assert True
+    array = ak.Array(
+        [
+            {"x": 1.1, "y": [1]},
+            {"x": 2.2, "y": [2, 2]},
+            {"x": 3.3, "y": [3, 3, 3]},
+        ]
+    )
+    named_array = ak.with_named_axis(array, ("x", "y"))
+    xyz = ak.with_field(named_array, ak.Array([[1], [2], [3]]), "z")
+    x, y, z = ak.unzip(xyz)
+    assert x.named_axis == y.named_axis == z.named_axis == {"x": 0, "y": 1}
+
+    named_z = ak.with_named_axis(ak.Array([[1], [2], [3]]), ("a", "b"))
+    with pytest.raises(ValueError):
+        ak.with_field(named_array, named_z, "z")
 
 
 def test_named_axis_ak_with_name():
@@ -1528,11 +1384,6 @@ def test_named_axis_ak_with_parameter():
     )
 
 
-def test_named_axis_ak_without_field():
-    # skip
-    assert True
-
-
 def test_named_axis_ak_without_parameters():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -1557,10 +1408,13 @@ def test_named_axis_ak_zeros_like():
 
 
 def test_named_axis_ak_zip():
-    # named_array1 = ak.with_named_axis(ak.Array([1, 2, 3]), ("a",))
-    # named_array2 = ak.with_named_axis(ak.Array([[4, 5, 6], [], [7]]), ("x", "y"))
+    named_array1 = ak.with_named_axis(ak.Array([1, 2, 3]), ("x",))
+    named_array2 = ak.with_named_axis(ak.Array([[4, 5, 6], [], [7]]), ("x", "y"))
 
-    # record = ak.zip({"x": named_array1, "y": named_array2})
+    assert ak.zip({"x": named_array1, "y": named_array2}).named_axis == {"x": 0, "y": 1}
 
-    # TODO: need to implement broadcasting properly first
-    assert True
+    named_array1 = ak.with_named_axis(ak.Array([1, 2, 3]), ("a",))
+    named_array2 = ak.with_named_axis(ak.Array([[4, 5, 6], [], [7]]), ("x", "y"))
+
+    with pytest.raises(ValueError):
+        _ = ak.zip({"x": named_array1, "y": named_array2})

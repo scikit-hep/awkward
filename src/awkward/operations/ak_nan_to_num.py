@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from functools import reduce
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import NamedAxesWithDims, _NamedAxisKey, _unify_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Mapping
 
@@ -91,15 +94,19 @@ def _impl(
 
     broadcasting_ids = {}
     broadcasting = [layout]
+    arrays_to_broadcast = [array]
     if isinstance(nan_layout, ak.contents.Content):
         broadcasting_ids[id(nan)] = len(broadcasting)
         broadcasting.append(nan_layout)
+        arrays_to_broadcast.append(nan)
     if isinstance(posinf_layout, ak.contents.Content):
         broadcasting_ids[id(posinf)] = len(broadcasting)
         broadcasting.append(posinf_layout)
+        arrays_to_broadcast.append(posinf)
     if isinstance(neginf_layout, ak.contents.Content):
         broadcasting_ids[id(neginf)] = len(broadcasting)
         broadcasting.append(neginf_layout)
+        arrays_to_broadcast.append(neginf)
 
     if len(broadcasting) == 1:
 
@@ -148,9 +155,29 @@ def _impl(
             else:
                 return None
 
-        out = ak._broadcasting.broadcast_and_apply(broadcasting, action)
+        depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+            arrays_to_broadcast
+        )
+        out = ak._broadcasting.broadcast_and_apply(
+            broadcasting,
+            action,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+        )
         assert isinstance(out, tuple) and len(out) == 1
-        out = out[0]
+
+        # Unify named axes propagated through the broadcast
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+        )
+        wrapped_out = ctx.wrap(out[0], highlevel=highlevel)
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped_out,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
 
     return ctx.wrap(out, highlevel=highlevel)
 

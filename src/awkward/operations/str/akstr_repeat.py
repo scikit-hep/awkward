@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import numbers
+from functools import reduce
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._backends.typetracer import TypeTracerBackend
+from awkward._behavior import behavior_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import NamedAxesWithDims, _NamedAxisKey, _unify_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("repeat",)
@@ -79,8 +83,26 @@ def _impl(array, num_repeats, highlevel, behavior, attrs):
 
                 return (_apply_through_arrow(pc.binary_repeat, *inputs),)
 
+        depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+            [array, num_repeats]
+        )
         (out,) = ak._broadcasting.broadcast_and_apply(
-            (layout, num_repeats_layout), action
+            (layout, num_repeats_layout),
+            action,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+        )
+
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+        )
+        wrapped = ctx.wrap(out, highlevel=highlevel)
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=behavior_of_obj(wrapped),
+            attrs=attrs_of_obj(wrapped),
         )
 
     else:
@@ -98,4 +120,4 @@ def _impl(array, num_repeats, highlevel, behavior, attrs):
 
         out = ak._do.recursively_apply(layout, action)
 
-    return ctx.wrap(out, highlevel=highlevel)
+        return ctx.wrap(out, highlevel=highlevel)

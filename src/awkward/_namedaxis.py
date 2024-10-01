@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import awkward._typing as tp
 from awkward._regularize import is_integer
 
@@ -108,6 +110,8 @@ def _is_valid_named_axis(axis: AxisName) -> bool:
         isinstance(axis, AxisName)
         # ... but not an integer, otherwise we would confuse it with positional axis
         and not is_integer(axis)
+        # we also prohibit None, which is reserved for wildcard
+        and axis is not None
         # Let's only allow strings for now, in the future we can open up to more types
         # by removing the isinstance(axis, str) check.
         and isinstance(axis, str)
@@ -400,90 +404,83 @@ def _remove_named_axis(
     # remove the specified axis
     out = {ax: pos for ax, pos in named_axis.items() if pos != axis}
 
-    return _adjust_pos_axis(out, axis, total)
-
-
-def _remove_named_axis_by_name(
-    named_axis: AxisMapping,
-    axis: AxisName,
-    total: int | None = None,
-) -> AxisMapping:
-    """
-    Determines the new named axis after removing the specified axis by its name. This is useful, for example,
-    when applying an operation that removes one axis.
-
-    Args:
-        named_axis (AxisMapping): The current named axis.
-        axis (AxisName | None, optional): The name of the axis to remove. If None, no axes are removed. Default is None.
-        total (int | None, optional): The total number of axes. If None, it is calculated as the length of the named axis. Default is None.
-
-    Returns:
-        AxisMapping: The new named axis after removing the specified axis.
-
-    Examples:
-        >>> _remove_named_axis_by_name({"x": 0, "y": 1}, "x")
-        {"y": 0}
-        >>> _remove_named_axis_by_name({"x": 0, "y": 1, "z": 2}, "y")
-        {"x": 0, "z": 1}
-        >>> _remove_named_axis_by_name({"x": 0, "y": 1, "z": -1}, "z")
-        {"x": 0, "y": 1}
-    """
-    if axis is None:
-        return {}
-
-    if total is None:
-        total = len(named_axis)
-
-    # remove the specified axis
-    out = dict(named_axis)
-    pos = out.pop(axis)
-
-    return _adjust_pos_axis(out, pos, total)
+    return _adjust_pos_axis(out, axis, total, direction=-1)
 
 
 def _adjust_pos_axis(
     named_axis: AxisMapping,
     axis: int,
     total: int,
+    direction: int,
 ) -> AxisMapping:
     """
-    Adjusts the positions of the axes in the named axis mapping after an axis has been removed.
-
-    The adjustment is done as follows:
-    - If the position of an axis is greater than the removed axis, it is decremented by 1.
-    - If the position of an axis is less than the removed axis and greater or equal to -1, it is kept as is.
-    - If the position of an axis is negative and smaller than the amount of total left axes, it is incremented by 1.
+    Adjusts the positions of the axes in the named axis mapping after an axis has been removed or added.
 
     Args:
         named_axis (AxisMapping): The current named axis mapping.
-        axis (int): The position of the removed axis.
+        axis (int): The position of the removed/added axis.
         total (int): The total number of axes.
+        direction (int): The direction of the adjustment. -1 means axis is removed; +1 means axis is added. Default is +1.
 
     Returns:
         AxisMapping: The adjusted named axis mapping.
 
     Examples:
-        >>> _adjust_pos_axis({"x": 0, "z": 2}, 1, 3)
+        # axis=1 removed
+        >>> _adjust_pos_axis({"x": 0, "z": 2}, 1, 3, -1)
         {"x": 0, "z": 1}
-        >>> _adjust_pos_axis({"x": 0, "z": -1}, 1, 3)
+        # axis=1 added
+        >>> _adjust_pos_axis({"x": 0, "z": 2}, 1, 3, +1)
+        {"x": 0, "z": 3}
+        # axis=1 removed
+        >>> _adjust_pos_axis({"x": 0, "z": -1}, 1, 3, -1)
         {"x": 0, "z": -1}
-        >>> _adjust_pos_axis({"x": 0, "z": -3}, 1, 3)
-        {"x": 0, "z": -2}
+        # axis=1 added
+        >>> _adjust_pos_axis({"x": 0, "z": -1}, 1, 3, +1)
+        {"x": 0, "z": -1}
     """
+    assert direction in (-1, +1), f"Invalid direction: {direction}"
+
+    def _adjust(pos: int, axis: int, direction: int) -> int:
+        # positive axis
+        if axis >= 0:
+            # positive axis and position greater than or equal to the removed/added (positive) axis
+            # -> change position by direction
+            if pos >= axis:
+                return pos + direction
+            # positive axis and position smaller than the removed/added (positive) axis, but greater than 0
+            # -> keep position
+            elif pos >= 0:
+                return pos
+            # positive axis and negative position
+            # -> change position by direction
+            else:
+                return _adjust(pos, axis - total, direction)
+        # negative axis
+        else:
+            # negative axis and position smaller than the removed/added (negative) axis
+            # -> change position by inverse direction
+            if pos <= axis:
+                return pos - direction
+            # negative axis and positive position
+            # -> change position by inverse direction
+            elif pos > axis + total:
+                return pos + direction
+            # negative axis and position greater than the removed/added (negative) axis, but smaller than 0
+            # -> keep position
+            else:
+                return pos
+
     out = dict(named_axis)
     for k, v in out.items():
-        if v > axis:
-            out[k] = v - 1
-        elif v < -1 and len(out) < total:
-            out[k] = v + 1
-        else:
-            out[k] = v
+        out[k] = _adjust(v, axis, direction)
     return out
 
 
 def _add_named_axis(
     named_axis: AxisMapping,
     axis: int,
+    total: int | None = None,
 ) -> AxisMapping:
     """
     Adds a new axis to the named_axis at the specified position.
@@ -501,11 +498,11 @@ def _add_named_axis(
         >>> _add_named_axis({"x": 0, "y": 1, "z": 2}, 1)
         {"x": 0, "y": 2, "z": 3}
     """
+    if total is None:
+        total = len(named_axis)
+
     out = dict(named_axis)
-    for k, v in out.items():
-        if v >= axis and v >= 0:
-            out[k] = v + 1
-    return out
+    return _adjust_pos_axis(out, axis, total, direction=+1)
 
 
 def _unify_named_axis(
@@ -576,6 +573,66 @@ def _unify_named_axis(
         elif axis_name2 is not None:  # axis_name1 is None
             unified_named_axis[axis_name2] = position
     return unified_named_axis
+
+
+@dataclass
+class NamedAxesWithDims:
+    """
+    A dataclass that stores the named axis and their corresponding dimensions.
+
+    Attributes:
+        named_axis (AxisMapping): The named axis mapping.
+        ndims (Tuple[int]): The number of dimensions of the named axis.
+    """
+
+    named_axis: list[AxisMapping]
+    ndims: list[int]
+
+    def __post_init__(self):
+        if len(self.named_axis) != len(self.ndims):
+            raise ValueError(
+                "The number of dimensions must match the number of named axis mappings."
+            )
+
+    def __iter__(self) -> tp.Iterator[tuple[AxisMapping, int]]:
+        yield from zip(self.named_axis, self.ndims)
+
+    @classmethod
+    def prepare_contexts(
+        cls, arrays: tp.Sequence, unwrap_kwargs: dict | None = None
+    ) -> tuple[dict, dict]:
+        from awkward._layout import HighLevelContext
+        from awkward._typetracer import MaybeNone
+
+        # unwrap options
+        arrays = [x.content if isinstance(x, MaybeNone) else x for x in arrays]
+
+        _unwrap_kwargs = {"allow_unknown": True}
+        if unwrap_kwargs is not None:
+            _unwrap_kwargs.update(unwrap_kwargs)
+
+        _named_axes = []
+        _ndims = []
+        for array in arrays:
+            with HighLevelContext() as ctx:
+                layout = ctx.unwrap(array, **_unwrap_kwargs)
+            _named_axes.append(_get_named_axis(array))
+            _ndims.append(layout.minmax_depth[1])
+
+        depth_context = {_NamedAxisKey: cls(_named_axes, _ndims)}
+        lateral_context = {_NamedAxisKey: cls(_named_axes, _ndims)}
+        return depth_context, lateral_context
+
+    def __setitem__(self, index: int, named_axis_with_ndim: tuple[AxisMapping, int]):
+        named_axis, ndim = named_axis_with_ndim
+        self.named_axis[index] = named_axis
+        self.ndims[index] = ndim
+
+    def __getitem__(self, index: int) -> tuple[AxisMapping, int]:
+        return self.named_axis[index], self.ndims[index]
+
+    def __len__(self) -> int:
+        return len(self.named_axis)
 
 
 class Slicer:

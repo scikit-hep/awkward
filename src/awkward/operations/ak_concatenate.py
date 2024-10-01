@@ -11,9 +11,11 @@ from awkward._dispatch import high_level_function
 from awkward._do import mergeable
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._namedaxis import (
+    NamedAxesWithDims,
     _get_named_axis,
     _is_valid_named_axis,
     _named_axis_to_positional_axis,
+    _NamedAxisKey,
     _unify_named_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -359,9 +361,21 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
             else:
                 return None
 
+        depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+            list(arrays)
+        )
         out = ak._broadcasting.broadcast_and_apply(
-            content_or_others, action, allow_records=True, right_broadcast=False
+            content_or_others,
+            action,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            allow_records=True,
+            right_broadcast=False,
         )[0]
+        # Unify named axes
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+        )
 
     wrapped_out = ctx.wrap(
         out,

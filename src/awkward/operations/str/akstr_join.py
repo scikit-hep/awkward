@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+from functools import reduce
+
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._backends.typetracer import TypeTracerBackend
+from awkward._behavior import behavior_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import NamedAxesWithDims, _NamedAxisKey, _unify_named_axis
 
 __all__ = ("join",)
 
@@ -95,6 +100,7 @@ def _impl(array, separator, highlevel, behavior, attrs):
             )
 
         out = ak._do.recursively_apply(layout, apply_unary)
+        return ctx.wrap(out, highlevel=highlevel)
     else:
 
         def apply_binary(layouts, **kwargs):
@@ -123,8 +129,24 @@ def _impl(array, separator, highlevel, behavior, attrs):
                 ),
             )
 
+        depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+            [array, separator]
+        )
         (out,) = ak._broadcasting.broadcast_and_apply(
-            (layout, maybe_separator_layout), apply_binary
+            (layout, maybe_separator_layout),
+            apply_binary,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
         )
 
-    return ctx.wrap(out, highlevel=highlevel)
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+        )
+        wrapped = ctx.wrap(out, highlevel=highlevel)
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=behavior_of_obj(wrapped),
+            attrs=attrs_of_obj(wrapped),
+        )

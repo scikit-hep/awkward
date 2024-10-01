@@ -23,7 +23,6 @@ from awkward._namedaxis import (
     _add_named_axis,
     _keep_named_axis,
     _remove_named_axis,
-    _remove_named_axis_by_name,
 )
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of_obj
@@ -603,18 +602,20 @@ class Content(Meta):
             # now propagate named axis
             _named_axis = _keep_named_axis(named_axis.mapping, None)
             iter_named_axis = iter(dict(_named_axis).items())
+            _adjust_dims = 0
             for i, nw in enumerate(_nextwhere):
-                name = None
-                for _name, pos in iter_named_axis:
+                i += _adjust_dims
+                for _, pos in iter_named_axis:
                     if pos == i:
-                        name = _name
                         break
                 if is_integer(nw) or (is_array_like(nw) and nw.ndim == 0):
-                    _named_axis = _remove_named_axis_by_name(
-                        _named_axis, name, self.purelist_depth
+                    _named_axis = _remove_named_axis(
+                        _named_axis, i, self.purelist_depth
                     )
+                    _adjust_dims -= 1
                 elif nw is None:
-                    _named_axis = _add_named_axis(_named_axis, i)
+                    _named_axis = _add_named_axis(_named_axis, i, self.purelist_depth)
+                    _adjust_dims += 1
 
             # set propagated named axis
             named_axis.mapping = _named_axis

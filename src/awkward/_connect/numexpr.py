@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import sys
 import warnings
+from functools import reduce
 
 from packaging.version import parse as parse_version
 
 import awkward as ak
-from awkward._behavior import behavior_of
+from awkward._attrs import attrs_of_obj
+from awkward._behavior import behavior_of, behavior_of_obj
 from awkward._layout import wrap_layout
+from awkward._namedaxis import NamedAxesWithDims, _NamedAxisKey, _unify_named_axis
 
 _has_checked_version = False
 
@@ -110,9 +113,26 @@ def evaluate(
             return None
 
     behavior = behavior_of(*arrays)
-    out = ak._broadcasting.broadcast_and_apply(arrays, action, allow_records=False)
+    depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(arguments)
+    out = ak._broadcasting.broadcast_and_apply(
+        arrays,
+        action,
+        depth_context=depth_context,
+        lateral_context=lateral_context,
+        allow_records=False,
+    )
     assert isinstance(out, tuple) and len(out) == 1
-    return wrap_layout(out[0], behavior)
+    wrapped = wrap_layout(out[0], behavior)
+    out_named_axis = reduce(
+        _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+    )
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped,
+        named_axis=out_named_axis,
+        highlevel=True,
+        behavior=behavior_of_obj(wrapped),
+        attrs=attrs_of_obj(wrapped),
+    )
 
 
 evaluate.evaluate = evaluate
@@ -148,6 +168,24 @@ def re_evaluate(local_dict=None):
             return None
 
     behavior = behavior_of(*arrays)
-    out = ak._broadcasting.broadcast_and_apply(arrays, action, allow_records=False)
+
+    depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(arguments)
+    out = ak._broadcasting.broadcast_and_apply(
+        arrays,
+        action,
+        depth_context=depth_context,
+        lateral_context=lateral_context,
+        allow_records=False,
+    )
     assert isinstance(out, tuple) and len(out) == 1
-    return wrap_layout(out[0], behavior)
+    wrapped = wrap_layout(out[0], behavior)
+    out_named_axis = reduce(
+        _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+    )
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped,
+        named_axis=out_named_axis,
+        highlevel=True,
+        behavior=behavior_of_obj(wrapped),
+        attrs=attrs_of_obj(wrapped),
+    )

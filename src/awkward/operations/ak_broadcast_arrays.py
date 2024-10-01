@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import reduce
+
 import awkward as ak
 from awkward._attrs import attrs_of_obj
 from awkward._backends.dispatch import backend_of
@@ -10,6 +12,11 @@ from awkward._behavior import behavior_of_obj
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
+from awkward._namedaxis import (
+    NamedAxesWithDims,
+    _NamedAxisKey,
+    _unify_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("broadcast_arrays",)
@@ -243,24 +250,43 @@ def _impl(
         else:
             return None
 
+    depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(arrays)
     out = ak._broadcasting.broadcast_and_apply(
         inputs,
         action,
+        depth_context=depth_context,
+        lateral_context=lateral_context,
         left_broadcast=left_broadcast,
         right_broadcast=right_broadcast,
         broadcast_parameters_rule=broadcast_parameters_rule,
         numpy_to_regular=True,
     )
     assert isinstance(out, tuple)
-    return [
-        wrap_layout(
+
+    # unify named axes
+    out_named_axis = reduce(
+        _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+    )
+    wrapped_out = []
+    for layout_out, array_in in zip(out, arrays):
+        _behavior = behavior_of_obj(array_in, behavior=behavior)
+        _attrs = attrs_of_obj(array_in, attrs=attrs)
+        wrapped = wrap_layout(
             layout_out,
-            behavior=behavior_of_obj(array_in, behavior=behavior),
+            behavior=_behavior,
             highlevel=highlevel,
-            attrs=attrs_of_obj(array_in, attrs=attrs),
+            attrs=_attrs,
         )
-        for layout_out, array_in in zip(out, arrays)
-    ]
+        wrapped_out.append(
+            ak.operations.ak_with_named_axis._impl(
+                wrapped,
+                named_axis=out_named_axis,
+                highlevel=highlevel,
+                behavior=_behavior,
+                attrs=_attrs,
+            )
+        )
+    return wrapped_out
 
 
 @ak._connect.numpy.implements("broadcast_arrays")
