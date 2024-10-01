@@ -1332,7 +1332,16 @@ def test_named_axis_ak_var():
 
 
 def test_named_axis_ak_where():
-    assert True
+    a = ak.Array([[1, 2], [3, 4]])
+    na = ak.with_named_axis(a, ("x", "y"))
+
+    assert ak.all(ak.where(a > 2, 0, 1) == ak.where(na > 2, 0, 1))
+    assert ak.where(na > 2, 0, 1).named_axis == {"x": 0, "y": 1}
+    assert ak.where(na > 2, na, 1).named_axis == {"x": 0, "y": 1}
+
+    nb = ak.with_named_axis(a, ("a", "b"))
+    with pytest.raises(ValueError):
+        _ = ak.where(na > 2, nb, 1)
 
 
 def test_named_axis_ak_with_field():
