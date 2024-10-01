@@ -618,7 +618,8 @@ def test_named_axis_ak_cartesian():
 
 
 def test_named_axis_ak_categories():
-    # This test sometimes doesn't run because of an `import pyarrow` issue
+    pyarrow = pytest.importorskip("pyarrow")  # noqa: F841
+
     array = ak.str.to_categorical([["one", "two"], ["one", "three"], ["one", "four"]])
 
     named_array = ak.with_named_axis(array, named_axis=("a", "b"))
