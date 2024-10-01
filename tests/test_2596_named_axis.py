@@ -587,8 +587,15 @@ def test_named_axis_ak_backend():
 
 
 def test_named_axis_ak_broadcast_fields():
-    # what to do with this one?
-    assert True
+    x = ak.Array([{"x": {"y": 1, "z": 2, "w": [1]}}])
+    y = ak.Array([{"x": [{"y": 1}]}])
+
+    nx = ak.with_named_axis(x, named_axis=("x", "y"))
+    ny = ak.with_named_axis(y, named_axis=("a", "b"))
+
+    na, nb = ak.broadcast_fields(nx, ny)
+    assert na.named_axis == {"x": 0, "y": 1}
+    assert nb.named_axis == {"a": 0, "b": 1}
 
 
 def test_named_axis_ak_cartesian():
