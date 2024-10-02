@@ -9,6 +9,18 @@ import awkward as ak
 from awkward._namedaxis import _get_named_axis
 
 
+def test_constructor():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]], named_axis=("x", "y"))
+    assert _get_named_axis(array)
+    assert array.named_axis == {"x": 0, "y": 1}
+    assert array.positional_axis == (0, 1)
+
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]], named_axis={"x": 0, "y": 1})
+    assert _get_named_axis(array)
+    assert array.named_axis == {"x": 0, "y": 1}
+    assert array.positional_axis == (0, 1)
+
+
 def test_with_named_axis():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
     assert not _get_named_axis(array)
@@ -868,15 +880,19 @@ def test_named_axis_ak_imag():
 
 
 def test_named_axis_ak_is_none():
-    array = ak.Array([[1, None], [3], [None], [4, None, 6]])
+    array = ak.Array([[[1, None]], [[3]], [[None]], [[4, None, 6]]])
 
-    named_array = ak.with_named_axis(array, ("x", "y"))
+    named_array = ak.with_named_axis(array, ("x", "y", "z"))
 
     assert ak.all(ak.is_none(array, axis=0) == ak.is_none(named_array, axis="x"))
     assert ak.all(ak.is_none(array, axis=1) == ak.is_none(named_array, axis="y"))
+    assert ak.all(ak.is_none(array, axis=2) == ak.is_none(named_array, axis="z"))
 
-    assert ak.is_none(named_array, axis="x").named_axis == {"x": 0, "y": 1}
+    assert ak.is_none(named_array, axis="x").named_axis == {
+        "x": 0,
+    }
     assert ak.is_none(named_array, axis="y").named_axis == {"x": 0, "y": 1}
+    assert ak.is_none(named_array, axis="z").named_axis == {"x": 0, "y": 1, "z": 2}
 
 
 def test_named_axis_ak_isclose():

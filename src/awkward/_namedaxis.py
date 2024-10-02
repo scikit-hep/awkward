@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import re
 from dataclasses import dataclass
 
 import awkward._typing as tp
@@ -37,6 +39,38 @@ class NamedAxis:
 NamedAxis.mapping = {}
 
 
+def _prettify_named_axes(named_axis: AxisMapping) -> str:
+    """
+    Prettifies the named axes for better readability.
+
+    This function takes a named axis mapping and returns a string representation of the mapping.
+    The axis names are sorted in ascending order of their corresponding integer values.
+    If the axis name is a valid Python identifier, it is represented as is.
+    Otherwise, it is represented as a JSON string.
+
+    Args:
+        named_axis (AxisMapping): The named axis mapping to prettify.
+
+    Returns:
+        str: The prettified string representation of the named axis mapping.
+
+    Examples:
+        >>> _prettify_named_axes({"x": 0, "y": 1, "z": 2})
+        'x:0, y:1, z:2'
+        >>> _prettify_named_axes({"x": 0, "y": 1, "$": 2})
+        'x:0, y:1, "$":2'
+    """
+
+    def _prettify(ax: AxisName) -> str:
+        repr_nax = str(ax)
+        if re.match("[A-Za-z_][A-Za-z_0-9]*", repr_nax):
+            return repr_nax
+        return json.dumps(repr_nax)
+
+    sorted_named_axis = sorted(named_axis.items(), key=lambda x: x[1])
+    return ", ".join([f"{_prettify(k)}:{v}" for k, v in sorted_named_axis])
+
+
 def _get_named_axis(
     ctx: MaybeSupportsNamedAxis | AttrsNamedAxisMapping | tp.Mapping | tp.Any,
 ) -> AxisMapping:
@@ -45,7 +79,7 @@ def _get_named_axis(
     or a dictionary that includes a named axis mapping.
 
     Args:
-        ctx (MaybeSupportsNamedAxis | AttrsNamedAxisMapping): The context from which the named axis is to be retrieved.
+        ctx (MaybeSupportsNamedAxis | AttrsNamedAxisMapping | Mapping | Any): The context from which the named axis is to be retrieved.
 
     Returns:
         AxisMapping: The named axis retrieved from the context. If the context does not include a named axis,
@@ -91,7 +125,7 @@ def _make_positional_axis_tuple(n: int) -> tuple[int, ...]:
 
 def _is_valid_named_axis(axis: AxisName) -> bool:
     """
-    Checks if the given axis is a valid named axis. A valid named axis is a hashable object that is not an integer.
+    Checks if the given axis is a valid named axis. A valid named axis is a hashable object that is not an integer or None. Currently it is restricted to strings.
 
     Args:
         axis (AxisName): The axis to check.
@@ -194,6 +228,54 @@ def _axis_tuple_to_mapping(axis_tuple: AxisTuple) -> AxisMapping:
     return {axis: i for i, axis in enumerate(axis_tuple) if axis is not None}
 
 
+def _prepare_named_axis_for_attrs(
+    named_axis: AxisMapping | AxisTuple,
+    ndim: int,
+) -> AxisMapping:
+    """
+    Prepares the named axis for attribute assignment.
+
+    This function takes a named axis, which can either be a mapping or a tuple, and returns a dictionary mapping axis names to their positions.
+    The function checks if the named axis is valid and if the positional axes match the number of dimensions. If not, an error is raised.
+
+    Args:
+        named_axis (AxisMapping | AxisTuple): The named axis to prepare. Can either be a mapping or a tuple.
+        ndim (int): The number of dimensions.
+
+    Returns:
+        AxisMapping: The prepared named axis.
+
+    Raises:
+        TypeError: If the named axis is not a mapping or a tuple.
+        ValueError: If the named axes do not point to positional axes matching the number of dimensions.
+
+    Examples:
+        >>> _prepare_named_axis_for_attrs({"x": 0, "y": 1, "z": 2}, 3)
+        {"x": 0, "y": 1, "z": 2}
+        >>> _prepare_named_axis_for_attrs(("x", "y", "z"), 3)
+        {"x": 0, "y": 1, "z": 2}
+        >>> _prepare_named_axis_for_attrs({"x": 0, "y": 1, "z": 2}, 2)
+        Traceback (most recent call last):
+        ...
+        ValueError: Named axes must point to positional axes matching 2 dimensions, got named_axis={"x": 0, "y": 1, "z": 2}, ndim=2
+    """
+    if isinstance(named_axis, tuple):
+        _named_axis = _axis_tuple_to_mapping(named_axis)
+    elif isinstance(named_axis, dict):
+        _named_axis = dict(named_axis)
+    else:
+        raise TypeError(
+            f"named_axis must be a mapping or a tuple, got {named_axis=} [{type(named_axis)=}]"
+        )
+    _check_valid_named_axis_mapping(_named_axis)
+    pos_axes = set(_named_axis.values())
+    if max(pos_axes, default=0) >= ndim or min(pos_axes, default=0) < -ndim:
+        raise ValueError(
+            f"Named axes must point to positional axes matching {ndim} dimensions, got {named_axis=}, {ndim=}"
+        )
+    return _named_axis
+
+
 def _named_axis_to_positional_axis(
     named_axis: AxisMapping,
     axis: AxisName,
@@ -232,55 +314,9 @@ def _named_axis_to_positional_axis(
 
         return namedint(named_axis[axis])
     if is_integer(axis) or axis is None:
-        # this is a int or None, but pyright doesn't understand it
         return axis
     else:
         raise ValueError(f"Invalid {axis=} [{type(axis)=}]")
-
-
-def _set_named_axis_to_attrs(
-    attrs: tp.Mapping,
-    named_axis: AxisTuple | AxisMapping,
-    overwrite: bool = True,
-) -> tp.Mapping:
-    """
-    Sets the named axis mapping into the given attributes dictionary.
-
-    Args:
-        attrs (dict): The attributes dictionary to set the named axis mapping into.
-        named_axis (AxisTuple | AxisMapping): The named axis mapping to set. Can be a tuple or a dictionary.
-        overwrite (bool, optional): If True, any existing named axis mapping in the attributes dictionary will be overwritten.
-            If False, a KeyError will be raised if a named axis mapping already exists in the attributes dictionary.
-            Default is True.
-
-    Returns:
-        dict: The attributes dictionary with the named axis mapping set.
-
-    Raises:
-        TypeError: If the named axis is not a tuple or a dictionary.
-        KeyError: If a named axis mapping already exists in the attributes dictionary and overwrite is False.
-
-    Examples:
-        >>> attrs = {"other_key": "other_value"}
-        >>> named_axis = ("x", "y", "z")
-        >>> _set_named_axis_to_attrs(attrs, named_axis)
-        {"other_key": "other_value", "__named_axis__": {"x": 0, "y": 1, "z": 2}}
-    """
-    attrs = dict(attrs)  # copy
-    if isinstance(named_axis, tuple):
-        named_axis_mapping = _axis_tuple_to_mapping(named_axis)
-    elif isinstance(named_axis, dict):
-        named_axis_mapping = named_axis
-    else:
-        raise TypeError(f"named_axis must be a tuple or dict, not {named_axis}")
-
-    if _NamedAxisKey in attrs and not overwrite:
-        raise KeyError(
-            f"Can't set named axis mapping into attrs with key {_NamedAxisKey}, have {attrs=}."
-        )
-
-    attrs[_NamedAxisKey] = named_axis_mapping
-    return attrs
 
 
 # These are the strategies to handle named axis for the
@@ -292,10 +328,10 @@ def _set_named_axis_to_attrs(
 # - "keep all" (_keep_named_axis(..., None)): Keep all named axes in the output array, e.g.: `ak.drop_none`
 # - "keep one" (_keep_named_axis(..., int)): Keep one named axes in the output array, e.g.: `ak.firsts`
 # - "keep up to" (_keep_named_axis_up_to(..., int)): Keep all named axes upto a certain positional axis in the output array, e.g.: `ak.local_index`
-# - "remove all" (_remove_all_named_axis): Removes all named axis, e.g.: `ak.categories
+# - "remove all" (_remove_all_named_axis): Removes all named axis, e.g.: `ak.categories`
 # - "remove one" (_remove_named_axis): Remove the named axis from the output array, e.g.: `ak.sum`
-# - "add one" (_add_named_axis): Add a new named axis to the output array, e.g.: `ak.concatenate, ak.singletons` (not clear yet...)
-# - "unify" (_unify_named_axis): Unify the named axis in the output array given two input arrays, e.g.: `__add__`
+# - "add one" (_add_named_axis): Add a new named axis to the output array, e.g.: `ak.concatenate`
+# - "unify" (_unify_named_axis): Unify the named axis in the output array given two input arrays, e.g.: `ak.broadcast_arrays`
 
 
 def _keep_named_axis(
@@ -506,6 +542,7 @@ def _add_named_axis(
     Args:
         named_axis (AxisMapping): The current named axis mapping.
         axis (int): The position at which to add the new axis.
+        total (int | None): The total number of axes.
 
     Returns:
         AxisMapping: The updated named axis mapping after adding the new axis.
@@ -597,6 +634,8 @@ def _unify_named_axis(
 class NamedAxesWithDims:
     """
     A dataclass that stores the named axis and their corresponding dimensions.
+    This is a helper class to store the named axis mapping and the number of
+    dimensions of each named axis, which is useful for broadcasting.
 
     Attributes:
         named_axis (AxisMapping): The named axis mapping.
@@ -707,7 +746,7 @@ NamedAxisSlice: tp.TypeAlias = tp.Dict[AxisName, AxisSlice]
 
 def _normalize_named_slice(
     named_axis: AxisMapping,
-    where: AxisSlice | NamedAxisSlice | tuple[AxisSlice | NamedAxisSlice],
+    where: AxisSlice | NamedAxisSlice,
     total: int,
 ) -> AxisSlice:
     """
@@ -718,7 +757,7 @@ def _normalize_named_slice(
 
     Args:
         named_axis (AxisMapping): The current named axis mapping.
-        where (AxisSlice | NamedAxisSlice | tuple[AxisSlice | NamedAxisSlice]): The slice to normalize. Can be a single slice, a tuple of slices, or a dictionary mapping axis names to slices.
+        where (AxisSlice | NamedAxisSlice): The slice to normalize. Can be a single slice, a tuple of slices, or a dictionary mapping axis names to slices.
         total (int): The total number of axes.
 
     Returns:

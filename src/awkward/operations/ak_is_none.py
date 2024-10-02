@@ -7,6 +7,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._namedaxis import (
     _get_named_axis,
+    _keep_named_axis_up_to,
     _named_axis_to_positional_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -58,6 +59,12 @@ def _impl(array, axis, highlevel, behavior, attrs):
     if not is_integer(axis):
         raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
 
+    # Step 2: propagate named axis from input to output,
+    #   use strategy "keep up to" (see: awkward._namedaxis)
+    out_named_axis = _keep_named_axis_up_to(
+        named_axis, axis + layout.minmax_depth[1] if axis < 0 else axis
+    )
+
     def action(layout, depth, backend, lateral_context, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
 
@@ -78,4 +85,16 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
     out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return ctx.wrap(out, highlevel=highlevel)
+    wrapped_out = ctx.wrap(
+        out,
+        highlevel=highlevel,
+    )
+
+    # propagate named axis to output
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

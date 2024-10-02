@@ -35,11 +35,6 @@ from __future__ import annotations
 
 import numpy as np
 
-from awkward._typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    pass
-
 
 def _disables_array_ufunc(obj):
     """True when __array_ufunc__ is set to None."""
@@ -56,8 +51,7 @@ def _binary_method(ufunc, name):
         if _disables_array_ufunc(other):
             return NotImplemented
 
-        out = ufunc(self, other)
-        return out
+        return ufunc(self, other)
 
     func.__name__ = f"__{name}__"
     return func
@@ -69,8 +63,7 @@ def _reflected_binary_method(ufunc, name):
     def func(self, other):
         if _disables_array_ufunc(other):
             return NotImplemented
-        out = ufunc(other, self)
-        return out
+        return ufunc(other, self)
 
     func.__name__ = f"__r{name}__"
     return func
@@ -80,8 +73,7 @@ def _inplace_binary_method(ufunc, name):
     """Implement an in-place binary method with a ufunc, e.g., __iadd__."""
 
     def func(self, other):
-        out = ufunc(self, other, out=(self,))
-        return out
+        return ufunc(self, other, out=(self,))
 
     func.__name__ = f"__i{name}__"
     return func

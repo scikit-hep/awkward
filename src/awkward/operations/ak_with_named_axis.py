@@ -7,9 +7,8 @@ from awkward._layout import HighLevelContext
 from awkward._namedaxis import (
     AxisMapping,
     AxisTuple,
-    _axis_tuple_to_mapping,
-    _check_valid_named_axis_mapping,
     _NamedAxisKey,
+    _prepare_named_axis_for_attrs,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -58,21 +57,14 @@ def _impl(array, named_axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=True)
 
-    if isinstance(named_axis, tuple):
-        (_, ndim) = layout.minmax_depth
-        if len(named_axis) != ndim:
-            raise ValueError(
-                f"{named_axis=} must have the same length as the number of dimensions ({ndim})"
-            )
-        _named_axis = _axis_tuple_to_mapping(named_axis)
-    elif isinstance(named_axis, dict):
-        _named_axis = named_axis
-    else:
-        raise TypeError(f"named_axis must be a mapping or a tuple, got {named_axis}")
-
+    _named_axis = _prepare_named_axis_for_attrs(
+        named_axis=named_axis,
+        ndim=layout.minmax_depth[1],
+    )
+    # now we're good, set the named axis
     return ctx.with_attr(
         key=_NamedAxisKey,
-        value=_check_valid_named_axis_mapping(_named_axis),
+        value=_named_axis,
     ).wrap(
         layout,
         highlevel=highlevel,

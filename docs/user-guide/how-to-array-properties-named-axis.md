@@ -137,6 +137,17 @@ print("classic indexing:", named_events[0, 0:1])
 print("named indexing  :", named_events[{"events": 0, "jets": slice(0, 1)}])
 ```
 
+For syntatic suger, Awkward-Array provides the `ak.Slicer` class to define slices more easily:
+
+```{code-cell}
+s = ak.Slicer()
+
+array = ak.Array([[[1, 2]], [[3]], [[4]], [[5, 6], [7]]])
+named_array = ak.with_named_axis(array, named_axis=("x", "y", "z"))
+
+assert ak.all(named_array[{"x": s[0:2]}] == named_array[{"x": slice(0, 2)}])
+```
+
 Highlevel Operations with Named Axes
 ------------------------------------
 

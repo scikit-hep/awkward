@@ -108,9 +108,9 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
     # Step 2: propagate named axis from input to output,
     #   use strategy "keep up to" (see: awkward._namedaxis)
-    if axis < 0:
-        axis += layout.purelist_depth
-    out_named_axis = _keep_named_axis_up_to(named_axis, axis)
+    out_named_axis = _keep_named_axis_up_to(
+        named_axis, axis + layout.minmax_depth[1] if axis < 0 else axis
+    )
 
     out = ak._do.local_index(layout, axis)
 
