@@ -305,7 +305,7 @@ def _named_axis_to_positional_axis(
         # in order to properly display it in error messages. This is useful for cases
         # where the positional axis is pointing to a non-existing axis. The error message
         # will then show the original (named) axis together with the positional axis.
-        class namedint(int): ...
+        class namedint(int): ...  # pylint: disable=multiple-statements
 
         def _repr(self):
             return f"{axis!r} (named axis) -> {super(namedint, self).__repr__()} (pos. axis)"
