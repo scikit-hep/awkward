@@ -1081,8 +1081,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         with ak._errors.SlicingErrorContext(self, where):
             # Handle named axis
             (_, ndim) = self._layout.minmax_depth
-            if named_axis := _get_named_axis(self):
-                where = _normalize_named_slice(named_axis, where, ndim)
+            named_axis = _get_named_axis(self)
+            where = _normalize_named_slice(named_axis, where, ndim)
 
             NamedAxis.mapping = named_axis
 

@@ -13,7 +13,6 @@ from awkward._namedaxis import (
     NamedAxesWithDims,
     _add_named_axis,
     _get_named_axis,
-    _is_valid_named_axis,
     _named_axis_to_positional_axis,
     _NamedAxisKey,
     _unify_named_axis,
@@ -255,10 +254,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
     axis = regularize_axis(axis)
 
     # Handle named axis
-    if out_named_axis:
-        if _is_valid_named_axis(axis):
-            # Step 1: Normalize named axis to positional axis
-            axis = _named_axis_to_positional_axis(out_named_axis, axis)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(out_named_axis, axis)
 
     if with_name is not None:
         if parameters is None:

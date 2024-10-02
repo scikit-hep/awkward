@@ -38,7 +38,7 @@ NamedAxis.mapping = {}
 
 
 def _get_named_axis(
-    ctx: MaybeSupportsNamedAxis | AttrsNamedAxisMapping | tp.Mapping,
+    ctx: MaybeSupportsNamedAxis | AttrsNamedAxisMapping | tp.Mapping | tp.Any,
 ) -> AxisMapping:
     """
     Retrieves the named axis from the provided context. The context can either be an object that supports named axis
@@ -197,7 +197,7 @@ def _axis_tuple_to_mapping(axis_tuple: AxisTuple) -> AxisMapping:
 def _named_axis_to_positional_axis(
     named_axis: AxisMapping,
     axis: AxisName,
-) -> int:
+) -> int | None:
     """
     Converts a single named axis to a positional axis.
 
@@ -215,9 +215,27 @@ def _named_axis_to_positional_axis(
         >>> _named_axis_to_positional_axis({"x": 0, "y": 1, "z": 2}, "x")
         0
     """
-    if axis not in named_axis:
-        raise ValueError(f"{axis=} not found in {named_axis=} mapping.")
-    return named_axis[axis]
+    if _is_valid_named_axis(axis):
+        if axis not in named_axis:
+            raise ValueError(f"{axis=} not found in {named_axis=} mapping.")
+
+        # we wrap it to preserve the original name in its __repr__ and __str__
+        # in order to properly display it in error messages. This is useful for cases
+        # where the positional axis is pointing to a non-existing axis. The error message
+        # will then show the original (named) axis together with the positional axis.
+        class namedint(int): ...
+
+        def _repr(self):
+            return f"{axis!r} (named axis) -> {super(namedint, self).__repr__()} (pos. axis)"
+
+        namedint.__repr__ = namedint.__str__ = _repr
+
+        return namedint(named_axis[axis])
+    if is_integer(axis) or axis is None:
+        # this is a int or None, but pyright doesn't understand it
+        return axis
+    else:
+        raise ValueError(f"Invalid {axis=} [{type(axis)=}]")
 
 
 def _set_named_axis_to_attrs(
@@ -731,10 +749,14 @@ def _normalize_named_slice(
         out_where: list[AxisSlice] = [slice(None)] * total
         for ax_name, ax_where in where.items():
             slice_ = ax_where if ax_where is not ... else slice(None)
-            if isinstance(ax_name, int):
-                out_where[ax_name] = slice_
+            if is_integer(ax_name):
+                # it's an integer, pyright doesn't get this
+                idx = tp.cast(int, ax_name)
+                out_where[idx] = slice_
             elif _is_valid_named_axis(ax_name):
                 idx = _named_axis_to_positional_axis(named_axis, ax_name)
+                # it's an integer, pyright doesn't get this
+                idx = tp.cast(int, idx)
                 out_where[idx] = slice_
             else:
                 raise ValueError(f"Invalid axis name: {ax_name} in slice {where}")

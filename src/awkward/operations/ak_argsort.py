@@ -8,8 +8,6 @@ from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._namedaxis import (
     _get_named_axis,
-    _is_valid_named_axis,
-    _keep_named_axis,
     _named_axis_to_positional_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -82,36 +80,19 @@ def _impl(array, axis, ascending, stable, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
 
     # Handle named axis
-    out_named_axis = None
-    if named_axis := _get_named_axis(ctx):
-        if _is_valid_named_axis(axis):
-            # Step 1: Normalize named axis to positional axis
-            axis = _named_axis_to_positional_axis(named_axis, axis)
-
-        # Step 2: propagate named axis from input to output,
-        #   use strategy "keep all" (see: awkward._namedaxis)
-        out_named_axis = _keep_named_axis(named_axis, None)
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
 
     if not is_integer(axis):
         raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
 
     out = ak._do.argsort(layout, axis, ascending, stable)
 
-    wrapped_out = ctx.wrap(
+    return ctx.wrap(
         out,
         highlevel=highlevel,
     )
-
-    if out_named_axis:
-        # propagate named axis to output
-        return ak.operations.ak_with_named_axis._impl(
-            wrapped_out,
-            named_axis=out_named_axis,
-            highlevel=highlevel,
-            behavior=ctx.behavior,
-            attrs=ctx.attrs,
-        )
-    return wrapped_out
 
 
 @ak._connect.numpy.implements("argsort")

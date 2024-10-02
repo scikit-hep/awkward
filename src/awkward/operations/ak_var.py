@@ -14,9 +14,7 @@ from awkward._layout import (
 )
 from awkward._namedaxis import (
     _get_named_axis,
-    _is_valid_named_axis,
     _named_axis_to_positional_axis,
-    _NamedAxisKey,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -195,10 +193,9 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
     axis = regularize_axis(axis)
 
     # Handle named axis
-    if named_axis := _get_named_axis(ctx):
-        if _is_valid_named_axis(axis):
-            # Step 1: Normalize named axis to positional axis
-            axis = _named_axis_to_positional_axis(named_axis, axis)
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
@@ -280,17 +277,19 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        # propagate named axis to output
-        if out_named_axis := _get_named_axis(attrs_of_obj(out) or {}):
-            ctx = ctx.with_attr(
-                key=_NamedAxisKey,
-                value=out_named_axis,
-            )
-
-        return ctx.wrap(
+        wrapped = ctx.wrap(
             maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,
+        )
+
+        # propagate named axis to output
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped,
+            named_axis=_get_named_axis(attrs_of_obj(out)),
+            highlevel=highlevel,
+            behavior=None,
+            attrs=None,
         )
 
 

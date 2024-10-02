@@ -14,7 +14,7 @@ kernelspec:
 Named axes
 ==========
 
-Named axes are an experimental feature in Awkward Array that allows you to give names to the axes of an array.
+Named axes are a feature in Awkward Array that allows you to give names to the axes of an array.
 This can be useful for documentation, debugging, and for writing code that is more robust to changes in the structure of the data.
 As argumented at [PyHEP.dev 2023](https://indico.cern.ch/event/1234156/) and by the Harvard NLP group in their ["Tensor Considered Harmful"](https://nlp.seas.harvard.edu/NamedTensor.html) write-up, named axes can be a powerful tool to make code more readable and less error-prone.
 

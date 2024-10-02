@@ -8,7 +8,6 @@ from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._namedaxis import (
     _add_named_axis,
     _get_named_axis,
-    _is_valid_named_axis,
     _named_axis_to_positional_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -68,18 +67,16 @@ def _impl(array, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis)
 
     # Handle named axis
-    out_named_axis = None
-    if named_axis := _get_named_axis(ctx):
-        if _is_valid_named_axis(axis):
-            # Step 1: Normalize named axis to positional axis
-            axis = _named_axis_to_positional_axis(named_axis, axis)
-
-        # Step 2: propagate named axis from input to output,
-        #   use strategy "add one" (see: awkward._namedaxis)
-        out_named_axis = _add_named_axis(named_axis, axis + 1)
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
 
     if not is_integer(axis):
         raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
+
+    # Step 2: propagate named axis from input to output,
+    #   use strategy "add one" (see: awkward._namedaxis)
+    out_named_axis = _add_named_axis(named_axis, axis + 1)
 
     def action(layout, depth, backend, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
