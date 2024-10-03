@@ -87,7 +87,7 @@ jobs:
 
         - os: windows-latest
           arch: auto32
-          build: "cp{38,39}-"
+          build: "cp"
 
     steps:
     - uses: actions/checkout@v4
@@ -114,13 +114,7 @@ jobs:
         package-dir: awkward-cpp
 
     - name: Check metadata
-      shell: python
-      run: |
-        import subprocess, glob
-        subprocess.run(
-          ["pipx", "run", "twine", "check", *glob.glob("wheelhouse/*.whl")],
-          check=True
-        )
+      run: pipx run twine check wheelhouse/*.whl
 
     - name: Upload wheels
       uses: actions/upload-artifact@v4
@@ -166,13 +160,7 @@ jobs:
         package-dir: awkward-cpp
 
     - name: Check metadata
-      shell: python
-      run: |
-        import subprocess, glob
-        subprocess.run(
-          ["pipx", "run", "twine", "check", *glob.glob("wheelhouse/*.whl")],
-          check=True
-        )
+      run: pipx run twine check wheelhouse/*.whl
 
     - name: Upload wheels
       uses: actions/upload-artifact@v4
