@@ -25,8 +25,6 @@ import awkward._errors
 import awkward._lookup
 import awkward._ext  # strictly for unpickling from Awkward 1
 import awkward._namedaxis
-from awkward._namedaxis import Slicer  # explicitly expose Slicer
-
 
 # third-party connectors
 import awkward._connect.numpy

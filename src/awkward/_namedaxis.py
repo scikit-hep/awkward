@@ -694,53 +694,6 @@ class NamedAxesWithDims:
         return len(self.named_axis)
 
 
-class Slicer:
-    """
-    The Slicer class provides a more convenient syntax for creating slices.
-
-    This class overloads the __getitem__ method to return the slice object directly,
-    allowing for a more intuitive syntax when creating slices.
-
-    Examples:
-        To create a Slicer object:
-
-        >>> ak_slice = Slicer()
-
-        To use the Slicer object to create slices:
-
-        >>> ak_slice[1:5]
-        slice(1, 5, None)
-
-        >>> ak_slice[1:5:2]
-        slice(1, 5, 2)
-
-        To create a tuple of slices:
-
-        >>> ak_slice[1:5:2, 2:10]
-        (slice(1, 5, 2), slice(2, 10, None))
-
-        To use the Slicer object to create a slice that includes all elements:
-
-        >>> ak_slice[...]
-        Ellipsis
-
-        >>> ak_slice[:]
-        slice(None, None, None)
-    """
-
-    def __getitem__(self, where):
-        """
-        Overloads the __getitem__ method to return the slice object directly.
-
-        Args:
-            where (slice): The slice object.
-
-        Returns:
-            slice: The input slice object.
-        """
-        return where
-
-
 # Define a type alias for a slice or int (can be a single axis or a sequence of axes)
 AxisSlice: tp.TypeAlias = tp.Union[tuple, slice, int, tp.EllipsisType, None]
 NamedAxisSlice: tp.TypeAlias = tp.Dict[AxisName, AxisSlice]
