@@ -555,9 +555,11 @@ class Content(Meta):
                 return self
 
             # count number of ellipsis
-            # fun fact:
+            # Need to use a little trick here:
             #   where.count(Ellipsis) does not work, because it will do a == comparison against Ellipsis,
-            #   but luckily we can use the fact that Ellipsis is a singleton and use the 'is' operator
+            #   and this will fail in the case of typetracers where == is dispatched to np.equal ufunc.
+            #   In this dispatch we encounter an assertion that the type of the Ellipsis is not allowed.
+            #   ...but luckily we can use the fact that Ellipsis is a singleton and use the 'is' operator
             n_ellipsis = 0
             for w in where:
                 if w is ...:
@@ -581,28 +583,32 @@ class Content(Meta):
             _nextwhere = tuple(nextwhere)
             if n_ellipsis == 1:
                 # collect the ellipsis index
-                # same fun fact as above for `nextwhere.index(...)`
+                # same little trick as above for `nextwhere.index(...)`
                 (ellipsis_at,) = tuple(i for i, x in enumerate(nextwhere) if x is ...)
                 # calculate how many slice(None) we need to add
-                # same fun fact as above for `nextwhere.count(None)`
+                # same little trick as above for `nextwhere.count(None)`
                 n_newaxis = 0
                 for x in nextwhere:
                     if x is np.newaxis or x is None:
                         n_newaxis += 1
                 n_total = self.purelist_depth
                 n_slice_none = n_total - (len(_nextwhere) - n_newaxis - 1)
-                # insert (slice(None),) * n_slice_none at the ellipsis index
+                # expand `[...]` to `[:]*n_slice_none`
                 _nextwhere = (
                     _nextwhere[:ellipsis_at]
                     + (slice(None),) * n_slice_none
                     + _nextwhere[ellipsis_at + 1 :]
                 )
-                # assert len(_nextwhere) == n_total + n_newaxis
 
             # now propagate named axis
             _named_axis = _keep_named_axis(named_axis.mapping, None)
             iter_named_axis = iter(dict(_named_axis).items())
             _adjust_dims = 0
+            # this loop does the following:
+            # - remove a named axis for integer indices, e.g. `a[1, 2]`
+            # - add a named axis for None (or np.newaxis) indices, e.g. `a[..., None]`
+            # - keep named axis for any other index, e.g. `a[:]`, `a[0:1]`, or `a[a>0]`
+            #   (these may only remove elements, but not dimensions)
             for i, nw in enumerate(_nextwhere):
                 i += _adjust_dims
                 for _, pos in iter_named_axis:

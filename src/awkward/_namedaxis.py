@@ -62,13 +62,15 @@ def _prettify_named_axes(named_axis: AxisMapping) -> str:
     """
 
     def _prettify(ax: AxisName) -> str:
-        repr_nax = str(ax)
-        if re.match("[A-Za-z_][A-Za-z_0-9]*", repr_nax):
-            return repr_nax
-        return json.dumps(repr_nax)
+        repr_ax = str(ax)
+        if re.match("[A-Za-z_][A-Za-z_0-9]*", repr_ax):
+            return repr_ax
+        return json.dumps(repr_ax)
 
     sorted_named_axis = sorted(named_axis.items(), key=lambda x: x[1])
-    return ", ".join([f"{_prettify(k)}:{v}" for k, v in sorted_named_axis])
+    return ", ".join(
+        [f"{_prettify(named_ax)}:{pos_ax}" for named_ax, pos_ax in sorted_named_axis]
+    )
 
 
 def _get_named_axis(

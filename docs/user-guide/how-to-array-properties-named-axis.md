@@ -49,18 +49,34 @@ The `named_axis` argument of {func}`ak.with_named_axis` accepts either a `tuple`
   - `positional axis`: value
   - _additional_: not specifying a name is not allowed, e.g.: `{"x": 0}` means that the first axis is named "x", all other existing dimensions are unnamed. The `dict` option also allows for renaming negative axes, e.g.: `{"x": -1}` means that the last axis is named "x".
 
-The axis names of an array can be attached as follows:
 
 ```{code-cell}
 import awkward as ak
 import numpy as np
 ```
 
+The axis names of an array can be attached through the constructor:
 ```{code-cell}
-array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+named_array = ak.Array([[1, 2], [3], [], [4, 5, 6]], named_axis=("x", "y"))
+# or
+named_array = ak.Array([[1, 2], [3], [], [4, 5, 6]], named_axis={"x": 0, "y": 1})
+```
+
+... or through `ak.with_named_axis`:
+```{code-cell}
 named_array = ak.with_named_axis(array, named_axis=("x", "y"))
 # or
 named_array = ak.with_named_axis(array, named_axis={"x": 0, "y": 1})
+```
+
+After attaching named axes, you can see the named axes comma-separated in the arrays representation and in `.show(axes=True)`:
+
+```{code-cell}
+ak.Array([[1, 2], [3], [], [4, 5, 6]], named_axis=("x", "y"))
+```
+
+```{code-cell}
+ak.Array([[1, 2], [3], [], [4, 5, 6]], named_axis=("x", "y")).show(axes=True)
 ```
 
 Accessing the named axis mapping to positional axis can be done using the `named_axis` and `positional_axis` properties:

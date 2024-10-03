@@ -1962,6 +1962,15 @@ class Record(NDArrayOperatorsMixin):
         else:
             raise TypeError("behavior must be None or a dict")
 
+    @property
+    def positional_axis(self) -> tuple[int, ...]:
+        (_, ndim) = self._layout.minmax_depth
+        return _make_positional_axis_tuple(ndim)
+
+    @property
+    def named_axis(self) -> AxisMapping:
+        return _get_named_axis(self)
+
     def tolist(self):
         """
         Converts this Record into Python objects; same as #ak.to_list
