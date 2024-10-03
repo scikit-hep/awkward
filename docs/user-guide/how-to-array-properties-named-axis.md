@@ -64,6 +64,7 @@ named_array = ak.Array([[1, 2], [3], [], [4, 5, 6]], named_axis={"x": 0, "y": 1}
 
 ... or through `ak.with_named_axis`:
 ```{code-cell}
+array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 named_array = ak.with_named_axis(array, named_axis=("x", "y"))
 # or
 named_array = ak.with_named_axis(array, named_axis={"x": 0, "y": 1})
