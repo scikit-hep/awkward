@@ -226,6 +226,155 @@ def test_named_axis_indexing():
     )
 
 
+def test_negative_named_axis_indexing():
+    array = ak.Array([[[1, 2]], [[3]], [[4]], [[5, 6], [7]]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -3, "y": -2, "z": -1})
+
+    # test indexing
+    assert ak.all(array[...] == named_array[...])
+    assert ak.all(array[()] == named_array[()])
+
+    assert ak.all(array[None, :, :, :] == named_array[None, :, :, :])
+    assert ak.all(array[:, None, :, :] == named_array[:, None, :, :])
+    assert ak.all(array[:, :, None, :] == named_array[:, :, None, :])
+    assert ak.all(array[:, :, :, None] == named_array[:, :, :, None])
+
+    assert ak.all(array[0, :, :] == named_array[{"x": 0}])
+    assert ak.all(array[:, 0, :] == named_array[{"y": 0}])
+    assert ak.all(array[:, :, 0] == named_array[{"z": 0}])
+
+    assert ak.all(array[0, :, :] == named_array[{0: 0}])
+    assert ak.all(array[:, 0, :] == named_array[{1: 0}])
+    assert ak.all(array[:, :, 0] == named_array[{2: 0}])
+
+    assert ak.all(array[0, :, :] == named_array[{-3: 0}])
+    assert ak.all(array[:, 0, :] == named_array[{-2: 0}])
+    assert ak.all(array[:, :, 0] == named_array[{-1: 0}])
+
+    assert ak.all(array[0, 0, :] == named_array[{"x": 0, "y": 0}])
+    assert ak.all(array[0, :, 0] == named_array[{"x": 0, "z": 0}])
+    assert ak.all(array[:, 0, 0] == named_array[{"y": 0, "z": 0}])
+    assert array[0, 0, 0] == named_array[{"x": 0, "y": 0, "z": 0}]
+
+    assert ak.all(array[slice(0, 1), :, :] == named_array[{"x": slice(0, 1)}])
+    assert ak.all(array[:, slice(0, 1), :] == named_array[{"y": slice(0, 1)}])
+    assert ak.all(array[:, :, slice(0, 1)] == named_array[{"z": slice(0, 1)}])
+
+    assert ak.all(array[0, :, slice(0, 1)] == named_array[{"x": 0, "z": slice(0, 1)}])
+    assert ak.all(array[:, 0, slice(0, 1)] == named_array[{"y": 0, "z": slice(0, 1)}])
+    assert ak.all(array[slice(0, 1), 0, :] == named_array[{"x": slice(0, 1), "y": 0}])
+
+    assert ak.all(array[array > 3] == named_array[named_array > 3])
+
+    # test naming propagation
+    assert (
+        named_array[...].named_axis
+        == named_array.named_axis
+        == {"x": -3, "y": -2, "z": -1}
+    )
+    assert (
+        named_array[()].named_axis
+        == named_array.named_axis
+        == {"x": -3, "y": -2, "z": -1}
+    )
+
+    assert named_array[None, :, :, :].named_axis == {"x": -3, "y": -2, "z": -1}
+    assert named_array[:, None, :, :].named_axis == {"x": -4, "y": -2, "z": -1}
+    assert named_array[:, :, None, :].named_axis == {"x": -4, "y": -3, "z": -1}
+    assert named_array[:, :, :, None].named_axis == {"x": -4, "y": -3, "z": -2}
+
+    assert named_array[None, ...].named_axis == {"x": -3, "y": -2, "z": -1}
+    assert named_array[:, None, ...].named_axis == {"x": -4, "y": -2, "z": -1}
+    assert named_array[..., None, :].named_axis == {"x": -4, "y": -3, "z": -1}
+    assert named_array[..., None].named_axis == {"x": -4, "y": -3, "z": -2}
+
+    assert (
+        named_array[0, :, :].named_axis
+        == named_array[{"x": 0}].named_axis
+        == {"y": -2, "z": -1}
+    )
+    assert (
+        named_array[:, 0, :].named_axis
+        == named_array[{"y": 0}].named_axis
+        == {"x": -2, "z": -1}
+    )
+    assert (
+        named_array[:, :, 0].named_axis
+        == named_array[{"z": 0}].named_axis
+        == {"x": -2, "y": -1}
+    )
+
+    assert (
+        named_array[0, ...].named_axis
+        == named_array[{"x": 0}].named_axis
+        == {"y": -2, "z": -1}
+    )
+    assert (
+        named_array[..., 0].named_axis
+        == named_array[{"z": 0}].named_axis
+        == {"x": -2, "y": -1}
+    )
+
+    assert named_array[{0: 0}].named_axis == {"y": -2, "z": -1}
+    assert named_array[{1: 0}].named_axis == {"x": -2, "z": -1}
+    assert named_array[{2: 0}].named_axis == {"x": -2, "y": -1}
+
+    assert named_array[{-3: 0}].named_axis == {"y": -2, "z": -1}
+    assert named_array[{-2: 0}].named_axis == {"x": -2, "z": -1}
+    assert named_array[{-1: 0}].named_axis == {"x": -2, "y": -1}
+
+    assert (
+        named_array[0, 0, :].named_axis
+        == named_array[{"x": 0, "y": 0}].named_axis
+        == {"z": -1}
+    )
+    assert (
+        named_array[0, :, 0].named_axis
+        == named_array[{"x": 0, "z": 0}].named_axis
+        == {"y": -1}
+    )
+    assert (
+        named_array[:, 0, 0].named_axis
+        == named_array[{"y": 0, "z": 0}].named_axis
+        == {"x": -1}
+    )
+    assert not _get_named_axis(named_array[0, 0, 0])
+    assert not _get_named_axis(named_array[{"x": 0, "y": 0, "z": 0}])
+
+    assert (
+        named_array[slice(0, 1), :, :].named_axis
+        == named_array[{"x": slice(0, 1)}].named_axis
+        == {"x": -3, "y": -2, "z": -1}
+    )
+    assert (
+        named_array[:, slice(0, 1), :].named_axis
+        == named_array[{"y": slice(0, 1)}].named_axis
+        == {"x": -3, "y": -2, "z": -1}
+    )
+    assert (
+        named_array[:, :, slice(0, 1)].named_axis
+        == named_array[{"z": slice(0, 1)}].named_axis
+        == {"x": -3, "y": -2, "z": -1}
+    )
+
+    assert (
+        named_array[0, :, slice(0, 1)].named_axis
+        == named_array[{"x": 0, "z": slice(0, 1)}].named_axis
+        == {"y": -2, "z": -1}
+    )
+    assert (
+        named_array[:, 0, slice(0, 1)].named_axis
+        == named_array[{"y": 0, "z": slice(0, 1)}].named_axis
+        == {"x": -2, "z": -1}
+    )
+    assert (
+        named_array[slice(0, 1), 0, :].named_axis
+        == named_array[{"x": slice(0, 1), "y": 0}].named_axis
+        == {"x": -2, "z": -1}
+    )
+
+
 @pytest.mark.xfail(
     sys.platform == "win32",
     reason="right-broadcasting (NumPy-style) behaves differently for 32-bit windows",
@@ -366,6 +515,39 @@ def test_named_axis_ak_all():
     assert not _get_named_axis(ak.all(named_array < 4, axis=None))
 
 
+def test_negative_named_axis_ak_all():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
+
+    # first check that they work the same
+    assert ak.all(ak.all(array < 4, axis=-2) == ak.all(named_array < 4, axis="x"))
+    assert ak.all(ak.all(array < 4, axis=-1) == ak.all(named_array < 4, axis="y"))
+
+    # check that result axis names are correctly propagated
+    assert (
+        ak.all(named_array < 4, axis=-2).named_axis
+        == ak.all(named_array < 4, axis="x").named_axis
+        == {"y": -1}
+    )
+    assert (
+        ak.all(named_array < 4, axis=-1).named_axis
+        == ak.all(named_array < 4, axis="y").named_axis
+        == {"x": -1}
+    )
+    assert (
+        ak.all(named_array < 4, axis=-2, keepdims=True).named_axis
+        == ak.all(named_array < 4, axis="x", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert (
+        ak.all(named_array < 4, axis=-1, keepdims=True).named_axis
+        == ak.all(named_array < 4, axis="y", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert not _get_named_axis(ak.all(named_array < 4, axis=None))
+
+
 def test_named_axis_ak_almost_equal():
     array1 = array2 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -386,6 +568,28 @@ def test_named_axis_ak_almost_equal():
     assert not ak.almost_equal(named_array1, named_array3, check_named_axis=True)
 
 
+def test_negative_named_axis_ak_almost_equal():
+    array1 = array2 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array1 = named_array2 = ak.with_named_axis(
+        array1, named_axis={"x": -2, "y": -1}
+    )
+
+    assert ak.almost_equal(array1, array2, check_named_axis=False) == ak.almost_equal(
+        named_array1, named_array2, check_named_axis=False
+    )
+    assert ak.almost_equal(array1, array2, check_named_axis=True) == ak.almost_equal(
+        named_array1, named_array2, check_named_axis=True
+    )
+
+    assert ak.almost_equal(named_array1, array1, check_named_axis=False)
+    assert ak.almost_equal(named_array1, array1, check_named_axis=True)
+
+    named_array3 = ak.with_named_axis(array1, named_axis={"x": -2, "z": -1})
+    assert ak.almost_equal(named_array1, named_array3, check_named_axis=False)
+    assert not ak.almost_equal(named_array1, named_array3, check_named_axis=True)
+
+
 def test_named_axis_ak_angle():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -396,6 +600,18 @@ def test_named_axis_ak_angle():
 
     # check that result axis names are correctly propagated
     assert ak.angle(named_array).named_axis == {"x": 0, "y": 1}
+
+
+def test_negative_named_axis_ak_angle():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
+
+    # first check that they work the same
+    assert ak.all(ak.angle(array) == ak.angle(named_array))
+
+    # check that result axis names are correctly propagated
+    assert ak.angle(named_array).named_axis == {"x": -2, "y": -1}
 
 
 def test_named_axis_ak_any():
@@ -431,6 +647,39 @@ def test_named_axis_ak_any():
     assert not _get_named_axis(ak.all(named_array < 4, axis=None))
 
 
+def test_negative_named_axis_ak_any():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
+
+    # first check that they work the same
+    assert ak.all(ak.any(array < 4, axis=-2) == ak.any(named_array < 4, axis="x"))
+    assert ak.all(ak.any(array < 4, axis=-1) == ak.any(named_array < 4, axis="y"))
+
+    # check that result axis names are correctly propagated
+    assert (
+        ak.any(named_array < 4, axis=-2).named_axis
+        == ak.any(named_array < 4, axis="x").named_axis
+        == {"y": -1}
+    )
+    assert (
+        ak.any(named_array < 4, axis=-1).named_axis
+        == ak.any(named_array < 4, axis="y").named_axis
+        == {"x": -1}
+    )
+    assert (
+        ak.any(named_array < 4, axis=-2, keepdims=True).named_axis
+        == ak.any(named_array < 4, axis="x", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert (
+        ak.any(named_array < 4, axis=-1, keepdims=True).named_axis
+        == ak.any(named_array < 4, axis="y", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert not _get_named_axis(ak.all(named_array < 4, axis=None))
+
+
 def test_named_axis_ak_argcartesian():
     one = ak.Array([[1], [2], [3]])
     two = ak.Array([[4, 5]])
@@ -457,10 +706,49 @@ def test_named_axis_ak_argcartesian():
     ).named_axis == {"x": 2, "y": 3}
 
 
+def test_negative_named_axis_ak_argcartesian():
+    one = ak.Array([[1], [2], [3]])
+    two = ak.Array([[4, 5]])
+    three = ak.Array([[6, 7]])
+
+    named_one = ak.with_named_axis(one, named_axis={"x": -2, "y": -1})
+    named_two = ak.with_named_axis(two, named_axis={"x": -2, "y": -1})
+    named_three = ak.with_named_axis(three, named_axis={"x": -2, "y": -1})
+
+    assert ak.argcartesian(
+        [named_one, named_two, named_three], axis="y", nested=False
+    ).named_axis == {"x": -1}
+    assert ak.argcartesian(
+        [named_one, named_two, named_three], axis="y", nested=True
+    ).named_axis == {"x": -2, "y": -1}
+    assert ak.argcartesian(
+        [named_one, named_two, named_three], axis="y", nested=[0]
+    ).named_axis == {"x": -1}
+    assert ak.argcartesian(
+        [named_one, named_two, named_three], axis="y", nested=[1]
+    ).named_axis == {"y": -1}
+    assert ak.argcartesian(
+        [named_one, named_two, named_three], axis="y", nested=[0, 1]
+    ).named_axis == {"x": -2, "y": -1}
+
+
 def test_named_axis_ak_argcombinations():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
     named_array = ak.with_named_axis(array, named_axis=("x", "y"))
+
+    assert (
+        ak.argcombinations(named_array, 2, axis=0).named_axis == named_array.named_axis
+    )
+    assert (
+        ak.argcombinations(named_array, 2, axis=1).named_axis == named_array.named_axis
+    )
+
+
+def test_negative_named_axis_ak_argcombinations():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
 
     assert (
         ak.argcombinations(named_array, 2, axis=0).named_axis == named_array.named_axis
@@ -512,6 +800,48 @@ def test_named_axis_ak_argmax():
     assert not _get_named_axis(ak.argmax(named_array, axis=None))
 
 
+def test_negative_named_axis_ak_argmax():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
+
+    # first check that they work the same
+    assert ak.all(ak.argmax(array, axis=-2) == ak.argmax(named_array, axis="x"))
+    assert ak.all(ak.argmax(array, axis=-1) == ak.argmax(named_array, axis="y"))
+    assert ak.all(
+        ak.argmax(array, axis=-2, keepdims=True)
+        == ak.argmax(named_array, axis="x", keepdims=True)
+    )
+    assert ak.all(
+        ak.argmax(array, axis=-1, keepdims=True)
+        == ak.argmax(named_array, axis="y", keepdims=True)
+    )
+    assert ak.argmax(array, axis=None) == ak.argmax(named_array, axis=None)
+
+    # check that result axis names are correctly propagated
+    assert (
+        ak.argmax(named_array, axis=-2).named_axis
+        == ak.argmax(named_array, axis="x").named_axis
+        == {"y": -1}
+    )
+    assert (
+        ak.argmax(named_array, axis=-1).named_axis
+        == ak.argmax(named_array, axis="y").named_axis
+        == {"x": -1}
+    )
+    assert (
+        ak.argmax(named_array, axis=-2, keepdims=True).named_axis
+        == ak.argmax(named_array, axis="x", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert (
+        ak.argmax(named_array, axis=-1, keepdims=True).named_axis
+        == ak.argmax(named_array, axis="y", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert not _get_named_axis(ak.argmax(named_array, axis=None))
+
+
 def test_named_axis_ak_argmin():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -554,6 +884,48 @@ def test_named_axis_ak_argmin():
     assert not _get_named_axis(ak.argmin(named_array, axis=None))
 
 
+def test_negative_named_axis_ak_argmin():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
+
+    # first check that they work the same
+    assert ak.all(ak.argmin(array, axis=-2) == ak.argmin(named_array, axis="x"))
+    assert ak.all(ak.argmin(array, axis=-1) == ak.argmin(named_array, axis="y"))
+    assert ak.all(
+        ak.argmin(array, axis=-2, keepdims=True)
+        == ak.argmin(named_array, axis="x", keepdims=True)
+    )
+    assert ak.all(
+        ak.argmin(array, axis=-1, keepdims=True)
+        == ak.argmin(named_array, axis="y", keepdims=True)
+    )
+    assert ak.argmin(array, axis=None) == ak.argmin(named_array, axis=None)
+
+    # check that result axis names are correctly propagated
+    assert (
+        ak.argmin(named_array, axis=-2).named_axis
+        == ak.argmin(named_array, axis="x").named_axis
+        == {"y": -1}
+    )
+    assert (
+        ak.argmin(named_array, axis=-1).named_axis
+        == ak.argmin(named_array, axis="y").named_axis
+        == {"x": -1}
+    )
+    assert (
+        ak.argmin(named_array, axis=-2, keepdims=True).named_axis
+        == ak.argmin(named_array, axis="x", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert (
+        ak.argmin(named_array, axis=-1, keepdims=True).named_axis
+        == ak.argmin(named_array, axis="y", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert not _get_named_axis(ak.argmin(named_array, axis=None))
+
+
 def test_named_axis_ak_argsort():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -576,6 +948,28 @@ def test_named_axis_ak_argsort():
     )
 
 
+def test_negative_named_axis_ak_argsort():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
+
+    # first check that they work the same
+    assert ak.all(ak.argsort(array, axis=-2) == ak.argsort(named_array, axis="x"))
+    assert ak.all(ak.argsort(array, axis=-1) == ak.argsort(named_array, axis="y"))
+
+    # check that result axis names are correctly propagated
+    assert (
+        ak.argsort(named_array, axis=-2).named_axis
+        == ak.argsort(named_array, axis="x").named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert (
+        ak.argsort(named_array, axis=-1).named_axis
+        == ak.argsort(named_array, axis="y").named_axis
+        == {"x": -2, "y": -1}
+    )
+
+
 def test_named_axis_ak_array_equal():
     array1 = array2 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -591,7 +985,29 @@ def test_named_axis_ak_array_equal():
     assert ak.array_equal(named_array1, array1, check_named_axis=False)
     assert ak.array_equal(named_array1, array1, check_named_axis=True)
 
-    named_array3 = ak.with_named_axis(array1, named_axis=("x", "muons"))
+    named_array3 = ak.with_named_axis(array1, named_axis=("x", "z"))
+    assert ak.array_equal(named_array1, named_array3, check_named_axis=False)
+    assert not ak.array_equal(named_array1, named_array3, check_named_axis=True)
+
+
+def test_negative_named_axis_ak_array_equal():
+    array1 = array2 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array1 = named_array2 = ak.with_named_axis(
+        array1, named_axis={"x": -2, "y": -1}
+    )
+
+    assert ak.array_equal(array1, array2, check_named_axis=False) == ak.array_equal(
+        named_array1, named_array2, check_named_axis=False
+    )
+    assert ak.array_equal(array1, array2, check_named_axis=True) == ak.array_equal(
+        named_array1, named_array2, check_named_axis=True
+    )
+
+    assert ak.array_equal(named_array1, array1, check_named_axis=False)
+    assert ak.array_equal(named_array1, array1, check_named_axis=True)
+
+    named_array3 = ak.with_named_axis(array1, named_axis={"x": -2, "z": -1})
     assert ak.array_equal(named_array1, named_array3, check_named_axis=False)
     assert not ak.array_equal(named_array1, named_array3, check_named_axis=True)
 
@@ -642,6 +1058,32 @@ def test_named_axis_ak_cartesian():
     ).named_axis == {"x": 2, "y": 3}
 
 
+def test_negative_named_axis_ak_cartesian():
+    one = ak.Array([[1], [2], [3]])
+    two = ak.Array([[4, 5]])
+    three = ak.Array([[6, 7]])
+
+    named_one = ak.with_named_axis(one, named_axis={"x": -2, "y": -1})
+    named_two = ak.with_named_axis(two, named_axis={"x": -2, "y": -1})
+    named_three = ak.with_named_axis(three, named_axis={"x": -2, "y": -1})
+
+    assert ak.cartesian(
+        [named_one, named_two, named_three], axis="y", nested=False
+    ).named_axis == {"x": -1}
+    assert ak.cartesian(
+        [named_one, named_two, named_three], axis="y", nested=True
+    ).named_axis == {"x": -2, "y": -1}
+    assert ak.cartesian(
+        [named_one, named_two, named_three], axis="y", nested=[0]
+    ).named_axis == {"x": -1}
+    assert ak.cartesian(
+        [named_one, named_two, named_three], axis="y", nested=[1]
+    ).named_axis == {"y": -1}
+    assert ak.cartesian(
+        [named_one, named_two, named_three], axis="y", nested=[0, 1]
+    ).named_axis == {"x": -2, "y": -1}
+
+
 def test_named_axis_ak_categories():
     pyarrow = pytest.importorskip("pyarrow")  # noqa: F841
 
@@ -662,6 +1104,15 @@ def test_named_axis_ak_combinations():
 
     assert ak.combinations(named_array, 2, axis=0).named_axis == named_array.named_axis
     assert ak.combinations(named_array, 2, axis=1).named_axis == named_array.named_axis
+
+
+def test_negative_named_axis_ak_combinations():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
+
+    assert ak.combinations(named_array, 2, axis=-2).named_axis == named_array.named_axis
+    assert ak.combinations(named_array, 2, axis=-1).named_axis == named_array.named_axis
 
 
 def test_named_axis_ak_concatenate():
@@ -714,6 +1165,34 @@ def test_named_axis_ak_concatenate():
         )
 
 
+def test_negative_named_axis_ak_concatenate():
+    array1 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+    array2 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+    array3 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+    array4 = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    all_arrays = [array1, array2, array3, array4]
+
+    named_array1 = ak.with_named_axis(array1, named_axis={})
+    named_array2 = ak.with_named_axis(array1, named_axis={"y": -1})
+    named_array3 = ak.with_named_axis(array1, named_axis={"x": -2})
+    named_array4 = ak.with_named_axis(array1, named_axis={"x": -2, "y": -1})
+
+    all_named_arrays = [named_array1, named_array2, named_array3, named_array4]
+
+    assert ak.all(
+        ak.concatenate(all_arrays, axis=-2)
+        == ak.concatenate(all_named_arrays, axis="x")
+    )
+    assert ak.all(
+        ak.concatenate(all_arrays, axis=-1)
+        == ak.concatenate(all_named_arrays, axis="y")
+    )
+
+    assert ak.concatenate(all_named_arrays, axis="x").named_axis == {"x": -2, "y": -1}
+    assert ak.concatenate(all_named_arrays, axis="y").named_axis == {"x": -2, "y": -1}
+
+
 def test_named_axis_ak_copy():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -723,27 +1202,27 @@ def test_named_axis_ak_copy():
 
 
 # def test_named_axis_ak_corr():
-# array_x = ak.Array([[0, 1.1], [3.3, 4.4]])
-# array_y = ak.Array([[0, 1], [3, 4]])
+#     array_x = ak.Array([[0, 1.1], [3.3, 4.4]])
+#     array_y = ak.Array([[0, 1], [3, 4]])
 
-# named_array_x = ak.with_named_axis(array_x, ("x", "y"))
-# named_array_y = ak.with_named_axis(array_y, ("x", "y"))
+#     named_array_x = ak.with_named_axis(array_x, ("x", "y"))
+#     named_array_y = ak.with_named_axis(array_y, ("x", "y"))
 
-# assert ak.all(
-#     ak.corr(array_x, array_y, axis=0)
-#     == ak.corr(named_array_x, named_array_y, axis="x")
-# )
-# assert ak.all(
-#     ak.corr(array_x, array_y, axis=1)
-#     == ak.corr(named_array_x, named_array_y, axis="y")
-# )
-# assert ak.corr(array_x, array_y, axis=None) == ak.corr(
-#     named_array_x, named_array_y, axis=None
-# )
+#     assert ak.all(
+#         ak.corr(array_x, array_y, axis=0)
+#         == ak.corr(named_array_x, named_array_y, axis="x")
+#     )
+#     assert ak.all(
+#         ak.corr(array_x, array_y, axis=1)
+#         == ak.corr(named_array_x, named_array_y, axis="y")
+#     )
+#     assert ak.corr(array_x, array_y, axis=None) == ak.corr(
+#         named_array_x, named_array_y, axis=None
+#     )
 
-# assert ak.corr(named_array_x, named_array_y, axis="x").named_axis == {"y": 0}
-# assert ak.corr(named_array_x, named_array_y, axis="y").named_axis == {"x": 0}
-# assert not _get_named_axis(ak.corr(named_array_x, named_array_y, axis=None))
+#     assert ak.corr(named_array_x, named_array_y, axis="x").named_axis == {"y": 0}
+#     assert ak.corr(named_array_x, named_array_y, axis="y").named_axis == {"x": 0}
+#     assert not _get_named_axis(ak.corr(named_array_x, named_array_y, axis=None))
 
 
 def test_named_axis_ak_count():
@@ -757,6 +1236,20 @@ def test_named_axis_ak_count():
 
     assert ak.count(named_array, axis="x").named_axis == {"y": 0}
     assert ak.count(named_array, axis="y").named_axis == {"x": 0}
+    assert not _get_named_axis(ak.count(named_array, axis=None))
+
+
+def test_negative_named_axis_ak_count():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(ak.count(array, axis=-2) == ak.count(named_array, axis="x"))
+    assert ak.all(ak.count(array, axis=-1) == ak.count(named_array, axis="y"))
+    assert ak.count(array, axis=None) == ak.count(named_array, axis=None)
+
+    assert ak.count(named_array, axis="x").named_axis == {"y": -1}
+    assert ak.count(named_array, axis="y").named_axis == {"x": -1}
     assert not _get_named_axis(ak.count(named_array, axis=None))
 
 
@@ -777,6 +1270,26 @@ def test_named_axis_ak_count_nonzero():
 
     assert ak.count_nonzero(named_array, axis="x").named_axis == {"y": 0}
     assert ak.count_nonzero(named_array, axis="y").named_axis == {"x": 0}
+    assert not _get_named_axis(ak.count_nonzero(named_array, axis=None))
+
+
+def test_negative_named_axis_ak_count_nonzero():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(
+        ak.count_nonzero(array, axis=-2) == ak.count_nonzero(named_array, axis="x")
+    )
+    assert ak.all(
+        ak.count_nonzero(array, axis=-1) == ak.count_nonzero(named_array, axis="y")
+    )
+    assert ak.count_nonzero(array, axis=None) == ak.count_nonzero(
+        named_array, axis=None
+    )
+
+    assert ak.count_nonzero(named_array, axis="x").named_axis == {"y": -1}
+    assert ak.count_nonzero(named_array, axis="y").named_axis == {"x": -1}
     assert not _get_named_axis(ak.count_nonzero(named_array, axis=None))
 
 
@@ -820,6 +1333,22 @@ def test_named_axis_ak_drop_none():
     assert ak.drop_none(named_array, axis=None).named_axis == {"x": 0, "y": 1}
 
 
+def test_negative_named_axis_ak_drop_none():
+    array = ak.Array([[1, None], [3], [None], [4, None, 6]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(ak.drop_none(array, axis=-2) == ak.drop_none(named_array, axis="x"))
+    assert ak.all(ak.drop_none(array, axis=-1) == ak.drop_none(named_array, axis="y"))
+    assert ak.all(
+        ak.drop_none(array, axis=None) == ak.drop_none(named_array, axis=None)
+    )
+
+    assert ak.drop_none(named_array, axis="x").named_axis == {"x": -2, "y": -1}
+    assert ak.drop_none(named_array, axis="y").named_axis == {"x": -2, "y": -1}
+    assert ak.drop_none(named_array, axis=None).named_axis == {"x": -2, "y": -1}
+
+
 def test_named_axis_ak_enforce_type():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -848,6 +1377,26 @@ def test_named_axis_ak_fill_none():
     assert ak.fill_none(named_array, 0, axis=None).named_axis == {"x": 0, "y": 1}
 
 
+def test_negative_named_axis_ak_fill_none():
+    array = ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(
+        ak.fill_none(array, 0, axis=-2) == ak.fill_none(named_array, 0, axis="x")
+    )
+    assert ak.all(
+        ak.fill_none(array, 0, axis=-1) == ak.fill_none(named_array, 0, axis="y")
+    )
+    assert ak.all(
+        ak.fill_none(array, 0, axis=None) == ak.fill_none(named_array, 0, axis=None)
+    )
+
+    assert ak.fill_none(named_array, 0, axis="x").named_axis == {"x": -2, "y": -1}
+    assert ak.fill_none(named_array, 0, axis="y").named_axis == {"x": -2, "y": -1}
+    assert ak.fill_none(named_array, 0, axis=None).named_axis == {"x": -2, "y": -1}
+
+
 def test_named_axis_ak_firsts():
     array = ak.Array([[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]])
 
@@ -860,6 +1409,18 @@ def test_named_axis_ak_firsts():
     assert ak.firsts(named_array, axis="y").named_axis == {"x": 0}
 
 
+def test_negative_named_axis_ak_firsts():
+    array = ak.Array([[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(ak.firsts(array, axis=-2) == ak.firsts(named_array, axis="x"))
+    assert ak.all(ak.firsts(array, axis=-1) == ak.firsts(named_array, axis="y"))
+
+    assert ak.firsts(named_array, axis="x").named_axis == {"y": -1}
+    assert ak.firsts(named_array, axis="y").named_axis == {"x": -1}
+
+
 def test_named_axis_ak_flatten():
     array = ak.Array([[[1.1, 2.2]], [[]], [[3.3]], [[]], [[]], [[4.4, 5.5]]])
 
@@ -867,12 +1428,28 @@ def test_named_axis_ak_flatten():
 
     assert ak.all(ak.flatten(array, axis=0) == ak.flatten(named_array, axis="x"))
     assert ak.all(ak.flatten(array, axis=1) == ak.flatten(named_array, axis="y"))
-    assert ak.all(ak.flatten(array, axis=0) == ak.flatten(named_array, axis="x"))
+    assert ak.all(ak.flatten(array, axis=2) == ak.flatten(named_array, axis="z"))
     assert ak.all(ak.flatten(array, axis=None) == ak.flatten(named_array, axis=None))
 
     assert ak.flatten(named_array, axis="x").named_axis == {"x": 0, "y": 1, "z": 2}
     assert ak.flatten(named_array, axis="y").named_axis == {"x": 0, "z": 1}
     assert ak.flatten(named_array, axis="z").named_axis == {"x": 0, "y": 1}
+    assert not _get_named_axis(ak.flatten(named_array, axis=None))
+
+
+def test_negative_named_axis_ak_flatten():
+    array = ak.Array([[[1.1, 2.2]], [[]], [[3.3]], [[]], [[]], [[4.4, 5.5]]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -3, "y": -2, "z": -1})
+
+    assert ak.all(ak.flatten(array, axis=-3) == ak.flatten(named_array, axis="x"))
+    assert ak.all(ak.flatten(array, axis=-2) == ak.flatten(named_array, axis="y"))
+    assert ak.all(ak.flatten(array, axis=-1) == ak.flatten(named_array, axis="z"))
+    assert ak.all(ak.flatten(array, axis=None) == ak.flatten(named_array, axis=None))
+
+    assert ak.flatten(named_array, axis="x").named_axis == {"x": -3, "y": -2, "z": -1}
+    assert ak.flatten(named_array, axis="y").named_axis == {"x": -2, "z": -1}
+    assert ak.flatten(named_array, axis="z").named_axis == {"x": -2, "y": -1}
     assert not _get_named_axis(ak.flatten(named_array, axis=None))
 
 
@@ -894,11 +1471,23 @@ def test_named_axis_ak_is_none():
     assert ak.all(ak.is_none(array, axis=1) == ak.is_none(named_array, axis="y"))
     assert ak.all(ak.is_none(array, axis=2) == ak.is_none(named_array, axis="z"))
 
-    assert ak.is_none(named_array, axis="x").named_axis == {
-        "x": 0,
-    }
+    assert ak.is_none(named_array, axis="x").named_axis == {"x": 0}
     assert ak.is_none(named_array, axis="y").named_axis == {"x": 0, "y": 1}
     assert ak.is_none(named_array, axis="z").named_axis == {"x": 0, "y": 1, "z": 2}
+
+
+def test_negative_named_axis_ak_is_none():
+    array = ak.Array([[[1, None]], [[3]], [[None]], [[4, None, 6]]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -3, "y": -2, "z": -1})
+
+    assert ak.all(ak.is_none(array, axis=-3) == ak.is_none(named_array, axis="x"))
+    assert ak.all(ak.is_none(array, axis=-2) == ak.is_none(named_array, axis="y"))
+    assert ak.all(ak.is_none(array, axis=-1) == ak.is_none(named_array, axis="z"))
+
+    assert ak.is_none(named_array, axis="x").named_axis == {"z": -1}
+    assert ak.is_none(named_array, axis="y").named_axis == {"y": -2, "z": -1}
+    assert ak.is_none(named_array, axis="z").named_axis == {"x": -3, "y": -2, "z": -1}
 
 
 def test_named_axis_ak_isclose():
@@ -936,17 +1525,17 @@ def test_named_axis_ak_local_index():
     assert ak.local_index(named_array, axis="y").named_axis == {"x": 0, "y": 1}
     assert ak.local_index(named_array, axis="z").named_axis == {"x": 0, "y": 1, "z": 2}
 
-    # now with negative axis mappings
-    named_array = ak.with_named_axis(array, {"x": 0, "y": -2, "z": -1})
 
-    assert ak.local_index(named_array, axis="x").named_axis == {"x": 0, "z": -1}
-    assert ak.local_index(named_array, axis="y").named_axis == {
-        "x": 0,
-        "y": -2,
-        "z": -1,
-    }
+def test_negative_named_axis_ak_local_index():
+    array = ak.Array(
+        [[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [], [[5.5], [], [6.6, 7.7, 8.8, 9.9]]]
+    )
+    named_array = ak.with_named_axis(array, {"x": -3, "y": -2, "z": -1})
+
+    assert ak.local_index(named_array, axis="x").named_axis == {"z": -1}
+    assert ak.local_index(named_array, axis="y").named_axis == {"y": -2, "z": -1}
     assert ak.local_index(named_array, axis="z").named_axis == {
-        "x": 0,
+        "x": -3,
         "y": -2,
         "z": -1,
     }
@@ -999,6 +1588,39 @@ def test_named_axis_ak_max():
     assert not _get_named_axis(ak.max(named_array, axis=None))
 
 
+def test_negative_named_axis_ak_max():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
+
+    # first check that they work the same
+    assert ak.all(ak.max(array, axis=-2) == ak.max(named_array, axis="x"))
+    assert ak.all(ak.max(array, axis=-1) == ak.max(named_array, axis="y"))
+
+    # check that result axis names are correctly propagated
+    assert (
+        ak.max(named_array, axis=-2).named_axis
+        == ak.max(named_array, axis="x").named_axis
+        == {"y": -1}
+    )
+    assert (
+        ak.max(named_array, axis=-1).named_axis
+        == ak.max(named_array, axis="y").named_axis
+        == {"x": -1}
+    )
+    assert (
+        ak.max(named_array, axis=-2, keepdims=True).named_axis
+        == ak.max(named_array, axis="x", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert (
+        ak.max(named_array, axis=-1, keepdims=True).named_axis
+        == ak.max(named_array, axis="y", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert not _get_named_axis(ak.max(named_array, axis=None))
+
+
 def test_named_axis_ak_mean():
     array = ak.Array([[1, 2], [3], [4, 5, 6]])
 
@@ -1015,12 +1637,33 @@ def test_named_axis_ak_mean():
     assert not _get_named_axis(ak.mean(named_array, axis=None))
 
 
+def test_negative_named_axis_ak_mean():
+    array = ak.Array([[1, 2], [3], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
+
+    assert ak.all(ak.mean(array, axis=-2) == ak.mean(named_array, axis="x"))
+    assert ak.all(ak.mean(array, axis=-1) == ak.mean(named_array, axis="y"))
+    assert ak.mean(array, axis=None) == ak.mean(named_array, axis=None)
+
+    assert ak.mean(named_array, axis="x").named_axis == {"y": -1}
+    assert ak.mean(named_array, axis="y").named_axis == {"x": -1}
+    assert ak.mean(named_array, axis="x", keepdims=True).named_axis == {
+        "x": -2,
+        "y": -1,
+    }
+    assert ak.mean(named_array, axis="y", keepdims=True).named_axis == {
+        "x": -2,
+        "y": -1,
+    }
+    assert not _get_named_axis(ak.mean(named_array, axis=None))
+
+
 def test_named_axis_ak_merge_option_of_records():
     array = ak.Array([None, {"a": 1}, {"a": 2}])
 
     named_array = ak.with_named_axis(array, named_axis=("x",))
 
-    # assert ak.all(ak.merge_option_of_records(array, axis=0) == ak.merge_option_of_records(named_array, axis="x"))
     assert (
         ak.merge_option_of_records(named_array, axis="x").named_axis
         == named_array.named_axis
@@ -1032,7 +1675,6 @@ def test_named_axis_ak_merge_union_of_records():
 
     named_array = ak.with_named_axis(array, named_axis=("x",))
 
-    # assert ak.all(ak.merge_union_of_records(array, axis=0) == ak.merge_union_of_records(named_array, axis="x"))
     assert (
         ak.merge_union_of_records(named_array, axis="x").named_axis
         == named_array.named_axis
@@ -1072,6 +1714,39 @@ def test_named_axis_ak_min():
     assert not _get_named_axis(ak.min(named_array, axis=None))
 
 
+def test_negative_named_axis_ak_min():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, named_axis={"x": -2, "y": -1})
+
+    # first check that they work the same
+    assert ak.all(ak.min(array, axis=-2) == ak.min(named_array, axis="x"))
+    assert ak.all(ak.min(array, axis=-1) == ak.min(named_array, axis="y"))
+
+    # check that result axis names are correctly propagated
+    assert (
+        ak.min(named_array, axis=-2).named_axis
+        == ak.min(named_array, axis="x").named_axis
+        == {"y": -1}
+    )
+    assert (
+        ak.min(named_array, axis=-1).named_axis
+        == ak.min(named_array, axis="y").named_axis
+        == {"x": -1}
+    )
+    assert (
+        ak.min(named_array, axis=-2, keepdims=True).named_axis
+        == ak.min(named_array, axis="x", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert (
+        ak.min(named_array, axis=-1, keepdims=True).named_axis
+        == ak.min(named_array, axis="y", keepdims=True).named_axis
+        == {"x": -2, "y": -1}
+    )
+    assert not _get_named_axis(ak.min(named_array, axis=None))
+
+
 def test_named_axis_ak_moment():
     array = ak.Array([[0, 1.1], [3.3, 4.4]])
 
@@ -1083,6 +1758,20 @@ def test_named_axis_ak_moment():
 
     assert ak.moment(named_array, 0, axis="x").named_axis == {"y": 0}
     assert ak.moment(named_array, 0, axis="y").named_axis == {"x": 0}
+    assert not _get_named_axis(ak.moment(named_array, 0, axis=None))
+
+
+def test_negative_named_axis_ak_moment():
+    array = ak.Array([[0, 1.1], [3.3, 4.4]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(ak.moment(array, 0, axis=-2) == ak.moment(named_array, 0, axis="x"))
+    assert ak.all(ak.moment(array, 0, axis=-1) == ak.moment(named_array, 0, axis="y"))
+    assert ak.moment(array, 0, axis=None) == ak.moment(named_array, 0, axis=None)
+
+    assert ak.moment(named_array, 0, axis="x").named_axis == {"y": -1}
+    assert ak.moment(named_array, 0, axis="y").named_axis == {"x": -1}
     assert not _get_named_axis(ak.moment(named_array, 0, axis=None))
 
 
@@ -1111,6 +1800,18 @@ def test_named_axis_ak_num():
 
     assert ak.num(array, axis=0) == ak.num(named_array, axis="x")
     assert ak.all(ak.num(array, axis=1) == ak.num(named_array, axis="y"))
+
+    assert ak.num(named_array, axis="y").named_axis == {"y": 0}
+    assert not _get_named_axis(ak.num(named_array, axis="x"))
+
+
+def test_negative_named_axis_ak_num():
+    array = ak.Array([[1, 2], [3], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.num(array, axis=-2) == ak.num(named_array, axis="x")
+    assert ak.all(ak.num(array, axis=-1) == ak.num(named_array, axis="y"))
 
     assert ak.num(named_array, axis="y").named_axis == {"y": 0}
     assert not _get_named_axis(ak.num(named_array, axis="x"))
@@ -1152,6 +1853,20 @@ def test_named_axis_ak_prod():
     assert not _get_named_axis(ak.prod(named_array, axis=None))
 
 
+def test_negative_named_axis_ak_prod():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(ak.prod(array, axis=-2) == ak.prod(named_array, axis="x"))
+    assert ak.all(ak.prod(array, axis=-1) == ak.prod(named_array, axis="y"))
+    assert ak.prod(array, axis=None) == ak.prod(named_array, axis=None)
+
+    assert ak.prod(named_array, axis="x").named_axis == {"y": -1}
+    assert ak.prod(named_array, axis="y").named_axis == {"x": -1}
+    assert not _get_named_axis(ak.prod(named_array, axis=None))
+
+
 def test_named_axis_ak_ptp():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -1163,6 +1878,20 @@ def test_named_axis_ak_ptp():
 
     assert ak.ptp(named_array, axis="x").named_axis == {"y": 0}
     assert ak.ptp(named_array, axis="y").named_axis == {"x": 0}
+    assert not _get_named_axis(ak.ptp(named_array, axis=None))
+
+
+def test_negative_named_axis_ak_ptp():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(ak.ptp(array, axis=-2) == ak.ptp(named_array, axis="x"))
+    assert ak.all(ak.ptp(array, axis=-1) == ak.ptp(named_array, axis="y"))
+    assert ak.ptp(array, axis=None) == ak.ptp(named_array, axis=None)
+
+    assert ak.ptp(named_array, axis="x").named_axis == {"y": -1}
+    assert ak.ptp(named_array, axis="y").named_axis == {"x": -1}
     assert not _get_named_axis(ak.ptp(named_array, axis=None))
 
 
@@ -1216,6 +1945,18 @@ def test_named_axis_ak_singletons():
     assert ak.singletons(named_array, axis=1).named_axis == {"x": 0, "y": 1}
 
 
+def test_negative_named_axis_ak_singletons():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(ak.singletons(array, axis=-2) == ak.singletons(named_array, axis="x"))
+    assert ak.all(ak.singletons(array, axis=-1) == ak.singletons(named_array, axis="y"))
+
+    assert ak.singletons(named_array, axis=-2).named_axis == {"x": -3, "y": -1}
+    assert ak.singletons(named_array, axis=-1).named_axis == {"x": -3, "y": -2}
+
+
 def test_named_axis_ak_softmax():
     array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
 
@@ -1262,6 +2003,20 @@ def test_named_axis_ak_std():
     assert not _get_named_axis(ak.std(named_array, axis=None))
 
 
+def test_negative_named_axis_ak_std():
+    array = ak.Array([[1, 2], [3], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(ak.std(array, axis=-2) == ak.std(named_array, axis="x"))
+    assert ak.all(ak.std(array, axis=-1) == ak.std(named_array, axis="y"))
+    assert ak.std(array, axis=None) == ak.std(named_array, axis=None)
+
+    assert ak.std(named_array, axis="x").named_axis == {"y": -1}
+    assert ak.std(named_array, axis="y").named_axis == {"x": -1}
+    assert not _get_named_axis(ak.std(named_array, axis=None))
+
+
 def test_named_axis_ak_strings_astype():
     array = ak.Array([["1", "2"], ["3"], ["4", "5", "6"]])
 
@@ -1285,6 +2040,20 @@ def test_named_axis_ak_sum():
 
     assert ak.sum(named_array, axis="x").named_axis == {"y": 0}
     assert ak.sum(named_array, axis="y").named_axis == {"x": 0}
+    assert not _get_named_axis(ak.sum(named_array, axis=None))
+
+
+def test_negative_named_axis_ak_sum():
+    array = ak.Array([[1, 2], [3], [], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(ak.sum(array, axis=-2) == ak.sum(named_array, axis="x"))
+    assert ak.all(ak.sum(array, axis=-1) == ak.sum(named_array, axis="y"))
+    assert ak.sum(array, axis=None) == ak.sum(named_array, axis=None)
+
+    assert ak.sum(named_array, axis="x").named_axis == {"y": -1}
+    assert ak.sum(named_array, axis="y").named_axis == {"x": -1}
     assert not _get_named_axis(ak.sum(named_array, axis=None))
 
 
@@ -1358,6 +2127,20 @@ def test_named_axis_ak_var():
 
     assert ak.var(named_array, axis="x").named_axis == {"y": 0}
     assert ak.var(named_array, axis="y").named_axis == {"x": 0}
+    assert not _get_named_axis(ak.var(named_array, axis=None))
+
+
+def test_negative_named_axis_ak_var():
+    array = ak.Array([[1, 2], [3], [4, 5, 6]])
+
+    named_array = ak.with_named_axis(array, {"x": -2, "y": -1})
+
+    assert ak.all(ak.var(array, axis=-2) == ak.var(named_array, axis="x"))
+    assert ak.all(ak.var(array, axis=-1) == ak.var(named_array, axis="y"))
+    assert ak.var(array, axis=None) == ak.var(named_array, axis=None)
+
+    assert ak.var(named_array, axis="x").named_axis == {"y": -1}
+    assert ak.var(named_array, axis="y").named_axis == {"x": -1}
     assert not _get_named_axis(ak.var(named_array, axis=None))
 
 

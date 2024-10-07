@@ -256,6 +256,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
     # Handle named axis
     # Step 1: Normalize named axis to positional axis
     axis = _named_axis_to_positional_axis(out_named_axis, axis)
+    max_ndim = max([layout.minmax_depth[1] for layout in layouts])
 
     if with_name is not None:
         if parameters is None:
@@ -284,7 +285,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
     if nested is None or nested is False:
         nested = []
     elif nested is True:
-        out_named_axis = _add_named_axis(out_named_axis, 0)
+        out_named_axis = _add_named_axis(out_named_axis, 0, max_ndim)
         if fields is not None:
             nested = list(fields)[:-1]
         else:
@@ -311,7 +312,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
                     "[0, len(arrays) - 1) for an iterable of arrays"
                 )
         for n in nested:
-            out_named_axis = _add_named_axis(out_named_axis, n)
+            out_named_axis = _add_named_axis(out_named_axis, n, max_ndim)
 
     backend = next((layout.backend for layout in layouts), cpu)
     if posaxis == 0:

@@ -76,7 +76,9 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
     # Step 2: propagate named axis from input to output,
     #   use strategy "add one" (see: awkward._namedaxis)
-    out_named_axis = _add_named_axis(named_axis, axis + 1)
+    out_named_axis = _add_named_axis(
+        named_axis, (axis + 1) if axis >= 0 else axis, layout.minmax_depth[1]
+    )
 
     def action(layout, depth, backend, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)

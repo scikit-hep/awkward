@@ -73,6 +73,34 @@ def _prettify_named_axes(named_axis: AxisMapping) -> str:
     )
 
 
+def _neg2pos_axis(
+    axis: int,
+    total: int,
+) -> int:
+    """
+    Converts a negative axis index to a positive one.
+
+    This function takes a negative axis index and the total number of axes and returns the corresponding positive axis index.
+    If the input axis index is already positive, it is returned as is.
+
+    Args:
+        axis (int): The axis index to convert. Can be negative.
+        total (int): The total number of axes.
+
+    Returns:
+        int: The positive axis index corresponding to the input axis index.
+
+    Examples:
+        >>> _neg2pos_axis(-1, 3)
+        2
+        >>> _neg2pos_axis(1, 3)
+        1
+    """
+    if axis < 0:
+        return total + axis
+    return axis
+
+
 def _get_named_axis(
     ctx: MaybeSupportsNamedAxis | AttrsNamedAxisMapping | tp.Mapping | tp.Any,
 ) -> AxisMapping:
@@ -365,6 +393,7 @@ def _keep_named_axis(
 def _keep_named_axis_up_to(
     named_axis: AxisMapping,
     axis: int,
+    total: int,
 ) -> AxisMapping:
     """
     Determines the new named axis after keeping all axes up to the specified axis. This function is useful when an operation
@@ -373,26 +402,20 @@ def _keep_named_axis_up_to(
     Args:
         named_axis (AxisMapping): The current named axis.
         axis (int): The index of the axis up to which to keep.
+        total (int): The total number of axes.
 
     Returns:
         AxisMapping: The new named axis after keeping all axes up to the specified axis.
 
     Examples:
-        >>> _keep_named_axis_up_to({"x": 0, "y": 2}, 0)
+        >>> _keep_named_axis_up_to({"x": 0, "y": 1, "z": 2}, 1, 3)
+        {"x": 0, "y": 1}
+        >>> _keep_named_axis_up_to({"x": 0, "y": 1, "z": 2}, -1, 3)
+        {"x": 0, "y": 1, "z": 2}
+        >>> _keep_named_axis_up_to({"x": 0, "y": 1, "z": 2}, 0, 3)
         {"x": 0}
-        >>> _keep_named_axis_up_to({"x": 0, "y": 2}, 1)
-        {"x": 0}
-        >>> _keep_named_axis_up_to({"x": 0, "y": 2}, 2)
-        {"x": 0, "y": 2}
-        >>> _keep_named_axis_up_to({"x": 0, "y": -2}, 0)
-        {"x": 0}
-        >>> _keep_named_axis_up_to({"x": 0, "y": -2}, 1)
-        {"x": 0, "y": -2}
-        >>> _keep_named_axis_up_to({"x": 0, "y": -2}, 2)
-        {"x": 0, "y": -2}
     """
-    if axis < 0:
-        raise ValueError("The axis must be a positive integer.")
+    axis = _neg2pos_axis(axis, total)
     out = {}
     for k, v in named_axis.items():
         if v >= 0 and v <= axis:
@@ -458,7 +481,11 @@ def _remove_named_axis(
         total = len(named_axis)
 
     # remove the specified axis
-    out = {ax: pos for ax, pos in named_axis.items() if pos != axis}
+    out = {
+        ax: pos
+        for ax, pos in named_axis.items()
+        if _neg2pos_axis(pos, total) != _neg2pos_axis(axis, total)
+    }
 
     return _adjust_pos_axis(out, axis, total, direction=-1)
 
@@ -504,14 +531,14 @@ def _adjust_pos_axis(
             # -> change position by direction
             if pos >= axis:
                 return pos + direction
-            # positive axis and position smaller than the removed/added (positive) axis, but greater than 0
-            # -> keep position
-            elif pos >= 0:
-                return pos
             # positive axis and negative position
             # -> change position by direction
+            elif pos < 0 and pos + total < axis:
+                return pos - direction
+            # positive axis and position smaller than the removed/added (positive) axis, but greater than 0
+            # -> keep position
             else:
-                return _adjust(pos, axis - total, direction)
+                return pos
         # negative axis
         else:
             # negative axis and position smaller than the removed/added (negative) axis
@@ -520,7 +547,7 @@ def _adjust_pos_axis(
                 return pos - direction
             # negative axis and positive position
             # -> change position by inverse direction
-            elif pos > axis + total:
+            elif pos > 0 and pos > axis + total:
                 return pos + direction
             # negative axis and position greater than the removed/added (negative) axis, but smaller than 0
             # -> keep position

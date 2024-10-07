@@ -16,7 +16,7 @@ from awkward._backends.dispatch import (
 )
 from awkward._behavior import get_array_class, get_record_class
 from awkward._kernels import KernelError
-from awkward._layout import wrap_layout
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._meta.meta import Meta
 from awkward._namedaxis import (
     NamedAxis,
@@ -591,7 +591,7 @@ class Content(Meta):
                 for x in nextwhere:
                     if x is np.newaxis or x is None:
                         n_newaxis += 1
-                n_total = self.purelist_depth
+                n_total = self.minmax_depth[1]
                 n_slice_none = n_total - (len(_nextwhere) - n_newaxis - 1)
                 # expand `[...]` to `[:]*n_slice_none`
                 _nextwhere = (
@@ -602,26 +602,33 @@ class Content(Meta):
 
             # now propagate named axis
             _named_axis = _keep_named_axis(named_axis.mapping, None)
-            iter_named_axis = iter(dict(_named_axis).items())
-            _adjust_dims = 0
+            _adjust_dim = 0
             # this loop does the following:
             # - remove a named axis for integer indices, e.g. `a[1, 2]`
             # - add a named axis for None (or np.newaxis) indices, e.g. `a[..., None]`
             # - keep named axis for any other index, e.g. `a[:]`, `a[0:1]`, or `a[a>0]`
             #   (these may only remove elements, but not dimensions)
-            for i, nw in enumerate(_nextwhere):
-                i += _adjust_dims
-                for _, pos in iter_named_axis:
-                    if pos == i:
+            for dim, nw in enumerate(_nextwhere):
+                dim_adjusted = dim + _adjust_dim
+                total_adjusted = self.minmax_depth[1] + _adjust_dim
+                for _, pos in _named_axis.items():
+                    if maybe_posaxis(self, pos, 0) == dim_adjusted:
                         break
+
                 if is_integer(nw) or (is_array_like(nw) and nw.ndim == 0):
                     _named_axis = _remove_named_axis(
-                        _named_axis, i, self.purelist_depth
+                        named_axis=_named_axis,
+                        axis=dim_adjusted,
+                        total=total_adjusted,
                     )
-                    _adjust_dims -= 1
+                    _adjust_dim -= 1
                 elif nw is None:
-                    _named_axis = _add_named_axis(_named_axis, i, self.purelist_depth)
-                    _adjust_dims += 1
+                    _named_axis = _add_named_axis(
+                        named_axis=_named_axis,
+                        axis=dim_adjusted,
+                        total=total_adjusted,
+                    )
+                    _adjust_dim += 1
 
             # set propagated named axis
             named_axis.mapping = _named_axis

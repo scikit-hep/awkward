@@ -1109,12 +1109,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
 
             if NamedAxis.mapping:
-                out = ak.operations.ak_with_named_axis._impl(
+                return ak.operations.ak_with_named_axis._impl(
                     out,
                     named_axis=NamedAxis.mapping,
                     highlevel=True,
-                    behavior=self._behavior,
-                    attrs=self._attrs,
+                    behavior=None,
+                    attrs=None,
                 )
             return out
 
