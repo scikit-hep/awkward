@@ -100,7 +100,7 @@ jobs:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: yezz123/setup-uv@v4
+      uses: astral-sh/setup-uv@v3
 
     - name: Prepare build files
       run: pipx run nox -s prepare
@@ -150,7 +150,7 @@ jobs:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: yezz123/setup-uv@v4
+      uses: astral-sh/setup-uv@v3
 
     - name: Prepare build files
       run: pipx run nox -s prepare
@@ -192,7 +192,7 @@ jobs:
         submodules: true
 
     - name: Setup uv
-      uses: yezz123/setup-uv@v4
+      uses: astral-sh/setup-uv@v3
 
     - name: Prepare build files
       run: pipx run nox -s prepare
