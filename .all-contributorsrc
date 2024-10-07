@@ -483,6 +483,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "tacaswell",
+      "name": "Thomas A Caswell",
+      "avatar_url": "https://avatars.githubusercontent.com/u/199813?v=4",
+      "profile": "https://tacaswell.github.io",
+      "contributions": [
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,
