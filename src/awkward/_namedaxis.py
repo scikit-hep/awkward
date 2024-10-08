@@ -22,7 +22,7 @@ _NamedAxisKey: str = "__named_axis__"  # reserved for named axis
 
 
 class AttrsNamedAxisMapping(tp.TypedDict, total=False):
-    _NamedAxisKey: AxisMapping
+    __named_axis__: AxisMapping
 
 
 @tp.runtime_checkable
