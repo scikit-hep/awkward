@@ -18,7 +18,9 @@ AxisMapping: tp.TypeAlias = tp.Mapping[AxisName, int]
 AxisTuple: tp.TypeAlias = tp.Tuple[AxisName, ...]
 
 
-NAMED_AXIS_KEY: str = "__named_axis__"  # reserved for named axis
+NAMED_AXIS_KEY: tp.Literal["__named_axis__"] = (
+    "__named_axis__"  # reserved for named axis
+)
 
 
 class AttrsNamedAxisMapping(tp.TypedDict, total=False):
