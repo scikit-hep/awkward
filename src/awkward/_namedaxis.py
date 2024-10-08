@@ -18,7 +18,7 @@ AxisMapping: tp.TypeAlias = tp.Mapping[AxisName, int]
 AxisTuple: tp.TypeAlias = tp.Tuple[AxisName, ...]
 
 
-_NamedAxisKey: str = "__named_axis__"  # reserved for named axis
+NAMED_AXIS_KEY: str = "__named_axis__"  # reserved for named axis
 
 
 class AttrsNamedAxisMapping(tp.TypedDict, total=False):
@@ -119,19 +119,19 @@ def _get_named_axis(
         >>> class Test(MaybeSupportsNamedAxis):
         ...     @property
         ...     def attrs(self):
-        ...         return {_NamedAxisKey: {"x": 0, "y": 1, "z": 2}}
+        ...         return {NAMED_AXIS_KEY: {"x": 0, "y": 1, "z": 2}}
         ...
         >>> _get_named_axis(Test())
         {"x": 0, "y": 1, "z": 2}
-        >>> _get_named_axis({_NamedAxisKey: {"x": 0, "y": 1, "z": 2}})
+        >>> _get_named_axis({NAMED_AXIS_KEY: {"x": 0, "y": 1, "z": 2}})
         {"x": 0, "y": 1, "z": 2}
         >>> _get_named_axis({"other_key": "other_value"})
         {}
     """
     if isinstance(ctx, MaybeSupportsNamedAxis):
         return _get_named_axis(ctx.attrs)
-    elif isinstance(ctx, tp.Mapping) and _NamedAxisKey in ctx:
-        return dict(ctx[_NamedAxisKey])
+    elif isinstance(ctx, tp.Mapping) and NAMED_AXIS_KEY in ctx:
+        return dict(ctx[NAMED_AXIS_KEY])
     else:
         return {}
 
@@ -705,8 +705,8 @@ class NamedAxesWithDims:
             _named_axes.append(_get_named_axis(array))
             _ndims.append(layout.minmax_depth[1])
 
-        depth_context = {_NamedAxisKey: cls(_named_axes, _ndims)}
-        lateral_context = {_NamedAxisKey: cls(_named_axes, _ndims)}
+        depth_context = {NAMED_AXIS_KEY: cls(_named_axes, _ndims)}
+        lateral_context = {NAMED_AXIS_KEY: cls(_named_axes, _ndims)}
         return depth_context, lateral_context
 
     def __setitem__(self, index: int, named_axis_with_ndim: tuple[AxisMapping, int]):

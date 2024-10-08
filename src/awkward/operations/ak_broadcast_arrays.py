@@ -13,8 +13,8 @@ from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
     NamedAxesWithDims,
-    _NamedAxisKey,
     _unify_named_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -265,7 +265,7 @@ def _impl(
 
     # unify named axes
     out_named_axis = reduce(
-        _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+        _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
     )
     wrapped_out = []
     for layout_out, array_in in zip(out, arrays):

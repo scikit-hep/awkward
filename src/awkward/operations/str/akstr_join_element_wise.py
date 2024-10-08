@@ -10,7 +10,7 @@ from awkward._backends.typetracer import TypeTracerBackend
 from awkward._behavior import behavior_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
-from awkward._namedaxis import NamedAxesWithDims, _NamedAxisKey, _unify_named_axis
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 
 __all__ = ("join_element_wise",)
 
@@ -80,7 +80,7 @@ def _impl(arrays, highlevel, behavior, attrs):
     )
 
     out_named_axis = reduce(
-        _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+        _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
     )
     wrapped = ctx.wrap(out, highlevel=highlevel)
     return ak.operations.ak_with_named_axis._impl(

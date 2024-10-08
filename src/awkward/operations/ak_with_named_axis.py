@@ -5,9 +5,9 @@ from __future__ import annotations
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
     AxisMapping,
     AxisTuple,
-    _NamedAxisKey,
     _prepare_named_axis_for_attrs,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -63,7 +63,7 @@ def _impl(array, named_axis, highlevel, behavior, attrs):
     )
     # now we're good, set the named axis
     return ctx.with_attr(
-        key=_NamedAxisKey,
+        key=NAMED_AXIS_KEY,
         value=_named_axis,
     ).wrap(
         layout,

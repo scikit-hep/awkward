@@ -24,12 +24,12 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
     AttrsNamedAxisMapping,
     AxisMapping,
     NamedAxis,
     _get_named_axis,
     _make_positional_axis_tuple,
-    _NamedAxisKey,
     _normalize_named_slice,
     _prepare_named_axis_for_attrs,
     _prettify_named_axes,
@@ -349,8 +349,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             # now we're good, set the named axis
             if attrs is None:
                 attrs = {}
-            # if _NamedAxisKey is already in attrs, it will be overwritten
-            attrs[_NamedAxisKey] = _named_axis
+            # if NAMED_AXIS_KEY is already in attrs, it will be overwritten
+            attrs[NAMED_AXIS_KEY] = _named_axis
 
         self._layout = layout
         self._behavior = behavior
@@ -1844,8 +1844,8 @@ class Record(NDArrayOperatorsMixin):
             # now we're good, set the named axis
             if attrs is None:
                 attrs = {}
-            # if _NamedAxisKey is already in attrs, it will be overwritten
-            attrs[_NamedAxisKey] = _named_axis
+            # if NAMED_AXIS_KEY is already in attrs, it will be overwritten
+            attrs[NAMED_AXIS_KEY] = _named_axis
 
         self._layout = layout
         self._behavior = behavior

@@ -10,11 +10,11 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
 from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
     NamedAxesWithDims,
     _add_named_axis,
     _get_named_axis,
     _named_axis_to_positional_axis,
-    _NamedAxisKey,
     _unify_named_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -439,7 +439,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
 
         # Unify named axes propagated through the broadcast
         out_named_axis = reduce(
-            _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+            _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
         )
         wrapped_out = ctx.wrap(result, highlevel=highlevel)
         # propagate named axis to output

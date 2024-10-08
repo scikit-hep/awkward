@@ -16,7 +16,7 @@ from awkward._broadcasting import (
 )
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
-from awkward._namedaxis import NamedAxesWithDims, _NamedAxisKey, _unify_named_axis
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 
 __all__ = ("transform",)
 
@@ -586,8 +586,8 @@ def _impl(
             depth_context = {}
         if lateral_context is None:
             lateral_context = {}
-        assert _NamedAxisKey not in depth_context
-        assert _NamedAxisKey not in lateral_context
+        assert NAMED_AXIS_KEY not in depth_context
+        assert NAMED_AXIS_KEY not in lateral_context
         _depth_context, _lateral_context = NamedAxesWithDims.prepare_contexts(
             [array, *more_arrays]
         )
@@ -609,7 +609,7 @@ def _impl(
 
         # Unify named axes propagated through the broadcast
         out_named_axis = reduce(
-            _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+            _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
         )
 
         if return_value == "none":

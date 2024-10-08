@@ -12,8 +12,8 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
 from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
     _add_named_axis,
-    _NamedAxisKey,
     _unify_named_axis,
 )
 from awkward._nplikes.numpy import Numpy
@@ -330,9 +330,9 @@ def _export_named_axis_from_depth_to_lateral(
     lateral_context: dict[str, Any],
 ) -> None:
     # set adjusted named axes to lateral (inplace)
-    named_axis, ndim = depth_context[_NamedAxisKey][idx]
-    seen_named_axis, _ = lateral_context[_NamedAxisKey][idx]
-    lateral_context[_NamedAxisKey][idx] = (
+    named_axis, ndim = depth_context[NAMED_AXIS_KEY][idx]
+    seen_named_axis, _ = lateral_context[NAMED_AXIS_KEY][idx]
+    lateral_context[NAMED_AXIS_KEY][idx] = (
         _unify_named_axis(named_axis, seen_named_axis),
         ndim,
     )
@@ -448,8 +448,8 @@ def apply_step(
         if max_depth > 0 and all(x.purelist_isregular for x in contents):
             nextinputs = []
 
-            named_axes_with_ndims = depth_context[_NamedAxisKey]
-            seen_named_axes = lateral_context[_NamedAxisKey]
+            named_axes_with_ndims = depth_context[NAMED_AXIS_KEY]
+            seen_named_axes = lateral_context[NAMED_AXIS_KEY]
             for i, ((named_axis, ndim), o) in enumerate(
                 zip(named_axes_with_ndims, inputs)
             ):
@@ -461,7 +461,7 @@ def apply_step(
                         # rightbroadcasting adds a new first(!) dimension at depth
                         seen_named_axis, seen_ndim = seen_named_axes[i]
                         named_axis = _add_named_axis(named_axis, depth, ndim)
-                        depth_context[_NamedAxisKey][i] = (
+                        depth_context[NAMED_AXIS_KEY][i] = (
                             _unify_named_axis(named_axis, seen_named_axis),
                             ndim + 1,
                         )
@@ -573,7 +573,7 @@ def apply_step(
         # Under the category of "is_list", we have both strings and non-strings
         # The strings should behave like non-lists within these routines.
 
-        named_axes_with_ndims = depth_context[_NamedAxisKey]
+        named_axes_with_ndims = depth_context[NAMED_AXIS_KEY]
         # Are the non-string list types exclusively regular?
         if all(x.is_regular or (is_string_like(x) or not x.is_list) for x in contents):
             # Compute the expected dim size
@@ -643,7 +643,7 @@ def apply_step(
                         nextparameters.append(x._parameters)
                         # track new dimensions for named axis
                         # rightbroadcasting adds a new first(!) dimension as depth
-                        depth_context[_NamedAxisKey][i] = (
+                        depth_context[NAMED_AXIS_KEY][i] = (
                             _add_named_axis(named_axis, depth, ndim),
                             ndim + 1,
                         )
@@ -732,7 +732,7 @@ def apply_step(
                     nextparameters.append(NO_PARAMETERS)
                     # track new dimensions for named axis
                     # leftbroadcasting adds a new last dimension at depth + 1
-                    depth_context[_NamedAxisKey][i] = (
+                    depth_context[NAMED_AXIS_KEY][i] = (
                         _add_named_axis(named_axis, depth + 1, ndim),
                         ndim + 1,
                     )

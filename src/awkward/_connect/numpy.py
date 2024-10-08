@@ -22,7 +22,7 @@ from awkward._behavior import (
 )
 from awkward._categorical import as_hashable
 from awkward._layout import wrap_layout
-from awkward._namedaxis import NamedAxesWithDims, _NamedAxisKey, _unify_named_axis
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 from awkward._nplikes import to_nplike
 from awkward._parameters import parameters_intersect
 from awkward._regularize import is_non_string_like_iterable
@@ -476,7 +476,7 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
     )
 
     out_named_axis = functools.reduce(
-        _unify_named_axis, lateral_context[_NamedAxisKey].named_axis
+        _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
     )
     if len(out) == 1:
         wrapped = wrap_layout(out[0], behavior=behavior, attrs=attrs)

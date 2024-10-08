@@ -5,7 +5,7 @@ from __future__ import annotations
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._namedaxis import (
-    _NamedAxisKey,
+    NAMED_AXIS_KEY,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -47,7 +47,7 @@ def _impl(array, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=True)
 
-    return ctx.without_attr(key=_NamedAxisKey).wrap(
+    return ctx.without_attr(key=NAMED_AXIS_KEY).wrap(
         layout,
         highlevel=highlevel,
         allow_other=True,
