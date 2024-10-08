@@ -1101,22 +1101,23 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
             NamedAxis.mapping = named_axis
 
-            out = wrap_layout(
-                prepare_layout(self._layout._getitem(where, NamedAxis)),
-                self._behavior,
-                allow_other=True,
-                attrs=self._attrs,
-            )
+            indexed_layout = prepare_layout(self._layout._getitem(where, NamedAxis))
 
             if NamedAxis.mapping:
                 return ak.operations.ak_with_named_axis._impl(
-                    out,
+                    indexed_layout,
                     named_axis=NamedAxis.mapping,
                     highlevel=True,
-                    behavior=None,
-                    attrs=None,
+                    behavior=self._behavior,
+                    attrs=self._attrs,
                 )
-            return out
+            else:
+                return wrap_layout(
+                    indexed_layout,
+                    self._behavior,
+                    allow_other=True,
+                    attrs=self._attrs,
+                )
 
     def __bytes__(self) -> bytes:
         if isinstance(self._layout, ak.contents.NumpyArray) and self._layout.parameter(
