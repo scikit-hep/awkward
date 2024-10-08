@@ -47,8 +47,6 @@ def _prettify_named_axes(
     maxlen: None | int = None,
 ) -> str:
     """
-    Prettifies the named axes for better readability.
-
     This function takes a named axis mapping and returns a string representation of the mapping.
     The axis names are sorted in ascending order of their corresponding integer values.
     If the axis name is a valid Python identifier, it is represented as is.
@@ -56,6 +54,8 @@ def _prettify_named_axes(
 
     Args:
         named_axis (AxisMapping): The named axis mapping to prettify.
+        delimiter (str, optional): The delimiter to use between items in the output string. Defaults to ", ".
+        maxlen (None | int, optional): The maximum length of the output string. If the string exceeds this length, it is truncated and ends with "...". Defaults to None.
 
     Returns:
         str: The prettified string representation of the named axis mapping.
@@ -65,6 +65,10 @@ def _prettify_named_axes(
         'x:0, y:1, z:2'
         >>> _prettify_named_axes({"x": 0, "y": 1, "$": 2})
         'x:0, y:1, "$":2'
+        >>> _prettify_named_axes({"x": 0, "y": 1, "z": 2}, delimiter="; ")
+        'x:0; y:1; z:2'
+        >>> _prettify_named_axes({"foo": 0, "bar": 1, "baz": 2}, maxlen=17)
+        'foo:0, bar:1, ...'
     """
 
     def _prettify(ax: AxisName) -> str:
