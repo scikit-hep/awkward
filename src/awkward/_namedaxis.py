@@ -41,7 +41,11 @@ class NamedAxis:
 NamedAxis.mapping = {}
 
 
-def _prettify_named_axes(named_axis: AxisMapping) -> str:
+def _prettify_named_axes(
+    named_axis: AxisMapping,
+    delimiter: str = ", ",
+    maxlen: None | int = None,
+) -> str:
     """
     Prettifies the named axes for better readability.
 
@@ -70,9 +74,17 @@ def _prettify_named_axes(named_axis: AxisMapping) -> str:
         return json.dumps(repr_ax)
 
     sorted_named_axis = sorted(named_axis.items(), key=lambda x: x[1])
-    return ", ".join(
-        [f"{_prettify(named_ax)}:{pos_ax}" for named_ax, pos_ax in sorted_named_axis]
-    )
+    items = [
+        f"{_prettify(named_ax)}:{pos_ax}" for named_ax, pos_ax in sorted_named_axis
+    ]
+    if maxlen is not None:
+        if len(delimiter.join(items)) > maxlen:
+            while (
+                len(delimiter.join(items)) > maxlen - len(delimiter + "...")
+            ) and items:
+                items.pop(-1)
+            items.append("...")
+    return delimiter.join(items)
 
 
 def _neg2pos_axis(

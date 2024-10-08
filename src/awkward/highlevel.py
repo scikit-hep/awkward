@@ -1360,15 +1360,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             valuestr = "-typetracer"
 
         # prepare named_axis str for repr
-        axisstr = _prettify_named_axes(self.named_axis).split(", ")
-        # we reserve at maximum 20 characters for the named axis string
-        # if it's too long we cut it off until there is enough space for in total 20 chars including ",..."
-        if len(",".join(axisstr)) > 20:
-            while len(",".join(axisstr)) > 20 - len(",..."):
-                axisstr.pop(-1)
-            axisstr.append("...")
-        axisstr = ",".join(axisstr)
-        if axisstr:
+        axisstr = ""
+        if self.named_axis:
+            # we reserve at maximum 20 characters for the named axis string
+            axisstr = _prettify_named_axes(self.named_axis, delimiter=",", maxlen=20)
             axisstr = f" {axisstr}"
         # subtract the reserved space from the limit_cols
         limit_cols -= len(axisstr)
@@ -1398,7 +1393,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         limit_rows=20,
         limit_cols=80,
         type=False,
-        axes=False,
+        named_axis=False,
         stream=STDOUT,
         *,
         formatter=None,
@@ -1431,24 +1426,24 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self, limit_rows, limit_cols, formatter=formatter_impl
         )
 
-        out = ""
+        out_io = io.StringIO()
         if type:
-            tmp = io.StringIO()
-            self.type.show(stream=tmp)
-            out += "type: " + tmp.getvalue()
-        if axes:
-            if self.named_axis:
-                out += f"axes: {_prettify_named_axes(self.named_axis)}\n"
-            else:
-                out += "axes: " + ", ".join(map(str, self.positional_axis)) + "\n"
-        out += valuestr
+            out_io.write("type: ")
+            self.type.show(stream=out_io)
+        if named_axis and self.named_axis:
+            out_io.write("axes: ")
+            out_io.write(
+                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
+            )
+            out_io.write("\n")
+        out_io.write(valuestr)
 
         if stream is None:
-            return out
+            return out_io
         else:
             if stream is STDOUT:
                 stream = STDOUT.stream
-            stream.write(out + "\n")
+            stream.write(out_io.getvalue() + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
         value_buff = io.StringIO()
@@ -2266,15 +2261,10 @@ class Record(NDArrayOperatorsMixin):
             valuestr = "-typetracer"
 
         # prepare named_axis str for repr
-        axisstr = _prettify_named_axes(_get_named_axis(self)).split(", ")
-        # we reserve at maximum 20 characters for the named axis string
-        # if it's too long we cut it off until there is enough space for in total 20 chars including ",..."
-        if len(",".join(axisstr)) > 20:
-            while len(",".join(axisstr)) > 20 - len(",..."):
-                axisstr.pop(-1)
-            axisstr.append("...")
-        axisstr = ",".join(axisstr)
-        if axisstr:
+        axisstr = ""
+        if self.named_axis:
+            # we reserve at maximum 20 characters for the named axis string
+            axisstr = _prettify_named_axes(self.named_axis, delimiter=",", maxlen=20)
             axisstr = f" {axisstr}"
         # subtract the reserved space from the limit_cols
         limit_cols -= len(axisstr)
@@ -2304,7 +2294,7 @@ class Record(NDArrayOperatorsMixin):
         limit_rows=20,
         limit_cols=80,
         type=False,
-        axes=False,
+        named_axis=False,
         stream=STDOUT,
         *,
         formatter=None,
@@ -2335,24 +2325,24 @@ class Record(NDArrayOperatorsMixin):
             self, limit_rows, limit_cols, formatter=formatter_impl
         )
 
-        out = ""
+        out_io = io.StringIO()
         if type:
-            tmp = io.StringIO()
-            self.type.show(stream=tmp)
-            out += "type: " + tmp.getvalue()
-        if axes:
-            if self.named_axis:
-                out += f"axes: {_prettify_named_axes(self.named_axis)}\n"
-            else:
-                out += "axes: " + ", ".join(map(str, self.positional_axis)) + "\n"
-        out += valuestr
+            out_io.write("type: ")
+            self.type.show(stream=out_io)
+        if named_axis and self.named_axis:
+            out_io.write("axes: ")
+            out_io.write(
+                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
+            )
+            out_io.write("\n")
+        out_io.write(valuestr)
 
         if stream is None:
-            return out
+            return out_io.getvalue()
         else:
             if stream is STDOUT:
                 stream = STDOUT.stream
-            stream.write(out + "\n")
+            stream.write(out_io.getvalue() + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
         value_buff = io.StringIO()
