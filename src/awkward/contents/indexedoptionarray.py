@@ -1576,6 +1576,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             options,
         )
 
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        return self.to_ByteMaskedArray(True)._to_cudf(cudf, mask, length)
+
     def _to_backend_array(self, allow_missing, backend):
         nplike = backend.nplike
         index_nplike = backend.index_nplike

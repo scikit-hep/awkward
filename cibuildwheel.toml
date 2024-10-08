@@ -23,5 +23,5 @@ build-verbosity = 1
 PIP_ONLY_BINARY = "cmake,numpy"
 
 [[tool.cibuildwheel.overrides]]
-select = "cp312-*"
-environment.PIP_PRE = "1"
+select = "cp313*"
+environment.PYO3_USE_ABI3_FORWARD_COMPATIBILITY = "1"

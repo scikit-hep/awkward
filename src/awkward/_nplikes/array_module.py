@@ -118,7 +118,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         *,
         dtype: DTypeLike | None = None,
     ) -> ArrayLikeT:
-        return self._module.full(shape, fill_value, dtype=dtype)
+        return self._module.full(shape, self._module.array(fill_value), dtype=dtype)
 
     def zeros_like(
         self, x: ArrayLikeT | PlaceholderArray, *, dtype: DTypeLike | None = None
@@ -146,7 +146,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         if isinstance(x, PlaceholderArray):
             return self.full(x.shape, fill_value, dtype=dtype or x.dtype)
         else:
-            return self._module.full_like(x, fill_value, dtype=dtype)
+            return self._module.full_like(
+                x, self._module.array(fill_value), dtype=dtype
+            )
 
     def arange(
         self,

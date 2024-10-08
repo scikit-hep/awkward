@@ -10,6 +10,7 @@ from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -1998,6 +1999,39 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     validbytes, options["count_nulls"]
                 ),
             )
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        cupy = Cupy.instance()
+        index = self._offsets.raw(cupy).astype("int32")
+        buf = cudf.core.buffer.as_buffer(index)
+        ind_buf = cudf.core.column.numerical.NumericalColumn(
+            buf, index.dtype, None, size=len(index)
+        )
+        cont = self._content._to_cudf(cudf, None, len(self._content))
+        if mask is not None:
+            m = np._module.packbits(mask, bitorder="little")
+            if m.nbytes % 64:
+                m = cupy.resize(m, ((m.nbytes // 64) + 1) * 64)
+            m = cudf.core.buffer.as_buffer(cupy.asarray(m))
+        else:
+            m = None
+        if self.parameters.get("__array__") == "string":
+            from cudf.core.column.string import StringColumn
+
+            data = cudf.core.buffer.as_buffer(cupy.asarray(self._content.data))
+            # docs for StringColumn says there should be two children instead of a data=
+            return StringColumn(
+                data=data,
+                children=(ind_buf,),
+                mask=m,
+            )
+
+        return cudf.core.column.lists.ListColumn(
+            length,
+            mask=m,
+            children=(ind_buf, cont),
+            dtype=cudf.core.dtypes.ListDtype(cont.dtype),
+        )
 
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")

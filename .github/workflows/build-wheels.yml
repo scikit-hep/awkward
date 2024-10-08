@@ -87,7 +87,7 @@ jobs:
 
         - os: windows-latest
           arch: auto32
-          build: "cp{38,39}-"
+          build: "cp"
 
     steps:
     - uses: actions/checkout@v4
@@ -100,12 +100,12 @@ jobs:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: yezz123/setup-uv@v4
+      uses: astral-sh/setup-uv@v3
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v2.19
+    - uses: pypa/cibuildwheel@v2.21
       env:
         CIBW_BUILD: "${{ matrix.build }}*"
         CIBW_ARCHS: ${{ matrix.arch }}
@@ -114,13 +114,7 @@ jobs:
         package-dir: awkward-cpp
 
     - name: Check metadata
-      shell: python
-      run: |
-        import subprocess, glob
-        subprocess.run(
-          ["pipx", "run", "twine", "check", *glob.glob("wheelhouse/*.whl")],
-          check=True
-        )
+      run: pipx run twine check wheelhouse/*.whl
 
     - name: Upload wheels
       uses: actions/upload-artifact@v4
@@ -136,7 +130,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     strategy:
       matrix:
-        python: [38, 39, 310, 311, 312]
+        python: [38, 39, 310, 311, 312, 313]
         arch: [aarch64]
     steps:
 
@@ -150,14 +144,14 @@ jobs:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: yezz123/setup-uv@v4
+      uses: astral-sh/setup-uv@v3
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
     - uses: docker/setup-qemu-action@v3.2.0
 
-    - uses: pypa/cibuildwheel@v2.19
+    - uses: pypa/cibuildwheel@v2.21
       env:
         CIBW_BUILD: cp${{ matrix.python }}-*
         CIBW_ARCHS: ${{ matrix.arch }}
@@ -166,13 +160,7 @@ jobs:
         package-dir: awkward-cpp
 
     - name: Check metadata
-      shell: python
-      run: |
-        import subprocess, glob
-        subprocess.run(
-          ["pipx", "run", "twine", "check", *glob.glob("wheelhouse/*.whl")],
-          check=True
-        )
+      run: pipx run twine check wheelhouse/*.whl
 
     - name: Upload wheels
       uses: actions/upload-artifact@v4
@@ -192,7 +180,7 @@ jobs:
         submodules: true
 
     - name: Setup uv
-      uses: yezz123/setup-uv@v4
+      uses: astral-sh/setup-uv@v3
 
     - name: Prepare build files
       run: pipx run nox -s prepare
