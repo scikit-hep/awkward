@@ -633,7 +633,7 @@ namespace awkward {
       class BufferNBytesFunctor {
       public:
           // Constructor to capture names_nbytes by reference
-          BufferNBytesFunctor(std::map<std::string, size_t>& names_nbytes) 
+          BufferNBytesFunctor(std::map<std::string, size_t>& names_nbytes)
               : names_nbytes_(names_nbytes) { }
 
           // Template operator() to handle the content
@@ -653,7 +653,7 @@ namespace awkward {
               visit_at(contents, i, bufferNBytesFunctor); // pass the functor instead of the lambda
           }
       }
-      
+
       /// @brief Copies and concatenates all the accumulated data in each of the
       /// buffers of the builder and its contents to user-defined pointers.
       ///
@@ -662,7 +662,7 @@ namespace awkward {
       class ToBuffersFunctor {
       public:
           // Constructor to capture buffers by reference
-          ToBuffersFunctor(std::map<std::string, void*>& buffers) 
+          ToBuffersFunctor(std::map<std::string, void*>& buffers)
               : buffers_(buffers) { }
 
           // Template operator() to handle the content
@@ -718,7 +718,7 @@ namespace awkward {
       class ToCharBuffersFunctor {
       public:
           // Constructor to capture buffers by reference
-          ToCharBuffersFunctor(std::map<std::string, uint8_t*>& buffers) 
+          ToCharBuffersFunctor(std::map<std::string, uint8_t*>& buffers)
               : buffers_(buffers) { }
 
           // Template operator() to handle the content
@@ -2642,7 +2642,7 @@ namespace awkward {
 
           // Instantiate the functor to handle each content's buffer_nbytes call
           BufferNBytesFunctor bufferNBytesFunctor(names_nbytes);
-          
+
           for (size_t i = 0; i < contents_count_; i++) {
               visit_at(contents_, i, bufferNBytesFunctor);  // pass the functor instead of the lambda
           }
@@ -2682,7 +2682,7 @@ namespace awkward {
 
           // Create the functor to handle each content's to_buffers call
           ToBuffersFunctor toBuffersFunctor(buffers);
-          
+
           for (size_t i = 0; i < contents_count_; i++) {
               visit_at(contents_, i, toBuffersFunctor);  // pass the functor instead of the lambda
           }
@@ -2762,7 +2762,7 @@ namespace awkward {
 
           // Instantiate the functor to handle each content's to_char_buffers call
           ToCharBuffersFunctor toCharBuffersFunctor(buffers);
-          
+
           for (size_t i = 0; i < contents_count_; i++) {
               visit_at(contents_, i, toCharBuffersFunctor);  // pass the functor instead of the lambda
           }
