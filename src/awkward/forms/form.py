@@ -558,6 +558,52 @@ class Form(Meta):
 
         container = {}
 
+        def prepare_empty(form):
+            form_key = f"node-{len(container)}"
+
+            if isinstance(form, (ak.forms.BitMaskedForm, ak.forms.ByteMaskedForm)):
+                container[form_key] = b""
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
+
+            elif isinstance(form, ak.forms.IndexedOptionForm):
+                container[form_key] = b""
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
+
+            elif isinstance(form, ak.forms.EmptyForm):
+                return form
+
+            elif isinstance(form, ak.forms.UnmaskedForm):
+                return form.copy(content=prepare_empty(form.content))
+
+            elif isinstance(form, (ak.forms.IndexedForm, ak.forms.ListForm)):
+                container[form_key] = b""
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
+
+            elif isinstance(form, ak.forms.ListOffsetForm):
+                container[form_key] = b""
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
+
+            elif isinstance(form, ak.forms.RegularForm):
+                return form.copy(content=prepare_empty(form.content))
+
+            elif isinstance(form, ak.forms.NumpyForm):
+                container[form_key] = b""
+                return form.copy(form_key=form_key)
+
+            elif isinstance(form, ak.forms.RecordForm):
+                return form.copy(contents=[prepare_empty(x) for x in form.contents])
+
+            elif isinstance(form, ak.forms.UnionForm):
+                # both tags and index will get this buffer
+                container[form_key] = b""
+                return form.copy(
+                    contents=[prepare_empty(x) for x in form.contents],
+                    form_key=form_key,
+                )
+
+            else:
+                raise AssertionError(f"not a Form: {form!r}")
+
         def prepare(form, multiplier):
             form_key = f"node-{len(container)}"
 
@@ -566,11 +612,13 @@ class Form(Meta):
                     container[form_key] = b"\x00" * multiplier
                 else:
                     container[form_key] = b"\xff" * multiplier
-                return form.copy(form_key=form_key)  # DO NOT RECURSE
+                # switch from recursing down `prepare` to `prepare_empty`
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
 
             elif isinstance(form, ak.forms.IndexedOptionForm):
                 container[form_key] = b"\xff\xff\xff\xff\xff\xff\xff\xff"  # -1
-                return form.copy(form_key=form_key)  # DO NOT RECURSE
+                # switch from recursing down `prepare` to `prepare_empty`
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
 
             elif isinstance(form, ak.forms.EmptyForm):
                 # no error if protected by non-recursing node type
@@ -624,13 +672,11 @@ class Form(Meta):
             elif isinstance(form, ak.forms.UnionForm):
                 # both tags and index will get this buffer, but index is 8 bytes
                 container[form_key] = b"\x00" * (8 * multiplier)
-                return form.copy(
-                    # only recurse down contents[0] because all index == 0
-                    contents=(
-                        [prepare(form.contents[0], multiplier)] + form.contents[1:]
-                    ),
-                    form_key=form_key,
-                )
+                # recurse down contents[0] with `prepare`, but others with `prepare_empty`
+                contents = [prepare(form.contents[0], multiplier)]
+                for x in form.contents[1:]:
+                    contents.append(prepare_empty(x))
+                return form.copy(contents=contents, form_key=form_key)
 
             else:
                 raise AssertionError(f"not a Form: {form!r}")
