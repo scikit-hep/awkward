@@ -70,14 +70,14 @@ named_array = ak.with_named_axis(array, named_axis=("x", "y"))
 named_array = ak.with_named_axis(array, named_axis={"x": 0, "y": 1})
 ```
 
-After attaching named axes, you can see the named axes comma-separated in the arrays representation and in `.show(axes=True)`:
+After attaching named axes, you can see the named axes comma-separated in the arrays representation and in `.show(named_axis=True)`:
 
 ```{code-cell}
 ak.Array([[1, 2], [3], [], [4, 5, 6]], named_axis=("x", "y"))
 ```
 
 ```{code-cell}
-ak.Array([[1, 2], [3], [], [4, 5, 6]], named_axis=("x", "y")).show(axes=True)
+ak.Array([[1, 2], [3], [], [4, 5, 6]], named_axis=("x", "y")).show(named_axis=True)
 ```
 
 Accessing the named axis mapping to positional axis can be done using the `named_axis` and `positional_axis` properties:
