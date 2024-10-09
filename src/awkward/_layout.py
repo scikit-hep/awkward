@@ -29,7 +29,6 @@ numpy_backend = NumpyBackend.instance()
 T = TypeVar("T")
 
 if TYPE_CHECKING:
-    from awkward._namedaxis import AttrsNamedAxisMapping
     from awkward.highlevel import Array
     from awkward.highlevel import Record as HighLevelRecord
 
@@ -96,7 +95,7 @@ class HighLevelContext:
             raise RuntimeError("HighLevelContext has already been finalized")
 
     @property
-    def attrs(self) -> Mapping | AttrsNamedAxisMapping:
+    def attrs(self) -> Mapping:
         self._ensure_finalized()
         if self._attrs is None:
             self._attrs = {}

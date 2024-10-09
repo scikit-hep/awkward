@@ -24,16 +24,6 @@ NAMED_AXIS_KEY: tp.Literal["__named_axis__"] = (
 )
 
 
-class AttrsNamedAxisMapping(tp.TypedDict, total=False):
-    __named_axis__: AxisMapping
-
-
-@tp.runtime_checkable
-class MaybeSupportsNamedAxis(tp.Protocol):
-    @property
-    def attrs(self) -> tp.Mapping | AttrsNamedAxisMapping: ...
-
-
 # just a class for inplace mutation
 class NamedAxis:
     mapping: AxisMapping
@@ -92,37 +82,31 @@ def _prettify_named_axes(
     return delimiter.join(items)
 
 
-def _get_named_axis(
-    ctx: MaybeSupportsNamedAxis | AttrsNamedAxisMapping | tp.Mapping | tp.Any,
-) -> AxisMapping:
+def _get_named_axis(ctx: tp.Any) -> AxisMapping:
     """
-    Retrieves the named axis from the provided context. The context can either be an object that supports named axis
-    or a dictionary that includes a named axis mapping.
+    Retrieves the named axis from the provided context.
 
     Args:
-        ctx (MaybeSupportsNamedAxis | AttrsNamedAxisMapping | Mapping | Any): The context from which the named axis is to be retrieved.
+        ctx (Any): The context from which the named axis is to be retrieved.
 
     Returns:
         AxisMapping: The named axis retrieved from the context. If the context does not include a named axis,
             an empty dictionary is returned.
 
     Examples:
-        >>> class Test(MaybeSupportsNamedAxis):
-        ...     @property
-        ...     def attrs(self):
-        ...         return {NAMED_AXIS_KEY: {"x": 0, "y": 1, "z": 2}}
-        ...
-        >>> _get_named_axis(Test())
-        {"x": 0, "y": 1, "z": 2}
+        >>> _get_named_axis(ak.Array([1, 2, 3], named_axis={"x": 0}))
+        {"x": 0}
+        >>> _get_named_axis(np.array([1, 2, 3]))
+        {}
         >>> _get_named_axis({NAMED_AXIS_KEY: {"x": 0, "y": 1, "z": 2}})
         {"x": 0, "y": 1, "z": 2}
         >>> _get_named_axis({"other_key": "other_value"})
         {}
     """
-    if isinstance(ctx, MaybeSupportsNamedAxis):
+    if hasattr(ctx, "attrs"):
         return _get_named_axis(ctx.attrs)
     elif isinstance(ctx, tp.Mapping) and NAMED_AXIS_KEY in ctx:
-        return ctx[NAMED_AXIS_KEY]
+        return dict(ctx[NAMED_AXIS_KEY])
     else:
         return {}
 

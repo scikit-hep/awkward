@@ -25,7 +25,6 @@ from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
 from awkward._namedaxis import (
     NAMED_AXIS_KEY,
-    AttrsNamedAxisMapping,
     AxisMapping,
     NamedAxis,
     _get_named_axis,
@@ -380,7 +379,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         self.__class__ = get_array_class(self._layout, self._behavior)
 
     @property
-    def attrs(self) -> Mapping | AttrsNamedAxisMapping:
+    def attrs(self) -> Mapping:
         """
         The mutable mapping containing top-level metadata, which is serialised
         with the array during pickling.
