@@ -5,6 +5,7 @@ import re
 from dataclasses import dataclass
 
 import awkward._typing as tp
+from awkward._layout import _neg2pos_axis
 from awkward._regularize import is_integer
 
 # axis names are hashables, mostly strings,
@@ -89,34 +90,6 @@ def _prettify_named_axes(
                 items.pop(-1)
             items.append("...")
     return delimiter.join(items)
-
-
-def _neg2pos_axis(
-    axis: int,
-    total: int,
-) -> int:
-    """
-    Converts a negative axis index to a positive one.
-
-    This function takes a negative axis index and the total number of axes and returns the corresponding positive axis index.
-    If the input axis index is already positive, it is returned as is.
-
-    Args:
-        axis (int): The axis index to convert. Can be negative.
-        total (int): The total number of axes.
-
-    Returns:
-        int: The positive axis index corresponding to the input axis index.
-
-    Examples:
-        >>> _neg2pos_axis(-1, 3)
-        2
-        >>> _neg2pos_axis(1, 3)
-        1
-    """
-    if axis < 0:
-        return total + axis
-    return axis
 
 
 def _get_named_axis(

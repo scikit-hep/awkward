@@ -393,6 +393,34 @@ def from_arraylib(
     return layout
 
 
+def _neg2pos_axis(
+    axis: int,
+    total: int,
+) -> int:
+    """
+    Converts a negative axis index to a positive one.
+
+    This function takes a negative axis index and the total number of axes and returns the corresponding positive axis index.
+    If the input axis index is already positive, it is returned as is.
+
+    Args:
+        axis (int): The axis index to convert. Can be negative.
+        total (int): The total number of axes.
+
+    Returns:
+        int: The positive axis index corresponding to the input axis index.
+
+    Examples:
+        >>> _neg2pos_axis(-1, 3)
+        2
+        >>> _neg2pos_axis(1, 3)
+        1
+    """
+    if axis < 0:
+        return total + axis
+    return axis
+
+
 def maybe_posaxis(layout: Content, axis: int, depth: int) -> int | None:
     from awkward.record import Record
 
@@ -407,6 +435,6 @@ def maybe_posaxis(layout: Content, axis: int, depth: int) -> int | None:
     else:
         is_branching, additional_depth = layout.branch_depth
         if not is_branching:
-            return axis + depth + additional_depth - 1
+            return _neg2pos_axis(axis, additional_depth) + depth - 1
         else:
             return None
