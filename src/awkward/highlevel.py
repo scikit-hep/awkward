@@ -43,7 +43,7 @@ from awkward._pickle import (
     unpickle_record_schema_1,
 )
 from awkward._regularize import is_non_string_like_iterable
-from awkward._typing import Any, TypeVar
+from awkward._typing import Any, MutableMapping, TypeVar
 from awkward._util import STDOUT
 from awkward.prettyprint import Formatter
 from awkward.prettyprint import valuestr as prettyprint_valuestr
@@ -338,7 +338,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or a mapping")
 
-        if attrs is not None and not isinstance(attrs, dict):
+        if attrs is not None and not isinstance(attrs, MutableMapping):
             raise TypeError("attrs must be None or a mapping")
 
         if named_axis:
@@ -1446,6 +1446,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             stream.write(out_io.getvalue() + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
+        # order: 1. array, 2. named_axis, 3. type
         value_buff = io.StringIO()
         self.show(type=False, stream=value_buff)
         header_lines = value_buff.getvalue().splitlines()
@@ -1829,7 +1830,7 @@ class Record(NDArrayOperatorsMixin):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or mapping")
 
-        if attrs is not None and not isinstance(attrs, dict):
+        if attrs is not None and not isinstance(attrs, MutableMapping):
             raise TypeError("attrs must be None or a mapping")
 
         if named_axis:
@@ -2345,6 +2346,7 @@ class Record(NDArrayOperatorsMixin):
             stream.write(out_io.getvalue() + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
+        # order: 1. array, 2. named_axis, 3. type
         value_buff = io.StringIO()
         self.show(type=False, stream=value_buff)
         header_lines = value_buff.getvalue().splitlines()
