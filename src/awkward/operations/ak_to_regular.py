@@ -66,7 +66,7 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, axis, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
+    axis = regularize_axis(axis, none_allowed=True)
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 

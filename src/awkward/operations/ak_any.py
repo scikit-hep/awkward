@@ -13,7 +13,7 @@ from awkward._namedaxis import (
     _remove_named_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._regularize import regularize_axis
 
 __all__ = ("any",)
 
@@ -76,8 +76,6 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
-    axis = regularize_axis(axis)
-
     # Handle named axis
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis
@@ -93,8 +91,7 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
             total=layout.minmax_depth[1],
         )
 
-    if not is_integer(axis) and axis is not None:
-        raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
+    axis = regularize_axis(axis, none_allowed=True)
 
     reducer = ak._reducers.Any()
 

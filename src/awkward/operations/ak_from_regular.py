@@ -56,7 +56,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False)
 
-    axis = regularize_axis(axis)
+    axis = regularize_axis(axis, none_allowed=True)
 
     if axis is None:
 

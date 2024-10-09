@@ -128,12 +128,11 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
             )
         )
 
-    axis = regularize_axis(axis)
-
     # Handle named axis
     merged_named_axis = reduce(_unify_named_axis, map(_get_named_axis, arrays))
     # Step 1: normalize named axis to positional axis
     axis = _named_axis_to_positional_axis(merged_named_axis, axis)
+    axis = regularize_axis(axis, none_allowed=False)
     # Step 2: propagate named axis from input to output,
     #   use strategy "unify" (see: awkward._namedaxis)
     out_named_axis = merged_named_axis

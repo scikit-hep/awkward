@@ -14,11 +14,10 @@ from awkward._layout import (
 )
 from awkward._namedaxis import (
     _get_named_axis,
-    _is_valid_named_axis,
     _named_axis_to_positional_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._regularize import regularize_axis
 
 __all__ = ("mean", "nanmean")
 
@@ -195,16 +194,12 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
-    axis = regularize_axis(axis)
-
     # Handle named axis
-    if named_axis := _get_named_axis(ctx):
-        if _is_valid_named_axis(axis):
-            # Step 1: Normalize named axis to positional axis
-            axis = _named_axis_to_positional_axis(named_axis, axis)
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
 
-    if not is_integer(axis) and axis is not None:
-        raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
+    axis = regularize_axis(axis, none_allowed=True)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:

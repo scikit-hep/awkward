@@ -51,11 +51,19 @@ def is_non_string_like_sequence(obj) -> bool:
     return not isinstance(obj, (str, bytes)) and isinstance(obj, Sequence)
 
 
-def regularize_axis(axis: Any) -> int | Any:
+def regularize_axis(axis: Any, none_allowed: bool = True) -> int | None:
     """
-    This function's purpose is to convert "0" to 0, "1" to 1, etc., but leave any other value as it is.
+    This function's main purpose is to convert [np,cp,...].array(0) to 0.
     """
-    try:
-        return int(axis)
-    except (TypeError, ValueError):
-        return axis
+    if is_integer_like(axis):
+        regularized_axis = int(axis)
+    else:
+        regularized_axis = axis
+    cond = is_integer(regularized_axis)
+    msg = f"'axis' must be an integer, not {axis!r}"
+    if none_allowed:
+        cond = cond or regularized_axis is None
+        msg = f"'axis' must be an integer or None, not {axis!r}"
+    if not cond:
+        raise TypeError(msg)
+    return regularized_axis

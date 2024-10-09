@@ -10,7 +10,7 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
 )
-from awkward._namedaxis import _get_named_axis
+from awkward._namedaxis import _get_named_axis, _is_valid_named_axis
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -88,7 +88,10 @@ def corr(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
+    if _is_valid_named_axis(axis):
+        raise NotImplementedError("named axis not yet supported for ak.corr")
+
+    axis = regularize_axis(axis, none_allowed=True)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, y_layout, weight_layout = ensure_same_backend(

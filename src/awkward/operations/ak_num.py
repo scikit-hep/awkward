@@ -11,7 +11,7 @@ from awkward._namedaxis import (
     _named_axis_to_positional_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._regularize import regularize_axis
 from awkward._typing import Mapping
 from awkward.errors import AxisError
 
@@ -32,7 +32,7 @@ def num(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (AxisName): The dimension at which this operation is applied. The
+        axis (int): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
@@ -106,8 +106,6 @@ def _impl(
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
-    axis = regularize_axis(axis)
-
     # Handle named axis
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis
@@ -116,8 +114,7 @@ def _impl(
     #   use strategy "keep one" (see: awkward._namedaxis)
     out_named_axis = _keep_named_axis(named_axis, axis)
 
-    if not is_integer(axis):
-        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
+    axis = regularize_axis(axis, none_allowed=False)
 
     if maybe_posaxis(layout, axis, 1) == 0:
         index_nplike = layout.backend.index_nplike

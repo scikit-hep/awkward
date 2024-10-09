@@ -10,7 +10,7 @@ from awkward._namedaxis import (
     _named_axis_to_positional_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
 
 __all__ = ("fill_none",)
@@ -86,15 +86,12 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
             ),
         )
 
-    axis = regularize_axis(axis)
-
     # Handle named axis
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis
     axis = _named_axis_to_positional_axis(named_axis, axis)
 
-    if not is_integer(axis) and axis is not None:
-        raise TypeError(f"'axis' must be an integer or None by now, not {axis!r}")
+    axis = regularize_axis(axis, none_allowed=True)
 
     if isinstance(value_layout, ak.record.Record):
         value_layout = value_layout.array[value_layout.at : value_layout.at + 1]

@@ -251,11 +251,10 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
             #   use strategy "unify" (see: awkward._namedaxis)
             out_named_axis = reduce(_unify_named_axis, map(_get_named_axis, arrays))
 
-    axis = regularize_axis(axis)
-
     # Handle named axis
     # Step 1: Normalize named axis to positional axis
     axis = _named_axis_to_positional_axis(out_named_axis, axis)
+    axis = regularize_axis(axis, none_allowed=False)
     max_ndim = max(layout.minmax_depth[1] for layout in layouts)
 
     if with_name is not None:

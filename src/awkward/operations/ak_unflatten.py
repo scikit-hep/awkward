@@ -13,7 +13,7 @@ from awkward._namedaxis import (
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
-from awkward._regularize import is_integer, is_integer_like, regularize_axis
+from awkward._regularize import is_integer_like, regularize_axis
 
 __all__ = ("unflatten",)
 
@@ -107,15 +107,12 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
             ),
         )
 
-    axis = regularize_axis(axis)
-
     # Handle named axis
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis
     axis = _named_axis_to_positional_axis(named_axis, axis)
 
-    if not is_integer(axis):
-        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
+    axis = regularize_axis(axis, none_allowed=False)
 
     if is_integer_like(maybe_counts_layout):
         # Regularize unknown values to unknown lengths

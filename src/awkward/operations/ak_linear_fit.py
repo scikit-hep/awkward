@@ -7,7 +7,6 @@ from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
 
 __all__ = ("linear_fit",)
 
@@ -95,8 +94,6 @@ def linear_fit(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, y_layout, weight_layout = ensure_same_backend(
             ctx.unwrap(x, allow_record=False, primitive_policy="error"),

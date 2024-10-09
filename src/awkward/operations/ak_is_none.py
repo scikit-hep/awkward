@@ -11,7 +11,7 @@ from awkward._namedaxis import (
     _named_axis_to_positional_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
 
 __all__ = ("is_none",)
@@ -49,15 +49,12 @@ def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
-    axis = regularize_axis(axis)
-
     # Handle named axis
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis
     axis = _named_axis_to_positional_axis(named_axis, axis)
 
-    if not is_integer(axis):
-        raise TypeError(f"'axis' must be an integer by now, not {axis!r}")
+    axis = regularize_axis(axis, none_allowed=False)
 
     # Step 2: propagate named axis from input to output,
     #   use strategy "keep up to" (see: awkward._namedaxis)

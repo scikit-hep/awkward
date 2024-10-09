@@ -190,12 +190,11 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
-    axis = regularize_axis(axis)
-
     # Handle named axis
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis
     axis = _named_axis_to_positional_axis(named_axis, axis)
+    axis = regularize_axis(axis, none_allowed=True)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
