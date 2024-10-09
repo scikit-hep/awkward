@@ -8,6 +8,7 @@ from awkward._nplikes.shape import ShapeItem
 from awkward._typing import (
     TYPE_CHECKING,
     DType,
+    EllipsisType,
     Protocol,
     Self,
     SupportsIndex,
@@ -15,8 +16,6 @@ from awkward._typing import (
 )
 
 if TYPE_CHECKING:
-    from types import EllipsisType
-
     from numpy.typing import DTypeLike
 
 

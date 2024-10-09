@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from functools import reduce
 
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("zip",)
@@ -174,6 +176,7 @@ def _impl(
 ):
     if depth_limit is not None and depth_limit <= 0:
         raise ValueError("depth_limit must be None or at least 1")
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         if isinstance(arrays, Mapping):
             layouts = ensure_same_backend(
@@ -238,8 +241,15 @@ def _impl(
         else:
             return None
 
+    depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+        list(arrays.values()) if isinstance(arrays, Mapping) else list(arrays)
+    )
     out = ak._broadcasting.broadcast_and_apply(
-        layouts, action, right_broadcast=right_broadcast
+        layouts,
+        action,
+        depth_context=depth_context,
+        lateral_context=lateral_context,
+        right_broadcast=right_broadcast,
     )
     assert isinstance(out, tuple) and len(out) == 1
     out = out[0]
@@ -248,4 +258,15 @@ def _impl(
         out = out[0]
         assert isinstance(out, ak.record.Record)
 
-    return ctx.wrap(out, highlevel=highlevel)
+    # Unify named axes propagated through the broadcast
+    out_named_axis = reduce(
+        _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+    )
+    wrapped_out = ctx.wrap(out, highlevel=highlevel)
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

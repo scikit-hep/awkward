@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._typing import Mapping
 
 __all__ = ("nan_to_none",)
 
@@ -13,7 +14,13 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def nan_to_none(array, *, highlevel=True, behavior=None, attrs=None):
+def nan_to_none(
+    array,
+    *,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -35,7 +42,7 @@ def nan_to_none(array, *, highlevel=True, behavior=None, attrs=None):
     return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl(array, highlevel, behavior, attrs):
+def _impl(array, highlevel: bool, behavior: Mapping | None, attrs: Mapping | None):
     def action(layout, continuation, backend, **kwargs):
         if layout.is_numpy and np.issubdtype(layout.dtype, np.floating):
             mask = backend.nplike.isnan(layout.data)
@@ -55,5 +62,6 @@ def _impl(array, highlevel, behavior, attrs):
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
     out = ak._do.recursively_apply(layout, action)
     return ctx.wrap(out, highlevel=highlevel)

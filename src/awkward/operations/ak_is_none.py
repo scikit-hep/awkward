@@ -5,8 +5,13 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
+from awkward._namedaxis import (
+    _get_named_axis,
+    _keep_named_axis_up_to,
+    _named_axis_to_positional_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
 
 __all__ = ("is_none",)
@@ -41,12 +46,19 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, axis, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
-    if not is_integer(axis):
-        raise TypeError(f"'axis' must be an integer, not {axis!r}")
+    # Handle named axis
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
+
+    axis = regularize_axis(axis, none_allowed=False)
+
+    # Step 2: propagate named axis from input to output,
+    #   use strategy "keep up to" (see: awkward._namedaxis)
+    out_named_axis = _keep_named_axis_up_to(named_axis, axis, layout.minmax_depth[1])
 
     def action(layout, depth, backend, lateral_context, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
@@ -68,4 +80,16 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
     out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return ctx.wrap(out, highlevel=highlevel)
+    wrapped_out = ctx.wrap(
+        out,
+        highlevel=highlevel,
+    )
+
+    # propagate named axis to output
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

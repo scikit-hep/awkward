@@ -14,10 +14,10 @@ np = NumpyMetadata.instance()
 
 @ak._connect.numpy.implements("real")
 @high_level_function()
-def real(val, highlevel=True, behavior=None, attrs=None):
+def real(array, highlevel=True, behavior=None, attrs=None):
     """
     Args:
-        val : array_like
+        array : array_like
             Input array.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
@@ -30,15 +30,15 @@ def real(val, highlevel=True, behavior=None, attrs=None):
     If the arrays have complex elements, the returned arrays are floats.
     """
     # Dispatch
-    yield (val,)
+    yield (array,)
 
     # Implementation
-    return _impl_real(val, highlevel, behavior, attrs)
+    return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl_real(val, highlevel, behavior, attrs):
+def _impl(array, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(val, allow_record=False, primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     out = ak._do.recursively_apply(layout, _action_real)
     return ctx.wrap(out, highlevel=highlevel)

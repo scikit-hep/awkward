@@ -18,6 +18,7 @@ def array_equal(
     same_content_types: bool = True,
     check_parameters: bool = True,
     check_regular: bool = True,
+    check_named_axis: bool = True,
 ):
     """
     True if two arrays have the same shape and elements, False otherwise.
@@ -34,6 +35,7 @@ def array_equal(
         check_parameters: bool (default=True) whether to compare parameters.
         check_regular: bool (default=True) whether to consider ragged and regular dimensions as
             unequal.
+        check_named_axis: bool (default=True) whether to consider named axes as unequal.
 
     TypeTracer arrays are not supported, as there is very little information to
     be compared.
@@ -49,6 +51,7 @@ def array_equal(
         dtype_exact=dtype_exact,
         check_parameters=check_parameters,
         check_regular=check_regular,
+        check_named_axis=check_named_axis,
         exact_eq=True,
         same_content_types=same_content_types and check_regular,
         equal_nan=equal_nan,

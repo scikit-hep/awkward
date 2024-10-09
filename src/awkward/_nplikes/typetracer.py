@@ -26,6 +26,7 @@ from awkward._typing import (
     TYPE_CHECKING,
     Any,
     DType,
+    EllipsisType,
     Final,
     Literal,
     Self,
@@ -36,8 +37,6 @@ from awkward._typing import (
 )
 
 if TYPE_CHECKING:
-    from types import EllipsisType
-
     from numpy.typing import DTypeLike
 
     from awkward.contents.content import Content

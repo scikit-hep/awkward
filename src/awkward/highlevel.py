@@ -23,6 +23,16 @@ from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
+from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
+    AxisMapping,
+    NamedAxis,
+    _get_named_axis,
+    _make_positional_axis_tuple,
+    _normalize_named_slice,
+    _prepare_named_axis_for_attrs,
+    _prettify_named_axes,
+)
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
@@ -32,7 +42,7 @@ from awkward._pickle import (
     unpickle_record_schema_1,
 )
 from awkward._regularize import is_non_string_like_iterable
-from awkward._typing import Any, TypeVar
+from awkward._typing import Any, MutableMapping, TypeVar
 from awkward._util import STDOUT
 from awkward.prettyprint import Formatter
 from awkward.prettyprint import valuestr as prettyprint_valuestr
@@ -278,6 +288,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         check_valid=False,
         backend=None,
         attrs=None,
+        named_axis=None,
     ):
         self._cpp_type = None
         if isinstance(data, ak.contents.Content):
@@ -326,8 +337,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or a mapping")
 
-        if attrs is not None and not isinstance(attrs, Mapping):
+        if attrs is not None and not isinstance(attrs, MutableMapping):
             raise TypeError("attrs must be None or a mapping")
+
+        if named_axis:
+            _named_axis = _prepare_named_axis_for_attrs(
+                named_axis=named_axis,
+                ndim=layout.minmax_depth[1],
+            )
+            # now we're good, set the named axis
+            if attrs is None:
+                attrs = {}
+            # if NAMED_AXIS_KEY is already in attrs, it will be overwritten
+            attrs[NAMED_AXIS_KEY] = _named_axis
 
         self._layout = layout
         self._behavior = behavior
@@ -357,7 +379,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         self.__class__ = get_array_class(self._layout, self._behavior)
 
     @property
-    def attrs(self) -> Mapping[str, Any]:
+    def attrs(self) -> Mapping:
         """
         The mutable mapping containing top-level metadata, which is serialised
         with the array during pickling.
@@ -454,6 +476,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self._update_class()
         else:
             raise TypeError("behavior must be None or a dict")
+
+    @property
+    def positional_axis(self) -> tuple[int, ...]:
+        (_, ndim) = self._layout.minmax_depth
+        return _make_positional_axis_tuple(ndim)
+
+    @property
+    def named_axis(self) -> AxisMapping:
+        return _get_named_axis(self)
 
     class Mask:
         def __init__(self, array):
@@ -1062,12 +1093,30 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         have the same dimension as the array being indexed.
         """
         with ak._errors.SlicingErrorContext(self, where):
-            return wrap_layout(
-                prepare_layout(self._layout[where]),
-                self._behavior,
-                allow_other=True,
-                attrs=self._attrs,
-            )
+            # Handle named axis
+            (_, ndim) = self._layout.minmax_depth
+            named_axis = _get_named_axis(self)
+            where = _normalize_named_slice(named_axis, where, ndim)
+
+            NamedAxis.mapping = named_axis
+
+            indexed_layout = prepare_layout(self._layout._getitem(where, NamedAxis))
+
+            if NamedAxis.mapping:
+                return ak.operations.ak_with_named_axis._impl(
+                    indexed_layout,
+                    named_axis=NamedAxis.mapping,
+                    highlevel=True,
+                    behavior=self._behavior,
+                    attrs=self._attrs,
+                )
+            else:
+                return wrap_layout(
+                    indexed_layout,
+                    self._behavior,
+                    allow_other=True,
+                    attrs=self._attrs,
+                )
 
     def __bytes__(self) -> bytes:
         if isinstance(self._layout, ak.contents.NumpyArray) and self._layout.parameter(
@@ -1309,6 +1358,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             valuestr = "-typetracer"
 
+        # prepare named_axis str for repr
+        axisstr = ""
+        if self.named_axis:
+            # we reserve at maximum 20 characters for the named axis string
+            axisstr = _prettify_named_axes(self.named_axis, delimiter=",", maxlen=20)
+            axisstr = f" {axisstr}"
+        # subtract the reserved space from the limit_cols
+        limit_cols -= len(axisstr)
+
         if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
             strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
         else:
@@ -1327,13 +1385,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             typestr = "'" + typestr + "'"
 
-        return f"<{pytype}{valuestr} type={typestr}>"
+        return f"<{pytype}{valuestr}{axisstr} type={typestr}>"
 
     def show(
         self,
         limit_rows=20,
         limit_cols=80,
         type=False,
+        named_axis=False,
         stream=STDOUT,
         *,
         formatter=None,
@@ -1365,24 +1424,40 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         valuestr = prettyprint_valuestr(
             self, limit_rows, limit_cols, formatter=formatter_impl
         )
+
+        out_io = io.StringIO()
         if type:
-            tmp = io.StringIO()
-            self.type.show(stream=tmp)
-            out = "type: " + tmp.getvalue() + valuestr
-        else:
-            out = valuestr
+            out_io.write("type: ")
+            self.type.show(stream=out_io)
+        if named_axis and self.named_axis:
+            out_io.write("axes: ")
+            out_io.write(
+                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
+            )
+            out_io.write("\n")
+        out_io.write(valuestr)
 
         if stream is None:
-            return out
+            return out_io
         else:
             if stream is STDOUT:
                 stream = STDOUT.stream
-            stream.write(out + "\n")
+            stream.write(out_io.getvalue() + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
+        # order: 1. array, 2. named_axis, 3. type
         value_buff = io.StringIO()
-        self.show(type=False, stream=value_buff)
+        self.show(type=False, named_axis=False, stream=value_buff)
         header_lines = value_buff.getvalue().splitlines()
+
+        named_axis_line = ""
+        if self.named_axis:
+            named_axis_buff = io.StringIO()
+            named_axis_buff.write("axes: ")
+            named_axis_buff.write(
+                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
+            )
+            named_axis_line = named_axis_buff.getvalue()
 
         type_buff = io.StringIO()
         self.type.show(stream=type_buff)
@@ -1393,8 +1468,16 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if header_lines[-1] == "":
             del header_lines[-1]
 
-        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
-        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+        n_cols = max(
+            len(line)
+            for line in itertools.chain(header_lines, [named_axis_line], footer_lines)
+        )
+        body_lines = header_lines
+        body_lines.append("-" * n_cols)
+        if named_axis_line:
+            body_lines.append(named_axis_line)
+        body_lines.extend(footer_lines)
+        body = "\n".join(body_lines)
 
         return {
             "text/html": f"<pre>{html.escape(body)}</pre>",
@@ -1719,6 +1802,7 @@ class Record(NDArrayOperatorsMixin):
         check_valid=False,
         backend=None,
         attrs=None,
+        named_axis=None,
     ):
         if isinstance(data, ak.record.Record):
             layout = data
@@ -1761,6 +1845,20 @@ class Record(NDArrayOperatorsMixin):
 
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or mapping")
+
+        if attrs is not None and not isinstance(attrs, MutableMapping):
+            raise TypeError("attrs must be None or a mapping")
+
+        if named_axis:
+            _named_axis = _prepare_named_axis_for_attrs(
+                named_axis=named_axis,
+                ndim=layout.minmax_depth[1],
+            )
+            # now we're good, set the named axis
+            if attrs is None:
+                attrs = {}
+            # if NAMED_AXIS_KEY is already in attrs, it will be overwritten
+            attrs[NAMED_AXIS_KEY] = _named_axis
 
         self._layout = layout
         self._behavior = behavior
@@ -1876,6 +1974,15 @@ class Record(NDArrayOperatorsMixin):
             self._update_class()
         else:
             raise TypeError("behavior must be None or a dict")
+
+    @property
+    def positional_axis(self) -> tuple[int, ...]:
+        (_, ndim) = self._layout.minmax_depth
+        return _make_positional_axis_tuple(ndim)
+
+    @property
+    def named_axis(self) -> AxisMapping:
+        return _get_named_axis(self)
 
     def tolist(self):
         """
@@ -2170,6 +2277,15 @@ class Record(NDArrayOperatorsMixin):
         else:
             valuestr = "-typetracer"
 
+        # prepare named_axis str for repr
+        axisstr = ""
+        if self.named_axis:
+            # we reserve at maximum 20 characters for the named axis string
+            axisstr = _prettify_named_axes(self.named_axis, delimiter=",", maxlen=20)
+            axisstr = f" {axisstr}"
+        # subtract the reserved space from the limit_cols
+        limit_cols -= len(axisstr)
+
         if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
             strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
         else:
@@ -2188,13 +2304,14 @@ class Record(NDArrayOperatorsMixin):
         else:
             typestr = "'" + typestr + "'"
 
-        return f"<{pytype}{valuestr} type={typestr}>"
+        return f"<{pytype}{valuestr}{axisstr} type={typestr}>"
 
     def show(
         self,
         limit_rows=20,
         limit_cols=80,
         type=False,
+        named_axis=False,
         stream=STDOUT,
         *,
         formatter=None,
@@ -2224,24 +2341,40 @@ class Record(NDArrayOperatorsMixin):
         valuestr = prettyprint_valuestr(
             self, limit_rows, limit_cols, formatter=formatter_impl
         )
+
+        out_io = io.StringIO()
         if type:
-            tmp = io.StringIO()
-            self.type.show(stream=tmp)
-            out = "type: " + tmp.getvalue() + valuestr
-        else:
-            out = valuestr
+            out_io.write("type: ")
+            self.type.show(stream=out_io)
+        if named_axis and self.named_axis:
+            out_io.write("axes: ")
+            out_io.write(
+                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
+            )
+            out_io.write("\n")
+        out_io.write(valuestr)
 
         if stream is None:
-            return out
+            return out_io.getvalue()
         else:
             if stream is STDOUT:
                 stream = STDOUT.stream
-            stream.write(out + "\n")
+            stream.write(out_io.getvalue() + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
+        # order: 1. array, 2. named_axis, 3. type
         value_buff = io.StringIO()
-        self.show(type=False, stream=value_buff)
+        self.show(type=False, named_axis=False, stream=value_buff)
         header_lines = value_buff.getvalue().splitlines()
+
+        named_axis_line = ""
+        if self.named_axis:
+            named_axis_buff = io.StringIO()
+            named_axis_buff.write("axes: ")
+            named_axis_buff.write(
+                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
+            )
+            named_axis_line = named_axis_buff.getvalue()
 
         type_buff = io.StringIO()
         self.type.show(stream=type_buff)
@@ -2252,8 +2385,16 @@ class Record(NDArrayOperatorsMixin):
         if header_lines[-1] == "":
             del header_lines[-1]
 
-        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
-        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+        n_cols = max(
+            len(line)
+            for line in itertools.chain(header_lines, [named_axis_line], footer_lines)
+        )
+        body_lines = header_lines
+        body_lines.append("-" * n_cols)
+        if named_axis_line:
+            body_lines.append(named_axis_line)
+        body_lines.extend(footer_lines)
+        body = "\n".join(body_lines)
 
         return {
             "text/html": f"<pre>{html.escape(body)}</pre>",

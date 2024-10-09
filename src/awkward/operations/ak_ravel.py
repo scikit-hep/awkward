@@ -75,7 +75,16 @@ def _impl(array, highlevel, behavior, attrs):
 
     result = ak._do.mergemany(out)
 
-    return ctx.wrap(result, highlevel=highlevel)
+    wrapped_out = ctx.wrap(result, highlevel=highlevel)
+
+    # propagate named axis to output
+    # use strategy "remove all" (see: awkward._namedaxis)
+    return ak.operations.ak_without_named_axis._impl(
+        wrapped_out,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )
 
 
 @ak._connect.numpy.implements("ravel")
