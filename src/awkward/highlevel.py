@@ -1448,8 +1448,17 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def _repr_mimebundle_(self, include=None, exclude=None):
         # order: 1. array, 2. named_axis, 3. type
         value_buff = io.StringIO()
-        self.show(type=False, stream=value_buff)
+        self.show(type=False, named_axis=False, stream=value_buff)
         header_lines = value_buff.getvalue().splitlines()
+
+        named_axis_line = ""
+        if self.named_axis:
+            named_axis_buff = io.StringIO()
+            named_axis_buff.write("axes: ")
+            named_axis_buff.write(
+                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
+            )
+            named_axis_line = named_axis_buff.getvalue()
 
         type_buff = io.StringIO()
         self.type.show(stream=type_buff)
@@ -1460,8 +1469,16 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if header_lines[-1] == "":
             del header_lines[-1]
 
-        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
-        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+        n_cols = max(
+            len(line)
+            for line in itertools.chain(header_lines, [named_axis_line], footer_lines)
+        )
+        body_lines = header_lines
+        body_lines.append("-" * n_cols)
+        if named_axis_line:
+            body_lines.append(named_axis_line)
+        body_lines.extend(footer_lines)
+        body = "\n".join(body_lines)
 
         return {
             "text/html": f"<pre>{html.escape(body)}</pre>",
@@ -2348,8 +2365,17 @@ class Record(NDArrayOperatorsMixin):
     def _repr_mimebundle_(self, include=None, exclude=None):
         # order: 1. array, 2. named_axis, 3. type
         value_buff = io.StringIO()
-        self.show(type=False, stream=value_buff)
+        self.show(type=False, named_axis=False, stream=value_buff)
         header_lines = value_buff.getvalue().splitlines()
+
+        named_axis_line = ""
+        if self.named_axis:
+            named_axis_buff = io.StringIO()
+            named_axis_buff.write("axes: ")
+            named_axis_buff.write(
+                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
+            )
+            named_axis_line = named_axis_buff.getvalue()
 
         type_buff = io.StringIO()
         self.type.show(stream=type_buff)
@@ -2360,8 +2386,16 @@ class Record(NDArrayOperatorsMixin):
         if header_lines[-1] == "":
             del header_lines[-1]
 
-        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
-        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+        n_cols = max(
+            len(line)
+            for line in itertools.chain(header_lines, [named_axis_line], footer_lines)
+        )
+        body_lines = header_lines
+        body_lines.append("-" * n_cols)
+        if named_axis_line:
+            body_lines.append(named_axis_line)
+        body_lines.extend(footer_lines)
+        body = "\n".join(body_lines)
 
         return {
             "text/html": f"<pre>{html.escape(body)}</pre>",
