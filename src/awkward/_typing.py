@@ -26,6 +26,7 @@ __all__ = list(
         "Literal",
         "SupportsIndex",
         "ParamSpec",
+        "EllipsisType",
         *typing.__all__,
     }
 )
@@ -46,7 +47,10 @@ if sys.version_info < (3, 11):
         TypeGuard,
         Unpack,
     )
+
+    EllipsisType = type(...)
 else:
+    from types import EllipsisType
     from typing import (
         ClassVar,
         Final,
