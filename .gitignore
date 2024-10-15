@@ -1,4 +1,5 @@
 studies/**/sample-*
+studies/named_axis.*
 docs/demos/countries.geojson
 docs/demos/test-program
 docs/demos/test-program.cpp
