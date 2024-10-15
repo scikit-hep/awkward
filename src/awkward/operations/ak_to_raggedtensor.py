@@ -50,42 +50,37 @@ or
 
     # keep the same device
     ak_device = ak.backend(array)
-    if ak_device not in ["cuda", "cpu"]:
+    if ak_device not in ['cuda', 'cpu']:
         raise ValueError("""Only 'cpu' and 'cuda' backend conversions are allowed""")
 
-    if ak_device == "cpu":
-        device = "CPU:0"
+    if ak_device == 'cpu':
+        device = 'CPU:0'
     else:
-        device = "GPU:0"
+        _, depth = array.minmax_depth
+        id = array[depth-1].content.data.device.id
+        device = 'GPU:' + str(id)
 
     with tf.device(device):
         if isinstance(array, ak.contents.numpyarray.NumpyArray):
             values = array.data
             # handle cupy separately
-            if not isinstance(array.data, np.ndarray):
-                values = _cupy_to_tensor(values)
-
+            values = _convert_to_tensor_if_cupy(values)
             return tf.RaggedTensor.from_row_splits(
                 values=values, row_splits=[0, array.__len__()]
             )
 
         else:
             flat_values, nested_row_splits = _recursive_call(array, ())
+            return tf.RaggedTensor.from_nested_row_splits(flat_values, nested_row_splits)
 
-            ragged_tensor = tf.RaggedTensor.from_nested_row_splits(
-                flat_values, nested_row_splits
-            )
-            # print(ragged_tensor[0][0].device)
-            return ragged_tensor
-
-
-def _cupy_to_tensor(cupy):
-    # converts cupy directly to tensor,
-    # since `tf.RaggedTensor.from_nested_row_splits` can not work with Cupy arrays
-    import tensorflow as tf
-
-    return tf.experimental.dlpack.from_dlpack(cupy.toDlpack())
-
+def _convert_to_tensor_if_cupy(array):
+    if isinstance(array, np.ndarray):
+        return array
+    else:
+        # converts cupy directly to tensor,
+        # since `tf.RaggedTensor.from_nested_row_splits` can not work with Cupy arrays
+        import tensorflow as tf
+        return tf.experimental.dlpack.from_dlpack(array.toDlpack())
 
 def _recursive_call(layout, offsets_arr):
     try:
@@ -108,17 +103,13 @@ def _recursive_call(layout, offsets_arr):
 
         # recursively gather all of the offsets of an array
         offset = layout.offsets.data
-        if isinstance(offset, np.ndarray):
-            offsets_arr += (offset,)
-        else:
-            offsets_arr += (_cupy_to_tensor(offset),)
+        offset = _convert_to_tensor_if_cupy(offset)
+        offsets_arr += (offset,)
 
     except AttributeError:
         # at the last iteration form a ragged tensor from the
         # accumulated offsets and flattened values of the array
         data = layout.data
-        if isinstance(data, np.ndarray):
-            return data, offsets_arr
-        else:
-            return _cupy_to_tensor(data), offsets_arr
+        data = _convert_to_tensor_if_cupy(data)
+        return data, offsets_arr
     return _recursive_call(layout.content, offsets_arr)
