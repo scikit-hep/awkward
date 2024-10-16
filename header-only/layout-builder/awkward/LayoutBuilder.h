@@ -568,13 +568,13 @@ namespace awkward {
 
       /// @brief Assigns a unique ID to each node.
       void set_id(size_t& id) noexcept {
-          
+
           id_ = id;
           id++;
-          
+
           BuilderSetId bsi(id);
           for (size_t i = 0; i < fields_count_; i++) {
-            
+
               visit_at(contents, i, bsi);  // Here the functor will propagate `id`
           }
       }
@@ -776,15 +776,15 @@ namespace awkward {
       std::string form() const noexcept {
           std::stringstream form_key;
           form_key << "node" << id_;
-          
+
           std::string params("");
           if (!parameters_.empty()) {
               params = "\"parameters\": { " + parameters_ + " }, ";
           }
-          
+
           std::stringstream out;
           out << "{ \"class\": \"RecordArray\", \"contents\": { ";
-          
+
           for (size_t i = 0; i < fields_count_; i++) {
               if (i != 0) {
                   out << ", ";
@@ -792,7 +792,7 @@ namespace awkward {
               ContentsFormFunctor contentsFormFunctor(out, content_names_);
               visit_at(contents, i, contentsFormFunctor);
           }
-          
+
           out << " }, ";
           out << params << "\"form_key\": \"" << form_key.str() << "\" }";
           return out.str();
