@@ -232,6 +232,7 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = [
     'awkward._nplikes.*',
+    'awkward._namedaxis',
     'awkward._behavior.*',
     'awkward._backends.*',
     'awkward._meta.*',

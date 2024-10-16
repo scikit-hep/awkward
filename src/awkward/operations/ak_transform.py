@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+from functools import reduce
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
@@ -15,6 +16,7 @@ from awkward._broadcasting import (
 )
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 
 __all__ = ("transform",)
 
@@ -580,6 +582,17 @@ def _impl(
                     f"transformation must return a Content, tuple of Contents, or None, not {type(out)}\n\n{out!r}"
                 )
 
+        if depth_context is None:
+            depth_context = {}
+        if lateral_context is None:
+            lateral_context = {}
+        assert NAMED_AXIS_KEY not in depth_context
+        assert NAMED_AXIS_KEY not in lateral_context
+        _depth_context, _lateral_context = NamedAxesWithDims.prepare_contexts(
+            [array, *more_arrays]
+        )
+        depth_context.update(_depth_context)
+        lateral_context.update(_lateral_context)
         backend = next((layout.backend for layout in layouts), cpu)
         isscalar = []
         out = apply_broadcasting_step(
@@ -594,6 +607,11 @@ def _impl(
         assert isinstance(out, tuple)
         out = [broadcast_unpack(x, isscalar) for x in out]
 
+        # Unify named axes propagated through the broadcast
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+        )
+
         if return_value == "none":
             return
         elif expect_return_value and not transformer_did_terminate:
@@ -602,6 +620,25 @@ def _impl(
                 "or tuple of Contents, but instead only returned None."
             )
         elif len(out) == 1:
-            return ctx.wrap(out[0], highlevel=highlevel)
+            wrapped_out = ctx.wrap(out[0], highlevel=highlevel)
+            return ak.operations.ak_with_named_axis._impl(
+                wrapped_out,
+                named_axis=out_named_axis,
+                highlevel=highlevel,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
+            )
         else:
-            return tuple(ctx.wrap(x, highlevel=highlevel) for x in out)
+            wrapped_out = []
+            for x in out:
+                wrapped = ctx.wrap(x, highlevel=highlevel)
+                wrapped_out.append(
+                    ak.operations.ak_with_named_axis._impl(
+                        wrapped,
+                        named_axis=out_named_axis,
+                        highlevel=highlevel,
+                        behavior=ctx.behavior,
+                        attrs=ctx.attrs,
+                    )
+                )
+            return tuple(wrapped_out)
