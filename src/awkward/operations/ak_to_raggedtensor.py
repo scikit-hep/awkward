@@ -56,8 +56,7 @@ or
     if ak_device == "cpu":
         device = "CPU:0"
     else:
-        _, depth = array.minmax_depth
-        id = array[depth - 1].content.data.device.id
+        id = _find_innermost_content(array).data.device.id
         device = "GPU:" + str(id)
 
     with tf.device(device):
@@ -74,6 +73,13 @@ or
             return tf.RaggedTensor.from_nested_row_splits(
                 flat_values, nested_row_splits
             )
+
+
+def _find_innermost_content(array):
+    if isinstance(array, ak.contents.numpyarray.NumpyArray):
+        return array
+    else:
+        return _find_innermost_content(array.content)
 
 
 def _convert_to_tensor_if_cupy(array):
