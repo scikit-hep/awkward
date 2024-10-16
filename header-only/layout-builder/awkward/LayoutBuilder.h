@@ -26,13 +26,15 @@ namespace awkward {
     /// @brief Functor for setting the ids of all nodes in a layout tree.
     class BuilderSetId {
     public:
-      BuilderSetId(size_t& id) : id_(id) {;}
-      template <class CONTENT>
-      void operator()(CONTENT& content) {
-        content.builder.set_id(id_);
-      }
+        BuilderSetId(size_t& id) : id_(id) {}
+
+        template <class CONTENT>
+        void operator()(CONTENT& content) {
+            content.builder.set_id(id_);
+        }
+
     private:
-      size_t id_;
+        size_t& id_;
     };
 
     /// @class Field
@@ -124,7 +126,7 @@ namespace awkward {
       /// @brief Discards the accumulated data in the builder.
       void
       clear() noexcept {
-        data_.clear();
+         data_.clear();
       }
 
       /// @brief Current length of the data.
@@ -565,14 +567,16 @@ namespace awkward {
       }
 
       /// @brief Assigns a unique ID to each node.
-      void
-      set_id(size_t& id) noexcept {
-        id_ = id;
-        id++;
-        BuilderSetId bsi(id);
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, bsi);
-        }
+      void set_id(size_t& id) noexcept {
+          
+          id_ = id;
+          id++;
+          
+          BuilderSetId bsi(id);
+          for (size_t i = 0; i < fields_count_; i++) {
+            
+              visit_at(contents, i, bsi);  // Here the functor will propagate `id`
+          }
       }
 
       /// @brief Clears the builder contents.
@@ -769,16 +773,18 @@ namespace awkward {
       };
 
 
-      std::string
-      form() const noexcept {
+      std::string form() const noexcept {
           std::stringstream form_key;
           form_key << "node" << id_;
+          
           std::string params("");
           if (!parameters_.empty()) {
               params = "\"parameters\": { " + parameters_ + " }, ";
           }
+          
           std::stringstream out;
           out << "{ \"class\": \"RecordArray\", \"contents\": { ";
+          
           for (size_t i = 0; i < fields_count_; i++) {
               if (i != 0) {
                   out << ", ";
@@ -786,11 +792,11 @@ namespace awkward {
               ContentsFormFunctor contentsFormFunctor(out, content_names_);
               visit_at(contents, i, contentsFormFunctor);
           }
+          
           out << " }, ";
           out << params << "\"form_key\": \"" << form_key.str() << "\" }";
           return out.str();
       }
-
 
       /// @brief The contents of the RecordArray.
       RecordContents contents;
