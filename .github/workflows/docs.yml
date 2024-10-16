@@ -17,51 +17,9 @@ env:
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
-  pyodide-python-version:
-    name: Determine Pyodide Python version
-    runs-on: ubuntu-22.04
-    outputs:
-      python-version: ${{ steps.retrieve-python-version.outputs.python-version }}
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-
-    - name: Cache python version
-      id: cache-pyodide-python-version
-      uses: actions/cache@v4
-      with:
-        path: pyodide-python-version
-        key: ${{ runner.os }}-docs-pyodide-python-version-${{ hashFiles('docs/requirements-wasm.txt') }}
-
-    - name: Setup Python
-      if: steps.cache-pyodide-python-version.outputs.cache-hit != 'true'
-      uses: actions/setup-python@v5
-      with:
-        python-version: "${{ env.X86_64_PYTHON_VERSION }}"
-
-    - name: Install dependencies
-      if: steps.cache-pyodide-python-version.outputs.cache-hit != 'true'
-      run: python3 -m pip install -r docs/requirements-wasm.txt
-
-    - name: Determine Python version
-      if: steps.cache-pyodide-python-version.outputs.cache-hit != 'true'
-      id: compute-python-version
-      run: |
-        # Save Python version
-        PYTHON_VERSION=$(pyodide config get python_version)
-        echo $PYTHON_VERSION > pyodide-python-version
-
-    - name: Retrieve Python version
-      id: retrieve-python-version
-      run: |
-        PYTHON_VERSION=$(cat pyodide-python-version)
-        echo "python-version=$PYTHON_VERSION" >> "$GITHUB_OUTPUT"
-
   awkward-cpp-wasm:
     name: Build C++ WASM
     runs-on: ubuntu-22.04
-    needs: [pyodide-python-version]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -70,52 +28,23 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: "${{ needs.pyodide-python-version.outputs.python-version }}"
+        python-version: "3.12"
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures
 
-    - name: Cache wheel
-      id: cache-awkward-cpp-wasm-wheel
-      uses: actions/cache@v4
+    - uses: pypa/cibuildwheel@v2.21
       with:
-        path: ./awkward-cpp/dist
-        key: ${{ runner.os }}-"${{ needs.pyodide-python-version.outputs.python-version }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
-
-    - name: Install dependencies
-      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
-      run: python3 -m pip install -r docs/requirements-wasm.txt
-
-    - name: Determine EMSDK version
-      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
-      id: compute-emsdk-version
-      run: |
-        # Prepare xbuild environment (side-effect)
-        pyodide config list
-        # Save EMSDK version
-        EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
-        echo "emsdk-version=$EMSCRIPTEN_VERSION" >> $GITHUB_OUTPUT
-      working-directory: awkward-cpp
-
-    - name: Install EMSDK
-      uses: mymindstorm/setup-emsdk@v14
-      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
-      with:
-        version: ${{ steps.compute-emsdk-version.outputs.emsdk-version }}
-
-    - name: Build wheel
-      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
-      id: build-awkward-cpp-wasm-wheel
-      run: |
-        # pyodide-build doesn't work out of the box with pipx
-        CFLAGS=-fexceptions LDFLAGS=-fexceptions pyodide build --exports whole_archive
-      working-directory: awkward-cpp
+        package-dir: awkward-cpp
+      env:
+        CIBW_PLATFORM: pyodide
 
     - name: Upload wheel
       uses: actions/upload-artifact@v4
       with:
         name: awkward-cpp-wasm
         path: awkward-cpp/dist/awkward*wasm32.whl
+
 
   awkward-cpp-x86-64:
     runs-on: ubuntu-22.04
