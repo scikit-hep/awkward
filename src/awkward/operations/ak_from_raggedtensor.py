@@ -29,17 +29,6 @@ def from_raggedtensor(array):
 
 def _impl(array):
     try:
-        import tensorflow as tf
-    except ImportError as err:
-        raise ImportError(
-            """to use ak.from_raggedtensor, you must install the 'tensorflow' package with:
-
-        pip install tensorflow
-or
-        conda install tensorflow"""
-        ) from err
-
-    try:
         # get the flat values
         content = array.flat_values
     except AttributeError as err:
@@ -48,12 +37,7 @@ or
         ) from err
 
     # handle gpu and cpu instances separately
-    device = content.device
-
-    # since TensorFlow currently does not support
-    # int32 variables being placed on the GPU, use CPU for them instead
-    if content.dtype == tf.int32:
-        device = "cpu"
+    device = content.backing_device
 
     content = _tensor_to_np_or_cp(content, device)
 
@@ -79,9 +63,18 @@ or
 
 
 def _tensor_to_np_or_cp(array, device):
-    import tensorflow as tf
+    if device.endswith("GPU", 0, -2):
+        try:
+            import tensorflow as tf
+        except ImportError as err:
+            raise ImportError(
+                """to use ak.from_raggedtensor, you must install the 'tensorflow' package with:
 
-    if "GPU" in device:
+            pip install tensorflow
+    or
+            conda install tensorflow"""
+            ) from err
+
         from awkward._nplikes.cupy import Cupy
 
         cp = Cupy.instance()
