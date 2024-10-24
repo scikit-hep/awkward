@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 
@@ -63,7 +65,13 @@ def _impl(array):
 
 
 def _tensor_to_np_or_cp(array, device):
-    if device.endswith("GPU", 0, -2):
+    matched_device = re.match(".*:(CPU|GPU):[0-9]+", device)
+
+    if matched_device is None:
+        raise NotImplementedError(
+            f"TensorFlow device has an unexpected format: {device!r}"
+        )
+    elif matched_device.groups()[0] == "GPU":
         try:
             import tensorflow as tf
         except ImportError as err:
@@ -79,7 +87,7 @@ def _tensor_to_np_or_cp(array, device):
 
         cp = Cupy.instance()
         return cp.from_dlpack(tf.experimental.dlpack.to_dlpack(array))
-    else:
+    elif matched_device.groups()[0] == "CPU":
         return array.numpy()
 
 
