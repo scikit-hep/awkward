@@ -162,3 +162,6 @@ Testing/
 # Pip stuff
 /pip-wheel-metadata/*
 /_skbuild/*
+
+# MacOS
+.DS_Store
