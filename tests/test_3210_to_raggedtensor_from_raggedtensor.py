@@ -107,7 +107,7 @@ def test_convert_from_raggedtensor():
 
     ak_array1 = ak.contents.ListOffsetArray(offsets1, content1)
     result1 = ak.to_layout(from_raggedtensor(tf_array1), allow_record=False)
-    assert (result1.content.data == np_array1).all()
+    assert (result1.content.data == ak.to_backend(np_array1, result1.backend).layout.data).all()
     assert (result1.offsets.data == [0, 2, 3, 3, 5]).all()
     assert from_raggedtensor(tf_array1).to_list() == ak_array1.to_list()
 
