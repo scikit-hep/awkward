@@ -501,6 +501,15 @@
       "contributions": [
         "maintenance"
       ]
+    },
+    {
+      "login": "nj-vs-vh",
+      "name": "Igor Vaiman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30616208?v=4",
+      "profile": "https://nj-vs-vh.name/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
