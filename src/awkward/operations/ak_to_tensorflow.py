@@ -71,7 +71,6 @@ or
         # check if cupy or numpy
         if isinstance(backend_array, np.ndarray):
             # convert numpy to a tensorflow tensor
-            # this makes a copy unfortunately, since numpy is mutable and TensorFlow tensor is not
             tensor = tf.convert_to_tensor(backend_array, dtype=tf.float64)
         else:
             # cupy -> tensorflow tensor

@@ -62,6 +62,7 @@ or
         ak_array = ak.from_cupy(cp_array)
 
     elif matched_device.groups()[0] == "CPU":
+        # this makes a copy unfortunately, since numpy is mutable and TensorFlow tensor is not
         np_array = array.numpy()
         ak_array = ak.from_numpy(np_array)
 
