@@ -11,6 +11,11 @@ from collections.abc import Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
+from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
+    _add_named_axis,
+    _unify_named_axis,
+)
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -319,10 +324,18 @@ BROADCAST_RULE_TO_FACTORY_IMPL = {
 }
 
 
-def left_broadcast_to(content: Content, depth: int) -> Content:
-    for _ in range(content.purelist_depth, depth):
-        content = RegularArray(content, 1, content.length)
-    return content
+def _export_named_axis_from_depth_to_lateral(
+    idx: int,
+    depth_context: dict[str, Any],
+    lateral_context: dict[str, Any],
+) -> None:
+    # set adjusted named axes to lateral (inplace)
+    named_axis, ndim = depth_context[NAMED_AXIS_KEY][idx]
+    seen_named_axis, _ = lateral_context[NAMED_AXIS_KEY][idx]
+    lateral_context[NAMED_AXIS_KEY][idx] = (
+        _unify_named_axis(named_axis, seen_named_axis),
+        ndim,
+    )
 
 
 def broadcast_regular_dim_size(contents: Sequence[ak.contents.Content]) -> ShapeItem:
@@ -433,10 +446,32 @@ def apply_step(
         max_depth = max(x.purelist_depth for x in contents)
 
         if max_depth > 0 and all(x.purelist_isregular for x in contents):
-            nextinputs = [
-                left_broadcast_to(o, max_depth) if isinstance(o, Content) else o
-                for o in inputs
-            ]
+            nextinputs = []
+
+            named_axes_with_ndims = depth_context[NAMED_AXIS_KEY]
+            seen_named_axes = lateral_context[NAMED_AXIS_KEY]
+            for i, ((named_axis, ndim), o) in enumerate(
+                zip(named_axes_with_ndims, inputs)
+            ):
+                if isinstance(o, Content):
+                    # rightbroadcast
+                    for _ in range(o.purelist_depth, max_depth):
+                        o = RegularArray(o, 1, o.length)
+                        # track new dimensions for named axis
+                        # rightbroadcasting adds a new first(!) dimension at depth
+                        seen_named_axis, seen_ndim = seen_named_axes[i]
+                        named_axis = _add_named_axis(named_axis, depth, ndim)
+                        depth_context[NAMED_AXIS_KEY][i] = (
+                            _unify_named_axis(named_axis, seen_named_axis),
+                            ndim + 1,
+                        )
+                        if o.is_leaf:
+                            _export_named_axis_from_depth_to_lateral(
+                                i, depth_context, lateral_context
+                            )
+                    nextinputs.append(o)
+                else:
+                    nextinputs.append(o)
             # Did a broadcast take place?
             if any(x is not y for x, y in zip(inputs, nextinputs)):
                 return apply_step(
@@ -538,6 +573,7 @@ def apply_step(
         # Under the category of "is_list", we have both strings and non-strings
         # The strings should behave like non-lists within these routines.
 
+        named_axes_with_ndims = depth_context[NAMED_AXIS_KEY]
         # Are the non-string list types exclusively regular?
         if all(x.is_regular or (is_string_like(x) or not x.is_list) for x in contents):
             # Compute the expected dim size
@@ -586,7 +622,9 @@ def apply_step(
             # we don't left-broadcast
             nextinputs = []
             nextparameters = []
-            for x, x_is_string in zip(inputs, inputs_are_strings):
+            for i, ((named_axis, ndim), x, x_is_string) in enumerate(
+                zip(named_axes_with_ndims, inputs, inputs_are_strings)
+            ):
                 if isinstance(x, RegularArray) and not x_is_string:
                     content_size_maybe_one = (
                         x.size is not unknown_length and x.size == 1
@@ -603,6 +641,16 @@ def apply_step(
                             )
                         )
                         nextparameters.append(x._parameters)
+                        # track new dimensions for named axis
+                        # rightbroadcasting adds a new first(!) dimension as depth
+                        depth_context[NAMED_AXIS_KEY][i] = (
+                            _add_named_axis(named_axis, depth, ndim),
+                            ndim + 1,
+                        )
+                        if x.is_leaf:
+                            _export_named_axis_from_depth_to_lateral(
+                                i, depth_context, lateral_context
+                            )
                     # Any unknown values or sizes are assumed to be correct as-is
                     elif (
                         dim_size is unknown_length
@@ -667,7 +715,9 @@ def apply_step(
 
             nextinputs = []
             nextparameters = []
-            for x, x_is_string in zip(inputs, input_is_string):
+            for i, ((named_axis, ndim), x, x_is_string) in enumerate(
+                zip(named_axes_with_ndims, inputs, input_is_string)
+            ):
                 if isinstance(x, listtypes) and not x_is_string:
                     next_content = broadcast_to_offsets_avoiding_carry(x, offsets)
                     nextinputs.append(next_content)
@@ -680,6 +730,16 @@ def apply_step(
                         .content
                     )
                     nextparameters.append(NO_PARAMETERS)
+                    # track new dimensions for named axis
+                    # leftbroadcasting adds a new last dimension at depth + 1
+                    depth_context[NAMED_AXIS_KEY][i] = (
+                        _add_named_axis(named_axis, depth + 1, ndim),
+                        ndim + 1,
+                    )
+                    if x.is_leaf:
+                        _export_named_axis_from_depth_to_lateral(
+                            i, depth_context, lateral_context
+                        )
                 else:
                     nextinputs.append(x)
                     nextparameters.append(NO_PARAMETERS)
@@ -889,7 +949,7 @@ def apply_step(
             (xy_mask, cond_mask),
             action_logical_or,
             0,
-            None,
+            depth_context,
             lateral_context,
             simple_options,
         )[0]
@@ -917,7 +977,7 @@ def apply_step(
             (xy_unmasked, mask),
             apply_mask_action,
             0,
-            None,
+            depth_context,
             lateral_context,
             simple_options,
         )

@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import copy
+from functools import reduce
 
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
 
@@ -75,6 +77,11 @@ def _impl(base, what, where, highlevel, behavior, attrs):
         # If we have an iterable here, pull out the only ti
         if is_non_string_like_sequence(where):
             where = where[0]
+
+        depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+            [base, what],
+            unwrap_kwargs={"none_policy": "promote"},
+        )
 
         with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
             base, what = ensure_same_backend(
@@ -156,9 +163,24 @@ def _impl(base, what, where, highlevel, behavior, attrs):
                 return None
 
         out = ak._broadcasting.broadcast_and_apply(
-            [base, what], action, right_broadcast=False
+            [base, what],
+            action,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            right_broadcast=False,
         )
 
         assert isinstance(out, tuple) and len(out) == 1
 
-        return ctx.wrap(out[0], highlevel=highlevel)
+        # Unify named axes propagated through the broadcast
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+        )
+        wrapped_out = ctx.wrap(out[0], highlevel=highlevel)
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped_out,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
