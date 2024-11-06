@@ -95,187 +95,584 @@ awkward_regularize_rangeslice(
   }
 }
 
+namespace awkward {
 
-// atomicMin() specializations
-template <typename T>
-__device__ T atomicMin(T* address, T val);
+namespace detail {
 
-// atomicMin() specialization for int8_t
-template <>
-__device__ int8_t atomicMin<int8_t>(int8_t* address, int8_t val) {
-  unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
-  unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
-  unsigned int sel = selectors[(size_t)address & 3];
-  unsigned int old, assumed, min_, new_;
-  old = *base_address;
-  do {
-    assumed = old;
-    min_ = min(val, (int8_t)__byte_perm(old, 0, ((size_t)address & 3)));
-    new_ = __byte_perm(old, min_, sel);
-    old = atomicCAS(base_address, assumed, new_);
-  } while (assumed != old);
-  return old;
+template <typename T_output, typename T_input>
+__forceinline__  __device__
+T_output type_reinterpret(T_input value)
+{
+    return *( reinterpret_cast<T_output*>(&value) );
+}
+    // the implementation of `genericAtomicOperation`
+    template <typename T, typename Op, size_t n>
+    struct genericAtomicOperationImpl;
+
+    // single byte atomic operation
+    template<typename T, typename Op>
+    struct genericAtomicOperationImpl<T, Op, 1> {
+        __forceinline__  __device__
+        T operator()(T* addr, T const & update_value, Op op)
+        {
+            using T_int = unsigned int;
+
+            T_int * address_uint32 = reinterpret_cast<T_int *>
+                (addr - (reinterpret_cast<size_t>(addr) & 3));
+            unsigned int shift = ((reinterpret_cast<size_t>(addr) & 3) * 8);
+
+            T_int old = *address_uint32;
+            T_int assumed ;
+
+            do {
+                assumed = old;
+                T target_value = T((old >> shift) & 0xff);
+                uint8_t new_value = type_reinterpret<uint8_t, T>
+                    ( op(target_value, update_value) );
+                old = (old & ~(0x000000ff << shift)) | (T_int(new_value) << shift);
+                old = atomicCAS(address_uint32, assumed, old);
+            } while (assumed != old);
+
+            return T((old >> shift) & 0xff);
+        }
+    };
+
+    // 2 bytes atomic operation
+    template<typename T, typename Op>
+    struct genericAtomicOperationImpl<T, Op, 2> {
+        __forceinline__  __device__
+        T operator()(T* addr, T const & update_value, Op op)
+        {
+            using T_int = unsigned int;
+            bool is_32_align = (reinterpret_cast<size_t>(addr) & 2) ? false : true;
+            T_int * address_uint32 = reinterpret_cast<T_int *>
+                (reinterpret_cast<size_t>(addr) - (is_32_align ? 0 : 2));
+
+            T_int old = *address_uint32;
+            T_int assumed ;
+
+            do {
+                assumed = old;
+                T target_value = (is_32_align) ? T(old & 0xffff) : T(old >> 16);
+                uint16_t new_value = type_reinterpret<uint16_t, T>
+                    ( op(target_value, update_value) );
+
+                old = (is_32_align) ? (old & 0xffff0000) | new_value
+                                    : (old & 0xffff) | (T_int(new_value) << 16);
+                old = atomicCAS(address_uint32, assumed, old);
+            } while (assumed != old);
+
+            return (is_32_align) ? T(old & 0xffff) : T(old >> 16);;
+        }
+    };
+
+    // 4 bytes atomic operation
+    template<typename T, typename Op>
+    struct genericAtomicOperationImpl<T, Op, 4> {
+        __forceinline__  __device__
+        T operator()(T* addr, T const & update_value, Op op)
+        {
+            using T_int = unsigned int;
+
+            T old_value = *addr;
+            T assumed {old_value};
+
+            do {
+                assumed  = old_value;
+                const T new_value = op(old_value, update_value);
+
+                T_int ret = atomicCAS(
+                    reinterpret_cast<T_int*>(addr),
+                    type_reinterpret<T_int, T>(assumed),
+                    type_reinterpret<T_int, T>(new_value));
+                old_value = type_reinterpret<T, T_int>(ret);
+
+            } while (assumed != old_value);
+
+            return old_value;
+        }
+    };
+
+    // 8 bytes atomic operation
+    template<typename T, typename Op>
+    struct genericAtomicOperationImpl<T, Op, 8> {
+        __forceinline__  __device__
+        T operator()(T* addr, T const & update_value, Op op)
+        {
+            using T_int = unsigned long long int;
+
+            T old_value = *addr;
+            T assumed {old_value};
+
+            do {
+                assumed  = old_value;
+                const T new_value = op(old_value, update_value);
+
+                T_int ret = atomicCAS(
+                    reinterpret_cast<T_int*>(addr),
+                    type_reinterpret<T_int, T>(assumed),
+                    type_reinterpret<T_int, T>(new_value));
+                old_value = type_reinterpret<T, T_int>(ret);
+
+            } while (assumed != old_value);
+
+            return old_value;
+        }
+    };
+
+    // the implementation of `typesAtomicCASImpl`
+    template <typename T, size_t n>
+    struct typesAtomicCASImpl;
+
+    template<typename T>
+    struct typesAtomicCASImpl<T, 4> {
+        __forceinline__  __device__
+        T operator()(T* addr, T const & compare, T const & update_value)
+        {
+            using T_int = unsigned int;
+
+            T_int ret = atomicCAS(
+                reinterpret_cast<T_int*>(addr),
+                type_reinterpret<T_int, T>(compare),
+                type_reinterpret<T_int, T>(update_value));
+
+            return type_reinterpret<T, T_int>(ret);
+        }
+    };
+
+    // 8 bytes atomic operation
+    template<typename T>
+    struct typesAtomicCASImpl<T, 8> {
+        __forceinline__  __device__
+        T operator()(T* addr, T const & compare, T const & update_value)
+        {
+            using T_int = unsigned long long int;
+
+            T_int ret = atomicCAS(
+                reinterpret_cast<T_int*>(addr),
+                type_reinterpret<T_int, T>(compare),
+                type_reinterpret<T_int, T>(update_value));
+
+            return type_reinterpret<T, T_int>(ret);
+        }
+    };
+
+    // call atomic function with type cast between same underlying type
+    template <typename T, typename Functor>
+    __forceinline__  __device__
+    T typesAtomicOperation32(T* addr, T val, Functor atomicFunc)
+    {
+        using T_int = int;
+        T_int ret = atomicFunc(reinterpret_cast<T_int*>(addr),
+            awkward::detail::type_reinterpret<T_int, T>(val));
+
+        return awkward::detail::type_reinterpret<T, T_int>(ret);
+    }
+
+    // call atomic function with type cast between same underlying type
+    template <typename T, typename Functor>
+    __forceinline__  __device__
+    T typesAtomicOperation64(T* addr, T val, Functor atomicFunc)
+    {
+        using T_int = long long int;
+        T_int ret = atomicFunc(reinterpret_cast<T_int*>(addr),
+            awkward::detail::type_reinterpret<T_int, T>(val));
+
+        return awkward::detail::type_reinterpret<T, T_int>(ret);
+    }
+
+    // call atomic function with type cast between same underlying type
+    template <typename T, typename Functor>
+    __forceinline__  __device__
+    T typesAtomicOperationU64(T* addr, T val, Functor atomicFunc)
+    {
+        using T_int = unsigned long long int;
+        T_int ret = atomicFunc(reinterpret_cast<T_int*>(addr),
+            awkward::detail::type_reinterpret<T_int, T>(val));
+
+        return awkward::detail::type_reinterpret<T, T_int>(ret);
+    }
+
+} // namespace detail
+
+
+template <typename T, typename BinaryOp>
+__forceinline__  __device__
+T genericAtomicOperation(T* address, T const & update_value, BinaryOp op)
+{
+    return awkward::detail::genericAtomicOperationImpl<T, BinaryOp, sizeof(T)>()
+        (address, update_value, op);
 }
 
-// atomicMin() specialization for uint8_t
-template <>
-__device__ uint8_t atomicMin<uint8_t>(uint8_t* address, uint8_t val) {
-  unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
-  unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
-  unsigned int sel = selectors[(size_t)address & 3];
-  unsigned int old, assumed, min_, new_;
-  old = *base_address;
-  do {
-    assumed = old;
-    min_ = min(val, (uint8_t)__byte_perm(old, 0, ((size_t)address & 3)));
-    new_ = __byte_perm(old, min_, sel);
-    old = atomicCAS(base_address, assumed, new_);
-  } while (assumed != old);
-  return old;
+// ------------------------------------------------------------------------
+// Binary ops for sum, min, max, prod
+struct DeviceSum {
+    template<typename T>
+    __device__
+    T operator() (const T &lhs, const T &rhs) {
+        return lhs + rhs;
+    }
+
+    template<typename T>
+    static constexpr T identity() { return T{0}; }
+};
+
+struct DeviceMin{
+    template<typename T>
+    __device__
+    T operator() (const T &lhs, const T &rhs) {
+        return lhs <= rhs ? lhs : rhs;
+    }
+
+    template<typename T>
+    static constexpr T identity() { return std::numeric_limits<T>::max(); }
+};
+
+struct DeviceMax{
+    template<typename T>
+    __device__
+    T operator() (const T &lhs, const T &rhs) {
+        return lhs >= rhs ? lhs : rhs;
+    }
+
+    template<typename T>
+    static constexpr T identity() { return std::numeric_limits<T>::lowest(); }
+};
+
+struct DeviceProduct {
+    template<typename T>
+    __device__
+    T operator() (const T &lhs, const T &rhs)
+    {
+        return lhs * rhs;
+    }
+
+    template<typename T>
+    static constexpr T identity() { return T{1}; }
+};
+
+} // namespace awkward
+
+/* Overloads for `atomicMin` */
+/** -------------------------------------------------------------------------*
+ * @brief reads the `old` located at the `address` in global or shared memory, 
+ * computes the minimum of old and val, and stores the result back to memory
+ * at the same address.
+ * These three operations are performed in one atomic transaction.
+ *
+ * The supported awkward types for `atomicMin` are:
+ * int8_t, int16_t, int32_t, int64_t, float, double,
+ * uint8_t, uint16_t, uint32_t, uint64_t.
+ * CUDA natively supports `sint32`, `uint32`, `sint64`, `uint64`.
+ * Other types are implemented by `atomicCAS`.
+ *
+ * @param[in] address The address of old value in global or shared memory
+ * @param[in] val The value to be computed
+ *
+ * @returns The old value at `address`
+ * -------------------------------------------------------------------------**/
+__forceinline__ __device__
+int8_t atomicMin(int8_t* address, int8_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMin{});
 }
 
-// atomicMin() specialization for int16_t
-template <>
-__device__ int16_t atomicMin<int16_t>(int16_t* address, int16_t val) {
-  uint16_t* address_as_ush = reinterpret_cast<uint16_t*>(address);
-  uint16_t old = *address_as_ush, assumed;
-  do {
-    assumed = old;
-    int16_t temp = min(val, reinterpret_cast<int16_t&>(assumed));
-    old = atomicCAS(
-        address_as_ush, assumed, reinterpret_cast<uint16_t&>(temp)
-    );
-  } while (assumed != old);
-  return reinterpret_cast<int16_t&>(old);
+/**
+ * @overload uint8_t atomicMin(uint8_t* address, uint8_t val)
+ */
+__forceinline__ __device__
+uint8_t atomicMin(uint8_t* address, uint8_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMin{});
 }
 
-// atomicMin() specialization for uint16_t
-template <>
-__device__ uint16_t atomicMin<uint16_t>(uint16_t* address, uint16_t val) {
-  uint16_t old = *address, assumed;
-  do {
-    assumed = old;
-    old = atomicCAS(address, assumed, min(val, assumed));
-  } while (assumed != old);
-  return old;
+/**
+ * @overload int16_t atomicMin(int16_t* address, int16_t val)
+ */
+__forceinline__ __device__
+int16_t atomicMin(int16_t* address, int16_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMin{});
 }
 
-// atomicMin() specialization for float
-template <>
-__device__ float atomicMin<float>(float* addr, float value) {
-  float old;
-  old = !signbit(value) ? __int_as_float(atomicMin((int*)addr, __float_as_int(value))) :
-      __uint_as_float(atomicMax((unsigned int*)addr, __float_as_uint(value)));
-  return old;
+/**
+ * @overload uint16_t atomicMin(uint16_t* address, uint16_t val)
+ */
+__forceinline__ __device__
+uint16_t atomicMin(uint16_t* address, uint16_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMin{});
 }
 
-// atomicMin() specialization for double
-template <>
-__device__ double atomicMin<double>(double* addr, double value) {
-  double old;
-  old = !signbit(value) ? __longlong_as_double(atomicMin((long long int*)addr, __double_as_longlong(value))) :
-      __ull2double_rz(atomicMax((unsigned long long int*)addr, __double2ull_ru(value)));
-  return old;
+/**
+ * @overload int64_t atomicMin(int64_t* address, int64_t val)
+ */
+__forceinline__ __device__
+int64_t atomicMin(int64_t* address, int64_t val)
+{
+    using T = long long int;
+    return awkward::detail::typesAtomicOperation64
+        (address, val, [](T* a, T v){return atomicMin(a, v);});
 }
 
-
-// atomicMax() specializations
-template <typename T>
-__device__ T atomicMax(T* address, T val);
-
-// atomicMax() specialization for int8_t
-template <>
-__device__ int8_t atomicMax<int8_t>(int8_t* address, int8_t val) {
-  unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
-  unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
-  unsigned int sel = selectors[(size_t)address & 3];
-  unsigned int old, assumed, max_, new_;
-  old = *base_address;
-  do {
-    assumed = old;
-    max_ = max(val, (int8_t)__byte_perm(old, 0, ((size_t)address & 3)));
-    new_ = __byte_perm(old, max_, sel);
-    old = atomicCAS(base_address, assumed, new_);
-  } while (assumed != old);
-  return old;
+/**
+ * @overload uint64_t atomicMin(uint64_t* address, uint64_t val)
+ */
+__forceinline__ __device__
+uint64_t atomicMin(uint64_t* address, uint64_t val)
+{
+    using T = unsigned long long int;
+    return awkward::detail::typesAtomicOperationU64
+        (address, val, [](T* a, T v){return atomicMin(a, v);});
 }
 
-// atomicMax() specialization for uint8_t
-template <>
-__device__ uint8_t atomicMax<uint8_t>(uint8_t* address, uint8_t val) {
-  unsigned int *base_address = (unsigned int *)((size_t)address & ~3);
-  unsigned int selectors[] = {0x3214, 0x3240, 0x3410, 0x4210};
-  unsigned int sel = selectors[(size_t)address & 3];
-  unsigned int old, assumed, max_, new_;
-  old = *base_address;
-  do {
-    assumed = old;
-    max_ = max(val, (uint8_t)__byte_perm(old, 0, ((size_t)address & 3)));
-    new_ = __byte_perm(old, max_, sel);
-    old = atomicCAS(base_address, assumed, new_);
-  } while (assumed != old);
-  return old;
+/**
+ * @overload float atomicMin(float* address, float val)
+ */
+__forceinline__ __device__
+float atomicMin(float* address, float val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMin{});
 }
 
-// atomicMax() specialization for int16_t
-template <>
-__device__ int16_t atomicMax<int16_t>(int16_t* address, int16_t val) {
-  uint16_t* address_as_ush = reinterpret_cast<uint16_t*>(address);
-  uint16_t old = *address_as_ush, assumed;
-  do {
-    assumed = old;
-    int16_t temp = max(val, reinterpret_cast<int16_t&>(assumed));
-    old = atomicCAS(
-        address_as_ush, assumed, reinterpret_cast<uint16_t&>(temp)
-    );
-  } while (assumed != old);
-  return reinterpret_cast<int16_t&>(old);
+/**
+ * @overload double atomicMin(double* address, double val)
+ */
+__forceinline__ __device__
+double atomicMin(double* address, double val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMin{});
 }
 
-// atomicMax() specialization for uint16_t
-template <>
-__device__ uint16_t atomicMax<uint16_t>(uint16_t* address, uint16_t val) {
-  uint16_t old = *address, assumed;
-  do {
-    assumed = old;
-    old = atomicCAS(address, assumed, max(val, assumed));
-  } while (assumed != old);
-  return old;
+/* Overloads for `atomicMax` */
+/** -------------------------------------------------------------------------*
+ * @brief reads the `old` located at the `address` in global or shared memory, 
+ * computes the maximum of old and val, and stores the result back to memory
+ * at the same address.
+ * These three operations are performed in one atomic transaction.
+ *
+ * The supported awkward types for `atomicMax` are:
+ * int8_t, int16_t, int32_t, int64_t, float, double,
+ * uint8_t, uint16_t, uint32_t, uint64_t.
+ * CUDA natively supports `sint32`, `uint32`, `sint64`, `uint64`.
+ * Other types are implemented by `atomicCAS`.
+ *
+ * @param[in] address The address of old value in global or shared memory
+ * @param[in] val The value to be computed
+ *
+ * @returns The old value at `address`
+ * -------------------------------------------------------------------------**/
+__forceinline__ __device__
+int8_t atomicMax(int8_t* address, int8_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMax{});
 }
 
-// atomicMax() specialization for float
-template <>
-__device__ float atomicMax<float>(float* addr, float value) {
-  float old;
-  old = !signbit(value) ? __int_as_float(atomicMax((int*)addr, __float_as_int(value))) :
-      __uint_as_float(atomicMin((unsigned int*)addr, __float_as_uint(value)));
-  return old;
+/**
+ * @overload uint8_t atomicMax(uint8_t* address, uint6_t val)
+ */
+__forceinline__ __device__
+uint8_t atomicMax(uint8_t* address, uint8_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMax{});
 }
 
-// atomicMax() specialization for double
-template <>
-__device__ double atomicMax<double>(double* addr, double value) {
-  double old;
-  old = !signbit(value) ? __longlong_as_double(atomicMax((long long int*)addr, __double_as_longlong(value))) :
-      __ull2double_rz(atomicMin((unsigned long long int*)addr, __double2ull_ru(value)));
-  return old;
+/**
+ * @overload int16_t atomicMax(int16_t* address, int16_t val)
+ */
+__forceinline__ __device__
+int16_t atomicMax(int16_t* address, int16_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMax{});
 }
 
-
-// atomicAdd() specialization for int64_t
-// uses 2's complement
-__device__ int64_t atomicAdd(int64_t* address, int64_t val) {
-  uint64_t* address_as_ull = (uint64_t*)address;
-  uint64_t old = *address_as_ull, assumed;
-  do {
-    assumed = old;
-    old = atomicCAS(address_as_ull, assumed, assumed + (uint64_t)val);
-  } while (assumed != old);
-  return (int64_t)old;
+/**
+ * @overload uint16_t atomicMax(uint16_t* address, uint16_t val)
+ */
+__forceinline__ __device__
+int16_t atomicMax(uint16_t* address, uint16_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMax{});
 }
 
+/**
+ * @overload int64_t atomicMax(int64_t* address, int64_t val)
+ */
+__forceinline__ __device__
+int64_t atomicMax(int64_t* address, int64_t val)
+{
+    using T = long long int;
+    return awkward::detail::typesAtomicOperation64
+        (address, val, [](T* a, T v){return atomicMax(a, v);});
+}
 
-// atomicMul() specializations
+/**
+ * @overload uint64_t atomicMax(uint64_t* address, uint64_t val)
+ */
+__forceinline__ __device__
+uint64_t atomicMax(uint64_t* address, uint64_t val)
+{
+    using T = unsigned long long int;
+    return awkward::detail::typesAtomicOperationU64
+        (address, val, [](T* a, T v){return atomicMax(a, v);});
+}
+
+/**
+ * @overload float atomicMax(float* address, float val)
+ */
+__forceinline__ __device__
+float atomicMax(float* address, float val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMax{});
+}
+
+/**
+ * @overload double atomicMax(double* address, double val)
+ */
+__forceinline__ __device__
+double atomicMax(double* address, double val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceMax{});
+}
+
+/* Overloads for `atomicAdd` */
+/** -------------------------------------------------------------------------*
+ * @brief reads the `old` located at the `address` in global or shared memory, 
+ * computes (old + val), and stores the result back to memory at the same
+ * address. These three operations are performed in one atomic transaction.
+ *
+ * The supported awkward types for `atomicAdd` are:
+ * int8_t, int16_t, int32_t, int64_t, float, double,
+ * uint8_t, uint16_t, uint32_t, uint64_t.
+ * CUDA natively supports `sint32`, `uint32`, `uint64`, `float`, `double`
+ * (`double` is supported after Pascal).
+ * Other types are implemented by `atomicCAS`.
+ *
+ * @param[in] address The address of old value in global or shared memory
+ * @param[in] val The value to be added
+ *
+ * @returns The old value at `address`
+ * -------------------------------------------------------------------------**/
+__forceinline__ __device__
+int8_t atomicAdd(int8_t* address, int8_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceSum{});
+}
+
+/**
+ * @overload uint8_t atomicAdd(uint8_t* address, uint8_t val)
+ */
+__forceinline__ __device__
+uint8_t atomicAdd(uint8_t* address, uint8_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceSum{});
+}
+
+/**
+ * @overload int16_t atomicAdd(int16_t* address, int16_t val)
+ */
+__forceinline__ __device__
+int16_t atomicAdd(int16_t* address, int16_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceSum{});
+}
+
+/**
+ * @overload uint16_t atomicAdd(uint16_t* address, uint16_t val)
+ */
+__forceinline__ __device__
+int16_t atomicAdd(uint16_t* address, uint16_t val)
+{
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceSum{});
+}
+
+/**
+ * @overload int64_t atomicAdd(int64_t* address, int64_t val)
+ */
+__forceinline__ __device__
+int64_t atomicAdd(int64_t* address, int64_t val)
+{
+    // `atomicAdd` supports uint64_t, but not int64_t
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceSum{});
+}
+
+#if defined(__CUDA_ARCH__) && ( __CUDA_ARCH__ < 600 )
+/**
+ * @overload double atomicAdd(double* address, double val)
+ */
+__forceinline__ __device__
+double atomicAdd(double* address, double val)
+{
+    // `atomicAdd` for `double` is supported from Pascal
+    return awkward::genericAtomicOperation(address, val, awkward::DeviceSum{});
+}
+#endif
+
+/* Overloads for `atomicCAS` */
+/** --------------------------------------------------------------------------*
+ * @brief reads the `old` located at the `address` in global or shared memory, 
+ * computes the maximum of old and val, and stores the result back to memory
+ * at the same address.
+ * These three operations are performed in one atomic transaction.
+ *
+ * The supported awkward types for `atomicCAS` are:
+ * int32_t, int64_t, float, double, uint32_t, uint64_t.
+ * int8_t, int16_t are not supported as overloads
+ * CUDA natively supports `sint32`, `uint32`, `uint64`.
+ * Other types are implemented by `atomicCAS`.
+ *
+ * @param[in] address The address of old value in global or shared memory
+ * @param[in] val The value to be computed
+ *
+ * @returns The old value at `address`
+ *
+ * @note int8_t, int16_t are not supported as `atomicCAS` overloads 
+ * -------------------------------------------------------------------------**/
+__forceinline__ __device__
+int64_t atomicCAS(int64_t* address, int64_t compare, int64_t val)
+{
+    using T = int64_t;
+    return awkward::detail::typesAtomicCASImpl<T, sizeof(T)>()(address, compare, val);
+}
+
+/**
+ * @overload float atomicCAS(float* address, float compare, float val)
+ */
+__forceinline__ __device__
+float atomicCAS(float* address, float compare, float val)
+{
+    using T = float;
+    return awkward::detail::typesAtomicCASImpl<T, sizeof(T)>()(address, compare, val);
+}
+
+/**
+ * @overload double atomicCAS(double* address, double compare, double val)
+ */
+__forceinline__ __device__
+double atomicCAS(double* address, double compare, double val)
+{
+    using T = double;
+    return awkward::detail::typesAtomicCASImpl<T, sizeof(T)>()(address, compare, val);
+}
+
+/* Overloads for `atomicMul` */
+/** -------------------------------------------------------------------------*
+ * @brief reads the `old` located at the `address` in global or shared memory, 
+ * computes (old * val), and stores the result back to memory
+ * at the same address.
+ * These three operations are performed in one atomic transaction.
+ *
+ * The supported awkward types for `atomicMul` are:
+ * int8_t, int16_t, int32_t, int64_t, float, double,
+ * uint8_t, uint16_t, uint32_t, uint64_t.
+ * CUDA natively supports `sint32`, `uint32`, `sint64`, `uint64`.
+ * Other types are implemented by `atomicCAS`.
+ *
+ * @param[in] address The address of old value in global or shared memory
+ * @param[in] val The value to be computed
+ *
+ * @returns The old value at `address`
+ * -------------------------------------------------------------------------**/
 template <typename T>
 __device__ T atomicMul(T* address, T val);
 
