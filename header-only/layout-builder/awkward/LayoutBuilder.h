@@ -1078,47 +1078,21 @@ namespace awkward {
           }
       }
 
-
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
-      // class ContentsFormFunctor {
-      // public:
-      //     ContentsFormFunctor(std::stringstream& out)
-      //         : out_(out) {}
-
-      //     // Template operator() to handle each content
-      //     template <class CONTENT>
-      //     void operator()(CONTENT& content) const {
-      //         out_ << content.form();
-      //     }
-
-      // private:
-      //     std::stringstream& out_;  // Reference to the output stringstream
-      // };
       class ContentsFormFunctor {
       public:
-          // Modify the constructor to accept a std::map instead of a std::vector
-          ContentsFormFunctor(std::stringstream& out, const std::map<unsigned long, std::string>& content_names)
-              : out_(out), content_names_(content_names) {}
+          ContentsFormFunctor(std::stringstream& out)
+              : out_(out) {}
 
-          // Template operator() to handle the content
+          // Template operator() to handle each content
           template <class CONTENT>
           void operator()(CONTENT& content) const {
-              unsigned long index = content.index;  // Assuming CONTENT has an index
-              auto it = content_names_.find(index); // Lookup content name in the map
-
-              if (it != content_names_.end()) {
-                  out_ << "\"" << it->second << "\": ";
-              } else {
-                  out_ << "\"" << index << "\": "; // Fallback to index if not found
-              }
-
-              out_ << content.builder.form();
+              out_ << content.form();
           }
 
       private:
-          std::stringstream& out_;
-          const std::map<unsigned long, std::string>& content_names_;  // Store the map by reference
+          std::stringstream& out_;  // Reference to the output stringstream
       };
 
 
@@ -2779,28 +2753,17 @@ namespace awkward {
       /// contents in the form of a JSON-like string.
       class ContentsFormFunctor {
       public:
-          // Modify the constructor to accept a std::map instead of a std::vector
-          ContentsFormFunctor(std::stringstream& out, const std::map<unsigned long, std::string>& content_names)
-              : out_(out), content_names_(content_names) {}
+          ContentsFormFunctor(std::stringstream& out)
+              : out_(out) {}
 
-          // Template operator() to handle the content
+          // Template operator() to handle each content
           template <class CONTENT>
           void operator()(CONTENT& content) const {
-              unsigned long index = content.index;  // Assuming CONTENT has an index
-              auto it = content_names_.find(index); // Lookup content name in the map
-
-              if (it != content_names_.end()) {
-                  out_ << "\"" << it->second << "\": ";
-              } else {
-                  out_ << "\"" << index << "\": "; // Fallback to index if not found
-              }
-
-              out_ << content.builder.form();
+              out_ << content.form();
           }
 
       private:
-          std::stringstream& out_;
-          const std::map<unsigned long, std::string>& content_names_;  // Store the map by reference
+          std::stringstream& out_;  // Reference to the output stringstream
       };
 
 
