@@ -232,6 +232,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/maxymnaumchyk"><img src="https://avatars.githubusercontent.com/u/70752300?v=4?s=100" width="100px;" alt="maxymnaumchyk"/><br /><sub><b>maxymnaumchyk</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=maxymnaumchyk" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://tacaswell.github.io"><img src="https://avatars.githubusercontent.com/u/199813?v=4?s=100" width="100px;" alt="Thomas A Caswell"/><br /><sub><b>Thomas A Caswell</b></sub></a><br /><a href="#maintenance-tacaswell" title="Maintenance">🚧</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://www.nijho.lt"><img src="https://avatars.githubusercontent.com/u/6897215?v=4?s=100" width="100px;" alt="Bas Nijholt"/><br /><sub><b>Bas Nijholt</b></sub></a><br /><a href="#maintenance-basnijholt" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://nj-vs-vh.name/"><img src="https://avatars.githubusercontent.com/u/30616208?v=4?s=100" width="100px;" alt="Igor Vaiman"/><br /><sub><b>Igor Vaiman</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=nj-vs-vh" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

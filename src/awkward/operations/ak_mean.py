@@ -225,8 +225,8 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
             sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
