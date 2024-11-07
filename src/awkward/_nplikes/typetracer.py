@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Collection, Sequence, Set
+from collections.abc import Collection, Iterator, Sequence, Set
 from numbers import Number
-from typing import Callable, Iterator
+from typing import Callable
 
 import numpy
 
