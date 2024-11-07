@@ -749,13 +749,13 @@ namespace awkward {
       class ContentsFormFunctor {
       public:
           // Modify the constructor to accept a std::map instead of a std::vector
-          ContentsFormFunctor(std::stringstream& out, const std::map<unsigned long, std::string>& content_names)
+          ContentsFormFunctor(std::stringstream& out, const std::map<size_t, std::string>& content_names)
               : out_(out), content_names_(content_names) {}
 
           // Template operator() to handle the content
           template <class CONTENT>
           void operator()(CONTENT& content) const {
-              unsigned long index = content.index;  // Assuming CONTENT has an index
+              size_t index = content.index;  // Assuming CONTENT has an index
               auto it = content_names_.find(index); // Lookup content name in the map
 
               if (it != content_names_.end()) {
@@ -769,7 +769,7 @@ namespace awkward {
 
       private:
           std::stringstream& out_;
-          const std::map<unsigned long, std::string>& content_names_;  // Store the map by reference
+          const std::map<size_t, std::string>& content_names_;  // Store the map by reference
       };
 
 
