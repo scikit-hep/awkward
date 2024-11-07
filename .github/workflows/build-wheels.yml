@@ -130,7 +130,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     strategy:
       matrix:
-        python: [38, 39, 310, 311, 312, 313]
+        python: [39, 310, 311, 312, 313]
         arch: [aarch64]
     steps:
 
