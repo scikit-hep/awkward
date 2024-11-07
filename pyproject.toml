@@ -10,7 +10,7 @@ name = "awkward"
 version = "2.6.10"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [
     { name = "Jim Pivarski", email = "pivarski@princeton.edu" },
 ]
@@ -27,7 +27,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -138,7 +137,7 @@ filterwarnings = [
 log_cli_level = "info"
 
 [tool.pylint]
-py-version = "3.8"
+py-version = "3.9"
 jobs = "0"
 ignore-paths = [
     "src/awkward/_typeparser/generated_parser.py",
