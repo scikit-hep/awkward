@@ -9,7 +9,7 @@ import shutil
 
 import nox
 
-ALL_PYTHONS = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+ALL_PYTHONS = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
 nox.needs_version = ">=2024.3.2"
 nox.options.default_venv_backend = "uv|virtualenv"

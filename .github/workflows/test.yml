@@ -44,7 +44,6 @@ jobs:
           - '3.11'
           - '3.10'
           - '3.9'
-          - '3.8'
         python-architecture:
           - x64
         dependencies-kind:
@@ -58,7 +57,7 @@ jobs:
             python-architecture: x86
             runs-on: windows-latest
             dependencies-kind: numpy1
-          - python-version: '3.8'
+          - python-version: '3.9'
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: minimal
@@ -180,9 +179,9 @@ jobs:
           # Cache invalidates daily by default
           cache-environment: true
           environment-name: awkward
-          # Need Python 3.8 for the cached wheels
+          # Need Python 3.9 for the cached wheels
           create-args: >-
-            python=3.8
+            python=3.9
             numpy
             root
 
