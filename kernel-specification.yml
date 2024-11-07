@@ -1466,7 +1466,7 @@ kernels:
           - {name: tocarry, type: "List[int64_t]", dir: out}
           - {name: fromstarts, type: "Const[List[int32_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int32_t]]", dir: in, role: ListArray-stops}
-          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-at}
+          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-length}
           - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_ListArray64_getitem_jagged_expand_64
         args:
@@ -1476,7 +1476,7 @@ kernels:
           - {name: tocarry, type: "List[int64_t]", dir: out}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
-          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-at}
+          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-length}
           - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_ListArrayU32_getitem_jagged_expand_64
         args:
@@ -1486,7 +1486,7 @@ kernels:
           - {name: tocarry, type: "List[int64_t]", dir: out}
           - {name: fromstarts, type: "Const[List[uint32_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[uint32_t]]", dir: in, role: ListArray-stops}
-          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-at}
+          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-length}
           - {name: length, type: "int64_t", dir: in, role: default}
     description: null
     definition: |

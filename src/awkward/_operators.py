@@ -50,6 +50,7 @@ def _binary_method(ufunc, name):
     def func(self, other):
         if _disables_array_ufunc(other):
             return NotImplemented
+
         return ufunc(self, other)
 
     func.__name__ = f"__{name}__"

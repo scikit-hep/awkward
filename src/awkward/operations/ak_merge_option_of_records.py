@@ -5,6 +5,10 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
+from awkward._namedaxis import (
+    _get_named_axis,
+    _named_axis_to_positional_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
@@ -49,9 +53,14 @@ def merge_option_of_records(
 
 
 def _impl(array, axis, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
+
+    axis = regularize_axis(axis, none_allowed=False)
 
     # First, normalise type-invsible "index-of-records" to "record-of-index"
     def apply_displace_index(layout, backend, **kwargs):

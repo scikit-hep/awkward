@@ -51,6 +51,7 @@ def unzip(array, *, highlevel=True, behavior=None, attrs=None):
 def _impl(array, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
+
     fields = ak.operations.fields(layout)
 
     def check_for_union(layout, **kwargs):
@@ -70,5 +71,10 @@ def _impl(array, highlevel, behavior, attrs):
         return (ctx.wrap(layout, highlevel=highlevel, allow_other=True),)
     else:
         return tuple(
-            ctx.wrap(layout[n], highlevel=highlevel, allow_other=True) for n in fields
+            ctx.wrap(
+                layout[n],
+                highlevel=highlevel,
+                allow_other=True,
+            )
+            for n in fields
         )

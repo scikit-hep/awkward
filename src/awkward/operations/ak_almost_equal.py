@@ -7,6 +7,7 @@ from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._dispatch import high_level_function
 from awkward._layout import ensure_same_backend
+from awkward._namedaxis import _get_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
@@ -27,6 +28,7 @@ def almost_equal(
     dtype_exact: bool = True,
     check_parameters: bool = True,
     check_regular: bool = True,
+    check_named_axis: bool = True,
 ):
     """
     Args:
@@ -39,6 +41,7 @@ def almost_equal(
         check_parameters: whether to compare parameters.
         check_regular: whether to consider ragged and regular dimensions as
             unequal.
+        check_named_axis: bool (default=True) whether to consider named axes as unequal.
 
     Return True if the two array-like arguments are considered equal for the
     given options. Otherwise, return False.
@@ -61,6 +64,7 @@ def almost_equal(
         dtype_exact=dtype_exact,
         check_parameters=check_parameters,
         check_regular=check_regular,
+        check_named_axis=check_named_axis,
         exact_eq=False,
         same_content_types=False,
         equal_nan=False,
@@ -75,6 +79,7 @@ def _impl(
     dtype_exact: bool,
     check_parameters: bool,
     check_regular: bool,
+    check_named_axis: bool,
     exact_eq: bool,
     same_content_types: bool,
     equal_nan: bool,
@@ -90,6 +95,10 @@ def _impl(
     left_layout = layouts[0].to_packed()
     right_layout = layouts[1].to_packed()
     backend = backend_of(left_layout)
+
+    if check_named_axis and _get_named_axis(left) and _get_named_axis(right):
+        if left.named_axis != right.named_axis:
+            return False
 
     if not backend.nplike.known_data:
         raise NotImplementedError(
