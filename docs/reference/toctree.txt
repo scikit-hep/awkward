@@ -40,6 +40,14 @@
     generated/ak.from_avro_file
 
 .. toctree::
+    :caption: Conversions for machine learning
+
+    generated/ak.from_raggedtensor
+    generated/ak.to_raggedtensor
+    generated/ak.from_torch
+    generated/ak.to_torch
+
+.. toctree::
     :caption: Converting to Pandas DataFrames
 
     generated/ak.to_dataframe

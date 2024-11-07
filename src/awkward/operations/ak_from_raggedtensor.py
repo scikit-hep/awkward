@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 
@@ -30,18 +32,25 @@ def from_raggedtensor(array):
 def _impl(array):
     try:
         # get the flat values
-        content = array.flat_values.numpy()
+        content = array.flat_values
     except AttributeError as err:
         raise TypeError(
             """only RaggedTensor can be converted to awkward array"""
         ) from err
-    # convert them to ak.contents right away
+
+    # handle gpu and cpu instances separately
+    device = content.backing_device
+
+    content = _tensor_to_np_or_cp(content, device)
+
+    # convert flat_values to ak.contents right away
     content = ak.contents.NumpyArray(content)
 
     # get the offsets
     offsets_arr = []
     for splits in array.nested_row_splits:
-        split = splits.numpy()
+        # handle gpu and cpu instances separately
+        split = _tensor_to_np_or_cp(splits, device)
         # convert to ak.index
         offset = ak.index.Index64(split)
         offsets_arr.append(offset)
@@ -53,6 +62,33 @@ def _impl(array):
 
     # if a tensor has multiple *ragged dimensions*
     return ak.Array(_recursive_call(content, offsets_arr, 0))
+
+
+def _tensor_to_np_or_cp(array, device):
+    matched_device = re.match(".*:(CPU|GPU):[0-9]+", device)
+
+    if matched_device is None:
+        raise NotImplementedError(
+            f"TensorFlow device has an unexpected format: {device!r}"
+        )
+    elif matched_device.groups()[0] == "GPU":
+        try:
+            import tensorflow as tf
+        except ImportError as err:
+            raise ImportError(
+                """to use ak.from_raggedtensor, you must install the 'tensorflow' package with:
+
+            pip install tensorflow
+    or
+            conda install tensorflow"""
+            ) from err
+
+        from awkward._nplikes.cupy import Cupy
+
+        cp = Cupy.instance()
+        return cp.from_dlpack(tf.experimental.dlpack.to_dlpack(array))
+    elif matched_device.groups()[0] == "CPU":
+        return array.numpy()
 
 
 def _recursive_call(content, offsets_arr, count):
