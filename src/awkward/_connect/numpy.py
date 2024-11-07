@@ -22,6 +22,7 @@ from awkward._behavior import (
 )
 from awkward._categorical import as_hashable
 from awkward._layout import wrap_layout
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 from awkward._nplikes import to_nplike
 from awkward._parameters import parameters_intersect
 from awkward._regularize import is_non_string_like_iterable
@@ -363,6 +364,8 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
     attrs = attrs_of(*inputs)
     backend = backend_of(*inputs, coerce_to_common=True)
 
+    depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(inputs)
+
     inputs = _array_ufunc_custom_cast(inputs, behavior, backend)
 
     def action(inputs, **ignore):
@@ -464,13 +467,40 @@ def array_ufunc(ufunc, method: str, inputs, kwargs: dict[str, Any]):
         return None
 
     out = ak._broadcasting.broadcast_and_apply(
-        inputs, action, allow_records=False, function_name=ufunc.__name__
+        inputs,
+        action,
+        depth_context=depth_context,
+        lateral_context=lateral_context,
+        allow_records=False,
+        function_name=ufunc.__name__,
     )
 
+    out_named_axis = functools.reduce(
+        _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+    )
     if len(out) == 1:
-        return wrap_layout(out[0], behavior=behavior, attrs=attrs)
+        wrapped = wrap_layout(out[0], behavior=behavior, attrs=attrs)
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped,
+            named_axis=out_named_axis,
+            highlevel=True,
+            behavior=None,
+            attrs=None,
+        )
     else:
-        return tuple(wrap_layout(o, behavior=behavior, attrs=attrs) for o in out)
+        wrapped_out = []
+        for o in out:
+            wrapped = wrap_layout(o, behavior=behavior, attrs=attrs)
+            wrapped_out.append(
+                ak.operations.ak_with_named_axis._impl(
+                    wrapped,
+                    named_axis=out_named_axis,
+                    highlevel=True,
+                    behavior=None,
+                    attrs=None,
+                )
+            )
+        return tuple(wrapped_out)
 
 
 def action_for_matmul(inputs):

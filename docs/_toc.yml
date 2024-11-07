@@ -4,12 +4,11 @@ title: "Awkward Array"
 defaults:
   titlesonly: True
 
-
 subtrees:
   - entries:
       - file: getting-started/index
         subtrees:
-            - entries:
+          - entries:
               - file: getting-started/what-is-an-awkward-array
               - file: getting-started/10-minutes-to-awkward-array
               - file: getting-started/uproot-awkward-columnar-hats
@@ -18,7 +17,7 @@ subtrees:
               - file: getting-started/papers-and-talks
       - file: user-guide/index
         subtrees:
-            - entries:
+          - entries:
               - file: user-guide/how-to-convert
                 title: "Converting arrays"
                 subtrees:
@@ -73,6 +72,13 @@ subtrees:
                         title: "Simple slicing"
                       - file: user-guide/how-to-examine-checking-validity
                         title: "Checking validity"
+
+              - file: user-guide/how-to-array-properties
+                title: "Array properties"
+                subtrees:
+                  - entries:
+                      - file: user-guide/how-to-array-properties-named-axis
+                        title: "Named axes"
 
               - file: user-guide/how-to-math
                 title: "Numerical math"
