@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("to_raggedtensor",)
+
+np = NumpyMetadata.instance()
 
 
 @high_level_function()
@@ -45,14 +48,49 @@ or
     # also transforms a python list to awkward array
     array = ak.to_layout(array, allow_record=False)
 
-    if isinstance(array, ak.contents.numpyarray.NumpyArray):
-        return tf.RaggedTensor.from_row_splits(
-            values=array.data, row_splits=[0, array.__len__()]
-        )
-    else:
-        flat_values, nested_row_splits = _recursive_call(array, ())
+    # keep the same device
+    ak_device = ak.backend(array)
+    if ak_device not in ["cuda", "cpu"]:
+        raise ValueError("""Only 'cpu' and 'cuda' backend conversions are allowed""")
 
-        return tf.RaggedTensor.from_nested_row_splits(flat_values, nested_row_splits)
+    if ak_device == "cpu":
+        device = "CPU:0"
+    else:
+        id = _find_innermost_content(array).data.device.id
+        device = "GPU:" + str(id)
+
+    with tf.device(device):
+        if isinstance(array, ak.contents.numpyarray.NumpyArray):
+            values = array.data
+            # handle cupy separately
+            values = _convert_to_tensor_if_cupy(values)
+            return tf.RaggedTensor.from_row_splits(
+                values=values, row_splits=[0, array.__len__()]
+            )
+
+        else:
+            flat_values, nested_row_splits = _recursive_call(array, ())
+            return tf.RaggedTensor.from_nested_row_splits(
+                flat_values, nested_row_splits
+            )
+
+
+def _find_innermost_content(array):
+    if isinstance(array, ak.contents.numpyarray.NumpyArray):
+        return array
+    else:
+        return _find_innermost_content(array.content)
+
+
+def _convert_to_tensor_if_cupy(array):
+    if isinstance(array, np.ndarray):
+        return array
+    else:
+        # converts cupy directly to tensor,
+        # since `tf.RaggedTensor.from_nested_row_splits` can not work with Cupy arrays
+        import tensorflow as tf
+
+        return tf.experimental.dlpack.from_dlpack(array.toDlpack())
 
 
 def _recursive_call(layout, offsets_arr):
@@ -75,10 +113,14 @@ def _recursive_call(layout, offsets_arr):
             )
 
         # recursively gather all of the offsets of an array
-        offsets_arr += (layout.offsets.data,)
+        offset = layout.offsets.data
+        offset = _convert_to_tensor_if_cupy(offset)
+        offsets_arr += (offset,)
 
     except AttributeError:
         # at the last iteration form a ragged tensor from the
         # accumulated offsets and flattened values of the array
-        return layout.data, offsets_arr
+        data = layout.data
+        data = _convert_to_tensor_if_cupy(data)
+        return data, offsets_arr
     return _recursive_call(layout.content, offsets_arr)

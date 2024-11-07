@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import (
     HighLevelContext,
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
+)
+from awkward._namedaxis import (
+    _get_named_axis,
+    _named_axis_to_positional_axis,
 )
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -75,10 +80,16 @@ def softmax(
 
 def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     original_axis = axis
-    axis = regularize_axis(axis)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout = ctx.unwrap(x, allow_record=False, primitive_policy="error")
+
+    # Handle named axis
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
+    axis = regularize_axis(axis, none_allowed=True)
+
     x = ctx.wrap(x_layout)
 
     if maybe_posaxis(x_layout, axis, 1) != maybe_posaxis(x_layout, -1, 1):
@@ -97,8 +108,19 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
             behavior=ctx.behavior,
             attrs=ctx.attrs,
         )
-        return ctx.wrap(
-            maybe_highlevel_to_lowlevel(expx / denom),
+
+        out = expx / denom
+
+        wrapped = ctx.wrap(
+            maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,
+        )
+        # propagate named axis to output
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped,
+            named_axis=_get_named_axis(attrs_of_obj(out)),
+            highlevel=highlevel,
+            behavior=None,
+            attrs=None,
         )

@@ -56,15 +56,29 @@ def merge_mappings(
 
 
 class HighLevelContext:
-    def __init__(
-        self, behavior: Mapping | None = None, attrs: Mapping[str, Any] | None = None
-    ):
+    def __init__(self, behavior: Mapping | None = None, attrs: Mapping | None = None):
         self._behavior = behavior
         self._attrs = attrs
         self._is_finalized = False
 
         self._attrs_from_objects = []
         self._behavior_from_objects = []
+
+    def with_attr(self, key, value) -> Self:
+        self._ensure_finalized()
+        return type(self)(
+            behavior=self.behavior,
+            attrs={**self.attrs, key: value},
+        ).finalize()
+
+    def without_attr(self, key) -> Self:
+        self._ensure_finalized()
+        attrs = dict(self.attrs)
+        attrs.pop(key, None)
+        return type(self)(
+            behavior=self.behavior,
+            attrs=attrs,
+        ).finalize()
 
     def __enter__(self):
         return self
@@ -81,8 +95,10 @@ class HighLevelContext:
             raise RuntimeError("HighLevelContext has already been finalized")
 
     @property
-    def attrs(self) -> Mapping[str, Any] | None:
+    def attrs(self) -> Mapping:
         self._ensure_finalized()
+        if self._attrs is None:
+            self._attrs = {}
         return self._attrs
 
     @property
@@ -154,7 +170,11 @@ class HighLevelContext:
         )
 
     def wrap(
-        self, obj: Any, *, highlevel: bool = True, allow_other: bool = False
+        self,
+        obj: Any,
+        *,
+        highlevel: bool = True,
+        allow_other: bool = False,
     ) -> Any:
         self._ensure_finalized()
 
@@ -230,7 +250,7 @@ def maybe_highlevel_to_lowlevel(obj):
     Args:
         obj: an object
 
-    Calls #ak.to_layout and returns the result iff. the object is a high-level
+    Calls #ak.to_layout and returns the result if the object is a high-level
     Awkward object, otherwise the object is returned as-is.
 
     This function should be removed once scalars are properly handled by `to_layout`.
@@ -372,6 +392,34 @@ def from_arraylib(
     return layout
 
 
+def _neg2pos_axis(
+    axis: int,
+    total: int,
+) -> int:
+    """
+    Converts a negative axis index to a positive one.
+
+    This function takes a negative axis index and the total number of axes and returns the corresponding positive axis index.
+    If the input axis index is already positive, it is returned as is.
+
+    Args:
+        axis (int): The axis index to convert. Can be negative.
+        total (int): The total number of axes.
+
+    Returns:
+        int: The positive axis index corresponding to the input axis index.
+
+    Examples:
+        >>> _neg2pos_axis(-1, 3)
+        2
+        >>> _neg2pos_axis(1, 3)
+        1
+    """
+    if axis < 0:
+        return total + axis
+    return axis
+
+
 def maybe_posaxis(layout: Content, axis: int, depth: int) -> int | None:
     from awkward.record import Record
 
@@ -386,6 +434,6 @@ def maybe_posaxis(layout: Content, axis: int, depth: int) -> int | None:
     else:
         is_branching, additional_depth = layout.branch_depth
         if not is_branching:
-            return axis + depth + additional_depth - 1
+            return _neg2pos_axis(axis, additional_depth) + depth - 1
         else:
             return None
