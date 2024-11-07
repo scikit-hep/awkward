@@ -44,6 +44,8 @@
 
     generated/ak.from_raggedtensor
     generated/ak.to_raggedtensor
+    generated/ak.from_tensorflow
+    generated/ak.to_tensorflow
     generated/ak.from_torch
     generated/ak.to_torch
 
