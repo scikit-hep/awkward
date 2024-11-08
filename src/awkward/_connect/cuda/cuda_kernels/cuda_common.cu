@@ -355,7 +355,7 @@ struct DeviceProduct {
 
 /* Overloads for `atomicMin` */
 /** -------------------------------------------------------------------------*
- * @brief reads the `old` located at the `address` in global or shared memory, 
+ * @brief reads the `old` located at the `address` in global or shared memory,
  * computes the minimum of old and val, and stores the result back to memory
  * at the same address.
  * These three operations are performed in one atomic transaction.
@@ -446,7 +446,7 @@ double atomicMin(double* address, double val)
 
 /* Overloads for `atomicMax` */
 /** -------------------------------------------------------------------------*
- * @brief reads the `old` located at the `address` in global or shared memory, 
+ * @brief reads the `old` located at the `address` in global or shared memory,
  * computes the maximum of old and val, and stores the result back to memory
  * at the same address.
  * These three operations are performed in one atomic transaction.
@@ -537,7 +537,7 @@ double atomicMax(double* address, double val)
 
 /* Overloads for `atomicAdd` */
 /** -------------------------------------------------------------------------*
- * @brief reads the `old` located at the `address` in global or shared memory, 
+ * @brief reads the `old` located at the `address` in global or shared memory,
  * computes (old + val), and stores the result back to memory at the same
  * address. These three operations are performed in one atomic transaction.
  *
@@ -610,7 +610,7 @@ double atomicAdd(double* address, double val)
 
 /* Overloads for `atomicCAS` */
 /** --------------------------------------------------------------------------*
- * @brief reads the `old` located at the `address` in global or shared memory, 
+ * @brief reads the `old` located at the `address` in global or shared memory,
  * computes the maximum of old and val, and stores the result back to memory
  * at the same address.
  * These three operations are performed in one atomic transaction.
@@ -626,7 +626,7 @@ double atomicAdd(double* address, double val)
  *
  * @returns The old value at `address`
  *
- * @note int8_t, int16_t are not supported as `atomicCAS` overloads 
+ * @note int8_t, int16_t are not supported as `atomicCAS` overloads
  * -------------------------------------------------------------------------**/
 __forceinline__ __device__
 int64_t atomicCAS(int64_t* address, int64_t compare, int64_t val)
@@ -657,7 +657,7 @@ double atomicCAS(double* address, double compare, double val)
 
 /* Overloads for `atomicMul` */
 /** -------------------------------------------------------------------------*
- * @brief reads the `old` located at the `address` in global or shared memory, 
+ * @brief reads the `old` located at the `address` in global or shared memory,
  * computes (old * val), and stores the result back to memory
  * at the same address.
  * These three operations are performed in one atomic transaction.

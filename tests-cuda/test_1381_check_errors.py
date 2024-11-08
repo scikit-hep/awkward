@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import traceback
-
 import cupy as cp
 import numpy as np  # noqa: F401
 import pytest
@@ -26,7 +24,7 @@ def test():
         print(array_cuda[11,])
         print(array_cuda[12,])
 
-    #with pytest.raises(ValueError) as err:
+    # with pytest.raises(ValueError) as err:
     awkward._connect.cuda.synchronize_cuda(stream)
 
     # assert isinstance(err.value, ValueError)

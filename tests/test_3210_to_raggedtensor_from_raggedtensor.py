@@ -110,7 +110,10 @@ def test_convert_from_raggedtensor():
     assert (
         result1.content.data == ak.to_backend(np_array1, result1.backend).layout.data
     ).all()
-    assert (result1.offsets.data == ak.to_backend([0, 2, 3, 3, 5], result1.backend).layout.data).all()
+    assert (
+        result1.offsets.data
+        == ak.to_backend([0, 2, 3, 3, 5], result1.backend).layout.data
+    ).all()
     assert from_raggedtensor(tf_array1).to_list() == ak_array1.to_list()
 
     tf_array2 = tf.RaggedTensor.from_nested_row_splits(
