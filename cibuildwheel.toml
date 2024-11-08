@@ -9,7 +9,6 @@ pytest {project}/tests \
        {package}/tests-spec-explicit
 """
 skip = [
-    "*p38*",
     "pp*win*",
     "pp*-manylinux_i686",
 ]
