@@ -108,20 +108,17 @@ def _impl(
 
     axis = regularize_axis(axis, none_allowed=False)
 
-    if axis < 0:
-        raise ValueError("the 'axis' for argcombinations must be non-negative")
-    else:
-        with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-            layout = ak._do.local_index(
-                ctx.unwrap(array, allow_record=False, primitive_policy="error"),
-                axis,
-            )
-        out = ak._do.combinations(
-            layout,
-            n,
-            replacement=replacement,
-            axis=axis,
-            fields=fields,
-            parameters=parameters,
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ak._do.local_index(
+            ctx.unwrap(array, allow_record=False, primitive_policy="error"),
+            axis,
         )
-        return ctx.wrap(out, highlevel=highlevel)
+    out = ak._do.combinations(
+        layout,
+        n,
+        replacement=replacement,
+        axis=axis,
+        fields=fields,
+        parameters=parameters,
+    )
+    return ctx.wrap(out, highlevel=highlevel)
