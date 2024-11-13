@@ -285,7 +285,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
         # propagate named axis to output
         return ak.operations.ak_with_named_axis._impl(
             wrapped,
-            named_axis=_get_named_axis(attrs_of_obj(out)),
+            named_axis=_get_named_axis(attrs_of_obj(out), allow_any=True),
             highlevel=highlevel,
             behavior=None,
             attrs=None,
