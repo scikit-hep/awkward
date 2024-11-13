@@ -652,7 +652,7 @@ class NamedAxesWithDims:
     """
 
     named_axis: list[AxisMapping]
-    ndims: list[int]
+    ndims: list[int | None]
 
     def __post_init__(self):
         if len(self.named_axis) != len(self.ndims):
@@ -660,7 +660,7 @@ class NamedAxesWithDims:
                 "The number of dimensions must match the number of named axis mappings."
             )
 
-    def __iter__(self) -> tp.Iterator[tuple[AxisMapping, int]]:
+    def __iter__(self) -> tp.Iterator[tuple[AxisMapping, int | None]]:
         yield from zip(self.named_axis, self.ndims)
 
     @classmethod
@@ -683,18 +683,20 @@ class NamedAxesWithDims:
             with HighLevelContext() as ctx:
                 layout = ctx.unwrap(array, **_unwrap_kwargs)
             _named_axes.append(_get_named_axis(array))
-            _ndims.append(layout.minmax_depth[1])
+            _ndims.append(getattr(layout, "minmax_depth", (None, None))[1])
 
         depth_context = {NAMED_AXIS_KEY: cls(_named_axes, _ndims)}
         lateral_context = {NAMED_AXIS_KEY: cls(_named_axes, _ndims)}
         return depth_context, lateral_context
 
-    def __setitem__(self, index: int, named_axis_with_ndim: tuple[AxisMapping, int]):
+    def __setitem__(
+        self, index: int, named_axis_with_ndim: tuple[AxisMapping, int | None]
+    ):
         named_axis, ndim = named_axis_with_ndim
         self.named_axis[index] = named_axis
         self.ndims[index] = ndim
 
-    def __getitem__(self, index: int) -> tuple[AxisMapping, int]:
+    def __getitem__(self, index: int) -> tuple[AxisMapping, int | None]:
         return self.named_axis[index], self.ndims[index]
 
     def __len__(self) -> int:
