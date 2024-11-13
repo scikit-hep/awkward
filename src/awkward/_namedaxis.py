@@ -82,7 +82,7 @@ def _prettify_named_axes(
     return delimiter.join(items)
 
 
-def _get_named_axis(ctx: tp.Any) -> AxisMapping:
+def _get_named_axis(ctx: tp.Any, allow_any: bool = False) -> AxisMapping:
     """
     Retrieves the named axis from the provided context.
 
@@ -103,9 +103,12 @@ def _get_named_axis(ctx: tp.Any) -> AxisMapping:
         >>> _get_named_axis({"other_key": "other_value"})
         {}
     """
-    if hasattr(ctx, "attrs"):
-        return _get_named_axis(ctx.attrs)
-    elif isinstance(ctx, tp.Mapping) and NAMED_AXIS_KEY in ctx:
+    from awkward._layout import HighLevelContext
+    from awkward.highlevel import Array, Record
+
+    if hasattr(ctx, "attrs") and isinstance(ctx, (HighLevelContext, Array, Record)):
+        return _get_named_axis(ctx.attrs, allow_any=True)
+    elif allow_any and isinstance(ctx, tp.Mapping) and NAMED_AXIS_KEY in ctx:
         return dict(ctx[NAMED_AXIS_KEY])
     else:
         return {}
