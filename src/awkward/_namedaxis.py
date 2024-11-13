@@ -106,7 +106,9 @@ def _get_named_axis(ctx: tp.Any, allow_any: bool = False) -> AxisMapping:
     from awkward._layout import HighLevelContext
     from awkward.highlevel import Array, Record
 
-    if hasattr(ctx, "attrs") and isinstance(ctx, (HighLevelContext, Array, Record)):
+    if hasattr(ctx, "attrs") and (
+        isinstance(ctx, (HighLevelContext, Array, Record)) or allow_any
+    ):
         return _get_named_axis(ctx.attrs, allow_any=True)
     elif allow_any and isinstance(ctx, tp.Mapping) and NAMED_AXIS_KEY in ctx:
         return dict(ctx[NAMED_AXIS_KEY])
