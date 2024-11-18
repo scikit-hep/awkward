@@ -270,7 +270,7 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
         )
         return ak.operations.ak_with_named_axis._impl(
             wrapped,
-            named_axis=_get_named_axis(attrs_of_obj(out) or {}),
+            named_axis=_get_named_axis(attrs_of_obj(out), allow_any=True),
             highlevel=highlevel,
             behavior=None,
             attrs=None,
