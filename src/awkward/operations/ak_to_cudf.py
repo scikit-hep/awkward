@@ -18,4 +18,4 @@ def to_cudf(
     """
     import cudf
 
-    return cudf.Series(array.layout._to_cudf(cudf, None, len(array)))
+    return cudf.Series._from_column(array.layout._to_cudf(cudf, None, len(array)))
