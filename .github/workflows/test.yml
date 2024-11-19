@@ -153,7 +153,7 @@ jobs:
 
       - name: Upload Codecov results
         if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
 
   Linux-ROOT:
     runs-on: ubuntu-20.04
