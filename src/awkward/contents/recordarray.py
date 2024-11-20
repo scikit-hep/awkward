@@ -316,6 +316,24 @@ class RecordArray(RecordMeta[Content], Content):
             form_key=form_key,
         )
 
+    def _form_with_key_path(self, path: (str | None)) -> RecordForm:
+        if self._fields is None:
+            contents = [
+                x._form_with_key_path((*path, i)) for i, x in enumerate(self._contents)
+            ]
+        else:
+            contents = [
+                x._form_with_key_path((*path, k))
+                for k, x in zip(self._fields, self._contents)
+            ]
+
+        return self.form_cls(
+            contents,
+            self._fields,
+            parameters=self._parameters,
+            form_key=repr(path),
+        )
+
     def _to_buffers(
         self,
         form: Form,

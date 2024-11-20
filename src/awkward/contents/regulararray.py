@@ -211,6 +211,14 @@ class RegularArray(RegularMeta[Content], Content):
             form_key=form_key,
         )
 
+    def _form_with_key_path(self, path: (str | None)) -> RegularForm:
+        return self.form_cls(
+            self._content._form_with_key_path((*path, None)),
+            self._size,
+            parameters=self._parameters,
+            form_key=repr(path),
+        )
+
     def _to_buffers(
         self,
         form: Form,

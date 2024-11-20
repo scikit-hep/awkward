@@ -200,6 +200,14 @@ class NumpyArray(NumpyMeta, Content):
             form_key=getkey(self),
         )
 
+    def _form_with_key_path(self, path: (str | None)) -> NumpyForm:
+        return self.form_cls(
+            ak.types.numpytype.dtype_to_primitive(self._data.dtype),
+            self.inner_shape,
+            parameters=self._parameters,
+            form_key=repr(path),
+        )
+
     def _to_buffers(
         self,
         form: Form,
