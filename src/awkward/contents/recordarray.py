@@ -316,7 +316,7 @@ class RecordArray(RecordMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | None)) -> RecordForm:
+    def _form_with_key_path(self, path: (str | int | None)) -> RecordForm:
         if self._fields is None:
             contents = [
                 x._form_with_key_path((*path, i)) for i, x in enumerate(self._contents)

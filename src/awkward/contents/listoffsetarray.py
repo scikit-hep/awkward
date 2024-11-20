@@ -199,7 +199,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | None)) -> ListOffsetForm:
+    def _form_with_key_path(self, path: (str | int | None)) -> ListOffsetForm:
         return self.form_cls(
             self._offsets.form,
             self._content._form_with_key_path((*path, None)),

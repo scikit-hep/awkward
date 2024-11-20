@@ -207,7 +207,7 @@ class ListArray(ListMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | None)) -> ListForm:
+    def _form_with_key_path(self, path: (str | int | None)) -> ListForm:
         return self.form_cls(
             self._starts.form,
             self._stops.form,

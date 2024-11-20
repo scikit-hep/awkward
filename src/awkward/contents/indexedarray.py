@@ -214,7 +214,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | None)) -> IndexedForm:
+    def _form_with_key_path(self, path: (str | int | None)) -> IndexedForm:
         return self.form_cls(
             self._index.form,
             self._content._form_with_key_path((*path, None)),

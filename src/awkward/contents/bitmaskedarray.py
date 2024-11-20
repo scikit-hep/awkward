@@ -288,7 +288,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | None)) -> BitMaskedForm:
+    def _form_with_key_path(self, path: (str | int | None)) -> BitMaskedForm:
         return self.form_cls(
             self._mask.form,
             self._content._form_with_key_path((*path, None)),

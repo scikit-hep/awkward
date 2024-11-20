@@ -460,7 +460,7 @@ class UnionArray(UnionMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | None)) -> UnionForm:
+    def _form_with_key_path(self, path: (str | int | None)) -> UnionForm:
         return self.form_cls(
             self._tags.form,
             self._index.form,

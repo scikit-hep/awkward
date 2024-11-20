@@ -118,7 +118,7 @@ class EmptyArray(EmptyMeta, Content):
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> EmptyForm:
         return self.form_cls(form_key=getkey(self))
 
-    def _form_with_key_path(self, path: (str | None)) -> EmptyForm:
+    def _form_with_key_path(self, path: (str | int | None)) -> EmptyForm:
         return self.form_cls(form_key=repr(path))
 
     def _to_buffers(

@@ -138,7 +138,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | None)) -> UnmaskedForm:
+    def _form_with_key_path(self, path: (str | int | None)) -> UnmaskedForm:
         return self.form_cls(
             self._content._form_with_key_path((*path, None)),
             parameters=self._parameters,

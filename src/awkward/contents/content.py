@@ -238,10 +238,10 @@ class Content(Meta):
     ) -> Form:
         raise NotImplementedError
 
-    def form_with_key_path(self, root: (str | None) = ()) -> Form:
+    def form_with_key_path(self, root: (str | int | None) = ()) -> Form:
         return self._form_with_key_path(root)
 
-    def _form_with_key_path(self, path: (str | None)) -> Form:
+    def _form_with_key_path(self, path: (str | int | None)) -> Form:
         raise NotImplementedError
 
     @property
