@@ -28,3 +28,12 @@ ERROR awkward_UnionArray8_regular_index_getsize(
     fromtags,
     length);
 }
+ERROR awkward_UnionArray64_regular_index_getsize(
+  int64_t* size,
+  const int64_t* fromtags,
+  int64_t length) {
+  return awkward_UnionArray_regular_index_getsize<int64_t>(
+    size,
+    fromtags,
+    length);
+}
