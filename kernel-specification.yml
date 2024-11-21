@@ -3514,15 +3514,15 @@ kernels:
 
   - name: awkward_UnionArray_regular_index_getsize
     specializations:
-      - name: awkward_UnionArray8_regular_index_getsize
-        args:
-          - {name: size, type: "List[int64_t]", dir: out}
-          - {name: fromtags, type: "Const[List[int8_t]]", dir: in, role: UnionArray-tags}
-          - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray64_regular_index_getsize
         args:
           - {name: size, type: "List[int64_t]", dir: out}
           - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_UnionArray8_regular_index_getsize
+        args:
+          - {name: size, type: "List[int64_t]", dir: out}
+          - {name: fromtags, type: "Const[List[int8_t]]", dir: in, role: UnionArray-tags}
           - {name: length, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
