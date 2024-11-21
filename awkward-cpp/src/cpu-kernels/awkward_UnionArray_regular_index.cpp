@@ -21,45 +21,6 @@ ERROR awkward_UnionArray_regular_index(
   }
   return success();
 }
-ERROR awkward_UnionArray8_32_regular_index(
-  int32_t* toindex,
-  int32_t* current,
-  int64_t size,
-  const int8_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index<int8_t, int32_t>(
-    toindex,
-    current,
-    size,
-    fromtags,
-    length);
-}
-ERROR awkward_UnionArray8_U32_regular_index(
-  uint32_t* toindex,
-  uint32_t* current,
-  int64_t size,
-  const int8_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index<int8_t, uint32_t>(
-    toindex,
-    current,
-    size,
-    fromtags,
-    length);
-}
-ERROR awkward_UnionArray8_64_regular_index(
-  int64_t* toindex,
-  int64_t* current,
-  int64_t size,
-  const int8_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index<int8_t, int64_t>(
-    toindex,
-    current,
-    size,
-    fromtags,
-    length);
-}
 ERROR awkward_UnionArray64_32_regular_index(
   int32_t* toindex,
   int32_t* current,
@@ -93,6 +54,45 @@ ERROR awkward_UnionArray64_64_regular_index(
   const int64_t* fromtags,
   int64_t length) {
   return awkward_UnionArray_regular_index<int64_t, int64_t>(
+    toindex,
+    current,
+    size,
+    fromtags,
+    length);
+}
+ERROR awkward_UnionArray8_32_regular_index(
+  int32_t* toindex,
+  int32_t* current,
+  int64_t size,
+  const int8_t* fromtags,
+  int64_t length) {
+  return awkward_UnionArray_regular_index<int8_t, int32_t>(
+    toindex,
+    current,
+    size,
+    fromtags,
+    length);
+}
+ERROR awkward_UnionArray8_U32_regular_index(
+  uint32_t* toindex,
+  uint32_t* current,
+  int64_t size,
+  const int8_t* fromtags,
+  int64_t length) {
+  return awkward_UnionArray_regular_index<int8_t, uint32_t>(
+    toindex,
+    current,
+    size,
+    fromtags,
+    length);
+}
+ERROR awkward_UnionArray8_64_regular_index(
+  int64_t* toindex,
+  int64_t* current,
+  int64_t size,
+  const int8_t* fromtags,
+  int64_t length) {
+  return awkward_UnionArray_regular_index<int8_t, int64_t>(
     toindex,
     current,
     size,
