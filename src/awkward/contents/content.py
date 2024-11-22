@@ -238,7 +238,7 @@ class Content(Meta):
     ) -> Form:
         raise NotImplementedError
 
-    def form_with_key_path(self, root: (str | int | None) = ()) -> Form:
+    def form_with_key_path(self, root: FormKeyPathT = ()) -> Form:
         return self._form_with_key_path(root)
 
     def _form_with_key_path(self, path: FormKeyPathT) -> Form:
