@@ -39,7 +39,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
 
@@ -214,7 +214,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | int | None)) -> IndexedForm:
+    def _form_with_key_path(self, path: FormKeyPathT) -> IndexedForm:
         return self.form_cls(
             self._index.form,
             self._content._form_with_key_path((*path, None)),

@@ -37,7 +37,7 @@ from awkward.contents.content import (
     RemoveStructureOptions,
     ToArrowOptions,
 )
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.regularform import RegularForm
 from awkward.index import Index
 
@@ -211,7 +211,7 @@ class RegularArray(RegularMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | int | None)) -> RegularForm:
+    def _form_with_key_path(self, path: FormKeyPathT) -> RegularForm:
         return self.form_cls(
             self._content._form_with_key_path((*path, None)),
             self._size,

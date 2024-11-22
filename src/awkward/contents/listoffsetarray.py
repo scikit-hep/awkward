@@ -39,7 +39,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index, Index64
 
@@ -199,7 +199,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | int | None)) -> ListOffsetForm:
+    def _form_with_key_path(self, path: FormKeyPathT) -> ListOffsetForm:
         return self.form_cls(
             self._offsets.form,
             self._content._form_with_key_path((*path, None)),

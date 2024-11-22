@@ -42,7 +42,7 @@ from awkward.contents.content import (
 )
 from awkward.errors import AxisError
 from awkward.forms.bytemaskedform import ByteMaskedForm
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.index import Index
 
 if TYPE_CHECKING:
@@ -218,7 +218,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | int | None)) -> ByteMaskedForm:
+    def _form_with_key_path(self, path: FormKeyPathT) -> ByteMaskedForm:
         return self.form_cls(
             self._mask.form,
             self._content._form_with_key_path((*path, None)),

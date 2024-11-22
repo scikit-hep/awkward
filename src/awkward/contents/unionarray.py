@@ -39,7 +39,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
 
@@ -460,7 +460,7 @@ class UnionArray(UnionMeta[Content], Content):
             form_key=form_key,
         )
 
-    def _form_with_key_path(self, path: (str | int | None)) -> UnionForm:
+    def _form_with_key_path(self, path: FormKeyPathT) -> UnionForm:
         return self.form_cls(
             self._tags.form,
             self._index.form,
