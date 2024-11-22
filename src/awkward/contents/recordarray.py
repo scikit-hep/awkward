@@ -768,10 +768,13 @@ class RecordArray(RecordMeta[Content], Content):
             ):
                 minlength = merged.length
 
-        if minlength is unknown_length:
+        # `not for_each_field`: is a corner-case when all
+        # the arrays are empty and have no fields either.
+        if minlength is unknown_length or not for_each_field:
+            from operator import attrgetter
+
             minlength = self.length
-            for x in others:
-                minlength += x.length
+            minlength += sum(map(attrgetter("length"), others))
 
         next = RecordArray(
             nextcontents,
