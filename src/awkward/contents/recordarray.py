@@ -317,7 +317,7 @@ class RecordArray(RecordMeta[Content], Content):
         )
 
     def _form_with_key_path(self, path: FormKeyPathT) -> RecordForm:
-        # explicitely use `self.fields` instead of `self._fields`,
+        # explicitly use `self.fields` instead of `self._fields`,
         # because we want string-typed field names in the path -
         # also for tuple records
         contents = [
