@@ -845,7 +845,7 @@ class RecordArray(RecordMeta[Content], Content):
         raise NotImplementedError
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
-        if self._fields is None or len(self._fields) == 0:
+        if len(self.fields) == 0:
             return ak.contents.NumpyArray(
                 self._backend.nplike.instance().empty(0, dtype=np.int64),
                 parameters=None,
