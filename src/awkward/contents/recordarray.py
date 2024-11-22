@@ -40,7 +40,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.recordform import RecordForm
 from awkward.index import Index
 from awkward.record import Record
@@ -314,6 +314,22 @@ class RecordArray(RecordMeta[Content], Content):
             self._fields,
             parameters=self._parameters,
             form_key=form_key,
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> RecordForm:
+        # explicitly use `self.fields` instead of `self._fields`,
+        # because we want string-typed field names in the path -
+        # also for tuple records
+        contents = [
+            x._form_with_key_path((*path, k))
+            for k, x in zip(self.fields, self._contents)
+        ]
+
+        return self.form_cls(
+            contents,
+            self._fields,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(

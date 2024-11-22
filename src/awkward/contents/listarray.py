@@ -38,7 +38,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.contents.listoffsetarray import ListOffsetArray
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.listform import ListForm
 from awkward.index import Index
 
@@ -205,6 +205,15 @@ class ListArray(ListMeta[Content], Content):
             self._content._form_with_key(getkey),
             parameters=self._parameters,
             form_key=form_key,
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> ListForm:
+        return self.form_cls(
+            self._starts.form,
+            self._stops.form,
+            self._content._form_with_key_path((*path, None)),
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(

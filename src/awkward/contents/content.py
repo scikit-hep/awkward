@@ -54,7 +54,7 @@ from awkward._typing import (
     TypedDict,
 )
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.index import Index, Index64
 
 if TYPE_CHECKING:
@@ -236,6 +236,12 @@ class Content(Meta):
         self,
         getkey: Callable[[Content], str | None],
     ) -> Form:
+        raise NotImplementedError
+
+    def form_with_key_path(self, root: FormKeyPathT = ()) -> Form:
+        return self._form_with_key_path(root)
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> Form:
         raise NotImplementedError
 
     @property

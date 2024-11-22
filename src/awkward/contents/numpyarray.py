@@ -45,7 +45,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
 from awkward.index import Index
 from awkward.types.numpytype import primitive_to_dtype
@@ -198,6 +198,14 @@ class NumpyArray(NumpyMeta, Content):
             self.inner_shape,
             parameters=self._parameters,
             form_key=getkey(self),
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> NumpyForm:
+        return self.form_cls(
+            ak.types.numpytype.dtype_to_primitive(self._data.dtype),
+            self.inner_shape,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(

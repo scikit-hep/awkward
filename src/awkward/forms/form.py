@@ -27,6 +27,9 @@ from awkward._typing import (
     Iterator,
     JSONMapping,
     Self,
+    Tuple,
+    TypeAlias,
+    Union,
 )
 
 __all__ = ("from_dict", "from_type", "from_json", "reserved_nominal_parameters", "Form")
@@ -34,6 +37,7 @@ __all__ = ("from_dict", "from_type", "from_json", "reserved_nominal_parameters",
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
 
+FormKeyPathT: TypeAlias = Tuple[Union[str, int, None], ...]
 
 reserved_nominal_parameters: Final = frozenset(
     {

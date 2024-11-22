@@ -38,7 +38,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.forms.bitmaskedform import BitMaskedForm
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.index import Index
 
 if TYPE_CHECKING:
@@ -286,6 +286,16 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._lsb_order,
             parameters=self._parameters,
             form_key=form_key,
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> BitMaskedForm:
+        return self.form_cls(
+            self._mask.form,
+            self._content._form_with_key_path((*path, None)),
+            self._valid_when,
+            self._lsb_order,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
