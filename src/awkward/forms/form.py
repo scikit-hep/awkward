@@ -27,9 +27,9 @@ from awkward._typing import (
     Iterator,
     JSONMapping,
     Self,
+    Tuple,
     TypeAlias,
     Union,
-    Tuple,
 )
 
 __all__ = ("from_dict", "from_type", "from_json", "reserved_nominal_parameters", "Form")
