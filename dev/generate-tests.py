@@ -26,7 +26,7 @@ def reproducible_datetime():
 
 
 class Argument:
-    __slots__ = ("name", "typename", "direction", "role")
+    __slots__ = ("direction", "name", "role", "typename")
 
     def __init__(self, name, typename, direction, role="default"):
         self.name = name

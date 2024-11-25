@@ -19,7 +19,7 @@ from awkward._namedaxis import (
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
-__all__ = ("var", "nanvar")
+__all__ = ("nanvar", "var")
 
 np = NumpyMetadata.instance()
 
