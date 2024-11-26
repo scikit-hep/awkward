@@ -100,12 +100,12 @@ jobs:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v4
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v2.21
+    - uses: pypa/cibuildwheel@v2.22
       env:
         CIBW_BUILD: "${{ matrix.build }}*"
         CIBW_ARCHS: ${{ matrix.arch }}
@@ -144,14 +144,14 @@ jobs:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v4
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
     - uses: docker/setup-qemu-action@v3.2.0
 
-    - uses: pypa/cibuildwheel@v2.21
+    - uses: pypa/cibuildwheel@v2.22
       env:
         CIBW_BUILD: cp${{ matrix.python }}-*
         CIBW_ARCHS: ${{ matrix.arch }}
@@ -180,7 +180,7 @@ jobs:
         submodules: true
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v4
 
     - name: Prepare build files
       run: pipx run nox -s prepare
