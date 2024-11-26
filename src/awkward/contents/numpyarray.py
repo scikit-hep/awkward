@@ -484,7 +484,8 @@ class NumpyArray(NumpyMeta, Content):
             elif (
                 np.issubdtype(self.dtype, np.bool_)
                 and np.issubdtype(other.dtype, np.number)
-                or np.issubdtype(self.dtype, np.number)
+            ) or (
+                np.issubdtype(self.dtype, np.number)
                 and np.issubdtype(other.dtype, np.bool_)
             ):
                 return mergebool
@@ -1382,16 +1383,18 @@ class NumpyArray(NumpyMeta, Content):
         return self._is_equal_to_generic(other, all_parameters) and (
             not numpyarray
             # dtypes agree
-            or self.dtype == other.dtype
-            # Contents agree
-            and (
-                not self._backend.nplike.known_data
-                or self._backend.nplike.array_equal(self.data, other.data)
-            )
-            # Shapes agree
-            and all(
-                x is unknown_length or y is unknown_length or x == y
-                for x, y in zip(self.shape, other.shape)
+            or (
+                self.dtype == other.dtype
+                # Contents agree
+                and (
+                    not self._backend.nplike.known_data
+                    or self._backend.nplike.array_equal(self.data, other.data)
+                )
+                # Shapes agree
+                and all(
+                    x is unknown_length or y is unknown_length or x == y
+                    for x, y in zip(self.shape, other.shape)
+                )
             )
         )
 

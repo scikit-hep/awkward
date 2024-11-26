@@ -15,7 +15,7 @@ from awkward._namedaxis import (
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
-__all__ = ("sum", "nansum")
+__all__ = ("nansum", "sum")
 
 np = NumpyMetadata.instance()
 

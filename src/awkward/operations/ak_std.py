@@ -20,7 +20,7 @@ from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
-__all__ = ("std", "nanstd")
+__all__ = ("nanstd", "std")
 
 np = NumpyMetadata.instance()
 
