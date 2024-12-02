@@ -40,7 +40,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.recordform import RecordForm
 from awkward.index import Index
 from awkward.record import Record
@@ -314,6 +314,22 @@ class RecordArray(RecordMeta[Content], Content):
             self._fields,
             parameters=self._parameters,
             form_key=form_key,
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> RecordForm:
+        # explicitly use `self.fields` instead of `self._fields`,
+        # because we want string-typed field names in the path -
+        # also for tuple records
+        contents = [
+            x._form_with_key_path((*path, k))
+            for k, x in zip(self.fields, self._contents)
+        ]
+
+        return self.form_cls(
+            contents,
+            self._fields,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
@@ -752,10 +768,13 @@ class RecordArray(RecordMeta[Content], Content):
             ):
                 minlength = merged.length
 
-        if minlength is unknown_length:
+        # `not for_each_field`: is a corner-case when all
+        # the arrays are empty and have no fields either.
+        if minlength is unknown_length or not for_each_field:
+            from operator import attrgetter
+
             minlength = self.length
-            for x in others:
-                minlength += x.length
+            minlength += sum(map(attrgetter("length"), others))
 
         next = RecordArray(
             nextcontents,
@@ -829,7 +848,7 @@ class RecordArray(RecordMeta[Content], Content):
         raise NotImplementedError
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
-        if self._fields is None or len(self._fields) == 0:
+        if len(self.fields) == 0:
             return ak.contents.NumpyArray(
                 self._backend.nplike.instance().empty(0, dtype=np.int64),
                 parameters=None,

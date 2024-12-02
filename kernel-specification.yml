@@ -3458,6 +3458,27 @@ kernels:
 
   - name: awkward_UnionArray_regular_index
     specializations:
+      - name: awkward_UnionArray64_32_regular_index
+        args:
+          - {name: toindex, type: "List[int32_t]", dir: out}
+          - {name: current, type: "List[int32_t]", dir: out}
+          - {name: size, type: "int64_t", dir: in, role: default}
+          - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_UnionArray64_64_regular_index
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: current, type: "List[int64_t]", dir: out}
+          - {name: size, type: "int64_t", dir: in, role: default}
+          - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_UnionArray64_U32_regular_index
+        args:
+          - {name: toindex, type: "List[uint32_t]", dir: out}
+          - {name: current, type: "List[uint32_t]", dir: out}
+          - {name: size, type: "int64_t", dir: in, role: default}
+          - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_32_regular_index
         args:
           - {name: toindex, type: "List[int32_t]", dir: out}
@@ -3493,6 +3514,11 @@ kernels:
 
   - name: awkward_UnionArray_regular_index_getsize
     specializations:
+      - name: awkward_UnionArray64_regular_index_getsize
+        args:
+          - {name: size, type: "List[int64_t]", dir: out}
+          - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_regular_index_getsize
         args:
           - {name: size, type: "List[int64_t]", dir: out}

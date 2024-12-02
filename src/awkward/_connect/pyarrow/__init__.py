@@ -7,17 +7,19 @@ from types import ModuleType
 from packaging.version import parse as parse_version
 
 __all__ = [
-    "import_pyarrow",
-    "import_pyarrow_parquet",
-    "import_pyarrow_compute",
     "AwkwardArrowArray",
     "AwkwardArrowType",
     "and_validbytes",
+    "convert_awkward_arrow_table_to_native",
+    "convert_native_arrow_table_to_awkward",
     "convert_to_array",
     "direct_Content_subclass",
     "direct_Content_subclass_name",
     "form_handle_arrow",
     "handle_arrow",
+    "import_pyarrow",
+    "import_pyarrow_compute",
+    "import_pyarrow_parquet",
     "popbuffers",
     "remove_optiontype",
     "to_awkwardarrow_storage_types",
@@ -25,8 +27,6 @@ __all__ = [
     "to_length",
     "to_null_count",
     "to_validbits",
-    "convert_awkward_arrow_table_to_native",
-    "convert_native_arrow_table_to_awkward",
 ]
 
 try:

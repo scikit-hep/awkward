@@ -94,11 +94,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
         def recompute_offsets(layout, depth, **kwargs):
             posaxis = maybe_posaxis(layout, axis, depth)
-            if (
-                posaxis == 0
-                and posaxis == depth - 1
-                or posaxis == depth
-                and layout.is_list
+            if (posaxis == 0 and posaxis == depth - 1) or (
+                posaxis == depth and layout.is_list
             ):
                 none_indexes = options["none_indexes"].pop(0)
                 out = layout._rebuild_without_nones(none_indexes, layout.content)

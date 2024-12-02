@@ -40,7 +40,7 @@ class WeakMethodProxy:
 class PartialFunction:
     """Analogue of `functools.partial`, but as a distinct type"""
 
-    __slots__ = ("func", "args", "kwargs")
+    __slots__ = ("args", "func", "kwargs")
 
     def __init__(self, func, *args, **kwargs):
         self.func = func

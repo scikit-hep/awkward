@@ -50,6 +50,7 @@ GPATH
 GRTAGS
 .vscode
 pyrightconfig.json
+.ropeproject
 # ...
 
 ############################################################# LaTeX

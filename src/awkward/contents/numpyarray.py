@@ -45,7 +45,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
 from awkward.index import Index
 from awkward.types.numpytype import primitive_to_dtype
@@ -198,6 +198,14 @@ class NumpyArray(NumpyMeta, Content):
             self.inner_shape,
             parameters=self._parameters,
             form_key=getkey(self),
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> NumpyForm:
+        return self.form_cls(
+            ak.types.numpytype.dtype_to_primitive(self._data.dtype),
+            self.inner_shape,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
@@ -476,7 +484,8 @@ class NumpyArray(NumpyMeta, Content):
             elif (
                 np.issubdtype(self.dtype, np.bool_)
                 and np.issubdtype(other.dtype, np.number)
-                or np.issubdtype(self.dtype, np.number)
+            ) or (
+                np.issubdtype(self.dtype, np.number)
                 and np.issubdtype(other.dtype, np.bool_)
             ):
                 return mergebool
@@ -1374,16 +1383,18 @@ class NumpyArray(NumpyMeta, Content):
         return self._is_equal_to_generic(other, all_parameters) and (
             not numpyarray
             # dtypes agree
-            or self.dtype == other.dtype
-            # Contents agree
-            and (
-                not self._backend.nplike.known_data
-                or self._backend.nplike.array_equal(self.data, other.data)
-            )
-            # Shapes agree
-            and all(
-                x is unknown_length or y is unknown_length or x == y
-                for x, y in zip(self.shape, other.shape)
+            or (
+                self.dtype == other.dtype
+                # Contents agree
+                and (
+                    not self._backend.nplike.known_data
+                    or self._backend.nplike.array_equal(self.data, other.data)
+                )
+                # Shapes agree
+                and all(
+                    x is unknown_length or y is unknown_length or x == y
+                    for x, y in zip(self.shape, other.shape)
+                )
             )
         )
 
