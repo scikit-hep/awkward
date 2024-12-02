@@ -21,4 +21,4 @@ def to_cudf(
     if hasattr(cudf.Series, "_from_column"):
         return cudf.Series._from_column(array.layout._to_cudf(cudf, None, len(array)))
     # older Series invocation
-    return  cudf.Series(array.layout._to_cudf(cudf, None, len(array)))
+    return cudf.Series(array.layout._to_cudf(cudf, None, len(array)))
