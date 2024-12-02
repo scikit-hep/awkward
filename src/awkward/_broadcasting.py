@@ -860,7 +860,7 @@ def apply_step(
             if not isinstance(xyc, Content):
                 unmasked.append(xyc)
                 masks.append(
-                    NumpyArray(backend.nplike.zeros(len(inputs[2]), dtype=np.int8))
+                    NumpyArray(backend.nplike.zeros(inputs[2].length, dtype=np.int8))
                 )
             elif not xyc.is_option:
                 unmasked.append(xyc)
