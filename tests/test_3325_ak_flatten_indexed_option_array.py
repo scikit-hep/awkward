@@ -49,6 +49,6 @@ ttlayout, report = ak.typetracer.typetracer_with_report(form)
 ttarray = ak.Array(ttlayout)
 
 
-@pytest.mark.parametrize("ax", [None, *list(i for i in range(4))])
+@pytest.mark.parametrize("ax", [None, 0, 1, 2, 3])
 def test_3325_flatten_index_option_array(ax):
     ak.flatten(ttarray, axis=ax)
