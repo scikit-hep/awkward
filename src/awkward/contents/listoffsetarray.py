@@ -2013,7 +2013,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         index = self._offsets.raw(cupy).astype("int32")
         buf = cudf.core.buffer.as_buffer(index)
         ind_buf = cudf.core.column.numerical.NumericalColumn(
-            buf, index.dtype, None, size=len(index)
+            data=buf, dtype=index.dtype, mask=None, size=len(index)
         )
         cont = self._content._to_cudf(cudf, None, len(self._content))
         if mask is not None:
@@ -2035,7 +2035,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
 
         return cudf.core.column.lists.ListColumn(
-            length,
+            size=length,
+            data=None,
             mask=m,
             children=(ind_buf, cont),
             dtype=cudf.core.dtypes.ListDtype(cont.dtype),
