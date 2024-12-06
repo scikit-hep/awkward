@@ -614,14 +614,14 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         return self.to_ByteMaskedArray()._numbers_to_type(name, including_unknown)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._mask.length == 0:
+        if self._mask.length is not unknown_length and self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
             negaxis, starts, parents, outlength
         )
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self._mask.length == 0:
+        if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
         out = self.to_IndexedOptionArray64()._unique(
             negaxis, starts, parents, outlength
@@ -810,7 +810,10 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
         else:
             excess_length = int(math.ceil(self._length / 8.0))
-            if self._mask.length == excess_length:
+            if (
+                self._mask.length is not unknown_length
+                and self._mask.length == excess_length
+            ):
                 mask = self._mask
             else:
                 mask = self._mask[:excess_length]
