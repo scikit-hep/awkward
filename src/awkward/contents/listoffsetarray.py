@@ -2010,6 +2010,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         from packaging.version import parse as parse_version
+
         cupy = Cupy.instance()
         index = self._offsets.raw(cupy).astype("int32")
         buf = cudf.core.buffer.as_buffer(index)
