@@ -8,6 +8,7 @@ from operator import mul
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._regularize import is_array_like
 from awkward._typing import TYPE_CHECKING, Any, DType, Self
 
 np = NumpyMetadata.instance()
@@ -95,6 +96,8 @@ class PlaceholderArray(ArrayLike):
             return type(self)(self._nplike, (new_length,), self._dtype)
         elif isinstance(index, int):
             return type(self)(self._nplike, (1,), self._dtype)
+        elif is_array_like(index) and np.issubdtype(index.dtype, np.integer):
+            return type(self)(self._nplike, index.shape, self._dtype)
         else:
             raise TypeError(
                 f"{type(self).__name__} supports only trivial slices, not {type(index).__name__}"
