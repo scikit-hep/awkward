@@ -93,6 +93,8 @@ class PlaceholderArray(ArrayLike):
                 new_length = (stop - start) // step
 
             return type(self)(self._nplike, (new_length,), self._dtype)
+        elif isinstance(index, int):
+            return type(self)(self._nplike, (1,), self._dtype)
         else:
             raise TypeError(
                 f"{type(self).__name__} supports only trivial slices, not {type(index).__name__}"
