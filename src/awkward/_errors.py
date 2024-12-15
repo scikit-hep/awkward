@@ -84,9 +84,7 @@ class ErrorContext:
             # Is this necessary to do here? (We're about to raise an exception anyway)
             self._slate.__dict__.clear()
             # Handle caught exception
-            raise self.decorate_exception(
-                exception_type, exception_value
-            ) from exception_value
+            raise self.decorate_exception(exception_type, exception_value)
         else:
             # Step out of the way so that another ErrorContext can become primary.
             if self.primary() is self:
@@ -102,18 +100,15 @@ class ErrorContext:
                 exception.add_note(self.note)
             return exception
         else:
-            new_exception: Exception
             if issubclass(cls, (NotImplementedError, AssertionError)):
-                # Raise modified exception
-                new_exception = cls(
-                    str(exception)
-                    + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
-                )
+                note = "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
+                exception.__notes__ = [note]
             elif issubclass(cls, builtins.KeyError):
-                new_exception = KeyError(self.format_exception(exception))
+                exception: Exception = KeyError(self.format_exception(exception))
+                exception.__notes__ = [self.note]
             else:
-                new_exception = cls(self.format_exception(exception))
-            return new_exception
+                exception.__notes__ = [self.note]
+            return exception
 
     def format_argument(self, width, value):
         from awkward import contents, highlevel, record
