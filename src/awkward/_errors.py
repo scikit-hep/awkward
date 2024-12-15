@@ -80,6 +80,9 @@ class ErrorContext:
             and issubclass(exception_type, Exception)
             and self.primary() is self
         ):
+            # Step out of the way so that another ErrorContext can become primary.
+            # Is this necessary to do here? (We're about to raise an exception anyway)
+            self._slate.__dict__.clear()
             # Handle caught exception
             raise self.decorate_exception(exception_type, exception_value) from exception_value
         else:
