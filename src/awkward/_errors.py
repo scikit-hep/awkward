@@ -75,24 +75,17 @@ class ErrorContext:
             self._slate.__dict__["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        try:
+        if (
+            exception_type is not None
+            and issubclass(exception_type, Exception)
+            and self.primary() is self
+        ):
             # Handle caught exception
-            if (
-                exception_type is not None
-                and issubclass(exception_type, Exception)
-                and self.primary() is self
-            ):
-                self.handle_exception(exception_type, exception_value)
-        finally:
+            raise self.decorate_exception(exception_type, exception_value) from exception_value
+        else:
             # Step out of the way so that another ErrorContext can become primary.
             if self.primary() is self:
                 self._slate.__dict__.clear()
-
-    def handle_exception(self, cls: type[E], exception: E):
-        if sys.version_info >= (3, 11, 0, "final"):
-            self.decorate_exception(cls, exception)
-        else:
-            raise self.decorate_exception(cls, exception)
 
     def decorate_exception(self, cls: type[E], exception: E) -> Exception:
         if sys.version_info >= (3, 11, 0, "final"):
@@ -111,13 +104,10 @@ class ErrorContext:
                     str(exception)
                     + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
                 )
-                new_exception.__cause__ = exception
             elif issubclass(cls, builtins.KeyError):
                 new_exception = KeyError(self.format_exception(exception))
-                new_exception.__cause__ = exception
             else:
                 new_exception = cls(self.format_exception(exception))
-                new_exception.__cause__ = exception
             return new_exception
 
     def format_argument(self, width, value):
