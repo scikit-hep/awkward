@@ -51,11 +51,6 @@ class PartialFunction:
         return self.func(*self.args, **self.kwargs)
 
 
-class KeyError(builtins.KeyError):
-    def __str__(self):
-        return super(Exception, self).__str__()
-
-
 class ErrorContext:
     # Any other threads should get a completely independent _slate.
     _slate = threading.local()
@@ -91,24 +86,17 @@ class ErrorContext:
                 self._slate.__dict__.clear()
 
     def decorate_exception(self, cls: type[E], exception: E) -> Exception:
-        if sys.version_info >= (3, 11, 0, "final"):
-            if issubclass(cls, (NotImplementedError, AssertionError)):
-                exception.add_note(
-                    "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
-                )
+        def _add_note(exception: E, note: str) -> E:
+            if sys.version_info >= (3, 11, 0, "final"):
+                exception.add_note(note)
             else:
-                exception.add_note(self.note)
-            return exception
-        else:
-            if issubclass(cls, (NotImplementedError, AssertionError)):
-                note = "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
                 exception.__notes__ = [note]
-            elif issubclass(cls, builtins.KeyError):
-                exception: Exception = KeyError(self.format_exception(exception))
-                exception.__notes__ = [self.note]
-            else:
-                exception.__notes__ = [self.note]
             return exception
+
+        note = self.note
+        if issubclass(cls, (NotImplementedError, AssertionError)):
+            note = "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
+        return _add_note(exception, note)
 
     def format_argument(self, width, value):
         from awkward import contents, highlevel, record
