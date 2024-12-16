@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 import threading
 import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
