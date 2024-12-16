@@ -86,7 +86,7 @@ class ErrorContext:
 
     def decorate_exception(self, cls: type[E], exception: E) -> Exception:
         def _add_note(exception: E, note: str) -> E:
-            if sys.version_info >= (3, 11, 0, "final"):
+            if hasattr(exception, "add_note"):
                 exception.add_note(note)
             else:
                 exception.__notes__ = [note]
