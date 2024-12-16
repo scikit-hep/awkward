@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import weakref
 from collections.abc import Mapping
 from types import MappingProxyType
 
@@ -47,14 +48,18 @@ def without_transient_attrs(attrs: dict[str, Any]) -> JSONMapping:
 
 class Attrs(Mapping):
     def __init__(self, ref, data: Mapping[str, Any]):
-        self._ref = ref
+        self._ref = weakref.ref(ref)
         self._data = _freeze_attrs(data)
 
     def __getitem__(self, key: str):
         return self._data[key]
 
     def __setitem__(self, key: str, value: Any):
-        self._ref._attrs = _unfreeze_attrs(self._data) | {key: value}
+        ref = self._ref()
+        if ref is None:
+            msg = "The reference array has been deleted. If you still need to set attributes, convert this 'Attrs' instance to a dict with '.to_dict()'."
+            raise ValueError(msg)
+        ref._attrs = _unfreeze_attrs(self._data) | {key: value}
 
     def __iter__(self):
         return iter(self._data)
@@ -63,7 +68,10 @@ class Attrs(Mapping):
         return len(self._data)
 
     def __repr__(self):
-        return repr(_unfreeze_attrs(self._data))
+        return f"Attrs({_unfreeze_attrs(self._data)!r})"
+
+    def to_dict(self):
+        return _unfreeze_attrs(self._data)
 
 
 def _freeze_attrs(attrs: Mapping[str, Any]) -> Mapping[str, Any]:
