@@ -12,6 +12,7 @@ import itertools
 import keyword
 import pickle
 import re
+import weakref
 from collections.abc import Iterable, Mapping, Sequence, Sized
 
 from awkward_cpp.lib import _ext
@@ -488,13 +489,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     class Mask:
         def __init__(self, array):
-            self._array = array
+            self._array = weakref.ref(array)
 
         def __getitem__(self, where):
+            array = self._array()
+            if array is None:
+                msg = "The array to mask was deleted before it could be masked. "
+                msg += "If you want to construct this mask, you must either keep the array alive "
+                msg += "or use 'ak.mask' explicitly."
+                raise ValueError(msg)
             with ak._errors.OperationErrorContext(
-                "ak.Array.mask", args=[self._array, where], kwargs={}
+                "ak.Array.mask", args=[array, where], kwargs={}
             ):
-                return ak.operations.mask(self._array, where, valid_when=True)
+                return ak.operations.mask(array, where, valid_when=True)
 
     @property
     def mask(self):
