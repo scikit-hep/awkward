@@ -1387,6 +1387,54 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return f"<{pytype}{valuestr}{axisstr} type={typestr}>"
 
+    def _show_rows(
+        self,
+        limit_rows=20,
+        limit_cols=80,
+        type=False,
+        named_axis=False,
+        nbytes=False,
+        backend=False,
+        *,
+        formatter=None,
+        precision=3,
+    ) -> list[str]:
+        rows = []
+        formatter_impl = Formatter(formatter, precision=precision)
+
+        valuestr = prettyprint_valuestr(
+            self, limit_rows, limit_cols, formatter=formatter_impl
+        )
+        rows.append(valuestr)
+
+        if type:
+            out_io = io.StringIO()
+            out_io.write("type: ")
+            self.type.show(stream=out_io)
+            rows.append(out_io.getvalue())
+
+        # other info
+        if named_axis and self.named_axis:
+            out_io = io.StringIO()
+            out_io.write("axes: ")
+            out_io.write(
+                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
+            )
+            rows.append(out_io.getvalue())
+        if nbytes:
+            out_io = io.StringIO()
+            out_io.write(f"nbytes: {bytes_repr(self.nbytes)}")
+            rows.append(out_io.getvalue())
+        if backend:
+            out_io = io.StringIO()
+            out_io.write(f"backend: {self.layout.backend.name}")
+            rows.append(out_io.getvalue())
+
+        # make sure the type is always the second row, don't move it
+        if type:
+            assert rows[1].startswith("type: ")
+        return rows
+
     def show(
         self,
         limit_rows=20,
@@ -1394,6 +1442,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         type=False,
         named_axis=False,
         nbytes=False,
+        backend=False,
         stream=STDOUT,
         *,
         formatter=None,
@@ -1405,9 +1454,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             limit_cols (int): Maximum number of columns (characters wide).
             type (bool): If True, print the type as well. (Doesn't count toward number
                 of rows/lines limit.)
+            named_axis (bool): If True, print the named axis as well. (Doesn't count toward number
+                of rows/lines limit.)
+            nbytes (bool): If True, print the number of bytes as well. (Doesn't count toward number
+                of rows/lines limit.)
+            nbytes (bool): If True, print the backend of the array as well. (Doesn't count toward number
+                of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
-
             formatter (Mapping or None): Mapping of types/type-classes to string formatters.
                 If None, use the default formatter.
 
@@ -1420,70 +1474,62 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
         string values, falling back upon `"str_kind"`.
         """
-        formatter_impl = Formatter(formatter, precision=precision)
-
-        valuestr = prettyprint_valuestr(
-            self, limit_rows, limit_cols, formatter=formatter_impl
+        rows = self._show_rows(
+            limit_rows=limit_rows,
+            limit_cols=limit_cols,
+            type=type,
+            named_axis=named_axis,
+            nbytes=nbytes,
+            backend=backend,
+            formatter=formatter,
+            precision=precision,
         )
+        array_line = rows.pop(0)
 
         out_io = io.StringIO()
         if type:
-            out_io.write("type: ")
-            self.type.show(stream=out_io)
-        if named_axis and self.named_axis:
-            out_io.write("axes: ")
-            out_io.write(
-                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
-            )
-            out_io.write("\n")
-        if nbytes:
-            out_io.write(f"size: {bytes_repr(self.nbytes)}\n")
-        out_io.write(valuestr)
+            # it's always the second row (after the array)
+            type_line = rows.pop(0)
+            out_io.write(type_line)
 
+        # the rest of the rows we sort by the length of their '<prefix>:'
+        # but we sort it from shortest to longest contrary to _repr_mimebundle_
+        sorted_rows = sorted([r for r in rows if r], key=lambda x: len(x.split(":")[0]))
+
+        if sorted_rows:
+            out_io.write("\n".join(sorted_rows))
+            out_io.write("\n")
+
+        out_io.write(array_line)
         if stream is None:
-            return out_io
+            return out_io.get_value()
         else:
             if stream is STDOUT:
                 stream = STDOUT.stream
             stream.write(out_io.getvalue() + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
-        # order: 1. array, 2. named_axis, 3. type
-        value_buff = io.StringIO()
-        self.show(type=False, named_axis=False, nbytes=False, stream=value_buff)
-        header_lines = value_buff.getvalue().splitlines()
+        # order:
+        # first: array,
+        # last: type,
+        # middle: rest sorted by length of prefix (longest first)
 
-        nbytes_buff = io.StringIO()
-        nbytes_buff.write(f"size: {bytes_repr(self.nbytes)}")
-        nbytes_line = nbytes_buff.getvalue()
+        rows = self._show_rows(type=True, named_axis=True, nbytes=True, backend=True)
+        header_lines = rows.pop(0).removesuffix("\n").splitlines()
 
-        named_axis_line = ""
-        if self.named_axis:
-            named_axis_buff = io.StringIO()
-            named_axis_buff.write("axes: ")
-            named_axis_buff.write(
-                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
-            )
-            named_axis_line = named_axis_buff.getvalue()
+        # it's always the second row (after the array)
+        type_lines = [rows.pop(0).removesuffix("\n")]
 
-        type_buff = io.StringIO()
-        self.type.show(stream=type_buff)
-        type_lines = type_buff.getvalue().splitlines()
-        # Prepend a `type: ` prefix to the type information
-        type_lines[0] = f"type: {type_lines[0]}"
-
-        if header_lines[-1] == "":
-            del header_lines[-1]
+        # the rest of the rows we sort by the length of their '<prefix>:'
+        # but we sort it from longest to shortest for _repr_mimebundle_
+        sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
 
         n_cols = max(
-            len(line)
-            for line in itertools.chain(header_lines, [named_axis_line], type_lines)
+            len(line) for line in itertools.chain(header_lines, sorted_rows, type_lines)
         )
         body_lines = header_lines
         body_lines.append("-" * n_cols)
-        body_lines.append(nbytes_line)
-        if named_axis_line:
-            body_lines.append(named_axis_line)
+        body_lines.extend(sorted_rows)
         body_lines.extend(type_lines)
         body = "\n".join(body_lines)
 
@@ -2314,6 +2360,54 @@ class Record(NDArrayOperatorsMixin):
 
         return f"<{pytype}{valuestr}{axisstr} type={typestr}>"
 
+    def _show_rows(
+        self,
+        limit_rows=20,
+        limit_cols=80,
+        type=False,
+        named_axis=False,
+        nbytes=False,
+        backend=False,
+        *,
+        formatter=None,
+        precision=3,
+    ) -> list[str]:
+        rows = []
+        formatter_impl = Formatter(formatter, precision=precision)
+
+        valuestr = prettyprint_valuestr(
+            self, limit_rows, limit_cols, formatter=formatter_impl
+        )
+        rows.append(valuestr)
+
+        if type:
+            out_io = io.StringIO()
+            out_io.write("type: ")
+            self.type.show(stream=out_io)
+            rows.append(out_io.getvalue())
+
+        # other info
+        if named_axis and self.named_axis:
+            out_io = io.StringIO()
+            out_io.write("axes: ")
+            out_io.write(
+                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
+            )
+            rows.append(out_io.getvalue())
+        if nbytes:
+            out_io = io.StringIO()
+            out_io.write(f"nbytes: {bytes_repr(self.nbytes)}")
+            rows.append(out_io.getvalue())
+        if backend:
+            out_io = io.StringIO()
+            out_io.write(f"backend: {self.layout.backend.name}")
+            rows.append(out_io.getvalue())
+
+        # make sure the type is always the second row, don't move it
+        if type:
+            assert rows[1].startswith("type: ")
+        return rows
+
     def show(
         self,
         limit_rows=20,
@@ -2321,6 +2415,7 @@ class Record(NDArrayOperatorsMixin):
         type=False,
         named_axis=False,
         nbytes=False,
+        backend=False,
         stream=STDOUT,
         *,
         formatter=None,
@@ -2331,6 +2426,12 @@ class Record(NDArrayOperatorsMixin):
             limit_rows (int): Maximum number of rows (lines) to use in the output.
             limit_cols (int): Maximum number of columns (characters wide).
             type (bool): If True, print the type as well. (Doesn't count toward number
+                of rows/lines limit.)
+            named_axis (bool): If True, print the named axis as well. (Doesn't count toward number
+                of rows/lines limit.)
+            nbytes (bool): If True, print the number of bytes as well. (Doesn't count toward number
+                of rows/lines limit.)
+            nbytes (bool): If True, print the backend of the array as well. (Doesn't count toward number
                 of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
@@ -2346,69 +2447,62 @@ class Record(NDArrayOperatorsMixin):
         key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
         string values, falling back upon `"str_kind"`.
         """
-        formatter_impl = Formatter(formatter, precision=precision)
-        valuestr = prettyprint_valuestr(
-            self, limit_rows, limit_cols, formatter=formatter_impl
+        rows = self._show_rows(
+            limit_rows=limit_rows,
+            limit_cols=limit_cols,
+            type=type,
+            named_axis=named_axis,
+            nbytes=nbytes,
+            backend=backend,
+            formatter=formatter,
+            precision=precision,
         )
+        array_line = rows.pop(0)
 
         out_io = io.StringIO()
         if type:
-            out_io.write("type: ")
-            self.type.show(stream=out_io)
-        if named_axis and self.named_axis:
-            out_io.write("axes: ")
-            out_io.write(
-                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
-            )
-            out_io.write("\n")
-        if nbytes:
-            out_io.write(f"size: {bytes_repr(self.nbytes)}\n")
-        out_io.write(valuestr)
+            # it's always the second row (after the array)
+            type_line = rows.pop(0)
+            out_io.write(type_line)
 
+        # the rest of the rows we sort by the length of their '<prefix>:'
+        # but we sort it from shortest to longest contrary to _repr_mimebundle_
+        sorted_rows = sorted([r for r in rows if r], key=lambda x: len(x.split(":")[0]))
+
+        if sorted_rows:
+            out_io.write("\n".join(sorted_rows))
+            out_io.write("\n")
+
+        out_io.write(array_line)
         if stream is None:
-            return out_io.getvalue()
+            return out_io.get_value()
         else:
             if stream is STDOUT:
                 stream = STDOUT.stream
             stream.write(out_io.getvalue() + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
-        # order: 1. array, 2. named_axis, 3. type
-        value_buff = io.StringIO()
-        self.show(type=False, named_axis=False, nbytes=False, stream=value_buff)
-        header_lines = value_buff.getvalue().splitlines()
+        # order:
+        # first: array,
+        # last: type,
+        # middle: rest sorted by length of prefix (longest first)
 
-        nbytes_buff = io.StringIO()
-        nbytes_buff.write(f"size: {bytes_repr(self.nbytes)}")
-        nbytes_line = nbytes_buff.getvalue()
+        rows = self._show_rows(type=True, named_axis=True, nbytes=True, backend=True)
+        header_lines = rows.pop(0).removesuffix("\n").splitlines()
 
-        named_axis_line = ""
-        if self.named_axis:
-            named_axis_buff = io.StringIO()
-            named_axis_buff.write("axes: ")
-            named_axis_buff.write(
-                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
-            )
-            named_axis_line = named_axis_buff.getvalue()
+        # it's always the second row (after the array)
+        type_lines = [rows.pop(0).removesuffix("\n")]
 
-        type_buff = io.StringIO()
-        self.type.show(stream=type_buff)
-        type_lines = type_buff.getvalue().splitlines()
-        # Prepend a `type: ` prefix to the type information
-        type_lines[0] = f"type: {type_lines[0]}"
-
-        if header_lines[-1] == "":
-            del header_lines[-1]
+        # the rest of the rows we sort by the length of their '<prefix>:'
+        # but we sort it from longest to shortest for _repr_mimebundle_
+        sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
 
         n_cols = max(
-            len(line)
-            for line in itertools.chain(header_lines, [named_axis_line], type_lines)
+            len(line) for line in itertools.chain(header_lines, sorted_rows, type_lines)
         )
         body_lines = header_lines
         body_lines.append("-" * n_cols)
-        body_lines.append(nbytes_line)
-        if named_axis_line:
-            body_lines.append(named_axis_line)
+        body_lines.extend(sorted_rows)
         body_lines.extend(type_lines)
         body = "\n".join(body_lines)
 

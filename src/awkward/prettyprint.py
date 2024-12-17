@@ -441,7 +441,7 @@ def bytes_repr(nbytes: int) -> str:
         if nbytes > 1e9
         else (f"{nbytes / 1e6 :,.1f}", "MB")
         if nbytes > 1e6
-        else (f"{nbytes / 1e3 :,.1f}", "KB")
+        else (f"{nbytes / 1e3 :,.1f}", "kB")
         if nbytes > 1e3
         else (f"{nbytes:,}", "B")
     )
