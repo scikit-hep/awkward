@@ -44,7 +44,7 @@ from awkward._pickle import (
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, MutableMapping, TypeVar
 from awkward._util import STDOUT
-from awkward.prettyprint import Formatter
+from awkward.prettyprint import Formatter, bytes_repr
 from awkward.prettyprint import valuestr as prettyprint_valuestr
 
 __all__ = ("Array", "ArrayBuilder", "Record")
@@ -1393,6 +1393,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         limit_cols=80,
         type=False,
         named_axis=False,
+        nbytes=False,
         stream=STDOUT,
         *,
         formatter=None,
@@ -1435,6 +1436,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
             )
             out_io.write("\n")
+        if nbytes:
+            out_io.write(f"size: {bytes_repr(self.nbytes)}\n")
         out_io.write(valuestr)
 
         if stream is None:
@@ -1447,8 +1450,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def _repr_mimebundle_(self, include=None, exclude=None):
         # order: 1. array, 2. named_axis, 3. type
         value_buff = io.StringIO()
-        self.show(type=False, named_axis=False, stream=value_buff)
+        self.show(type=False, named_axis=False, nbytes=False, stream=value_buff)
         header_lines = value_buff.getvalue().splitlines()
+
+        nbytes_buff = io.StringIO()
+        nbytes_buff.write(f"size: {bytes_repr(self.nbytes)}")
+        nbytes_line = nbytes_buff.getvalue()
 
         named_axis_line = ""
         if self.named_axis:
@@ -1461,22 +1468,23 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         type_buff = io.StringIO()
         self.type.show(stream=type_buff)
-        footer_lines = type_buff.getvalue().splitlines()
+        type_lines = type_buff.getvalue().splitlines()
         # Prepend a `type: ` prefix to the type information
-        footer_lines[0] = f"type: {footer_lines[0]}"
+        type_lines[0] = f"type: {type_lines[0]}"
 
         if header_lines[-1] == "":
             del header_lines[-1]
 
         n_cols = max(
             len(line)
-            for line in itertools.chain(header_lines, [named_axis_line], footer_lines)
+            for line in itertools.chain(header_lines, [named_axis_line], type_lines)
         )
         body_lines = header_lines
         body_lines.append("-" * n_cols)
+        body_lines.append(nbytes_line)
         if named_axis_line:
             body_lines.append(named_axis_line)
-        body_lines.extend(footer_lines)
+        body_lines.extend(type_lines)
         body = "\n".join(body_lines)
 
         return {
@@ -2312,6 +2320,7 @@ class Record(NDArrayOperatorsMixin):
         limit_cols=80,
         type=False,
         named_axis=False,
+        nbytes=False,
         stream=STDOUT,
         *,
         formatter=None,
@@ -2352,6 +2361,8 @@ class Record(NDArrayOperatorsMixin):
                 _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
             )
             out_io.write("\n")
+        if nbytes:
+            out_io.write(f"size: {bytes_repr(self.nbytes)}\n")
         out_io.write(valuestr)
 
         if stream is None:
@@ -2364,8 +2375,12 @@ class Record(NDArrayOperatorsMixin):
     def _repr_mimebundle_(self, include=None, exclude=None):
         # order: 1. array, 2. named_axis, 3. type
         value_buff = io.StringIO()
-        self.show(type=False, named_axis=False, stream=value_buff)
+        self.show(type=False, named_axis=False, nbytes=False, stream=value_buff)
         header_lines = value_buff.getvalue().splitlines()
+
+        nbytes_buff = io.StringIO()
+        nbytes_buff.write(f"size: {bytes_repr(self.nbytes)}")
+        nbytes_line = nbytes_buff.getvalue()
 
         named_axis_line = ""
         if self.named_axis:
@@ -2378,22 +2393,23 @@ class Record(NDArrayOperatorsMixin):
 
         type_buff = io.StringIO()
         self.type.show(stream=type_buff)
-        footer_lines = type_buff.getvalue().splitlines()
+        type_lines = type_buff.getvalue().splitlines()
         # Prepend a `type: ` prefix to the type information
-        footer_lines[0] = f"type: {footer_lines[0]}"
+        type_lines[0] = f"type: {type_lines[0]}"
 
         if header_lines[-1] == "":
             del header_lines[-1]
 
         n_cols = max(
             len(line)
-            for line in itertools.chain(header_lines, [named_axis_line], footer_lines)
+            for line in itertools.chain(header_lines, [named_axis_line], type_lines)
         )
         body_lines = header_lines
         body_lines.append("-" * n_cols)
+        body_lines.append(nbytes_line)
         if named_axis_line:
             body_lines.append(named_axis_line)
-        body_lines.extend(footer_lines)
+        body_lines.extend(type_lines)
         body = "\n".join(body_lines)
 
         return {

@@ -433,3 +433,17 @@ def valuestr(
 
     else:
         raise AssertionError(type(data))
+
+
+def bytes_repr(nbytes: int) -> str:
+    count, unit = (
+        (f"{nbytes / 1e9 :,.1f}", "GB")
+        if nbytes > 1e9
+        else (f"{nbytes / 1e6 :,.1f}", "MB")
+        if nbytes > 1e6
+        else (f"{nbytes / 1e3 :,.1f}", "KB")
+        if nbytes > 1e3
+        else (f"{nbytes:,}", "B")
+    )
+
+    return f"{count} {unit}"
