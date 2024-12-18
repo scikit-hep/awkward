@@ -93,6 +93,9 @@ def get_at(data: Content, index: int):
 
 
 def get_field(data: Content, field: str):
+    if isinstance(data._layout, ak.record.Record):
+        if data._layout._array.content(field)._is_getitem_at_placeholder():
+            return PlaceholderValue()
     out = data._layout._getitem_field(field)
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
