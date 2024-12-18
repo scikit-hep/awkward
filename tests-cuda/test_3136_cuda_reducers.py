@@ -271,9 +271,7 @@ def test_2020_reduce_axis_none_sum():
     arr = ak.Array([[63.0]], backend="cuda")
     assert ak.almost_equal(
         ak.sum(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[ak.Array([[True]], backend="cuda")]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
     )
     assert ak.sum(array[2], axis=None, mask_identity=True) is None
     del array
@@ -297,11 +295,7 @@ def test_2020_reduce_axis_none_prod():
     arr = ak.Array([[4838400.0]], backend="cuda")
     assert ak.almost_equal(
         ak.prod(array[1:], axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[
-                ak.Array([[True]], backend="cuda")
-            ]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
     )
     assert ak.prod(array[2], axis=None, mask_identity=True) is None
     del array
@@ -324,19 +318,13 @@ def test_2020_reduce_axis_none_min():
     arr = ak.Array([[0.0]], backend="cuda")
     assert ak.almost_equal(
         ak.min(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[ak.Array([[True]], backend="cuda")]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
     )
 
     arr = ak.Array(ak.Array([[np.inf]], backend="cuda"))
     assert ak.almost_equal(
         ak.min(array[-1:], axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[
-                ak.Array([[False]], backend="cuda")
-            ]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[False]], backend="cuda")]),
     )
     assert ak.min(array[2], axis=None, mask_identity=True) is None
     del array
@@ -359,19 +347,13 @@ def test_2020_reduce_axis_none_max():
     arr = ak.Array([[10.0]], backend="cuda")
     assert ak.almost_equal(
         ak.max(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[ak.Array([[True]], backend="cuda")]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
     )
 
     arr = ak.Array(ak.Array([[np.inf]], backend="cuda"))
     assert ak.almost_equal(
         ak.max(array[-1:], axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[
-                ak.Array([[False]], backend="cuda")
-            ]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[False]], backend="cuda")]),
     )
     assert ak.max(array[2], axis=None, mask_identity=True) is None
     del array
@@ -390,17 +372,13 @@ def test_2020_reduce_axis_none_count():
     arr = ak.Array([[12]], backend="cuda")
     assert ak.almost_equal(
         ak.count(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[ak.Array([[True]], backend="cuda")]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
     )
 
     arr = ak.Array([[0]], backend="cuda")
     assert ak.almost_equal(
         ak.count(array[-1:], axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[ak.Array([[False]], backend="cuda")]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[False]], backend="cuda")]),
     )
     assert ak.count(array[2], axis=None, mask_identity=True) is None
     assert ak.count(array[2], axis=None, mask_identity=False) == 0
@@ -420,17 +398,13 @@ def test_2020_reduce_axis_none_count_nonzero():
     arr = ak.Array([[11]], backend="cuda")
     assert ak.almost_equal(
         ak.count_nonzero(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[ak.Array([[True]], backend="cuda")]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
     )
 
     arr = ak.Array([[0]], backend="cuda")
     assert ak.almost_equal(
         ak.count_nonzero(array[-1:], axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[ak.Array([[False]], backend="cuda")]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[False]], backend="cuda")]),
     )
     assert ak.count_nonzero(array[2], axis=None, mask_identity=True) is None
     assert ak.count_nonzero(array[2], axis=None, mask_identity=False) == 0
@@ -444,9 +418,7 @@ def test_2020_reduce_axis_none_std_no_mask_axis_none():
     out1 = ak.std(array[-1:], axis=None, keepdims=True, mask_identity=True)
 
     arr = ak.Array([[0.0]], backend="cuda")
-    out2 = ak.to_regular(
-        arr.mask[ak.Array([[False]], backend="cuda")]
-    )
+    out2 = ak.to_regular(arr.mask[ak.Array([[False]], backend="cuda")])
     assert ak.almost_equal(out1, out2)
 
     out3 = ak.std(array[2], axis=None, mask_identity=True)
@@ -468,11 +440,7 @@ def test_2020_reduce_axis_none_std():
     arr = ak.Array([[3.139134700306227]], backend="cuda")
     cpt.assert_allclose(
         ak.std(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(
-            arr.mask[
-                ak.Array([[True]], backend="cuda")
-            ]
-        ),
+        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
     )
     assert np.isnan(ak.std(array[2], axis=None, mask_identity=False))
     del array
