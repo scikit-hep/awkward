@@ -381,7 +381,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @property
     def attrs(self) -> Attrs:
         """
-        The mutable mapping containing top-level metadata, which is serialised
+         The mapping containing top-level metadata, which is serialised
         with the array during pickling.
 
         Keys prefixed with `@` are identified as "transient" attributes
