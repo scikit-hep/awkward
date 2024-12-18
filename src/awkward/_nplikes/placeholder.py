@@ -17,10 +17,21 @@ if TYPE_CHECKING:
 
 
 class PlaceholderArray(ArrayLike):
-    def __init__(self, nplike: NumpyLike, shape: tuple[ShapeItem, ...], dtype: DType):
+    def __init__(
+        self,
+        nplike: NumpyLike,
+        shape: tuple[ShapeItem, ...],
+        dtype: DType,
+        field_path: tuple[str, ...] = (),
+    ):
         self._nplike = nplike
         self._shape = shape
         self._dtype = np.dtype(dtype)
+        self._field_path = field_path
+
+    @property
+    def field_path(self) -> str:
+        return ".".join(self._field_path)
 
     @property
     def dtype(self) -> DType:
@@ -67,7 +78,7 @@ class PlaceholderArray(ArrayLike):
             shape = self._shape[:-1] + (last,)
         else:
             shape = self._shape
-        return type(self)(self._nplike, shape, dtype)
+        return type(self)(self._nplike, shape, dtype, self._field_path)
 
     def __getitem__(self, index):
         # Typetracers permit slices that don't touch data or shapes
@@ -92,11 +103,19 @@ class PlaceholderArray(ArrayLike):
                 start, stop, step = index.indices(length)
                 new_length = (stop - start) // step
 
-            return type(self)(self._nplike, (new_length,), self._dtype)
-        else:
-            raise TypeError(
-                f"{type(self).__name__} supports only trivial slices, not {type(index).__name__}"
+            return type(self)(
+                self._nplike, (new_length,), self._dtype, self._field_path
             )
+        else:
+            msg = f"{type(self).__name__} supports only trivial slices, not {type(index).__name__}"
+            if self.field_path:
+                msg += f"\n\nAwkward-array attempted to access a field '{self.field_path}', but "
+                msg += (
+                    "it has been excluded during a pre-run phase (possibly by Dask). "
+                )
+                msg += "If this was supposed to happen automatically (e.g. you're using Dask), "
+                msg += "please report it to the developers at: https://github.com/scikit-hep/awkward/issues"
+            raise TypeError(msg)
 
     def __setitem__(self, key, value):
         raise RuntimeError
