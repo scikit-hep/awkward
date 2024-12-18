@@ -19,7 +19,7 @@ from awkward_cpp.lib import _ext
 
 import awkward as ak
 import awkward._connect.hist
-from awkward._attrs import attrs_of, without_transient_attrs
+from awkward._attrs import Attrs, attrs_of, without_transient_attrs
 from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
@@ -43,7 +43,7 @@ from awkward._pickle import (
     unpickle_record_schema_1,
 )
 from awkward._regularize import is_non_string_like_iterable
-from awkward._typing import Any, MutableMapping, TypeVar
+from awkward._typing import Any, TypeVar
 from awkward._util import STDOUT
 from awkward.prettyprint import Formatter
 from awkward.prettyprint import valuestr as prettyprint_valuestr
@@ -338,7 +338,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or a mapping")
 
-        if attrs is not None and not isinstance(attrs, MutableMapping):
+        if attrs is not None and not isinstance(attrs, Mapping):
             raise TypeError("attrs must be None or a mapping")
 
         if named_axis:
@@ -380,9 +380,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         self.__class__ = get_array_class(self._layout, self._behavior)
 
     @property
-    def attrs(self) -> Mapping:
+    def attrs(self) -> Attrs:
         """
-        The mutable mapping containing top-level metadata, which is serialised
+         The mapping containing top-level metadata, which is serialised
         with the array during pickling.
 
         Keys prefixed with `@` are identified as "transient" attributes
@@ -391,14 +391,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         if self._attrs is None:
             self._attrs = {}
-        return self._attrs
+        return Attrs(self, self._attrs)
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = value
+            self._attrs = dict(value)
         else:
-            raise TypeError("attrs must be a mapping")
+            raise TypeError("attrs must be a 'Attrs' mapping")
 
     @property
     def layout(self):
@@ -1853,7 +1853,7 @@ class Record(NDArrayOperatorsMixin):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or mapping")
 
-        if attrs is not None and not isinstance(attrs, MutableMapping):
+        if attrs is not None and not isinstance(attrs, Mapping):
             raise TypeError("attrs must be None or a mapping")
 
         if named_axis:
@@ -1890,7 +1890,7 @@ class Record(NDArrayOperatorsMixin):
         self.__class__ = get_record_class(self._layout, self._behavior)
 
     @property
-    def attrs(self) -> Mapping[str, Any]:
+    def attrs(self) -> Attrs:
         """
         The mapping containing top-level metadata, which is serialised
         with the record during pickling.
@@ -1901,12 +1901,12 @@ class Record(NDArrayOperatorsMixin):
         """
         if self._attrs is None:
             self._attrs = {}
-        return self._attrs
+        return Attrs(self, self._attrs)
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = value
+            self._attrs = dict(value)
         else:
             raise TypeError("attrs must be a mapping")
 
@@ -2679,7 +2679,7 @@ class ArrayBuilder(Sized):
         return out
 
     @property
-    def attrs(self) -> Mapping[str, Any]:
+    def attrs(self) -> Attrs:
         """
         The mapping containing top-level metadata, which is serialised
         with the array during pickling.
@@ -2690,12 +2690,12 @@ class ArrayBuilder(Sized):
         """
         if self._attrs is None:
             self._attrs = {}
-        return self._attrs
+        return Attrs(self, self._attrs)
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = value
+            self._attrs = dict(value)
         else:
             raise TypeError("attrs must be a mapping")
 
