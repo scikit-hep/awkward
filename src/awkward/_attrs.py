@@ -43,15 +43,15 @@ def attrs_of(*arrays, attrs: Mapping | None = None) -> Mapping:
 
 
 def without_transient_attrs(attrs: dict[str, Any]) -> JSONMapping:
-    return {
-        k: v for k, v in attrs.items() if not (isinstance(k, str) and k.startswith("@"))
-    }
+    return {k: v for k, v in attrs.items() if not k.startswith("@")}
 
 
 class Attrs(Mapping):
     def __init__(self, ref, data: Mapping[str, Any]):
         self._ref = weakref.ref(ref)
-        self._data = _freeze_attrs(data)
+        self._data = _freeze_attrs(
+            {_enforce_str_key(k): v for k, v in _unfreeze_attrs(data).items()}
+        )
 
     def __getitem__(self, key: str):
         return self._data[key]
@@ -61,7 +61,7 @@ class Attrs(Mapping):
         if ref is None:
             msg = "The reference array has been deleted. If you still need to set attributes, convert this 'Attrs' instance to a dict with '.to_dict()'."
             raise ValueError(msg)
-        ref._attrs = _unfreeze_attrs(self._data) | {key: value}
+        ref._attrs = _unfreeze_attrs(self._data) | {_enforce_str_key(key): value}
 
     def __iter__(self):
         return iter(self._data)
@@ -74,6 +74,12 @@ class Attrs(Mapping):
 
     def to_dict(self):
         return _unfreeze_attrs(self._data)
+
+
+def _enforce_str_key(attr: Any) -> str:
+    if not isinstance(attr, str):
+        raise TypeError(f"'attrs' keys must be strings: {attr!r}")
+    return attr
 
 
 def _freeze_attrs(attrs: Mapping[str, Any]) -> Mapping[str, Any]:
