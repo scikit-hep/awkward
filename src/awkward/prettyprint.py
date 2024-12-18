@@ -469,9 +469,7 @@ def highlevel_array_show_rows(
     rows = []
     formatter_impl = Formatter(formatter, precision=precision)
 
-    array_line = valuestr(
-        array, limit_rows, limit_cols, formatter=formatter_impl
-    )
+    array_line = valuestr(array, limit_rows, limit_cols, formatter=formatter_impl)
     rows.append(array_line)
 
     if type:
@@ -484,7 +482,9 @@ def highlevel_array_show_rows(
     # other info
     if named_axis and array.named_axis:
         named_axis_line = "named axis: "
-        named_axis_line += _prettify_named_axes(array.named_axis, delimiter=", ", maxlen=None)
+        named_axis_line += _prettify_named_axes(
+            array.named_axis, delimiter=", ", maxlen=None
+        )
         rows.append(named_axis_line)
     if nbytes:
         nbytes_line = f"nbytes: {bytes_repr(array.nbytes)}"

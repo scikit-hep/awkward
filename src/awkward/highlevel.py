@@ -45,7 +45,7 @@ from awkward._pickle import (
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
 from awkward._util import STDOUT
-from awkward.prettyprint import Formatter, bytes_repr, highlevel_array_show_rows
+from awkward.prettyprint import Formatter, highlevel_array_show_rows
 from awkward.prettyprint import valuestr as prettyprint_valuestr
 
 __all__ = ("Array", "ArrayBuilder", "Record")
