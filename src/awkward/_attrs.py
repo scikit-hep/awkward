@@ -76,10 +76,10 @@ class Attrs(Mapping):
         return _unfreeze_attrs(self._data)
 
 
-def _enforce_str_key(attr: Any) -> str:
-    if not isinstance(attr, str):
-        raise TypeError(f"'attrs' keys must be strings: {attr!r}")
-    return attr
+def _enforce_str_key(key: Any) -> str:
+    if not isinstance(key, str):
+        raise TypeError(f"'attrs' keys must be strings, got: {key!r}")
+    return key
 
 
 def _freeze_attrs(attrs: Mapping[str, Any]) -> Mapping[str, Any]:
