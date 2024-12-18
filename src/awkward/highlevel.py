@@ -12,13 +12,14 @@ import itertools
 import keyword
 import pickle
 import re
+import weakref
 from collections.abc import Iterable, Mapping, Sequence, Sized
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
 import awkward._connect.hist
-from awkward._attrs import attrs_of, without_transient_attrs
+from awkward._attrs import Attrs, attrs_of, without_transient_attrs
 from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
@@ -42,7 +43,7 @@ from awkward._pickle import (
     unpickle_record_schema_1,
 )
 from awkward._regularize import is_non_string_like_iterable
-from awkward._typing import Any, MutableMapping, TypeVar
+from awkward._typing import Any, TypeVar
 from awkward._util import STDOUT
 from awkward.prettyprint import Formatter, bytes_repr, highlevel_array_show_rows
 from awkward.prettyprint import valuestr as prettyprint_valuestr
@@ -337,7 +338,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or a mapping")
 
-        if attrs is not None and not isinstance(attrs, MutableMapping):
+        if attrs is not None and not isinstance(attrs, Mapping):
             raise TypeError("attrs must be None or a mapping")
 
         if named_axis:
@@ -379,9 +380,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         self.__class__ = get_array_class(self._layout, self._behavior)
 
     @property
-    def attrs(self) -> Mapping:
+    def attrs(self) -> Attrs:
         """
-        The mutable mapping containing top-level metadata, which is serialised
+         The mapping containing top-level metadata, which is serialised
         with the array during pickling.
 
         Keys prefixed with `@` are identified as "transient" attributes
@@ -390,14 +391,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         if self._attrs is None:
             self._attrs = {}
-        return self._attrs
+        return Attrs(self, self._attrs)
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = value
+            self._attrs = dict(value)
         else:
-            raise TypeError("attrs must be a mapping")
+            raise TypeError("attrs must be a 'Attrs' mapping")
 
     @property
     def layout(self):
@@ -488,13 +489,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     class Mask:
         def __init__(self, array):
-            self._array = array
+            self._array = weakref.ref(array)
 
         def __getitem__(self, where):
+            array = self._array()
+            if array is None:
+                msg = "The array to mask was deleted before it could be masked. "
+                msg += "If you want to construct this mask, you must either keep the array alive "
+                msg += "or use 'ak.mask' explicitly."
+                raise ValueError(msg)
             with ak._errors.OperationErrorContext(
-                "ak.Array.mask", args=[self._array, where], kwargs={}
+                "ak.Array.mask", args=[array, where], kwargs={}
             ):
-                return ak.operations.mask(self._array, where, valid_when=True)
+                return ak.operations.mask(array, where, valid_when=True)
 
     @property
     def mask(self):
@@ -1862,7 +1869,7 @@ class Record(NDArrayOperatorsMixin):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or mapping")
 
-        if attrs is not None and not isinstance(attrs, MutableMapping):
+        if attrs is not None and not isinstance(attrs, Mapping):
             raise TypeError("attrs must be None or a mapping")
 
         if named_axis:
@@ -1899,7 +1906,7 @@ class Record(NDArrayOperatorsMixin):
         self.__class__ = get_record_class(self._layout, self._behavior)
 
     @property
-    def attrs(self) -> Mapping[str, Any]:
+    def attrs(self) -> Attrs:
         """
         The mapping containing top-level metadata, which is serialised
         with the record during pickling.
@@ -1910,12 +1917,12 @@ class Record(NDArrayOperatorsMixin):
         """
         if self._attrs is None:
             self._attrs = {}
-        return self._attrs
+        return Attrs(self, self._attrs)
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = value
+            self._attrs = dict(value)
         else:
             raise TypeError("attrs must be a mapping")
 
@@ -2706,7 +2713,7 @@ class ArrayBuilder(Sized):
         return out
 
     @property
-    def attrs(self) -> Mapping[str, Any]:
+    def attrs(self) -> Attrs:
         """
         The mapping containing top-level metadata, which is serialised
         with the array during pickling.
@@ -2717,12 +2724,12 @@ class ArrayBuilder(Sized):
         """
         if self._attrs is None:
             self._attrs = {}
-        return self._attrs
+        return Attrs(self, self._attrs)
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = value
+            self._attrs = dict(value)
         else:
             raise TypeError("attrs must be a mapping")
 

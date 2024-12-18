@@ -25,7 +25,7 @@ def test_set_attrs():
     assert array.attrs == {}
 
     array.attrs = OTHER_ATTRS
-    assert array.attrs is OTHER_ATTRS
+    assert array.attrs == OTHER_ATTRS
 
     with pytest.raises(TypeError):
         array.attrs = "Hello world!"
@@ -52,7 +52,7 @@ def test_transient_metadata_persists():
     attrs = {**SOME_ATTRS, "@transient_key": lambda: None}
     array = ak.Array([[1, 2, 3]], attrs=attrs)
     num = ak.num(array)
-    assert num.attrs is attrs
+    assert num.attrs == attrs
 
 
 @pytest.mark.parametrize(
@@ -79,13 +79,13 @@ def test_single_arg_ops(func):
     # Carry from argument
     assert (
         func([[1, 2, 3, 4], [5], [10]], axis=-1, highlevel=True, attrs=SOME_ATTRS).attrs
-        is SOME_ATTRS
+        == SOME_ATTRS
     )
     # Carry from outer array
     array = ak.Array([[1, 2, 3, 4], [5], [10]], attrs=SOME_ATTRS)
-    assert func(array, axis=-1, highlevel=True).attrs is SOME_ATTRS
+    assert func(array, axis=-1, highlevel=True).attrs == SOME_ATTRS
     # Carry from argument exclusively
-    assert func(array, axis=-1, highlevel=True, attrs=OTHER_ATTRS).attrs is OTHER_ATTRS
+    assert func(array, axis=-1, highlevel=True, attrs=OTHER_ATTRS).attrs == OTHER_ATTRS
 
 
 @pytest.mark.parametrize(
@@ -134,15 +134,15 @@ def test_string_operations_unary(func):
             highlevel=True,
             attrs=SOME_ATTRS,
         ).attrs
-        is SOME_ATTRS
+        == SOME_ATTRS
     )
     # Carry from outer array
     array = ak.Array(
         [["hello", "world!"], [], ["it's a beautiful day!"]], attrs=SOME_ATTRS
     )
-    assert func(array, highlevel=True).attrs is SOME_ATTRS
+    assert func(array, highlevel=True).attrs == SOME_ATTRS
     # Carry from argument exclusively
-    assert func(array, highlevel=True, attrs=OTHER_ATTRS).attrs is OTHER_ATTRS
+    assert func(array, highlevel=True, attrs=OTHER_ATTRS).attrs == OTHER_ATTRS
 
 
 @pytest.mark.parametrize(
@@ -188,15 +188,15 @@ def test_string_operations_unary_with_arg(func, arg):
             highlevel=True,
             attrs=SOME_ATTRS,
         ).attrs
-        is SOME_ATTRS
+        == SOME_ATTRS
     )
     # Carry from outer array
     array = ak.Array(
         [["hello", "world!"], [], ["it's a beautiful day!"]], attrs=SOME_ATTRS
     )
-    assert func(array, arg, highlevel=True).attrs is SOME_ATTRS
+    assert func(array, arg, highlevel=True).attrs == SOME_ATTRS
     # Carry from argument exclusively
-    assert func(array, arg, highlevel=True, attrs=OTHER_ATTRS).attrs is OTHER_ATTRS
+    assert func(array, arg, highlevel=True, attrs=OTHER_ATTRS).attrs == OTHER_ATTRS
 
 
 def test_string_operations_unary_with_arg_slice():
@@ -220,16 +220,16 @@ def test_string_operations_unary_with_arg_slice():
             highlevel=True,
             attrs=SOME_ATTRS,
         ).attrs
-        is SOME_ATTRS
+        == SOME_ATTRS
     )
     # Carry from outer array
     array = ak.Array(
         [["hello", "world!"], [], ["it's a beautiful day!"]], attrs=SOME_ATTRS
     )
-    assert ak.str.slice(array, 1, highlevel=True).attrs is SOME_ATTRS
+    assert ak.str.slice(array, 1, highlevel=True).attrs == SOME_ATTRS
     # Carry from argument exclusively
     assert (
-        ak.str.slice(array, 1, highlevel=True, attrs=OTHER_ATTRS).attrs is OTHER_ATTRS
+        ak.str.slice(array, 1, highlevel=True, attrs=OTHER_ATTRS).attrs == OTHER_ATTRS
     )
 
 
@@ -262,13 +262,13 @@ def test_string_operations_binary(func):
             highlevel=True,
             attrs=SOME_ATTRS,
         ).attrs
-        is SOME_ATTRS
+        == SOME_ATTRS
     )
     # Carry from first array
     array = ak.Array(
         [["hello", "world!"], [], ["it's a beautiful day!"]], attrs=SOME_ATTRS
     )
-    assert func(array, ["hello"], highlevel=True).attrs is SOME_ATTRS
+    assert func(array, ["hello"], highlevel=True).attrs == SOME_ATTRS
 
     # Carry from second array
     value_array = ak.Array(["hello"], attrs=OTHER_ATTRS)
@@ -278,7 +278,7 @@ def test_string_operations_binary(func):
             value_array,
             highlevel=True,
         ).attrs
-        is OTHER_ATTRS
+        == OTHER_ATTRS
     )
     # Carry from both arrays
     assert func(
@@ -289,7 +289,7 @@ def test_string_operations_binary(func):
 
     # Carry from argument
     assert (
-        func(array, value_array, highlevel=True, attrs=OTHER_ATTRS).attrs is OTHER_ATTRS
+        func(array, value_array, highlevel=True, attrs=OTHER_ATTRS).attrs == OTHER_ATTRS
     )
 
 
@@ -298,8 +298,8 @@ def test_broadcasting_arrays():
     right = ak.Array([1], attrs=OTHER_ATTRS)
 
     left_result, right_result = ak.broadcast_arrays(left, right)
-    assert left_result.attrs is SOME_ATTRS
-    assert right_result.attrs is OTHER_ATTRS
+    assert left_result.attrs == SOME_ATTRS
+    assert right_result.attrs == OTHER_ATTRS
 
 
 def test_broadcasting_fields():
@@ -307,29 +307,29 @@ def test_broadcasting_fields():
     right = ak.Array([{"y": 1}, {"y": 2}], attrs=OTHER_ATTRS)
 
     left_result, right_result = ak.broadcast_fields(left, right)
-    assert left_result.attrs is SOME_ATTRS
-    assert right_result.attrs is OTHER_ATTRS
+    assert left_result.attrs == SOME_ATTRS
+    assert right_result.attrs == OTHER_ATTRS
 
 
 def test_numba_arraybuilder():
     numba = pytest.importorskip("numba")
     builder = ak.ArrayBuilder(attrs=SOME_ATTRS)
-    assert builder.attrs is SOME_ATTRS
+    assert builder.attrs == SOME_ATTRS
 
     @numba.njit
     def func(array):
         return array
 
-    assert func(builder).attrs is SOME_ATTRS
+    assert func(builder).attrs == SOME_ATTRS
 
 
 def test_numba_array():
     numba = pytest.importorskip("numba")
     array = ak.Array([1, 2, 3], attrs=SOME_ATTRS)
-    assert array.attrs is SOME_ATTRS
+    assert array.attrs == SOME_ATTRS
 
     @numba.njit
     def func(array):
         return array
 
-    assert func(array).attrs is SOME_ATTRS
+    assert func(array).attrs == SOME_ATTRS
