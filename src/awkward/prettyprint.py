@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import io
 import math
 import re
 from collections.abc import Callable
 
 import awkward as ak
 from awkward._layout import wrap_layout
+from awkward._namedaxis import _prettify_named_axes
 from awkward._nplikes.numpy import Numpy, NumpyMetadata
 from awkward._typing import TYPE_CHECKING, Any, TypeAlias, TypedDict
 
@@ -450,3 +452,48 @@ def bytes_repr(nbytes: int) -> str:
     )
 
     return f"{count} {unit}"
+
+
+def highlevel_array_show_rows(
+    array,
+    limit_rows=20,
+    limit_cols=80,
+    type=False,
+    named_axis=False,
+    nbytes=False,
+    backend=False,
+    *,
+    formatter=None,
+    precision=3,
+) -> list[str]:
+    rows = []
+    formatter_impl = Formatter(formatter, precision=precision)
+
+    array_line = valuestr(
+        array, limit_rows, limit_cols, formatter=formatter_impl
+    )
+    rows.append(array_line)
+
+    if type:
+        typeio = io.StringIO()
+        array.type.show(stream=typeio)
+        type_line = "type: "
+        type_line += typeio.getvalue().removesuffix("\n")
+        rows.append(type_line)
+
+    # other info
+    if named_axis and array.named_axis:
+        named_axis_line = "named axis: "
+        named_axis_line += _prettify_named_axes(array.named_axis, delimiter=", ", maxlen=None)
+        rows.append(named_axis_line)
+    if nbytes:
+        nbytes_line = f"nbytes: {bytes_repr(array.nbytes)}"
+        rows.append(nbytes_line)
+    if backend:
+        backend_line = f"backend: {array.layout.backend.name}"
+        rows.append(backend_line)
+
+    # make sure the type is always the second row, don't move it
+    if type:
+        assert rows[1].startswith("type: ")
+    return rows

@@ -44,7 +44,7 @@ from awkward._pickle import (
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, MutableMapping, TypeVar
 from awkward._util import STDOUT
-from awkward.prettyprint import Formatter, bytes_repr
+from awkward.prettyprint import Formatter, bytes_repr, highlevel_array_show_rows
 from awkward.prettyprint import valuestr as prettyprint_valuestr
 
 __all__ = ("Array", "ArrayBuilder", "Record")
@@ -1387,64 +1387,17 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         return f"<{pytype}{valuestr}{axisstr} type={typestr}>"
 
-    def _show_rows(
-        self,
-        limit_rows=20,
-        limit_cols=80,
-        type=False,
-        named_axis=False,
-        nbytes=False,
-        backend=False,
-        *,
-        formatter=None,
-        precision=3,
-    ) -> list[str]:
-        rows = []
-        formatter_impl = Formatter(formatter, precision=precision)
-
-        valuestr = prettyprint_valuestr(
-            self, limit_rows, limit_cols, formatter=formatter_impl
-        )
-        rows.append(valuestr)
-
-        if type:
-            out_io = io.StringIO()
-            out_io.write("type: ")
-            self.type.show(stream=out_io)
-            rows.append(out_io.getvalue())
-
-        # other info
-        if named_axis and self.named_axis:
-            out_io = io.StringIO()
-            out_io.write("axes: ")
-            out_io.write(
-                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
-            )
-            rows.append(out_io.getvalue())
-        if nbytes:
-            out_io = io.StringIO()
-            out_io.write(f"nbytes: {bytes_repr(self.nbytes)}")
-            rows.append(out_io.getvalue())
-        if backend:
-            out_io = io.StringIO()
-            out_io.write(f"backend: {self.layout.backend.name}")
-            rows.append(out_io.getvalue())
-
-        # make sure the type is always the second row, don't move it
-        if type:
-            assert rows[1].startswith("type: ")
-        return rows
-
     def show(
         self,
         limit_rows=20,
         limit_cols=80,
+        *,
         type=False,
         named_axis=False,
         nbytes=False,
         backend=False,
+        all=False,
         stream=STDOUT,
-        *,
         formatter=None,
         precision=3,
     ):
@@ -1458,7 +1411,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 of rows/lines limit.)
             nbytes (bool): If True, print the number of bytes as well. (Doesn't count toward number
                 of rows/lines limit.)
-            nbytes (bool): If True, print the backend of the array as well. (Doesn't count toward number
+            backend (bool): If True, print the backend of the array as well. (Doesn't count toward number
+                of rows/lines limit.)
+            all (bool): If True, print the 'type', 'named axis', 'nbytes', and 'backend' of the array. (Doesn't count toward number
                 of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
@@ -1474,13 +1429,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
         string values, falling back upon `"str_kind"`.
         """
-        rows = self._show_rows(
+        rows = highlevel_array_show_rows(
+            array=self,
             limit_rows=limit_rows,
             limit_cols=limit_cols,
-            type=type,
-            named_axis=named_axis,
-            nbytes=nbytes,
-            backend=backend,
+            type=type or all,
+            named_axis=named_axis or all,
+            nbytes=nbytes or all,
+            backend=backend or all,
             formatter=formatter,
             precision=precision,
         )
@@ -1502,7 +1458,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         out_io.write(array_line)
         if stream is None:
-            return out_io.get_value()
+            return out_io.getvalue()
         else:
             if stream is STDOUT:
                 stream = STDOUT.stream
@@ -1514,7 +1470,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         # last: type,
         # middle: rest sorted by length of prefix (longest first)
 
-        rows = self._show_rows(type=True, named_axis=True, nbytes=True, backend=True)
+        rows = highlevel_array_show_rows(
+            array=self,
+            type=True,
+            named_axis=True,
+            nbytes=True,
+            backend=True,
+        )
         header_lines = rows.pop(0).removesuffix("\n").splitlines()
 
         # it's always the second row (after the array)
@@ -2360,64 +2322,17 @@ class Record(NDArrayOperatorsMixin):
 
         return f"<{pytype}{valuestr}{axisstr} type={typestr}>"
 
-    def _show_rows(
-        self,
-        limit_rows=20,
-        limit_cols=80,
-        type=False,
-        named_axis=False,
-        nbytes=False,
-        backend=False,
-        *,
-        formatter=None,
-        precision=3,
-    ) -> list[str]:
-        rows = []
-        formatter_impl = Formatter(formatter, precision=precision)
-
-        valuestr = prettyprint_valuestr(
-            self, limit_rows, limit_cols, formatter=formatter_impl
-        )
-        rows.append(valuestr)
-
-        if type:
-            out_io = io.StringIO()
-            out_io.write("type: ")
-            self.type.show(stream=out_io)
-            rows.append(out_io.getvalue())
-
-        # other info
-        if named_axis and self.named_axis:
-            out_io = io.StringIO()
-            out_io.write("axes: ")
-            out_io.write(
-                _prettify_named_axes(self.named_axis, delimiter=", ", maxlen=None)
-            )
-            rows.append(out_io.getvalue())
-        if nbytes:
-            out_io = io.StringIO()
-            out_io.write(f"nbytes: {bytes_repr(self.nbytes)}")
-            rows.append(out_io.getvalue())
-        if backend:
-            out_io = io.StringIO()
-            out_io.write(f"backend: {self.layout.backend.name}")
-            rows.append(out_io.getvalue())
-
-        # make sure the type is always the second row, don't move it
-        if type:
-            assert rows[1].startswith("type: ")
-        return rows
-
     def show(
         self,
         limit_rows=20,
         limit_cols=80,
+        *,
         type=False,
         named_axis=False,
         nbytes=False,
         backend=False,
+        all=False,
         stream=STDOUT,
-        *,
         formatter=None,
         precision=3,
     ):
@@ -2431,7 +2346,9 @@ class Record(NDArrayOperatorsMixin):
                 of rows/lines limit.)
             nbytes (bool): If True, print the number of bytes as well. (Doesn't count toward number
                 of rows/lines limit.)
-            nbytes (bool): If True, print the backend of the array as well. (Doesn't count toward number
+            backend (bool): If True, print the backend of the array as well. (Doesn't count toward number
+                of rows/lines limit.)
+            all (bool): If True, print the 'type', 'named axis', 'nbytes', and 'backend' of the array. (Doesn't count toward number
                 of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
@@ -2447,13 +2364,14 @@ class Record(NDArrayOperatorsMixin):
         key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
         string values, falling back upon `"str_kind"`.
         """
-        rows = self._show_rows(
+        rows = highlevel_array_show_rows(
+            array=self,
             limit_rows=limit_rows,
             limit_cols=limit_cols,
-            type=type,
-            named_axis=named_axis,
-            nbytes=nbytes,
-            backend=backend,
+            type=type or all,
+            named_axis=named_axis or all,
+            nbytes=nbytes or all,
+            backend=backend or all,
             formatter=formatter,
             precision=precision,
         )
@@ -2475,7 +2393,7 @@ class Record(NDArrayOperatorsMixin):
 
         out_io.write(array_line)
         if stream is None:
-            return out_io.get_value()
+            return out_io.getvalue()
         else:
             if stream is STDOUT:
                 stream = STDOUT.stream
@@ -2487,7 +2405,13 @@ class Record(NDArrayOperatorsMixin):
         # last: type,
         # middle: rest sorted by length of prefix (longest first)
 
-        rows = self._show_rows(type=True, named_axis=True, nbytes=True, backend=True)
+        rows = highlevel_array_show_rows(
+            array=self,
+            type=True,
+            named_axis=True,
+            nbytes=True,
+            backend=True,
+        )
         header_lines = rows.pop(0).removesuffix("\n").splitlines()
 
         # it's always the second row (after the array)
