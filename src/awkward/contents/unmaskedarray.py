@@ -13,7 +13,7 @@ from awkward._meta.unmaskedmeta import UnmaskedMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
-from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone
 from awkward._parameters import (
     parameters_intersect,
@@ -340,7 +340,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
             raise AxisError("axis=0 not allowed for flatten")
         else:
             offsets, flattened = self._content._offsets_and_flattened(axis, depth)
-            if offsets.length == 0:
+            if offsets.length is not unknown_length and offsets.length == 0:
                 return (
                     offsets,
                     UnmaskedArray(flattened, parameters=self._parameters),
@@ -399,12 +399,12 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._content.length == 0:
+        if self._content.length is not unknown_length and self._content.length == 0:
             return True
         return self._content._is_unique(negaxis, starts, parents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self._content.length == 0:
+        if self._content.length is not unknown_length and self._content.length == 0:
             return self
         return self._content._unique(negaxis, starts, parents, outlength)
 
