@@ -2032,7 +2032,7 @@ class Record(NDArrayOperatorsMixin):
         the (small) Python objects that reference the (large)
         array buffers.
         """
-        return self._layout.nbytes
+        return self._layout.array.nbytes
 
     @property
     def fields(self):
