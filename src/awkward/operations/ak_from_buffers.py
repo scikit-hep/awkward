@@ -186,10 +186,7 @@ def _from_buffer(
         return array[:count]
     else:
         array = nplike.frombuffer(buffer, dtype=dtype, count=count)
-        if byteorder != ak._util.native_byteorder:
-            return array.byteswap(inplace=False)
-        else:
-            return array
+        return ak._util.native_to_byteorder(array, byteorder)
 
 
 def _reconstitute(
