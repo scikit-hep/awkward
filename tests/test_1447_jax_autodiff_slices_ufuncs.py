@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from packaging.version import parse as parse_version
 
 import awkward as ak
 
 jax = pytest.importorskip("jax")
 jax.config.update("jax_platform_name", "cpu")
 jax.config.update("jax_enable_x64", True)
+if parse_version(jax.__version__) >= parse_version("0.4.36"):
+    jax.config.update("jax_data_dependent_tracing_fallback", True)
 
 ak.jax.register_and_check()
 

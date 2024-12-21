@@ -306,7 +306,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT | PlaceholderArray:
         if isinstance(x, PlaceholderArray):
             next_shape = self._compute_compatible_shape(shape, x.shape)
-            return PlaceholderArray(self, next_shape, x.dtype)
+            return PlaceholderArray(self, next_shape, x.dtype, x._field_path)
 
         if copy is None:
             return self._module.reshape(x, shape)
