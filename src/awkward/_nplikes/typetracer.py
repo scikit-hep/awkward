@@ -55,7 +55,9 @@ def is_unknown_scalar(array: Any) -> TypeGuard[TypeTracerArray]:
 
 
 def is_unknown_integer(array: Any) -> TypeGuard[TypeTracerArray]:
-    return is_unknown_scalar(array) and np.issubdtype(array.dtype, np.integer)
+    return cast(
+        bool, is_unknown_scalar(array) and np.issubdtype(array.dtype, np.integer)
+    )
 
 
 def is_unknown_array(array: Any) -> TypeGuard[TypeTracerArray]:
