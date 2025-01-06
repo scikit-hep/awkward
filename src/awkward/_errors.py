@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import builtins
-import sys
 import threading
 import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
@@ -51,11 +49,6 @@ class PartialFunction:
         return self.func(*self.args, **self.kwargs)
 
 
-class KeyError(builtins.KeyError):
-    def __str__(self):
-        return super(Exception, self).__str__()
-
-
 class ErrorContext:
     # Any other threads should get a completely independent _slate.
     _slate = threading.local()
@@ -75,50 +68,33 @@ class ErrorContext:
             self._slate.__dict__["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        try:
+        if (
+            exception_type is not None
+            and issubclass(exception_type, Exception)
+            and self.primary() is self
+        ):
+            # Step out of the way so that another ErrorContext can become primary.
+            # Is this necessary to do here? (We're about to raise an exception anyway)
+            self._slate.__dict__.clear()
             # Handle caught exception
-            if (
-                exception_type is not None
-                and issubclass(exception_type, Exception)
-                and self.primary() is self
-            ):
-                self.handle_exception(exception_type, exception_value)
-        finally:
+            raise self.decorate_exception(exception_type, exception_value)
+        else:
             # Step out of the way so that another ErrorContext can become primary.
             if self.primary() is self:
                 self._slate.__dict__.clear()
 
-    def handle_exception(self, cls: type[E], exception: E):
-        if sys.version_info >= (3, 11, 0, "final"):
-            self.decorate_exception(cls, exception)
-        else:
-            raise self.decorate_exception(cls, exception)
-
     def decorate_exception(self, cls: type[E], exception: E) -> Exception:
-        if sys.version_info >= (3, 11, 0, "final"):
-            if issubclass(cls, (NotImplementedError, AssertionError)):
-                exception.add_note(
-                    "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
-                )
+        def _add_note(exception: E, note: str) -> E:
+            if hasattr(exception, "add_note"):
+                exception.add_note(note)
             else:
-                exception.add_note(self.note)
+                exception.__notes__ = [note]
             return exception
-        else:
-            new_exception: Exception
-            if issubclass(cls, (NotImplementedError, AssertionError)):
-                # Raise modified exception
-                new_exception = cls(
-                    str(exception)
-                    + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
-                )
-                new_exception.__cause__ = exception
-            elif issubclass(cls, builtins.KeyError):
-                new_exception = KeyError(self.format_exception(exception))
-                new_exception.__cause__ = exception
-            else:
-                new_exception = cls(self.format_exception(exception))
-                new_exception.__cause__ = exception
-            return new_exception
+
+        note = self.note
+        if issubclass(cls, (NotImplementedError, AssertionError)):
+            note = "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
+        return _add_note(exception, note)
 
     def format_argument(self, width, value):
         from awkward import contents, highlevel, record

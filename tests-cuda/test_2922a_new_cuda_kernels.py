@@ -1003,7 +1003,8 @@ def test_2064_fill_none_record_axis_last():
 
 
 def test_2064_fill_none_record_option_outside_record():
-    record = ak.zip({"x": [1, 4], "y": [2, 3]}).mask[[True, False]]
+    record = ak.zip({"x": [1, 4], "y": [2, 3]})
+    record = record.mask[[True, False]]
 
     cuda_record = ak.to_backend(record, "cuda")
 
