@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from functools import cached_property
 
 from awkward._meta.meta import Meta
 from awkward._typing import Generic, JSONSerializable, TypeVar
@@ -31,15 +32,15 @@ class UnionMeta(Meta, Generic[T]):
 
         return None
 
-    @property
-    def purelist_isregular(self) -> bool:
+    @cached_property
+    def purelist_isregular(self) -> bool:  # type: ignore[override]
         for content in self._contents:
             if not content.purelist_isregular:
                 return False
         return True
 
-    @property
-    def purelist_depth(self) -> int:
+    @cached_property
+    def purelist_depth(self) -> int:  # type: ignore[override]
         out = None
         for content in self._contents:
             if out is None:
@@ -53,8 +54,8 @@ class UnionMeta(Meta, Generic[T]):
     def is_identity_like(self) -> bool:
         return False
 
-    @property
-    def minmax_depth(self) -> tuple[int, int]:
+    @cached_property
+    def minmax_depth(self) -> tuple[int, int]:  # type: ignore[override]
         if len(self._contents) == 0:
             return (0, 0)
         mins, maxs = [], []
@@ -64,8 +65,8 @@ class UnionMeta(Meta, Generic[T]):
             maxs.append(maxdepth)
         return (min(mins), max(maxs))
 
-    @property
-    def branch_depth(self) -> tuple[bool, int]:
+    @cached_property
+    def branch_depth(self) -> tuple[bool, int]:  # type: ignore[override]
         if len(self._contents) == 0:
             return False, 1
 
@@ -83,8 +84,8 @@ class UnionMeta(Meta, Generic[T]):
         assert min_depth is not None
         return any_branch, min_depth
 
-    @property
-    def fields(self) -> list[str]:
+    @cached_property
+    def fields(self) -> list[str]:  # type: ignore[override]
         field_counts = Counter([f for c in self._contents for f in c.fields])
         return [f for f, n in field_counts.items() if n == len(self._contents)]
 
@@ -102,6 +103,6 @@ class UnionMeta(Meta, Generic[T]):
     def content(self, index: int) -> T:
         return self._contents[index]
 
-    @property
+    @cached_property
     def contents(self) -> list[T]:
         return self._contents

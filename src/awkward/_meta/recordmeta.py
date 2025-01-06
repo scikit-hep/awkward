@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import cached_property
+
 from awkward._meta.meta import Meta
 from awkward._regularize import is_integer
 from awkward._typing import Generic, JSONSerializable, TypeVar
@@ -39,8 +41,8 @@ class RecordMeta(Meta, Generic[T]):
     def is_identity_like(self) -> bool:
         return False
 
-    @property
-    def minmax_depth(self) -> tuple[int, int]:
+    @cached_property
+    def minmax_depth(self) -> tuple[int, int]:  # type: ignore[override]
         if len(self._contents) == 0:
             return (1, 1)
         mins, maxs = [], []
@@ -50,8 +52,8 @@ class RecordMeta(Meta, Generic[T]):
             maxs.append(maxdepth)
         return (min(mins), max(maxs))
 
-    @property
-    def branch_depth(self) -> tuple[bool, int]:
+    @cached_property
+    def branch_depth(self) -> tuple[bool, int]:  # type: ignore[override]
         if len(self._contents) == 0:
             return False, 1
 
@@ -80,8 +82,8 @@ class RecordMeta(Meta, Generic[T]):
     def contents(self) -> list[T]:
         return self._contents
 
-    @property
-    def fields(self) -> list[str]:
+    @cached_property
+    def fields(self) -> list[str]:  # type: ignore[override]
         if self._fields is None:
             return [str(i) for i in range(len(self._contents))]
         else:
