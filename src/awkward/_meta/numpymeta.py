@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import cached_property
+
 from awkward._meta.meta import Meta
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import JSONSerializable
@@ -31,13 +33,13 @@ class NumpyMeta(Meta):
     def is_identity_like(self) -> bool:
         return False
 
-    @property
-    def minmax_depth(self) -> tuple[int, int]:
+    @cached_property
+    def minmax_depth(self) -> tuple[int, int]:  # type: ignore[override]
         depth = len(self.inner_shape) + 1
         return (depth, depth)
 
-    @property
-    def branch_depth(self) -> tuple[bool, int]:
+    @cached_property
+    def branch_depth(self) -> tuple[bool, int]:  # type: ignore[override]
         return (False, len(self.inner_shape) + 1)
 
     @property
