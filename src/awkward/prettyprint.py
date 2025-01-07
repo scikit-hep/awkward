@@ -487,8 +487,11 @@ def highlevel_array_show_rows(
             array.named_axis, delimiter=", ", maxlen=None
         )
         rows.append(named_axis_line)
-    if nbytes and array.nbytes is not unknown_length:
-        nbytes_line = f"nbytes: {bytes_repr(array.nbytes)}"
+    if nbytes:
+        if array.nbytes is unknown_length:
+            nbytes_line = "nbytes: unknown"
+        else:
+            nbytes_line = f"nbytes: {bytes_repr(array.nbytes)}"
         rows.append(nbytes_line)
     if backend:
         backend_line = f"backend: {array.layout.backend.name}"
