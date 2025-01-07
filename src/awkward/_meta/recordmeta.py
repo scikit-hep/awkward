@@ -45,12 +45,14 @@ class RecordMeta(Meta, Generic[T]):
     def minmax_depth(self) -> tuple[int, int]:  # type: ignore[override]
         if len(self._contents) == 0:
             return (1, 1)
-        mins, maxs = [], []
-        for content in self._contents:
-            mindepth, maxdepth = content.minmax_depth
-            mins.append(mindepth)
-            maxs.append(maxdepth)
-        return (min(mins), max(maxs))
+        mindepth, maxdepth = self._contents[0].minmax_depth
+        for content in self._contents[1:]:
+            mindepth_, maxdepth_ = content.minmax_depth
+            if mindepth_ < mindepth:
+                mindepth = mindepth_
+            if maxdepth_ > maxdepth:
+                maxdepth = maxdepth_
+        return (mindepth, maxdepth)
 
     @cached_property
     def branch_depth(self) -> tuple[bool, int]:  # type: ignore[override]
