@@ -13,7 +13,7 @@ class HashableDict:
     def __init__(self, obj):
         self.keys = tuple(sorted(obj))
         self.values = tuple(as_hashable(obj[k]) for k in self.keys)
-        self.hash = hash((HashableDict, *self.keys), self.values)
+        self.hash = hash((HashableDict, self.keys, self.values))
 
     def __hash__(self):
         return self.hash
