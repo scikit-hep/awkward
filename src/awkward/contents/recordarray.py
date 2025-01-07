@@ -250,13 +250,6 @@ class RecordArray(RecordMeta[Content], Content):
         self._length = length
         self._init(parameters, backend)
 
-    @property
-    def fields(self) -> list[str]:
-        if self._fields is None:
-            return [str(i) for i in range(len(self._contents))]
-        else:
-            return self._fields
-
     form_cls: Final = RecordForm
 
     def copy(
@@ -297,10 +290,6 @@ class RecordArray(RecordMeta[Content], Content):
         backend=None,
     ):
         return cls(contents, fields, length, parameters=parameters, backend=backend)
-
-    @property
-    def is_tuple(self) -> bool:
-        return self._fields is None
 
     def to_tuple(self) -> Self:
         return RecordArray(
