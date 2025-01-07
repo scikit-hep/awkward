@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Collection, Iterator, Sequence, Set
+from functools import lru_cache
 from numbers import Number
 from typing import Callable
 
@@ -55,7 +56,9 @@ def is_unknown_scalar(array: Any) -> TypeGuard[TypeTracerArray]:
 
 
 def is_unknown_integer(array: Any) -> TypeGuard[TypeTracerArray]:
-    return is_unknown_scalar(array) and np.issubdtype(array.dtype, np.integer)
+    return cast(
+        bool, is_unknown_scalar(array) and np.issubdtype(array.dtype, np.integer)
+    )
 
 
 def is_unknown_array(array: Any) -> TypeGuard[TypeTracerArray]:
@@ -1147,38 +1150,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             return start, stop, step, self.index_as_shape_item(slice_length)
 
     def broadcast_shapes(self, *shapes: tuple[ShapeItem, ...]) -> tuple[ShapeItem, ...]:
-        ndim = max((len(s) for s in shapes), default=0)
-        result: list[ShapeItem] = [1] * ndim
-
-        for shape in shapes:
-            # Right broadcasting
-            missing_dim = ndim - len(shape)
-            if missing_dim > 0:
-                head: tuple[int, ...] = (1,) * missing_dim
-                shape = head + shape
-
-            # Fail if we absolutely know the shapes aren't compatible
-            for i, item in enumerate(shape):
-                # Item is unknown, take it
-                if is_unknown_length(item):
-                    result[i] = item
-                # Existing item is unknown, keep it
-                elif is_unknown_length(result[i]):
-                    continue
-                # Items match, continue
-                elif result[i] == item:
-                    continue
-                # Item is broadcastable, take existing
-                elif item == 1:
-                    continue
-                # Existing is broadcastable, take it
-                elif result[i] == 1:
-                    result[i] = item
-                else:
-                    raise ValueError(
-                        "known component of shape does not match broadcast result"
-                    )
-        return tuple(result)
+        return _broadcast_shapes(*shapes)
 
     def broadcast_arrays(self, *arrays: TypeTracerArray) -> list[TypeTracerArray]:
         for x in arrays:
@@ -1704,6 +1676,42 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
 
     def __dlpack__(self, stream=None):
         raise NotImplementedError
+
+
+@lru_cache
+def _broadcast_shapes(*shapes):
+    ndim = max((len(s) for s in shapes), default=0)
+    result: list[ShapeItem] = [1] * ndim
+
+    for shape in shapes:
+        # Right broadcasting
+        missing_dim = ndim - len(shape)
+        if missing_dim > 0:
+            head: tuple[int, ...] = (1,) * missing_dim
+            shape = head + shape
+
+        # Fail if we absolutely know the shapes aren't compatible
+        for i, item in enumerate(shape):
+            # Item is unknown, take it
+            if is_unknown_length(item):
+                result[i] = item
+            # Existing item is unknown, keep it
+            elif is_unknown_length(result[i]):
+                continue
+            # Items match, continue
+            elif result[i] == item:
+                continue
+            # Item is broadcastable, take existing
+            elif item == 1:
+                continue
+            # Existing is broadcastable, take it
+            elif result[i] == 1:
+                result[i] = item
+            else:
+                raise ValueError(
+                    "known component of shape does not match broadcast result"
+                )
+    return tuple(result)
 
 
 def _attach_report(
