@@ -582,15 +582,18 @@ def apply_step(
             dimsize_is_zero = dim_size is not unknown_length and dim_size == 0
 
             # Build a broadcast index for size=1 contents, and identify whether we have strings
-            inputs_are_strings = []
             size_one_carry_index = None
-            for x in inputs:
+            nextinputs = []
+            nextparameters = []
+            for i, ((named_axis, ndim), x) in enumerate(
+                zip(named_axes_with_ndims, inputs)
+            ):
+                x_is_string = False
                 if isinstance(x, ak.contents.Content):
-                    content_is_string = is_string_like(x)
-                    inputs_are_strings.append(content_is_string)
+                    x_is_string = is_string_like(x)
                     if (
                         # Strings don't count as lists in this context
-                        not content_is_string
+                        not x_is_string
                         # Is this layout known to be size==1?
                         and x.is_regular
                         and x.size is not unknown_length
@@ -610,21 +613,14 @@ def apply_step(
                             ),
                             nplike=index_nplike,
                         )
-                else:
-                    inputs_are_strings.append(False)
 
-            # W.r.t broadcasting against other lists, we have three possibilities
-            # a. any (exactly) size-0 content broadcasts all other regular dimensions to 0
-            # b. any (exactly) size-1 content broadcasts to the `size_one_carry_index``
-            # c. otherwise, the list size should equal the dimension; recurse into the content as-is
+                # W.r.t broadcasting against other lists, we have three possibilities
+                # a. any (exactly) size-0 content broadcasts all other regular dimensions to 0
+                # b. any (exactly) size-1 content broadcasts to the `size_one_carry_index``
+                # c. otherwise, the list size should equal the dimension; recurse into the content as-is
 
-            # If we have non-lists, these are just appended as-is. As we're dealing with regular layouts,
-            # we don't left-broadcast
-            nextinputs = []
-            nextparameters = []
-            for i, ((named_axis, ndim), x, x_is_string) in enumerate(
-                zip(named_axes_with_ndims, inputs, inputs_are_strings)
-            ):
+                # If we have non-lists, these are just appended as-is. As we're dealing with regular layouts,
+                # we don't left-broadcast
                 if isinstance(x, RegularArray) and not x_is_string:
                     content_size_maybe_one = (
                         x.size is not unknown_length and x.size == 1
@@ -801,21 +797,21 @@ def apply_step(
                 else:
                     mask = backend.index_nplike.logical_or(mask, m, maybe_out=mask)
 
-        nextmask = Index8(mask.view(np.int8))
+        nextmask = Index8(mask.view(np.int8), nplike=backend.index_nplike)
         index = backend.index_nplike.full(mask.shape[0], np.int64(-1), dtype=np.int64)
         index[~mask] = backend.index_nplike.arange(
             backend.index_nplike.shape_item_as_index(mask.shape[0])
             - backend.index_nplike.count_nonzero(mask),
             dtype=np.int64,
         )
-        index = Index64(index)
+        index = Index64(index, nplike=backend.index_nplike)
         if any(not x.is_option for x in contents):
             nextindex = backend.index_nplike.arange(
                 backend.index_nplike.shape_item_as_index(mask.shape[0]),
                 dtype=np.int64,
             )
             nextindex[mask] = -1
-            nextindex = Index64(nextindex)
+            nextindex = Index64(nextindex, nplike=backend.index_nplike)
 
         nextinputs = []
         nextparameters = []
@@ -874,25 +870,27 @@ def apply_step(
                     # Unknown arrays cannot use to_ByteMaskedArray.
                     # Create a stand-in array of similar shape and any dtype (we use bool here)
                     unused_unmasked = NumpyArray(
-                        backend.nplike.zeros(xyc.length, dtype=np.bool_)
+                        backend.nplike.zeros(xyc.length, dtype=np.bool_),
+                        backend=backend,
                     )
                     unmasked.append(unused_unmasked)
                     all_masked = NumpyArray(
-                        backend.nplike.ones(xyc.length, dtype=np.int8)
+                        backend.nplike.ones(xyc.length, dtype=np.int8),
+                        backend=backend,
                     )
                     masks.append(all_masked)
                 else:
                     xyc_as_masked = xyc.to_ByteMaskedArray(valid_when=False)
                     unmasked.append(xyc_as_masked.content)
-                    masks.append(NumpyArray(xyc_as_masked.mask.data))
+                    masks.append(NumpyArray(xyc_as_masked.mask.data, backend=backend))
             elif not isinstance(xyc.form, ByteMaskedForm) or xyc.form.valid_when:
                 # Must make existing mask conform to our convention
                 xyc_as_bytemasked = xyc.to_ByteMaskedArray(valid_when=False)
                 unmasked.append(xyc_as_bytemasked.content)
-                masks.append(NumpyArray(xyc_as_bytemasked.mask.data))
+                masks.append(NumpyArray(xyc_as_bytemasked.mask.data, backend=backend))
             else:
                 unmasked.append(xyc.content)
-                masks.append(NumpyArray(xyc.mask.data))
+                masks.append(NumpyArray(xyc.mask.data, backend=backend))
 
         # (1) Apply ak_where action to unmasked inputs
         outcontent = apply_step(
@@ -940,7 +938,9 @@ def apply_step(
             # Return None when condition is None or selected element is None
             m1, m2 = inputs
             if all(isinstance(x, NumpyArray) for x in inputs):
-                out = NumpyArray(backend.nplike.logical_or(m1.data, m2.data))
+                out = NumpyArray(
+                    backend.nplike.logical_or(m1.data, m2.data), backend=backend
+                )
                 return (out,)
 
         cond_mask = masks[2]
@@ -962,9 +962,9 @@ def apply_step(
             ):
                 content, mask = inputs
                 if hasattr(mask, "content"):
-                    mask_as_idx = Index8(mask.content.data)
+                    mask_as_idx = Index8(mask.content.data, nplike=backend.index_nplike)
                 else:
-                    mask_as_idx = Index8(mask.data)
+                    mask_as_idx = Index8(mask.data, nplike=backend.index_nplike)
                 out = ByteMaskedArray(
                     mask_as_idx,
                     content,

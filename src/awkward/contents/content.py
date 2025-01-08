@@ -583,61 +583,64 @@ class Content(Meta):
             # Prepare items for advanced indexing (e.g. via broadcasting)
             nextwhere = ak._slicing.prepare_advanced_indexing(items, backend)
 
-            # Handle named axis
-            # first expand the ellipsis to colons in nextwhere,
-            # copy nextwhere to not pollute the original
-            _nextwhere = tuple(nextwhere)
-            if n_ellipsis == 1:
-                # collect the ellipsis index
-                # same little trick as above for `nextwhere.index(...)`
-                (ellipsis_at,) = tuple(i for i, x in enumerate(nextwhere) if x is ...)
-                # calculate how many slice(None) we need to add
-                # same little trick as above for `nextwhere.count(None)`
-                n_newaxis = 0
-                for x in nextwhere:
-                    if x is np.newaxis or x is None:
-                        n_newaxis += 1
-                n_total = self.minmax_depth[1]
-                n_slice_none = n_total - (len(_nextwhere) - n_newaxis - 1)
-                # expand `[...]` to `[:]*n_slice_none`
-                _nextwhere = (
-                    _nextwhere[:ellipsis_at]
-                    + (slice(None),) * n_slice_none
-                    + _nextwhere[ellipsis_at + 1 :]
-                )
-
-            # now propagate named axis
-            _named_axis = _keep_named_axis(named_axis.mapping, None)
-            _adjust_dim = 0
-            # this loop does the following:
-            # - remove a named axis for integer indices, e.g. `a[1, 2]`
-            # - add a named axis for None (or np.newaxis) indices, e.g. `a[..., None]`
-            # - keep named axis for any other index, e.g. `a[:]`, `a[0:1]`, or `a[a>0]`
-            #   (these may only remove elements, but not dimensions)
-            for dim, nw in enumerate(_nextwhere):
-                dim_adjusted = dim + _adjust_dim
-                total_adjusted = self.minmax_depth[1] + _adjust_dim
-                for _, pos in _named_axis.items():
-                    if maybe_posaxis(self, pos, 0) == dim_adjusted:
-                        break
-
-                if is_integer(nw) or (is_array_like(nw) and nw.ndim == 0):
-                    _named_axis = _remove_named_axis(
-                        named_axis=_named_axis,
-                        axis=dim_adjusted,
-                        total=total_adjusted,
+            if named_axis.mapping:
+                # Handle named axis (but only if it is not empty)
+                # first expand the ellipsis to colons in nextwhere,
+                # copy nextwhere to not pollute the original
+                _nextwhere = tuple(nextwhere)
+                if n_ellipsis == 1:
+                    # collect the ellipsis index
+                    # same little trick as above for `nextwhere.index(...)`
+                    (ellipsis_at,) = tuple(
+                        i for i, x in enumerate(nextwhere) if x is ...
                     )
-                    _adjust_dim -= 1
-                elif nw is None:
-                    _named_axis = _add_named_axis(
-                        named_axis=_named_axis,
-                        axis=dim_adjusted,
-                        total=total_adjusted,
+                    # calculate how many slice(None) we need to add
+                    # same little trick as above for `nextwhere.count(None)`
+                    n_newaxis = 0
+                    for x in nextwhere:
+                        if x is np.newaxis or x is None:
+                            n_newaxis += 1
+                    n_total = self.minmax_depth[1]
+                    n_slice_none = n_total - (len(_nextwhere) - n_newaxis - 1)
+                    # expand `[...]` to `[:]*n_slice_none`
+                    _nextwhere = (
+                        _nextwhere[:ellipsis_at]
+                        + (slice(None),) * n_slice_none
+                        + _nextwhere[ellipsis_at + 1 :]
                     )
-                    _adjust_dim += 1
 
-            # set propagated named axis
-            named_axis.mapping = _named_axis
+                # now propagate named axis
+                _named_axis = _keep_named_axis(named_axis.mapping, None)
+                _adjust_dim = 0
+                # this loop does the following:
+                # - remove a named axis for integer indices, e.g. `a[1, 2]`
+                # - add a named axis for None (or np.newaxis) indices, e.g. `a[..., None]`
+                # - keep named axis for any other index, e.g. `a[:]`, `a[0:1]`, or `a[a>0]`
+                #   (these may only remove elements, but not dimensions)
+                for dim, nw in enumerate(_nextwhere):
+                    dim_adjusted = dim + _adjust_dim
+                    total_adjusted = self.minmax_depth[1] + _adjust_dim
+                    for _, pos in _named_axis.items():
+                        if maybe_posaxis(self, pos, 0) == dim_adjusted:
+                            break
+
+                    if is_integer(nw) or (is_array_like(nw) and nw.ndim == 0):
+                        _named_axis = _remove_named_axis(
+                            named_axis=_named_axis,
+                            axis=dim_adjusted,
+                            total=total_adjusted,
+                        )
+                        _adjust_dim -= 1
+                    elif nw is None:
+                        _named_axis = _add_named_axis(
+                            named_axis=_named_axis,
+                            axis=dim_adjusted,
+                            total=total_adjusted,
+                        )
+                        _adjust_dim += 1
+
+                # set propagated named axis
+                named_axis.mapping = _named_axis
 
             next = ak.contents.RegularArray(
                 this,

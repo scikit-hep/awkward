@@ -427,6 +427,8 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         if not isinstance(key, tuple):
             key = (key,)
 
+        ndim = self.ndim
+
         # 1. Validate slice items
         has_seen_ellipsis = 0
         n_basic_non_ellipsis = 0
@@ -458,18 +460,19 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 )
 
         n_dim_index = n_basic_non_ellipsis + n_advanced
-        if n_dim_index > self.ndim:
+        if n_dim_index > ndim:
             raise IndexError(
-                f"too many indices for array: array is {self.ndim}-dimensional, but {n_dim_index} were indexed"
+                f"too many indices for array: array is {ndim}-dimensional, but {n_dim_index} were indexed"
             )
 
         # 2. Normalise Ellipsis and boolean arrays
+        # How many more dimensions do we have than the index provides
+        n_missing_dims = (slice(None),) * (ndim - n_dim_index)
+
         key_parts: list[SupportsIndex | slice | ArrayLike] = []
         for item in key:
             if item is Ellipsis:
-                # How many more dimensions do we have than the index provides
-                n_missing_dims = self.ndim - n_dim_index
-                key_parts.extend((slice(None),) * n_missing_dims)
+                key_parts.extend(n_missing_dims)
             elif is_unknown_array(item) and np.issubdtype(item, np.bool_):
                 key_parts.append(self.nplike.nonzero(item)[0])
             else:
@@ -1153,21 +1156,19 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         return _broadcast_shapes(*shapes)
 
     def broadcast_arrays(self, *arrays: TypeTracerArray) -> list[TypeTracerArray]:
-        for x in arrays:
-            assert isinstance(x, TypeTracerArray)
-            try_touch_data(x)
-
         if len(arrays) == 0:
             return []
 
-        all_arrays = []
+        all_arrays, all_shapes = [], []
         for x in arrays:
+            assert isinstance(x, TypeTracerArray)
+            try_touch_data(x)
             if not hasattr(x, "shape"):
                 x = self.asarray(x)
             all_arrays.append(x)
+            all_shapes.append(x.shape)
 
-        shapes = [x.shape for x in all_arrays]
-        shape = self.broadcast_shapes(*shapes)
+        shape = self.broadcast_shapes(*all_shapes)
 
         return [TypeTracerArray._new(x.dtype, shape=shape) for x in all_arrays]
 

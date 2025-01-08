@@ -129,23 +129,24 @@ def prepare_advanced_indexing(items, backend: Backend):
         if len(x.shape) == 0:
             prepared.append(x)
         elif np.issubdtype(x.dtype, np.int64):
-            prepared.append(ak.index.Index64(nplike.reshape(x, (-1,))))
+            prepared.append(ak.index.Index64(nplike.reshape(x, (-1,)), nplike=nplike))
             prepared[-1].metadata["shape"] = x.shape
         elif np.issubdtype(x.dtype, np.integer):
             prepared.append(
                 ak.index.Index64(
-                    nplike.reshape(nplike.astype(x, dtype=np.int64), (-1,))
+                    nplike.reshape(nplike.astype(x, dtype=np.int64), (-1,)),
+                    nplike=nplike,
                 )
             )
             prepared[-1].metadata["shape"] = x.shape
         elif np.issubdtype(x.dtype, np.bool_):
             if len(x.shape) == 1:
-                current = ak.index.Index64(nplike.nonzero(x)[0])
+                current = ak.index.Index64(nplike.nonzero(x)[0], nplike=nplike)
                 prepared.append(current)
                 prepared[-1].metadata["shape"] = current.data.shape
             else:
                 for w in nplike.nonzero(x):
-                    prepared.append(ak.index.Index64(w))
+                    prepared.append(ak.index.Index64(w, nplike=nplike))
         else:
             raise TypeError(
                 "array slice must be an array of integers or booleans, not\n\n    {}".format(
@@ -500,7 +501,9 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             )
 
             item_offsets = item_backend.index_nplike.asarray(item.offsets)
-            nextoffsets = ak.index.Index(cumsum[item_offsets])
+            nextoffsets = ak.index.Index(
+                cumsum[item_offsets], nplike=item_backend.index_nplike
+            )
 
         else:
             item._touch_data(recursive=False)
@@ -549,11 +552,14 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             cumsum[0] = 0
             cumsum[1:] = item_backend.nplike.cumsum(expanded)
             item_offsets = item_backend.index_nplike.asarray(item.offsets)
-            nextoffsets = ak.index.Index(cumsum[item_offsets])
+            nextoffsets = ak.index.Index(
+                cumsum[item_offsets], nplike=item_backend.index_nplike
+            )
 
             # outindex fits into the lists; non-missing are sequential
             outindex = ak.index.Index64(
-                item_backend.index_nplike.full(nextoffsets[-1], -1, dtype=np.int64)
+                item_backend.index_nplike.full(nextoffsets[-1], -1, dtype=np.int64),
+                nplike=item_backend.index_nplike,
             )
             outindex.data[~isnegative[expanded]] = item_backend.index_nplike.arange(
                 nextcontent.shape[0], dtype=np.int64
@@ -620,7 +626,8 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                 # non-missing are sequential
                 non_negative = item_backend.nplike.logical_not(isnegative[expanded])
                 outindex = ak.index.Index64(
-                    item_backend.index_nplike.full(lenoutindex, -1, dtype=np.int64)
+                    item_backend.index_nplike.full(lenoutindex, -1, dtype=np.int64),
+                    nplike=item_backend.index_nplike,
                 )
                 outindex.data[to_nplike(non_negative, item_backend.index_nplike)] = (
                     item_backend.index_nplike.arange(
