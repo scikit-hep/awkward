@@ -11,6 +11,7 @@ import awkward as ak
 from awkward._layout import wrap_layout
 from awkward._namedaxis import _prettify_named_axes
 from awkward._nplikes.numpy import Numpy, NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._typing import TYPE_CHECKING, Any, TypeAlias, TypedDict
 
 if TYPE_CHECKING:
@@ -487,7 +488,10 @@ def highlevel_array_show_rows(
         )
         rows.append(named_axis_line)
     if nbytes:
-        nbytes_line = f"nbytes: {bytes_repr(array.nbytes)}"
+        if array.nbytes is unknown_length:
+            nbytes_line = "nbytes: unknown"
+        else:
+            nbytes_line = f"nbytes: {bytes_repr(array.nbytes)}"
         rows.append(nbytes_line)
     if backend:
         backend_line = f"backend: {array.layout.backend.name}"

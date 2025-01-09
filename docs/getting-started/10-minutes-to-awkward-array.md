@@ -24,7 +24,7 @@ In this guide, we'll look at how to manipulate a jagged dataset to plot taxi rou
 
 ## Loading the dataset
 
-Our dataset is formatted as a 611 MB [Apache Parquet](https://parquet.apache.org/) file, provided [here](https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet). Alongside JSON, and raw buffers, Awkward can also read Parquet files and Arrow tables.
+Our dataset is formatted as a 611 MB [Apache Parquet](https://parquet.apache.org/) file, provided [here](https://zenodo.org/records/14537442/files/chicago-taxi.parquet). Alongside JSON, and raw buffers, Awkward can also read Parquet files and Arrow tables.
 
 Given that this file is so large, let's first look at the *metadata* with `ak.metadata_from_parquet` to see what we're working with:
 
@@ -43,7 +43,7 @@ import numpy as np
 import awkward as ak
 
 metadata = ak.metadata_from_parquet(
-    "https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet"
+    "https://zenodo.org/records/14537442/files/chicago-taxi.parquet"
 )
 ```
 
@@ -59,7 +59,7 @@ There are a lot of different columns here (`trip.sec`, `trip.begin.lon`, `trip.p
 
 ```{code-cell} ipython3
 taxi = ak.from_parquet(
-    "https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet",
+    "https://zenodo.org/records/14537442/files/chicago-taxi.parquet",
     row_groups=[0],
     columns=["trip.km", "trip.begin.l*", "trip.end.l*", "trip.path.*"],
 )
