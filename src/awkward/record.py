@@ -194,7 +194,7 @@ class Record:
         return self._array._getitem_fields(where)._getitem_at(self._at)
 
     def to_packed(self, recursive: bool = True) -> Self:
-        if self._array.length == 1:
+        if self._array.length is not unknown_length and self._array.length == 1:
             return Record(self._array.to_packed(recursive), self._at)
         else:
             return Record(self._array[self._at : self._at + 1].to_packed(recursive), 0)
