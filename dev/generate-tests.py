@@ -1254,7 +1254,7 @@ def gencudaunittests(specdict):
                         if test["error"]:
                             f.write(
                                 f"""
-    error_message = re.escape("{test['message']} in compiled CUDA code ({spec.templatized_kernel_name})")
+    error_message = re.escape("{test["message"]} in compiled CUDA code ({spec.templatized_kernel_name})")
 """
                             )
                             f.write(
@@ -1326,7 +1326,7 @@ def genunittests():
             os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit", func),
             "w",
         ) as file:
-            file.write("import pytest\n" "import numpy\n" "import kernels\n\n")
+            file.write("import pytest\nimport numpy\nimport kernels\n\n")
             for test in function["tests"]:
                 num += 1
                 funcName = "def test_" + function["name"] + "_" + str(num) + "():\n"
