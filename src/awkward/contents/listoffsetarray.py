@@ -310,7 +310,10 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        return isinstance(self._offsets, PlaceholderArray)
+        return (
+            isinstance(self._offsets.data, PlaceholderArray)
+            or self._content._is_getitem_at_placeholder()
+        )
 
     def _getitem_at(self, where: IndexType):
         # Wrap `where` by length

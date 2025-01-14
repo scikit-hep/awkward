@@ -311,8 +311,8 @@ class ListArray(ListMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        return isinstance(self._starts, PlaceholderArray) or isinstance(
-            self._stops, PlaceholderArray
+        return isinstance(self._starts.data, PlaceholderArray) or isinstance(
+            self._stops.data, PlaceholderArray
         )
 
     def _getitem_at(self, where: IndexType):
