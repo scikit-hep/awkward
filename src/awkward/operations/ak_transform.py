@@ -426,7 +426,7 @@ def transform(
         The output arrays will not be given parameters.
 
 
-    Performance Tipp
+    Performance Tip
     ================
 
     #ak.transform will traverse the layout of (potentially multiple) arrays once.
