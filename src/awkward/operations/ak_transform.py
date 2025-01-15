@@ -425,6 +425,40 @@ def transform(
     `"none"`
         The output arrays will not be given parameters.
 
+
+    Performance Tipp
+    ================
+
+    #ak.transform will traverse the layout of (potentially multiple) arrays once.
+    This can be useful if one wants to apply a batch of transformations in one single
+    layout traversal. Traversing the layout multiple times can be inefficient.
+
+    Consider the following example:
+
+        >>> def batch_of_operations(array):
+        ...     return np.sqrt(np.sin(array) + 1) - 1
+        ...
+        >>> def apply_batch_of_operations(layout, **kwargs):
+        ...     if layout.is_numpy:
+        ...         return ak.contents.NumpyArray(
+        ...             batch_of_operations(layout.data)
+        ...         )
+        ...
+        >>> array = ak.Array(
+        ... [[[[[1.1, 2.2, 3.3], []], None], []],
+        ...  [[[[4.4, 5.5]]]]]
+        ... )
+        >>> %timeit ak.transform(apply_batch_of_operations, array)
+        ... 68.5 μs ± 663 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+        >>> %timeit batch_of_operations(array)
+        ... 1.07 ms ± 39.1 μs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
+
+    The first `%timeit` cell shows the time it takes to apply the batch of operations using #ak.transform,
+    which allows to apply the operations in one single traversal of the layout. The second `%timeit` cell shows
+    the runtime of applying the operations directly to the array, which traverses the layout multiple times.
+    To be more explicit: one layout traversal for each operation.
+
+
     See also: #ak.is_valid and #ak.valid_when to check the validity of transformed
     outputs.
     """
