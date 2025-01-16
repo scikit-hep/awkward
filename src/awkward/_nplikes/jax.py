@@ -34,8 +34,7 @@ class Jax(ArrayModuleNumpyLike):  # pylint: disable=too-many-ancestors
     @property
     def char(self):
         raise ValueError(
-            "JAX arrays cannot do string manipulations until JAX implements "
-            "numpy.char"
+            "JAX arrays cannot do string manipulations until JAX implements numpy.char"
         )
 
     @property

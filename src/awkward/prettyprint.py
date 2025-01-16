@@ -443,11 +443,11 @@ def valuestr(
 
 def bytes_repr(nbytes: int) -> str:
     count, unit = (
-        (f"{nbytes / 1e9 :,.1f}", "GB")
+        (f"{nbytes / 1e9:,.1f}", "GB")
         if nbytes > 1e9
-        else (f"{nbytes / 1e6 :,.1f}", "MB")
+        else (f"{nbytes / 1e6:,.1f}", "MB")
         if nbytes > 1e6
-        else (f"{nbytes / 1e3 :,.1f}", "kB")
+        else (f"{nbytes / 1e3:,.1f}", "kB")
         if nbytes > 1e3
         else (f"{nbytes:,}", "B")
     )

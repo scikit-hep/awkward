@@ -275,7 +275,7 @@ class OperationErrorContext(ErrorContext):
                 arguments.append(f"\n        {valuestr}")
 
         extra_line = "" if len(arguments) == 0 else "\n    "
-        calling_note = f'{self.name}({"".join(arguments)}{extra_line})'
+        calling_note = f"{self.name}({''.join(arguments)}{extra_line})"
         return f"""
 This error occurred while calling
 
