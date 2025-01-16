@@ -692,7 +692,7 @@ class NumpyArray(NumpyMeta, Content):
             )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self.length == 0:
+        if self.length is not unknown_length and self.length == 0:
             return True
         elif len(self.shape) != 1:
             return self.to_RegularArray()._is_unique(
@@ -711,9 +711,12 @@ class NumpyArray(NumpyMeta, Content):
         else:
             out = self._unique(negaxis, starts, parents, outlength)
             if isinstance(out, ak.contents.ListOffsetArray):
-                return out.content.length == self.length
+                return (
+                    out.content.length is not unknown_length
+                    and out.content.length == self.length
+                )
             else:
-                return out.length == self.length
+                return out.length is not unknown_length and out.length == self.length
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self.shape[0] == 0:

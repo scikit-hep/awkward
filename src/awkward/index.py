@@ -71,9 +71,9 @@ class Index:
             raise TypeError("Index data must be one-dimensional")
 
         if np.issubdtype(self._data.dtype, np.longlong):
-            assert (
-                np.dtype(np.longlong).itemsize == 8
-            ), "longlong is always 64-bit, right?"
+            assert np.dtype(np.longlong).itemsize == 8, (
+                "longlong is always 64-bit, right?"
+            )
 
             self._data = self._data.view(np.int64)
 
