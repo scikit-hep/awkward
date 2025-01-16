@@ -37,6 +37,10 @@ from awkward._typing import (
     cast,
 )
 
+from awkward.tracing.core import new_main_trace, FuncCapture, ArbitraryFunction, NumpyLikeFunction, disable_adding_new_main_trace
+from awkward.tracing.typetracer import trace_typetracer_method
+
+
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
 
@@ -302,9 +306,15 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def T(self) -> Self:
-        return TypeTracerArray._new(
+        out = TypeTracerArray._new(
             self.dtype, self._shape[::-1], self.form_key, self.report
         )
+        with new_main_trace(
+            func_capture=FuncCapture(ArbitraryFunction(lambda x: x.T)),
+            in_arrays=(self,),
+            out_arrays=(out,),
+        ):
+            return out
 
     @property
     def dtype(self) -> DType:
@@ -424,6 +434,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | tuple[SupportsIndex | slice | EllipsisType | ArrayLike, ...]
         | ArrayLike,
     ) -> Self:
+        # save for the main trace
+        orig_key = key
+
         if not isinstance(key, tuple):
             key = (key,)
 
@@ -544,12 +557,20 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         broadcast_shape = tuple(i for p in result_shape_parts for i in p)
         result_shape = broadcast_shape + tuple(iter_shape)
 
-        return self._new(
+        out = self._new(
             self._dtype,
             result_shape,
             self._form_key,
             self._report,
         )
+        with new_main_trace(
+            func_capture=FuncCapture(
+                ArbitraryFunction(lambda x: x[orig_key])
+            ),
+            in_arrays=(self,),
+            out_arrays=(out,),
+        ):
+            return out
 
     def __setitem__(
         self,
@@ -560,13 +581,28 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | ArrayLike,
         value: int | float | bool | complex | ArrayLike,
     ):
-        existing_value = self.__getitem__(key)
-        if isinstance(value, TypeTracerArray) and value.ndim > existing_value.ndim:
-            raise ValueError("cannot assign shape larger than destination")
+        with new_main_trace(
+            func_capture=FuncCapture(
+                ArbitraryFunction(lambda x, key: x.__setitem__(key)),
+            ),
+            in_arrays=(self,),
+            out_arrays=(),
+        ):
+            # by disabling the inner __getitem__ call we make sure that we only add a trace
+            # for the __setitem__ call
+            with disable_adding_new_main_trace():
+                existing_value = self.__getitem__(key)
+                if isinstance(value, TypeTracerArray) and value.ndim > existing_value.ndim:
+                    raise ValueError("cannot assign shape larger than destination")
 
     def copy(self):
-        self.touch_data()
-        return self
+        with new_main_trace(
+            func_capture=FuncCapture(ArbitraryFunction(lambda x: x.copy())),
+            in_arrays=(self,),
+            out_arrays=(self,),
+        ):
+            self.touch_data()
+            return self
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         # raise ak._errors.wrap_error(
@@ -672,12 +708,19 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         result_dtypes = resolved_dtypes[ufunc.nin :]
 
         if len(result_dtypes) == 1:
-            return TypeTracerArray._new(result_dtypes[0], shape=broadcasted_shape)
+            out = TypeTracerArray._new(result_dtypes[0], shape=broadcasted_shape)
         else:
-            return tuple(
+            out = tuple(
                 TypeTracerArray._new(dtype, shape=broadcasted_shape)
                 for dtype in result_dtypes
             )
+        with new_main_trace(
+            func_capture=FuncCapture(ArbitraryFunction(ufunc), (), kwargs or {}),
+            in_arrays=tuple(args),
+            out_arrays=out,
+        ):
+            return out
+
 
     def _apply_ufunc_legacy(
         self,
@@ -717,12 +760,18 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             result_dtypes = [x.dtype for x in proxy_result]
 
         if len(result_dtypes) == 1:
-            return TypeTracerArray._new(result_dtypes[0], shape=broadcasted_shape)
+            out = TypeTracerArray._new(result_dtypes[0], shape=broadcasted_shape)
         else:
-            return tuple(
+            out = tuple(
                 TypeTracerArray._new(dtype, shape=broadcasted_shape)
                 for dtype in result_dtypes
             )
+        with new_main_trace(
+            func_capture=FuncCapture(ArbitraryFunction(ufunc), (), kwargs or {}),
+            in_arrays=tuple(args),
+            out_arrays=out,
+        ):
+            return out
 
     def _axis_is_valid(self, axis: int, ndim: int) -> bool:
         if axis < 0:
@@ -763,9 +812,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             report = obj._report
 
             if dtype is None:
-                return obj
+                out = obj
             elif dtype == obj.dtype:
-                return TypeTracerArray._new(
+                out = TypeTracerArray._new(
                     dtype, obj.shape, form_key=form_key, report=report
                 )
             elif copy is False:
@@ -774,9 +823,20 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                 )
             else:
                 try_touch_data(obj)
-                return TypeTracerArray._new(
+                out = TypeTracerArray._new(
                     dtype, obj.shape, form_key=form_key, report=report
                 )
+
+            # Add a trace for the asarray call,
+            # but only if we got a TypeTracer in the first place.
+            # Is this the right thing to do?
+            kwargs = {"dtype": dtype, "copy": copy}
+            with new_main_trace(
+                func_capture=FuncCapture(NumpyLikeFunction(self, self.asarray), (), kwargs),
+                in_arrays=(obj,),
+                out_arrays=(out,),
+            ):
+                return out
         else:
             # Convert NumPy generics to scalars
             if isinstance(obj, np.generic):
@@ -843,6 +903,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             else:
                 raise TypeError
 
+    @trace_typetracer_method
     def ascontiguousarray(
         self, x: TypeTracerArray | PlaceholderArray
     ) -> TypeTracerArray | PlaceholderArray:
@@ -851,6 +912,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             x.dtype, shape=x.shape, form_key=x.form_key, report=x.report
         )
 
+    @trace_typetracer_method
     def frombuffer(
         self, buffer, *, dtype: DTypeLike | None = None, count: ShapeItem = -1
     ) -> TypeTracerArray:
@@ -861,13 +923,17 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         if isinstance(buffer, TypeTracerArray) or is_unknown_scalar(count):
             raise NotImplementedError
         else:
-            return self.asarray(numpy.frombuffer(buffer, dtype=dtype, count=count))
+            with disable_adding_new_main_trace():
+                # I think this correct to disable, otherwise we'd add a "asarray" trace that is not needed
+                return self.asarray(numpy.frombuffer(buffer, dtype=dtype, count=count))
 
+    @trace_typetracer_method
     def from_dlpack(self, x: Any) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
         raise NotImplementedError
 
+    @trace_typetracer_method
     def zeros(
         self,
         shape: ShapeItem | tuple[ShapeItem, ...],
@@ -882,6 +948,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             dtype = np.dtype(dtype)
         return TypeTracerArray._new(dtype, shape)
 
+    @trace_typetracer_method
     def ones(
         self,
         shape: ShapeItem | tuple[ShapeItem, ...],
@@ -896,6 +963,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             dtype = np.dtype(dtype)
         return TypeTracerArray._new(dtype, shape)
 
+    @trace_typetracer_method
     def empty(
         self,
         shape: ShapeItem | tuple[ShapeItem, ...],
@@ -910,6 +978,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             dtype = np.dtype(dtype)
         return TypeTracerArray._new(dtype, shape)
 
+    @trace_typetracer_method
     def full(
         self,
         shape: ShapeItem | tuple[ShapeItem, ...],
@@ -923,6 +992,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         dtype = _scalar_type_of(fill_value) if dtype is None else np.dtype(dtype)
         return TypeTracerArray._new(dtype, shape)
 
+    @trace_typetracer_method
     def zeros_like(
         self, x: TypeTracerArray | PlaceholderArray, *, dtype: DTypeLike | None = None
     ) -> TypeTracerArray:
@@ -937,6 +1007,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         else:
             return TypeTracerArray._new(dtype, shape=x.shape)
 
+    @trace_typetracer_method
     def ones_like(
         self, x: TypeTracerArray | PlaceholderArray, *, dtype: DTypeLike | None = None
     ) -> TypeTracerArray:
@@ -944,6 +1015,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         try_touch_shape(x)
         return self.zeros_like(x, dtype=dtype)
 
+    @trace_typetracer_method
     def full_like(
         self,
         x: TypeTracerArray | PlaceholderArray,
@@ -955,6 +1027,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         try_touch_shape(x)
         return self.zeros_like(x, dtype=dtype)
 
+    @trace_typetracer_method
     def arange(
         self,
         start: float | int,
@@ -984,6 +1057,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             dtype = np.dtype(dtype)
         return TypeTracerArray._new(dtype, (length,))
 
+    @trace_typetracer_method
     def meshgrid(
         self, *arrays: TypeTracerArray, indexing: Literal["xy", "ij"] = "xy"
     ) -> list[TypeTracerArray]:
@@ -1002,11 +1076,13 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
 
     ############################ testing
 
+    @trace_typetracer_method
     def array_equal(
         self, x1: TypeTracerArray, x2: TypeTracerArray, *, equal_nan: bool = False
     ) -> bool:
         raise RuntimeError
 
+    @trace_typetracer_method
     def searchsorted(
         self,
         x: TypeTracerArray,
@@ -1152,6 +1228,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     def broadcast_shapes(self, *shapes: tuple[ShapeItem, ...]) -> tuple[ShapeItem, ...]:
         return _broadcast_shapes(*shapes)
 
+    @trace_typetracer_method
     def broadcast_arrays(self, *arrays: TypeTracerArray) -> list[TypeTracerArray]:
         for x in arrays:
             assert isinstance(x, TypeTracerArray)
@@ -1171,6 +1248,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
 
         return [TypeTracerArray._new(x.dtype, shape=shape) for x in all_arrays]
 
+    @trace_typetracer_method
     def broadcast_to(
         self, x: TypeTracerArray, shape: tuple[ShapeItem, ...]
     ) -> TypeTracerArray:
@@ -1193,6 +1271,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                 raise ValueError
         return TypeTracerArray._new(x.dtype, shape=new_shape)
 
+    @trace_typetracer_method
     def reshape(
         self,
         x: TypeTracerArray | PlaceholderArray,
@@ -1236,6 +1315,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
 
         return TypeTracerArray._new(x.dtype, tuple(new_shape), x.form_key, x.report)
 
+    @trace_typetracer_method
     def cumsum(
         self,
         x: TypeTracerArray,
@@ -1251,6 +1331,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             assert self._axis_is_valid(axis, x.ndim)
             return TypeTracerArray._new(x.dtype, x.shape)
 
+    @trace_typetracer_method
     def nonzero(self, x: TypeTracerArray) -> tuple[TypeTracerArray, ...]:
         assert isinstance(x, TypeTracerArray)
         # array
@@ -1259,6 +1340,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             x.shape
         )
 
+    @trace_typetracer_method
     def where(
         self, condition: TypeTracerArray, x1: TypeTracerArray, x2: TypeTracerArray
     ) -> TypeTracerArray:
@@ -1269,11 +1351,13 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         result_dtype = numpy.result_type(x1, x2)
         return TypeTracerArray._new(result_dtype, shape=condition.shape)
 
+    @trace_typetracer_method
     def unique_values(self, x: TypeTracerArray) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
         return TypeTracerArray._new(x.dtype, shape=(unknown_length,))
 
+    @trace_typetracer_method
     def unique_all(self, x: TypeTracerArray) -> UniqueAllResult:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
@@ -1284,6 +1368,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             TypeTracerArray._new(np.dtype(np.int64), shape=(unknown_length,)),
         )
 
+    @trace_typetracer_method
     def sort(
         self,
         x: TypeTracerArray,
@@ -1296,6 +1381,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         try_touch_data(x)
         return TypeTracerArray._new(x.dtype, shape=x.shape)
 
+    @trace_typetracer_method
     def concat(self, arrays, *, axis: int | None = 0) -> TypeTracerArray:
         if axis is None:
             assert all(x.ndim == 1 for x in arrays)
@@ -1323,6 +1409,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             numpy.concatenate(emptyarrays).dtype, (unknown_length, *inner_shape)
         )
 
+    @trace_typetracer_method
     def repeat(
         self,
         x: TypeTracerArray,
@@ -1350,6 +1437,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                 shape[axis] = shape[axis] * self.index_as_shape_item(repeats)
             return TypeTracerArray._new(x.dtype, shape=tuple(shape))
 
+    @trace_typetracer_method
     def stack(
         self,
         arrays: list[TypeTracerArray] | tuple[TypeTracerArray, ...],
@@ -1375,6 +1463,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         result = numpy.stack(emptyarrays, axis=axis)
         return TypeTracerArray._new(result.dtype, result.shape)
 
+    @trace_typetracer_method
     def packbits(
         self,
         x: TypeTracerArray,
@@ -1386,6 +1475,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         try_touch_data(x)
         raise NotImplementedError
 
+    @trace_typetracer_method
     def unpackbits(
         self,
         x: TypeTracerArray,
@@ -1466,6 +1556,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
 
     ############################ almost-ufuncs
 
+    @trace_typetracer_method
     def nan_to_num(
         self,
         x: TypeTracerArray,
@@ -1479,6 +1570,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         try_touch_data(x)
         return TypeTracerArray._new(x.dtype, shape=x.shape)
 
+    @trace_typetracer_method
     def isclose(
         self,
         x1: TypeTracerArray,
@@ -1495,29 +1587,34 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         out, _ = self.broadcast_arrays(x1, x2)
         return TypeTracerArray._new(np.dtype(np.bool_), shape=out.shape)
 
+    @trace_typetracer_method
     def isnan(self, x: TypeTracerArray) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
         return TypeTracerArray._new(np.dtype(np.bool_), shape=x.shape)
 
+    @trace_typetracer_method
     def real(self, x: TypeTracerArray) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
         real_type = numpy.real(numpy.zeros(0, dtype=x.dtype)).dtype
         return TypeTracerArray._new(real_type, shape=x.shape)
 
+    @trace_typetracer_method
     def imag(self, x: TypeTracerArray) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
         real_type = numpy.imag(numpy.zeros(0, dtype=x.dtype)).dtype
         return TypeTracerArray._new(real_type, shape=x.shape)
 
+    @trace_typetracer_method
     def angle(self, x: TypeTracerArray, deg: bool = False) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
         float_type = numpy.angle(numpy.zeros(0, dtype=x.dtype)).dtype
         return TypeTracerArray._new(float_type, shape=x.shape)
 
+    @trace_typetracer_method
     def round(
         self,
         x: TypeTracerArray,
@@ -1529,6 +1626,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
 
     ############################ reducers
 
+    @trace_typetracer_method
     def all(
         self,
         x: TypeTracerArray,
@@ -1567,6 +1665,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             del next_shape[axis]
             return TypeTracerArray._new(np.dtype(np.bool_), shape=tuple(next_shape))
 
+    @trace_typetracer_method
     def any(
         self,
         x: TypeTracerArray,
@@ -1575,8 +1674,11 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         keepdims: bool = False,
         maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
-        return self.all(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
+        # we would add a wrong trace of "all" here if we wouldn't disable adding a new trace
+        with disable_adding_new_main_trace():
+            return self.all(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
 
+    @trace_typetracer_method
     def count_nonzero(
         self, x: TypeTracerArray, *, axis: int | tuple[int, ...] | None = None
     ) -> TypeTracerArray:
@@ -1587,6 +1689,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         else:
             raise NotImplementedError
 
+    @trace_typetracer_method
     def min(
         self,
         x: TypeTracerArray,
@@ -1625,6 +1728,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             del next_shape[axis]
             return TypeTracerArray._new(x.dtype, shape=tuple(next_shape))
 
+    @trace_typetracer_method
     def max(
         self,
         x: TypeTracerArray,
@@ -1633,7 +1737,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         keepdims: bool = False,
         maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
-        return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
+        # we would add a wrong trace of "min" here if we wouldn't disable adding a new trace
+        with disable_adding_new_main_trace():
+            return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
 
     def array_str(
         self,
@@ -1647,6 +1753,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         try_touch_data(x)
         return "[## ... ##]"
 
+    @trace_typetracer_method
     def astype(
         self, x: TypeTracerArray, dtype: DTypeLike, *, copy: bool | None = True
     ) -> TypeTracerArray:

@@ -13,6 +13,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import try_touch_data
 from awkward._typing import Protocol, TypeAlias
+from awkward.tracing.typetracer import trace_typetracer_method
 
 KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
 
@@ -177,10 +178,15 @@ class TypeTracerKernelError(KernelError):
         self.id = ak._util.kSliceNone
 
 
-class TypeTracerKernel:
+class TypeTracerKernel(Kernel):
     def __init__(self, index):
         self._name_and_types = index
 
+    @property
+    def key(self):
+        return self._name_and_types
+
+    @trace_typetracer_method
     def __call__(self, *args) -> TypeTracerKernelError:
         for arg in args:
             try_touch_data(arg)
