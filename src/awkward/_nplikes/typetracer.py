@@ -36,10 +36,14 @@ from awkward._typing import (
     TypeVar,
     cast,
 )
-
-from awkward.tracing.core import new_main_trace, FuncCapture, ArbitraryFunction, NumpyLikeFunction, disable_adding_new_main_trace
+from awkward.tracing.core import (
+    ArbitraryFunction,
+    FuncCapture,
+    NumpyLikeFunction,
+    disable_adding_new_main_trace,
+    new_main_trace,
+)
 from awkward.tracing.typetracer import trace_typetracer_method
-
 
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
@@ -564,9 +568,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             self._report,
         )
         with new_main_trace(
-            func_capture=FuncCapture(
-                ArbitraryFunction(lambda x: x[orig_key])
-            ),
+            func_capture=FuncCapture(ArbitraryFunction(lambda x: x[orig_key])),
             in_arrays=(self,),
             out_arrays=(out,),
         ):
@@ -592,7 +594,10 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             # for the __setitem__ call
             with disable_adding_new_main_trace():
                 existing_value = self.__getitem__(key)
-                if isinstance(value, TypeTracerArray) and value.ndim > existing_value.ndim:
+                if (
+                    isinstance(value, TypeTracerArray)
+                    and value.ndim > existing_value.ndim
+                ):
                     raise ValueError("cannot assign shape larger than destination")
 
     def copy(self):
@@ -721,7 +726,6 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         ):
             return out
 
-
     def _apply_ufunc_legacy(
         self,
         ufunc: UfuncLike,
@@ -832,7 +836,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             # Is this the right thing to do?
             kwargs = {"dtype": dtype, "copy": copy}
             with new_main_trace(
-                func_capture=FuncCapture(NumpyLikeFunction(self, self.asarray), (), kwargs),
+                func_capture=FuncCapture(
+                    NumpyLikeFunction(self, self.asarray), (), kwargs
+                ),
                 in_arrays=(obj,),
                 out_arrays=(out,),
             ):

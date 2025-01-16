@@ -6,25 +6,27 @@ import typing as tp
 from functools import cached_property
 from types import MappingProxyType
 
-from awkward.tracing.core import ArbitraryFunction, TraceStack, AwkwardKernelFunction, NumpyLikeFunction
-from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._backends.dispatch import backend_of
-
-
+from awkward._nplikes.dispatch import nplike_of_obj
+from awkward.tracing.core import (
+    ArbitraryFunction,
+    AwkwardKernelFunction,
+    NumpyLikeFunction,
+    TraceStack,
+)
 
 # None of this is working right now. We should rather think of translating
 # our 'TraceStack - DAG' to a 'dask DAG' instead of implementing our own interpreter...
 
 
-
-
 if tp.TYPE_CHECKING:
-    from awkward._nplikes.typetracer import TypeTracerArray
     from awkward._nplikes.array_like import ArrayLike
+    from awkward._nplikes.typetracer import TypeTracerArray
 
 
 def _get_unique_id(tracer: TypeTracerArray) -> int:
     return id(tracer)
+
 
 def _get_valid_form_key(tracer: TypeTracerArray) -> str:
     form_key = tracer.form_key
@@ -35,6 +37,7 @@ def _get_valid_form_key(tracer: TypeTracerArray) -> str:
 
 # let's restrict our input/output to a single buffer mapping of str to ArrayLike
 InterpreterInOut = tp.TypeVar("InterpreterInOut", bound=dict[str, ArrayLike])
+
 
 class Interpreter:  # this should be dask.sync.get if we'd implement the DAG with dask
     """
@@ -51,6 +54,7 @@ class Interpreter:  # this should be dask.sync.get if we'd implement the DAG wit
     traversals, type checks, etc. - every "metadata" computation that is run already
     in the typetracing step.
     """
+
     def __init__(self, trace_stack: TraceStack):
         self.trace_stack = trace_stack
 
@@ -84,7 +88,9 @@ class Interpreter:  # this should be dask.sync.get if we'd implement the DAG wit
         # this one needs to stay mutable (it's similar to python's locals()/globals())!
         program_state = {}
 
-        def _update_program_state(program_state, tracers_and_arrays, level) -> dict[int, ArrayLike]:
+        def _update_program_state(
+            program_state, tracers_and_arrays, level
+        ) -> dict[int, ArrayLike]:
             for tracer, array in tracers_and_arrays:
                 key = _get_unique_id(tracer)
                 program_state[key] = array
@@ -119,16 +125,19 @@ class Interpreter:  # this should be dask.sync.get if we'd implement the DAG wit
             if not len(in_arrays) == len(main_trace.in_arrays):
                 raise ValueError("Not all input buffers are available")
 
-
             func_capture = main_trace.func_capture
             if isinstance(func_capture.func, AwkwardKernelFunction):
                 backend = backend_of(in_arrays[0])
-                assert all(backend == backend_of(arr) for arr in in_arrays), "All arrays must be of the same backend"
+                assert all(backend == backend_of(arr) for arr in in_arrays), (
+                    "All arrays must be of the same backend"
+                )
                 func_capture.func = func_capture.func.switch_instance(instance=backend)
                 out_arrays = func_capture(*in_arrays)
             elif isinstance(func_capture.func, NumpyLikeFunction):
                 nplike = nplike_of_obj(in_arrays[0])
-                assert all(nplike == nplike_of_obj(arr) for arr in in_arrays), "All arrays must be of the same nplike"
+                assert all(nplike == nplike_of_obj(arr) for arr in in_arrays), (
+                    "All arrays must be of the same nplike"
+                )
                 func = func_capture.func.switch_instance(instance=nplike)
                 out_arrays = func_capture(*in_arrays)
             else:
@@ -158,7 +167,6 @@ class Interpreter:  # this should be dask.sync.get if we'd implement the DAG wit
         # intermediate buffers that might be still alive.
         program_state.clear()
         return output_buffer_env
-
 
 
 # Out = tp.TypeVar("Out")

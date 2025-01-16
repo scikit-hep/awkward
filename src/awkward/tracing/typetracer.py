@@ -6,12 +6,12 @@ import typing as tp
 from functools import wraps
 
 from awkward.tracing.core import (
-    FuncCapture,
-    new_main_trace,
-    _enable_adding_new_main_trace,
     ArbitraryFunction,
     AwkwardKernelFunction,
+    FuncCapture,
     NumpyLikeFunction,
+    _enable_adding_new_main_trace,
+    new_main_trace,
 )
 
 
@@ -24,7 +24,6 @@ def trace_typetracer_method(fun: tp.Callable) -> tp.Callable:
     def wrapper(*args, **kwargs):
         from awkward._kernels import TypeTracerKernel
         from awkward._nplikes.typetracer import TypeTracer, TypeTracerArray
-
 
         # return the result directly if we are not
         # allowed to add a new main trace for this one
@@ -40,7 +39,9 @@ def trace_typetracer_method(fun: tp.Callable) -> tp.Callable:
         elif isinstance(inst, TypeTracerKernel):
             func = AwkwardKernelFunction(instance=inst, func=fun)
         else:
-            assert isinstance(inst, TypeTracer), f"Expected TypeTracer, got {type(inst)}"
+            assert isinstance(inst, TypeTracer), (
+                f"Expected TypeTracer, got {type(inst)}"
+            )
             func = NumpyLikeFunction(instance=inst, func=fun)
 
         tracers = []
@@ -51,7 +52,9 @@ def trace_typetracer_method(fun: tp.Callable) -> tp.Callable:
             if isinstance(arg, TypeTracerArray):
                 tracers.append(arg)
             # multiple tracers, e.g. nplike.broadcast_arrays
-            elif isinstance(arg, tuple) and all(isinstance(a, TypeTracerArray) for a in arg):
+            elif isinstance(arg, tuple) and all(
+                isinstance(a, TypeTracerArray) for a in arg
+            ):
                 tracers.extend(arg)
             else:
                 remaining_kwargs[key] = arg
@@ -75,7 +78,9 @@ def trace_typetracer_method(fun: tp.Callable) -> tp.Callable:
 
         # we only track tracers, any other metadata will be captured anyway
         # TODO: this should do a recursive search (~jax.PyTrees)
-        out_arrays = tuple(out for out in out_arrays if isinstance(out, TypeTracerArray))
+        out_arrays = tuple(
+            out for out in out_arrays if isinstance(out, TypeTracerArray)
+        )
 
         # create a new trace and return the result,
         # we do that after calling the function to make sure
@@ -87,4 +92,5 @@ def trace_typetracer_method(fun: tp.Callable) -> tp.Callable:
             out_arrays=out_arrays,  # type: ignore
         ):
             return out_arrays
+
     return wrapper

@@ -8,11 +8,10 @@ from contextlib import contextmanager
 
 from awkward._nplikes.array_like import ArrayLike
 
-
 if tp.TYPE_CHECKING:
     from awkward._kernels import Kernel
-    from awkward._nplikes.typetracer import TypeTracerArray
     from awkward._nplikes.numpy_like import NumpyLike
+    from awkward._nplikes.typetracer import TypeTracerArray
 
 
 # make this somehow a class level attribute to further hide it in a namespace?
@@ -59,7 +58,9 @@ class NumpyLikeFunction:
         return getattr(self.instance, self.func.__name__)
 
 
-TraceableFunctions = tp.Union[ArbitraryFunction, AwkwardKernelFunction, NumpyLikeFunction]
+TraceableFunctions = tp.Union[
+    ArbitraryFunction, AwkwardKernelFunction, NumpyLikeFunction
+]
 
 
 class FuncCapture(tp.NamedTuple):
@@ -107,7 +108,9 @@ class TraceStack(threading.local):
         return new_stack
 
 
-def try_merging_last_two_traces(second_to_last_trace: MainTrace, last_trace: MainTrace) -> tuple[MainTrace, ...]:
+def try_merging_last_two_traces(
+    second_to_last_trace: MainTrace, last_trace: MainTrace
+) -> tuple[MainTrace, ...]:
     # Merge the last two traces if possible,
     # this could reduce the number of traces
     # in the stack and may improve performance
@@ -120,7 +123,9 @@ def try_merging_last_two_traces(second_to_last_trace: MainTrace, last_trace: Mai
     if False and second_to_last_trace.out_arrays == last_trace.in_arrays:
         new_last_trace = MainTrace(
             level=second_to_last_trace.level,
-            func_capture=second_to_last_trace.func_capture.merge(last_trace.func_capture),
+            func_capture=second_to_last_trace.func_capture.merge(
+                last_trace.func_capture
+            ),
             in_arrays=second_to_last_trace.in_arrays,
             out_arrays=last_trace.out_arrays,
         )
@@ -131,8 +136,8 @@ def try_merging_last_two_traces(second_to_last_trace: MainTrace, last_trace: Mai
 @contextmanager
 def new_main_trace(
     func_capture: FuncCapture,
-    in_arrays: TypeTracerArray| tuple[TypeTracerArray, ...],
-    out_arrays: TypeTracerArray| tuple[TypeTracerArray, ...],
+    in_arrays: TypeTracerArray | tuple[TypeTracerArray, ...],
+    out_arrays: TypeTracerArray | tuple[TypeTracerArray, ...],
     optimize: bool = False,
 ):
     if _enable_adding_new_main_trace:
@@ -149,7 +154,6 @@ def new_main_trace(
             in_arrays=in_arrays,
             out_arrays=out_arrays,
         )
-
 
         if main_trace.level > 0:
             # pop the previous trace from the stack
