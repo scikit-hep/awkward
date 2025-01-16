@@ -2144,8 +2144,8 @@ class Record(NDArrayOperatorsMixin):
             ):
                 raise TypeError("only fields may be assigned in-place (by field name)")
 
-            self._layout = ak.operations.ak_with_field._impl(
-                self._layout,
+            self._layout._array = ak.operations.ak_with_field._impl(
+                self._layout.array,
                 what,
                 where,
                 highlevel=False,
