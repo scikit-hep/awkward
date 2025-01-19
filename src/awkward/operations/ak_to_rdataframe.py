@@ -81,7 +81,7 @@ def _impl(
             none_policy="error",
             regulararray=True,
             use_from_iter=True,
-            primitive_policy="forbid",
+            primitive_policy="pass-through",
             string_policy="as-characters",
         ).to_backend(cpu)
         if length is None:
