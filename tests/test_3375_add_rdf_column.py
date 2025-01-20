@@ -15,7 +15,7 @@ compiler = ROOT.gInterpreter.Declare
 
 
 # ---------------------------------------------------------------------
-def add_column(rdf: RDataFrame, arr_val: numpy.ndarray, name: str):
+def add_column(rdf: ROOT.RDataFrame, arr_val: np.ndarray, name: str):
     v_col_org = rdf.GetColumnNames()
     l_col_org = [name.c_str() for name in v_col_org]
     l_col = []
@@ -80,7 +80,7 @@ def test_add_numpy():
     rdf = rdf.Define("z", "ROOT::RVec<int>({1, 2, 3})")
     rdf = rdf.Define("w", "true")
 
-    arr_val = numpy.array([10, 20, 30])
+    arr_val = np.array([10, 20, 30])
 
     rdf = add_numpy_column(rdf, arr_val, "values")
 
