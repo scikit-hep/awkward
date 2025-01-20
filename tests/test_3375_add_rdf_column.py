@@ -7,14 +7,11 @@ import pytest
 import awkward as ak
 import awkward._connect.cling
 import awkward._lookup
+import numpy as np
 
 ROOT = pytest.importorskip("ROOT")
 
-
 compiler = ROOT.gInterpreter.Declare
-
-import numpy
-from ROOT import RDF, RDataFrame
 
 
 # ---------------------------------------------------------------------
@@ -54,7 +51,7 @@ def test_add_column():
 
 
 # ---------------------------------------------------------------------
-def add_numpy_column(rdf: RDataFrame, arr_val: numpy.ndarray, name: str):
+def add_numpy_column(rdf: ROOT.RDataFrame, arr_val: np.ndarray, name: str):
     v_col_org = rdf.GetColumnNames()
     l_col_org = [name.c_str() for name in v_col_org]
     l_col = []
@@ -75,11 +72,11 @@ def add_numpy_column(rdf: RDataFrame, arr_val: numpy.ndarray, name: str):
 # ---------------------------------------------------------------------
 def test_add_numpy():
     d_data = {
-        "x": numpy.array([1, 2, 3]),
-        "y": numpy.array([4, 5, 6]),
+        "x": np.array([1, 2, 3]),
+        "y": np.array([4, 5, 6]),
     }
 
-    rdf = RDF.MakeNumpyDataFrame(d_data)
+    rdf = ROOT.RDF.MakeNumpyDataFrame(d_data)
     rdf = rdf.Define("z", "ROOT::RVec<int>({1, 2, 3})")
     rdf = rdf.Define("w", "true")
 
