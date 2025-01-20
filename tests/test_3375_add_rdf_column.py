@@ -76,7 +76,7 @@ def test_add_numpy():
         "y": np.array([4, 5, 6]),
     }
 
-    rdf = ROOT.RDF.MakeNumpyDataFrame(d_data)
+    rdf = ROOT.RDF.FromNumpy(d_data)
     rdf = rdf.Define("z", "ROOT::RVec<int>({1, 2, 3})")
     rdf = rdf.Define("w", "true")
 
