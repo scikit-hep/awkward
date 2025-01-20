@@ -13,6 +13,7 @@ ROOT = pytest.importorskip("ROOT")
 
 compiler = ROOT.gInterpreter.Declare
 
+ROOT::DisableImplicitMT()
 
 # ---------------------------------------------------------------------
 def add_column(rdf: ROOT.RDataFrame, arr_val: np.ndarray, name: str):
