@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 import awkward as ak
 import awkward._connect.cling
 import awkward._lookup
-import numpy as np
 
 ROOT = pytest.importorskip("ROOT")
 
