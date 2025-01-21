@@ -143,7 +143,7 @@ class VirtualArray(ArrayLike):
         return self._array is not _unmaterialized
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(array={self._array}, shape={self.shape} dtype={self.dtype})"
+        return f"{self.__class__.__name__}(array={self._array}, shape={self.shape}, dtype={self.dtype})"
 
     def __setitem__(self, key, value):
         array = self.materialize()
