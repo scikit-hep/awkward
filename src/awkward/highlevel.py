@@ -302,19 +302,22 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         elif isinstance(data, dict):
             fields = []
-            contents = []
+            _arrays = []
             length = None
             for k, v in data.items():
                 fields.append(k)
-                contents.append(Array(v).layout)
+                _arrays.append(Array(v))
                 if length is None:
-                    length = contents[-1].length
-                elif length != contents[-1].length:
+                    length = _arrays[-1].layout.length
+                elif length != _arrays[-1].layout.length:
                     raise ValueError(
                         "dict of arrays in ak.Array constructor must have arrays "
-                        f"of equal length ({length} vs {contents[-1].length})"
+                        f"of equal length ({length} vs {_arrays[-1].layout.length}). "
+                        "For automatic broadcasting use 'ak.zip' instead. "
                     )
-            layout = ak.contents.RecordArray(contents, fields)
+            layout = ak.contents.RecordArray([arr.layout for arr in _arrays], fields)
+            attrs = attrs_of(*_arrays, attrs=attrs)
+            behavior = behavior_of(*_arrays, behavior=behavior)
 
         elif isinstance(data, str):
             layout = ak.operations.from_json(data, highlevel=False)
