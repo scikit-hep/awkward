@@ -220,9 +220,13 @@ class Index:
         ):
             arraystr_lines = ["[## ... ##]"]
         else:
-            arraystr_lines = self._nplike.array_str(self.data, max_line_width=30).split(
-                "\n"
-            )
+            if isinstance(self.data, VirtualArray) and self.data.is_materialized:
+                in_array_str = self.data._array
+            else:
+                in_array_str = self.data
+            arraystr_lines = self._nplike.array_str(
+                in_array_str, max_line_width=30
+            ).split("\n")
 
         if len(arraystr_lines) > 1 or self._metadata is not None:
             arraystr_lines = self._nplike.array_str(

@@ -292,11 +292,17 @@ class NumpyArray(NumpyMeta, Content):
 
         extra = self._repr_extra(indent + "    ")
 
-        if isinstance(self.data, (TypeTracerArray, PlaceholderArray, VirtualArray)):
+        if isinstance(self.data, (TypeTracerArray, PlaceholderArray)) or (
+            isinstance(self.data, VirtualArray) and not self.data.is_materialized
+        ):
             arraystr_lines = ["[## ... ##]"]
         else:
+            if isinstance(self.data, VirtualArray) and self.data.is_materialized:
+                in_array_str = self.data._array
+            else:
+                in_array_str = self.data
             arraystr_lines = self._backend.nplike.array_str(
-                self.data, max_line_width=30
+                in_array_str, max_line_width=30
             ).split("\n")
 
         if len(extra) != 0 or len(arraystr_lines) > 1:

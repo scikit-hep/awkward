@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import typing as tp
 from functools import reduce
 from operator import mul
 
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
-from awkward._typing import TYPE_CHECKING, Any, DType, Self
+from awkward._typing import TYPE_CHECKING, Any, Callable, ClassVar, DType, Self, cast
 from awkward._util import Sentinel
 
 np = NumpyMetadata.instance()
@@ -57,14 +56,14 @@ class VirtualArray(ArrayLike):
     # a form key has been materialized, etc.
     #
     # (TODO: Is this set supposed to be thread-local?)
-    _materialized_form_keys: tp.ClassVar[set] = set()
+    _materialized_form_keys: ClassVar[set] = set()
 
     def __init__(
         self,
         nplike: NumpyLike,
         shape: tuple[ShapeItem, ...],
         dtype: DType,
-        generator: tp.Callable[
+        generator: Callable[
             [], ArrayLike
         ],  # annotation (should) make clear that it's a callable without(!) arguments that returns an ArrayLike
         form_key: str | None = None,
@@ -125,7 +124,7 @@ class VirtualArray(ArrayLike):
         return transposed
 
     @property
-    def generator(self) -> tp.Callable:
+    def generator(self) -> Callable:
         return self._generator
 
     @property
@@ -137,13 +136,13 @@ class VirtualArray(ArrayLike):
             print("Materializing:", self.form_key)  # debugging purposes
             self._materialized_form_keys.add(self.form_key)
             self._array = self.nplike.asarray(self.generator())
-        return tp.cast(ArrayLike, self._array)
+        return cast(ArrayLike, self._array)
 
     @property
     def is_materialized(self) -> bool:
         return self._array is not _unmaterialized
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}(array={self._array}, shape={self.shape} dtype={self.dtype})"
 
     def __setitem__(self, key, value):
@@ -161,7 +160,10 @@ class VirtualArray(ArrayLike):
     # Note: not all of the following methods need materialization, e.g. __len__.
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
-        raise NotImplementedError
+        out: tuple[ShapeItem, ...] = (self._dtype.itemsize,)
+        for item in reversed(self._shape):
+            out = (item * out[0], *out)
+        return out
 
     def __bool__(self) -> bool:
         raise NotImplementedError
@@ -173,7 +175,7 @@ class VirtualArray(ArrayLike):
         raise NotImplementedError
 
     def __len__(self) -> int:
-        raise NotImplementedError
+        return int(self._shape[0])
 
     def view(self, dtype: DTypeLike) -> Self:
         raise NotImplementedError
@@ -217,8 +219,7 @@ class VirtualArray(ArrayLike):
     def __invert__(self) -> Self:
         raise NotImplementedError
 
-    def __iter__(self):
-        raise NotImplementedError
+    __iter__: None = None
 
     def __dlpack_device__(self) -> tuple[int, int]:
         raise NotImplementedError
