@@ -115,7 +115,11 @@ class VirtualArray(ArrayLike):
     @property
     def T(self):
         transposed = type(self)(
-            self._nplike, self._shape[::-1], self._dtype, lambda: self._generator().T, self._form_key
+            self._nplike,
+            self._shape[::-1],
+            self._dtype,
+            lambda: self._generator().T,
+            self._form_key,
         )
         if self.is_materialized:
             transposed._array = self._array.T
@@ -136,7 +140,11 @@ class VirtualArray(ArrayLike):
         else:
             shape = self._shape
         return type(self)(
-            self._nplike, shape, dtype, lambda: self._generator().view(dtype), self._form_key
+            self._nplike,
+            shape,
+            dtype,
+            lambda: self._generator().view(dtype),
+            self._form_key,
         )
 
     @property
