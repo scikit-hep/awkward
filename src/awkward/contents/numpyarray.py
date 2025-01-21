@@ -259,7 +259,12 @@ class NumpyArray(NumpyMeta, Content):
 
         extra = self._repr_extra(indent + "    ")
 
-        if isinstance(self._data, (TypeTracerArray, PlaceholderArray, VirtualArray)):
+        # We can't print data of arrays that don't have any like TypeTracerArray or PlaceholderArray.
+        # For VirtualArray, we can print the data if it is materialized, otherwise use the same repr
+        # as for TypeTracerArray and PlaceholderArray. Is there a better way to do this for VirtualArrays?
+        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)) or (
+                isinstance(self._data, VirtualArray) and not self._data.is_materialized
+        ):
             arraystr_lines = ["[## ... ##]"]
         else:
             arraystr_lines = self._backend.nplike.array_str(

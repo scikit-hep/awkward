@@ -56,10 +56,13 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         copy: bool | None = None,
     ) -> ArrayLikeT | PlaceholderArray:
         # We need to materialize if we have a VirtualArray
-        if isinstance(obj, (VirtualArray, PlaceholderArray)):
+        if isinstance(obj, PlaceholderArray) or (isinstance(obj, VirtualArray) and not obj.is_materialized):
             assert obj.dtype == dtype or dtype is None
             return obj
-        elif copy:
+        if isinstance(obj, VirtualArray) and obj.is_materialized:
+            assert obj.dtype == dtype or dtype is None
+            obj = obj.materialize()
+        if copy:
             return self._module.array(obj, dtype=dtype, copy=True)
         elif copy is None:
             return self._module.asarray(obj, dtype=dtype)
