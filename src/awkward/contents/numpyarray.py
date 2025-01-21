@@ -263,7 +263,7 @@ class NumpyArray(NumpyMeta, Content):
         # For VirtualArray, we can print the data if it is materialized, otherwise use the same repr
         # as for TypeTracerArray and PlaceholderArray. Is there a better way to do this for VirtualArrays?
         if isinstance(self._data, (TypeTracerArray, PlaceholderArray)) or (
-                isinstance(self._data, VirtualArray) and not self._data.is_materialized
+            isinstance(self._data, VirtualArray) and not self._data.is_materialized
         ):
             arraystr_lines = ["[## ... ##]"]
         else:

@@ -55,8 +55,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
     ) -> ArrayLikeT | PlaceholderArray:
-        # We need to materialize if we have a VirtualArray
-        if isinstance(obj, PlaceholderArray) or (isinstance(obj, VirtualArray) and not obj.is_materialized):
+        if isinstance(obj, PlaceholderArray) or (
+            isinstance(obj, VirtualArray) and not obj.is_materialized
+        ):
             assert obj.dtype == dtype or dtype is None
             return obj
         if isinstance(obj, VirtualArray) and obj.is_materialized:
@@ -131,25 +132,22 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         *,
         dtype: DTypeLike | None = None,
     ) -> ArrayLikeT:
-        # PlaceholderArrays: don't have data, but we can still create a zeros array with the same shape.
-        # VirtualArrays: don't need to be materialized to create a zeros array with the same shape,
-        # unless we've already materialized it, then we can just use the materialized array.
         if isinstance(x, PlaceholderArray) or (
             isinstance(x, VirtualArray) and not x.is_materialized
         ):
             return self.zeros(x.shape, dtype=dtype or x.dtype)
         else:
-            # If we're here, the VirtualArray is (already) materialized; we can use `materialize_if_virtual()`
-            # as a no-op way to get the (already) materialized array.
             return self._module.zeros_like(*materialize_if_virtual(x), dtype=dtype)
 
     def ones_like(
         self, x: ArrayLikeT | PlaceholderArray, *, dtype: DTypeLike | None = None
     ) -> ArrayLikeT:
-        if isinstance(x, PlaceholderArray):
+        if isinstance(x, PlaceholderArray) or (
+            isinstance(x, VirtualArray) and not x.is_materialized
+        ):
             return self.ones(x.shape, dtype=dtype or x.dtype)
         else:
-            return self._module.ones_like(x, dtype=dtype)
+            return self._module.ones_like(*materialize_if_virtual(x), dtype=dtype)
 
     def full_like(
         self,
@@ -158,11 +156,13 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         *,
         dtype: DTypeLike | None = None,
     ) -> ArrayLikeT:
-        if isinstance(x, PlaceholderArray):
+        if isinstance(x, PlaceholderArray) or (
+            isinstance(x, VirtualArray) and not x.is_materialized
+        ):
             return self.full(x.shape, fill_value, dtype=dtype or x.dtype)
         else:
             return self._module.full_like(
-                x, self._module.array(fill_value), dtype=dtype
+                *materialize_if_virtual(x), self._module.array(fill_value), dtype=dtype
             )
 
     def arange(
@@ -181,7 +181,6 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     def meshgrid(
         self, *arrays: ArrayLikeT, indexing: Literal["xy", "ij"] = "xy"
     ) -> list[ArrayLikeT]:
-        # if `arrays` are virtual arrays, we need to materialize them
         return self._module.meshgrid(
             *materialize_if_virtual(*arrays), indexing=indexing
         )
