@@ -59,32 +59,14 @@ class Index:
         else:
             self._nplike = nplike
 
-        # If this is an actual array, we wrap it in a VirtualArray
-        # this preserves the same API for the rest of the code
-        if not isinstance(data, VirtualArray):
-            data = self._nplike.ascontiguousarray(
-                self._nplike.asarray(data, dtype=self._expected_dtype)
-            )
-            self._data = VirtualArray(
-                nplike=self._nplike,
-                shape=data.shape,
-                dtype=data.dtype,
-                generator=lambda: data,
-                form_key=getattr(data, "form_key", None),
-            )
-            # If this is a TypeTracerArray or PlaceholderArray, we materialize it right away
-            if isinstance(data, (TypeTracerArray, PlaceholderArray)):
-                self._data.materialize()
-        # this is the data that could come from `ak.from_buffers`, where we
-        # already have a `VirtualArray` constructed. Typically its
-        # `generator` would be a data-reading function (e.g. uproot.TBranch.array(...))
-        else:
-            assert isinstance(data, VirtualArray)
-            self._data = data
-
         if metadata is not None and not isinstance(metadata, dict):
             raise TypeError("Index metadata must be None or a dict")
         self._metadata = metadata
+        # We don't care about F, C (it's one dimensional), but we do need
+        # the array to be contiguous. This should _not_ return a copy if already
+        self._data = self._nplike.ascontiguousarray(
+            self._nplike.asarray(data, dtype=self._expected_dtype)
+        )
 
         if len(self._data.shape) != 1:
             raise TypeError("Index data must be one-dimensional")

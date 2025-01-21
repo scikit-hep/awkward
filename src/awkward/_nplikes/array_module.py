@@ -56,8 +56,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         copy: bool | None = None,
     ) -> ArrayLikeT | PlaceholderArray:
         # We need to materialize if we have a VirtualArray
-        (obj,) = materialize_if_virtual(obj)
-        if isinstance(obj, PlaceholderArray):
+        if isinstance(obj, (VirtualArray, PlaceholderArray)):
             assert obj.dtype == dtype or dtype is None
             return obj
         elif copy:
@@ -75,7 +74,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     def ascontiguousarray(
         self, x: ArrayLikeT | PlaceholderArray
     ) -> ArrayLikeT | PlaceholderArray:
-        if isinstance(x, PlaceholderArray):
+        if isinstance(x, (PlaceholderArray, VirtualArray)):
             return x
         else:
             return self._module.ascontiguousarray(x)
@@ -693,7 +692,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         precision: int | None = None,
         suppress_small: bool | None = None,
     ):
-        assert not isinstance(x, PlaceholderArray)
+        assert not isinstance(x, (PlaceholderArray, VirtualArray))
         return self._module.array_str(
             x,
             max_line_width=max_line_width,
