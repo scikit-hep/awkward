@@ -7,7 +7,7 @@ from operator import mul
 
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
-from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import TYPE_CHECKING, Any, Callable, ClassVar, DType, Self, cast
 from awkward._util import Sentinel
 
@@ -84,24 +84,20 @@ class VirtualArray(ArrayLike):
         self._form_key = form_key
 
     @property
-    def nplike(self) -> NumpyLike:
-        return self._nplike
+    def dtype(self) -> DType:
+        return self._dtype
 
     @property
     def shape(self) -> tuple[ShapeItem, ...]:
         return self._shape
 
     @property
-    def size(self) -> ShapeItem:
-        return reduce(mul, self.shape)
-
-    @property
     def ndim(self) -> int:
-        return len(self.shape)
+        return len(self._shape)
 
     @property
-    def dtype(self) -> DType:
-        return self._dtype
+    def size(self) -> ShapeItem:
+        return reduce(mul, self._shape)
 
     @property
     def nbytes(self) -> int:
@@ -110,18 +106,38 @@ class VirtualArray(ArrayLike):
         return 0
 
     @property
+    def strides(self) -> tuple[ShapeItem, ...]:
+        out: tuple[ShapeItem, ...] = (self._dtype.itemsize,)
+        for item in reversed(self._shape):
+            out = (item * out[0], *out)
+        return out
+
+    @property
     def T(self):
         transposed = type(self)(
-            nplike=self.nplike,
-            shape=self.shape[::-1],
-            dtype=self.dtype,
-            # we can delay materialization by stacking the transposition with a lambda
-            generator=lambda: self.generator().T,
-            form_key=self.form_key,
+            self._nplike, self._shape[::-1], self._dtype, lambda: self._generator().T, self._form_key
         )
         if self.is_materialized:
             transposed._array = self._array.T
         return transposed
+
+    def view(self, dtype: DTypeLike) -> Self:
+        dtype = np.dtype(dtype)
+        if len(self._shape) >= 1:
+            last, remainder = divmod(
+                self._shape[-1] * self._dtype.itemsize, dtype.itemsize
+            )
+            if remainder is not unknown_length and remainder != 0:
+                raise ValueError(
+                    "new size of array with larger dtype must be a "
+                    "divisor of the total size in bytes (of the last axis of the array)"
+                )
+            shape = self._shape[:-1] + (last,)
+        else:
+            shape = self._shape
+        return type(self)(
+            self._nplike, shape, dtype, lambda: self._generator().view(dtype), self._form_key
+        )
 
     @property
     def generator(self) -> Callable:
@@ -131,98 +147,147 @@ class VirtualArray(ArrayLike):
     def form_key(self) -> str | None:
         return self._form_key
 
+    @form_key.setter
+    def form_key(self, value: str | None):
+        if value is not None and not isinstance(value, str):
+            raise TypeError("form_key must be None or a string")
+        self._form_key = value
+
+    @property
+    def nplike(self) -> NumpyLike:
+        return self._nplike
+
     def materialize(self) -> ArrayLike:
         if self._array is _unmaterialized:
             print("Materializing:", self.form_key)  # debugging purposes
             self._materialized_form_keys.add(self.form_key)
-            self._array = self.nplike.asarray(self.generator())
+            self._array = self._nplike.asarray(self.generator())
         return cast(ArrayLike, self._array)
 
     @property
     def is_materialized(self) -> bool:
         return self._array is not _unmaterialized
 
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(array={self._array}, shape={self.shape}, dtype={self.dtype})"
+    def __array__(self, dtype=None):
+        raise NotImplementedError
 
-    def __setitem__(self, key, value):
-        array = self.materialize()
-        array[key] = value
+    def __repr__(self):
+        dtype = repr(self._dtype)
+        if self.shape is None:
+            shape = ""
+        else:
+            shape = ", shape=" + repr(self._shape)
+        return f"VirtualArray(array={self._array}, {dtype}{shape})"
+
+    def __str__(self):
+        if self.ndim == 0:
+            return "##"
+        else:
+            return repr(self)
 
     def __getitem__(self, key):
         array = self.materialize()
         return array[key]
+
+    def __setitem__(self, key, value):
+        array = self.materialize()
+        array[key] = value
 
     # TODO: The following methods need to be implemented (ArrayLike protocol).
     # If there's something missing, we should take a look at the
     # typetracer implementation in src/awkward/_nplikes/typetracer.py
     #
     # Note: not all of the following methods need materialization, e.g. __len__.
-    @property
-    def strides(self) -> tuple[ShapeItem, ...]:
-        out: tuple[ShapeItem, ...] = (self._dtype.itemsize,)
-        for item in reversed(self._shape):
-            out = (item * out[0], *out)
-        return out
 
     def __bool__(self) -> bool:
-        raise NotImplementedError
+        array = self.materialize()
+        return bool(array)
 
     def __int__(self) -> int:
-        raise NotImplementedError
+        array = self.materialize()
+        if array.ndim == 0:
+            return int(array)
+        raise TypeError("Only scalar arrays can be converted to an int.")
 
     def __index__(self) -> int:
-        raise NotImplementedError
+        array = self.materialize()
+        if array.ndim == 0:
+            return int(array)
+        raise TypeError("Only scalar arrays can be used as an index.")
 
     def __len__(self) -> int:
         return int(self._shape[0])
 
-    def view(self, dtype: DTypeLike) -> Self:
-        raise NotImplementedError
+    def __add__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array + other
 
-    def __add__(self, other: int | complex | float | Self) -> Self:
-        raise NotImplementedError
+    def __and__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array & other
 
-    def __sub__(self, other: int | complex | float | Self) -> Self:
-        raise NotImplementedError
+    def __eq__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array == other
 
-    def __mul__(self, other: int | complex | float | Self) -> Self:
-        raise NotImplementedError
+    def __floordiv__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array // other
 
-    def __truediv__(self, other: int | complex | float | Self) -> Self:
-        raise NotImplementedError
+    def __ge__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array >= other
 
-    def __floordiv__(self, other: int | complex | float | Self) -> Self:
-        raise NotImplementedError
+    def __gt__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array > other
 
-    def __gt__(self, other: int | complex | float | Self) -> Self:
-        raise NotImplementedError
+    def __invert__(self):
+        array = self.materialize()
+        return ~array
 
-    def __lt__(self, other: int | complex | float | Self) -> Self:
-        raise NotImplementedError
+    def __le__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array <= other
 
-    def __ge__(self, other: int | complex | float | Self) -> Self:
-        raise NotImplementedError
+    def __lt__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array < other
 
-    def __le__(self, other: int | complex | float | Self) -> Self:
-        raise NotImplementedError
+    def __mul__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array * other
 
-    def __eq__(self, other: int | complex | float | bool | Self) -> Self:
-        raise NotImplementedError
+    def __or__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array | other
 
-    def __and__(self, other: int | bool | Self) -> Self:
-        raise NotImplementedError
+    def __sub__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array - other
 
-    def __or__(self, other: int | bool | Self) -> Self:
-        raise NotImplementedError
-
-    def __invert__(self) -> Self:
-        raise NotImplementedError
+    def __truediv__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array / other
 
     __iter__: None = None
 
     def __dlpack_device__(self) -> tuple[int, int]:
-        raise NotImplementedError
+        array = self.materialize()
+        return array.__dlpack_device__()
 
     def __dlpack__(self, stream: Any = None) -> Any:
-        raise NotImplementedError
+        array = self.materialize()
+        return array.__dlpack__(stream)
