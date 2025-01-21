@@ -118,10 +118,7 @@ class NumpyArray(NumpyMeta, Content):
         if backend is None:
             backend = backend_of_obj(data, default=NumpyBackend.instance())
 
-        if isinstance(data, VirtualArray):
-            self._data = data
-        else:
-            self._data = backend.nplike.asarray(data)
+        self._data = backend.nplike.asarray(data)
 
         if not isinstance(backend.nplike, Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)

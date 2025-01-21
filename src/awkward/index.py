@@ -76,7 +76,7 @@ class Index:
                 "longlong is always 64-bit, right?"
             )
 
-            self._data = self.data.view(np.int64)
+            self._data = self._data.view(np.int64)
 
         if self._expected_dtype is None:
             if self._data.dtype == np.dtype(np.int8):
@@ -127,7 +127,7 @@ class Index:
 
     @property
     def dtype(self) -> DType:
-        return self.data.dtype
+        return self._data.dtype
 
     @property
     def metadata(self) -> dict:
@@ -138,9 +138,9 @@ class Index:
     @property
     def ptr(self):
         if isinstance(self._nplike, Numpy):
-            return self.data.ctypes.data
+            return self._data.ctypes.data
         elif isinstance(self._nplike, Cupy):
-            return self.data.data.ptr
+            return self._data.data.ptr
         elif isinstance(self._nplike, TypeTracer):
             return 0
         else:
@@ -150,12 +150,12 @@ class Index:
 
     @property
     def length(self) -> ShapeItem:
-        return self.data.shape[0]
+        return self._data.shape[0]
 
     def forget_length(self) -> Self:
         tt = TypeTracer.instance()
         if isinstance(self._nplike, type(tt)):
-            data = self.data
+            data = self._data
         else:
             data = self.raw(tt)
 
@@ -170,20 +170,20 @@ class Index:
 
     @property
     def __cuda_array_interface__(self):
-        return self.data.__cuda_array_interface__  # type: ignore[attr-defined]
+        return self._data.__cuda_array_interface__  # type: ignore[attr-defined]
 
     @property
     def __array_interface__(self):
-        return self.data.__array_interface__  # type: ignore[attr-defined]
+        return self._data.__array_interface__  # type: ignore[attr-defined]
 
     def __dlpack_device__(self) -> tuple[int, int]:
-        return self.data.__dlpack_device__()  # type: ignore[attr-defined]
+        return self._data.__dlpack_device__()  # type: ignore[attr-defined]
 
     def __dlpack__(self, stream: Any = None) -> Any:
         if stream is None:
-            return self.data.__dlpack__()  # type: ignore[attr-defined]
+            return self._data.__dlpack__()  # type: ignore[attr-defined]
         else:
-            return self.data.__dlpack__(stream=stream)  # type: ignore[attr-defined]
+            return self._data.__dlpack__(stream=stream)  # type: ignore[attr-defined]
 
     def __repr__(self) -> str:
         return self._repr("", "", "")
@@ -192,27 +192,27 @@ class Index:
         out = [indent, pre, "<Index dtype="]
         out.append(repr(str(self.dtype)))
         out.append(" len=")
-        out.append(repr(str(self.data.shape[0])))
+        out.append(repr(str(self._data.shape[0])))
 
         # We can't print data of arrays that don't have any like TypeTracerArray or PlaceholderArray.
         # For VirtualArray, we can print the data if it is materialized, otherwise use the same repr
         # as for TypeTracerArray and PlaceholderArray. Is there a better way to do this for VirtualArrays?
-        if isinstance(self.data, (TypeTracerArray, PlaceholderArray)) or (
-            isinstance(self.data, VirtualArray) and not self.data.is_materialized
+        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)) or (
+            isinstance(self._data, VirtualArray) and not self._data.is_materialized
         ):
             arraystr_lines = ["[## ... ##]"]
         else:
-            if isinstance(self.data, VirtualArray) and self.data.is_materialized:
-                in_array_str = self.data._array
+            if isinstance(self._data, VirtualArray) and self._data.is_materialized:
+                in_array_str = self._data._array
             else:
-                in_array_str = self.data
+                in_array_str = self._data
             arraystr_lines = self._nplike.array_str(
                 in_array_str, max_line_width=30
             ).split("\n")
 
         if len(arraystr_lines) > 1 or self._metadata is not None:
             arraystr_lines = self._nplike.array_str(
-                self.data, max_line_width=max(80 - len(indent) - 4, 40)
+                self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
                 arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
@@ -236,13 +236,13 @@ class Index:
 
     @property
     def form(self) -> str:
-        return _dtype_to_form[self.data.dtype]
+        return _dtype_to_form[self._data.dtype]
 
     def __getitem__(self, where):
         if isinstance(where, slice):
             where = normalize_slice(where, nplike=self.nplike)
 
-        out = self.data[where]
+        out = self._data[where]
 
         if hasattr(out, "shape") and len(out.shape) != 0:
             return Index(out, metadata=self.metadata, nplike=self._nplike)
@@ -252,17 +252,17 @@ class Index:
             return out
 
     def __setitem__(self, where, what):
-        self.data[where] = what
+        self._data[where] = what
 
     def to64(self) -> Index:
-        return Index(self._nplike.astype(self.data, dtype=np.int64))
+        return Index(self._nplike.astype(self._data, dtype=np.int64))
 
     def __copy__(self) -> Self:
         return type(self)(self._data, metadata=self._metadata, nplike=self._nplike)
 
     def __deepcopy__(self, memo: dict) -> Self:
         return type(self)(
-            copy.deepcopy(self.data, memo),
+            copy.deepcopy(self._data, memo),
             metadata=copy.deepcopy(self._metadata, memo),
             nplike=self._nplike,
         )
@@ -280,18 +280,18 @@ class Index:
             return (
                 not self._nplike.known_data
                 or self._nplike.array_equal(self.data, other.data)
-            ) and self.data.dtype == other.data.dtype
+            ) and self._data.dtype == other.data.dtype
 
         else:
             return self._nplike.array_equal(self.data, other.data)
 
     def _touch_data(self):
-        if hasattr(self.data._array, "touch_data"):
-            self.data._array.touch_data()
+        if hasattr(self._data, "touch_data"):
+            self._data.touch_data()
 
     def _touch_shape(self):
-        if hasattr(self.data._array, "touch_shape"):
-            self.data._array.touch_shape()
+        if hasattr(self._data, "touch_shape"):
+            self._data.touch_shape()
 
 
 class Index8(Index):
