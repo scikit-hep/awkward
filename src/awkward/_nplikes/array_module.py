@@ -78,6 +78,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     def ascontiguousarray(
         self, x: ArrayLikeT | PlaceholderArray
     ) -> ArrayLikeT | PlaceholderArray:
+        # TODO: Should this materialize virtual arrays?
         if isinstance(x, (PlaceholderArray, VirtualArray)):
             return x
         else:
@@ -88,6 +89,8 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         if isinstance(buffer, PlaceholderArray):
             raise TypeError("placeholder arrays are not supported in `frombuffer`")
+        if isinstance(buffer, VirtualArray):
+            raise TypeError("virtual arrays are not supported in `frombuffer`")
         return self._module.frombuffer(buffer, dtype=dtype, count=count)
 
     def from_dlpack(self, x: Any) -> ArrayLikeT:
@@ -176,6 +179,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         assert not isinstance(start, PlaceholderArray)
         assert not isinstance(stop, PlaceholderArray)
         assert not isinstance(step, PlaceholderArray)
+        start, stop, step = materialize_if_virtual(start, stop, step)
         return self._module.arange(start, stop, step, dtype=dtype)
 
     def meshgrid(
@@ -192,6 +196,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> bool:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
+        x1, x2 = materialize_if_virtual(x1, x2)
         if equal_nan:
             # Only newer numpy.array_equal supports the equal_nan parameter.
             both_nan = self._module.logical_and(
@@ -213,6 +218,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         assert not isinstance(x, PlaceholderArray)
         assert not isinstance(values, PlaceholderArray)
         assert not isinstance(sorter, PlaceholderArray)
+        x, values, sorter = materialize_if_virtual(x, values, sorter)
         return self._module.searchsorted(x, values, side=side, sorter=sorter)
 
     ############################ manipulation
@@ -226,7 +232,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         if method != "__call__" or len(args) == 0:
             raise NotImplementedError
 
-        args = materialize_if_virtual(*args)
+        args = list(materialize_if_virtual(*args))
 
         if hasattr(ufunc, "resolve_dtypes"):
             return self._apply_ufunc_nep_50(ufunc, method, args, kwargs)
@@ -297,6 +303,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def broadcast_arrays(self, *arrays: ArrayLikeT) -> list[ArrayLikeT]:
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)
+        arrays = materialize_if_virtual(*arrays)
         return self._module.broadcast_arrays(*arrays)
 
     def _compute_compatible_shape(
@@ -326,6 +333,15 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         if isinstance(x, PlaceholderArray):
             next_shape = self._compute_compatible_shape(shape, x.shape)
             return PlaceholderArray(self, next_shape, x.dtype, x._field_path)
+        if isinstance(x, VirtualArray) and not x.is_materialized:
+            next_shape = self._compute_compatible_shape(shape, x.shape)
+            return VirtualArray(
+                self,
+                next_shape,
+                x.dtype,
+                lambda: x.nplike.reshape(x.generator(), next_shape),
+                x.form_key,
+            )
 
         if copy is None:
             return self._module.reshape(x, shape)
@@ -403,6 +419,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def nonzero(self, x: ArrayLikeT) -> tuple[ArrayLikeT, ...]:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.nonzero(x)
 
     def where(
@@ -411,10 +428,13 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         assert not isinstance(condition, PlaceholderArray)
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
+        condition, x1, x2 = materialize_if_virtual(condition, x1, x2)
+
         return self._module.where(condition, x1, x2)
 
     def unique_values(self, x: ArrayLikeT) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         np_unique_accepts_equal_nan = (
             "equal_nan" in inspect.signature(self._module.unique).parameters
         )
@@ -437,6 +457,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def unique_all(self, x: ArrayLikeT) -> UniqueAllResult:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         values, indices, inverse_indices, counts = self._module.unique(
             x, return_counts=True, return_index=True, return_inverse=True
         )
@@ -454,6 +475,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         stable: bool = True,
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         # Note: this keyword argument is different, and the default is different.
         kind = "stable" if stable else "quicksort"
         res = self._module.sort(x, axis=axis, kind=kind)
@@ -469,6 +491,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         axis: int | None = 0,
     ) -> ArrayLikeT:
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)
+        arrays = materialize_if_virtual(*arrays)
         if _nplike_concatenate_has_casting(self._module):
             return self._module.concatenate(arrays, axis=axis, casting="same_kind")
         else:
@@ -483,6 +506,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         assert not isinstance(repeats, PlaceholderArray)
+        x, repeats = materialize_if_virtual(x, repeats)
         return self._module.repeat(x, repeats=repeats, axis=axis)
 
     def stack(
@@ -492,6 +516,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         axis: int = 0,
     ) -> ArrayLikeT:
         assert not any(isinstance(x, PlaceholderArray) for x in arrays)
+        arrays = materialize_if_virtual(*arrays)
         arrays = list(arrays)
         return self._module.stack(arrays, axis=axis)
 
@@ -503,6 +528,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         bitorder: Literal["big", "little"] = "big",
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.packbits(x, axis=axis, bitorder=bitorder)
 
     def unpackbits(
@@ -514,14 +540,16 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         bitorder: Literal["big", "little"] = "big",
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
 
     def broadcast_to(self, x: ArrayLikeT, shape: tuple[ShapeItem, ...]) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.broadcast_to(x, shape)
 
     def strides(self, x: ArrayLikeT | PlaceholderArray) -> tuple[ShapeItem, ...]:
-        if isinstance(x, PlaceholderArray):
+        if isinstance(x, (PlaceholderArray, VirtualArray)):
             # Assume contiguous
             strides: tuple[ShapeItem, ...] = (x.dtype.itemsize,)
             for item in x.shape[-1:0:-1]:
@@ -537,6 +565,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
+        x1, x2 = materialize_if_virtual(x1, x2)
         return self._module.add(x1, x2, out=maybe_out)
 
     def logical_or(
@@ -544,6 +573,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
+        x1, x2 = materialize_if_virtual(x1, x2)
         return self._module.logical_or(x1, x2, out=maybe_out)
 
     def logical_and(
@@ -551,20 +581,24 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
+        x1, x2 = materialize_if_virtual(x1, x2)
         return self._module.logical_and(x1, x2, out=maybe_out)
 
     def logical_not(
         self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.logical_not(x, out=maybe_out)
 
     def sqrt(self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.sqrt(x, out=maybe_out)
 
     def exp(self, x: ArrayLikeT, maybe_out: ArrayLikeT | None = None) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.exp(x, out=maybe_out)
 
     def divide(
@@ -572,6 +606,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
+        x1, x2 = materialize_if_virtual(x1, x2)
         return self._module.divide(x1, x2, out=maybe_out)
 
     ############################ almost-ufuncs
@@ -586,6 +621,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         neginf: int | float | None = None,
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.nan_to_num(
             x, copy=copy, nan=nan, posinf=posinf, neginf=neginf
         )
@@ -601,10 +637,12 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
+        x1, x2 = materialize_if_virtual(x1, x2)
         return self._module.isclose(x1, x2, rtol=rtol, atol=atol, equal_nan=equal_nan)
 
     def isnan(self, x: ArrayLikeT) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.isnan(x)
 
     def all(
@@ -616,6 +654,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         maybe_out: ArrayLikeT | None = None,
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.all(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def any(
@@ -627,6 +666,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         maybe_out: ArrayLikeT | None = None,
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.any(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def min(
@@ -638,6 +678,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         maybe_out: ArrayLikeT | None = None,
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.min(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def max(
@@ -649,6 +690,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         maybe_out: ArrayLikeT | None = None,
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.max(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
     def count_nonzero(
@@ -656,6 +698,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
         assert isinstance(axis, int) or axis is None
+        (x,) = materialize_if_virtual(x)
         return self._module.count_nonzero(x, axis=axis)
 
     def cumsum(
@@ -666,26 +709,31 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         maybe_out: ArrayLikeT | None = None,
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.cumsum(x, axis=axis, out=maybe_out)
 
     def real(self, x: ArrayLikeT) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         xr = self._module.real(x)
         # For numpy, xr is a view on x, but we don't want to mutate x.
         return self._module.copy(xr)
 
     def imag(self, x: ArrayLikeT) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         xr = self._module.imag(x)
         # For numpy, xr is a view on x, but we don't want to mutate x.
         return self._module.copy(xr)
 
     def angle(self, x: ArrayLikeT, deg: bool = False) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.angle(x, deg)
 
     def round(self, x: ArrayLikeT, decimals: int = 0) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return self._module.round(x, decimals=decimals)
 
     def array_str(
@@ -711,6 +759,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         self, x: ArrayLikeT, dtype: DTypeLike, *, copy: bool | None = True
     ) -> ArrayLikeT:
         assert not isinstance(x, PlaceholderArray)
+        (x,) = materialize_if_virtual(x)
         return x.astype(dtype, copy=copy)  # type: ignore[attr-defined]
 
     def can_cast(
