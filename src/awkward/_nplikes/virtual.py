@@ -177,6 +177,7 @@ class VirtualArray(ArrayLike):
         return self._array is not _unmaterialized
 
     def __array__(self, dtype=None):
+        # TODO: Should __array__ materialize?
         return self.materialize().__array__(dtype=dtype)
 
     def __repr__(self):
