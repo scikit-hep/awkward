@@ -49,7 +49,7 @@ def materialize_if_virtual(*arrays: VirtualArray | ArrayLike) -> tuple[ArrayLike
     )
 
 
-class VirtualArray:
+class VirtualArray(ArrayLike):
     # let's keep track of the form keys that have been materialized.
     #
     # In future, we could track even more, like the number of times
@@ -225,6 +225,70 @@ class VirtualArray:
 
     def __len__(self) -> int:
         return int(self._shape[0])
+
+    def __add__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array + other
+
+    def __and__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array & other
+
+    def __eq__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array == other
+
+    def __floordiv__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array // other
+
+    def __ge__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array >= other
+
+    def __gt__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array > other
+
+    def __invert__(self):
+        array = self.materialize()
+        return ~array
+
+    def __le__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array <= other
+
+    def __lt__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array < other
+
+    def __mul__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array * other
+
+    def __or__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array | other
+
+    def __sub__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array - other
+
+    def __truediv__(self, other):
+        other = other.materialize() if isinstance(other, VirtualArray) else other
+        array = self.materialize()
+        return array / other
 
     __iter__: None = None
 
