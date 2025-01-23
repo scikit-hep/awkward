@@ -258,12 +258,9 @@ class NumpyArray(NumpyMeta, Content):
 
         extra = self._repr_extra(indent + "    ")
 
-        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)):
-            arraystr_lines = ["[## ... ##]"]
-        else:
-            arraystr_lines = self._backend.nplike.array_str(
-                self._data, max_line_width=30
-            ).split("\n")
+        arraystr_lines = self._backend.nplike.array_str(
+            self._data, max_line_width=30
+        ).split("\n")
 
         if len(extra) != 0 or len(arraystr_lines) > 1:
             arraystr_lines = self._backend.nplike.array_str(
