@@ -22,13 +22,13 @@ class PlaceholderArray(ArrayLike):
         nplike: NumpyLike,
         shape: tuple[ShapeItem, ...],
         dtype: DType,
-        field_path: tuple[str, ...] = (),
+        field_path: tuple = (),
     ):
         self._nplike = nplike
         self._shape = shape
         self._dtype = np.dtype(dtype)
         if not isinstance(field_path, tuple):
-            raise TypeError(f"field_path must be a tuple of strings, not {field_path}")
+            raise TypeError(f"field_path must be a tuple, not {field_path}")
         self._field_path = field_path
 
     @property
