@@ -58,6 +58,18 @@ target_include_directories(awkward-parent INTERFACE rapidjson/include)
 add_subdirectory(header-only EXCLUDE_FROM_ALL)
 target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
 
+# WASM needs exceptions enabled
+if(CMAKE_SYSTEM_NAME MATCHES Emscripten)
+  set_property(
+    TARGET awkward-parent
+    APPEND
+    PROPERTY INTERFACE_LINK_OPTIONS -fexceptions)
+  set_property(
+    TARGET awkward-parent
+    APPEND
+    PROPERTY INTERFACE_COMPILE_OPTIONS -fexceptions)
+endif()
+
 # First tier: cpu-kernels
 add_library(awkward-cpu-kernels SHARED ${CPU_KERNEL_SOURCES})
 target_link_libraries(awkward-cpu-kernels PUBLIC awkward-parent)
