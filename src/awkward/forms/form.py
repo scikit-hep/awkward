@@ -8,7 +8,6 @@ import re
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Mapping
 from fnmatch import fnmatchcase
-from functools import lru_cache
 from glob import escape as escape_glob
 
 import awkward as ak
@@ -203,7 +202,6 @@ def from_dict(input: Mapping) -> Form:
         )
 
 
-@lru_cache
 def from_json(input: str) -> Form:
     return from_dict(json.loads(input))
 
