@@ -27,11 +27,13 @@ class PlaceholderArray(ArrayLike):
         self._nplike = nplike
         self._shape = shape
         self._dtype = np.dtype(dtype)
+        if not isinstance(field_path, tuple):
+            raise TypeError(f"field_path must be a tuple of strings, not {field_path}")
         self._field_path = field_path
 
     @property
     def field_path(self) -> str:
-        return ".".join(self._field_path)
+        return ".".join(map(str, self._field_path))
 
     @property
     def dtype(self) -> DType:
