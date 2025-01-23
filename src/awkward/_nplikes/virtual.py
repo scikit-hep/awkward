@@ -114,38 +114,11 @@ class VirtualArray(ArrayLike):
 
     @property
     def T(self):
-        transposed = type(self)(
-            self._nplike,
-            self._shape[::-1],
-            self._dtype,
-            lambda: self._generator().T,
-            self._form_key,
-        )
-        if self.is_materialized:
-            transposed._array = self._array.T
-        return transposed
+        return self.materialize().T
 
     def view(self, dtype: DTypeLike) -> Self:
         dtype = np.dtype(dtype)
-        if len(self._shape) >= 1:
-            last, remainder = divmod(
-                self._shape[-1] * self._dtype.itemsize, dtype.itemsize
-            )
-            if remainder is not unknown_length and remainder != 0:
-                raise ValueError(
-                    "new size of array with larger dtype must be a "
-                    "divisor of the total size in bytes (of the last axis of the array)"
-                )
-            shape = self._shape[:-1] + (last,)
-        else:
-            shape = self._shape
-        return type(self)(
-            self._nplike,
-            shape,
-            dtype,
-            lambda: self._generator().view(dtype),
-            self._form_key,
-        )
+        return self.materialize().view(dtype)
 
     @property
     def generator(self) -> Callable:
@@ -195,12 +168,11 @@ class VirtualArray(ArrayLike):
             return repr(self)
 
     def __getitem__(self, key):
-        array = self.materialize()
-        return array[key]
+        return self.materialize().__getitem__(key)
 
     def __setitem__(self, key, value):
         array = self.materialize()
-        array[key] = value
+        array.__setitem__(key, value)
 
     # TODO: The following methods need to be implemented (ArrayLike protocol).
     # If there's something missing, we should take a look at the
@@ -228,68 +200,56 @@ class VirtualArray(ArrayLike):
         return int(self._shape[0])
 
     def __add__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array + other
+        array, other_array = materialize_if_virtual(self, other)
+        return array + other_array
 
     def __and__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array & other
+        array, other_array = materialize_if_virtual(self, other)
+        return array & other_array
 
     def __eq__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array == other
+        array, other_array = materialize_if_virtual(self, other)
+        return array == other_array
 
     def __floordiv__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array // other
+        array, other_array = materialize_if_virtual(self, other)
+        return array // other_array
 
     def __ge__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array >= other
+        array, other_array = materialize_if_virtual(self, other)
+        return array >= other_array
 
     def __gt__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array > other
+        array, other_array = materialize_if_virtual(self, other)
+        return array > other_array
 
     def __invert__(self):
         array = self.materialize()
         return ~array
 
     def __le__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array <= other
+        array, other_array = materialize_if_virtual(self, other)
+        return array <= other_array
 
     def __lt__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array < other
+        array, other_array = materialize_if_virtual(self, other)
+        return array < other_array
 
     def __mul__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array * other
+        array, other_array = materialize_if_virtual(self, other)
+        return array * other_array
 
     def __or__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array | other
+        array, other_array = materialize_if_virtual(self, other)
+        return array | other_array
 
     def __sub__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array - other
+        array, other_array = materialize_if_virtual(self, other)
+        return array - other_array
 
     def __truediv__(self, other):
-        other = other.materialize() if isinstance(other, VirtualArray) else other
-        array = self.materialize()
-        return array / other
+        array, other_array = materialize_if_virtual(self, other)
+        return array / other_array
 
     __iter__: None = None
 
