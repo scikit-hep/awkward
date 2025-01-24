@@ -14,7 +14,7 @@ dependencies = [
 readme = "README.md"
 description = "CPU kernels and compiled extensions for Awkward Array"
 authors = [
-    {name = "Jim Pivarski", email = "pivarski@princeton.edu"},
+    {name = "Jim Pivarski", email = "jpivarski@gmail.com"},
 ]
 maintainers = [
     {name = "Scikit-HEP", email = "scikit-hep-admins@googlegroups.com"},
