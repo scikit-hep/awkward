@@ -69,13 +69,13 @@ namespace awkward {
       case dtype::int16:
         return "h";
       case dtype::int32:
-#if defined _MSC_VER || defined __i386__
+#if defined _MSC_VER || defined __i386__ || defined __EMSCRIPTEN__
         return "l";
 #else
         return "i";
 #endif
       case dtype::int64:
-#if defined _MSC_VER || defined __i386__
+#if defined _MSC_VER || defined __i386__ || defined __EMSCRIPTEN__
         return "q";
 #else
         return "l";
@@ -85,13 +85,13 @@ namespace awkward {
       case dtype::uint16:
         return "H";
       case dtype::uint32:
-#if defined _MSC_VER || defined __i386__
+#if defined _MSC_VER || defined __i386__ || defined __EMSCRIPTEN__
         return "L";
 #else
         return "I";
 #endif
       case dtype::uint64:
-#if defined _MSC_VER || defined __i386__
+#if defined _MSC_VER || defined __i386__ || defined __EMSCRIPTEN__
         return "Q";
 #else
         return "L";
