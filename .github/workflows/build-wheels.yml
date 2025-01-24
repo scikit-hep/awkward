@@ -65,22 +65,17 @@ jobs:
 
   build_wheels:
     needs: [determine-source-date-epoch]
-    name: "Wheel awkward-cpp: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }} with ${{ matrix.build }}"
+    name: "Wheel awkward-cpp: ${{ matrix.arch }} on ${{ matrix.os }} with ${{ matrix.build }}"
     runs-on: ${{ matrix.os }}
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-13]
+        os: [ubuntu-latest, macos-13, macos-14]
         arch: [auto64]
         build: ["cp", "pp"]
 
         include:
-        - os: macos-13
-          type: "Universal"
-          arch: universal2
-          build: "cp"
-
         - os: windows-latest
           arch: auto64
           build: "cp"
