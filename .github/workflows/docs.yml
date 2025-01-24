@@ -17,6 +17,35 @@ env:
   SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
+  awkward-cpp-wasm:
+    name: Build C++ WASM
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Generate build files
+      run: pipx run nox -s prepare -- --headers --signatures --tests
+
+    - uses: pypa/cibuildwheel@v2.22
+      with:
+        package-dir: awkward-cpp
+      env:
+        CIBW_PLATFORM: pyodide
+
+    - name: Upload wheel
+      uses: actions/upload-artifact@v4
+      with:
+        name: awkward-cpp-wasm
+        path: awkward-cpp/dist/awkward*wasm32.whl
+
+
   awkward-cpp-x86-64:
     runs-on: ubuntu-22.04
     name: Build C++ x86

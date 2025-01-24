@@ -109,7 +109,6 @@ jobs:
         CIBW_BUILD: "${{ matrix.build }}*"
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
-        config-file: cibuildwheel.toml
         package-dir: awkward-cpp
 
     - name: Check metadata
