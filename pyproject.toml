@@ -12,7 +12,7 @@ description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.9"
 authors = [
-    { name = "Jim Pivarski", email = "pivarski@princeton.edu" },
+    { name = "Jim Pivarski", email = "jpivarski@gmail.com" },
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
