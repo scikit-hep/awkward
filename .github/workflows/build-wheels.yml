@@ -84,6 +84,10 @@ jobs:
           arch: auto32
           build: "cp"
 
+        - os: ubuntu-24.04-arm
+          arch: auto64
+          build: "cp"
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -115,52 +119,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: awkward-cpp-wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.build }}
-        path: wheelhouse/*.whl
-
-  build_alt_wheels:
-    needs: [determine-source-date-epoch]
-    name: "Wheel awkward-cpp: ${{ matrix.python }} on ${{ matrix.arch }}"
-    runs-on: ubuntu-latest
-    env:
-      SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
-    strategy:
-      matrix:
-        python: [39, 310, 311, 312, 313]
-        arch: [aarch64]
-    steps:
-
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-
-    - name: Python 3.12
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-
-    - name: Setup uv
-      uses: astral-sh/setup-uv@v5
-
-    - name: Prepare build files
-      run: pipx run nox -s prepare
-
-    - uses: docker/setup-qemu-action@v3.3.0
-
-    - uses: pypa/cibuildwheel@v2.22
-      env:
-        CIBW_BUILD: cp${{ matrix.python }}-*
-        CIBW_ARCHS: ${{ matrix.arch }}
-      with:
-        config-file: cibuildwheel.toml
-        package-dir: awkward-cpp
-
-    - name: Check metadata
-      run: pipx run twine check wheelhouse/*.whl
-
-    - name: Upload wheels
-      uses: actions/upload-artifact@v4
-      with:
-        name: awkward-cpp-wheels-${{ matrix.arch }}-py${{ matrix.python }}
         path: wheelhouse/*.whl
 
   build_awkward_wheel:
