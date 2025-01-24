@@ -373,11 +373,6 @@ def test_negative_named_axis_indexing():
     )
 
 
-# @pytest.mark.xfail(
-#     sys.platform == "win32",
-#     reason="right-broadcasting (NumPy-style) behaves differently for 32-bit windows",
-#     strict=False,
-# )
 def test_named_axis_right_broadcasting():
     # [NumPy-style] rightbroadcasting: (n, m) -> (1, n, m)
     a = ak.Array([1])  # (1,)
