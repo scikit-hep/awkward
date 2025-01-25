@@ -15,6 +15,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
+from awkward._nplikes.virtual import VirtualArray
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -289,7 +290,12 @@ class IndexedArray(IndexedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._index.data, PlaceholderArray):
+        is_placeholder = isinstance(self._index.data, PlaceholderArray)
+        is_virtual = (
+            isinstance(self._index.data, VirtualArray)
+            and not self._index.data.is_materialized
+        )
+        if is_placeholder or is_virtual:
             return True
         return self._content._is_getitem_at_placeholder()
 

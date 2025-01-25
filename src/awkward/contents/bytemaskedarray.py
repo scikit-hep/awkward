@@ -18,6 +18,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
+from awkward._nplikes.virtual import VirtualArray
 from awkward._parameters import (
     parameters_intersect,
 )
@@ -380,7 +381,11 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._mask, PlaceholderArray):
+        is_placeholder = isinstance(self._mask, PlaceholderArray)
+        is_virtual = (
+            isinstance(self._mask, VirtualArray) and not self._mask.is_materialized
+        )
+        if is_placeholder or is_virtual:
             return True
         return self._content._is_getitem_at_placeholder()
 
