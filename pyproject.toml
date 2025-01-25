@@ -183,6 +183,7 @@ disable = [
     "no-member",
     "no-name-in-module",
     "no-value-for-parameter",
+    "possibly-used-before-assignment", # TODO
     "property-with-parameters",
     "protected-access",
     "raise-missing-from",
@@ -199,6 +200,7 @@ disable = [
     "too-many-lines",
     "too-many-locals",
     "too-many-nested-blocks",
+    "too-many-positional-arguments",
     "too-many-public-methods",
     "too-many-return-statements",
     "too-many-statements",
@@ -215,6 +217,7 @@ disable = [
     "unused-variable",
     "use-a-generator",
     "use-implicit-booleaness-not-len",
+    "used-before-assignment", # TODO
     "wrong-import-order",
     "wrong-import-position",
 ]
