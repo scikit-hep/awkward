@@ -73,7 +73,6 @@ jobs:
         CIBW_ARCHS_MACOS: universal2
         CIBW_BUILD: cp39-win_amd64 cp310-manylinux_x86_64 cp39-macosx_universal2
       with:
-        config-file: cibuildwheel.toml
         package-dir: awkward-cpp
 
     - uses: pypa/cibuildwheel@v2.22
@@ -81,7 +80,6 @@ jobs:
       env:
         CIBW_BUILD: cp312-manylinux_x86_64
       with:
-        config-file: cibuildwheel.toml
         package-dir: awkward-cpp
 
     - name: Upload wheels

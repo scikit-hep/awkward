@@ -18,7 +18,7 @@ np = NumpyMetadata.instance()
 
 
 @register_nplike
-class Numpy(ArrayModuleNumpyLike["NDArray"]):  # pylint: disable=too-many-ancestors
+class Numpy(ArrayModuleNumpyLike["NDArray"]):
     is_eager: Final = True
     supports_structured_dtypes: Final = True
 

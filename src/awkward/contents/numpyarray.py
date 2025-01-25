@@ -21,7 +21,6 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
-from awkward._nplikes.virtual import VirtualArray
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
@@ -259,17 +258,9 @@ class NumpyArray(NumpyMeta, Content):
 
         extra = self._repr_extra(indent + "    ")
 
-        # We can't print data of arrays that don't have any like TypeTracerArray or PlaceholderArray.
-        # For VirtualArray, we can print the data if it is materialized, otherwise use the same repr
-        # as for TypeTracerArray and PlaceholderArray. Is there a better way to do this for VirtualArrays?
-        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)) or (
-            isinstance(self._data, VirtualArray) and not self._data.is_materialized
-        ):
-            arraystr_lines = ["[## ... ##]"]
-        else:
-            arraystr_lines = self._backend.nplike.array_str(
-                self._data, max_line_width=30
-            ).split("\n")
+        arraystr_lines = self._backend.nplike.array_str(
+            self._data, max_line_width=30
+        ).split("\n")
 
         if len(extra) != 0 or len(arraystr_lines) > 1:
             arraystr_lines = self._backend.nplike.array_str(

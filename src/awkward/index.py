@@ -11,10 +11,8 @@ from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
-from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem
-from awkward._nplikes.typetracer import TypeTracer, TypeTracerArray
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.typetracer import TypeTracer
 from awkward._slicing import normalize_slice
 from awkward._typing import Any, DType, Final, Self, cast
 
@@ -194,21 +192,9 @@ class Index:
         out.append(" len=")
         out.append(repr(str(self._data.shape[0])))
 
-        # We can't print data of arrays that don't have any like TypeTracerArray or PlaceholderArray.
-        # For VirtualArray, we can print the data if it is materialized, otherwise use the same repr
-        # as for TypeTracerArray and PlaceholderArray. Is there a better way to do this for VirtualArrays?
-        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)) or (
-            isinstance(self._data, VirtualArray) and not self._data.is_materialized
-        ):
-            arraystr_lines = ["[## ... ##]"]
-        else:
-            if isinstance(self._data, VirtualArray) and self._data.is_materialized:
-                in_array_str = self._data._array
-            else:
-                in_array_str = self._data
-            arraystr_lines = self._nplike.array_str(
-                in_array_str, max_line_width=30
-            ).split("\n")
+        arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
+            "\n"
+        )
 
         if len(arraystr_lines) > 1 or self._metadata is not None:
             arraystr_lines = self._nplike.array_str(

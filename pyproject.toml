@@ -7,12 +7,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.7.2"
+version = "2.7.3"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.9"
 authors = [
-    { name = "Jim Pivarski", email = "pivarski@princeton.edu" },
+    { name = "Jim Pivarski", email = "jpivarski@gmail.com" },
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -40,7 +40,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==43",
+    "awkward_cpp==44",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.18.0",
     "packaging",
@@ -183,6 +183,7 @@ disable = [
     "no-member",
     "no-name-in-module",
     "no-value-for-parameter",
+    "possibly-used-before-assignment", # TODO
     "property-with-parameters",
     "protected-access",
     "raise-missing-from",
@@ -199,6 +200,7 @@ disable = [
     "too-many-lines",
     "too-many-locals",
     "too-many-nested-blocks",
+    "too-many-positional-arguments",
     "too-many-public-methods",
     "too-many-return-statements",
     "too-many-statements",
@@ -215,6 +217,7 @@ disable = [
     "unused-variable",
     "use-a-generator",
     "use-implicit-booleaness-not-len",
+    "used-before-assignment", # TODO
     "wrong-import-order",
     "wrong-import-position",
 ]

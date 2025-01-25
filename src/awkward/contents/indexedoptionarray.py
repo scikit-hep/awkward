@@ -588,7 +588,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 )
             )
 
-            return self._content._carry(nextcarry, False)
+            return self._content._carry(nextcarry, True)
 
     def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         posaxis = maybe_posaxis(self, axis, depth)

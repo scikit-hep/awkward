@@ -393,13 +393,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         non-pickleable types.
         """
         if self._attrs is None:
-            self._attrs = {}
-        return Attrs(self, self._attrs)
+            self._attrs = Attrs({})
+        return self._attrs
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = dict(value)
+            self._attrs = Attrs(value)
         else:
             raise TypeError("attrs must be a 'Attrs' mapping")
 
@@ -1919,13 +1919,13 @@ class Record(NDArrayOperatorsMixin):
         non-pickleable types.
         """
         if self._attrs is None:
-            self._attrs = {}
-        return Attrs(self, self._attrs)
+            self._attrs = Attrs({})
+        return self._attrs
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = dict(value)
+            self._attrs = Attrs(value)
         else:
             raise TypeError("attrs must be a mapping")
 
@@ -2726,13 +2726,13 @@ class ArrayBuilder(Sized):
         non-pickleable types.
         """
         if self._attrs is None:
-            self._attrs = {}
-        return Attrs(self, self._attrs)
+            self._attrs = Attrs({})
+        return self._attrs
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = dict(value)
+            self._attrs = Attrs(value)
         else:
             raise TypeError("attrs must be a mapping")
 
