@@ -2,6 +2,11 @@
 
 cmake_minimum_required(VERSION 3.15...3.30)
 
+if(NOT DEFINED SKBUILD)
+  set(SKBUILD_PROJECT_NAME awkward_cpp)
+  set(SKBUILD_PROJECT_VERSION 0.0.0)
+endif()
+
 # Project must be near the top
 project(
   ${SKBUILD_PROJECT_NAME}
