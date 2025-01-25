@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from numpy.typing import DTypeLike
 
 
-_unmaterialized = Sentinel("<unmaterialized>", None)
+UNMATERIALIZED = Sentinel("<UNMATERIALIZED>", None)
 
 
 def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
@@ -74,7 +74,7 @@ class VirtualArray(ArrayLike):
 
         # this is the _actual_ array, if it's
         # not materialized, it's a sentinel
-        self._array = _unmaterialized
+        self._array = UNMATERIALIZED
 
         # the generator function that creates the array
         self._generator = generator
@@ -169,7 +169,7 @@ class VirtualArray(ArrayLike):
         return self._nplike
 
     def materialize(self) -> ArrayLike:
-        if self._array is _unmaterialized:
+        if self._array is UNMATERIALIZED:
             print("Materializing:", self.form_key)  # debugging purposes
             self._materialized_form_keys.add(self.form_key)
             self._array = self._nplike.asarray(self.generator())
@@ -177,7 +177,7 @@ class VirtualArray(ArrayLike):
 
     @property
     def is_materialized(self) -> bool:
-        return self._array is not _unmaterialized
+        return self._array is not UNMATERIALIZED
 
     def __array__(self, dtype=None):
         # TODO: Should __array__ materialize?
@@ -198,6 +198,9 @@ class VirtualArray(ArrayLike):
             return repr(self)
 
     def __getitem__(self, index):
+        if self.is_materialized:
+            return self._array.__getitem__(index)
+
         if isinstance(index, slice):
             length = self._shape[0]
 
