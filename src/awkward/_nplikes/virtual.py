@@ -7,7 +7,7 @@ from operator import mul
 
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
-from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import TYPE_CHECKING, Any, Callable, ClassVar, DType, Self, cast
 from awkward._util import Sentinel
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 _unmaterialized = Sentinel("<unmaterialized>", None)
 
 
-def materialize_if_virtual(*arrays: VirtualArray | ArrayLike) -> tuple[ArrayLike, ...]:
+def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     """
     A little helper function to materialize all virtual arrays in a list of arrays.
     This is useful to materialize all potential virtual arrays right before calling
@@ -44,8 +44,7 @@ def materialize_if_virtual(*arrays: VirtualArray | ArrayLike) -> tuple[ArrayLike
             ...
     """
     return tuple(
-        array.materialize() if isinstance(array, VirtualArray) else array
-        for array in arrays
+        arg.materialize() if isinstance(arg, VirtualArray) else arg for arg in args
     )
 
 
@@ -114,11 +113,42 @@ class VirtualArray(ArrayLike):
 
     @property
     def T(self):
-        return self.materialize().T
+        if self.is_materialized:
+            return self._array.T
+
+        return type(self)(
+            self._nplike,
+            self._shape[::-1],
+            self._dtype,
+            lambda: self.materialize().T,
+            self._form_key,
+        )
 
     def view(self, dtype: DTypeLike) -> Self:
         dtype = np.dtype(dtype)
-        return self.materialize().view(dtype)
+
+        if self.is_materialized:
+            return self._array.view(dtype)
+
+        if len(self._shape) >= 1:
+            last, remainder = divmod(
+                self._shape[-1] * self._dtype.itemsize, dtype.itemsize
+            )
+            if remainder is not unknown_length and remainder != 0:
+                raise ValueError(
+                    "new size of array with larger dtype must be a "
+                    "divisor of the total size in bytes (of the last axis of the array)"
+                )
+            shape = self._shape[:-1] + (last,)
+        else:
+            shape = self._shape
+        return type(self)(
+            self._nplike,
+            shape,
+            dtype,
+            lambda: self.materialize().view(dtype),
+            self._form_key,
+        )
 
     @property
     def generator(self) -> Callable:
@@ -167,18 +197,35 @@ class VirtualArray(ArrayLike):
         else:
             return repr(self)
 
-    def __getitem__(self, key):
-        return self.materialize().__getitem__(key)
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            length = self._shape[0]
+
+            if length is unknown_length:
+                return self.materialize().__getitem__(index)
+            elif (
+                index.start is unknown_length
+                or index.stop is unknown_length
+                or index.step is unknown_length
+            ):
+                return self.materialize().__getitem__(index)
+            else:
+                start, stop, step = index.indices(length)
+                new_length = (stop - start) // step
+
+            return type(self)(
+                self._nplike,
+                (new_length,),
+                self._dtype,
+                lambda: self.materialize()[index],
+                self._form_key,
+            )
+        else:
+            return self.materialize().__getitem__(index)
 
     def __setitem__(self, key, value):
         array = self.materialize()
         array.__setitem__(key, value)
-
-    # TODO: The following methods need to be implemented (ArrayLike protocol).
-    # If there's something missing, we should take a look at the
-    # typetracer implementation in src/awkward/_nplikes/typetracer.py
-    #
-    # Note: not all of the following methods need materialization, e.g. __len__.
 
     def __bool__(self) -> bool:
         array = self.materialize()

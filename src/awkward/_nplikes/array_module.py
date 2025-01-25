@@ -54,7 +54,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         *,
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
-    ) -> ArrayLikeT | PlaceholderArray:
+    ) -> ArrayLikeT | PlaceholderArray | VirtualArray:
         if isinstance(obj, PlaceholderArray) or (
             isinstance(obj, VirtualArray) and not obj.is_materialized
         ):
@@ -76,8 +76,8 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                 return self._module.asarray(obj, dtype=dtype)
 
     def ascontiguousarray(
-        self, x: ArrayLikeT | PlaceholderArray
-    ) -> ArrayLikeT | PlaceholderArray:
+        self, x: ArrayLikeT | PlaceholderArray | VirtualArray
+    ) -> ArrayLikeT | PlaceholderArray | VirtualArray:
         # TODO: Should this materialize virtual arrays?
         if isinstance(x, (PlaceholderArray, VirtualArray)):
             return x
@@ -131,7 +131,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def zeros_like(
         self,
-        x: ArrayLikeT | PlaceholderArray | VirtualArray,
+        x: ArrayLikeT | PlaceholderArray | VirtualArray | VirtualArray,
         *,
         dtype: DTypeLike | None = None,
     ) -> ArrayLikeT:
@@ -143,7 +143,10 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             return self._module.zeros_like(*materialize_if_virtual(x), dtype=dtype)
 
     def ones_like(
-        self, x: ArrayLikeT | PlaceholderArray, *, dtype: DTypeLike | None = None
+        self,
+        x: ArrayLikeT | PlaceholderArray | VirtualArray,
+        *,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLikeT:
         if isinstance(x, PlaceholderArray) or (
             isinstance(x, VirtualArray) and not x.is_materialized
@@ -154,7 +157,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def full_like(
         self,
-        x: ArrayLikeT | PlaceholderArray,
+        x: ArrayLikeT | PlaceholderArray | VirtualArray,
         fill_value,
         *,
         dtype: DTypeLike | None = None,
@@ -325,16 +328,25 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def reshape(
         self,
-        x: ArrayLikeT | PlaceholderArray,
+        x: ArrayLikeT | PlaceholderArray | VirtualArray | VirtualArray,
         shape: tuple[ShapeItem, ...],
         *,
         copy: bool | None = None,
-    ) -> ArrayLikeT | PlaceholderArray:
+    ) -> ArrayLikeT | PlaceholderArray | VirtualArray | VirtualArray:
         if isinstance(x, PlaceholderArray):
             next_shape = self._compute_compatible_shape(shape, x.shape)
             return PlaceholderArray(self, next_shape, x.dtype, x._field_path)
-        if isinstance(x, VirtualArray) and not x.is_materialized:
-            x = x.materialize()
+        if isinstance(x, VirtualArray):
+            if not x.is_materialized:
+                next_shape = self._compute_compatible_shape(shape, x.shape)
+                return VirtualArray(
+                    self,
+                    next_shape,
+                    x.dtype,
+                    lambda: self.reshape(x.materialize(), next_shape),
+                )
+            else:
+                x = x._array
 
         if copy is None:
             return self._module.reshape(x, shape)
@@ -541,7 +553,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         (x,) = materialize_if_virtual(x)
         return self._module.broadcast_to(x, shape)
 
-    def strides(self, x: ArrayLikeT | PlaceholderArray) -> tuple[ShapeItem, ...]:
+    def strides(
+        self, x: ArrayLikeT | PlaceholderArray | VirtualArray
+    ) -> tuple[ShapeItem, ...]:
         if isinstance(x, (PlaceholderArray, VirtualArray)):
             # Assume contiguous
             strides: tuple[ShapeItem, ...] = (x.dtype.itemsize,)
