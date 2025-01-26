@@ -314,6 +314,10 @@ class ListArray(ListMeta[Content], Content):
     def _is_getitem_at_placeholder(self) -> bool:
         is_placeholder_starts = isinstance(self._starts.data, PlaceholderArray)
         is_placeholder_stops = isinstance(self._stops.data, PlaceholderArray)
+        is_placeholder = is_placeholder_starts or is_placeholder_stops
+        return is_placeholder
+
+    def _is_getitem_at_virtual(self) -> bool:
         is_virtual_starts = (
             isinstance(self._starts.data, VirtualArray)
             and not self._starts.data.is_materialized
@@ -322,9 +326,8 @@ class ListArray(ListMeta[Content], Content):
             isinstance(self._stops.data, VirtualArray)
             and not self._stops.data.is_materialized
         )
-        is_placeholder = is_placeholder_starts or is_placeholder_stops
         is_virtual = is_virtual_starts or is_virtual_stops
-        return is_placeholder or is_virtual
+        return is_virtual
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:

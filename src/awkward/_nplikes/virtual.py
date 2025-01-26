@@ -170,7 +170,6 @@ class VirtualArray(ArrayLike):
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
-            print("Materializing:", self.form_key)  # debugging purposes
             self._materialized_form_keys.add(self.form_key)
             self._array = self._nplike.asarray(self.generator())
         return cast(ArrayLike, self._array)

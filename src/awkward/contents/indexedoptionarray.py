@@ -312,13 +312,18 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
     def _is_getitem_at_placeholder(self) -> bool:
         is_placeholder = isinstance(self._index.data, PlaceholderArray)
+        if is_placeholder:
+            return True
+        return self._content._is_getitem_at_placeholder()
+
+    def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
             isinstance(self._index.data, VirtualArray)
             and not self._index.data.is_materialized
         )
-        if is_placeholder or is_virtual:
+        if is_virtual:
             return True
-        return self._content._is_getitem_at_placeholder()
+        return self._content._is_getitem_at_virtual()
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:

@@ -312,12 +312,14 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
     def _is_getitem_at_placeholder(self) -> bool:
         is_placeholder = isinstance(self._offsets.data, PlaceholderArray)
+        return is_placeholder or self._content._is_getitem_at_placeholder()
+
+    def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
             isinstance(self._offsets.data, VirtualArray)
             and not self._offsets.data.is_materialized
         )
-        is_placeholder_or_virtual = is_placeholder or is_virtual
-        return is_placeholder_or_virtual or self._content._is_getitem_at_placeholder()
+        return is_virtual or self._content._is_getitem_at_virtual()
 
     def _getitem_at(self, where: IndexType):
         # Wrap `where` by length

@@ -479,12 +479,17 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
     def _is_getitem_at_placeholder(self) -> bool:
         is_placeholder = isinstance(self._mask, PlaceholderArray)
+        if is_placeholder:
+            return True
+        return self._content._is_getitem_at_placeholder()
+
+    def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
             isinstance(self._mask, VirtualArray) and not self._mask.is_materialized
         )
-        if is_placeholder or is_virtual:
+        if is_virtual:
             return True
-        return self._content._is_getitem_at_placeholder()
+        return self._content._is_getitem_at_virtual()
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:

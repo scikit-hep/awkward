@@ -314,10 +314,13 @@ class NumpyArray(NumpyMeta, Content):
 
     def _is_getitem_at_placeholder(self) -> bool:
         is_placeholder = isinstance(self._data, PlaceholderArray)
+        return is_placeholder
+
+    def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
             isinstance(self._data, VirtualArray) and not self._data.is_materialized
         )
-        return is_placeholder or is_virtual
+        return is_virtual
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:

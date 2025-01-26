@@ -545,18 +545,26 @@ class UnionArray(UnionMeta[Content], Content):
     def _is_getitem_at_placeholder(self) -> bool:
         is_placeholder_tags = isinstance(self._tags, PlaceholderArray)
         is_placeholder_index = isinstance(self._index, PlaceholderArray)
+        is_placeholder = is_placeholder_tags or is_placeholder_index
+        if is_placeholder:
+            return True
+        for content in self._contents:
+            if content._is_getitem_at_placeholder():
+                return True
+        return False
+
+    def _is_getitem_at_virtual(self) -> bool:
         is_virtual_tags = (
             isinstance(self._tags, VirtualArray) and not self._tags.is_materialized
         )
         is_virtual_index = (
             isinstance(self._index, VirtualArray) and not self._index.is_materialized
         )
-        is_placeholder = is_placeholder_tags or is_placeholder_index
         is_virtual = is_virtual_tags or is_virtual_index
-        if is_placeholder or is_virtual:
+        if is_virtual:
             return True
         for content in self._contents:
-            if content._is_getitem_at_placeholder():
+            if content._is_getitem_at_virtual():
                 return True
         return False
 
