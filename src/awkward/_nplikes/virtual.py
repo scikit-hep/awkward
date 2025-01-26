@@ -23,25 +23,7 @@ UNMATERIALIZED = Sentinel("<UNMATERIALIZED>", None)
 def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     """
     A little helper function to materialize all virtual arrays in a list of arrays.
-    This is useful to materialize all potential virtual arrays right before calling
-    an awkward_cpp kernel, e.g. `src/awkward/contents/numpyarray.py (def _argsort_next())`
-    can be modified to:
-
-        .. code-block:: python
-
-            ...
-            self._backend[
-                "awkward_sorting_ranges_length",
-                _offsets_length.dtype.type,
-                parents.dtype.type,
-            ](
-                *materialize_if_virtual(
-                    _offsets_length.data,
-                    parents.data,
-                ),
-                parents_length,
-            )
-            ...
+    This is useful to materialize all potential virtual arrays right before calling an nplike function or a kernel.
     """
     return tuple(
         arg.materialize() if isinstance(arg, VirtualArray) else arg for arg in args
@@ -71,15 +53,8 @@ class VirtualArray(ArrayLike):
         self._nplike = nplike
         self._shape = shape
         self._dtype = np.dtype(dtype)
-
-        # this is the _actual_ array, if it's
-        # not materialized, it's a sentinel
         self._array = UNMATERIALIZED
-
-        # the generator function that creates the array
         self._generator = generator
-
-        # the form key of the array in the ak.forms.Form
         self._form_key = form_key
 
     @property
