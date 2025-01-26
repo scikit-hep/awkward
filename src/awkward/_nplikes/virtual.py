@@ -275,7 +275,9 @@ class VirtualArray(ArrayLike):
         array, other_array = materialize_if_virtual(self, other)
         return array / other_array
 
-    __iter__: None = None
+    def __iter__(self):
+        array = self.materialize()
+        return iter(array)
 
     def __dlpack_device__(self) -> tuple[int, int]:
         array = self.materialize()
