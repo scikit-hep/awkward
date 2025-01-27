@@ -8,6 +8,7 @@ from operator import mul
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._operators import NDArrayOperatorsMixin
 from awkward._typing import TYPE_CHECKING, Any, Callable, ClassVar, DType, Self, cast
 from awkward._util import Sentinel
 
@@ -30,7 +31,7 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     )
 
 
-class VirtualArray(ArrayLike):
+class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     # let's keep track of the form keys that have been materialized.
     #
     # In future, we could track even more, like the number of times
@@ -85,6 +86,16 @@ class VirtualArray(ArrayLike):
         for item in reversed(self._shape):
             out = (item * out[0], *out)
         return out
+
+    def materialize(self) -> ArrayLike:
+        if self._array is UNMATERIALIZED:
+            self._materialized_form_keys.add(self.form_key)
+            self._array = self._nplike.asarray(self.generator())
+        return cast(ArrayLike, self._array)
+
+    @property
+    def is_materialized(self) -> bool:
+        return self._array is not UNMATERIALIZED
 
     @property
     def T(self):
@@ -143,15 +154,9 @@ class VirtualArray(ArrayLike):
     def nplike(self) -> NumpyLike:
         return self._nplike
 
-    def materialize(self) -> ArrayLike:
-        if self._array is UNMATERIALIZED:
-            self._materialized_form_keys.add(self.form_key)
-            self._array = self._nplike.asarray(self.generator())
-        return cast(ArrayLike, self._array)
-
-    @property
-    def is_materialized(self) -> bool:
-        return self._array is not UNMATERIALIZED
+    def copy(self) -> VirtualArray:
+        self.materialize()
+        return self
 
     def __array__(self, dtype=None):
         # TODO: Should __array__ materialize?
@@ -222,58 +227,6 @@ class VirtualArray(ArrayLike):
 
     def __len__(self) -> int:
         return int(self._shape[0])
-
-    def __add__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array + other_array
-
-    def __and__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array & other_array
-
-    def __eq__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array == other_array
-
-    def __floordiv__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array // other_array
-
-    def __ge__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array >= other_array
-
-    def __gt__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array > other_array
-
-    def __invert__(self):
-        array = self.materialize()
-        return ~array
-
-    def __le__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array <= other_array
-
-    def __lt__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array < other_array
-
-    def __mul__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array * other_array
-
-    def __or__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array | other_array
-
-    def __sub__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array - other_array
-
-    def __truediv__(self, other):
-        array, other_array = materialize_if_virtual(self, other)
-        return array / other_array
 
     def __iter__(self):
         array = self.materialize()
