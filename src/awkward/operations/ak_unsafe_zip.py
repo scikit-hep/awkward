@@ -155,7 +155,7 @@ def _impl(
     # only allow all NumpyArrays and ListOffsetArrays
     # maybe this could be done recursively, but for now just check the top level. This is also how ak.zip works.
     if all(isinstance(layout, ak.contents.NumpyArray) for layout in layouts):
-        length = layouts[0].length
+        length = _check_equal_lengths(layouts)
         out = ak.contents.RecordArray(
             layouts, fields, length=length, parameters=parameters, backend=backend
         )
@@ -169,7 +169,7 @@ def _impl(
             contents.append(layout.content)
         # just get from the first one
         offsets = layouts[0].offsets
-        length = layouts[0].content.length
+        length = _check_equal_lengths([layout.content for layout in layouts])
         out = ak.contents.ListOffsetArray(
             offsets=offsets,
             content=ak.contents.RecordArray(
@@ -190,3 +190,13 @@ def _impl(
         behavior=ctx.behavior,
         attrs=ctx.attrs,
     )
+
+
+def _check_equal_lengths(
+    layouts: ak.contents.Content,
+) -> int | ak._nplikes.shape.UnknownLength:
+    length = layouts[0].length
+    for layout in layouts:
+        if layout.length != length:
+            raise ValueError("all arrays must have the same length")
+    return length
