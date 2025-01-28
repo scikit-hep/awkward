@@ -109,6 +109,7 @@ from awkward.operations.ak_to_torch import *
 from awkward.operations.ak_transform import *
 from awkward.operations.ak_type import *
 from awkward.operations.ak_unflatten import *
+from awkward.operations.ak_unsafe_zip import *
 from awkward.operations.ak_unzip import *
 from awkward.operations.ak_validity_error import *
 from awkward.operations.ak_values_astype import *
