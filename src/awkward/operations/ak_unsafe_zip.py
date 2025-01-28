@@ -169,7 +169,7 @@ def _impl(
             contents.append(layout.content)
         # just get from the first one
         offsets = layouts[0].offsets
-        length = layouts[0].length
+        length = layouts[0].content.length
         out = ak.contents.ListOffsetArray(
             offsets=offsets,
             content=ak.contents.RecordArray(
