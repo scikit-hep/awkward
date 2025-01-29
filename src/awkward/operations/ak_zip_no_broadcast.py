@@ -11,13 +11,13 @@ from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._namedaxis import _get_named_axis, _unify_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
-__all__ = ("unsafe_zip",)
+__all__ = ("zip_no_broadcast",)
 
 np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def unsafe_zip(
+def zip_no_broadcast(
     arrays,
     *,
     parameters=None,
@@ -46,7 +46,7 @@ def unsafe_zip(
     of records or the slots of a collection of tuples.
 
     Caution: unlike #ak.zip this function will _not_ broadcast the arrays together.
-    It assumes that the given arrays have already the same layouts and lengths.
+    During typetracing, it assumes that the given arrays have already the same layouts and lengths.
 
     This operation may be thought of as the opposite of projection in
     #ak.Array.__getitem__, which extracts fields one at a time, or
@@ -60,7 +60,7 @@ def unsafe_zip(
     Zipping them together using a dict creates a collection of records with
     the same nesting structure as `one` and `two`.
 
-        >>> ak.unsafe_zip({"x": one, "y": two}).show()
+        >>> ak.zip_no_broadcast({"x": one, "y": two}).show()
         [[{x: 1.1, y: 'a'}, {x: 2.2, y: 'b'}, {x: 3.3, y: 'c'}],
          [],
          [{x: 4.4, y: 'd'}],
@@ -153,7 +153,6 @@ def _impl(
         parameters["__record__"] = with_name
 
     # only allow all NumpyArrays and ListOffsetArrays
-    # maybe this could be done recursively, but for now just check the top level. This is also how ak.zip works.
     if all(isinstance(layout, ak.contents.NumpyArray) for layout in layouts):
         length = _check_equal_lengths(layouts)
         out = ak.contents.RecordArray(
@@ -162,14 +161,35 @@ def _impl(
     elif all(isinstance(layout, ak.contents.ListOffsetArray) for layout in layouts):
         contents = []
         for layout in layouts:
+            # get the content of the ListOffsetArray
             if not isinstance(layout.content, ak.contents.NumpyArray):
                 raise ValueError(
                     "can not (unsafe) zip ListOffsetArrays with non-NumpyArray contents"
                 )
             contents.append(layout.content)
-        # just get from the first one
-        offsets = layouts[0].offsets
-        length = _check_equal_lengths([layout.content for layout in layouts])
+
+        if backend.name == "typetracer":
+            # just get from the first one
+            # we're in typetracer mode, so we can't check the offsets (see else branch)
+            offsets = layouts[0].offsets
+        else:
+            # this is at 'runtime' with actual data, that means we can check the offsets,
+            # but only those that have actual data, i.e. no PlaceholderArrays
+            # so first, let's filter out any PlaceholderArrays
+            comparable_offsets = filter(
+                lambda o: not isinstance(o, ak._nplikes.placeholder.PlaceholderArray),
+                (layout.offsets for layout in layouts),
+            )
+            # check that offsets are the same
+            first = next(comparable_offsets)
+            if not all(
+                first.nplike.all(offsets.data == first.data)
+                for offsets in comparable_offsets
+            ):
+                raise ValueError("all ListOffsetArrays must have the same offsets")
+            offsets = first
+
+        length = _check_equal_lengths(contents)
         out = ak.contents.ListOffsetArray(
             offsets=offsets,
             content=ak.contents.RecordArray(
@@ -193,10 +213,10 @@ def _impl(
 
 
 def _check_equal_lengths(
-    layouts: ak.contents.Content,
+    contents: ak.contents.Content,
 ) -> int | ak._nplikes.shape.UnknownLength:
-    length = layouts[0].length
-    for layout in layouts:
+    length = contents[0].length
+    for layout in contents:
         if layout.length != length:
             raise ValueError("all arrays must have the same length")
     return length

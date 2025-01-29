@@ -6,31 +6,31 @@ from __future__ import annotations
 import awkward as ak
 
 
-def test_ak_unsafe_zip_NumpyArray_dict():
+def test_ak_zip_no_broadcast_NumpyArray_dict():
     a = ak.Array([1])
     b = ak.Array([2])
-    c = ak.unsafe_zip({"a": a, "b": b})
+    c = ak.zip_no_broadcast({"a": a, "b": b})
     assert ak.to_list(c) == ak.to_list(ak.zip({"a": a, "b": b}))
 
 
-def test_ak_unsafe_zip_ListOffsetArray_dict():
+def test_ak_zip_no_broadcast_ListOffsetArray_dict():
     a = ak.Array([[1], []])
     b = ak.Array([[2], []])
-    c = ak.unsafe_zip({"a": a, "b": b})
+    c = ak.zip_no_broadcast({"a": a, "b": b})
     assert ak.to_list(c) == ak.to_list(ak.zip({"a": a, "b": b}))
 
 
-def test_ak_unsafe_zip_NumpyArray_list():
+def test_ak_zip_no_broadcast_NumpyArray_list():
     a = ak.Array([1])
     b = ak.Array([2])
-    c = ak.unsafe_zip([a, b])
+    c = ak.zip_no_broadcast([a, b])
     assert ak.to_list(c) == ak.to_list(ak.zip([a, b]))
 
 
-def test_ak_unsafe_zip_ListOffsetArray_list():
+def test_ak_zip_no_broadcast_ListOffsetArray_list():
     a = ak.Array([[1], []])
     b = ak.Array([[2], []])
-    c = ak.unsafe_zip([a, b])
+    c = ak.zip_no_broadcast([a, b])
     assert ak.to_list(c) == ak.to_list(ak.zip([a, b]))
 
 
@@ -41,7 +41,7 @@ def test_typetracer_NumpyArray_non_touching():
         tracer.layout.form_with_key(), highlevel=True
     )
 
-    _ = ak.unsafe_zip({"foo": tracer, "bar": tracer})
+    _ = ak.zip_no_broadcast({"foo": tracer, "bar": tracer})
     assert len(report.shape_touched) == 1
     assert len(report.data_touched) == 0
 
@@ -53,6 +53,6 @@ def test_typetracer_ListOffsetArray_non_touching():
         tracer.layout.form_with_key(), highlevel=True
     )
 
-    _ = ak.unsafe_zip({"foo": tracer, "bar": tracer})
+    _ = ak.zip_no_broadcast({"foo": tracer, "bar": tracer})
     assert len(report.shape_touched) == 1
     assert len(report.data_touched) == 0
