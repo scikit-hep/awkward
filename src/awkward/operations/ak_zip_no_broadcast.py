@@ -68,7 +68,7 @@ def zip_no_broadcast(
 
     Doing so with a list creates tuples, whose fields are not named.
 
-        >>> ak.zip([one, two]).show()
+        >>> ak.zip_no_broadcast([one, two]).show()
         [[(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
          [],
          [(4.4, 'd')],
