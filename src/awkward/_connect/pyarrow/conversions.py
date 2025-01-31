@@ -471,6 +471,8 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if to64:
             data = numpy.astype(numpy.frombuffer(data, dtype=np.int32), dtype=np.int64)
         if dt is None:
+            if getattr(storage_type, "tz", None) is not None:
+                storage_type = pyarrow.lib.timestamp(storage_type.unit)
             dt = storage_type.to_pandas_dtype()
 
         out = ak.contents.NumpyArray(
@@ -670,6 +672,8 @@ def form_popbuffers(awkwardarrow_type, storage_type):
     elif isinstance(storage_type, pyarrow.lib.DataType):
         _, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
         if dt is None:
+            if getattr(storage_type, "tz", None) is not None:
+                storage_type = pyarrow.lib.timestamp(storage_type.unit)
             dt = np.dtype(storage_type.to_pandas_dtype())
 
         out = ak.forms.NumpyForm(
