@@ -123,3 +123,4 @@ from awkward.operations.ak_without_named_axis import *
 from awkward.operations.ak_without_parameters import *
 from awkward.operations.ak_zeros_like import *
 from awkward.operations.ak_zip import *
+from awkward.operations.ak_zip_no_broadcast import *
