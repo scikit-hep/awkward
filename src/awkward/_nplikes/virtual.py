@@ -50,6 +50,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         ],  # annotation (should) make clear that it's a callable without(!) arguments that returns an ArrayLike
         form_key: str | None = None,
     ) -> None:
+        if type(nplike).__name__ not in ("Numpy", "Cupy"):
+            raise ValueError(
+                f"Only numpy and cupy nplikes are supported for VirtualArray. Received {type(nplike)}"
+            )
+
         # array metadata
         self._nplike = nplike
         self._shape = shape
