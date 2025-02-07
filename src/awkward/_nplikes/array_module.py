@@ -755,6 +755,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             isinstance(x, VirtualArray) and not x.is_materialized
         ):
             return "[## ... ##]"
+        (x,) = materialize_if_virtual(x)
         return self._module.array_str(
             x,
             max_line_width=max_line_width,

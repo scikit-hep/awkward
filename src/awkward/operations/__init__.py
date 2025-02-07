@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward.operations.str
 from awkward.operations.ak_all import *
+from awkward.operations.ak_dematerialize import *
 from awkward.operations.ak_almost_equal import *
 from awkward.operations.ak_angle import *
 from awkward.operations.ak_any import *
@@ -25,6 +26,7 @@ from awkward.operations.ak_corr import *
 from awkward.operations.ak_count import *
 from awkward.operations.ak_count_nonzero import *
 from awkward.operations.ak_covar import *
+from awkward.operations.ak_dematerialize import *
 from awkward.operations.ak_drop_none import *
 from awkward.operations.ak_enforce_type import *
 from awkward.operations.ak_fields import *
@@ -59,6 +61,7 @@ from awkward.operations.ak_isclose import *
 from awkward.operations.ak_linear_fit import *
 from awkward.operations.ak_local_index import *
 from awkward.operations.ak_mask import *
+from awkward.operations.ak_materialize import *
 from awkward.operations.ak_max import *
 from awkward.operations.ak_mean import *
 from awkward.operations.ak_merge_option_of_records import *

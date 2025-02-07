@@ -181,7 +181,9 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return self.materialize().tolist()
 
     def __array__(self, *args, **kwargs):
-        raise NotImplementedError
+        raise AssertionError(
+            "The '__array__' method should never be called directly on a VirtualArray."
+        )
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
