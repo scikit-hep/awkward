@@ -24,10 +24,18 @@ UNMATERIALIZED = Sentinel("<UNMATERIALIZED>", None)
 def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     """
     A little helper function to materialize all virtual arrays in a list of arrays.
-    This is useful to materialize all potential virtual arrays right before calling an nplike function or a kernel.
     """
     return tuple(
         arg.materialize() if isinstance(arg, VirtualArray) else arg for arg in args
+    )
+
+
+def unmaterialize_if_virtual(*args: Any) -> tuple[Any, ...]:
+    """
+    A little helper function to unmaterialize all virtual arrays in a list of arrays.
+    """
+    return tuple(
+        arg.unmaterialize() if isinstance(arg, VirtualArray) else arg for arg in args
     )
 
 
@@ -98,6 +106,12 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             self._array = self._nplike.asarray(self.generator())
         return cast(ArrayLike, self._array)
 
+    def unmaterialize(self) -> VirtualArray:
+        if self._array is not UNMATERIALIZED:
+            self._materialized_form_keys.remove(self.form_key)
+            self._array = UNMATERIALIZED
+        return self
+
     @property
     def is_materialized(self) -> bool:
         return self._array is not UNMATERIALIZED
@@ -163,9 +177,14 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         self.materialize()
         return self
 
-    def __array__(self, dtype=None):
-        # TODO: Should __array__ materialize?
-        return self.materialize().__array__(dtype=dtype)
+    def tolist(self) -> NumpyLike:
+        return self.materialize().tolist()
+
+    def __array__(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
 
     def __repr__(self):
         dtype = repr(self._dtype)
@@ -241,6 +260,8 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         array = self.materialize()
         return array.__dlpack_device__()
 
-    def __dlpack__(self, stream: Any = None) -> Any:
+    def __dlpack__(self, *args, **kwargs):
         array = self.materialize()
-        return array.__dlpack__(stream)
+        if args or kwargs:
+            return array.__dlpack__(*args, **kwargs)
+        return array.__dlpack__()
