@@ -25,7 +25,6 @@ from awkward.operations.ak_corr import *
 from awkward.operations.ak_count import *
 from awkward.operations.ak_count_nonzero import *
 from awkward.operations.ak_covar import *
-from awkward.operations.ak_dematerialize import *
 from awkward.operations.ak_drop_none import *
 from awkward.operations.ak_enforce_type import *
 from awkward.operations.ak_fields import *

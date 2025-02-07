@@ -30,15 +30,6 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     )
 
 
-def dematerialize_if_virtual(*args: Any) -> tuple[Any, ...]:
-    """
-    A little helper function to dematerialize all virtual arrays in a list of arrays.
-    """
-    return tuple(
-        arg.dematerialize() if isinstance(arg, VirtualArray) else arg for arg in args
-    )
-
-
 class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     # let's keep track of the form keys that have been materialized.
     #
@@ -105,12 +96,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             self._materialized_form_keys.add(self.form_key)
             self._array = self._nplike.asarray(self.generator())
         return cast(ArrayLike, self._array)
-
-    def dematerialize(self) -> VirtualArray:
-        if self._array is not UNMATERIALIZED:
-            self._materialized_form_keys.remove(self.form_key)
-            self._array = UNMATERIALIZED
-        return self
 
     @property
     def is_materialized(self) -> bool:
