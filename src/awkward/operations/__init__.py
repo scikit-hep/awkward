@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import awkward.operations.str
 from awkward.operations.ak_all import *
-from awkward.operations.ak_dematerialize import *
 from awkward.operations.ak_almost_equal import *
 from awkward.operations.ak_angle import *
 from awkward.operations.ak_any import *
