@@ -23,10 +23,10 @@ def materialize(
     yield (array,)
 
     # Implementation
-    return _impl1(array, highlevel, behavior, attrs)
+    return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl1(array, highlevel, behavior, attrs):
+def _impl(array, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
 

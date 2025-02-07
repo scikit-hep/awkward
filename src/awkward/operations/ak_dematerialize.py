@@ -35,7 +35,7 @@ def _impl(array, highlevel, behavior, attrs):
         if isinstance(layout, ak.contents.NumpyArray):
             buffer = layout.data
             if isinstance(buffer, VirtualArray):
-                out = buffer.unmaterialize()
+                out = buffer.dematerialize()
             else:
                 out = VirtualArray(
                     nplike_of_obj(buffer), buffer.shape, buffer.dtype, lambda: buffer
