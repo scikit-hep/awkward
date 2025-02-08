@@ -44,9 +44,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         nplike: NumpyLike,
         shape: tuple[ShapeItem, ...],
         dtype: DType,
-        generator: Callable[
-            [], ArrayLike
-        ],  # annotation (should) make clear that it's a callable without(!) arguments that returns an ArrayLike
+        generator: Callable[[], ArrayLike],
         form_key: str | None = None,
     ) -> None:
         if type(nplike).__name__ not in ("Numpy", "Cupy"):
@@ -58,7 +56,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         self._nplike = nplike
         self._shape = shape
         self._dtype = np.dtype(dtype)
-        self._array = UNMATERIALIZED
+        self._array: Sentinel | ArrayLike = UNMATERIALIZED
         self._generator = generator
         self._form_key = form_key
 
@@ -79,9 +77,9 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return reduce(mul, self._shape)
 
     @property
-    def nbytes(self) -> int:
+    def nbytes(self) -> ShapeItem:
         if self.is_materialized:
-            return self._array.nbytes
+            return cast(ArrayLike, self._array).nbytes
         return 0
 
     @property
@@ -94,7 +92,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
             self._materialized_form_keys.add(self.form_key)
-            self._array = self._nplike.asarray(self.generator())
+            self._array = cast(ArrayLike, self._nplike.asarray(self.generator()))
         return cast(ArrayLike, self._array)
 
     @property
@@ -115,11 +113,8 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         )
 
     def view(self, dtype: DTypeLike) -> Self:
+        # TODO: Should views return a view of the underlying NDArray if it's materialized?
         dtype = np.dtype(dtype)
-
-        if self.is_materialized:
-            return self._array.view(dtype)
-
         if len(self._shape) >= 1:
             last, remainder = divmod(
                 self._shape[-1] * self._dtype.itemsize, dtype.itemsize
