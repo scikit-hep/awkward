@@ -160,6 +160,12 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def tolist(self) -> NumpyLike:
         return self.materialize().tolist()
 
+    @property
+    def ctypes(self):
+        if type(self._nplike).__name__ == "Cupy":
+            raise AttributeError("Cupy ndarrays do not have a ctypes attribute.")
+        return self.materialize().ctypes
+
     def __array__(self, *args, **kwargs):
         raise AssertionError(
             "The '__array__' method should never be called directly on a VirtualArray."
