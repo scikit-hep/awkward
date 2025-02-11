@@ -83,6 +83,7 @@
     :caption: Restructuring records (columns)
 
     generated/ak.zip
+    generated/ak.zip_no_broadcast
     generated/ak.unzip
     generated/ak.merge_union_of_records
     generated/ak.merge_option_of_records
@@ -294,6 +295,7 @@
     generated/ak.without_field
     generated/ak.with_parameter
     generated/ak.without_parameters
+    generated/ak.with_named_axis
 
 .. toctree::
     :caption: Overriding behavior
@@ -325,7 +327,7 @@
     generated/ak.zeros_like
     generated/ak.ones_like
     generated/ak.full_like
-    
+
 .. toctree::
     :caption: Third-party integration
 
@@ -385,7 +387,7 @@
 
 .. toctree::
     :caption: Low-level types: "forms"
-    
+
     generated/ak.forms.Form
     generated/ak.forms.BitMaskedForm
     generated/ak.forms.ByteMaskedForm
