@@ -4,12 +4,9 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.virtual import VirtualArray
 
 __all__ = ("materialize",)
-
-np = NumpyMetadata.instance()
 
 
 @high_level_function()
