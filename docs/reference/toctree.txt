@@ -296,6 +296,7 @@
     generated/ak.with_parameter
     generated/ak.without_parameters
     generated/ak.with_named_axis
+    generated/ak.without_named_axis
 
 .. toctree::
     :caption: Overriding behavior
