@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import reduce
 from operator import mul
 
+import awkward as ak
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -47,7 +48,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         generator: Callable[[], ArrayLike],
         form_key: str | None = None,
     ) -> None:
-        if type(nplike).__name__ not in ("Numpy", "Cupy"):
+        if not isinstance(nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)):
             raise ValueError(
                 f"Only numpy and cupy nplikes are supported for VirtualArray. Received {type(nplike)}"
             )
@@ -162,9 +163,13 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def ctypes(self):
-        if type(self._nplike).__name__ == "Cupy":
+        if isinstance((self._nplike), ak._nplikes.cupy.Cupy):
             raise AttributeError("Cupy ndarrays do not have a ctypes attribute.")
         return self.materialize().ctypes
+
+    @property
+    def data(self):
+        return self.materialize().data
 
     def __array__(self, *args, **kwargs):
         raise AssertionError(
