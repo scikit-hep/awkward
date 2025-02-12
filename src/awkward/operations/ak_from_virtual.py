@@ -19,7 +19,6 @@ numpy = Numpy.instance()
 @high_level_function()
 def from_virtual(
     form,
-    length,
     container,
     buffer_key="{form_key}-{attribute}",
     *,
