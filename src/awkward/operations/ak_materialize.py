@@ -24,8 +24,21 @@ def materialize(
 
 
 def _impl(array, highlevel, behavior, attrs):
+    if not isinstance(
+        array,
+        (
+            ak.highlevel.Array,
+            ak.highlevel.Record,
+            ak.contents.Content,
+            ak.record.Record,
+        ),
+    ):
+        return array
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
+        layout = ctx.unwrap(
+            array, allow_record=True, allow_unknown=True, primitive_policy="error"
+        )
 
     def action(layout, backend, **kwargs):
         if isinstance(layout, ak.contents.NumpyArray):
@@ -38,5 +51,10 @@ def _impl(array, highlevel, behavior, attrs):
         else:
             return None
 
-    out = ak._do.recursively_apply(layout, action)
+    out = ak._do.recursively_apply(
+        layout,
+        action,
+        numpy_to_regular=False,
+        return_simplified=False,
+    )
     return ctx.wrap(out, highlevel=highlevel)

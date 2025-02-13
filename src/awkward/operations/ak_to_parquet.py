@@ -240,7 +240,7 @@ def _impl(
 ):
     # Implementation
 
-    data = array
+    data = ak.operations.materialize(array)
 
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
 
