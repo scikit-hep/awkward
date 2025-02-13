@@ -16,6 +16,23 @@ def materialize(
     behavior=None,
     attrs=None,
 ):
+    """
+    Args:
+        array : array_like
+            An array with possible virtual buffers materialize.
+        highlevel (bool, default is True): If True, return an #ak.Array;
+            otherwise, return a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
+
+    Traverses the input array and materializes any virtual buffers.
+    The buffers of the returned array are no longer `VirtualArray` objects.
+    They will become either `numpy.ndarray` or `cupy.ndarray` objects depending on the array's backend.
+    Possible inputs that will be traversed are instances of #ak.Array, #ak.Record and #ak.contents.Content.
+    All other types of inputs will be returned as is.
+    """
     # Dispatch
     yield (array,)
 
@@ -30,7 +47,6 @@ def _impl(array, highlevel, behavior, attrs):
             ak.highlevel.Array,
             ak.highlevel.Record,
             ak.contents.Content,
-            ak.record.Record,
         ),
     ):
         return array
