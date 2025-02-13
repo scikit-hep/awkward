@@ -7,6 +7,7 @@ import datetime
 import json
 import os
 import shutil
+import sys
 import time
 from collections import OrderedDict
 from itertools import product
@@ -16,6 +17,11 @@ import yaml
 from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+try:
+    yaml_loader = yaml.CSafeLoader if sys._is_gil_enabled() else yaml.SafeLoader
+except AttributeError:
+    yaml_loader = yaml.CSafeLoader
 
 
 def reproducible_datetime():
@@ -203,7 +209,7 @@ def readspec():
     specdict = {}
     specdict_unit = {}
     with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as f:
-        loadfile = yaml.load(f, Loader=yaml.CSafeLoader)
+        loadfile = yaml.load(f, Loader=yaml_loader)
 
     indspec = loadfile["kernels"]
     with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
@@ -392,7 +398,7 @@ def awkward_ListArray_combinations_step(
         with open(
             os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")
         ) as specfile:
-            indspec = yaml.load(specfile, Loader=yaml.CSafeLoader)["kernels"]
+            indspec = yaml.load(specfile, Loader=yaml_loader)["kernels"]
             for spec in indspec:
                 if "def " in spec["definition"]:
                     outfile.write(spec["definition"] + "\n")
