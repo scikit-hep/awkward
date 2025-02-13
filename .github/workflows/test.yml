@@ -72,7 +72,11 @@ jobs:
           - python-version: '3.13t'
             python-architecture: x64
             runs-on: ubuntu-latest
-            dependencies-kind: full
+            dependencies-kind: nogil
+          - python-version: '3.13t'
+            python-architecture: x64
+            runs-on: windows-latest
+            dependencies-kind: nogil
 
     runs-on: ${{ matrix.runs-on }}
 
