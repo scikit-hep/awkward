@@ -170,6 +170,7 @@ class Cupy(ArrayModuleNumpyLike):
         Return `True` if the given object is a cupy buffer, otherwise `False`.
 
         """
+        # TODO: Implement this fore virtual arrays
         module, _, suffix = type_.__module__.partition(".")
         return module == "cupy"
 
