@@ -76,7 +76,7 @@ def backend_of_obj(obj, default: D | Sentinel = UNSET) -> Backend | D:
         if isinstance(obj.nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)):
             cls = obj.nplike.ndarray
         else:
-            raise ValueError(
+            raise TypeError(
                 f"Only numpy and cupy nplikes are supported for VirtualArray. Received {type(obj.nplike)}"
             )
     else:

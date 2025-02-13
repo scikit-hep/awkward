@@ -78,9 +78,18 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     def ascontiguousarray(
         self, x: ArrayLikeT | PlaceholderArray | VirtualArray
     ) -> ArrayLikeT | PlaceholderArray | VirtualArray:
-        # TODO: Should this materialize virtual arrays?
-        if isinstance(x, (PlaceholderArray, VirtualArray)):
+        if isinstance(x, PlaceholderArray):
             return x
+        elif isinstance(x, VirtualArray):
+            if x.is_materialized:
+                return self._module.ascontiguousarray(x.materialize())
+            else:
+                return VirtualArray(
+                    x.nplike,
+                    x.shape,
+                    x.dtype,
+                    lambda: self._module.ascontiguousarray(x.materialize()),
+                )
         else:
             return self._module.ascontiguousarray(x)
 
@@ -556,13 +565,14 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     def strides(
         self, x: ArrayLikeT | PlaceholderArray | VirtualArray
     ) -> tuple[ShapeItem, ...]:
-        if isinstance(x, (PlaceholderArray, VirtualArray)):
+        if isinstance(x, PlaceholderArray):
             # Assume contiguous
             strides: tuple[ShapeItem, ...] = (x.dtype.itemsize,)
             for item in x.shape[-1:0:-1]:
                 strides = (item * strides[0], *strides)
             return strides
 
+        (x,) = materialize_if_virtual(x)
         return x.strides  # type: ignore[attr-defined]
 
     ############################ ufuncs
@@ -777,4 +787,6 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     @classmethod
     def is_own_array(cls, obj) -> bool:
+        if isinstance(obj, VirtualArray):
+            return cls.is_own_array_type(obj.nplike.ndarray)
         return cls.is_own_array_type(type(obj))

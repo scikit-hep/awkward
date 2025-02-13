@@ -170,13 +170,13 @@ class Cupy(ArrayModuleNumpyLike):
         Return `True` if the given object is a cupy buffer, otherwise `False`.
 
         """
-        # TODO: Implement this fore virtual arrays
+        # TODO: What should this do for virtual arrays
         module, _, suffix = type_.__module__.partition(".")
-        return module == "cupy"
+        return module == "cupy" or suffix == "_nplikes.virtual"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
-        # TODO: Should this materialize virtual arrays?
-        if isinstance(x, (PlaceholderArray, VirtualArray)):
+        if isinstance(x, PlaceholderArray):
             return True
         else:
+            (x,) = materialize_if_virtual(x)
             return x.flags["C_CONTIGUOUS"]  # type: ignore[attr-defined]

@@ -44,7 +44,7 @@ def nplike_of_obj(
         if isinstance(obj.nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)):
             cls = obj.nplike.ndarray
         else:
-            raise ValueError(
+            raise TypeError(
                 f"Only numpy and cupy nplikes are supported for VirtualArray. Received {type(obj.nplike)}"
             )
     else:

@@ -49,7 +49,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         form_key: str | None = None,
     ) -> None:
         if not isinstance(nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)):
-            raise ValueError(
+            raise TypeError(
                 f"Only numpy and cupy nplikes are supported for VirtualArray. Received {type(nplike)}"
             )
 
@@ -116,6 +116,10 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def view(self, dtype: DTypeLike) -> Self:
         # TODO: Should views return a view of the underlying NDArray if it's materialized?
         dtype = np.dtype(dtype)
+
+        if self.is_materialized:
+            return self.materialize().view(dtype)
+
         if len(self._shape) >= 1:
             last, remainder = divmod(
                 self._shape[-1] * self._dtype.itemsize, dtype.itemsize
@@ -172,6 +176,8 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return self.materialize().data
 
     def __array__(self, *args, **kwargs):
+        # TODO: This is used to call np/cp.asarray on the array. Should this materialize the array?
+        # Should it only work if the array is materialized?
         raise AssertionError(
             "The '__array__' method should never be called directly on a VirtualArray."
         )
@@ -248,13 +254,3 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def __iter__(self):
         array = self.materialize()
         return iter(array)
-
-    def __dlpack_device__(self) -> tuple[int, int]:
-        array = self.materialize()
-        return array.__dlpack_device__()
-
-    def __dlpack__(self, *args, **kwargs):
-        array = self.materialize()
-        if args or kwargs:
-            return array.__dlpack__(*args, **kwargs)
-        return array.__dlpack__()
