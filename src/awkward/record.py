@@ -244,6 +244,10 @@ class Record:
     def materialize(self) -> Self:
         return Record(self._array._materialize(), self._at)
 
+    @property
+    def is_materialized(self) -> bool:
+        return self._array._is_materialized
+
     def __copy__(self) -> Self:
         return self.copy()
 
