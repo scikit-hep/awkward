@@ -2347,6 +2347,11 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         offsets = self._offsets.to_nplike(backend.index_nplike)
         return ListOffsetArray(offsets, content, parameters=self._parameters)
 
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        offsets = self._offsets.materialize()
+        return ListOffsetArray(offsets, content, parameters=self._parameters)
+
     def _awkward_strings_to_nonfinite(self, nonfinit_dict):
         if self.parameter("__array__") == "string":
             strings = self.to_list()

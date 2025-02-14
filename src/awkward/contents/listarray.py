@@ -1633,6 +1633,12 @@ class ListArray(ListMeta[Content], Content):
         stops = self._stops.to_nplike(backend.index_nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        starts = self._starts.materialize()
+        stops = self._stops.materialize()
+        return ListArray(starts, stops, content, parameters=self._parameters)
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

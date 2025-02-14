@@ -1182,6 +1182,11 @@ class IndexedArray(IndexedMeta[Content], Content):
         index = self._index.to_nplike(backend.index_nplike)
         return IndexedArray(index, content, parameters=self._parameters)
 
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        index = self._index.materialize()
+        return IndexedArray(index, content, parameters=self._parameters)
+
     def _push_inside_record_or_project(self) -> Self | ak.contents.RecordArray:
         if self.content.is_record:
             return ak.contents.RecordArray(

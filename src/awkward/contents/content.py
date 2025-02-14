@@ -1306,6 +1306,12 @@ class Content(Meta):
     def _to_backend(self, backend: Backend) -> Self:
         raise NotImplementedError
 
+    def materialize(self) -> Content:
+        return self._materialize()
+
+    def _materialize(self) -> Content:
+        raise NotImplementedError
+
     def with_parameter(self, key: str, value: Any) -> Self:
         out = copy.copy(self)
 

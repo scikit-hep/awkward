@@ -874,6 +874,18 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             parameters=self._parameters,
         )
 
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        mask = self._mask.materialize()
+        return BitMaskedArray(
+            mask,
+            content,
+            valid_when=self._valid_when,
+            length=len(self),
+            lsb_order=self._lsb_order,
+            parameters=self._parameters,
+        )
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

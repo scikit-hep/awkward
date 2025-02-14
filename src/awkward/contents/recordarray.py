@@ -1296,6 +1296,16 @@ class RecordArray(RecordMeta[Content], Content):
             backend=backend,
         )
 
+    def _materialize(self) -> Self:
+        contents = [content.materialize() for content in self._contents]
+        return RecordArray(
+            contents,
+            self._fields,
+            length=self._length,
+            parameters=self._parameters,
+            backend=self._backend,
+        )
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

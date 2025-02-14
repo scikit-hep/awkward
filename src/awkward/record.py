@@ -241,6 +241,9 @@ class Record:
         else:
             return Record(self._array._to_backend(backend), self._at)
 
+    def materialize(self) -> Self:
+        return Record(self._array._materialize(), self._at)
+
     def __copy__(self) -> Self:
         return self.copy()
 

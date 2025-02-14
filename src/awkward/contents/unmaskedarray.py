@@ -604,6 +604,10 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         content = self._content.to_backend(backend)
         return UnmaskedArray(content, parameters=self._parameters)
 
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        return UnmaskedArray(content, parameters=self._parameters)
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

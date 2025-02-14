@@ -4,7 +4,6 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._nplikes.virtual import VirtualArray
 
 __all__ = ("materialize",)
 
@@ -30,7 +29,7 @@ def materialize(
     Traverses the input array and materializes any virtual buffers.
     The buffers of the returned array are no longer `VirtualArray` objects.
     They will become either `numpy.ndarray` or `cupy.ndarray` objects depending on the array's backend.
-    Possible inputs that will be traversed are instances of #ak.Array, #ak.Record and #ak.contents.Content.
+    Possible inputs that will be traversed are instances of #ak.Array, #ak.Record, #ak.contents.Content, and #ak.record.Record.
     All other types of inputs will be returned as is.
     """
     # Dispatch
@@ -47,30 +46,12 @@ def _impl(array, highlevel, behavior, attrs):
             ak.highlevel.Array,
             ak.highlevel.Record,
             ak.contents.Content,
+            ak.record.Record,
         ),
     ):
         return array
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(
-            array, allow_record=True, allow_unknown=True, primitive_policy="error"
-        )
-
-    def action(layout, backend, **kwargs):
-        if isinstance(layout, ak.contents.NumpyArray):
-            buffer = layout.data
-            if isinstance(buffer, VirtualArray):
-                out = buffer.materialize()
-            else:
-                out = buffer
-            return ak.contents.NumpyArray(out, parameters=layout.parameters)
-        else:
-            return None
-
-    out = ak._do.recursively_apply(
-        layout,
-        action,
-        numpy_to_regular=False,
-        return_simplified=False,
-    )
+        layout = ctx.unwrap(array, allow_record=True, allow_unknown=False)
+    out = layout.materialize()
     return ctx.wrap(out, highlevel=highlevel)

@@ -1385,6 +1385,14 @@ class NumpyArray(NumpyMeta, Content):
             backend=backend,
         )
 
+    def _materialize(self) -> Self:
+        buffer = self._data
+        if isinstance(buffer, VirtualArray):
+            out = buffer.materialize()
+        else:
+            out = buffer
+        return NumpyArray(out, parameters=self._parameters, backend=self._backend)
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

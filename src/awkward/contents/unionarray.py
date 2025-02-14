@@ -1720,6 +1720,17 @@ class UnionArray(UnionMeta[Content], Content):
             parameters=self._parameters,
         )
 
+    def _materialize(self) -> Self:
+        tags = self._tags.materialize()
+        index = self._index.materialize()
+        contents = [content.materialize() for content in self._contents]
+        return UnionArray(
+            tags,
+            index,
+            contents,
+            parameters=self._parameters,
+        )
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

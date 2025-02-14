@@ -1210,6 +1210,13 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )
 
+    def _materialize(self) -> Self:
+        content = self._content._materialize()
+        mask = self._mask.materialize()
+        return ByteMaskedArray(
+            mask, content, valid_when=self._valid_when, parameters=self._parameters
+        )
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

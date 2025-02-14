@@ -1779,6 +1779,11 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         index = self._index.to_nplike(backend.index_nplike)
         return IndexedOptionArray(index, content, parameters=self._parameters)
 
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        index = self._index.materialize()
+        return IndexedOptionArray(index, content, parameters=self._parameters)
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:
