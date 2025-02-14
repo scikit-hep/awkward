@@ -466,6 +466,10 @@ class EmptyArray(EmptyMeta, Content):
     def _materialize(self) -> Self:
         return EmptyArray(backend=self._backend)
 
+    @property
+    def _is_materialized(self) -> bool:
+        return True
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

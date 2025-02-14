@@ -1217,6 +1217,10 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )
 
+    @property
+    def _is_materialized(self) -> bool:
+        return self._content.is_materialized and self._mask.is_materialized
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

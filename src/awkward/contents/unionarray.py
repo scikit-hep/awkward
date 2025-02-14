@@ -1731,6 +1731,14 @@ class UnionArray(UnionMeta[Content], Content):
             parameters=self._parameters,
         )
 
+    @property
+    def _is_materialized(self) -> bool:
+        return (
+            self._tags.is_materialized
+            and self._index.is_materialized
+            and all(content.is_materialized for content in self._contents)
+        )
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

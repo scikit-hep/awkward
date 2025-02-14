@@ -1639,6 +1639,14 @@ class ListArray(ListMeta[Content], Content):
         stops = self._stops.materialize()
         return ListArray(starts, stops, content, parameters=self._parameters)
 
+    @property
+    def _is_materialized(self) -> bool:
+        return (
+            self._content.is_materialized
+            and self._starts.is_materialized
+            and self._stops.is_materialized
+        )
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

@@ -1312,6 +1312,14 @@ class Content(Meta):
     def _materialize(self) -> Content:
         raise NotImplementedError
 
+    @property
+    def is_materialized(self) -> bool:
+        return self._is_materialized
+
+    @property
+    def _is_materialized(self) -> bool:
+        raise NotImplementedError
+
     def with_parameter(self, key: str, value: Any) -> Self:
         out = copy.copy(self)
 

@@ -172,6 +172,13 @@ class Index:
             out = buffer
         return Index(out, metadata=self.metadata, nplike=self._nplike)
 
+    @property
+    def is_materialized(self) -> bool:
+        buffer = self._data
+        if isinstance(buffer, VirtualArray):
+            return buffer.is_materialized
+        return True
+
     def __len__(self) -> int:
         return int(self.length)
 

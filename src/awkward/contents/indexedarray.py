@@ -1187,6 +1187,10 @@ class IndexedArray(IndexedMeta[Content], Content):
         index = self._index.materialize()
         return IndexedArray(index, content, parameters=self._parameters)
 
+    @property
+    def _is_materialized(self) -> bool:
+        return self._content.is_materialized and self._index.is_materialized
+
     def _push_inside_record_or_project(self) -> Self | ak.contents.RecordArray:
         if self.content.is_record:
             return ak.contents.RecordArray(

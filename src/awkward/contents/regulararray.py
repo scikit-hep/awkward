@@ -1528,6 +1528,10 @@ class RegularArray(RegularMeta[Content], Content):
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
 
+    @property
+    def _is_materialized(self) -> bool:
+        return self._content.is_materialized
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:

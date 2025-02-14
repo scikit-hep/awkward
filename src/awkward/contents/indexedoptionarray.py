@@ -1784,6 +1784,10 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         index = self._index.materialize()
         return IndexedOptionArray(index, content, parameters=self._parameters)
 
+    @property
+    def _is_materialized(self) -> bool:
+        return self._content.is_materialized and self._index.is_materialized
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:
