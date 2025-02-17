@@ -10,7 +10,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._operators import NDArrayOperatorsMixin
-from awkward._typing import TYPE_CHECKING, Any, Callable, ClassVar, DType, Self, cast
+from awkward._typing import TYPE_CHECKING, Any, Callable, DType, Self, cast
 from awkward._util import Sentinel
 
 np = NumpyMetadata.instance()
