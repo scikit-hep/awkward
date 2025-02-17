@@ -32,14 +32,6 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
 
 
 class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
-    # let's keep track of the form keys that have been materialized.
-    #
-    # In future, we could track even more, like the number of times
-    # a form key has been materialized, etc.
-    #
-    # (TODO: Is this set supposed to be thread-local?)
-    _materialized_form_keys: ClassVar[set] = set()
-
     def __init__(
         self,
         nplike: NumpyLike,
@@ -92,7 +84,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
-            self._materialized_form_keys.add(self.form_key)
             self._array = cast(ArrayLike, self._nplike.asarray(self.generator()))
         return cast(ArrayLike, self._array)
 
@@ -114,7 +105,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         )
 
     def view(self, dtype: DTypeLike) -> Self:
-        # TODO: Should views return a view of the underlying NDArray if it's materialized?
         dtype = np.dtype(dtype)
 
         if self.is_materialized:
@@ -254,3 +244,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def __iter__(self):
         array = self.materialize()
         return iter(array)
+
+    # TODO: The following can be implemented, but they will need materialization.
+    # Also older numpy versions don't support them.
+    def __dlpack_device__(self) -> tuple[int, int]:
+        raise RuntimeError("cannot realise an unknown value")
+
+    def __dlpack__(self, stream: Any = None) -> Any:
+        raise RuntimeError("cannot realise an unknown value")

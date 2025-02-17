@@ -1306,10 +1306,10 @@ class Content(Meta):
     def _to_backend(self, backend: Backend) -> Self:
         raise NotImplementedError
 
-    def materialize(self) -> Content:
+    def materialize(self) -> Self:
         return self._materialize()
 
-    def _materialize(self) -> Content:
+    def _materialize(self) -> Self:
         raise NotImplementedError
 
     @property
