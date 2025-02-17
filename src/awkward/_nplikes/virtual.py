@@ -84,7 +84,13 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
-            self._array = cast(ArrayLike, self._nplike.asarray(self.generator()))
+            array = cast(ArrayLike, self._nplike.asarray(self.generator()))
+            if self._shape[0] is not unknown_length:
+                assert self._shape == array.shape, (
+                    f"the array had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
+                )
+            self._shape = array.shape
+            self._array = array
         return cast(ArrayLike, self._array)
 
     @property
@@ -196,14 +202,14 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         if isinstance(index, slice):
             length = self._shape[0]
 
-            if length is unknown_length:
-                return self.materialize().__getitem__(index)
-            elif (
+            if (
                 index.start is unknown_length
                 or index.stop is unknown_length
                 or index.step is unknown_length
             ):
                 return self.materialize().__getitem__(index)
+            if length is unknown_length:
+                new_length = unknown_length
             else:
                 start, stop, step = index.indices(length)
                 new_length = (stop - start) // step
