@@ -115,7 +115,9 @@ def _impl(
 
     getkey = regularize_buffer_key(buffer_key)
 
-    out = _reconstitute(form, container, getkey, use_dtypes_from_form, allow_noncanonical_form)
+    out = _reconstitute(
+        form, container, getkey, use_dtypes_from_form, allow_noncanonical_form
+    )
     return wrap_layout(out, highlevel=highlevel, attrs=attrs, behavior=behavior)
 
 
@@ -243,13 +245,13 @@ def _reconstitute(form, container, getkey, use_dtypes_from_form, simplify):
     elif isinstance(form, ak.forms.ListForm):
         # starts
         starts = container[getkey(form, "starts")]
-        starts_dtype =  index_to_dtype[form.starts]
+        starts_dtype = index_to_dtype[form.starts]
         if use_dtypes_from_form:
             index._dtype = starts_dtype
         assert starts_dtype == starts.dtype
         # stops
         stops = container[getkey(form, "stops")]
-        stops_dtype =  index_to_dtype[form.stops]
+        stops_dtype = index_to_dtype[form.stops]
         if use_dtypes_from_form:
             index._dtype = stops_dtype
         assert stops_dtype == stops.dtype
