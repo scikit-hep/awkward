@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
 from awkward._dispatch import high_level_function
@@ -222,7 +223,9 @@ def _reconstitute(
         if form.inner_shape != ():
             if isinstance(data, VirtualArray):
                 # TODO(pfackeldey): pass down reshaping into the generator function
-                raise ValueError(f"VirtualArray found with more than one dimension: {data}")
+                raise ValueError(
+                    f"VirtualArray found with more than one dimension: {data}"
+                )
             else:
                 data = backend.nplike.reshape(data, (length, *form.inner_shape))
 
@@ -524,7 +527,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
         )
-        if isinstance(index, (PlaceholderArray, VirtualArray)) or isinstance(tags, (PlaceholderArray, VirtualArray)):
+        if isinstance(index, (PlaceholderArray, VirtualArray)) or isinstance(
+            tags, (PlaceholderArray, VirtualArray)
+        ):
             lengths = [unknown_length] * len(form.contents)
         else:
             lengths = []
