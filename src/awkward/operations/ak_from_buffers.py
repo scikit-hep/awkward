@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
 from awkward._dispatch import high_level_function
@@ -163,6 +162,16 @@ def _from_buffer(
     byteorder: str,
     field_path: tuple,
 ) -> ArrayLike:
+    if callable(buffer):
+        # This is the case for VirtualArrays
+        # We're assuming correct byteorder here
+        return VirtualArray(
+            nplike=nplike,
+            shape=(count,),
+            dtype=dtype,
+            generator=buffer,
+            form_key=field_path,
+        )
     # Unknown-length information implies that we didn't load shape-buffers (offsets, etc)
     # for the parent of this node. Thus, this node and its children *must* only
     # contain placeholders
@@ -185,14 +194,6 @@ def _from_buffer(
             )
 
         return array[:count]
-    elif isinstance(buffer, VirtualArray):
-        # we pass VirtualArray through as they are materialized later when needed.
-        #
-        # TODO:
-        # What should we do though with the byteorder?
-        # We could wrap the virtual array's generator return value with `nplike.from_buffer`
-        # and `ak._util.native_to_byteorder` ...
-        return buffer
     else:
         array = nplike.frombuffer(buffer, dtype=dtype, count=count)
         return ak._util.native_to_byteorder(array, byteorder)
@@ -219,7 +220,11 @@ def _reconstitute(
             field_path=field_path,
         )
         if form.inner_shape != ():
-            data = backend.nplike.reshape(data, (length, *form.inner_shape))
+            if isinstance(data, VirtualArray):
+                # TODO(pfackeldey): pass down reshaping into the generator function
+                raise ValueError(f"VirtualArray found with more than one dimension: {data}")
+            else:
+                data = backend.nplike.reshape(data, (length, *form.inner_shape))
 
         return ak.contents.NumpyArray(
             data, parameters=form._parameters, backend=backend
@@ -320,7 +325,7 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
         )
-        if isinstance(index, PlaceholderArray):
+        if isinstance(index, (PlaceholderArray, VirtualArray)):
             next_length = unknown_length
         else:
             next_length = (
@@ -356,7 +361,7 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
         )
-        if isinstance(index, PlaceholderArray):
+        if isinstance(index, (PlaceholderArray, VirtualArray)):
             next_length = unknown_length
         else:
             next_length = (
@@ -405,7 +410,7 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
         )
-        if isinstance(stops, PlaceholderArray):
+        if isinstance(stops, (PlaceholderArray, VirtualArray)):
             next_length = unknown_length
         else:
             reduced_stops = stops[starts != stops]
@@ -440,7 +445,7 @@ def _reconstitute(
             field_path=field_path,
         )
 
-        if isinstance(offsets, PlaceholderArray):
+        if isinstance(offsets, (PlaceholderArray, VirtualArray)):
             next_length = unknown_length
         else:
             next_length = 0 if len(offsets) == 1 else offsets[-1]
@@ -519,7 +524,7 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
         )
-        if isinstance(index, PlaceholderArray) or isinstance(tags, PlaceholderArray):
+        if isinstance(index, (PlaceholderArray, VirtualArray)) or isinstance(tags, (PlaceholderArray, VirtualArray)):
             lengths = [unknown_length] * len(form.contents)
         else:
             lengths = []
