@@ -17,6 +17,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
+from awkward._nplikes.virtual import VirtualArray
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import (
@@ -477,9 +478,18 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._mask, PlaceholderArray):
+        is_placeholder = isinstance(self._mask, PlaceholderArray)
+        if is_placeholder:
             return True
         return self._content._is_getitem_at_placeholder()
+
+    def _is_getitem_at_virtual(self) -> bool:
+        is_virtual = (
+            isinstance(self._mask, VirtualArray) and not self._mask.is_materialized
+        )
+        if is_virtual:
+            return True
+        return self._content._is_getitem_at_virtual()
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
@@ -863,6 +873,22 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             lsb_order=self._lsb_order,
             parameters=self._parameters,
         )
+
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        mask = self._mask.materialize()
+        return BitMaskedArray(
+            mask,
+            content,
+            valid_when=self._valid_when,
+            length=len(self),
+            lsb_order=self._lsb_order,
+            parameters=self._parameters,
+        )
+
+    @property
+    def _is_materialized(self) -> bool:
+        return self._content.is_materialized and self._mask.is_materialized
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool

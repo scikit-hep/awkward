@@ -59,6 +59,7 @@ from awkward.operations.ak_isclose import *
 from awkward.operations.ak_linear_fit import *
 from awkward.operations.ak_local_index import *
 from awkward.operations.ak_mask import *
+from awkward.operations.ak_materialize import *
 from awkward.operations.ak_max import *
 from awkward.operations.ak_mean import *
 from awkward.operations.ak_merge_option_of_records import *

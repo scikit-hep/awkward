@@ -18,6 +18,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
+from awkward._nplikes.virtual import VirtualArray
 from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
@@ -542,12 +543,28 @@ class UnionArray(UnionMeta[Content], Content):
         return self._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._tags, PlaceholderArray) or isinstance(
-            self._index, PlaceholderArray
-        ):
+        is_placeholder_tags = isinstance(self._tags, PlaceholderArray)
+        is_placeholder_index = isinstance(self._index, PlaceholderArray)
+        is_placeholder = is_placeholder_tags or is_placeholder_index
+        if is_placeholder:
             return True
         for content in self._contents:
             if content._is_getitem_at_placeholder():
+                return True
+        return False
+
+    def _is_getitem_at_virtual(self) -> bool:
+        is_virtual_tags = (
+            isinstance(self._tags, VirtualArray) and not self._tags.is_materialized
+        )
+        is_virtual_index = (
+            isinstance(self._index, VirtualArray) and not self._index.is_materialized
+        )
+        is_virtual = is_virtual_tags or is_virtual_index
+        if is_virtual:
+            return True
+        for content in self._contents:
+            if content._is_getitem_at_virtual():
                 return True
         return False
 
@@ -1701,6 +1718,25 @@ class UnionArray(UnionMeta[Content], Content):
             index,
             contents,
             parameters=self._parameters,
+        )
+
+    def _materialize(self) -> Self:
+        tags = self._tags.materialize()
+        index = self._index.materialize()
+        contents = [content.materialize() for content in self._contents]
+        return UnionArray(
+            tags,
+            index,
+            contents,
+            parameters=self._parameters,
+        )
+
+    @property
+    def _is_materialized(self) -> bool:
+        return (
+            self._tags.is_materialized
+            and self._index.is_materialized
+            and all(content.is_materialized for content in self._contents)
         )
 
     def _is_equal_to(

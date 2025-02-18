@@ -292,6 +292,9 @@ class RegularArray(RegularMeta[Content], Content):
     def _is_getitem_at_placeholder(self) -> bool:
         return False
 
+    def _is_getitem_at_virtual(self) -> bool:
+        return False
+
     def _getitem_at(self, where: IndexType):
         index_nplike = self._backend.index_nplike
         where = index_nplike.regularize_index_for_length(where, self._length)
@@ -1518,6 +1521,16 @@ class RegularArray(RegularMeta[Content], Content):
         return RegularArray(
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
+
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        return RegularArray(
+            content, self._size, zeros_length=self._length, parameters=self._parameters
+        )
+
+    @property
+    def _is_materialized(self) -> bool:
+        return self._content.is_materialized
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
