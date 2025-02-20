@@ -45,6 +45,9 @@ class ArrayLike(Protocol):
     def T(self) -> Self: ...
 
     @abstractmethod
+    def tolist(self) -> list: ...
+
+    @abstractmethod
     def __getitem__(
         self,
         key: SupportsIndex

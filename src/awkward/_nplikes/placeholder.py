@@ -125,6 +125,9 @@ class PlaceholderArray(ArrayLike):
                 msg += "please report it to the developers at: https://github.com/scikit-hep/awkward/issues"
             raise TypeError(msg)
 
+    def tolist(self) -> list:
+        raise RuntimeError
+
     def __setitem__(self, key, value):
         raise RuntimeError
 

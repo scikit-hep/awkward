@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy
 
+from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -12,13 +13,13 @@ from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._typing import TYPE_CHECKING, Final, Literal
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
+    pass
 
 np = NumpyMetadata.instance()
 
 
 @register_nplike
-class Numpy(ArrayModuleNumpyLike["NDArray"]):
+class Numpy(ArrayModuleNumpyLike):
     is_eager: Final = True
     supports_structured_dtypes: Final = True
 
@@ -49,7 +50,7 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
         # TODO: What should this do for VirtualArray?
         return issubclass(type_, (numpy.ndarray, VirtualArray))
 
-    def is_c_contiguous(self, x: NDArray | PlaceholderArray) -> bool:
+    def is_c_contiguous(self, x: ArrayLike) -> bool:
         if isinstance(x, PlaceholderArray):
             return True
         else:
@@ -58,7 +59,7 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
 
     def packbits(
         self,
-        x: NDArray,
+        x: ArrayLike,
         *,
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
@@ -68,7 +69,7 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
 
     def unpackbits(
         self,
-        x: NDArray,
+        x: ArrayLike,
         *,
         axis: int | None = None,
         count: int | None = None,

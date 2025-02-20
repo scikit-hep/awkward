@@ -117,7 +117,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         dtype = np.dtype(dtype)
 
         if self.is_materialized:
-            return self.materialize().view(dtype)
+            return self.materialize().view(dtype)  # type: ignore[return-value]
 
         if len(self._shape) >= 1:
             last, remainder = divmod(
@@ -161,7 +161,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         self.materialize()
         return self
 
-    def tolist(self) -> NumpyLike:
+    def tolist(self) -> list:
         return self.materialize().tolist()
 
     @property
