@@ -90,7 +90,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         if self._array is UNMATERIALIZED:
             array = cast(ArrayLike, self._nplike.asarray(self.generator()))
             assert self._shape == array.shape, (
-                    f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
+                f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
             )
             self._shape = array.shape
             self._array = array
