@@ -42,7 +42,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     ) -> None:
         if not isinstance(nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)):
             raise TypeError(
-                f"Only numpy and cupy nplikes are supported for VirtualArray. Received {type(nplike)}"
+                f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(nplike)}"
+            )
+        if any(dim is unknown_length for dim in shape):
+            raise ValueError(
+                f"{type(self).__name__} does not support unknown_length in its shape. Received shape {shape}."
             )
 
         # array metadata
@@ -85,10 +89,9 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
             array = cast(ArrayLike, self._nplike.asarray(self.generator()))
-            if self._shape[0] is not unknown_length:
-                assert self._shape == array.shape, (
-                    f"the array had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
-                )
+            assert self._shape == array.shape, (
+                    f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
+            )
             self._shape = array.shape
             self._array = array
         return cast(ArrayLike, self._array)
@@ -120,7 +123,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             last, remainder = divmod(
                 self._shape[-1] * self._dtype.itemsize, dtype.itemsize
             )
-            if remainder is not unknown_length and remainder != 0:
+            if remainder != 0:
                 raise ValueError(
                     "new size of array with larger dtype must be a "
                     "divisor of the total size in bytes (of the last axis of the array)"
@@ -175,7 +178,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         # TODO: This is used to call np/cp.asarray on the array. Should this materialize the array?
         # Should it only work if the array is materialized?
         raise AssertionError(
-            "The '__array__' method should never be called directly on a VirtualArray."
+            f"The '__array__' method should never be called directly on a {type(self).__name__}."
         )
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
@@ -207,9 +210,9 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                 or index.stop is unknown_length
                 or index.step is unknown_length
             ):
-                return self.materialize().__getitem__(index)
-            if length is unknown_length:
-                new_length = unknown_length
+                raise ValueError(
+                    f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided."
+                )
             else:
                 start, stop, step = index.indices(length)
                 new_length = (stop - start) // step
