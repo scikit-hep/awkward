@@ -45,7 +45,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                 f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(nplike)}"
             )
         if any(dim is unknown_length for dim in shape):
-            raise ValueError(
+            raise TypeError(
                 f"{type(self).__name__} does not support unknown_length in its shape. Received shape {shape}."
             )
 
@@ -210,7 +210,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                 or index.stop is unknown_length
                 or index.step is unknown_length
             ):
-                raise ValueError(
+                raise TypeError(
                     f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided."
                 )
             else:
