@@ -38,7 +38,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         shape: tuple[ShapeItem, ...],
         dtype: DType,
         generator: Callable[[], ArrayLike],
-        form_key: str | None = None,
     ) -> None:
         if not isinstance(nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)):
             raise TypeError(
@@ -55,7 +54,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         self._dtype = np.dtype(dtype)
         self._array: Sentinel | ArrayLike = UNMATERIALIZED
         self._generator = generator
-        self._form_key = form_key
 
     @property
     def dtype(self) -> DType:
@@ -110,7 +108,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             self._shape[::-1],
             self._dtype,
             lambda: self.materialize().T,
-            self._form_key,
         )
 
     def view(self, dtype: DTypeLike) -> Self:
@@ -136,22 +133,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             shape,
             dtype,
             lambda: self.materialize().view(dtype),
-            self._form_key,
         )
 
     @property
     def generator(self) -> Callable:
         return self._generator
-
-    @property
-    def form_key(self) -> str | None:
-        return self._form_key
-
-    @form_key.setter
-    def form_key(self, value: str | None):
-        if value is not None and not isinstance(value, str):
-            raise TypeError("form_key must be None or a string")
-        self._form_key = value
 
     @property
     def nplike(self) -> NumpyLike:
@@ -222,7 +208,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                 (new_length,),
                 self._dtype,
                 lambda: self.materialize()[index],
-                self._form_key,
             )
         else:
             return self.materialize().__getitem__(index)

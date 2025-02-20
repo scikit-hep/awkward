@@ -171,7 +171,6 @@ def _from_buffer(
             shape=(count,),
             dtype=dtype,
             generator=buffer,
-            form_key=field_path,
         )
     # Unknown-length information implies that we didn't load shape-buffers (offsets, etc)
     # for the parent of this node. Thus, this node and its children *must* only
