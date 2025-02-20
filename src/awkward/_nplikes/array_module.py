@@ -761,10 +761,10 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         precision: int | None = None,
         suppress_small: bool | None = None,
     ):
-        if isinstance(x, PlaceholderArray) or (
-            isinstance(x, VirtualArray) and not x.is_materialized
-        ):
-            return "[## ... ##]"
+        if isinstance(x, PlaceholderArray):
+            return "[XX ... XX]"
+        if isinstance(x, VirtualArray) and not x.is_materialized:
+            return "[?? ... ??]"
         (x,) = materialize_if_virtual(x)
         return self._module.array_str(
             x,

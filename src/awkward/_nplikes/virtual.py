@@ -194,7 +194,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __str__(self):
         if self.ndim == 0:
-            return "##"
+            return "??"
         else:
             return repr(self)
 
