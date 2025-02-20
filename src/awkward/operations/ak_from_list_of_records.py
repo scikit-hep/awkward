@@ -18,13 +18,20 @@ def from_lists_of_records(array, axis=0):
 
 
 def _impl(array, axis):
+    list_found = False
+
     def transform(layout, depth, **kwargs):
-        if depth == axis + 1:
-            if not layout.is_list:
-                raise ValueError(f"No list at axis={axis}")
+        nonlocal list_found
+        if not layout.is_list:
+            return
+        if axis is None or depth == axis + 1:
+            list_found = True
             return ak.contents.RecordArray(
                 ak.unzip(layout, highlevel=False),
-                layout.fields,
+                None if layout.is_tuple else layout.fields,
             )
 
-    return ak.transform(transform, array)
+    result = ak.transform(transform, array)
+    if not list_found:
+        raise ValueError(f"No list found using axis={axis} in the given array")
+    return result

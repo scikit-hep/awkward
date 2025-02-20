@@ -9,7 +9,7 @@ __all__ = ("to_lists_of_records",)
 
 
 @high_level_function()
-def to_lists_of_records(array, axis=0, depth_limit=None):
+def to_lists_of_records(array, axis=None, depth_limit=None):
     # Dispatch
     yield (array,)
 
@@ -18,14 +18,20 @@ def to_lists_of_records(array, axis=0, depth_limit=None):
 
 
 def _impl(array, axis, depth_limit):
-    def transform(layout, depth, **kwargs):
-        if depth == axis + 1:
-            if not layout.is_record:
-                raise ValueError(f"No record at axis={axis}")
-            return ak.zip(
-                dict(zip(layout.fields, ak.unzip(layout, highlevel=False))),
-                depth_limit=depth_limit,
-                highlevel=False,
-            )
+    record_found = False
 
-    return ak.transform(transform, array)
+    def transform(layout, depth, **kwargs):
+        nonlocal record_found
+        if not layout.is_record:
+            return
+        if axis is None or depth == axis + 1:
+            record_found = True
+            obj = ak.unzip(layout, highlevel=False)
+            if not layout.is_tuple:
+                obj = dict(zip(layout.fields, obj))
+            return ak.zip(obj, depth_limit=depth_limit, highlevel=False)
+
+    result = ak.transform(transform, array)
+    if not record_found:
+        raise ValueError(f"No record found using axis={axis} in the given array")
+    return result

@@ -19,6 +19,16 @@ def test_to_lists_of_records():
     ]
 
 
+def test_to_lists_of_records_tuple():
+    t = ak.Array([([1, 2, 3], [4, 5, 6]), ([7, 8], [9, 10]), ([], [])])
+    assert ak.to_lists_of_records(t).typestr == "3 * var * (int64, int64)"
+    assert ak.to_lists_of_records(t).tolist() == [
+        [(1, 4), (2, 5), (3, 6)],
+        [(7, 9), (8, 10)],
+        [],
+    ]
+
+
 def test_to_lists_of_records_axis_1():
     b = ak.Array(
         [
@@ -63,6 +73,22 @@ def test_from_lists_of_records():
         {"a": [1, 2, 3], "b": [4, 5, 6]},
         {"a": [7, 8], "b": [9, 10]},
         {"a": [], "b": []},
+    ]
+
+
+def test_from_lists_of_records_tuple():
+    t = ak.Array(
+        [
+            [(1, 4), (2, 5), (3, 6)],
+            [(7, 9), (8, 10)],
+            [],
+        ]
+    )
+    assert ak.from_lists_of_records(t).typestr == "3 * (var * int64, var * int64)"
+    assert ak.from_lists_of_records(t).tolist() == [
+        ([1, 2, 3], [4, 5, 6]),
+        ([7, 8], [9, 10]),
+        ([], []),
     ]
 
 
