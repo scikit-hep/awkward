@@ -48,8 +48,10 @@ class Cupy(ArrayModuleNumpyLike):
     def frombuffer(
         self, buffer, *, dtype: DTypeLike | None = None, count: ShapeItem = -1
     ) -> ArrayLike:
-        assert not isinstance(buffer, (PlaceholderArray, VirtualArray))
-        assert not isinstance(count, (PlaceholderArray, VirtualArray))
+        if isinstance(buffer, PlaceholderArray):
+            raise TypeError("placeholder arrays are not supported in `frombuffer`")
+        if isinstance(buffer, VirtualArray):
+            raise TypeError("virtual arrays are not supported in `frombuffer`")
         np_array = numpy.frombuffer(buffer, dtype=dtype, count=count)
         return self._module.asarray(np_array)
 
