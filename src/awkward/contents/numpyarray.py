@@ -1390,7 +1390,14 @@ class NumpyArray(NumpyMeta, Content):
         return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
     @property
-    def _is_materialized(self) -> bool:
+    def _is_all_materialized(self) -> bool:
+        buffer = self._data
+        if isinstance(buffer, VirtualArray):
+            return buffer.is_materialized
+        return True
+
+    @property
+    def _is_any_materialized(self) -> bool:
         buffer = self._data
         if isinstance(buffer, VirtualArray):
             return buffer.is_materialized

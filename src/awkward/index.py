@@ -169,7 +169,13 @@ class Index:
         return Index(out, metadata=self.metadata, nplike=self._nplike)
 
     @property
-    def is_materialized(self) -> bool:
+    def is_all_materialized(self) -> bool:
+        buffer = self._data
+        if isinstance(buffer, VirtualArray):
+            return buffer.is_materialized
+        return True
+
+    def is_any_materialized(self) -> bool:
         buffer = self._data
         if isinstance(buffer, VirtualArray):
             return buffer.is_materialized

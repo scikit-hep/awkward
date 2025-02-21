@@ -1732,11 +1732,19 @@ class UnionArray(UnionMeta[Content], Content):
         )
 
     @property
-    def _is_materialized(self) -> bool:
+    def _is_all_materialized(self) -> bool:
         return (
-            self._tags.is_materialized
-            and self._index.is_materialized
-            and all(content.is_materialized for content in self._contents)
+            self._tags.is_all_materialized
+            and self._index.is_all_materialized
+            and all(content.is_all_materialized for content in self._contents)
+        )
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return (
+            self._tags.is_any_materialized
+            or self._index.is_any_materialized
+            or any(content.is_any_materialized for content in self._contents)
         )
 
     def _is_equal_to(

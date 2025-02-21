@@ -1313,11 +1313,19 @@ class Content(Meta):
         raise NotImplementedError
 
     @property
-    def is_materialized(self) -> bool:
-        return self._is_materialized
+    def is_all_materialized(self) -> bool:
+        return self._is_all_materialized
 
     @property
-    def _is_materialized(self) -> bool:
+    def _is_all_materialized(self) -> bool:
+        raise NotImplementedError
+
+    @property
+    def is_any_materialized(self) -> bool:
+        return self._is_any_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
         raise NotImplementedError
 
     def with_parameter(self, key: str, value: Any) -> Self:

@@ -609,8 +609,12 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         return UnmaskedArray(content, parameters=self._parameters)
 
     @property
-    def _is_materialized(self) -> bool:
-        return self._content.is_materialized
+    def _is_all_materialized(self) -> bool:
+        return self._content.is_all_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return self._content.is_any_materialized
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool

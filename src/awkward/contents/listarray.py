@@ -1640,11 +1640,19 @@ class ListArray(ListMeta[Content], Content):
         return ListArray(starts, stops, content, parameters=self._parameters)
 
     @property
-    def _is_materialized(self) -> bool:
+    def _is_all_materialized(self) -> bool:
         return (
-            self._content.is_materialized
-            and self._starts.is_materialized
-            and self._stops.is_materialized
+            self._content.is_all_materialized
+            and self._starts.is_all_materialized
+            and self._stops.is_all_materialized
+        )
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return (
+            self._content.is_any_materialized
+            or self._starts.is_any_materialized
+            or self._stops.is_any_materialized
         )
 
     def _is_equal_to(

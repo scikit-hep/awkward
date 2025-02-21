@@ -2353,8 +2353,12 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         return ListOffsetArray(offsets, content, parameters=self._parameters)
 
     @property
-    def _is_materialized(self) -> bool:
-        return self._content.is_materialized and self._offsets.is_materialized
+    def _is_all_materialized(self) -> bool:
+        return self._content.is_all_materialized and self._offsets.is_all_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return self._content.is_any_materialized or self._offsets.is_any_materialized
 
     def _awkward_strings_to_nonfinite(self, nonfinit_dict):
         if self.parameter("__array__") == "string":
