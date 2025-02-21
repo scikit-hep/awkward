@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._layout import maybe_posaxis
 
 __all__ = ("to_lists_of_records",)
 
@@ -19,6 +20,8 @@ def to_lists_of_records(array, axis=None, depth_limit=None):
 
 def _impl(array, axis, depth_limit):
     record_found = False
+    if axis is not None:
+        axis = maybe_posaxis(array.layout, axis, 1)
 
     def transform(layout, depth, **kwargs):
         nonlocal record_found

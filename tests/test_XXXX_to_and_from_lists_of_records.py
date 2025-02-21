@@ -60,7 +60,7 @@ def test_to_lists_of_records_depth_limit_2():
     ]
 
 
-def test_from_lists_of_records():
+def test_to_record_of_lists():
     a = ak.Array(
         [
             [{"a": 1, "b": 4}, {"a": 2, "b": 5}, {"a": 3, "b": 6}],
@@ -68,15 +68,15 @@ def test_from_lists_of_records():
             [],
         ]
     )
-    assert ak.from_lists_of_records(a).typestr == "3 * {a: var * int64, b: var * int64}"
-    assert ak.from_lists_of_records(a).tolist() == [
+    assert ak.to_record_of_lists(a).typestr == "3 * {a: var * int64, b: var * int64}"
+    assert ak.to_record_of_lists(a).tolist() == [
         {"a": [1, 2, 3], "b": [4, 5, 6]},
         {"a": [7, 8], "b": [9, 10]},
         {"a": [], "b": []},
     ]
 
 
-def test_from_lists_of_records_tuple():
+def test_to_record_of_lists_tuple():
     t = ak.Array(
         [
             [(1, 4), (2, 5), (3, 6)],
@@ -84,24 +84,26 @@ def test_from_lists_of_records_tuple():
             [],
         ]
     )
-    assert ak.from_lists_of_records(t).typestr == "3 * (var * int64, var * int64)"
-    assert ak.from_lists_of_records(t).tolist() == [
+    assert ak.to_record_of_lists(t).typestr == "3 * (var * int64, var * int64)"
+    assert ak.to_record_of_lists(t).tolist() == [
         ([1, 2, 3], [4, 5, 6]),
         ([7, 8], [9, 10]),
         ([], []),
     ]
 
 
-def test_from_lists_of_records_axis_1():
-    b = [
-        [[{"a": 1, "b": 4}, {"a": 2, "b": 5}, {"a": 3, "b": 6}]],
-        [[{"a": 7, "b": 9}, {"a": 8, "b": 10}], []],
-    ]
+def test_to_record_of_lists_axis_1():
+    b = ak.Array(
+        [
+            [[{"a": 1, "b": 4}, {"a": 2, "b": 5}, {"a": 3, "b": 6}]],
+            [[{"a": 7, "b": 9}, {"a": 8, "b": 10}], []],
+        ]
+    )
     assert (
-        ak.from_lists_of_records(b, axis=1).typestr
+        ak.to_record_of_lists(b, axis=1).typestr
         == "2 * var * {a: var * int64, b: var * int64}"
     )
-    assert ak.from_lists_of_records(b, axis=1).tolist() == [
+    assert ak.to_record_of_lists(b, axis=1).tolist() == [
         [{"a": [1, 2, 3], "b": [4, 5, 6]}],
         [{"a": [7, 8], "b": [9, 10]}, {"a": [], "b": []}],
     ]

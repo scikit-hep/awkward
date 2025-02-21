@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._layout import maybe_posaxis
 
-__all__ = ("from_lists_of_records",)
+__all__ = ("to_record_of_lists",)
 
 
 @high_level_function()
-def from_lists_of_records(array, axis=0):
+def to_record_of_lists(array, axis=0):
     # Dispatch
     yield (array,)
 
@@ -19,6 +20,8 @@ def from_lists_of_records(array, axis=0):
 
 def _impl(array, axis):
     list_found = False
+    if axis is not None:
+        axis = maybe_posaxis(array.layout, axis, 1)
 
     def transform(layout, depth, **kwargs):
         nonlocal list_found
