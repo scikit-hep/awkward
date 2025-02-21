@@ -10,6 +10,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._operators import NDArrayOperatorsMixin
+from awkward._regularize import is_integer
 from awkward._typing import TYPE_CHECKING, Any, Callable, DType, Self
 from awkward._util import Sentinel
 
@@ -43,7 +44,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             raise TypeError(
                 f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(nplike)}"
             )
-        if any(not isinstance(item, int) for item in shape):
+        if any(not is_integer(dim) for dim in shape):
             raise TypeError(
                 f"{type(self).__name__} supports only shapes of integer dimensions. Received shape {shape}."
             )
