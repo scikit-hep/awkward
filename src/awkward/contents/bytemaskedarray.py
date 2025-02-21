@@ -381,14 +381,14 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        is_placeholder = isinstance(self._mask, PlaceholderArray)
+        is_placeholder = isinstance(self._mask.data, PlaceholderArray)
         if is_placeholder:
             return True
         return self._content._is_getitem_at_placeholder()
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
-            isinstance(self._mask, VirtualArray) and not self._mask.is_materialized
+            isinstance(self._mask.data, VirtualArray) and not self._mask.data.is_materialized
         )
         if is_virtual:
             return True

@@ -478,14 +478,14 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        is_placeholder = isinstance(self._mask, PlaceholderArray)
+        is_placeholder = isinstance(self._mask.data, PlaceholderArray)
         if is_placeholder:
             return True
         return self._content._is_getitem_at_placeholder()
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
-            isinstance(self._mask, VirtualArray) and not self._mask.is_materialized
+            isinstance(self._mask.data, VirtualArray) and not self._mask.data.is_materialized
         )
         if is_virtual:
             return True
@@ -888,11 +888,11 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
     @property
     def _is_all_materialized(self) -> bool:
-        return self._content.is_all_materialized and self._mask.is_materialized
+        return self._content.is_all_materialized and self._mask.is_all_materialized
 
     @property
     def _is_any_materialized(self) -> bool:
-        return self._content.is_any_materialized or self._mask.is_materialized
+        return self._content.is_any_materialized or self._mask.is_any_materialized
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
