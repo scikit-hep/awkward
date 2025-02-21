@@ -485,7 +485,8 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
-            isinstance(self._mask.data, VirtualArray) and not self._mask.data.is_materialized
+            isinstance(self._mask.data, VirtualArray)
+            and not self._mask.data.is_materialized
         )
         if is_virtual:
             return True

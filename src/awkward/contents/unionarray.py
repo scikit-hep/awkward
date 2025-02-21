@@ -555,10 +555,12 @@ class UnionArray(UnionMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual_tags = (
-            isinstance(self._tags.data, VirtualArray) and not self._tags.data.is_materialized
+            isinstance(self._tags.data, VirtualArray)
+            and not self._tags.data.is_materialized
         )
         is_virtual_index = (
-            isinstance(self._index.data, VirtualArray) and not self._index.data.is_materialized
+            isinstance(self._index.data, VirtualArray)
+            and not self._index.data.is_materialized
         )
         is_virtual = is_virtual_tags or is_virtual_index
         if is_virtual:
