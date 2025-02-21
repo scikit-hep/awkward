@@ -70,7 +70,6 @@
 
     generated/ak.from_buffers
     generated/ak.to_buffers
-    generated/ak.from_virtual
     generated/ak.to_packed
     generated/ak.copy
 
