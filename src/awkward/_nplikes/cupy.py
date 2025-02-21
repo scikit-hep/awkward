@@ -172,9 +172,8 @@ class Cupy(ArrayModuleNumpyLike):
         Return `True` if the given object is a cupy buffer, otherwise `False`.
 
         """
-        # TODO: What should this do for virtual arrays
         module, _, suffix = type_.__module__.partition(".")
-        return module == "cupy" or suffix == "_nplikes.virtual"
+        return module == "cupy"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         if isinstance(x, PlaceholderArray):

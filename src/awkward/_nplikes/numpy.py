@@ -47,8 +47,7 @@ class Numpy(ArrayModuleNumpyLike):
         Return `True` if the given object is a numpy buffer, otherwise `False`.
 
         """
-        # TODO: What should this do for VirtualArray?
-        return issubclass(type_, (numpy.ndarray, VirtualArray))
+        return issubclass(type_, numpy.ndarray)
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         if isinstance(x, PlaceholderArray):
