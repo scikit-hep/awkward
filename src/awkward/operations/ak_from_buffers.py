@@ -165,12 +165,14 @@ def _from_buffer(
 ) -> ArrayLike:
     if callable(buffer):
         # This is the case for VirtualArrays
-        # We're assuming correct byteorder here
+        # We use recursion here to pass down the from_buffer and byteorder transformations to the generator
         return VirtualArray(
             nplike=nplike,
             shape=(count,),
             dtype=dtype,
-            generator=buffer,
+            generator=lambda: _from_buffer(
+                nplike, buffer(), dtype, count, byteorder, field_path
+            ),
         )
     # Unknown-length information implies that we didn't load shape-buffers (offsets, etc)
     # for the parent of this node. Thus, this node and its children *must* only
