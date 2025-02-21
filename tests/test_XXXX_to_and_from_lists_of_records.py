@@ -29,7 +29,7 @@ def test_to_lists_of_records_tuple():
     ]
 
 
-def test_to_lists_of_records_axis_1():
+def test_to_lists_of_records_2D():
     b = ak.Array(
         [
             [{"a": [1, 2, 3], "b": [4, 5, 6]}],
@@ -37,10 +37,10 @@ def test_to_lists_of_records_axis_1():
         ]
     )
     assert (
-        ak.to_lists_of_records(b, axis=1).typestr
+        ak.to_lists_of_records(b).typestr
         == "2 * var * var * {a: int64, b: int64}"
     )
-    assert ak.to_lists_of_records(b, axis=1).tolist() == [
+    assert ak.to_lists_of_records(b).tolist() == [
         [[{"a": 1, "b": 4}, {"a": 2, "b": 5}, {"a": 3, "b": 6}]],
         [[{"a": 7, "b": 9}, {"a": 8, "b": 10}], []],
     ]
