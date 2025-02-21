@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike
 from awkward._nplikes.virtual import VirtualArray
@@ -41,12 +40,7 @@ def nplike_of_obj(
     """
 
     if isinstance(obj, VirtualArray):
-        if isinstance(obj.nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)):
-            cls = obj.nplike.ndarray
-        else:
-            raise TypeError(
-                f"Only numpy and cupy nplikes are supported for VirtualArray. Received {type(obj.nplike)}"
-            )
+        cls = obj.nplike.ndarray
     else:
         cls = type(obj)
     try:

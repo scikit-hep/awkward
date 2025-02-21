@@ -791,7 +791,7 @@ class Content(Meta):
         raise NotImplementedError
 
     def _is_getitem_at_virtual(self) -> bool:
-        return NotADirectoryError
+        return NotImplementedError
 
     def _getitem_at(self, where: IndexType):
         raise NotImplementedError

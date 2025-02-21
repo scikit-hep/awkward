@@ -10,7 +10,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._operators import NDArrayOperatorsMixin
-from awkward._typing import TYPE_CHECKING, Any, Callable, DType, Self, cast
+from awkward._typing import TYPE_CHECKING, Any, Callable, DType, Self
 from awkward._util import Sentinel
 
 np = NumpyMetadata.instance()
@@ -43,9 +43,9 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             raise TypeError(
                 f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(nplike)}"
             )
-        if any(dim is unknown_length for dim in shape):
+        if any(not isinstance(item, int) for item in shape):
             raise TypeError(
-                f"{type(self).__name__} does not support unknown_length in its shape. Received shape {shape}."
+                f"{type(self).__name__} supports only shapes of integer dimensions. Received shape {shape}."
             )
 
         # array metadata
@@ -74,25 +74,24 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     @property
     def nbytes(self) -> ShapeItem:
         if self.is_materialized:
-            return cast(ArrayLike, self._array).nbytes
+            return self._array.nbytes  # type: ignore[union-attr]
         return 0
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
-        out: tuple[ShapeItem, ...] = (self._dtype.itemsize,)
-        for item in reversed(self._shape):
-            out = (item * out[0], *out)
-        return out
+        return self.materialize().strides  # type: ignore[attr-defined]
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
-            array = cast(ArrayLike, self._nplike.asarray(self.generator()))
+            array = self._nplike.asarray(self.generator())
             assert self._shape == array.shape, (
                 f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
             )
-            self._shape = array.shape
+            assert self._dtype == array.dtype, (
+                f"{type(self).__name__} had dtype {self._dtype} before materialization while the materialized array has dtype {array.dtype}"
+            )
             self._array = array
-        return cast(ArrayLike, self._array)
+        return self._array  # type: ignore[return-value]
 
     @property
     def is_materialized(self) -> bool:
@@ -141,11 +140,23 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def nplike(self) -> NumpyLike:
+        if not isinstance(
+            self._nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)
+        ):
+            raise TypeError(
+                f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(self._nplike)}"
+            )
         return self._nplike
 
     def copy(self) -> VirtualArray:
-        self.materialize()
-        return self
+        new_virtual = type(self)(
+            self._nplike,
+            self._shape,
+            self._dtype,
+            lambda: self.materialize().copy(),  # type: ignore[attr-defined]
+        )
+        new_virtual.materialize()
+        return new_virtual
 
     def tolist(self) -> list:
         return self.materialize().tolist()
@@ -161,8 +172,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return self.materialize().data
 
     def __array__(self, *args, **kwargs):
-        # TODO: This is used to call np/cp.asarray on the array. Should this materialize the array?
-        # Should it only work if the array is materialized?
         raise AssertionError(
             f"The '__array__' method should never be called directly on a {type(self).__name__}."
         )
@@ -241,6 +250,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     # TODO: The following can be implemented, but they will need materialization.
     # Also older numpy versions don't support them.
+    # One needs them to use from_dlpack() on a virtual array.
     def __dlpack_device__(self) -> tuple[int, int]:
         raise RuntimeError("cannot realise an unknown value")
 

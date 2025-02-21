@@ -21,7 +21,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
@@ -1386,11 +1386,7 @@ class NumpyArray(NumpyMeta, Content):
         )
 
     def _materialize(self) -> Self:
-        buffer = self._data
-        if isinstance(buffer, VirtualArray):
-            out = buffer.materialize()
-        else:
-            out = buffer
+        (out,) = materialize_if_virtual(self._data)
         return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
     @property
