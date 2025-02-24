@@ -8,12 +8,15 @@ import awkward as ak
 from awkward import contents, highlevel, record
 from awkward._backends.jax import JaxBackend
 from awkward._layout import HighLevelContext
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Generic, TypeVar, Union
 from awkward.contents import Content
 
 T = TypeVar(
     "T", bound=Union[highlevel.Array, highlevel.Record, contents.Content, record.Record]
 )
+
+np = NumpyMetadata.instance()
 
 
 def split_buffers(buffers: dict) -> tuple[dict, dict]:
@@ -80,6 +83,17 @@ class AuxData(Generic[T]):
         )
 
     def unflatten(self, data_buffers: tuple) -> T:
+        for buffer in data_buffers:
+            # Check that JAX isn't trying to give us float0 types
+            dtype = getattr(buffer, "dtype", None)
+            if dtype == np.dtype([("float0", "V")]):
+                raise TypeError(
+                    f"a buffer with the dtype {buffer.dtype} was encountered during unflattening. "
+                    "JAX uses this dtype for the tangents of integer/boolean outputs; these cannot "
+                    "reasonably be differentiated. Make sure that you are not computing the derivative "
+                    "of a boolean/integer (array) valued function."
+                )
+
         # reconstitute data buffers
         data_buffers = dict(zip(self._data_buffer_keys, data_buffers))
 
