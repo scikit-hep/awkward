@@ -99,8 +99,12 @@ class AuxData(Generic[T]):
         )
 
     def __eq__(self, other: AuxData) -> bool:
-        # should this test for more?
-        return self._form == other._form and self._length == other._length
+        return (
+            self._form.is_equal_to(
+                other=other._form, all_parameters=True, form_key=True
+            )
+            and self._length == other._length
+        )
 
     def __ne__(self, other: AuxData) -> bool:
         return not self == other
