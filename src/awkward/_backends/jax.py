@@ -30,6 +30,7 @@ class JaxBackend(Backend):
 
     @property
     def index_nplike(self) -> Numpy:
+        # we need to ensure Numpy like here for our awkward-cpp kernels (they don't work with Jax arrays)
         return self._numpy
 
     def __init__(self):

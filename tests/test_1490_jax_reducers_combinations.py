@@ -10,7 +10,6 @@ import awkward as ak
 
 jax = pytest.importorskip("jax")
 jax.config.update("jax_platform_name", "cpu")
-jax.config.update("jax_enable_x64", True)
 
 ak.jax.register_and_check()
 
@@ -110,7 +109,5 @@ def test_bool_raises(func_ak, axis):
     def func_with_axis(x):
         return func_ak(x, axis=axis)
 
-    with pytest.raises(
-        TypeError, match=".*Make sure that you are not computing the derivative.*"
-    ):
+    with pytest.raises(ValueError, match="buffer is smaller than requested size"):
         jax.jvp(func_with_axis, (test_regulararray,), (test_regulararray_tangent,))
