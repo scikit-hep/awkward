@@ -102,7 +102,11 @@ class AuxData(Generic[T]):
 
         # reconstruct layout
         layout = ak.operations.from_buffers(
-            self._form, self._length, buffers, backend="jax"
+            self._form,
+            self._length,
+            buffers,
+            backend="jax",
+            highlevel=False,  # we will wrap it later
         )
 
         # wrap layout
