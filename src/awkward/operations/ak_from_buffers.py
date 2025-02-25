@@ -9,6 +9,7 @@ from awkward._backends.dispatch import regularize_backend
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -188,7 +189,8 @@ def _from_buffer(
         return PlaceholderArray(nplike, (count,), dtype, field_path)
     elif isinstance(buffer, PlaceholderArray) or nplike.is_own_array(buffer):
         # Require 1D buffers
-        array = nplike.reshape(buffer.view(dtype), shape=(-1,), copy=False)
+        copy = None if isinstance(nplike, Jax) else False  # Jax can not avoid this
+        array = nplike.reshape(buffer.view(dtype), shape=(-1,), copy=copy)
 
         if array.size < count:
             raise TypeError(

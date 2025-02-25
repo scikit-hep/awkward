@@ -66,7 +66,7 @@ def getArguments(names, local_dict=None, global_dict=None):
                 a = global_dict[name]
             arguments.append(a)  # <--- different from NumExpr
     finally:
-        if clear_local_dict:
+        if clear_local_dict and hasattr(local_dict, "clear"):
             local_dict.clear()
 
     return arguments

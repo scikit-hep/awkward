@@ -59,7 +59,7 @@ class ArgMin(JAXReducer):
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        raise RuntimeError("Cannot differentiate through argmin")
+        raise NotImplementedError()
 
 
 @overloads(_reducers.ArgMax)
@@ -85,7 +85,7 @@ class ArgMax(JAXReducer):
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        raise RuntimeError("Cannot differentiate through argmax")
+        raise NotImplementedError()
 
 
 @overloads(_reducers.Count)
@@ -146,7 +146,7 @@ class CountNonzero(JAXReducer):
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        raise RuntimeError("Cannot differentiate through count_nonzero")
+        raise NotImplementedError()
 
 
 @overloads(_reducers.Sum)
