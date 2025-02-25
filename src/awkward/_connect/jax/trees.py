@@ -6,130 +6,84 @@ import jax
 
 import awkward as ak
 from awkward import contents, highlevel, record
-from awkward._backends.backend import Backend
 from awkward._backends.jax import JaxBackend
-from awkward._behavior import behavior_of
-from awkward._layout import wrap_layout
-from awkward._nplikes.jax import Jax
-from awkward._nplikes.numpy import Numpy
+from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Generic, TypeVar, Union
 from awkward.contents import Content
-from awkward.record import Record
-
-numpy = Numpy.instance()
-np = NumpyMetadata.instance()
-
-
-def find_all_buffers(
-    layout: Content | Record,
-) -> list[numpy.ndarray]:
-    data_ptrs = []
-
-    def action(node, **kwargs):
-        if isinstance(node, ak.contents.NumpyArray):
-            data_ptrs.append(node.data)
-
-    ak._do.recursively_apply(
-        layout, action=action, return_array=False, numpy_to_regular=False
-    )
-
-    return data_ptrs
-
-
-def replace_all_buffers(
-    layout: contents.Content | record.Record,
-    buffers: list,
-    backend: Backend,
-):
-    def action(node, **kwargs):
-        jaxlike = Jax.instance()
-        if isinstance(node, ak.contents.NumpyArray):
-            buffer = buffers.pop(0)
-            # JAX might give us non-buffers, so ignore them
-            if not (numpy.is_own_array(buffer) or jaxlike.is_own_array(buffer)):
-                return
-            else:
-                return ak.contents.NumpyArray(
-                    buffer, parameters=node.parameters, backend=backend
-                )
-
-    return ak._do.recursively_apply(layout, action=action, numpy_to_regular=False)
-
 
 T = TypeVar(
     "T", bound=Union[highlevel.Array, highlevel.Record, contents.Content, record.Record]
 )
 
+np = NumpyMetadata.instance()
+
+
+def split_buffers(buffers: dict) -> tuple[dict, dict]:
+    data_buffers, other_buffers = {}, {}
+    for key, buf in buffers.items():
+        _, attr = key.rsplit("-", 1)
+        if attr == "data":
+            data_buffers[key] = buf
+        else:
+            other_buffers[key] = buf
+    return data_buffers, other_buffers
+
 
 class AuxData(Generic[T]):
+    """
+    This class is used to store the auxiliary data needed to reconstruct an Awkward Array from its buffers.
+
+    AuxData deliberately can not use the layout, because the layout has a reference to the buffers which are replaced
+    by JAX with tracers - this leads to tracer leaks!
+
+    Instead, this class holds the form, length, and other numpy buffers needed to reconstruct it.
+    """
+
     def __init__(
         self,
-        layout: contents.Content | record.Record,
-        is_highlevel: bool,
-        behavior: dict | None = None,
+        data_buffer_keys: tuple[str],
+        other_buffers: dict,
+        form: ak.forms.Form,
+        length: int,
+        ctx: HighLevelContext,
+        highlevel: bool = True,
     ):
-        self._layout = layout
-        self._behavior = behavior
-        self._is_highlevel = is_highlevel
+        self._data_buffer_keys = data_buffer_keys
+        self._other_buffers = other_buffers
+        self._form = form
+        self._length = length
+        self._ctx = ctx
+        self._highlevel = highlevel
 
     @classmethod
     def from_array_or_layout(cls, obj: T):
-        is_highlevel = isinstance(obj, (highlevel.Array, highlevel.Record))
-        if is_highlevel:
-            layout = obj.layout
-        elif isinstance(obj, (contents.Content, record.Record)):
-            layout = obj
-        else:
-            raise TypeError
+        with HighLevelContext() as ctx:
+            layout = ctx.unwrap(obj, allow_record=True, primitive_policy="error")
 
-        # First, make sure we're all JAX
+        # change backend
         jax_backend = JaxBackend.instance()
         layout = layout.to_backend(jax_backend)
 
-        # Now pull out the Jax tracers / arrays
-        buffers = find_all_buffers(layout)
+        # decompose
+        form, length, buffers = ak.operations.to_buffers(layout)
 
-        # # Drop the references to the existing buffers by replacing them with empty buffers
-        # # FIXME: This works-around the fact that AuxData should probably contain only a form and length,
-        # # rather than the actual layout (which holds references to the buffers that we're returning)
-        # # We use NumPy buffers here to ensure that we don't create any new tracers (they're just placeholders)
-        # # This is particularly unpleasant, because we're mixing nplikes here (deliberately)
-        # # We should use `to_buffers`.
-        # import numpy as _numpy
-        #
-        # def create_placeholder_like(array) -> _numpy.ndarray:
-        #     data = _numpy.empty(1, dtype=array.dtype)
-        #     strides = tuple(0 for _ in array.shape)
-        #     return _numpy.lib.stride_tricks.as_strided(
-        #         data, array.shape, strides=strides, writeable=False
-        #     )
-        # layout = replace_all_buffers(
-        #     layout,
-        #     [create_placeholder_like(n) for n in buffers],
-        #     nplike=Numpy.instance(),
-        # )
+        # we need to split buffers into all "data" buffers and all others (e.g. index, offsets, etc.)
+        data_buffers, other_buffers = split_buffers(buffers)
 
-        return buffers, AuxData(
-            layout=layout,
-            is_highlevel=is_highlevel,
-            behavior=behavior_of(obj),
+        # now we need to flatten the data buffers
+        data_buffer_keys, data_flat_buffers = zip(*data_buffers.items())
+        return data_flat_buffers, AuxData(
+            data_buffer_keys=data_buffer_keys,
+            other_buffers=other_buffers,
+            form=form,
+            length=length,
+            ctx=ctx,
+            highlevel=not isinstance(obj, Content),
         )
 
-    @property
-    def layout(self) -> contents.Content | record.Record:
-        return self._layout
-
-    @property
-    def behavior(self) -> dict | None:
-        return self._behavior
-
-    @property
-    def is_highlevel(self) -> bool:
-        return self._is_highlevel
-
-    def unflatten(self, buffers: tuple) -> T:
-        for buffer in buffers:
+    def unflatten(self, data_buffers: tuple) -> T:
+        for buffer in data_buffers:
             # Check that JAX isn't trying to give us float0 types
             dtype = getattr(buffer, "dtype", None)
             if dtype == np.dtype([("float0", "V")]):
@@ -140,28 +94,48 @@ class AuxData(Generic[T]):
                     "of a boolean/integer (array) valued function."
                 )
 
-        # Replace the mixed NumPy-JAX layout leaves with the given buffers (and use the JAX nplike)
-        layout = replace_all_buffers(
-            self._layout, list(buffers), backend=JaxBackend.instance()
+        # reconstitute data buffers
+        data_buffers = dict(zip(self._data_buffer_keys, data_buffers))
+
+        # combine data buffers with other buffers
+        buffers = {**self._other_buffers, **data_buffers}
+
+        # reconstruct layout
+        layout = ak.operations.from_buffers(
+            self._form,
+            self._length,
+            buffers,
+            backend="jax",
+            highlevel=False,  # we will wrap it later
         )
-        return wrap_layout(
-            layout, behavior=self._behavior, highlevel=self._is_highlevel
+
+        # wrap layout
+        return self._ctx.wrap(
+            layout,
+            highlevel=self._highlevel,
+            allow_other=True,
         )
 
     def __eq__(self, other: AuxData) -> bool:
-        return self.layout.is_equal_to(
-            other.layout, index_dtype=False, numpyarray=False
+        return (
+            self._form.is_equal_to(
+                other=other._form, all_parameters=True, form_key=True
+            )
+            and self._length == other._length
         )
+
+    def __ne__(self, other: AuxData) -> bool:
+        return not self == other
 
 
 def jax_flatten(
     array: T,
-) -> tuple[list[numpy.ndarray], AuxData]:
+) -> tuple[tuple, AuxData]:
     result = AuxData.from_array_or_layout(array)
     return result
 
 
-def jax_unflatten(aux_data: AuxData, children: list[numpy.ndarray]) -> T | None:
+def jax_unflatten(aux_data: AuxData, children: tuple) -> T | None:
     return aux_data.unflatten(children)
 
 
