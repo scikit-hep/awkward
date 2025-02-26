@@ -52,6 +52,8 @@ def to_list(array):
 
 
 def _impl(array):
+    array = ak.operations.materialize(array)
+
     if isinstance(
         array,
         (

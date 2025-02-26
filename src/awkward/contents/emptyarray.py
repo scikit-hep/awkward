@@ -177,6 +177,9 @@ class EmptyArray(EmptyMeta, Content):
     def _is_getitem_at_placeholder(self) -> bool:
         return False
 
+    def _is_getitem_at_virtual(self) -> bool:
+        return False
+
     def _getitem_at(self, where: IndexType):
         raise ak._errors.index_error(self, where, "array is empty")
 
@@ -459,6 +462,17 @@ class EmptyArray(EmptyMeta, Content):
 
     def _to_backend(self, backend: Backend) -> Self:
         return EmptyArray(backend=backend)
+
+    def _materialize(self) -> Self:
+        return EmptyArray(backend=self._backend)
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return True
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return True
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
