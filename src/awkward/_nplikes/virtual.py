@@ -87,12 +87,14 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
             array = self._nplike.asarray(self.generator())
-            assert self._shape == array.shape, (
-                f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
-            )
-            assert self._dtype == array.dtype, (
-                f"{type(self).__name__} had dtype {self._dtype} before materialization while the materialized array has dtype {array.dtype}"
-            )
+            if self._shape != array.shape:
+                raise TypeError(
+                    f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
+                )
+            if self._dtype != array.dtype:
+                raise TypeError(
+                    f"{type(self).__name__} had dtype {self._dtype} before materialization while the materialized array has dtype {array.dtype}"
+                )
             self._array = array
         return self._array  # type: ignore[return-value]
 

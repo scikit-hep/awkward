@@ -16,7 +16,7 @@ def numpy_like():
 
 @pytest.fixture
 def simple_array_generator():
-    return lambda: np.array([1, 2, 3, 4, 5])
+    return lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64)
 
 
 @pytest.fixture
@@ -31,7 +31,7 @@ def virtual_array(numpy_like, simple_array_generator):
 
 @pytest.fixture
 def two_dim_array_generator():
-    return lambda: np.array([[1, 2, 3], [4, 5, 6]])
+    return lambda: np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int64)
 
 
 @pytest.fixture
@@ -46,7 +46,7 @@ def two_dim_virtual_array(numpy_like, two_dim_array_generator):
 
 @pytest.fixture
 def scalar_array_generator():
-    return lambda: np.array(42)
+    return lambda: np.array(42, dtype=np.int64)
 
 
 @pytest.fixture
@@ -58,7 +58,7 @@ def scalar_virtual_array(numpy_like, scalar_array_generator):
 
 @pytest.fixture
 def float_array_generator():
-    return lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5])
+    return lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64)
 
 
 @pytest.fixture
@@ -155,7 +155,7 @@ def test_is_materialized(virtual_array):
 def test_materialize_shape_mismatch(numpy_like):
     # Generator returns array with different shape than declared
     with pytest.raises(
-        AssertionError,
+        TypeError,
         match=r"had shape \(5,\) before materialization while the materialized array has shape \(3,\)",
     ):
         va = VirtualArray(
@@ -170,7 +170,7 @@ def test_materialize_shape_mismatch(numpy_like):
 def test_materialize_dtype_mismatch(numpy_like):
     # Generator returns array with different dtype than declared
     with pytest.raises(
-        AssertionError,
+        TypeError,
         match=r"had dtype int64 before materialization while the materialized array has dtype float64",
     ):
         va = VirtualArray(
