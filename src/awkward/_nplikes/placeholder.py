@@ -109,7 +109,9 @@ class PlaceholderArray(ArrayLike):
                 )
             else:
                 start, stop, step = index.indices(length)
-                new_length = (stop - start) // step
+                new_length = max(
+                    0, (stop - start + (step - (1 if step > 0 else -1))) // step
+                )
 
             return type(self)(
                 self._nplike, (new_length,), self._dtype, self._field_path

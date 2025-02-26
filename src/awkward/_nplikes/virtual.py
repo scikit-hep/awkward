@@ -70,6 +70,8 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def size(self) -> ShapeItem:
+        if len(self._shape) == 0:
+            return 1
         return reduce(mul, self._shape)
 
     @property
@@ -172,11 +174,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def data(self):
         return self.materialize().data
 
-    def __array__(self, *args, **kwargs):
-        raise AssertionError(
-            f"The '__array__' method should never be called directly on a {type(self).__name__}."
-        )
-
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
 
@@ -189,7 +186,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return f"VirtualArray(array={self._array}, {dtype}{shape})"
 
     def __str__(self):
-        if self.ndim == 0:
+        if len(self._shape) == 0:
             return "??"
         else:
             return repr(self)
@@ -211,7 +208,9 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                 )
             else:
                 start, stop, step = index.indices(length)
-                new_length = (stop - start) // step
+                new_length = max(
+                    0, (stop - start + (step - (1 if step > 0 else -1))) // step
+                )
 
             return type(self)(
                 self._nplike,
@@ -232,17 +231,19 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __int__(self) -> int:
         array = self.materialize()
-        if array.ndim == 0:
+        if len(array.shape) == 0:
             return int(array)
         raise TypeError("Only scalar arrays can be converted to an int.")
 
     def __index__(self) -> int:
         array = self.materialize()
-        if array.ndim == 0:
+        if len(array.shape) == 0:
             return int(array)
         raise TypeError("Only scalar arrays can be used as an index.")
 
     def __len__(self) -> int:
+        if len(self._shape) == 0:
+            raise TypeError("len() of unsized object")
         return int(self._shape[0])
 
     def __iter__(self):
