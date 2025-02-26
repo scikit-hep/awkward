@@ -87,7 +87,7 @@ def test_init_invalid_nplike():
             "not_an_nplike",
             shape=(5,),
             dtype=np.int64,
-            generator=lambda: np.array([1, 2, 3, 4, 5]),
+            generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
         )
 
 
@@ -98,7 +98,7 @@ def test_init_invalid_shape():
             nplike,
             shape=("not_an_integer", 5),
             dtype=np.int64,
-            generator=lambda: np.array([[1, 2, 3, 4, 5]]),
+            generator=lambda: np.array([[1, 2, 3, 4, 5]], dtype=np.int64),
         )
 
 
@@ -162,7 +162,7 @@ def test_materialize_shape_mismatch(numpy_like):
             numpy_like,
             shape=(5,),
             dtype=np.int64,
-            generator=lambda: np.array([1, 2, 3]),
+            generator=lambda: np.array([1, 2, 3], dtype=np.int64),
         )
         va.materialize()
 
@@ -177,7 +177,7 @@ def test_materialize_dtype_mismatch(numpy_like):
             numpy_like,
             shape=(3,),
             dtype=np.int64,
-            generator=lambda: np.array([1.0, 2.0, 3.0]),
+            generator=lambda: np.array([1.0, 2.0, 3.0], dtype=np.float64),
         )
         va.materialize()
 
@@ -241,7 +241,7 @@ def test_nplike_invalid():
         Numpy.instance(),
         shape=(5,),
         dtype=np.int64,
-        generator=lambda: np.array([1, 2, 3, 4, 5]),
+        generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
     )
     va._nplike = "not_an_nplike"  # Directly modify to create an invalid state
     with pytest.raises(TypeError, match=r"Only numpy and cupy nplikes are supported"):
@@ -315,7 +315,10 @@ def test_getitem_slice_with_step(virtual_array):
 def test_getitem_slice_with_unknown_length():
     nplike = Numpy.instance()
     va = VirtualArray(
-        nplike, shape=(5,), dtype=np.int64, generator=lambda: np.array([1, 2, 3, 4, 5])
+        nplike,
+        shape=(5,),
+        dtype=np.int64,
+        generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
     )
     with pytest.raises(
         TypeError, match=r"does not support slicing with unknown_length"
@@ -339,7 +342,7 @@ def test_bool_scalar(scalar_virtual_array):
     # Test with zero value
     nplike = Numpy.instance()
     va_zero = VirtualArray(
-        nplike, shape=(), dtype=np.int64, generator=lambda: np.array(0)
+        nplike, shape=(), dtype=np.int64, generator=lambda: np.array(0, dtype=np.int64)
     )
     assert bool(va_zero) is False
 
@@ -384,7 +387,7 @@ def test_len_scalar():
     # Scalar arrays don't have a length
     nplike = Numpy.instance()
     scalar_va = VirtualArray(
-        nplike, shape=(), dtype=np.int64, generator=lambda: np.array(42)
+        nplike, shape=(), dtype=np.int64, generator=lambda: np.array(42, dtype=np.int64)
     )
     with pytest.raises(TypeError, match=r"len\(\) of unsized object"):
         len(scalar_va)
@@ -420,10 +423,16 @@ def test_materialize_if_virtual():
 
     nplike = Numpy.instance()
     va1 = VirtualArray(
-        nplike, shape=(3,), dtype=np.int64, generator=lambda: np.array([1, 2, 3])
+        nplike,
+        shape=(3,),
+        dtype=np.int64,
+        generator=lambda: np.array([1, 2, 3], dtype=np.int64),
     )
     va2 = VirtualArray(
-        nplike, shape=(2,), dtype=np.int64, generator=lambda: np.array([4, 5])
+        nplike,
+        shape=(2,),
+        dtype=np.int64,
+        generator=lambda: np.array([4, 5], dtype=np.int64),
     )
     regular_array = np.array([6, 7, 8])
 
@@ -570,7 +579,7 @@ def test_float_array_rounding():
         nplike,
         shape=(5,),
         dtype=np.float64,
-        generator=lambda: np.array([1.1, 2.5, 3.7, 4.2, 5.9]),
+        generator=lambda: np.array([1.1, 2.5, 3.7, 4.2, 5.9], dtype=np.float64),
     )
 
     # Test floor
@@ -593,7 +602,7 @@ def test_float_array_nan():
         nplike,
         shape=(5,),
         dtype=np.float64,
-        generator=lambda: np.array([1.1, np.nan, 3.3, np.nan, 5.5]),
+        generator=lambda: np.array([1.1, np.nan, 3.3, np.nan, 5.5], dtype=np.float64),
     )
 
     # Test isnan
@@ -618,7 +627,7 @@ def test_multidim_slicing(two_dim_virtual_array):
         nplike,
         shape=(2, 3),
         dtype=np.int64,
-        generator=lambda: np.array([[1, 2, 3], [4, 5, 6]]),
+        generator=lambda: np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int64),
     )
 
     # Test advanced indexing
@@ -722,7 +731,7 @@ def test_nested_virtual_arrays():
         nplike,
         shape=(3,),
         dtype=np.int64,
-        generator=lambda: np.array([10, 20, 30]),
+        generator=lambda: np.array([10, 20, 30], np.int64),
     )
 
     # Outer virtual array, generator returns inner virtual array
@@ -747,7 +756,7 @@ def test_complex_numbers():
         nplike,
         shape=(3,),
         dtype=np.complex128,
-        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j]),
+        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
     )
 
     assert va.dtype == np.dtype(np.complex128)
@@ -767,7 +776,7 @@ def test_slice_zero_step():
         nplike,
         shape=(5,),
         dtype=np.int64,
-        generator=lambda: np.array([1, 2, 3, 4, 5]),
+        generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
     )
 
     with pytest.raises(ValueError):
