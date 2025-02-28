@@ -84,6 +84,57 @@ def virtual_numpyarray(float_virtual_array):
     return ak.contents.NumpyArray(float_virtual_array)
 
 
+@pytest.fixture
+def offset_array_generator():
+    return lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64)
+
+
+@pytest.fixture
+def virtual_offset_array(numpy_like, offset_array_generator):
+    return VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=offset_array_generator,
+    )
+
+
+@pytest.fixture
+def content_array_generator():
+    return lambda: np.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    )
+
+
+@pytest.fixture
+def virtual_content_array(numpy_like, content_array_generator):
+    return VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.float64),
+        generator=content_array_generator,
+    )
+
+
+@pytest.fixture
+def listoffsetarray():
+    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+    content = np.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    )
+    return ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+
+@pytest.fixture
+def virtual_listoffsetarray(numpy_like, virtual_offset_array, virtual_content_array):
+    return ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offset_array),
+        ak.contents.NumpyArray(virtual_content_array),
+    )
+
+
 # Test initialization
 def test_init_valid(numpy_like, simple_array_generator):
     va = VirtualArray(
@@ -2532,3 +2583,988 @@ def test_numpyarray_full_like(numpyarray, virtual_numpyarray):
     )
     assert not virtual_numpyarray.is_any_materialized
     assert not virtual_numpyarray.is_all_materialized
+
+
+def test_listoffsetarray_to_list(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.to_list(virtual_listoffsetarray) == ak.to_list(listoffsetarray)
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_to_json(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.to_json(virtual_listoffsetarray) == ak.to_json(listoffsetarray)
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_to_numpy(listoffsetarray, virtual_listoffsetarray):
+    # ListOffsetArray can't be directly converted to numpy for non-rectangular data
+    # Test with flattened data instead
+    assert not virtual_listoffsetarray.is_any_materialized
+    flat_listoffsetarray = ak.flatten(listoffsetarray)
+    flat_virtual_listoffsetarray = ak.flatten(virtual_listoffsetarray)
+    assert np.all(
+        ak.to_numpy(flat_virtual_listoffsetarray) == ak.to_numpy(flat_listoffsetarray)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_to_buffers(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    out1 = ak.to_buffers(listoffsetarray)
+    out2 = ak.to_buffers(virtual_listoffsetarray)
+    # form
+    assert out1[0] == out2[0]
+    # length
+    assert out1[1] == out2[1]
+    # container
+    assert set(out1[2].keys()) == set(out2[2].keys())
+    for key in out1[2]:
+        if isinstance(out2[2][key], VirtualArray):
+            assert not out2[2][key].is_materialized
+            assert np.all(out1[2][key] == out2[2][key])
+            assert out2[2][key].is_materialized
+        else:
+            assert np.all(out1[2][key] == out2[2][key])
+
+
+def test_listoffsetarray_is_valid(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.is_valid(virtual_listoffsetarray) == ak.is_valid(listoffsetarray)
+    assert ak.validity_error(virtual_listoffsetarray) == ak.validity_error(
+        listoffsetarray
+    )
+
+
+def test_listoffsetarray_zip(listoffsetarray, virtual_listoffsetarray):
+    zip1 = ak.zip({"x": listoffsetarray, "y": listoffsetarray})
+    zip2 = ak.zip({"x": virtual_listoffsetarray, "y": virtual_listoffsetarray})
+    assert zip2.layout.is_any_materialized
+    assert not zip2.layout.is_all_materialized
+    assert zip1.fields == zip2.fields
+    assert ak.array_equal(ak.materialize(zip2), zip1)
+
+
+def test_listoffsetarray_unzip(listoffsetarray, virtual_listoffsetarray):
+    zip1 = ak.zip({"x": listoffsetarray, "y": listoffsetarray})
+    zip2 = ak.zip({"x": virtual_listoffsetarray, "y": virtual_listoffsetarray})
+    assert zip2.layout.is_any_materialized
+    unzip1 = ak.unzip(zip1)
+    unzip2 = ak.unzip(zip2)
+    assert unzip2[0].layout.is_any_materialized
+    assert unzip2[1].layout.is_any_materialized
+    assert ak.array_equal(ak.materialize(unzip2[0]), unzip1[0])
+    assert ak.array_equal(ak.materialize(unzip2[1]), unzip1[1])
+
+
+def test_listoffsetarray_concatenate(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.concatenate([listoffsetarray, listoffsetarray]),
+        ak.concatenate([virtual_listoffsetarray, virtual_listoffsetarray]),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_where(listoffsetarray, virtual_listoffsetarray):
+    # We need to use ak.Array for the where function
+    list_array = ak.Array(listoffsetarray)
+    virtual_list_array = ak.Array(virtual_listoffsetarray)
+
+    assert not virtual_list_array.layout.is_any_materialized
+
+    # For nested arrays, we need a compatible mask
+    # Create a mask that's True for some elements in each list
+    mask = ak.Array(
+        [[True, False], [False, True], [True, False, True], [False, True, True]]
+    )
+
+    # Test with a conditional mask
+    result1 = ak.where(mask, list_array, 999)
+    result2 = ak.where(mask, virtual_list_array, 999)
+
+    assert ak.array_equal(result1, result2)
+    assert virtual_list_array.layout.is_any_materialized
+    assert virtual_list_array.layout.is_all_materialized
+
+
+def test_listoffsetarray_unflatten(listoffsetarray, virtual_listoffsetarray):
+    # First flatten the arrays
+    flat_list = ak.flatten(listoffsetarray)
+    flat_virtual = ak.flatten(virtual_listoffsetarray)
+
+    # Define counts for unflattening
+    counts = np.array([2, 2, 3, 3])
+
+    assert virtual_listoffsetarray.is_any_materialized
+
+    # Unflatten and compare
+    result1 = ak.unflatten(flat_list, counts)
+    result2 = ak.unflatten(flat_virtual, counts)
+
+    assert ak.array_equal(result1, result2)
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_num(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(ak.num(virtual_listoffsetarray) == ak.num(listoffsetarray))
+    assert virtual_listoffsetarray.is_any_materialized
+    assert not virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_count(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.count(virtual_listoffsetarray, axis=1) == ak.count(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_count_nonzero(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.count_nonzero(virtual_listoffsetarray, axis=1)
+        == ak.count_nonzero(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_sum(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.sum(virtual_listoffsetarray, axis=1) == ak.sum(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_nansum(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.nansum(virtual_listoffsetarray, axis=1) == ak.nansum(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_prod(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.prod(virtual_listoffsetarray, axis=1) == ak.prod(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_nanprod(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.nanprod(virtual_listoffsetarray, axis=1)
+        == ak.nanprod(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_any(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.any(virtual_listoffsetarray, axis=1) == ak.any(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_all(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.all(virtual_listoffsetarray, axis=1) == ak.all(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_min(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.min(virtual_listoffsetarray, axis=1) == ak.min(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_nanmin(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.nanmin(virtual_listoffsetarray, axis=1) == ak.nanmin(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_max(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.max(virtual_listoffsetarray, axis=1) == ak.max(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_nanmax(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.all(
+        ak.nanmax(virtual_listoffsetarray, axis=1) == ak.nanmax(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_argmin(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.argmin(virtual_listoffsetarray), ak.argmin(listoffsetarray)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_nanargmin(numpy_like):
+    # Create arrays with NaN values to test nanargmin
+    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+    content = np.array(
+        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    )
+
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array(
+            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
+            dtype=np.float64,
+        ),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    # Axis=1 to test within each nested list
+    result1 = ak.nanargmin(array, axis=1)
+    result2 = ak.nanargmin(virtual_array, axis=1)
+    assert ak.array_equal(result1, result2)
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_argmax(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.argmax(virtual_listoffsetarray), ak.argmax(listoffsetarray)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_nanargmax(numpy_like):
+    # Create arrays with NaN values to test nanargmax
+    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+    content = np.array(
+        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    )
+
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array(
+            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
+            dtype=np.float64,
+        ),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    # Axis=1 to test within each nested list
+    result1 = ak.nanargmax(array, axis=1)
+    result2 = ak.nanargmax(virtual_array, axis=1)
+    assert ak.array_equal(result1, result2)
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_sort(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.sort(virtual_listoffsetarray),
+        ak.sort(listoffsetarray),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_argsort(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.argsort(virtual_listoffsetarray),
+        ak.argsort(listoffsetarray),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_is_none(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert np.all(ak.is_none(virtual_listoffsetarray) == ak.is_none(listoffsetarray))
+    assert virtual_listoffsetarray.is_any_materialized
+    assert not virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_drop_none(numpy_like):
+    # Create a ListOffsetArray with some None values
+    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+
+    # Create an IndexedOptionArray for the content that has None values
+    index_data = np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64)
+    content_data = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64)
+
+    index = ak.index.Index(index_data)
+    content = ak.contents.NumpyArray(content_data)
+    indexed_content = ak.contents.IndexedOptionArray(index, content)
+
+    array = ak.contents.ListOffsetArray(ak.index.Index(offsets), indexed_content)
+
+    # Create virtual versions
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+    )
+
+    virtual_index = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(6,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
+    )
+
+    virtual_indexed_content = ak.contents.IndexedOptionArray(
+        ak.index.Index(virtual_index), ak.contents.NumpyArray(virtual_content)
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), virtual_indexed_content
+    )
+
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.drop_none(virtual_array), ak.drop_none(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_pad_none(numpy_like):
+    # Create a regular ListOffsetArray
+    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+    content = np.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    )
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array(
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+        ),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    # Pad each list to length 5
+    assert ak.array_equal(
+        ak.pad_none(virtual_array, 5, axis=1), ak.pad_none(array, 5, axis=1)
+    )
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_fill_none(numpy_like):
+    # Create a ListOffsetArray with some None values
+    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+
+    # Create an IndexedOptionArray for the content that has None values
+    index_data = np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64)
+    content_data = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64)
+
+    index = ak.index.Index(index_data)
+    content = ak.contents.NumpyArray(content_data)
+    indexed_content = ak.contents.IndexedOptionArray(index, content)
+
+    array = ak.contents.ListOffsetArray(ak.index.Index(offsets), indexed_content)
+
+    # Create virtual versions
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+    )
+
+    virtual_index = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(6,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
+    )
+
+    virtual_indexed_content = ak.contents.IndexedOptionArray(
+        ak.index.Index(virtual_index), ak.contents.NumpyArray(virtual_content)
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), virtual_indexed_content
+    )
+
+    assert not virtual_array.is_any_materialized
+    # Fill None values with 999.0
+    assert ak.array_equal(
+        ak.fill_none(virtual_array, 999.0), ak.fill_none(array, 999.0)
+    )
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_firsts(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.firsts(virtual_listoffsetarray),
+        ak.firsts(listoffsetarray),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_singletons(numpy_like):
+    # Create a regular array to test
+    offsets = np.array([0, 1, 2, 3, 4], dtype=np.int64)
+    content = np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64)
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 1, 2, 3, 4], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.singletons(virtual_array), ak.singletons(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_to_regular(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.to_regular(virtual_listoffsetarray, axis=0),
+        ak.to_regular(listoffsetarray, axis=0),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_broadcast_arrays(virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    out = ak.broadcast_arrays(5, virtual_listoffsetarray)
+    assert virtual_listoffsetarray.is_any_materialized
+    assert out[1].layout.is_any_materialized
+    assert not virtual_listoffsetarray.is_all_materialized
+    assert not out[1].layout.is_all_materialized
+    assert ak.to_list(out[1]) == ak.to_list(virtual_listoffsetarray)
+
+
+def test_listoffsetarray_cartesian(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.cartesian([listoffsetarray, listoffsetarray]),
+        ak.cartesian([virtual_listoffsetarray, virtual_listoffsetarray]),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_argcartesian(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.argcartesian([listoffsetarray, listoffsetarray]),
+        ak.argcartesian([virtual_listoffsetarray, virtual_listoffsetarray]),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert not virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_combinations(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    # Need to use axis=1 for nested structures
+    assert ak.array_equal(
+        ak.combinations(virtual_listoffsetarray, 2, axis=1),
+        ak.combinations(listoffsetarray, 2, axis=1),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_argcombinations(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    # Need to use axis=1 for nested structures
+    assert ak.array_equal(
+        ak.argcombinations(virtual_listoffsetarray, 2, axis=1),
+        ak.argcombinations(listoffsetarray, 2, axis=1),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert not virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_nan_to_none(numpy_like):
+    # Create a ListOffsetArray with NaN values
+    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+    content = np.array(
+        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    )
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array(
+            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
+            dtype=np.float64,
+        ),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.nan_to_none(virtual_array), ak.nan_to_none(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_nan_to_num(numpy_like):
+    # Create a ListOffsetArray with NaN values
+    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+    content = np.array(
+        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    )
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array(
+            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
+            dtype=np.float64,
+        ),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.nan_to_num(virtual_array), ak.nan_to_num(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_local_index(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    # For ListOffsetArray, we should use axis=1 to get indices within each list
+    assert ak.array_equal(
+        ak.local_index(virtual_listoffsetarray, axis=1),
+        ak.local_index(listoffsetarray, axis=1),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert not virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_run_lengths(numpy_like):
+    # Create a ListOffsetArray with repeated values for run_lengths test
+    offsets = np.array([0, 3, 6], dtype=np.int64)
+    content = np.array([1, 1, 2, 3, 3, 3], dtype=np.int64)
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 3, 6], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(6,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([1, 1, 2, 3, 3, 3], dtype=np.int64),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    # Need to use axis=1 to check run lengths within each list
+    assert ak.array_equal(ak.run_lengths(virtual_array), ak.run_lengths(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_round(numpy_like):
+    # Create a ListOffsetArray with float values for rounding
+    offsets = np.array([0, 2, 4], dtype=np.int64)
+    content = np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64)
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.round(virtual_array), ak.round(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_isclose(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.isclose(virtual_listoffsetarray, listoffsetarray, rtol=1e-5, atol=1e-8),
+        ak.isclose(listoffsetarray, listoffsetarray, rtol=1e-5, atol=1e-8),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_almost_equal(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.almost_equal(virtual_listoffsetarray, listoffsetarray),
+        ak.almost_equal(listoffsetarray, listoffsetarray),
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_real(numpy_like):
+    # Create a ListOffsetArray with complex values for real test
+    offsets = np.array([0, 2, 3], dtype=np.int64)
+    content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 3], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.complex128),
+        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.real(virtual_array), ak.real(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_imag(numpy_like):
+    # Create a ListOffsetArray with complex values for imag test
+    offsets = np.array([0, 2, 3], dtype=np.int64)
+    content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 3], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.complex128),
+        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.imag(virtual_array), ak.imag(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_angle(numpy_like):
+    # Create a ListOffsetArray with complex values for angle test
+    offsets = np.array([0, 2, 4], dtype=np.int64)
+    content = np.array([1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=np.complex128)
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4], dtype=np.int64),
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.complex128),
+        generator=lambda: np.array(
+            [1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=np.complex128
+        ),
+    )
+
+    virtual_array = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(
+        ak.angle(virtual_array, deg=True),
+        ak.angle(array, deg=True),
+    )
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_listoffsetarray_zeros_like(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.zeros_like(virtual_listoffsetarray), ak.zeros_like(listoffsetarray)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert not virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_ones_like(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.ones_like(virtual_listoffsetarray), ak.ones_like(listoffsetarray)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert not virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_full_like(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.full_like(virtual_listoffsetarray, 100), ak.full_like(listoffsetarray, 100)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert not virtual_listoffsetarray.is_all_materialized
+
+
+# Additional tests for ListOffsetArray-specific operations
+
+
+def test_listoffsetarray_flatten(listoffsetarray, virtual_listoffsetarray):
+    assert not virtual_listoffsetarray.is_any_materialized
+    assert ak.array_equal(
+        ak.flatten(virtual_listoffsetarray, axis=1), ak.flatten(listoffsetarray, axis=1)
+    )
+    assert virtual_listoffsetarray.is_any_materialized
+    assert virtual_listoffsetarray.is_all_materialized
+
+
+def test_listoffsetarray_slicing(listoffsetarray, virtual_listoffsetarray):
+    # Convert to ak.Array for slicing operations
+    list_array = ak.Array(listoffsetarray)
+    virtual_list_array = ak.Array(virtual_listoffsetarray)
+
+    assert not virtual_list_array.layout.is_any_materialized
+
+    # Test slicing the outer dimension
+    assert ak.array_equal(virtual_list_array[1:3], list_array[1:3])
+
+    # Test indexing and then slicing inner dimension
+    assert ak.array_equal(virtual_list_array[0][0:2], list_array[0][0:2])
+
+    assert virtual_list_array.layout.is_any_materialized
+
+
+def test_listoffsetarray_mask_operations(listoffsetarray, virtual_listoffsetarray):
+    list_array = ak.Array(listoffsetarray)
+    virtual_list_array = ak.Array(virtual_listoffsetarray)
+
+    assert not virtual_list_array.layout.is_any_materialized
+
+    # Create a boolean mask
+    mask = ak.Array([True, False, True, False])
+
+    # Test masking
+    assert ak.array_equal(virtual_list_array[mask], list_array[mask])
+
+    assert virtual_list_array.layout.is_any_materialized
+
+
+def test_listoffsetarray_arithmetics(listoffsetarray, virtual_listoffsetarray):
+    list_array = ak.Array(listoffsetarray)
+    virtual_list_array = ak.Array(virtual_listoffsetarray)
+
+    assert not virtual_list_array.layout.is_any_materialized
+
+    # Test addition
+    assert ak.array_equal(virtual_list_array + 10, list_array + 10)
+
+    # Test multiplication
+    assert ak.array_equal(virtual_list_array * 2, list_array * 2)
+
+    # Test division
+    assert ak.array_equal(virtual_list_array / 2, list_array / 2)
+
+    assert virtual_list_array.layout.is_any_materialized
+    assert virtual_list_array.layout.is_all_materialized
