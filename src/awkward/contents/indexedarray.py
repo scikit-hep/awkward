@@ -1101,10 +1101,11 @@ class IndexedArray(IndexedMeta[Content], Content):
         ):
             npindex = self._index.data
             indexmin = self._backend.index_nplike.min(npindex)
+            indexmax = self._backend.index_nplike.max(npindex)
             index = ak.index.Index(
                 npindex - indexmin, nplike=self._backend.index_nplike
             )
-            content = self._content[indexmin : npindex.max() + 1]
+            content = self._content[indexmin : indexmax + 1]
         else:
             if not self._backend.nplike.known_data:
                 self._touch_data(recursive=False)

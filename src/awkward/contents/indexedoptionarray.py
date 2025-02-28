@@ -1671,10 +1671,11 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             npselect = npindex >= 0
             if self._backend.index_nplike.any(npselect):
                 indexmin = self._backend.index_nplike.min(npindex[npselect])
+                indexmax = self._backend.index_nplike.max(npindex)
                 index = ak.index.Index(
                     npindex - indexmin, nplike=self._backend.index_nplike
                 )
-                content = self._content[indexmin : npindex.max() + 1]
+                content = self._content[indexmin : indexmax + 1]
             else:
                 index, content = self._index, self._content
         else:

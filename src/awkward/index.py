@@ -175,6 +175,7 @@ class Index:
             return buffer.is_materialized
         return True
 
+    @property
     def is_any_materialized(self) -> bool:
         buffer = self._data
         if isinstance(buffer, VirtualArray):
