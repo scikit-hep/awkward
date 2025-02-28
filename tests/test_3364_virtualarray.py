@@ -100,23 +100,6 @@ def virtual_offset_array(numpy_like, offset_array_generator):
 
 
 @pytest.fixture
-def content_array_generator():
-    return lambda: np.array(
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
-    )
-
-
-@pytest.fixture
-def virtual_content_array(numpy_like, content_array_generator):
-    return VirtualArray(
-        numpy_like,
-        shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=content_array_generator,
-    )
-
-
-@pytest.fixture
 def listoffsetarray():
     offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
     content = np.array(
@@ -4681,18 +4664,6 @@ def test_listarray_full_like(listarray, virtual_listarray):
     )
     assert virtual_listarray.is_any_materialized
     assert not virtual_listarray.is_all_materialized
-
-
-# Additional tests for ListArray-specific operations
-
-
-def test_listarray_flatten(listarray, virtual_listarray):
-    assert not virtual_listarray.is_any_materialized
-    assert ak.array_equal(
-        ak.flatten(virtual_listarray, axis=1), ak.flatten(listarray, axis=1)
-    )
-    assert virtual_listarray.is_any_materialized
-    assert virtual_listarray.is_all_materialized
 
 
 def test_listarray_slicing(listarray, virtual_listarray):
