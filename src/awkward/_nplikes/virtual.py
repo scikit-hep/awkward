@@ -155,7 +155,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return self._nplike
 
     def copy(self) -> VirtualArray:
-        return self.__copy__()
+        return copy.copy(self)
 
     def tolist(self) -> list:
         return self.materialize().tolist()
