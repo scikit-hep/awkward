@@ -37,7 +37,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         self,
         nplike: NumpyLike,
         shape: tuple[ShapeItem, ...],
-        dtype: DType,
+        dtype: DTypeLike,
         generator: Callable[[], ArrayLike],
     ) -> None:
         if not isinstance(nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)):
