@@ -52,13 +52,22 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLike]):
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
     ) -> ArrayLike | PlaceholderArray:
-        if isinstance(obj, PlaceholderArray) or (
-            isinstance(obj, VirtualArray) and not obj.is_materialized
-        ):
+        if isinstance(obj, PlaceholderArray):
             assert obj.dtype == dtype or dtype is None
             return obj
-        if isinstance(obj, VirtualArray) and obj.is_materialized:
-            obj = obj.materialize()
+        if isinstance(obj, VirtualArray):
+            if obj.is_materialized:
+                obj = obj.materialize()
+            else:
+                if obj.dtype == dtype or dtype is None:
+                    return obj
+                else:
+                    return VirtualArray(
+                        obj.nplike,
+                        obj.shape,
+                        dtype,
+                        lambda: self.asarray(obj.materialize(), dtype=dtype),
+                    )
         if copy:
             return self._module.array(obj, dtype=dtype, copy=True)
         elif copy is None:

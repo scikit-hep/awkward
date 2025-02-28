@@ -847,15 +847,14 @@ def test_asarray_virtual_array_materialized(numpy_like, virtual_array):
 
 def test_asarray_virtual_array_with_dtype(numpy_like, virtual_array):
     # Test with dtype parameter
-    with pytest.raises(AssertionError):
-        # Should raise because dtype doesn't match
-        numpy_like.asarray(virtual_array, dtype=np.float64)
-
+    out = numpy_like.asarray(virtual_array, dtype=np.float64)
+    assert isinstance(out, VirtualArray)
+    assert out.dtype == np.dtype(np.float64)
+    assert not out.is_materialized
+    assert out.materialize().dtype == np.dtype(np.float64)
 
 def test_asarray_virtual_array_with_copy(numpy_like, virtual_array):
     # Test with copy parameter
-    with pytest.raises(AssertionError):
-        numpy_like.asarray(virtual_array, dtype=np.float64)
     virtual_array.materialize()
     with pytest.raises(
         ValueError,
