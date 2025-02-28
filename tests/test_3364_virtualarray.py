@@ -451,7 +451,7 @@ def test_copy(virtual_array):
     assert isinstance(copy, VirtualArray)
     assert copy.shape == virtual_array.shape
     assert copy.dtype == virtual_array.dtype
-    assert copy.is_materialized  # Copy should be materialized
+    assert not copy.is_materialized  # Copy should not be materialized
     assert id(copy) != id(virtual_array)  # Different objects
 
 

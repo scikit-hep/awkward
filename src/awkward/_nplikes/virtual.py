@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from functools import reduce
 from operator import mul
 
@@ -154,14 +155,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return self._nplike
 
     def copy(self) -> VirtualArray:
-        new_virtual = type(self)(
-            self._nplike,
-            self._shape,
-            self._dtype,
-            lambda: self.materialize().copy(),  # type: ignore[attr-defined]
-        )
-        new_virtual.materialize()
-        return new_virtual
+        return self.__copy__()
 
     def tolist(self) -> list:
         return self.materialize().tolist()
@@ -175,6 +169,28 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     @property
     def data(self):
         return self.materialize().data
+
+    def __copy__(self) -> VirtualArray:
+        new_virtual = type(self)(
+            self._nplike,
+            self._shape,
+            self._dtype,
+            self._generator,
+        )
+        new_virtual._array = self._array
+        return new_virtual
+
+    def __deepcopy__(self, memo) -> VirtualArray:
+        new_virtual = type(self)(
+            self._nplike,
+            self._shape,
+            self._dtype,
+            self._generator,
+        )
+        new_virtual._array = (
+            copy.deepcopy(self._array, memo) if self.is_materialized else UNMATERIALIZED
+        )
+        return new_virtual
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
