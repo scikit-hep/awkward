@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+import awkward as ak
 from awkward._backends.dispatch import backend_of_obj
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
@@ -71,6 +72,16 @@ def float_virtual_array(numpy_like, float_array_generator):
         dtype=np.dtype(np.float64),
         generator=float_array_generator,
     )
+
+
+@pytest.fixture
+def numpyarray():
+    return ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64))
+
+
+@pytest.fixture
+def virtual_numpyarray(float_virtual_array):
+    return ak.contents.NumpyArray(float_virtual_array)
 
 
 # Test initialization
@@ -898,6 +909,7 @@ def test_zeros_like_unmaterialized(numpy_like, virtual_array):
     assert result.shape == (5,)
     assert result.dtype == np.dtype(np.int64)
     np.testing.assert_array_equal(result, np.zeros(5, dtype=np.int64))
+    assert not virtual_array.is_materialized
 
 
 def test_zeros_like_materialized(numpy_like, virtual_array):
@@ -917,6 +929,7 @@ def test_ones_like_unmaterialized(numpy_like, virtual_array):
     assert result.shape == (5,)
     assert result.dtype == np.dtype(np.int64)
     np.testing.assert_array_equal(result, np.ones(5, dtype=np.int64))
+    assert not virtual_array.is_materialized
 
 
 def test_ones_like_materialized(numpy_like, virtual_array):
@@ -936,6 +949,7 @@ def test_full_like_unmaterialized(numpy_like, virtual_array):
     assert result.shape == (5,)
     assert result.dtype == np.dtype(np.int64)
     np.testing.assert_array_equal(result, np.full(5, 7, dtype=np.int64))
+    assert not virtual_array.is_materialized
 
 
 def test_full_like_materialized(numpy_like, virtual_array):
@@ -1948,3 +1962,573 @@ def test_chained_operations_materialization(numpy_like):
 
     result3 = result2 > 25  # [False, False, True, True, True]
     np.testing.assert_array_equal(result3, np.array([False, False, True, True, True]))
+
+
+def test_numpyarray_to_list(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.to_list(virtual_numpyarray) == ak.to_list(numpyarray)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_to_json(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.to_json(virtual_numpyarray) == ak.to_json(numpyarray)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_to_numpy(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert np.all(ak.to_numpy(virtual_numpyarray) == ak.to_numpy(numpyarray))
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_to_buffers(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    out1 = ak.to_buffers(numpyarray)
+    out2 = ak.to_buffers(virtual_numpyarray)
+    # form
+    assert out1[0] == out2[0]
+    # length
+    assert out1[1] == out2[1]
+    # container
+    assert out1[2].keys() == out2[2].keys()
+    for key in out1[2]:
+        assert isinstance(out2[2][key], VirtualArray)
+        assert not out2[2][key].is_materialized
+        assert np.all(out1[2][key] == out2[2][key])
+        assert out2[2][key].is_materialized
+
+
+def test_numpyarray_is_valid(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.is_valid(virtual_numpyarray) == ak.is_valid(numpyarray)
+    assert ak.validity_error(virtual_numpyarray) == ak.validity_error(numpyarray)
+
+
+def test_numpyarray_zip(numpyarray, virtual_numpyarray):
+    zip1 = ak.zip({"x": numpyarray, "y": numpyarray})
+    zip2 = ak.zip({"x": virtual_numpyarray, "y": virtual_numpyarray})
+    assert not zip2.layout.is_any_materialized
+    assert zip1.fields == zip2.fields
+    assert ak.array_equal(ak.materialize(zip2), zip1)
+
+
+def test_numpyarray_unzip(numpyarray, virtual_numpyarray):
+    zip1 = ak.zip({"x": numpyarray, "y": numpyarray})
+    zip2 = ak.zip({"x": virtual_numpyarray, "y": virtual_numpyarray})
+    assert not zip2.layout.is_any_materialized
+    unzip1 = ak.unzip(zip1)
+    unzip2 = ak.unzip(zip2)
+    assert not unzip2[0].layout.is_any_materialized
+    assert not unzip2[1].layout.is_any_materialized
+    assert ak.array_equal(ak.materialize(unzip2[0]), unzip1[0])
+    assert ak.array_equal(ak.materialize(unzip2[1]), unzip1[1])
+
+
+def test_numpyarray_concatenate(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.concatenate([numpyarray, numpyarray]),
+        ak.concatenate([virtual_numpyarray, virtual_numpyarray]),
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_where(numpyarray, virtual_numpyarray):
+    numpyarray = ak.Array(numpyarray)
+    virtual_numpyarray = ak.Array(virtual_numpyarray)
+    assert not virtual_numpyarray.layout.is_any_materialized
+    assert ak.array_equal(
+        ak.where(numpyarray > 2, numpyarray, numpyarray + 100),
+        ak.where(virtual_numpyarray > 2, virtual_numpyarray, virtual_numpyarray + 100),
+    )
+    assert virtual_numpyarray.layout.is_any_materialized
+    assert virtual_numpyarray.layout.is_all_materialized
+
+
+def test_numpyarray_unflatten(numpyarray, virtual_numpyarray):
+    numpyarray = ak.Array(numpyarray)
+    virtual_numpyarray = ak.Array(virtual_numpyarray)
+    assert not virtual_numpyarray.layout.is_any_materialized
+    assert ak.array_equal(
+        ak.unflatten(numpyarray, [2, 3]),
+        ak.unflatten(virtual_numpyarray, [2, 3]),
+    )
+    assert virtual_numpyarray.layout.is_any_materialized
+    assert virtual_numpyarray.layout.is_all_materialized
+
+
+def test_numpyarray_num(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.num(virtual_numpyarray, axis=0) == ak.num(numpyarray, axis=0)
+    assert not virtual_numpyarray.is_any_materialized
+
+
+def test_numpyarray_count(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.count(virtual_numpyarray, axis=0) == ak.count(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numppyarray_count_nonzero(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.count_nonzero(virtual_numpyarray, axis=0) == ak.count_nonzero(
+        numpyarray, axis=0
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_sum(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.sum(virtual_numpyarray, axis=0) == ak.sum(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_nansum(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.nansum(virtual_numpyarray, axis=0) == ak.nansum(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_prod(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.prod(virtual_numpyarray, axis=0) == ak.prod(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_nanprod(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.nanprod(virtual_numpyarray, axis=0) == ak.nanprod(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_any(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.any(virtual_numpyarray, axis=0) == ak.any(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_all(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.all(virtual_numpyarray, axis=0) == ak.all(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_min(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.min(virtual_numpyarray, axis=0) == ak.min(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_nanmin(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.nanmin(virtual_numpyarray, axis=0) == ak.nanmin(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_max(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.max(virtual_numpyarray, axis=0) == ak.max(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_nanmax(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.nanmax(virtual_numpyarray, axis=0) == ak.nanmax(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_argmin(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.argmin(virtual_numpyarray, axis=0) == ak.argmin(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_nanargmin(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.nanargmin(virtual_numpyarray, axis=0) == ak.nanargmin(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_argmax(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.argmax(virtual_numpyarray, axis=0) == ak.argmax(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_sort(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.sort(virtual_numpyarray, axis=0),
+        ak.sort(numpyarray, axis=0),
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_argsort(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.argsort(virtual_numpyarray, axis=0),
+        ak.argsort(numpyarray, axis=0),
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_is_none(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert np.all(ak.is_none(virtual_numpyarray) == ak.is_none(numpyarray))
+    assert not virtual_numpyarray.is_any_materialized
+    assert not virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_drop_none(numpy_like):
+    array = ak.Array([1, None, 2, 3, None, 4, 5]).layout
+    virtual_index = ak.index.Index(
+        VirtualArray(
+            numpy_like,
+            shape=(7,),
+            dtype=np.dtype(np.int64),
+            generator=lambda: np.array([0, -1, 1, 2, -1, 3, 4], dtype=np.int64),
+        )
+    )
+    virtual_content = ak.contents.NumpyArray(
+        VirtualArray(
+            numpy_like,
+            shape=(5,),
+            dtype=np.dtype(np.int64),
+            generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
+        )
+    )
+    virtual_array = ak.contents.IndexedOptionArray(virtual_index, virtual_content)
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.drop_none(virtual_array), ak.drop_none(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_numpy_array_pad_none(numpy_like):
+    array = ak.Array([1, None, 2, 3, None, 4, 5]).layout
+    virtual_index = ak.index.Index(
+        VirtualArray(
+            numpy_like,
+            shape=(7,),
+            dtype=np.dtype(np.int64),
+            generator=lambda: np.array([0, -1, 1, 2, -1, 3, 4], dtype=np.int64),
+        )
+    )
+    virtual_content = ak.contents.NumpyArray(
+        VirtualArray(
+            numpy_like,
+            shape=(5,),
+            dtype=np.dtype(np.int64),
+            generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
+        )
+    )
+    virtual_array = ak.contents.IndexedOptionArray(virtual_index, virtual_content)
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(
+        ak.pad_none(virtual_array, 10, axis=0), ak.pad_none(array, 10, axis=0)
+    )
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_numpyarray_fill_none(numpy_like):
+    array = ak.Array([1, None, 2, 3, None, 4, 5]).layout
+    virtual_index = ak.index.Index(
+        VirtualArray(
+            numpy_like,
+            shape=(7,),
+            dtype=np.dtype(np.int64),
+            generator=lambda: np.array([0, -1, 1, 2, -1, 3, 4], dtype=np.int64),
+        )
+    )
+    virtual_content = ak.contents.NumpyArray(
+        VirtualArray(
+            numpy_like,
+            shape=(5,),
+            dtype=np.dtype(np.int64),
+            generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
+        )
+    )
+    virtual_array = ak.contents.IndexedOptionArray(virtual_index, virtual_content)
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.fill_none(virtual_array, 100), ak.fill_none(array, 100))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_numpyarray_firsts(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.firsts(virtual_numpyarray, axis=0),
+        ak.firsts(numpyarray, axis=0),
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_singletons(numpy_like):
+    array = ak.Array([1, 2, 3, 4, 5]).layout
+    virtual_index = ak.index.Index(
+        VirtualArray(
+            numpy_like,
+            shape=(5,),
+            dtype=np.dtype(np.int64),
+            generator=lambda: np.array([0, 1, 2, 3, 4], dtype=np.int64),
+        )
+    )
+    virtual_content = ak.contents.NumpyArray(
+        VirtualArray(
+            numpy_like,
+            shape=(5,),
+            dtype=np.dtype(np.int64),
+            generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
+        )
+    )
+    virtual_array = ak.contents.IndexedArray(virtual_index, virtual_content)
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.singletons(virtual_array), ak.singletons(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_numpyarray_to_regular(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.to_regular(virtual_numpyarray, axis=0), ak.to_regular(numpyarray, axis=0)
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_broadcast_arrays(virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    out = ak.broadcast_arrays(5, virtual_numpyarray)
+    assert ak.to_list(out[0]) == [5, 5, 5, 5, 5]
+    assert not virtual_numpyarray.is_any_materialized
+    assert not out[1].layout.is_any_materialized
+    assert ak.to_list(out[1]) == ak.to_list(virtual_numpyarray)
+
+
+def test_numpyarray_cartesian(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.cartesian([numpyarray, numpyarray], axis=0),
+        ak.cartesian([virtual_numpyarray, virtual_numpyarray], axis=0),
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_argcartesian(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.argcartesian([numpyarray, numpyarray], axis=0),
+        ak.argcartesian([virtual_numpyarray, virtual_numpyarray], axis=0),
+    )
+    assert not virtual_numpyarray.is_any_materialized
+    assert not virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_combinations(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.combinations(numpyarray, 2, axis=0),
+        ak.combinations(virtual_numpyarray, 2, axis=0),
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_argcombinations(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.argcombinations(numpyarray, 2, axis=0),
+        ak.argcombinations(virtual_numpyarray, 2, axis=0),
+    )
+    assert not virtual_numpyarray.is_any_materialized
+    assert not virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_nan_to_none(numpy_like):
+    array = ak.Array([1, np.nan, 2, 3, np.nan, 4, 5]).layout
+    virtual_array = ak.contents.NumpyArray(
+        VirtualArray(
+            numpy_like,
+            shape=(7,),
+            dtype=np.dtype(np.float64),
+            generator=lambda: np.array(
+                [1, np.nan, 2, 3, np.nan, 4, 5], dtype=np.float64
+            ),
+        )
+    )
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.nan_to_none(virtual_array), ak.nan_to_none(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_numpyarray_nan_to_num(numpy_like):
+    array = ak.Array([1, np.nan, 2, 3, np.nan, 4, 5]).layout
+    virtual_array = ak.contents.NumpyArray(
+        VirtualArray(
+            numpy_like,
+            shape=(7,),
+            dtype=np.dtype(np.float64),
+            generator=lambda: np.array(
+                [1, np.nan, 2, 3, np.nan, 4, 5], dtype=np.float64
+            ),
+        )
+    )
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.nan_to_num(virtual_array), ak.nan_to_num(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_numpyarray_local_index(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.local_index(virtual_numpyarray, axis=0), ak.local_index(numpyarray, axis=0)
+    )
+    assert not virtual_numpyarray.is_any_materialized
+    assert not virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_run_lengths(numpy_like):
+    array = ak.Array([1, 1, 2, 3, 3, 3, 4, 5]).layout
+    virtual_array = ak.contents.NumpyArray(
+        VirtualArray(
+            numpy_like,
+            shape=(8,),
+            dtype=np.dtype(np.int64),
+            generator=lambda: np.array([1, 1, 2, 3, 3, 3, 4, 5], dtype=np.int64),
+        )
+    )
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.run_lengths(virtual_array), ak.run_lengths(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_numpyarray_round(numpy_like):
+    array = ak.Array([1.234, 2.567, 3.499, 4.501]).layout
+    virtual_array = ak.contents.NumpyArray(
+        VirtualArray(
+            numpy_like,
+            shape=(4,),
+            dtype=np.dtype(np.float64),
+            generator=lambda: np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64),
+        )
+    )
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.round(virtual_array), ak.round(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_numpyarray_isclose(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.isclose(virtual_numpyarray, numpyarray, rtol=1e-5, atol=1e-8),
+        ak.isclose(numpyarray, numpyarray, rtol=1e-5, atol=1e-8),
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_almost_equal(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.almost_equal(virtual_numpyarray, numpyarray),
+        ak.almost_equal(numpyarray, numpyarray),
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_real(numpy_like):
+    array = ak.Array([1 + 2j, 3 + 4j, 5 + 6j]).layout
+    virtual_array = ak.contents.NumpyArray(
+        VirtualArray(
+            numpy_like,
+            shape=(3,),
+            dtype=np.dtype(np.complex128),
+            generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+        )
+    )
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.real(virtual_array), ak.real(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_numpyarray_imag(numpy_like):
+    array = ak.Array([1 + 2j, 3 + 4j, 5 + 6j]).layout
+    virtual_array = ak.contents.NumpyArray(
+        VirtualArray(
+            numpy_like,
+            shape=(3,),
+            dtype=np.dtype(np.complex128),
+            generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+        )
+    )
+    assert not virtual_array.is_any_materialized
+    assert ak.array_equal(ak.imag(virtual_array), ak.imag(array))
+    assert virtual_array.is_any_materialized
+    assert virtual_array.is_all_materialized
+
+
+def test_numpyarray_angle(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.angle(virtual_numpyarray, deg=True),
+        ak.angle(numpyarray, deg=True),
+    )
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_zeros_like(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(ak.zeros_like(virtual_numpyarray), ak.zeros_like(numpyarray))
+    assert not virtual_numpyarray.is_any_materialized
+    assert not virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_ones_like(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(ak.ones_like(virtual_numpyarray), ak.ones_like(numpyarray))
+    assert not virtual_numpyarray.is_any_materialized
+    assert not virtual_numpyarray.is_all_materialized
+
+
+def test_numpyarray_full_like(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.array_equal(
+        ak.full_like(virtual_numpyarray, 100), ak.full_like(numpyarray, 100)
+    )
+    assert not virtual_numpyarray.is_any_materialized
+    assert not virtual_numpyarray.is_all_materialized
