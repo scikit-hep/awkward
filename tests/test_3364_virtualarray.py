@@ -188,6 +188,86 @@ def virtual_listarray(
     )
 
 
+@pytest.fixture
+def offsets_array_generator():
+    return lambda: np.array([0, 2, 4, 7, 10, 10], dtype=np.int64)
+
+
+@pytest.fixture
+def virtual_offsets_array(numpy_like, offsets_array_generator):
+    return VirtualArray(
+        numpy_like,
+        shape=(6,),
+        dtype=np.dtype(np.int64),
+        generator=offsets_array_generator,
+    )
+
+
+@pytest.fixture
+def x_content_array_generator():
+    return lambda: np.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    )
+
+
+@pytest.fixture
+def virtual_x_content_array(numpy_like, x_content_array_generator):
+    return VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.float64),
+        generator=x_content_array_generator,
+    )
+
+
+@pytest.fixture
+def y_array_generator():
+    return lambda: np.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=np.float64)
+
+
+@pytest.fixture
+def virtual_y_array(numpy_like, y_array_generator):
+    return VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.float64),
+        generator=y_array_generator,
+    )
+
+
+@pytest.fixture
+def recordarray():
+    # Create a regular RecordArray with ListOffsetArray and NumpyArray fields
+    offsets = np.array([0, 2, 4, 7, 10, 10], dtype=np.int64)
+    x_content = np.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    )
+    y_content = np.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=np.float64)
+
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+
+    y_field = ak.contents.NumpyArray(y_content)
+
+    return ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+
+@pytest.fixture
+def virtual_recordarray(
+    numpy_like, virtual_offsets_array, virtual_x_content_array, virtual_y_array
+):
+    # Create a RecordArray with virtual components
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets_array),
+        ak.contents.NumpyArray(virtual_x_content_array),
+    )
+
+    y_field = ak.contents.NumpyArray(virtual_y_array)
+
+    return ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+
 # Test initialization
 def test_init_valid(numpy_like, simple_array_generator):
     va = VirtualArray(
@@ -4714,3 +4794,1578 @@ def test_listarray_arithmetics(listarray, virtual_listarray):
 
     assert virtual_list_array.layout.is_any_materialized
     assert virtual_list_array.layout.is_all_materialized
+
+
+def test_recordarray_to_list(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+    assert ak.to_list(virtual_recordarray) == ak.to_list(recordarray)
+    assert virtual_recordarray.is_any_materialized
+    assert virtual_recordarray.is_all_materialized
+
+
+def test_recordarray_to_json(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+    assert ak.to_json(virtual_recordarray) == ak.to_json(recordarray)
+    assert virtual_recordarray.is_any_materialized
+    assert virtual_recordarray.is_all_materialized
+
+
+def test_recordarray_to_buffers(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+    out1 = ak.to_buffers(recordarray)
+    out2 = ak.to_buffers(virtual_recordarray)
+    # form
+    assert out1[0] == out2[0]
+    # length
+    assert out1[1] == out2[1]
+    # container
+    assert set(out1[2].keys()) == set(out2[2].keys())
+    for key in out1[2]:
+        if isinstance(out2[2][key], VirtualArray):
+            assert not out2[2][key].is_materialized
+            assert np.all(out1[2][key] == out2[2][key])
+            assert out2[2][key].is_materialized
+        else:
+            assert np.all(out1[2][key] == out2[2][key])
+
+
+def test_recordarray_is_valid(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+    assert ak.is_valid(virtual_recordarray) == ak.is_valid(recordarray)
+    assert ak.validity_error(virtual_recordarray) == ak.validity_error(recordarray)
+
+
+def test_recordarray_field_access(recordarray, virtual_recordarray):
+    # Test accessing fields directly
+    assert not virtual_recordarray.is_any_materialized
+
+    # Access x field (ListOffsetArray)
+    x_field = virtual_recordarray["x"]
+    assert isinstance(x_field, ak.contents.ListOffsetArray)
+    assert not x_field.is_any_materialized
+
+    # Access y field (NumpyArray)
+    y_field = virtual_recordarray["y"]
+    assert isinstance(y_field, ak.contents.NumpyArray)
+    assert not y_field.data.is_materialized
+
+    # Verify field values
+    assert ak.to_list(x_field) == ak.to_list(recordarray["x"])
+    assert ak.to_list(y_field) == ak.to_list(recordarray["y"])
+
+    # Check materialization state after access
+    assert x_field.is_any_materialized
+    assert y_field.data.is_materialized
+
+
+def test_recordarray_zip(recordarray, virtual_recordarray):
+    # Test zipping the RecordArray
+    zip1 = ak.zip({"record": recordarray})
+    zip2 = ak.zip({"record": virtual_recordarray})
+
+    assert not virtual_recordarray.is_any_materialized
+    assert zip1.fields == zip2.fields
+    assert ak.array_equal(ak.materialize(zip2), zip1)
+
+
+def test_recordarray_concatenate(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+    result = ak.concatenate([virtual_recordarray, virtual_recordarray])
+    expected = ak.concatenate([recordarray, recordarray])
+    assert ak.array_equal(result, expected)
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_where_x_field(recordarray, virtual_recordarray):
+    # Test where operation on the x field (ListOffsetArray)
+    record_array = ak.Array(recordarray)
+    virtual_record_array = ak.Array(virtual_recordarray)
+
+    assert not virtual_record_array.layout.is_any_materialized
+
+    # Create a mask compatible with nested list structure in x field
+    mask = ak.Array(
+        [[True, False], [False, True], [True, False, True], [False, True, True], []]
+    )
+
+    # Apply where operation on the x field
+    result1 = ak.where(mask, record_array.x, 999)
+    result2 = ak.where(mask, virtual_record_array.x, 999)
+
+    assert ak.array_equal(result1, result2)
+    assert virtual_record_array.layout.is_any_materialized
+
+
+def test_recordarray_where_y_field(recordarray, virtual_recordarray):
+    # Test where operation on the y field (NumpyArray)
+    record_array = ak.Array(recordarray)
+    virtual_record_array = ak.Array(virtual_recordarray)
+
+    assert not virtual_record_array.layout.is_any_materialized
+
+    # Create a simple mask for the y field
+    mask = ak.Array([True, False, True, False, True])
+
+    # Apply where operation on the y field
+    result1 = ak.where(mask, record_array.y, 999)
+    result2 = ak.where(mask, virtual_record_array.y, 999)
+
+    assert ak.array_equal(result1, result2)
+    assert virtual_record_array.layout.is_any_materialized
+
+
+def test_recordarray_count_x_field(recordarray, virtual_recordarray):
+    # Test count on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.count(recordarray["x"], axis=1)
+
+    result = ak.count(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_count_y_field(recordarray, virtual_recordarray):
+    # Test count on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.count(recordarray["y"])
+
+    result = ak.count(y_field)
+    assert result == expected
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_count_nonzero_x_field(recordarray, virtual_recordarray):
+    # Test count_nonzero on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.count_nonzero(recordarray["x"], axis=1)
+
+    result = ak.count_nonzero(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_count_nonzero_y_field(recordarray, virtual_recordarray):
+    # Test count_nonzero on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.count_nonzero(recordarray["y"])
+
+    result = ak.count_nonzero(y_field)
+    assert result == expected
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_sum_x_field(recordarray, virtual_recordarray):
+    # Test sum on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.sum(recordarray["x"], axis=1)
+
+    result = ak.sum(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_sum_y_field(recordarray, virtual_recordarray):
+    # Test sum on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.sum(recordarray["y"])
+
+    result = ak.sum(y_field)
+    assert result == expected
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_any_x_field(recordarray, virtual_recordarray):
+    # Test any on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.any(recordarray["x"], axis=1)
+
+    result = ak.any(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_any_y_field(recordarray, virtual_recordarray):
+    # Test any on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.any(recordarray["y"])
+
+    result = ak.any(y_field)
+    assert result == expected
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_all_x_field(recordarray, virtual_recordarray):
+    # Test all on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.all(recordarray["x"], axis=1)
+
+    result = ak.all(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_all_y_field(recordarray, virtual_recordarray):
+    # Test all on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.all(recordarray["y"])
+
+    result = ak.all(y_field)
+    assert result == expected
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_min_x_field(recordarray, virtual_recordarray):
+    # Test min on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.min(recordarray["x"], axis=1)
+
+    result = ak.min(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_min_y_field(recordarray, virtual_recordarray):
+    # Test min on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.min(recordarray["y"])
+
+    result = ak.min(y_field)
+    assert result == expected
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_max_x_field(recordarray, virtual_recordarray):
+    # Test max on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.max(recordarray["x"], axis=1)
+
+    result = ak.max(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_max_y_field(recordarray, virtual_recordarray):
+    # Test max on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.max(recordarray["y"])
+
+    result = ak.max(y_field)
+    assert result == expected
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_argmin_x_field(recordarray, virtual_recordarray):
+    # Test argmin on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.argmin(recordarray["x"], axis=1)
+
+    result = ak.argmin(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_argmin_y_field(recordarray, virtual_recordarray):
+    # Test argmin on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.argmin(recordarray["y"])
+
+    result = ak.argmin(y_field)
+    assert result == expected
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_argmax_x_field(recordarray, virtual_recordarray):
+    # Test argmax on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.argmax(recordarray["x"], axis=1)
+
+    result = ak.argmax(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_argmax_y_field(recordarray, virtual_recordarray):
+    # Test argmax on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.argmax(recordarray["y"])
+
+    result = ak.argmax(y_field)
+    assert result == expected
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_sort_x_field(recordarray, virtual_recordarray):
+    # Test sort on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.sort(recordarray["x"], axis=1)
+
+    result = ak.sort(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_sort_y_field(recordarray, virtual_recordarray):
+    # Test sort on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.sort(recordarray["y"])
+
+    result = ak.sort(y_field)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_argsort_x_field(recordarray, virtual_recordarray):
+    # Test argsort on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.argsort(recordarray["x"], axis=1)
+
+    result = ak.argsort(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_argsort_y_field(recordarray, virtual_recordarray):
+    # Test argsort on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.argsort(recordarray["y"])
+
+    result = ak.argsort(y_field)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_is_none(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+    assert ak.array_equal(ak.is_none(virtual_recordarray), ak.is_none(recordarray))
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_local_index_x_field(recordarray, virtual_recordarray):
+    # Test local_index on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.local_index(recordarray["x"], axis=1)
+
+    result = ak.local_index(x_field, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_local_index_y_field(recordarray, virtual_recordarray):
+    # Test local_index on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.local_index(recordarray["y"])
+
+    result = ak.local_index(y_field)
+    assert ak.array_equal(result, expected)
+    assert not virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_combinations_x_field(recordarray, virtual_recordarray):
+    # Test combinations on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.combinations(recordarray["x"], 2, axis=1)
+
+    result = ak.combinations(x_field, 2, axis=1)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_combinations_y_field(recordarray, virtual_recordarray):
+    # Test combinations on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.combinations(recordarray["y"], 2, axis=0)
+
+    result = ak.combinations(y_field, 2, axis=0)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_nan_to_none_x_field(numpy_like):
+    # Create a RecordArray with NaN values in the x field
+    offsets = np.array([0, 2, 4, 7, 10, 10], dtype=np.int64)
+    x_content = np.array(
+        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    )
+    y_content = np.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=np.float64)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(6,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 7, 10, 10], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array(
+            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
+            dtype=np.float64,
+        ),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=np.float64),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test nan_to_none on x field
+    assert not virtual_array.is_any_materialized
+
+    result_x = ak.nan_to_none(virtual_array["x"])
+    expected_x = ak.nan_to_none(array["x"])
+
+    assert ak.array_equal(result_x, expected_x)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_nan_to_none_y_field(numpy_like):
+    # Create a RecordArray with NaN values in the y field
+    offsets = np.array([0, 2, 4, 7, 10, 10], dtype=np.int64)
+    x_content = np.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    )
+    y_content = np.array([0.1, np.nan, 0.3, np.nan, 0.5], dtype=np.float64)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(6,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 7, 10, 10], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array(
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+        ),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([0.1, np.nan, 0.3, np.nan, 0.5], dtype=np.float64),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test nan_to_none on y field
+    assert not virtual_array.is_any_materialized
+
+    result_y = ak.nan_to_none(virtual_array["y"])
+    expected_y = ak.nan_to_none(array["y"])
+
+    assert ak.array_equal(result_y, expected_y)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_zeros_like(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+
+    result = ak.zeros_like(virtual_recordarray)
+    expected = ak.zeros_like(recordarray)
+
+    assert ak.array_equal(result, expected)
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_ones_like(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+
+    result = ak.ones_like(virtual_recordarray)
+    expected = ak.ones_like(recordarray)
+
+    assert ak.array_equal(result, expected)
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_full_like(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+
+    result = ak.full_like(virtual_recordarray, 100)
+    expected = ak.full_like(recordarray, 100)
+
+    assert ak.array_equal(result, expected)
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_slicing(recordarray, virtual_recordarray):
+    # Convert to ak.Array for slicing operations
+    record_array = ak.Array(recordarray)
+    virtual_record_array = ak.Array(virtual_recordarray)
+
+    assert not virtual_record_array.layout.is_any_materialized
+
+    # Test slicing the record array
+    assert ak.array_equal(virtual_record_array[1:3], record_array[1:3])
+
+    # Test slicing a field
+    assert ak.array_equal(virtual_record_array.x[1:3], record_array.x[1:3])
+    assert ak.array_equal(virtual_record_array.y[1:3], record_array.y[1:3])
+
+    assert virtual_record_array.layout.is_any_materialized
+
+
+def test_recordarray_mask_operations(recordarray, virtual_recordarray):
+    record_array = ak.Array(recordarray)
+    virtual_record_array = ak.Array(virtual_recordarray)
+
+    assert not virtual_record_array.layout.is_any_materialized
+
+    # Create a boolean mask
+    mask = ak.Array([True, False, True, False, True])
+
+    # Test masking the record array
+    assert ak.array_equal(virtual_record_array[mask], record_array[mask])
+
+    assert virtual_record_array.layout.is_any_materialized
+
+
+def test_recordarray_arithmetics_x_field(recordarray, virtual_recordarray):
+    record_array = ak.Array(recordarray)
+    virtual_record_array = ak.Array(virtual_recordarray)
+
+    assert not virtual_record_array.layout.is_any_materialized
+
+    # Test addition on the x field
+    assert ak.array_equal(virtual_record_array.x + 10, record_array.x + 10)
+
+    # Test multiplication on the x field
+    assert ak.array_equal(virtual_record_array.x * 2, record_array.x * 2)
+
+    # Test division on the x field
+    assert ak.array_equal(virtual_record_array.x / 2, record_array.x / 2)
+
+    assert virtual_record_array.layout.is_any_materialized
+
+
+def test_recordarray_arithmetics_y_field(recordarray, virtual_recordarray):
+    record_array = ak.Array(recordarray)
+    virtual_record_array = ak.Array(virtual_recordarray)
+
+    assert not virtual_record_array.layout.is_any_materialized
+
+    # Test addition on the y field
+    assert ak.array_equal(virtual_record_array.y + 10, record_array.y + 10)
+
+    # Test multiplication on the y field
+    assert ak.array_equal(virtual_record_array.y * 2, record_array.y * 2)
+
+    # Test division on the y field
+    assert ak.array_equal(virtual_record_array.y / 2, record_array.y / 2)
+
+    assert virtual_record_array.layout.is_any_materialized
+
+
+def test_recordarray_firsts_x_field(recordarray, virtual_recordarray):
+    # Test firsts on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.firsts(recordarray["x"])
+
+    result = ak.firsts(x_field)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_firsts_y_field(recordarray, virtual_recordarray):
+    # Test firsts on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.firsts(recordarray["y"], axis=0)
+
+    result = ak.firsts(y_field, axis=0)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_flatten_x_field(recordarray, virtual_recordarray):
+    # Test flatten on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.flatten(recordarray["x"])
+
+    result = ak.flatten(x_field)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_to_regular_x_field(recordarray, virtual_recordarray):
+    # Test to_regular on the x field (ListOffsetArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    x_field = virtual_recordarray["x"]
+    expected = ak.to_regular(recordarray["x"], axis=0)
+
+    result = ak.to_regular(x_field, axis=0)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_to_regular_y_field(recordarray, virtual_recordarray):
+    # Test to_regular on the y field (NumpyArray)
+    assert not virtual_recordarray.is_any_materialized
+
+    y_field = virtual_recordarray["y"]
+    expected = ak.to_regular(recordarray["y"], axis=0)
+
+    result = ak.to_regular(y_field, axis=0)
+    assert ak.array_equal(result, expected)
+
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_run_lengths_x_field(numpy_like):
+    # Create a RecordArray with repeated values in the x field for run_lengths test
+    offsets = np.array([0, 3, 6, 6], dtype=np.int64)
+    x_content = np.array([1, 1, 2, 3, 3, 3], dtype=np.int64)
+    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 3, 6, 6], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(6,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([1, 1, 2, 3, 3, 3], dtype=np.int64),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test run_lengths on x field
+    assert not virtual_array.is_any_materialized
+
+    result = ak.run_lengths(virtual_array["x"])
+    expected = ak.run_lengths(array["x"])
+
+    assert ak.array_equal(result, expected)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_run_lengths_y_field(numpy_like):
+    # Create a RecordArray with repeated values in the y field for run_lengths test
+    offsets = np.array([0, 3, 6, 6], dtype=np.int64)
+    x_content = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64)
+    y_content = np.array([0.1, 0.1, 0.2, 0.3, 0.3, 0.3], dtype=np.float64)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 3, 6, 6], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(6,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(6,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([0.1, 0.1, 0.2, 0.3, 0.3, 0.3], dtype=np.float64),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test run_lengths on y field
+    assert not virtual_array.is_any_materialized
+
+    result = ak.run_lengths(virtual_array["y"])
+    expected = ak.run_lengths(array["y"])
+
+    assert ak.array_equal(result, expected)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_round_x_field(numpy_like):
+    # Create a RecordArray with float values in the x field for rounding
+    offsets = np.array([0, 2, 4, 4], dtype=np.int64)
+    x_content = np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64)
+    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 4], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test round on x field
+    assert not virtual_array.is_any_materialized
+
+    result = ak.round(virtual_array["x"])
+    expected = ak.round(array["x"])
+
+    assert ak.array_equal(result, expected)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_round_y_field(numpy_like):
+    # Create a RecordArray with float values in the y field for rounding
+    offsets = np.array([0, 2, 4, 4], dtype=np.int64)
+    x_content = np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64)
+    y_content = np.array([1.234, 2.567, 3.499], dtype=np.float64)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 4], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.234, 2.567, 3.499], dtype=np.float64),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test round on y field
+    assert not virtual_array.is_any_materialized
+
+    result = ak.round(virtual_array["y"])
+    expected = ak.round(array["y"])
+
+    assert ak.array_equal(result, expected)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_isclose(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+
+    result = ak.isclose(virtual_recordarray, recordarray, rtol=1e-5, atol=1e-8)
+    expected = ak.isclose(recordarray, recordarray, rtol=1e-5, atol=1e-8)
+
+    assert ak.array_equal(result, expected)
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_almost_equal(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+
+    result = ak.almost_equal(virtual_recordarray, recordarray)
+    expected = ak.almost_equal(recordarray, recordarray)
+
+    assert ak.array_equal(result, expected)
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_real_x_field(numpy_like):
+    # Create a RecordArray with complex values in the x field
+    offsets = np.array([0, 2, 3, 3], dtype=np.int64)
+    x_content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.complex128),
+        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test real on x field
+    assert not virtual_array.is_any_materialized
+
+    result = ak.real(virtual_array["x"])
+    expected = ak.real(array["x"])
+
+    assert ak.array_equal(result, expected)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_real_y_field(numpy_like):
+    # Create a RecordArray with complex values in the y field
+    offsets = np.array([0, 2, 3, 3], dtype=np.int64)
+    x_content = np.array([1.1, 2.2, 3.3], dtype=np.float64)
+    y_content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.1, 2.2, 3.3], dtype=np.float64),
+    )
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.complex128),
+        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test real on y field
+    assert not virtual_array.is_any_materialized
+
+    result = ak.real(virtual_array["y"])
+    expected = ak.real(array["y"])
+
+    assert ak.array_equal(result, expected)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_imag_x_field(numpy_like):
+    # Create a RecordArray with complex values in the x field
+    offsets = np.array([0, 2, 3, 3], dtype=np.int64)
+    x_content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.complex128),
+        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test imag on x field
+    assert not virtual_array.is_any_materialized
+
+    result = ak.imag(virtual_array["x"])
+    expected = ak.imag(array["x"])
+
+    assert ak.array_equal(result, expected)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_imag_y_field(numpy_like):
+    # Create a RecordArray with complex values in the y field
+    offsets = np.array([0, 2, 3, 3], dtype=np.int64)
+    x_content = np.array([1.1, 2.2, 3.3], dtype=np.float64)
+    y_content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.1, 2.2, 3.3], dtype=np.float64),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.complex128),
+        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test imag on y field
+    assert not virtual_array.is_any_materialized
+
+    result = ak.imag(virtual_array["y"])
+    expected = ak.imag(array["y"])
+
+    assert ak.array_equal(result, expected)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_angle_x_field(numpy_like):
+    # Create a RecordArray with complex values in the x field
+    offsets = np.array([0, 2, 4, 4], dtype=np.int64)
+    x_content = np.array([1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=np.complex128)
+    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 4], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.complex128),
+        generator=lambda: np.array(
+            [1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=np.complex128
+        ),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test angle on x field
+    assert not virtual_array.is_any_materialized
+
+    result = ak.angle(virtual_array["x"], deg=True)
+    expected = ak.angle(array["x"], deg=True)
+
+    assert ak.array_equal(result, expected)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_angle_y_field(numpy_like):
+    # Create a RecordArray with complex values in the y field
+    offsets = np.array([0, 2, 3, 3], dtype=np.int64)
+    x_content = np.array([1.1, 2.2, 3.3], dtype=np.float64)
+    y_content = np.array([1 + 0j, 0 + 1j, -1 + 0j], dtype=np.complex128)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
+    )
+    y_field = ak.contents.NumpyArray(y_content)
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual version
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(4,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.1, 2.2, 3.3], dtype=np.float64),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.complex128),
+        generator=lambda: np.array([1 + 0j, 0 + 1j, -1 + 0j], dtype=np.complex128),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_x_content)
+    )
+
+    virtual_y_field = ak.contents.NumpyArray(virtual_y_content)
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test angle on y field
+    assert not virtual_array.is_any_materialized
+
+    result = ak.angle(virtual_array["y"], deg=True)
+    expected = ak.angle(array["y"], deg=True)
+
+    assert ak.array_equal(result, expected)
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_fields(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+
+    # Test fields property
+    assert virtual_recordarray.fields == recordarray.fields
+    assert not virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_with_field(recordarray, virtual_recordarray, numpy_like):
+    assert not virtual_recordarray.is_any_materialized
+
+    # Create a new field to add
+    new_field = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64),
+    )
+
+    # Test with_field method which adds a new field
+    result = ak.with_field(virtual_recordarray, ak.contents.NumpyArray(new_field), "z")
+    expected = ak.with_field(
+        recordarray, ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])), "z"
+    )
+
+    assert ak.array_equal(result, expected)
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_without_field(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+
+    # Test without_field method which removes a field
+    result = ak.without_field(virtual_recordarray, "y")
+    expected = ak.without_field(recordarray, "y")
+
+    assert ak.array_equal(result, expected)
+    assert virtual_recordarray.is_any_materialized
+
+
+def test_recordarray_broadcast_arrays(recordarray, virtual_recordarray):
+    assert not virtual_recordarray.is_any_materialized
+
+    # Test broadcast_arrays with a RecordArray
+    out = ak.broadcast_arrays(5, virtual_recordarray)
+    assert len(out) == 2
+    # The virtual_recordarray should stay virtual until accessed
+    assert not virtual_recordarray.is_any_materialized
+    assert not out[1].layout.is_any_materialized
+
+    # Verify content after materialization
+    assert ak.array_equal(out[1], recordarray)
+
+
+def test_recordarray_with_custom_generator(numpy_like):
+    # Create a RecordArray with a more complex generator function
+
+    # Define generator functions that compute values
+    def compute_offsets():
+        # Compute offsets dynamically
+        return np.array([0, 2, 5, 9, 10], dtype=np.int64)
+
+    def compute_content():
+        # Compute content with a formula
+        return np.array([i**2 for i in range(10)], dtype=np.float64)
+
+    def compute_y_values():
+        # Compute y values with a formula
+        return np.array([np.sin(i) for i in range(5)], dtype=np.float64)
+
+    # Create virtual arrays with these generators
+    virtual_offsets = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=compute_offsets,
+    )
+
+    virtual_content = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.float64),
+        generator=compute_content,
+    )
+
+    virtual_y = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.float64),
+        generator=compute_y_values,
+    )
+
+    # Create the RecordArray
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_offsets), ak.contents.NumpyArray(virtual_content)
+    )
+
+    y_field = ak.contents.NumpyArray(virtual_y)
+
+    virtual_array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create the expected array for comparison
+    offsets = np.array([0, 2, 5, 9, 10], dtype=np.int64)
+    content = np.array([0, 1, 4, 9, 16, 25, 36, 49, 64, 81], dtype=np.float64)
+    y_values = np.array(
+        [
+            0.0,
+            0.8414709848078965,
+            0.9092974268256817,
+            0.1411200080598672,
+            -0.7568024953079282,
+        ],
+        dtype=np.float64,
+    )
+
+    x_field_regular = ak.contents.ListOffsetArray(
+        ak.index.Index(offsets), ak.contents.NumpyArray(content)
+    )
+
+    y_field_regular = ak.contents.NumpyArray(y_values)
+
+    regular_array = ak.contents.RecordArray(
+        [x_field_regular, y_field_regular], ["x", "y"]
+    )
+
+    # Test operations
+    assert not virtual_array.is_any_materialized
+
+    # Check to_list
+    assert ak.to_list(virtual_array) == ak.to_list(regular_array)
+
+    # Check field access and operations
+    assert ak.array_equal(
+        ak.sum(virtual_array["x"], axis=1), ak.sum(regular_array["x"], axis=1)
+    )
+    assert ak.array_equal(ak.min(virtual_array["y"]), ak.min(regular_array["y"]))
+
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_with_none_values(numpy_like):
+    # Create a RecordArray with None values in both fields
+
+    # Create x field with None values
+    x_offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+    x_index = np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64)
+    x_content = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64)
+
+    # Create y field with None values
+    y_index = np.array([0, -1, 1, -1, 2], dtype=np.int64)
+    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+
+    # Create regular array
+    x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(x_offsets),
+        ak.contents.IndexedOptionArray(
+            ak.index.Index(x_index), ak.contents.NumpyArray(x_content)
+        ),
+    )
+
+    y_field = ak.contents.IndexedOptionArray(
+        ak.index.Index(y_index), ak.contents.NumpyArray(y_content)
+    )
+
+    array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
+
+    # Create virtual versions
+    virtual_x_offsets = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+    )
+
+    virtual_x_index = VirtualArray(
+        numpy_like,
+        shape=(10,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
+    )
+
+    virtual_x_content = VirtualArray(
+        numpy_like,
+        shape=(6,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
+    )
+
+    virtual_y_index = VirtualArray(
+        numpy_like,
+        shape=(5,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([0, -1, 1, -1, 2], dtype=np.int64),
+    )
+
+    virtual_y_content = VirtualArray(
+        numpy_like,
+        shape=(3,),
+        dtype=np.dtype(np.float64),
+        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+    )
+
+    virtual_x_field = ak.contents.ListOffsetArray(
+        ak.index.Index(virtual_x_offsets),
+        ak.contents.IndexedOptionArray(
+            ak.index.Index(virtual_x_index), ak.contents.NumpyArray(virtual_x_content)
+        ),
+    )
+
+    virtual_y_field = ak.contents.IndexedOptionArray(
+        ak.index.Index(virtual_y_index), ak.contents.NumpyArray(virtual_y_content)
+    )
+
+    virtual_array = ak.contents.RecordArray(
+        [virtual_x_field, virtual_y_field], ["x", "y"]
+    )
+
+    # Test operations with None values
+    assert not virtual_array.is_any_materialized
+
+    # Check to_list
+    assert ak.to_list(virtual_array) == ak.to_list(array)
+
+    # Test drop_none
+    assert ak.array_equal(ak.drop_none(virtual_array), ak.drop_none(array))
+
+    # Test fill_none
+    assert ak.array_equal(ak.fill_none(virtual_array, 999), ak.fill_none(array, 999))
+
+    # Test is_none
+    assert ak.array_equal(ak.is_none(virtual_array), ak.is_none(array))
+
+    assert virtual_array.is_any_materialized
+
+
+def test_recordarray_advanced_indexing(recordarray, virtual_recordarray):
+    record_array = ak.Array(recordarray)
+    virtual_record_array = ak.Array(virtual_recordarray)
+
+    assert not virtual_record_array.layout.is_any_materialized
+
+    # Test slicing with step
+    slice_result = virtual_record_array[::2]
+    expected_slice = record_array[::2]
+    assert ak.array_equal(slice_result, expected_slice)
+
+    # Test fancy indexing with array of indices
+    indices = np.array([3, 1, 2])
+    fancy_result = virtual_record_array[indices]
+    expected_fancy = record_array[indices]
+    assert ak.array_equal(fancy_result, expected_fancy)
+
+    # Test boolean masking
+    mask = np.array([True, False, True, False, True])
+    mask_result = virtual_record_array[mask]
+    expected_mask = record_array[mask]
+    assert ak.array_equal(mask_result, expected_mask)
+
+    assert virtual_record_array.layout.is_any_materialized
