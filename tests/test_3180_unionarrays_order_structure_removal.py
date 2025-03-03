@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import awkward as ak
 
 
@@ -16,3 +18,12 @@ def test_ListOffsetArray():
     a = ak.Array([[1, 2, 3], 4, [5, 6], 7, 8])
     b = ak.ravel(a)
     assert b.tolist() == [1, 2, 3, 4, 5, 6, 7, 8]
+
+
+def test_ravel_incompatible_types():
+    a = ak.Array([1, "high", 2, "low"])
+    with pytest.raises(
+        AssertionError,
+        match="cannot merge NumpyArray with ListOffsetArray",
+    ):
+        ak.ravel(a)
