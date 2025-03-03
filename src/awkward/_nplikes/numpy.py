@@ -36,6 +36,10 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
     def ndarray(self):
         return self._module.ndarray
 
+    @property
+    def atleast_1d(self):
+        return self._module.atleast_1d
+
     @classmethod
     def is_own_array_type(cls, type_: type) -> bool:
         """

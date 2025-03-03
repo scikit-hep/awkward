@@ -1574,14 +1574,25 @@ class UnionArray(UnionMeta[Content], Content):
         self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         out = []
-        _, unique_index, *_ = self._backend.index_nplike.unique_all(self._tags.data)
-        for i in self._tags.data[self._backend.index_nplike.sort(unique_index)]:
-            index = self._index[self._tags.data == i]
-            out.extend(
-                self._contents[i]
-                ._carry(index, False)
+
+        tags = numpy.atleast_1d(self._tags.raw(numpy))
+        index = numpy.atleast_1d(self._index.raw(numpy))
+
+        for i in range(len(tags)):
+            tag = tags[i]
+            idx_value = index[i]
+
+            content = (
+                self._contents[tag]
+                ._carry(ak.index.Index(numpy.atleast_1d(idx_value)), False)
                 ._remove_structure(backend, options)
             )
+
+            if isinstance(content, list):
+                out.extend(content)
+            else:
+                out.append(content)
+
         return out
 
     def _recursively_apply(
