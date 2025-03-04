@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 
@@ -16,6 +16,7 @@ def test_where():
 
 
 def test_almost_equal():
-    assert not ak.almost_equal(
-        [True, False, False], ak.to_backend([True, False, False], "typetracer")
-    )
+    with pytest.raises(NotImplementedError):
+        ak.almost_equal(
+            [True, False, False], ak.to_backend([True, False, False], "typetracer")
+        )

@@ -37,7 +37,7 @@ from awkward.contents.content import (
     RemoveStructureOptions,
     ToArrowOptions,
 )
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.regularform import RegularForm
 from awkward.index import Index
 
@@ -209,6 +209,14 @@ class RegularArray(RegularMeta[Content], Content):
             self._size,
             parameters=self._parameters,
             form_key=form_key,
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> RegularForm:
+        return self.form_cls(
+            self._content._form_with_key_path((*path, None)),
+            self._size,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
@@ -471,8 +479,7 @@ class RegularArray(RegularMeta[Content], Content):
             nexthead, nexttail = ak._slicing.head_tail(tail)
             nextcarry = ak.index.Index64.empty(self._length, index_nplike)
             assert nextcarry.nplike is index_nplike
-            if ak.backend(head) == "cuda":
-                head = int(ak.to_backend(head, backend=self._backend)[0])
+            head = ak._slicing.normalize_integer_like(head)
             self._maybe_index_error(
                 self._backend[
                     "awkward_RegularArray_getitem_next_at", nextcarry.dtype.type

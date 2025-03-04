@@ -118,7 +118,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         *,
         dtype: DTypeLike | None = None,
     ) -> ArrayLikeT:
-        return self._module.full(shape, fill_value, dtype=dtype)
+        return self._module.full(shape, self._module.array(fill_value), dtype=dtype)
 
     def zeros_like(
         self, x: ArrayLikeT | PlaceholderArray, *, dtype: DTypeLike | None = None
@@ -146,7 +146,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         if isinstance(x, PlaceholderArray):
             return self.full(x.shape, fill_value, dtype=dtype or x.dtype)
         else:
-            return self._module.full_like(x, fill_value, dtype=dtype)
+            return self._module.full_like(
+                x, self._module.array(fill_value), dtype=dtype
+            )
 
     def arange(
         self,
@@ -174,7 +176,10 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         if equal_nan:
-            both_nan = self._module.logical_and(x1 == np.nan, x2 == np.nan)
+            # Only newer numpy.array_equal supports the equal_nan parameter.
+            both_nan = self._module.logical_and(
+                self._module.isnan(x1), self._module.isnan(x2)
+            )
             both_equal = x1 == x2
             return self._module.all(self._module.logical_or(both_equal, both_nan))
         else:
@@ -301,7 +306,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT | PlaceholderArray:
         if isinstance(x, PlaceholderArray):
             next_shape = self._compute_compatible_shape(shape, x.shape)
-            return PlaceholderArray(self, next_shape, x.dtype)
+            return PlaceholderArray(self, next_shape, x.dtype, x._field_path)
 
         if copy is None:
             return self._module.reshape(x, shape)
@@ -672,7 +677,8 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         precision: int | None = None,
         suppress_small: bool | None = None,
     ):
-        assert not isinstance(x, PlaceholderArray)
+        if isinstance(x, PlaceholderArray):
+            return "[## ... ##]"
         return self._module.array_str(
             x,
             max_line_width=max_line_width,

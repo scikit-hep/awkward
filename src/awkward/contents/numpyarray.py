@@ -14,6 +14,7 @@ from awkward._layout import maybe_posaxis
 from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes import to_nplike
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
@@ -44,7 +45,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
 from awkward.index import Index
 from awkward.types.numpytype import primitive_to_dtype
@@ -174,7 +175,11 @@ class NumpyArray(NumpyMeta, Content):
 
     @property
     def inner_shape(self) -> tuple[ShapeItem, ...]:
-        return self._data.shape[1:]
+        if hasattr(self._data, "inner_shape"):
+            inner_shape = self._data.inner_shape
+        else:
+            inner_shape = self._data.shape[1:]
+        return inner_shape
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
@@ -188,16 +193,19 @@ class NumpyArray(NumpyMeta, Content):
         return to_nplike(self.data, nplike, from_nplike=self._backend.nplike)
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> NumpyForm:
-        if hasattr(self._data, "inner_shape"):
-            inner_shape = self._data.inner_shape
-        else:
-            inner_shape = self._data.shape[1:]
-
         return self.form_cls(
             ak.types.numpytype.dtype_to_primitive(self._data.dtype),
-            inner_shape,
+            self.inner_shape,
             parameters=self._parameters,
             form_key=getkey(self),
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> NumpyForm:
+        return self.form_cls(
+            ak.types.numpytype.dtype_to_primitive(self._data.dtype),
+            self.inner_shape,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
@@ -250,12 +258,9 @@ class NumpyArray(NumpyMeta, Content):
 
         extra = self._repr_extra(indent + "    ")
 
-        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)):
-            arraystr_lines = ["[## ... ##]"]
-        else:
-            arraystr_lines = self._backend.nplike.array_str(
-                self._data, max_line_width=30
-            ).split("\n")
+        arraystr_lines = self._backend.nplike.array_str(
+            self._data, max_line_width=30
+        ).split("\n")
 
         if len(extra) != 0 or len(arraystr_lines) > 1:
             arraystr_lines = self._backend.nplike.array_str(
@@ -476,7 +481,8 @@ class NumpyArray(NumpyMeta, Content):
             elif (
                 np.issubdtype(self.dtype, np.bool_)
                 and np.issubdtype(other.dtype, np.number)
-                or np.issubdtype(self.dtype, np.number)
+            ) or (
+                np.issubdtype(self.dtype, np.number)
                 and np.issubdtype(other.dtype, np.bool_)
             ):
                 return mergebool
@@ -683,7 +689,7 @@ class NumpyArray(NumpyMeta, Content):
             )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self.length == 0:
+        if self.length is not unknown_length and self.length == 0:
             return True
         elif len(self.shape) != 1:
             return self.to_RegularArray()._is_unique(
@@ -702,9 +708,12 @@ class NumpyArray(NumpyMeta, Content):
         else:
             out = self._unique(negaxis, starts, parents, outlength)
             if isinstance(out, ak.contents.ListOffsetArray):
-                return out.content.length == self.length
+                return (
+                    out.content.length is not unknown_length
+                    and out.content.length == self.length
+                )
             else:
-                return out.length == self.length
+                return out.length is not unknown_length and out.length == self.length
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self.shape[0] == 0:
@@ -1220,6 +1229,20 @@ class NumpyArray(NumpyMeta, Content):
             ),
         )
 
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        cupy = Cupy.instance()
+        from cudf.core.column.column import as_column
+
+        assert self._backend.nplike.known_data
+        data = as_column(self._data)
+        if mask is not None:
+            m = cupy.packbits(cupy.asarray(mask), bitorder="little")
+            if m.nbytes % 64:
+                m = cupy.resize(m, ((m.nbytes // 64) + 1) * 64)
+            m = cudf.core.buffer.as_buffer(m)
+            data.set_base_data(m)
+        return data
+
     def _to_backend_array(self, allow_missing, backend):
         return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
 
@@ -1360,16 +1383,18 @@ class NumpyArray(NumpyMeta, Content):
         return self._is_equal_to_generic(other, all_parameters) and (
             not numpyarray
             # dtypes agree
-            or self.dtype == other.dtype
-            # Contents agree
-            and (
-                not self._backend.nplike.known_data
-                or self._backend.nplike.array_equal(self.data, other.data)
-            )
-            # Shapes agree
-            and all(
-                x is unknown_length or y is unknown_length or x == y
-                for x, y in zip(self.shape, other.shape)
+            or (
+                self.dtype == other.dtype
+                # Contents agree
+                and (
+                    not self._backend.nplike.known_data
+                    or self._backend.nplike.array_equal(self.data, other.data)
+                )
+                # Shapes agree
+                and all(
+                    x is unknown_length or y is unknown_length or x == y
+                    for x, y in zip(self.shape, other.shape)
+                )
             )
         )
 

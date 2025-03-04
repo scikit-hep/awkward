@@ -63,6 +63,9 @@ class UnknownLength(PrivateSingleton):
     def __repr__(self):
         return self._instance_name
 
+    def __hash__(self):
+        return hash(self._instance_name)
+
     def __eq__(self, other) -> bool:
         if other is self:
             return True

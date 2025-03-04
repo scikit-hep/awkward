@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+from functools import reduce
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
@@ -15,6 +16,7 @@ from awkward._broadcasting import (
 )
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 
 __all__ = ("transform",)
 
@@ -423,6 +425,40 @@ def transform(
     `"none"`
         The output arrays will not be given parameters.
 
+
+    Performance Tip
+    ================
+
+    #ak.transform will traverse the layout of (potentially multiple) arrays once.
+    This can be useful if one wants to apply a batch of transformations in one single
+    layout traversal. Traversing the layout multiple times can be inefficient.
+
+    Consider the following example:
+
+        >>> def batch_of_operations(array):
+        ...     return np.sqrt(np.sin(array) + 1) - 1
+        ...
+        >>> def apply_batch_of_operations(layout, **kwargs):
+        ...     if layout.is_numpy:
+        ...         return ak.contents.NumpyArray(
+        ...             batch_of_operations(layout.data)
+        ...         )
+        ...
+        >>> array = ak.Array(
+        ... [[[[[1.1, 2.2, 3.3], []], None], []],
+        ...  [[[[4.4, 5.5]]]]]
+        ... )
+        >>> %timeit ak.transform(apply_batch_of_operations, array)
+        ... 68.5 μs ± 663 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+        >>> %timeit batch_of_operations(array)
+        ... 1.07 ms ± 39.1 μs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
+
+    The first `%timeit` cell shows the time it takes to apply the batch of operations using #ak.transform,
+    which allows to apply the operations in one single traversal of the layout. The second `%timeit` cell shows
+    the runtime of applying the operations directly to the array, which traverses the layout multiple times.
+    To be more explicit: one layout traversal for each operation.
+
+
     See also: #ak.is_valid and #ak.valid_when to check the validity of transformed
     outputs.
     """
@@ -580,6 +616,17 @@ def _impl(
                     f"transformation must return a Content, tuple of Contents, or None, not {type(out)}\n\n{out!r}"
                 )
 
+        if depth_context is None:
+            depth_context = {}
+        if lateral_context is None:
+            lateral_context = {}
+        assert NAMED_AXIS_KEY not in depth_context
+        assert NAMED_AXIS_KEY not in lateral_context
+        _depth_context, _lateral_context = NamedAxesWithDims.prepare_contexts(
+            [array, *more_arrays]
+        )
+        depth_context.update(_depth_context)
+        lateral_context.update(_lateral_context)
         backend = next((layout.backend for layout in layouts), cpu)
         isscalar = []
         out = apply_broadcasting_step(
@@ -594,6 +641,11 @@ def _impl(
         assert isinstance(out, tuple)
         out = [broadcast_unpack(x, isscalar) for x in out]
 
+        # Unify named axes propagated through the broadcast
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+        )
+
         if return_value == "none":
             return
         elif expect_return_value and not transformer_did_terminate:
@@ -602,6 +654,25 @@ def _impl(
                 "or tuple of Contents, but instead only returned None."
             )
         elif len(out) == 1:
-            return ctx.wrap(out[0], highlevel=highlevel)
+            wrapped_out = ctx.wrap(out[0], highlevel=highlevel)
+            return ak.operations.ak_with_named_axis._impl(
+                wrapped_out,
+                named_axis=out_named_axis,
+                highlevel=highlevel,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
+            )
         else:
-            return tuple(ctx.wrap(x, highlevel=highlevel) for x in out)
+            wrapped_out = []
+            for x in out:
+                wrapped = ctx.wrap(x, highlevel=highlevel)
+                wrapped_out.append(
+                    ak.operations.ak_with_named_axis._impl(
+                        wrapped,
+                        named_axis=out_named_axis,
+                        highlevel=highlevel,
+                        behavior=ctx.behavior,
+                        attrs=ctx.attrs,
+                    )
+                )
+            return tuple(wrapped_out)

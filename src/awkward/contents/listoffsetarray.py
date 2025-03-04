@@ -10,6 +10,7 @@ from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -38,7 +39,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.listoffsetform import ListOffsetForm
 from awkward.index import Index, Index64
 
@@ -198,6 +199,14 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             form_key=form_key,
         )
 
+    def _form_with_key_path(self, path: FormKeyPathT) -> ListOffsetForm:
+        return self.form_cls(
+            self._offsets.form,
+            self._content._form_with_key_path((*path, None)),
+            parameters=self._parameters,
+            form_key=repr(path),
+        )
+
     def _to_buffers(
         self,
         form: Form,
@@ -301,7 +310,10 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        return isinstance(self._offsets, PlaceholderArray)
+        return (
+            isinstance(self._offsets.data, PlaceholderArray)
+            or self._content._is_getitem_at_placeholder()
+        )
 
     def _getitem_at(self, where: IndexType):
         # Wrap `where` by length
@@ -1997,6 +2009,56 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 null_count=ak._connect.pyarrow.to_null_count(
                     validbytes, options["count_nulls"]
                 ),
+            )
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        from packaging.version import parse as parse_version
+
+        cupy = Cupy.instance()
+        index = self._offsets.raw(cupy).astype("int32")
+        buf = cudf.core.buffer.as_buffer(index)
+
+        if parse_version(cudf.__version__) >= parse_version("24.10.00"):
+            ind_buf = cudf.core.column.numerical.NumericalColumn(
+                data=buf, dtype=index.dtype, mask=None, size=len(index)
+            )
+        else:
+            ind_buf = cudf.core.column.numerical.NumericalColumn(
+                buf, index.dtype, None, size=len(index)
+            )
+        cont = self._content._to_cudf(cudf, None, len(self._content))
+        if mask is not None:
+            m = np._module.packbits(mask, bitorder="little")
+            if m.nbytes % 64:
+                m = cupy.resize(m, ((m.nbytes // 64) + 1) * 64)
+            m = cudf.core.buffer.as_buffer(cupy.asarray(m))
+        else:
+            m = None
+        if self.parameters.get("__array__") == "string":
+            from cudf.core.column.string import StringColumn
+
+            data = cudf.core.buffer.as_buffer(cupy.asarray(self._content.data))
+            # docs for StringColumn says there should be two children instead of a data=
+            return StringColumn(
+                data=data,
+                children=(ind_buf,),
+                mask=m,
+            )
+
+        if parse_version(cudf.__version__) >= parse_version("24.10.00"):
+            return cudf.core.column.lists.ListColumn(
+                size=length,
+                data=None,
+                mask=m,
+                children=(ind_buf, cont),
+                dtype=cudf.core.dtypes.ListDtype(cont.dtype),
+            )
+        else:
+            return cudf.core.column.lists.ListColumn(
+                length,
+                mask=m,
+                children=(ind_buf, cont),
+                dtype=cudf.core.dtypes.ListDtype(cont.dtype),
             )
 
     def _to_backend_array(self, allow_missing, backend):

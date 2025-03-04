@@ -11,6 +11,7 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._meta.bitmaskedmeta import BitMaskedMeta
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -37,7 +38,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.forms.bitmaskedform import BitMaskedForm
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.index import Index
 
 if TYPE_CHECKING:
@@ -285,6 +286,16 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._lsb_order,
             parameters=self._parameters,
             form_key=form_key,
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> BitMaskedForm:
+        return self.form_cls(
+            self._mask.form,
+            self._content._form_with_key_path((*path, None)),
+            self._valid_when,
+            self._lsb_order,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
@@ -603,14 +614,14 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         return self.to_ByteMaskedArray()._numbers_to_type(name, including_unknown)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._mask.length == 0:
+        if self._mask.length is not unknown_length and self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
             negaxis, starts, parents, outlength
         )
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self._mask.length == 0:
+        if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
         out = self.to_IndexedOptionArray64()._unique(
             negaxis, starts, parents, outlength
@@ -686,6 +697,24 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         return self.to_ByteMaskedArray()._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        cp = Cupy.instance()._module
+
+        assert mask is None  # this class has its own mask
+        if not self.lsb_order:
+            m = cp.flip(
+                cp.packbits(cp.flip(cp.unpackbits(cp.asarray(self._mask.data))))
+            )
+        else:
+            m = self._mask.data
+
+        if m.nbytes % 64:
+            m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
+        m = cudf.core.buffer.as_buffer(m)
+        inner = self._content._to_cudf(cudf, mask=None, length=length)
+        inner.set_base_mask(m)
+        return inner
 
     def _to_backend_array(self, allow_missing, backend):
         return self.to_ByteMaskedArray()._to_backend_array(allow_missing, backend)
@@ -781,7 +810,10 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
         else:
             excess_length = int(math.ceil(self._length / 8.0))
-            if self._mask.length == excess_length:
+            if (
+                self._mask.length is not unknown_length
+                and self._mask.length == excess_length
+            ):
                 mask = self._mask
             else:
                 mask = self._mask[:excess_length]

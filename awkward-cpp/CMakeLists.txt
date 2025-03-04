@@ -2,6 +2,11 @@
 
 cmake_minimum_required(VERSION 3.15...3.30)
 
+if(NOT DEFINED SKBUILD)
+  set(SKBUILD_PROJECT_NAME awkward_cpp)
+  set(SKBUILD_PROJECT_VERSION 0.0.0)
+endif()
+
 # Project must be near the top
 project(
   ${SKBUILD_PROJECT_NAME}
@@ -57,6 +62,18 @@ target_include_directories(awkward-parent INTERFACE rapidjson/include)
 # C++ dependencies (header-only): GrowableBuffer
 add_subdirectory(header-only EXCLUDE_FROM_ALL)
 target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
+
+# WASM needs exceptions enabled
+if(CMAKE_SYSTEM_NAME MATCHES Emscripten)
+  set_property(
+    TARGET awkward-parent
+    APPEND
+    PROPERTY INTERFACE_LINK_OPTIONS -fexceptions)
+  set_property(
+    TARGET awkward-parent
+    APPEND
+    PROPERTY INTERFACE_COMPILE_OPTIONS -fexceptions)
+endif()
 
 # First tier: cpu-kernels
 add_library(awkward-cpu-kernels SHARED ${CPU_KERNEL_SOURCES})

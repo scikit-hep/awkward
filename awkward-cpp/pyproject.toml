@@ -1,21 +1,20 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.9",
+    "scikit-build-core>=0.10",
     "pybind11",
 ]
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "37"
+version = "44"
 dependencies = [
-    "numpy>=1.18.0",
-    "importlib_resources;python_version < \"3.9\""
+    "numpy>=1.18.0"
 ]
 readme = "README.md"
 description = "CPU kernels and compiled extensions for Awkward Array"
 authors = [
-    {name = "Jim Pivarski", email = "pivarski@princeton.edu"},
+    {name = "Jim Pivarski", email = "jpivarski@gmail.com"},
 ]
 maintainers = [
     {name = "Scikit-HEP", email = "scikit-hep-admins@googlegroups.com"},
@@ -33,7 +32,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -46,7 +44,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 license = {text = "BSD-3-Clause"}
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [project.urls]
 Homepage = "https://github.com/scikit-hep/awkward-1.0"
@@ -59,7 +57,7 @@ Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 
 
 [tool.scikit-build]
-minimum-version = "0.9"
+minimum-version = "build-system.requires"
 build-dir = "build/{cache_tag}"
 sdist.reproducible = true
 sdist.include = [
@@ -75,3 +73,39 @@ sdist.include = [
 [[tool.scikit-build.overrides]]
 if.platform-system = "darwin"
 cmake.version = ">=3.29"
+
+
+[tool.cibuildwheel]
+build-frontend = "build[uv]"
+free-threaded-support = true
+test-requires = ["pytest>=6", "."]
+test-command = ["echo {project}:", "ls {project}", "echo {package}:", "ls {package}",
+"""
+pytest -p no:cacheprovider \
+       {project}/tests \
+       {package}/tests-cpu-kernels \
+       {package}/tests-cpu-kernels-explicit \
+       {package}/tests-spec \
+       {package}/tests-spec-explicit
+"""]
+skip = [
+    "pp*win*",
+    "pp*-manylinux_i686",
+]
+test-skip = [
+    "*universal2:arm64",
+    "pp*",
+    "*musllinux*",
+]
+build-verbosity = 1
+
+[tool.cibuildwheel.environment]
+PIP_ONLY_BINARY = "cmake,numpy"
+
+[[tool.cibuildwheel.overrides]]
+select = "cp313*"
+environment.PYO3_USE_ABI3_FORWARD_COMPATIBILITY = "1"
+
+[[tool.cibuildwheel.overrides]]
+select = "*pyodide*"
+build-frontend = {name = "build", args = ["--exports", "whole_archive"]}

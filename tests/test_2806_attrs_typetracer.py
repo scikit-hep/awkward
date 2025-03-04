@@ -22,7 +22,7 @@ def test_typetracer_with_report():
     form = layout.form_with_key("node{id}")
 
     meta, report = typetracer_with_report(form, highlevel=True, attrs=SOME_ATTRS)
-    assert meta.attrs is SOME_ATTRS
+    assert meta.attrs == SOME_ATTRS
 
     meta, report = typetracer_with_report(form, highlevel=True, attrs=None)
     assert meta._attrs is None
@@ -44,5 +44,5 @@ def test_function(function):
             "z": [[0.1, 0.1, 0.2], [3, 1, 2], [2, 1, 2]],
         }
     )
-    assert function(array, attrs=SOME_ATTRS).attrs is SOME_ATTRS
+    assert function(array, attrs=SOME_ATTRS).attrs == SOME_ATTRS
     assert function(array)._attrs is None

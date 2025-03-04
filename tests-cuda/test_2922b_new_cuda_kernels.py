@@ -1197,9 +1197,9 @@ def test_0093_simplify_uniontypes_and_optiontypes_numpyarray_merge():
             cuda_two = ak.to_backend(two, "cuda", highlevel=False)
 
             cuda_three = cuda_one._mergemany([cuda_two])
-            assert ak.to_numpy(cuda_three).dtype == np.dtype(
-                z
-            ), f"{x} {y} {z} {ak.to_numpy(cuda_three).dtype.type}"
+            assert ak.to_numpy(cuda_three).dtype == np.dtype(z), (
+                f"{x} {y} {z} {ak.to_numpy(cuda_three).dtype.type}"
+            )
             assert to_list(cuda_three) == to_list(
                 np.concatenate([ak.to_numpy(cuda_one), ak.to_numpy(two)])
             )

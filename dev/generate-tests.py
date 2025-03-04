@@ -7,6 +7,7 @@ import datetime
 import json
 import os
 import shutil
+import sys
 import time
 from collections import OrderedDict
 from itertools import product
@@ -17,16 +18,28 @@ from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
+try:
+    yaml_loader = yaml.CSafeLoader if sys._is_gil_enabled() else yaml.SafeLoader
+except AttributeError:
+    yaml_loader = yaml.CSafeLoader
+
 
 def reproducible_datetime():
-    build_date = datetime.datetime.utcfromtimestamp(
-        int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-    )
+    import sys
+
+    timestamp = int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
+
+    if sys.version_info >= (3, 11):
+        build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
+    else:
+        build_date = datetime.datetime.utcfromtimestamp(
+            int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
+        )
     return build_date.isoformat().replace("T", " AT ")[:22]
 
 
 class Argument:
-    __slots__ = ("name", "typename", "direction", "role")
+    __slots__ = ("direction", "name", "role", "typename")
 
     def __init__(self, name, typename, direction, role="default"):
         self.name = name
@@ -196,7 +209,7 @@ def readspec():
     specdict = {}
     specdict_unit = {}
     with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as f:
-        loadfile = yaml.load(f, Loader=yaml.CSafeLoader)
+        loadfile = yaml.load(f, Loader=yaml_loader)
 
     indspec = loadfile["kernels"]
     with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
@@ -385,7 +398,7 @@ def awkward_ListArray_combinations_step(
         with open(
             os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")
         ) as specfile:
-            indspec = yaml.load(specfile, Loader=yaml.CSafeLoader)["kernels"]
+            indspec = yaml.load(specfile, Loader=yaml_loader)["kernels"]
             for spec in indspec:
                 if "def " in spec["definition"]:
                     outfile.write(spec["definition"] + "\n")
@@ -1247,7 +1260,7 @@ def gencudaunittests(specdict):
                         if test["error"]:
                             f.write(
                                 f"""
-    error_message = re.escape("{test['message']} in compiled CUDA code ({spec.templatized_kernel_name})")
+    error_message = re.escape("{test["message"]} in compiled CUDA code ({spec.templatized_kernel_name})")
 """
                             )
                             f.write(
@@ -1319,7 +1332,7 @@ def genunittests():
             os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit", func),
             "w",
         ) as file:
-            file.write("import pytest\n" "import numpy\n" "import kernels\n\n")
+            file.write("import pytest\nimport numpy\nimport kernels\n\n")
             for test in function["tests"]:
                 num += 1
                 funcName = "def test_" + function["name"] + "_" + str(num) + "():\n"

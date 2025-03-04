@@ -14,15 +14,15 @@ def test():
 def test_unary():
     x = ak.Array([1, 2, 3], behavior={"foo": "BAR"}, attrs={"hello": "world"})
     y = -x
-    assert y.attrs is x.attrs
+    assert y.attrs == x.attrs
     assert x.behavior is y.behavior
 
 
 def test_two_return():
     x = ak.Array([1, 2, 3], behavior={"foo": "BAR"}, attrs={"hello": "world"})
     y, y_ret = divmod(x, 2)
-    assert y.attrs is y_ret.attrs
-    assert y.attrs is x.attrs
+    assert y.attrs == y_ret.attrs
+    assert y.attrs == x.attrs
 
     assert y.behavior is y_ret.behavior
     assert y.behavior is x.behavior

@@ -40,7 +40,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.recordform import RecordForm
 from awkward.index import Index
 from awkward.record import Record
@@ -250,13 +250,6 @@ class RecordArray(RecordMeta[Content], Content):
         self._length = length
         self._init(parameters, backend)
 
-    @property
-    def fields(self) -> list[str]:
-        if self._fields is None:
-            return [str(i) for i in range(len(self._contents))]
-        else:
-            return self._fields
-
     form_cls: Final = RecordForm
 
     def copy(
@@ -298,10 +291,6 @@ class RecordArray(RecordMeta[Content], Content):
     ):
         return cls(contents, fields, length, parameters=parameters, backend=backend)
 
-    @property
-    def is_tuple(self) -> bool:
-        return self._fields is None
-
     def to_tuple(self) -> Self:
         return RecordArray(
             self._contents, None, self._length, parameters=None, backend=self._backend
@@ -314,6 +303,22 @@ class RecordArray(RecordMeta[Content], Content):
             self._fields,
             parameters=self._parameters,
             form_key=form_key,
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> RecordForm:
+        # explicitly use `self.fields` instead of `self._fields`,
+        # because we want string-typed field names in the path -
+        # also for tuple records
+        contents = [
+            x._form_with_key_path((*path, k))
+            for k, x in zip(self.fields, self._contents)
+        ]
+
+        return self.form_cls(
+            contents,
+            self._fields,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
@@ -752,10 +757,13 @@ class RecordArray(RecordMeta[Content], Content):
             ):
                 minlength = merged.length
 
-        if minlength is unknown_length:
+        # `not for_each_field`: is a corner-case when all
+        # the arrays are empty and have no fields either.
+        if minlength is unknown_length or not for_each_field:
+            from operator import attrgetter
+
             minlength = self.length
-            for x in others:
-                minlength += x.length
+            minlength += sum(map(attrgetter("length"), others))
 
         next = RecordArray(
             nextcontents,
@@ -829,7 +837,7 @@ class RecordArray(RecordMeta[Content], Content):
         raise NotImplementedError
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
-        if self._fields is None or len(self._fields) == 0:
+        if len(self.fields) == 0:
             return ak.contents.NumpyArray(
                 self._backend.nplike.instance().empty(0, dtype=np.int64),
                 parameters=None,
@@ -1099,6 +1107,23 @@ class RecordArray(RecordMeta[Content], Content):
             length,
             [ak._connect.pyarrow.to_validbits(validbytes)],
             children=values,
+        )
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        children = tuple(
+            c._to_cudf(cudf, mask=None, length=length) for c in self.contents
+        )
+        dt = cudf.core.dtypes.StructDtype(
+            {field: c.dtype for field, c in zip(self.fields, children)}
+        )
+        m = mask._to_cudf(cudf, None, length) if mask else None
+        return cudf.core.column.struct.StructColumn(
+            data=None,
+            children=children,
+            dtype=dt,
+            mask=m,
+            size=length,
+            offset=0,
         )
 
     def _to_backend_array(self, allow_missing, backend):

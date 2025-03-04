@@ -1188,7 +1188,6 @@ def test_1074_combinations_UnmaskedArray():
 
 
 def test_block_boundary_combinations():
-    np.random.seed(42)
     content = ak.contents.NumpyArray(np.arange(300))
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
 
@@ -1219,7 +1218,6 @@ def test_block_boundary_combinations():
 
 
 def test_block_boundary_argcombinations():
-    np.random.seed(42)
     content = ak.contents.NumpyArray(np.arange(300))
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
 

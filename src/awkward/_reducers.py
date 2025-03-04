@@ -647,9 +647,9 @@ class Min(KernelReducer):
     def _identity_for(self, dtype: DTypeLike | None) -> float:
         dtype = np.dtype(dtype)
 
-        assert (
-            dtype.kind.upper() != "M"
-        ), "datetime64/timedelta64 should be converted to int64 before reduction"
+        assert dtype.kind.upper() != "M", (
+            "datetime64/timedelta64 should be converted to int64 before reduction"
+        )
         if self._initial is None:
             if dtype in (
                 np.int8,
@@ -755,9 +755,9 @@ class Max(KernelReducer):
     def _identity_for(self, dtype: DTypeLike | None):
         dtype = np.dtype(dtype)
 
-        assert (
-            dtype.kind.upper() != "M"
-        ), "datetime64/timedelta64 should be converted to int64 before reduction"
+        assert dtype.kind.upper() != "M", (
+            "datetime64/timedelta64 should be converted to int64 before reduction"
+        )
         if self._initial is None:
             if dtype in (
                 np.int8,

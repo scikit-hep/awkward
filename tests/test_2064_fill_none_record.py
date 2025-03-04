@@ -24,5 +24,6 @@ def test_axis_last():
 
 
 def test_option_outside_record():
-    record = ak.zip({"x": [1, 4], "y": [2, 3]}).mask[[True, False]]
+    record = ak.zip({"x": [1, 4], "y": [2, 3]})
+    record = record.mask[[True, False]]
     assert ak.fill_none(record, 0, axis=-1).to_list() == [{"x": 1, "y": 2}, 0]

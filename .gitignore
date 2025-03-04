@@ -1,4 +1,5 @@
 studies/**/sample-*
+studies/named_axis.*
 docs/demos/countries.geojson
 docs/demos/test-program
 docs/demos/test-program.cpp
@@ -49,6 +50,7 @@ GPATH
 GRTAGS
 .vscode
 pyrightconfig.json
+.ropeproject
 # ...
 
 ############################################################# LaTeX
@@ -161,3 +163,6 @@ Testing/
 # Pip stuff
 /pip-wheel-metadata/*
 /_skbuild/*
+
+# MacOS
+.DS_Store

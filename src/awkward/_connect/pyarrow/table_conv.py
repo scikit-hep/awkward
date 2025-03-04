@@ -221,7 +221,7 @@ def replace_schema(table: pyarrow.Table, new_schema: pyarrow.Schema) -> pyarrow.
         new_batches.append(
             pyarrow.RecordBatch.from_arrays(arrays=columns, schema=new_schema)
         )
-    return pyarrow.Table.from_batches(new_batches)
+    return pyarrow.Table.from_batches(new_batches, schema=new_schema)
 
 
 def array_with_replacement_type(

@@ -3,14 +3,19 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import (
     HighLevelContext,
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
 )
+from awkward._namedaxis import (
+    AxisName,
+    _get_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import regularize_axis
+from awkward._typing import Mapping
 
 __all__ = ("moment",)
 
@@ -22,13 +27,13 @@ def moment(
     x,
     n,
     weight=None,
-    axis=None,
+    axis: AxisName = None,
     *,
-    keepdims=False,
-    mask_identity=False,
-    highlevel=True,
-    behavior=None,
-    attrs=None,
+    keepdims: bool = False,
+    mask_identity: bool = False,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
 ):
     """
     Args:
@@ -86,9 +91,17 @@ def moment(
     )
 
 
-def _impl(x, n, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
-
+def _impl(
+    x,
+    n,
+    weight,
+    axis: AxisName,
+    keepdims: bool,
+    mask_identity: bool,
+    highlevel: bool,
+    behavior: Mapping | None,
+    attrs: Mapping | None,
+):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, weight_layout = ensure_same_backend(
             ctx.unwrap(x, allow_record=False, primitive_policy="error"),
@@ -143,8 +156,20 @@ def _impl(x, n, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-        return ctx.wrap(
-            maybe_highlevel_to_lowlevel(sumwxn / sumw),
+
+        out = sumwxn / sumw
+
+        # propagate named axis to output
+        wrapped = ctx.wrap(
+            maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,
+        )
+        # propagate named axis to output
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped,
+            named_axis=_get_named_axis(attrs_of_obj(out), allow_any=True),
+            highlevel=highlevel,
+            behavior=None,
+            attrs=None,
         )

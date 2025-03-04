@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from awkward._backends.dispatch import backend_of_obj
+from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._dispatch import high_level_function
+from awkward._layout import ensure_same_backend
+from awkward._namedaxis import _get_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
@@ -26,6 +28,7 @@ def almost_equal(
     dtype_exact: bool = True,
     check_parameters: bool = True,
     check_regular: bool = True,
+    check_named_axis: bool = True,
 ):
     """
     Args:
@@ -38,6 +41,7 @@ def almost_equal(
         check_parameters: whether to compare parameters.
         check_regular: whether to consider ragged and regular dimensions as
             unequal.
+        check_named_axis: bool (default=True) whether to consider named axes as unequal.
 
     Return True if the two array-like arguments are considered equal for the
     given options. Otherwise, return False.
@@ -52,18 +56,49 @@ def almost_equal(
     # Dispatch
     yield left, right
 
+    return _impl(
+        left,
+        right,
+        rtol=rtol,
+        atol=atol,
+        dtype_exact=dtype_exact,
+        check_parameters=check_parameters,
+        check_regular=check_regular,
+        check_named_axis=check_named_axis,
+        exact_eq=False,
+        same_content_types=False,
+        equal_nan=False,
+    )
+
+
+def _impl(
+    left,
+    right,
+    rtol: float,
+    atol: float,
+    dtype_exact: bool,
+    check_parameters: bool,
+    check_regular: bool,
+    check_named_axis: bool,
+    exact_eq: bool,
+    same_content_types: bool,
+    equal_nan: bool,
+):
     # Implementation
     left_behavior = behavior_of(left)
     right_behavior = behavior_of(right)
 
-    left_backend = backend_of_obj(left, default=cpu)
-    right_backend = backend_of_obj(right, default=cpu)
-    if left_backend is not right_backend:
-        return False
-    backend = left_backend
+    layouts = ensure_same_backend(
+        to_layout(left, allow_record=False),
+        to_layout(right, allow_record=False),
+    )
+    left_layout = layouts[0].to_packed()
+    right_layout = layouts[1].to_packed()
+    backend = backend_of(left_layout)
 
-    left_layout = to_layout(left, allow_record=False).to_packed()
-    right_layout = to_layout(right, allow_record=False).to_packed()
+    if check_named_axis and _get_named_axis(left) and _get_named_axis(right):
+        if left.named_axis != right.named_axis:
+            return False
 
     if not backend.nplike.known_data:
         raise NotImplementedError(
@@ -82,6 +117,10 @@ def almost_equal(
         return layout.content[layout.offsets[0] : layout.offsets[-1]]
 
     def visitor(left, right) -> bool:
+        # Most firstly, check same_content_types before any transformations
+        if same_content_types and left.__class__ is not right.__class__:
+            return False
+
         # First, erase indexed types!
         if left.is_indexed and not left.is_option:
             left = left.project()
@@ -152,12 +191,26 @@ def almost_equal(
                     and backend.nplike.all(left.data == right.data)
                     and left.shape == right.shape
                 )
+            elif exact_eq:
+                return (
+                    is_approx_dtype(left.dtype, right.dtype)
+                    and backend.nplike.array_equal(
+                        left.data,
+                        right.data,
+                        equal_nan=equal_nan,
+                    )
+                    and left.shape == right.shape
+                )
             else:
                 return (
                     is_approx_dtype(left.dtype, right.dtype)
                     and backend.nplike.all(
                         backend.nplike.isclose(
-                            left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+                            left.data,
+                            right.data,
+                            rtol=rtol,
+                            atol=atol,
+                            equal_nan=equal_nan,
                         )
                     )
                     and left.shape == right.shape

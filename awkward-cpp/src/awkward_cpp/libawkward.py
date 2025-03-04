@@ -3,13 +3,8 @@
 from __future__ import annotations
 
 import ctypes
+import importlib.resources as importlib_resources
 import platform
-import sys
-
-if sys.version_info < (3, 9):
-    import importlib_resources
-else:
-    import importlib.resources as importlib_resources
 
 if platform.system() == "Windows":
     name = "awkward.dll"

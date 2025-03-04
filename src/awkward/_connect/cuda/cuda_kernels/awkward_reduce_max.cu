@@ -7,7 +7,7 @@
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
-//     temp = cupy.full(lenparents, identity, dtype=toptr.dtype)
+//     temp = cupy.full(lenparents, cupy.array([identity]), dtype=toptr.dtype)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, toptr.dtype.type(identity), temp, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_max_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, toptr.dtype.type(identity), temp, invocation_index, err_code))
 // out["awkward_reduce_max_a", {dtype_specializations}] = None
@@ -60,7 +60,7 @@ awkward_reduce_max_b(
         T val = identity;
 
         if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-          val = temp[idx - stride];
+          val = temp[thread_id - stride];
         }
         __syncthreads();
         temp[thread_id] = val > temp[thread_id] ? val : temp[thread_id];

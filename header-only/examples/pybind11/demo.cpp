@@ -34,42 +34,36 @@ using MyBuilder = RecordBuilder<
  */
 template<typename T>
 py::object snapshot_builder(const T &builder) {
+    // We need NumPy (to allocate arrays) and Awkward Array (ak.from_buffers).
+    // pybind11 will raise a ModuleNotFoundError if they aren't installed.
+    auto np = py::module::import("numpy");
+    auto ak = py::module::import("awkward");
+
+    auto dtype_u1 = np.attr("dtype")("u1");
+
     // How much memory to allocate?
-    std::map <std::string, size_t> names_nbytes = {};
+    std::map<std::string, size_t> names_nbytes;
     builder.buffer_nbytes(names_nbytes);
 
-    // Allocate memory
-    std::map<std::string, void *> buffers = {};
-    for (auto it: names_nbytes) {
-        uint8_t *ptr = new uint8_t[it.second];
-        buffers[it.first] = (void *) ptr;
+    // Ask NumPy to allocate memory and get pointers to the raw buffers.
+    py::dict py_container;
+    std::map<std::string, void*> cpp_container;
+    for (auto name_nbytes : names_nbytes) {
+      py::object array = np.attr("empty")(name_nbytes.second, dtype_u1);
+
+      size_t pointer = py::cast<size_t>(array.attr("ctypes").attr("data"));
+      void* raw_data = (void*)pointer;
+
+      py::str py_name(name_nbytes.first);
+      py_container[py_name] = array;
+      cpp_container[name_nbytes.first] = raw_data;
     }
 
-    // Write non-contiguous contents to memory
-    builder.to_buffers(buffers);
-    auto from_buffers = py::module::import("awkward").attr("from_buffers");
+    // Write non-contiguous contents to memory.
+    builder.to_buffers(cpp_container);
 
-    // Build Python dictionary containing arrays
-    // dtypes not important here as long as they match the underlying buffer
-    // as Awkward Array calls `frombuffer` to convert to the correct type
-    py::dict container;
-    for (auto it: buffers) {
-
-        py::capsule free_when_done(it.second, [](void *data) {
-            uint8_t *dataPtr = reinterpret_cast<uint8_t *>(data);
-            delete[] dataPtr;
-        });
-
-        uint8_t *data = reinterpret_cast<uint8_t *>(it.second);
-        container[py::str(it.first)] = py::array_t<uint8_t>(
-                {names_nbytes[it.first]},
-                {sizeof(uint8_t)},
-                data,
-                free_when_done
-        );
-    }
-    return from_buffers(builder.form(), builder.length(), container);
-
+    // Build Python dictionary containing arrays.
+    return ak.attr("from_buffers")(builder.form(), builder.length(), py_container);
 }
 
 

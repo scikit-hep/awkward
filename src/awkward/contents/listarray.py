@@ -38,7 +38,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.contents.listoffsetarray import ListOffsetArray
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.listform import ListForm
 from awkward.index import Index
 
@@ -207,6 +207,15 @@ class ListArray(ListMeta[Content], Content):
             form_key=form_key,
         )
 
+    def _form_with_key_path(self, path: FormKeyPathT) -> ListForm:
+        return self.form_cls(
+            self._starts.form,
+            self._stops.form,
+            self._content._form_with_key_path((*path, None)),
+            parameters=self._parameters,
+            form_key=repr(path),
+        )
+
     def _to_buffers(
         self,
         form: Form,
@@ -302,8 +311,8 @@ class ListArray(ListMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        return isinstance(self._starts, PlaceholderArray) or isinstance(
-            self._stops, PlaceholderArray
+        return isinstance(self._starts.data, PlaceholderArray) or isinstance(
+            self._stops.data, PlaceholderArray
         )
 
     def _getitem_at(self, where: IndexType):
@@ -712,6 +721,7 @@ class ListArray(ListMeta[Content], Content):
             nexthead, nexttail = ak._slicing.head_tail(tail)
             lenstarts = self._starts.length
             nextcarry = ak.index.Index64.empty(lenstarts, self._backend.index_nplike)
+            head = ak._slicing.normalize_integer_like(head)
             assert (
                 nextcarry.nplike is self._backend.index_nplike
                 and self._starts.nplike is self._backend.index_nplike
@@ -1497,6 +1507,9 @@ class ListArray(ListMeta[Content], Content):
         return self.to_ListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        return self.to_ListOffsetArray64(False)._to_cudf(cudf, mask, length)
 
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")

@@ -1219,6 +1219,20 @@ and
 
 but the second is faster because it involves two Forth instructions and one ``memcpy``.
 
+If the number of items to read is negative then it is interpreted as zero.
+
+.. code-block:: python
+
+    >>> vm = ForthMachine32("""
+    ... input x
+    ... output y float32
+    ... 
+    ... -1000000 x #d-> y
+    ... """)
+    >>> vm.run({"x": np.arange(1000000) * 1.1})
+    >>> np.asarray(vm["y"])
+    array([], dtype=float32)
+
 Type codes
 """"""""""
 

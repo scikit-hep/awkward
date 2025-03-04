@@ -32,10 +32,11 @@ def from_parquet(
     Args:
         path (str): Local filename or remote URL, passed to fsspec for resolution.
             May contain glob patterns.
-        columns (None, str, or list of str): Glob pattern(s) with bash-like curly
+        columns (None, str, or iterable of (str or iterable of str)): Glob pattern(s) including bash-like curly
             brackets for matching column names. Nested records are separated by dots.
             If a list of patterns, the logical-or is matched. If None, all columns
-            are read.
+            are read. A list of lists can be provided to select columns with literal dots
+            in their names -- The inner list provides column names or patterns.
         row_groups (None or set of int): Row groups to read; must be non-negative.
             Order is ignored: the output array is presented in the order specified by
             Parquet metadata. If None, all row groups/all rows are read.

@@ -3,11 +3,20 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from functools import reduce
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
+from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
+    NamedAxesWithDims,
+    _add_named_axis,
+    _get_named_axis,
+    _named_axis_to_positional_axis,
+    _unify_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
@@ -214,7 +223,6 @@ def cartesian(
 
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         if isinstance(arrays, Mapping):
             layouts = ensure_same_backend(
@@ -226,6 +234,11 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
             fields = list(arrays.keys())
             array_layouts = dict(zip(fields, layouts))
 
+            # propagate named axis from input to output,
+            #   use strategy "unify" (see: awkward._namedaxis)
+            out_named_axis = reduce(
+                _unify_named_axis, map(_get_named_axis, arrays.values())
+            )
         else:
             layouts = array_layouts = ensure_same_backend(
                 *(
@@ -234,6 +247,15 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
                 )
             )
             fields = None
+            # propagate named axis from input to output,
+            #   use strategy "unify" (see: awkward._namedaxis)
+            out_named_axis = reduce(_unify_named_axis, map(_get_named_axis, arrays))
+
+    # Handle named axis
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(out_named_axis, axis)
+    axis = regularize_axis(axis, none_allowed=False)
+    max_ndim = max(layout.minmax_depth[1] for layout in layouts)
 
     if with_name is not None:
         if parameters is None:
@@ -262,6 +284,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
     if nested is None or nested is False:
         nested = []
     elif nested is True:
+        out_named_axis = _add_named_axis(out_named_axis, 0, max_ndim)
         if fields is not None:
             nested = list(fields)[:-1]
         else:
@@ -287,6 +310,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
                     "the 'nested' parameter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays"
                 )
+        for n in nested:
+            out_named_axis = _add_named_axis(out_named_axis, n, max_ndim)
 
     backend = next((layout.backend for layout in layouts), cpu)
     if posaxis == 0:
@@ -398,16 +423,48 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
             else:
                 return None
 
+        depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+            list(arrays.values()) if isinstance(arrays, Mapping) else list(arrays)
+        )
         out = ak._broadcasting.broadcast_and_apply(
-            new_layouts, apply_build_record, right_broadcast=False
+            new_layouts,
+            apply_build_record,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            right_broadcast=False,
         )
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
 
+        # Unify named axes propagated through the broadcast
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+        )
+        wrapped_out = ctx.wrap(result, highlevel=highlevel)
+        # propagate named axis to output
+        result = ak.operations.ak_with_named_axis._impl(
+            wrapped_out,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+
         # Remove surplus dimensions, iterating from smallest to greatest
         for axis_to_flatten in axes_to_flatten:
             result = ak.operations.flatten(
-                result, axis=axis_to_flatten, highlevel=False, behavior=behavior
+                result, axis=axis_to_flatten, highlevel=highlevel, behavior=behavior
             )
 
-    return ctx.wrap(result, highlevel=highlevel)
+        return result
+
+    wrapped_out = ctx.wrap(result, highlevel=highlevel)
+
+    # propagate named axis to output
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

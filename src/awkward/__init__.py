@@ -24,6 +24,7 @@ import awkward._util
 import awkward._errors
 import awkward._lookup
 import awkward._ext  # strictly for unpickling from Awkward 1
+import awkward._namedaxis
 
 # third-party connectors
 import awkward._connect.numpy

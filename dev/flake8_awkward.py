@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import ast
 import sys
-from typing import Iterator, NamedTuple
+from collections.abc import Iterator
+from typing import NamedTuple
 
 
 class Flake8ASTErrorInfo(NamedTuple):

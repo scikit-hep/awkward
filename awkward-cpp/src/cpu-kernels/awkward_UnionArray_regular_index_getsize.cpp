@@ -19,6 +19,15 @@ ERROR awkward_UnionArray_regular_index_getsize(
   *size = *size + 1;
   return success();
 }
+ERROR awkward_UnionArray64_regular_index_getsize(
+  int64_t* size,
+  const int64_t* fromtags,
+  int64_t length) {
+  return awkward_UnionArray_regular_index_getsize<int64_t>(
+    size,
+    fromtags,
+    length);
+}
 ERROR awkward_UnionArray8_regular_index_getsize(
   int64_t* size,
   const int8_t* fromtags,

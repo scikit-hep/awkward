@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import reduce
 from itertools import permutations
 
 import awkward as ak
@@ -9,6 +10,13 @@ from awkward._backends.dispatch import backend_of_obj
 from awkward._dispatch import high_level_function
 from awkward._do import mergeable
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
+from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
+    NamedAxesWithDims,
+    _get_named_axis,
+    _named_axis_to_positional_axis,
+    _unify_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
@@ -92,7 +100,6 @@ def _merge_as_union(
 
 
 def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
     # Simple single-array, axis=0 fast-path
     if (
         # Is an array with a known backend
@@ -120,6 +127,15 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                 for x in arrays
             )
         )
+
+    # Handle named axis
+    merged_named_axis = reduce(_unify_named_axis, map(_get_named_axis, arrays))
+    # Step 1: normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(merged_named_axis, axis)
+    axis = regularize_axis(axis, none_allowed=False)
+    # Step 2: propagate named axis from input to output,
+    #   use strategy "unify" (see: awkward._namedaxis)
+    out_named_axis = merged_named_axis
 
     contents = [x for x in content_or_others if isinstance(x, ak.contents.Content)]
     if len(contents) == 0:
@@ -342,11 +358,35 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
             else:
                 return None
 
+        depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+            list(arrays)
+        )
         out = ak._broadcasting.broadcast_and_apply(
-            content_or_others, action, allow_records=True, right_broadcast=False
+            content_or_others,
+            action,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            allow_records=True,
+            right_broadcast=False,
         )[0]
+        # Unify named axes
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+        )
 
-    return ctx.wrap(out, highlevel=highlevel)
+    wrapped_out = ctx.wrap(
+        out,
+        highlevel=highlevel,
+    )
+
+    # propagate named axis to output
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )
 
 
 def _form_has_type(form, type_):

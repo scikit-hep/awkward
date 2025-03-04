@@ -12,17 +12,28 @@ import itertools
 import keyword
 import pickle
 import re
+import weakref
 from collections.abc import Iterable, Mapping, Sequence, Sized
 
 from awkward_cpp.lib import _ext
 
 import awkward as ak
 import awkward._connect.hist
-from awkward._attrs import attrs_of, without_transient_attrs
+from awkward._attrs import Attrs, attrs_of, without_transient_attrs
 from awkward._backends.dispatch import register_backend_lookup_factory
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._layout import wrap_layout
+from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
+    AxisMapping,
+    NamedAxis,
+    _get_named_axis,
+    _make_positional_axis_tuple,
+    _normalize_named_slice,
+    _prepare_named_axis_for_attrs,
+    _prettify_named_axes,
+)
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
@@ -34,7 +45,7 @@ from awkward._pickle import (
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
 from awkward._util import STDOUT
-from awkward.prettyprint import Formatter
+from awkward.prettyprint import Formatter, highlevel_array_show_rows
 from awkward.prettyprint import valuestr as prettyprint_valuestr
 
 __all__ = ("Array", "ArrayBuilder", "Record")
@@ -278,6 +289,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         check_valid=False,
         backend=None,
         attrs=None,
+        named_axis=None,
     ):
         self._cpp_type = None
         if isinstance(data, ak.contents.Content):
@@ -290,19 +302,22 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         elif isinstance(data, dict):
             fields = []
-            contents = []
+            _arrays = []
             length = None
             for k, v in data.items():
                 fields.append(k)
-                contents.append(Array(v).layout)
+                _arrays.append(Array(v))
                 if length is None:
-                    length = contents[-1].length
-                elif length != contents[-1].length:
+                    length = _arrays[-1].layout.length
+                elif length != _arrays[-1].layout.length:
                     raise ValueError(
                         "dict of arrays in ak.Array constructor must have arrays "
-                        f"of equal length ({length} vs {contents[-1].length})"
+                        f"of equal length ({length} vs {_arrays[-1].layout.length}). "
+                        "For automatic broadcasting use 'ak.zip' instead. "
                     )
-            layout = ak.contents.RecordArray(contents, fields)
+            layout = ak.contents.RecordArray([arr.layout for arr in _arrays], fields)
+            attrs = attrs_of(*_arrays, attrs=attrs)
+            behavior = behavior_of(*_arrays, behavior=behavior)
 
         elif isinstance(data, str):
             layout = ak.operations.from_json(data, highlevel=False)
@@ -328,6 +343,17 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         if attrs is not None and not isinstance(attrs, Mapping):
             raise TypeError("attrs must be None or a mapping")
+
+        if named_axis:
+            _named_axis = _prepare_named_axis_for_attrs(
+                named_axis=named_axis,
+                ndim=layout.minmax_depth[1],
+            )
+            # now we're good, set the named axis
+            if attrs is None:
+                attrs = {}
+            # if NAMED_AXIS_KEY is already in attrs, it will be overwritten
+            attrs[NAMED_AXIS_KEY] = _named_axis
 
         self._layout = layout
         self._behavior = behavior
@@ -357,9 +383,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         self.__class__ = get_array_class(self._layout, self._behavior)
 
     @property
-    def attrs(self) -> Mapping[str, Any]:
+    def attrs(self) -> Attrs:
         """
-        The mutable mapping containing top-level metadata, which is serialised
+         The mapping containing top-level metadata, which is serialised
         with the array during pickling.
 
         Keys prefixed with `@` are identified as "transient" attributes
@@ -367,15 +393,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         non-pickleable types.
         """
         if self._attrs is None:
-            self._attrs = {}
+            self._attrs = Attrs({})
         return self._attrs
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = value
+            self._attrs = Attrs(value)
         else:
-            raise TypeError("attrs must be a mapping")
+            raise TypeError("attrs must be a 'Attrs' mapping")
 
     @property
     def layout(self):
@@ -455,15 +481,30 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             raise TypeError("behavior must be None or a dict")
 
+    @property
+    def positional_axis(self) -> tuple[int, ...]:
+        (_, ndim) = self._layout.minmax_depth
+        return _make_positional_axis_tuple(ndim)
+
+    @property
+    def named_axis(self) -> AxisMapping:
+        return _get_named_axis(self)
+
     class Mask:
         def __init__(self, array):
-            self._array = array
+            self._array = weakref.ref(array)
 
         def __getitem__(self, where):
+            array = self._array()
+            if array is None:
+                msg = "The array to mask was deleted before it could be masked. "
+                msg += "If you want to construct this mask, you must either keep the array alive "
+                msg += "or use 'ak.mask' explicitly."
+                raise ValueError(msg)
             with ak._errors.OperationErrorContext(
-                "ak.Array.mask", args=[self._array, where], kwargs={}
+                "ak.Array.mask", args=[array, where], kwargs={}
             ):
-                return ak.operations.mask(self._array, where, valid_when=True)
+                return ak.operations.mask(array, where, valid_when=True)
 
     @property
     def mask(self):
@@ -1062,12 +1103,30 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         have the same dimension as the array being indexed.
         """
         with ak._errors.SlicingErrorContext(self, where):
-            return wrap_layout(
-                prepare_layout(self._layout[where]),
-                self._behavior,
-                allow_other=True,
-                attrs=self._attrs,
-            )
+            # Handle named axis
+            (_, ndim) = self._layout.minmax_depth
+            named_axis = _get_named_axis(self)
+            where = _normalize_named_slice(named_axis, where, ndim)
+
+            NamedAxis.mapping = named_axis
+
+            indexed_layout = prepare_layout(self._layout._getitem(where, NamedAxis))
+
+            if NamedAxis.mapping:
+                return ak.operations.ak_with_named_axis._impl(
+                    indexed_layout,
+                    named_axis=NamedAxis.mapping,
+                    highlevel=True,
+                    behavior=self._behavior,
+                    attrs=self._attrs,
+                )
+            else:
+                return wrap_layout(
+                    indexed_layout,
+                    self._behavior,
+                    allow_other=True,
+                    attrs=self._attrs,
+                )
 
     def __bytes__(self) -> bytes:
         if isinstance(self._layout, ak.contents.NumpyArray) and self._layout.parameter(
@@ -1309,6 +1368,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             valuestr = "-typetracer"
 
+        # prepare named_axis str for repr
+        axisstr = ""
+        if self.named_axis:
+            # we reserve at maximum 20 characters for the named axis string
+            axisstr = _prettify_named_axes(self.named_axis, delimiter=",", maxlen=20)
+            axisstr = f" {axisstr}"
+        # subtract the reserved space from the limit_cols
+        limit_cols -= len(axisstr)
+
         if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
             strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
         else:
@@ -1327,15 +1395,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             typestr = "'" + typestr + "'"
 
-        return f"<{pytype}{valuestr} type={typestr}>"
+        return f"<{pytype}{valuestr}{axisstr} type={typestr}>"
 
     def show(
         self,
         limit_rows=20,
         limit_cols=80,
-        type=False,
-        stream=STDOUT,
         *,
+        type=False,
+        named_axis=False,
+        nbytes=False,
+        backend=False,
+        all=False,
+        stream=STDOUT,
         formatter=None,
         precision=3,
     ):
@@ -1345,9 +1417,16 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             limit_cols (int): Maximum number of columns (characters wide).
             type (bool): If True, print the type as well. (Doesn't count toward number
                 of rows/lines limit.)
+            named_axis (bool): If True, print the named axis as well. (Doesn't count toward number
+                of rows/lines limit.)
+            nbytes (bool): If True, print the number of bytes as well. (Doesn't count toward number
+                of rows/lines limit.)
+            backend (bool): If True, print the backend of the array as well. (Doesn't count toward number
+                of rows/lines limit.)
+            all (bool): If True, print the 'type', 'named axis', 'nbytes', and 'backend' of the array. (Doesn't count toward number
+                of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
-
             formatter (Mapping or None): Mapping of types/type-classes to string formatters.
                 If None, use the default formatter.
 
@@ -1360,41 +1439,71 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
         string values, falling back upon `"str_kind"`.
         """
-        formatter_impl = Formatter(formatter, precision=precision)
-
-        valuestr = prettyprint_valuestr(
-            self, limit_rows, limit_cols, formatter=formatter_impl
+        rows = highlevel_array_show_rows(
+            array=self,
+            limit_rows=limit_rows,
+            limit_cols=limit_cols,
+            type=type or all,
+            named_axis=named_axis or all,
+            nbytes=nbytes or all,
+            backend=backend or all,
+            formatter=formatter,
+            precision=precision,
         )
-        if type:
-            tmp = io.StringIO()
-            self.type.show(stream=tmp)
-            out = "type: " + tmp.getvalue() + valuestr
-        else:
-            out = valuestr
+        array_line = rows.pop(0)
 
+        out_io = io.StringIO()
+        if type:
+            # it's always the second row (after the array)
+            type_line = rows.pop(0)
+            out_io.write(type_line)
+
+        # the rest of the rows we sort by the length of their '<prefix>:'
+        # but we sort it from shortest to longest contrary to _repr_mimebundle_
+        sorted_rows = sorted([r for r in rows if r], key=lambda x: len(x.split(":")[0]))
+
+        if sorted_rows:
+            out_io.write("\n".join(sorted_rows))
+            out_io.write("\n")
+
+        out_io.write(array_line)
         if stream is None:
-            return out
+            return out_io.getvalue()
         else:
             if stream is STDOUT:
                 stream = STDOUT.stream
-            stream.write(out + "\n")
+            stream.write(out_io.getvalue() + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
-        value_buff = io.StringIO()
-        self.show(type=False, stream=value_buff)
-        header_lines = value_buff.getvalue().splitlines()
+        # order:
+        # first: array,
+        # last: type,
+        # middle: rest sorted by length of prefix (longest first)
 
-        type_buff = io.StringIO()
-        self.type.show(stream=type_buff)
-        footer_lines = type_buff.getvalue().splitlines()
-        # Prepend a `type: ` prefix to the type information
-        footer_lines[0] = f"type: {footer_lines[0]}"
+        rows = highlevel_array_show_rows(
+            array=self,
+            type=True,
+            named_axis=True,
+            nbytes=True,
+            backend=True,
+        )
+        header_lines = rows.pop(0).removesuffix("\n").splitlines()
 
-        if header_lines[-1] == "":
-            del header_lines[-1]
+        # it's always the second row (after the array)
+        type_lines = [rows.pop(0).removesuffix("\n")]
 
-        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
-        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+        # the rest of the rows we sort by the length of their '<prefix>:'
+        # but we sort it from longest to shortest for _repr_mimebundle_
+        sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
+
+        n_cols = max(
+            len(line) for line in itertools.chain(header_lines, sorted_rows, type_lines)
+        )
+        body_lines = header_lines
+        body_lines.append("-" * n_cols)
+        body_lines.extend(sorted_rows)
+        body_lines.extend(type_lines)
+        body = "\n".join(body_lines)
 
         return {
             "text/html": f"<pre>{html.escape(body)}</pre>",
@@ -1719,6 +1828,7 @@ class Record(NDArrayOperatorsMixin):
         check_valid=False,
         backend=None,
         attrs=None,
+        named_axis=None,
     ):
         if isinstance(data, ak.record.Record):
             layout = data
@@ -1762,6 +1872,20 @@ class Record(NDArrayOperatorsMixin):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or mapping")
 
+        if attrs is not None and not isinstance(attrs, Mapping):
+            raise TypeError("attrs must be None or a mapping")
+
+        if named_axis:
+            _named_axis = _prepare_named_axis_for_attrs(
+                named_axis=named_axis,
+                ndim=layout.minmax_depth[1],
+            )
+            # now we're good, set the named axis
+            if attrs is None:
+                attrs = {}
+            # if NAMED_AXIS_KEY is already in attrs, it will be overwritten
+            attrs[NAMED_AXIS_KEY] = _named_axis
+
         self._layout = layout
         self._behavior = behavior
         self._attrs = attrs
@@ -1785,7 +1909,7 @@ class Record(NDArrayOperatorsMixin):
         self.__class__ = get_record_class(self._layout, self._behavior)
 
     @property
-    def attrs(self) -> Mapping[str, Any]:
+    def attrs(self) -> Attrs:
         """
         The mapping containing top-level metadata, which is serialised
         with the record during pickling.
@@ -1795,13 +1919,13 @@ class Record(NDArrayOperatorsMixin):
         non-pickleable types.
         """
         if self._attrs is None:
-            self._attrs = {}
+            self._attrs = Attrs({})
         return self._attrs
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = value
+            self._attrs = Attrs(value)
         else:
             raise TypeError("attrs must be a mapping")
 
@@ -1877,6 +2001,15 @@ class Record(NDArrayOperatorsMixin):
         else:
             raise TypeError("behavior must be None or a dict")
 
+    @property
+    def positional_axis(self) -> tuple[int, ...]:
+        (_, ndim) = self._layout.minmax_depth
+        return _make_positional_axis_tuple(ndim)
+
+    @property
+    def named_axis(self) -> AxisMapping:
+        return _get_named_axis(self)
+
     def tolist(self):
         """
         Converts this Record into Python objects; same as #ak.to_list
@@ -1902,7 +2035,7 @@ class Record(NDArrayOperatorsMixin):
         the (small) Python objects that reference the (large)
         array buffers.
         """
-        return self._layout.nbytes
+        return self._layout.array.nbytes
 
     @property
     def fields(self):
@@ -2014,8 +2147,8 @@ class Record(NDArrayOperatorsMixin):
             ):
                 raise TypeError("only fields may be assigned in-place (by field name)")
 
-            self._layout = ak.operations.ak_with_field._impl(
-                self._layout,
+            self._layout._array = ak.operations.ak_with_field._impl(
+                self._layout.array,
                 what,
                 where,
                 highlevel=False,
@@ -2170,6 +2303,15 @@ class Record(NDArrayOperatorsMixin):
         else:
             valuestr = "-typetracer"
 
+        # prepare named_axis str for repr
+        axisstr = ""
+        if self.named_axis:
+            # we reserve at maximum 20 characters for the named axis string
+            axisstr = _prettify_named_axes(self.named_axis, delimiter=",", maxlen=20)
+            axisstr = f" {axisstr}"
+        # subtract the reserved space from the limit_cols
+        limit_cols -= len(axisstr)
+
         if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
             strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
         else:
@@ -2188,15 +2330,19 @@ class Record(NDArrayOperatorsMixin):
         else:
             typestr = "'" + typestr + "'"
 
-        return f"<{pytype}{valuestr} type={typestr}>"
+        return f"<{pytype}{valuestr}{axisstr} type={typestr}>"
 
     def show(
         self,
         limit_rows=20,
         limit_cols=80,
-        type=False,
-        stream=STDOUT,
         *,
+        type=False,
+        named_axis=False,
+        nbytes=False,
+        backend=False,
+        all=False,
+        stream=STDOUT,
         formatter=None,
         precision=3,
     ):
@@ -2205,6 +2351,14 @@ class Record(NDArrayOperatorsMixin):
             limit_rows (int): Maximum number of rows (lines) to use in the output.
             limit_cols (int): Maximum number of columns (characters wide).
             type (bool): If True, print the type as well. (Doesn't count toward number
+                of rows/lines limit.)
+            named_axis (bool): If True, print the named axis as well. (Doesn't count toward number
+                of rows/lines limit.)
+            nbytes (bool): If True, print the number of bytes as well. (Doesn't count toward number
+                of rows/lines limit.)
+            backend (bool): If True, print the backend of the array as well. (Doesn't count toward number
+                of rows/lines limit.)
+            all (bool): If True, print the 'type', 'named axis', 'nbytes', and 'backend' of the array. (Doesn't count toward number
                 of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
@@ -2220,40 +2374,71 @@ class Record(NDArrayOperatorsMixin):
         key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
         string values, falling back upon `"str_kind"`.
         """
-        formatter_impl = Formatter(formatter, precision=precision)
-        valuestr = prettyprint_valuestr(
-            self, limit_rows, limit_cols, formatter=formatter_impl
+        rows = highlevel_array_show_rows(
+            array=self,
+            limit_rows=limit_rows,
+            limit_cols=limit_cols,
+            type=type or all,
+            named_axis=named_axis or all,
+            nbytes=nbytes or all,
+            backend=backend or all,
+            formatter=formatter,
+            precision=precision,
         )
-        if type:
-            tmp = io.StringIO()
-            self.type.show(stream=tmp)
-            out = "type: " + tmp.getvalue() + valuestr
-        else:
-            out = valuestr
+        array_line = rows.pop(0)
 
+        out_io = io.StringIO()
+        if type:
+            # it's always the second row (after the array)
+            type_line = rows.pop(0)
+            out_io.write(type_line)
+
+        # the rest of the rows we sort by the length of their '<prefix>:'
+        # but we sort it from shortest to longest contrary to _repr_mimebundle_
+        sorted_rows = sorted([r for r in rows if r], key=lambda x: len(x.split(":")[0]))
+
+        if sorted_rows:
+            out_io.write("\n".join(sorted_rows))
+            out_io.write("\n")
+
+        out_io.write(array_line)
         if stream is None:
-            return out
+            return out_io.getvalue()
         else:
             if stream is STDOUT:
                 stream = STDOUT.stream
-            stream.write(out + "\n")
+            stream.write(out_io.getvalue() + "\n")
 
     def _repr_mimebundle_(self, include=None, exclude=None):
-        value_buff = io.StringIO()
-        self.show(type=False, stream=value_buff)
-        header_lines = value_buff.getvalue().splitlines()
+        # order:
+        # first: array,
+        # last: type,
+        # middle: rest sorted by length of prefix (longest first)
 
-        type_buff = io.StringIO()
-        self.type.show(stream=type_buff)
-        footer_lines = type_buff.getvalue().splitlines()
-        # Prepend a `type: ` prefix to the type information
-        footer_lines[0] = f"type: {footer_lines[0]}"
+        rows = highlevel_array_show_rows(
+            array=self,
+            type=True,
+            named_axis=True,
+            nbytes=True,
+            backend=True,
+        )
+        header_lines = rows.pop(0).removesuffix("\n").splitlines()
 
-        if header_lines[-1] == "":
-            del header_lines[-1]
+        # it's always the second row (after the array)
+        type_lines = [rows.pop(0).removesuffix("\n")]
 
-        n_cols = max(len(line) for line in itertools.chain(header_lines, footer_lines))
-        body = "\n".join([*header_lines, "-" * n_cols, *footer_lines])
+        # the rest of the rows we sort by the length of their '<prefix>:'
+        # but we sort it from longest to shortest for _repr_mimebundle_
+        sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
+
+        n_cols = max(
+            len(line) for line in itertools.chain(header_lines, sorted_rows, type_lines)
+        )
+        body_lines = header_lines
+        body_lines.append("-" * n_cols)
+        body_lines.extend(sorted_rows)
+        body_lines.extend(type_lines)
+        body = "\n".join(body_lines)
 
         return {
             "text/html": f"<pre>{html.escape(body)}</pre>",
@@ -2531,7 +2716,7 @@ class ArrayBuilder(Sized):
         return out
 
     @property
-    def attrs(self) -> Mapping[str, Any]:
+    def attrs(self) -> Attrs:
         """
         The mapping containing top-level metadata, which is serialised
         with the array during pickling.
@@ -2541,13 +2726,13 @@ class ArrayBuilder(Sized):
         non-pickleable types.
         """
         if self._attrs is None:
-            self._attrs = {}
+            self._attrs = Attrs({})
         return self._attrs
 
     @attrs.setter
     def attrs(self, value: Mapping[str, Any]):
         if isinstance(value, Mapping):
-            self._attrs = value
+            self._attrs = Attrs(value)
         else:
             raise TypeError("attrs must be a mapping")
 

@@ -17,7 +17,7 @@ def to_backend(array, backend, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        backend (`"cpu"`, `"cuda"`, or `"jax"`): If `"cpu"`, the array structure is
+        backend (`"cpu"`, `"cuda"`, `"jax"`, or `"typetracer"`): If `"cpu"`, the array structure is
             recursively copied (if need be) to main memory for use with
             the default Numpy backend; if `"cuda"`, the structure is copied
             to the GPU(s) for use with CuPy. If `"jax"`, the structure is

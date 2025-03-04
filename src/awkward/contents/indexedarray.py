@@ -13,7 +13,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
-from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
 from awkward._parameters import (
     parameters_intersect,
@@ -39,7 +39,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
 
@@ -214,6 +214,14 @@ class IndexedArray(IndexedMeta[Content], Content):
             form_key=form_key,
         )
 
+    def _form_with_key_path(self, path: FormKeyPathT) -> IndexedForm:
+        return self.form_cls(
+            self._index.form,
+            self._content._form_with_key_path((*path, None)),
+            parameters=self._parameters,
+            form_key=repr(path),
+        )
+
     def _to_buffers(
         self,
         form: Form,
@@ -281,7 +289,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._index, PlaceholderArray):
+        if isinstance(self._index.data, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
 
@@ -773,7 +781,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._index.length == 0:
+        if self._index.length is not unknown_length and self._index.length == 0:
             return True
 
         nextindex = self._unique_index(self._index)
@@ -785,7 +793,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         return next._is_unique(negaxis, starts, parents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self._index.length == 0:
+        if self._index.length is not unknown_length and self._index.length == 0:
             return self
 
         branch, depth = self.branch_depth
@@ -1036,7 +1044,7 @@ class IndexedArray(IndexedMeta[Content], Content):
                 return out
 
         else:
-            if self._content.length == 0:
+            if self._content.length is not unknown_length and self._content.length == 0:
                 # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
                 # every masked value is self._content[0], unless self._content.length == 0.
                 # In that case, don't call self._content[index]; it's empty anyway.
@@ -1048,6 +1056,16 @@ class IndexedArray(IndexedMeta[Content], Content):
                 parameters=parameters_union(next._parameters, self._parameters)
             )
             return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        if self._content.length is not unknown_length and self._content.length == 0:
+            # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
+            # every masked value is self._content[0], unless self._content.length == 0.
+            # In that case, don't call self._content[index]; it's empty anyway.
+            next = self._content
+        else:
+            next = self._content._carry(self._index, False)
+        return next._to_cudf(cudf, None, len(next))
 
     def _to_backend_array(self, allow_missing, backend):
         return self.project()._to_backend_array(allow_missing, backend)

@@ -72,6 +72,7 @@ def values_astype(
 def _impl(array, to, including_unknown, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
     to_str = ak.types.numpytype.dtype_to_primitive(np.dtype(to))
     out = ak._do.numbers_to_type(layout, to_str, including_unknown)
     return ctx.wrap(out, highlevel=highlevel)

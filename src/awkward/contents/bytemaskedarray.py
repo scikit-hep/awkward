@@ -12,6 +12,7 @@ from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.bytemaskedmeta import ByteMaskedMeta
 from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -41,7 +42,7 @@ from awkward.contents.content import (
 )
 from awkward.errors import AxisError
 from awkward.forms.bytemaskedform import ByteMaskedForm
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.index import Index
 
 if TYPE_CHECKING:
@@ -215,6 +216,15 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             self._valid_when,
             parameters=self._parameters,
             form_key=form_key,
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> ByteMaskedForm:
+        return self.form_cls(
+            self._mask.form,
+            self._content._form_with_key_path((*path, None)),
+            self._valid_when,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
@@ -674,7 +684,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
 
             offsets, flattened = next._offsets_and_flattened(axis, depth)
 
-            if offsets.length == 0:
+            if offsets.length is not unknown_length and offsets.length == 0:
                 return (
                     offsets,
                     ak.contents.IndexedOptionArray(
@@ -780,14 +790,14 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._mask.length == 0:
+        if self._mask.length is not unknown_length and self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
             negaxis, starts, parents, outlength
         )
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self._mask.length == 0:
+        if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
         return self.to_IndexedOptionArray64()._unique(
             negaxis, starts, parents, outlength
@@ -1050,6 +1060,18 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             length,
             options,
         )
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        cp = Cupy.instance()._module
+
+        assert mask is None  # this class has its own mask
+        m = cp.packbits(cp.asarray(self._mask), bitorder="little")
+        if m.nbytes % 64:
+            m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
+        m = cudf.core.buffer.as_buffer(m)
+        inner = self._content._to_cudf(cudf, mask=None, length=length)
+        inner.set_base_mask(m)
+        return inner
 
     def _to_backend_array(self, allow_missing, backend):
         return self.to_IndexedOptionArray64()._to_backend_array(allow_missing, backend)

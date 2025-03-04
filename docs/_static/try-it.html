@@ -73,7 +73,7 @@
       }
 
       async function main() {
-        let indexURL = "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/";
+        let indexURL = "https://cdn.jsdelivr.net/pyodide/v0.26.3/full/";
         const urlParams = new URLSearchParams(window.location.search);
         const buildParam = urlParams.get("build");
         if (buildParam) {
@@ -272,7 +272,7 @@
               import micropip
               import asyncio
               loop = asyncio.get_event_loop()
-              loop.run_until_complete(micropip.install("awkward==2.5.0"))
+              loop.run_until_complete(micropip.install("awkward==2.6.4"))
             `,
             { globals: namespace },
           ).then(function() {

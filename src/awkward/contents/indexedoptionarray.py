@@ -39,7 +39,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.indexedoptionform import IndexedOptionForm
 from awkward.index import Index
 
@@ -202,6 +202,14 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             form_key=form_key,
         )
 
+    def _form_with_key_path(self, path: FormKeyPathT) -> IndexedOptionForm:
+        return self.form_cls(
+            self._index.form,
+            self._content._form_with_key_path((*path, None)),
+            parameters=self._parameters,
+            form_key=repr(path),
+        )
+
     def _to_buffers(
         self,
         form: Form,
@@ -302,7 +310,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._index, PlaceholderArray):
+        if isinstance(self._index.data, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
 
@@ -580,7 +588,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 )
             )
 
-            return self._content._carry(nextcarry, False)
+            return self._content._carry(nextcarry, True)
 
     def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         posaxis = maybe_posaxis(self, axis, depth)
@@ -592,7 +600,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
             offsets, flattened = next._offsets_and_flattened(axis, depth)
 
-            if offsets.length == 0:
+            if offsets.length is not unknown_length and offsets.length == 0:
                 return (
                     offsets,
                     ak.contents.IndexedOptionArray(
@@ -1575,6 +1583,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             length,
             options,
         )
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        return self.to_ByteMaskedArray(True)._to_cudf(cudf, mask, length)
 
     def _to_backend_array(self, allow_missing, backend):
         nplike = backend.nplike

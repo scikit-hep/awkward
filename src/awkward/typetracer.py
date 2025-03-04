@@ -33,17 +33,17 @@ if TYPE_CHECKING:
     from numpy.typing import DTypeLike  # noqa: TID251
 
 __all__ = [
-    "is_unknown_array",
-    "is_unknown_scalar",
-    "TypeTracerReport",
-    "typetracer_with_report",
-    "PlaceholderArray",
-    "unknown_length",
-    "touch_data",
-    "TypeTracerArray",
     "MaybeNone",
     "OneOf",
+    "PlaceholderArray",
+    "TypeTracerArray",
+    "TypeTracerReport",
     "create_unknown_scalar",
+    "is_unknown_array",
+    "is_unknown_scalar",
+    "touch_data",
+    "typetracer_with_report",
+    "unknown_length",
 ]
 
 

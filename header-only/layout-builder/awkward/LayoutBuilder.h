@@ -21,6 +21,22 @@ namespace awkward {
 
   namespace LayoutBuilder {
 
+    /// @class BuilderSetId
+    ///
+    /// @brief Functor for setting the ids of all nodes in a layout tree.
+    class BuilderSetId {
+    public:
+        BuilderSetId(size_t& id) : id_(id) {}
+
+        template <class CONTENT>
+        void operator()(CONTENT& content) {
+            content.builder.set_id(id_);
+        }
+
+    private:
+        size_t& id_;
+    };
+
     /// @class Field
     ///
     /// @brief Helper class for sending a pair of field names (as enum) and field
@@ -110,7 +126,7 @@ namespace awkward {
       /// @brief Discards the accumulated data in the builder.
       void
       clear() noexcept {
-        data_.clear();
+         data_.clear();
       }
 
       /// @brief Current length of the data.
@@ -551,30 +567,37 @@ namespace awkward {
       }
 
       /// @brief Assigns a unique ID to each node.
-      void
-      set_id(size_t& id) noexcept {
-        id_ = id;
-        id++;
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [&id](auto& content) {
-            content.builder.set_id(id);
-          });
-        }
+      void set_id(size_t& id) noexcept {
+
+          id_ = id;
+          id++;
+
+          BuilderSetId bsi(id);
+          for (size_t i = 0; i < fields_count_; i++) {
+
+              visit_at(contents, i, bsi);  // Here the functor will propagate `id`
+          }
       }
 
       /// @brief Clears the builder contents.
       ///
       /// Discards the accumulated data and the contents in each
       /// field of the record.
+      class ClearBuilder {
+      public:
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.builder.clear();
+          }
+      };
+
       void
       clear() noexcept {
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [](auto& content) {
-            content.builder.clear();
-          });
-        }
+          ClearBuilder clearBuilder; // instantiate the functor
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, clearBuilder); // pass the functor instead of a lambda
+          }
       }
-
       /// @brief Current number of records in first field.
       size_t
       length() const noexcept {
@@ -611,14 +634,28 @@ namespace awkward {
 
       /// @brief Retrieves the names and sizes (in bytes) of the buffers used
       /// in the builder and its contents.
+      class BufferNBytesFunctor {
+      public:
+          // Constructor to capture names_nbytes by reference
+          BufferNBytesFunctor(std::map<std::string, size_t>& names_nbytes)
+              : names_nbytes_(names_nbytes) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.builder.buffer_nbytes(names_nbytes_);
+          }
+
+      private:
+          std::map<std::string, size_t>& names_nbytes_;  // reference to the map
+      };
+
       void
-      buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
-          noexcept {
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [&names_nbytes](auto& content) {
-            content.builder.buffer_nbytes(names_nbytes);
-          });
-        }
+      buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const noexcept {
+          BufferNBytesFunctor bufferNBytesFunctor(names_nbytes); // instantiate the functor
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, bufferNBytesFunctor); // pass the functor instead of the lambda
+          }
       }
 
       /// @brief Copies and concatenates all the accumulated data in each of the
@@ -626,69 +663,139 @@ namespace awkward {
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
+      class ToBuffersFunctor {
+      public:
+          // Constructor to capture buffers by reference
+          ToBuffersFunctor(std::map<std::string, void*>& buffers)
+              : buffers_(buffers) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.builder.to_buffers(buffers_);
+          }
+
+      private:
+          std::map<std::string, void*>& buffers_;  // reference to the map
+      };
+
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [&buffers](auto& content) {
-            content.builder.to_buffers(buffers);
-          });
-        }
+          ToBuffersFunctor toBuffersFunctor(buffers); // instantiate the functor
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, toBuffersFunctor); // pass the functor instead of the lambda
+          }
       }
-
       /// @brief Copies and concatenates the accumulated data in the buffers of the
       /// builder contents to user-defined pointers if the given node name matches
       /// with the node associated with that builder.
+      class ToBufferFunctor {
+      public:
+          // Constructor to capture buffer and name by reference
+          ToBufferFunctor(void* buffer, const char* name)
+              : buffer_(buffer), name_(name) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.builder.to_buffer(buffer_, name_);
+          }
+
+      private:
+          void* buffer_;            // reference to buffer
+          const char* name_;        // reference to name
+      };
+
       void
       to_buffer(void* buffer, const char* name) const noexcept {
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [&buffer, &name](auto& content) {
-            content.builder.to_buffer(buffer, name);
-          });
-        }
+          ToBufferFunctor toBufferFunctor(buffer, name); // instantiate the functor
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, toBufferFunctor); // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      class ToCharBuffersFunctor {
+      public:
+          // Constructor to capture buffers by reference
+          ToCharBuffersFunctor(std::map<std::string, uint8_t*>& buffers)
+              : buffers_(buffers) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.builder.to_char_buffers(buffers_);
+          }
+
+      private:
+          std::map<std::string, uint8_t*>& buffers_;  // reference to the buffers map
+      };
+
       void
       to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [&buffers](auto& content) {
-            content.builder.to_char_buffers(buffers);
-          });
-        }
+          ToCharBuffersFunctor toCharBuffersFunctor(buffers); // instantiate the functor
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, toCharBuffersFunctor); // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
-      std::string
-      form() const noexcept {
-        std::stringstream form_key;
-        form_key << "node" << id_;
-        std::string params("");
-        if (parameters_ == "") {
-        } else {
-          params = std::string("\"parameters\": { " + parameters_ + " }, ");
-        }
-        std::stringstream out;
-        out << "{ \"class\": \"RecordArray\", \"contents\": { ";
-        for (size_t i = 0; i < fields_count_; i++) {
-          if (i != 0) {
-            out << ", ";
+      class ContentsFormFunctor {
+      public:
+          // Modify the constructor to accept a std::map instead of a std::vector
+          ContentsFormFunctor(std::stringstream& out, const std::map<size_t, std::string>& content_names)
+              : out_(out), content_names_(content_names) {}
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              size_t index = content.index;  // Assuming CONTENT has an index
+              auto it = content_names_.find(index); // Lookup content name in the map
+
+              if (it != content_names_.end()) {
+                  out_ << "\"" << it->second << "\": ";
+              } else {
+                  out_ << "\"" << index << "\": "; // Fallback to index if not found
+              }
+
+              out_ << content.builder.form();
           }
-          auto contents_form = [&](auto& content) {
-            out << "\""
-                << (!content_names_.empty() ? content_names_.at(content.index)
-                                            : content.index_as_field())
-                << +"\": ";
-            out << content.builder.form();
-          };
-          visit_at(contents, i, contents_form);
-        }
-        out << " }, ";
-        out << params << "\"form_key\": \"" << form_key.str() << "\" }";
-        return out.str();
+
+      private:
+          std::stringstream& out_;
+          const std::map<size_t, std::string>& content_names_;  // Store the map by reference
+      };
+
+
+      std::string form() const noexcept {
+          std::stringstream form_key;
+          form_key << "node" << id_;
+
+          std::string params("");
+          if (!parameters_.empty()) {
+              params = "\"parameters\": { " + parameters_ + " }, ";
+          }
+
+          std::stringstream out;
+          out << "{ \"class\": \"RecordArray\", \"contents\": { ";
+
+          for (size_t i = 0; i < fields_count_; i++) {
+              if (i != 0) {
+                  out << ", ";
+              }
+              ContentsFormFunctor contentsFormFunctor(out, content_names_);
+              visit_at(contents, i, contentsFormFunctor);
+          }
+
+          out << " }, ";
+          out << params << "\"form_key\": \"" << form_key.str() << "\" }";
+          return out.str();
       }
 
       /// @brief The contents of the RecordArray.
@@ -777,27 +884,49 @@ namespace awkward {
       }
 
       /// @brief Assigns a unique ID to each node.
+      class SetIdFunctor {
+      public:
+          // Constructor to capture id by reference
+          SetIdFunctor(size_t& id) : id_(id) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.set_id(id_);
+          }
+
+      private:
+          size_t& id_;  // reference to the id
+      };
+
       void
       set_id(size_t& id) noexcept {
-        id_ = id;
-        id++;
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [&id](auto& content) {
-            content.set_id(id);
-          });
-        }
+          id_ = id;
+          id++;
+          SetIdFunctor setIdFunctor(id);  // instantiate the functor with id reference
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, setIdFunctor);  // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Clears the builder contents.
       ///
       /// Discards the accumulated data and the contents at each tuple index.
+      class ClearFunctor {
+      public:
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.clear();
+          }
+      };
       void
       clear() noexcept {
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [](auto& content) {
-            content.clear();
-          });
-        }
+          ClearFunctor clearFunctor;  // instantiate the functor
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, clearFunctor);  // pass the functor instead of the lambda
+          }
       }
 
       /// @brief Current number of records in the first index of the tuple.
@@ -837,80 +966,156 @@ namespace awkward {
 
       /// @brief Retrieves the names and sizes (in bytes) of the buffers used
       /// in the builder and its contents.
+      class BufferNBytesFunctor {
+      public:
+          // Constructor to capture names_nbytes by reference
+          BufferNBytesFunctor(std::map<std::string, size_t>& names_nbytes)
+              : names_nbytes_(names_nbytes) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.buffer_nbytes(names_nbytes_);
+          }
+
+      private:
+          std::map<std::string, size_t>& names_nbytes_;  // reference to the map
+      };
+
       void
-      buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
-          noexcept {
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [&names_nbytes](auto& content) {
-            content.buffer_nbytes(names_nbytes);
-          });
-        }
+      buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const noexcept {
+          BufferNBytesFunctor bufferNBytesFunctor(names_nbytes);  // instantiate the functor
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, bufferNBytesFunctor);  // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Copies and concatenates all the accumulated data in each of the
       /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
+      class ToBuffersFunctor {
+      public:
+          // Constructor to capture buffers by reference
+          ToBuffersFunctor(std::map<std::string, void*>& buffers)
+              : buffers_(buffers) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.to_buffers(buffers_);
+          }
+
+      private:
+          std::map<std::string, void*>& buffers_;  // reference to the buffers map
+      };
+
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [&buffers](auto& content) {
-            content.to_buffers(buffers);
-          });
-        }
+          ToBuffersFunctor toBuffersFunctor(buffers);  // instantiate the functor
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, toBuffersFunctor);  // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Copies and concatenates the accumulated data in the buffers of the
       /// builder contents to user-defined pointers if the given node name matches
       /// with the node associated with that builder.
+      class ToBufferFunctor {
+      public:
+          // Constructor to capture buffer and name by reference
+          ToBufferFunctor(void* buffer, const char* name)
+              : buffer_(buffer), name_(name) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.to_buffer(buffer_, name_);
+          }
+
+      private:
+          void* buffer_;            // reference to the buffer
+          const char* name_;        // reference to the name
+      };
+
       void
       to_buffer(void* buffer, const char* name) const noexcept {
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [&buffer, &name](auto& content) {
-            content.to_buffer(buffer, name);
-          });
-        }
+          ToBufferFunctor toBufferFunctor(buffer, name);  // instantiate the functor
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, toBufferFunctor);  // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      class ToCharBuffersFunctor {
+      public:
+          // Constructor to capture buffers by reference
+          ToCharBuffersFunctor(std::map<std::string, uint8_t*>& buffers)
+              : buffers_(buffers) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.to_char_buffers(buffers_);
+          }
+
+      private:
+          std::map<std::string, uint8_t*>& buffers_;  // reference to the buffers map
+      };
+
       void
       to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        for (size_t i = 0; i < fields_count_; i++) {
-          visit_at(contents, i, [&buffers](auto& content) {
-            content.to_char_buffers(buffers);
-          });
-        }
+          ToCharBuffersFunctor toCharBuffersFunctor(buffers);  // instantiate the functor
+          for (size_t i = 0; i < fields_count_; i++) {
+              visit_at(contents, i, toCharBuffersFunctor);  // pass the functor instead of the lambda
+          }
       }
 
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
+      class ContentsFormFunctor {
+      public:
+          ContentsFormFunctor(std::stringstream& out)
+              : out_(out) {}
+
+          // Template operator() to handle each content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              out_ << content.form();
+          }
+
+      private:
+          std::stringstream& out_;  // Reference to the output stringstream
+      };
+
+
       std::string
       form() const noexcept {
-        std::stringstream form_key;
-        form_key << "node" << id_;
-        std::string params("");
-        if (parameters_ == "") {
-        } else {
-          params = std::string("\"parameters\": { " + parameters_ + " }, ");
-        }
-        std::stringstream out;
-        out << "{ \"class\": \"RecordArray\", \"contents\": [";
-        for (size_t i = 0; i < fields_count_; i++) {
-          if (i != 0) {
-            out << ", ";
+          std::stringstream form_key;
+          form_key << "node" << id_;
+          std::string params("");
+          if (!parameters_.empty()) {
+              params = "\"parameters\": { " + parameters_ + " }, ";
           }
-          auto contents_form = [&out](auto& content) {
-            out << content.form();
-          };
-          visit_at(contents, i, contents_form);
-        }
-        out << "], ";
-        out << params << "\"form_key\": \"" << form_key.str() << "\" }";
-        return out.str();
+          std::stringstream out;
+          out << "{ \"class\": \"RecordArray\", \"contents\": [";
+          for (size_t i = 0; i < fields_count_; i++) {
+              if (i != 0) {
+                  out << ", ";
+              }
+              ContentsFormFunctor contentsFormFunctor(out);
+              visit_at(contents, i, contentsFormFunctor);
+          }
+          out << "], ";
+          out << params << "\"form_key\": \"" << form_key.str() << "\" }";
+          return out.str();
       }
 
       /// @brief The contents of the RecordArray without fields.
@@ -2300,36 +2505,59 @@ namespace awkward {
       }
 
       /// @brief Assigns a unique ID to each node.
+      class SetIdFunctor {
+      public:
+          // Constructor to capture id by reference
+          SetIdFunctor(size_t& id) : id_(id) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.set_id(id_);
+          }
+
+      private:
+          size_t& id_;  // reference to the id
+      };
+
       void
       set_id(size_t& id) noexcept {
-        id_ = id;
-        id++;
-        auto contents_id = [&id](auto& content) {
-          content.set_id(id);
-        };
-        for (size_t i = 0; i < contents_count_; i++) {
-          visit_at(contents_, i, contents_id);
-        }
+          id_ = id;
+          id++;
+          SetIdFunctor setIdFunctor(id);  // instantiate the functor
+          for (size_t i = 0; i < contents_count_; i++) {
+              visit_at(contents_, i, setIdFunctor);  // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Discards the accumulated tags and index, and clears
       /// the builder contents.
       ///
       /// Also, resets the last valid index array to `-1`.
+      class ClearContentsFunctor {
+      public:
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.clear();
+          }
+      };
+
       void
       clear() noexcept {
-        for (size_t i = 0; i < contents_count_; i++) {
-          last_valid_index_[i] = -1;
-        }
-        tags_.clear();
-        index_.clear();
-        auto clear_contents = [](auto& content) {
-          content.clear();
-        };
-        for (size_t i = 0; i < contents_count_; i++) {
-          visit_at(contents_, i, clear_contents);
-        }
+          for (size_t i = 0; i < contents_count_; i++) {
+              last_valid_index_[i] = -1;
+          }
+          tags_.clear();
+          index_.clear();
+
+          ClearContentsFunctor clearContentsFunctor;  // instantiate the functor
+          for (size_t i = 0; i < contents_count_; i++) {
+              visit_at(contents_, i, clearContentsFunctor);  // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Current length of the `tags` buffer.
       size_t
@@ -2368,112 +2596,201 @@ namespace awkward {
 
       /// @brief Retrieves the names and sizes (in bytes) of the buffers used
       /// in the builder and its contents.
+      class BufferNBytesFunctor {
+      public:
+          // Constructor to capture names_nbytes by reference
+          BufferNBytesFunctor(std::map<std::string, size_t>& names_nbytes)
+              : names_nbytes_(names_nbytes) {}
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.buffer_nbytes(names_nbytes_);
+          }
+
+      private:
+          std::map<std::string, size_t>& names_nbytes_;  // reference to the map
+      };
+
       void
-      buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
-          noexcept {
-        auto index_sequence((std::index_sequence_for<BUILDERS...>()));
+      buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const noexcept {
+          auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-        names_nbytes["node" + std::to_string(id_) + "-tags"] = tags_.nbytes();
-        names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
+          // Store the size of tags and index buffers
+          names_nbytes["node" + std::to_string(id_) + "-tags"] = tags_.nbytes();
+          names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
 
-        for (size_t i = 0; i < contents_count_; i++) {
-          visit_at(contents_, i, [&names_nbytes](auto& content) {
-            content.buffer_nbytes(names_nbytes);
-          });
-        }
+          // Instantiate the functor to handle each content's buffer_nbytes call
+          BufferNBytesFunctor bufferNBytesFunctor(names_nbytes);
+
+          for (size_t i = 0; i < contents_count_; i++) {
+              visit_at(contents_, i, bufferNBytesFunctor);  // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Copies and concatenates all the accumulated data in each of the
       /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
+      class ToBuffersFunctor {
+      public:
+          // Constructor to capture buffers by reference
+          ToBuffersFunctor(std::map<std::string, void*>& buffers)
+              : buffers_(buffers) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.to_buffers(buffers_);
+          }
+
+      private:
+          std::map<std::string, void*>& buffers_;  // reference to the buffers map
+      };
+
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        auto index_sequence((std::index_sequence_for<BUILDERS...>()));
+          auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-        tags_.concatenate(reinterpret_cast<TAGS*>(
-            buffers["node" + std::to_string(id_) + "-tags"]));
-        index_.concatenate(reinterpret_cast<INDEX*>(
-            buffers["node" + std::to_string(id_) + "-index"]));
+          // Concatenate tags and index buffers
+          tags_.concatenate(reinterpret_cast<TAGS*>(
+              buffers["node" + std::to_string(id_) + "-tags"]));
+          index_.concatenate(reinterpret_cast<INDEX*>(
+              buffers["node" + std::to_string(id_) + "-index"]));
 
-        for (size_t i = 0; i < contents_count_; i++) {
-          visit_at(contents_, i, [&buffers](auto& content) {
-            content.to_buffers(buffers);
-          });
-        }
+          // Create the functor to handle each content's to_buffers call
+          ToBuffersFunctor toBuffersFunctor(buffers);
+
+          for (size_t i = 0; i < contents_count_; i++) {
+              visit_at(contents_, i, toBuffersFunctor);  // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Copies and concatenates the accumulated data in the builder buffers to
       /// user-defined pointers if the given node name matches with any one of the nodes
       /// associated with the builder; otherwise, it searches the builder contents to
       /// locate a matching node.
+      class ToBufferFunctor {
+      public:
+          // Constructor to capture buffer and name by reference
+          ToBufferFunctor(void* buffer, const char* name)
+              : buffer_(buffer), name_(name) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.to_buffer(buffer_, name_);
+          }
+
+      private:
+          void* buffer_;            // reference to the buffer
+          const char* name_;        // reference to the name
+      };
+
       void
       to_buffer(void* buffer, const char* name) const noexcept {
-        auto index_sequence((std::index_sequence_for<BUILDERS...>()));
+          auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-        if (std::string(name) == std::string("node" + std::to_string(id_) + "-tags")) {
-          tags_.concatenate(reinterpret_cast<TAGS*>(buffer));
-        }
-        else if (std::string(name) == std::string("node" + std::to_string(id_) + "-index")) {
-          index_.concatenate(reinterpret_cast<INDEX*>(buffer));
-        }
+          if (std::string(name) == std::string("node" + std::to_string(id_) + "-tags")) {
+              tags_.concatenate(reinterpret_cast<TAGS*>(buffer));
+          }
+          else if (std::string(name) == std::string("node" + std::to_string(id_) + "-index")) {
+              index_.concatenate(reinterpret_cast<INDEX*>(buffer));
+          }
 
-        for (size_t i = 0; i < contents_count_; i++) {
-          visit_at(contents_, i, [&buffer, &name](auto& content) {
-            content.to_buffer(buffer, name);
-          });
-        }
+          // Instantiate the functor to handle each content's to_buffer call
+          ToBufferFunctor toBufferFunctor(buffer, name);
+
+          for (size_t i = 0; i < contents_count_; i++) {
+              visit_at(contents_, i, toBufferFunctor);  // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      class ToCharBuffersFunctor {
+      public:
+          // Constructor to capture buffers by reference
+          ToCharBuffersFunctor(std::map<std::string, uint8_t*>& buffers)
+              : buffers_(buffers) { }
+
+          // Template operator() to handle the content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              content.to_char_buffers(buffers_);
+          }
+
+      private:
+          std::map<std::string, uint8_t*>& buffers_;  // reference to the buffers map
+      };
+
       void
       to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        auto index_sequence((std::index_sequence_for<BUILDERS...>()));
+          auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-        tags_.concatenate(reinterpret_cast<TAGS*>(
-            buffers["node" + std::to_string(id_) + "-tags"]));
-        index_.concatenate(reinterpret_cast<INDEX*>(
-            buffers["node" + std::to_string(id_) + "-index"]));
+          // Concatenate tags and index buffers
+          tags_.concatenate(reinterpret_cast<TAGS*>(
+              buffers["node" + std::to_string(id_) + "-tags"]));
+          index_.concatenate(reinterpret_cast<INDEX*>(
+              buffers["node" + std::to_string(id_) + "-index"]));
 
-        for (size_t i = 0; i < contents_count_; i++) {
-          visit_at(contents_, i, [&buffers](auto& content) {
-            content.to_char_buffers(buffers);
-          });
-        }
+          // Instantiate the functor to handle each content's to_char_buffers call
+          ToCharBuffersFunctor toCharBuffersFunctor(buffers);
+
+          for (size_t i = 0; i < contents_count_; i++) {
+              visit_at(contents_, i, toCharBuffersFunctor);  // pass the functor instead of the lambda
+          }
       }
+
 
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
+      class ContentsFormFunctor {
+      public:
+          ContentsFormFunctor(std::stringstream& out)
+              : out_(out) {}
+
+          // Template operator() to handle each content
+          template <class CONTENT>
+          void operator()(CONTENT& content) const {
+              out_ << content.form();
+          }
+
+      private:
+          std::stringstream& out_;  // Reference to the output stringstream
+      };
+
+
       std::string
       form() const noexcept {
-        std::stringstream form_key;
-        form_key << "node" << id_;
-        std::string params("");
-        if (parameters_ == "") {
-        } else {
-          params = std::string(", \"parameters\": { " + parameters_ + " }");
-        }
-        std::stringstream out;
-        out << "{ \"class\": \"UnionArray\", \"tags\": \"" +
-                   type_to_numpy_like<TAGS>() + "\", \"index\": \"" +
-                   type_to_numpy_like<INDEX>() + "\", \"contents\": [";
-        for (size_t i = 0; i < contents_count_; i++) {
-          if (i != 0) {
-            out << ", ";
+          std::stringstream form_key;
+          form_key << "node" << id_;
+          std::string params("");
+          if (!parameters_.empty()) {
+              params = ", \"parameters\": { " + parameters_ + " }";
           }
-          auto contents_form = [&](auto& content) {
-            out << content.form();
-          };
-          visit_at(contents_, i, contents_form);
-        }
-        out << "], ";
-        out << params << "\"form_key\": \"" << form_key.str() << "\" }";
-        return out.str();
+          std::stringstream out;
+          out << "{ \"class\": \"UnionArray\", \"tags\": \"" +
+                    type_to_numpy_like<TAGS>() + "\", \"index\": \"" +
+                    type_to_numpy_like<INDEX>() + "\", \"contents\": [";
+          for (size_t i = 0; i < contents_count_; i++) {
+              if (i != 0) {
+                  out << ", ";
+              }
+              ContentsFormFunctor contentsFormFunctor(out);
+              visit_at(contents_, i, contentsFormFunctor);
+          }
+          out << "], ";
+          out << params << "\"form_key\": \"" << form_key.str() << "\" }";
+          return out.str();
       }
+
 
     private:
       /// @brief Inserts the lengths of all the builder contents in a vector

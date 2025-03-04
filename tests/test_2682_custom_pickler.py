@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import multiprocessing
 import os
 import pickle
 import sys
-from concurrent.futures import ProcessPoolExecutor
 
 if sys.version_info < (3, 12):
     import importlib_metadata
@@ -22,10 +20,16 @@ def has_entry_point():
     return bool(importlib_metadata.entry_points(group="awkward.pickle.reduce").names)
 
 
-pytestmark = pytest.mark.skipif(
-    has_entry_point(),
-    reason="Custom pickler is already registered!",
-)
+if sys.platform.startswith("emscripten"):
+    pytestmark = pytest.mark.skip
+else:
+    import multiprocessing
+    from concurrent.futures import ProcessPoolExecutor
+
+    pytestmark = pytest.mark.skipif(
+        has_entry_point(),
+        reason="Custom pickler is already registered!",
+    )
 
 
 def _init_process_with_pickler(pickler_source: str, tmp_path):

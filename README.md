@@ -4,7 +4,7 @@
 
 [![PyPI version](https://badge.fury.io/py/awkward.svg)](https://pypi.org/project/awkward)
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/awkward)](https://github.com/conda-forge/awkward-feedstock)
-[![Python 3.8‒3.12](https://img.shields.io/badge/python-3.8%E2%80%923.12-blue)](https://www.python.org)
+[![Python 3.9‒3.13](https://img.shields.io/badge/python-3.9%E2%80%923.13-blue)](https://www.python.org)
 [![BSD-3 Clause License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Build Test](https://github.com/scikit-hep/awkward/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/test.yml)
 
@@ -152,7 +152,7 @@ year = {2018}
 
 # Acknowledgements
 
-Support for this work was provided by NSF cooperative agreements [OAC-1836650](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650) and [PHY-2323298](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298) (IRIS-HEP), grant [OAC-1450377](https://nsf.gov/awardsearch/showAward?AWD_ID=1450377) (DIANA/HEP), [PHY-2121686](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686) (US-CMS LHC Ops), and [OAC-2103945](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945) (Awkward Array).
+Support for this work was provided by NSF cooperative agreement [OAC-1836650](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650) (IRIS-HEP 1), [PHY-2323298](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298) (IRIS-HEP 2), grant [OAC-1450377](https://nsf.gov/awardsearch/showAward?AWD_ID=1450377) (DIANA/HEP), [PHY-1520942](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942) and [PHY-2121686](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686) (US-CMS LHC Ops), and [OAC-2103945](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945) (Awkward Array).
 
 We also thank [Erez Shinan](https://github.com/erezsh) and the developers of the [Lark standalone parser](https://github.com/lark-parser/lark), which is used to parse type strings as type objects.
 
@@ -228,6 +228,12 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/pfackeldey"><img src="https://avatars.githubusercontent.com/u/18463582?v=4?s=100" width="100px;" alt="Peter Fackeldey"/><br /><sub><b>Peter Fackeldey</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=pfackeldey" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.ariostas.com"><img src="https://avatars.githubusercontent.com/u/7596837?v=4?s=100" width="100px;" alt="Andres Rios Tascon"/><br /><sub><b>Andres Rios Tascon</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=ariostas" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/maxymnaumchyk"><img src="https://avatars.githubusercontent.com/u/70752300?v=4?s=100" width="100px;" alt="maxymnaumchyk"/><br /><sub><b>maxymnaumchyk</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=maxymnaumchyk" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://tacaswell.github.io"><img src="https://avatars.githubusercontent.com/u/199813?v=4?s=100" width="100px;" alt="Thomas A Caswell"/><br /><sub><b>Thomas A Caswell</b></sub></a><br /><a href="#maintenance-tacaswell" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.nijho.lt"><img src="https://avatars.githubusercontent.com/u/6897215?v=4?s=100" width="100px;" alt="Bas Nijholt"/><br /><sub><b>Bas Nijholt</b></sub></a><br /><a href="#maintenance-basnijholt" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://nj-vs-vh.name/"><img src="https://avatars.githubusercontent.com/u/30616208?v=4?s=100" width="100px;" alt="Igor Vaiman"/><br /><sub><b>Igor Vaiman</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=nj-vs-vh" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/HavryliukAY"><img src="https://avatars.githubusercontent.com/u/58536463?v=4?s=100" width="100px;" alt="Havryliuk Artem "/><br /><sub><b>Havryliuk Artem </b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=HavryliukAY" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

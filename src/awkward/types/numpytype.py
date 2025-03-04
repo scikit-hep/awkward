@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Mapping
+from functools import lru_cache
 
 from awkward._behavior import find_array_typestr
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -25,6 +26,7 @@ def is_primitive(primitive):
         return primitive in _primitive_to_dtype_dict
 
 
+@lru_cache
 def primitive_to_dtype(primitive):
     if _primitive_to_dtype_datetime.match(primitive) is not None:
         return np.dtype(primitive)
@@ -42,6 +44,7 @@ def primitive_to_dtype(primitive):
         return out
 
 
+@lru_cache
 def dtype_to_primitive(dtype):
     if dtype.kind.upper() == "M" and dtype == dtype.newbyteorder("="):
         return str(dtype)

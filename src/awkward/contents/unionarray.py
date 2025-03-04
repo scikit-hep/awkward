@@ -39,7 +39,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
 
@@ -458,6 +458,15 @@ class UnionArray(UnionMeta[Content], Content):
             [x._form_with_key(getkey) for x in self._contents],
             parameters=self._parameters,
             form_key=form_key,
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> UnionForm:
+        return self.form_cls(
+            self._tags.form,
+            self._index.form,
+            [x._form_with_key_path((*path, i)) for i, x in enumerate(self._contents)],
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
@@ -1350,7 +1359,7 @@ class UnionArray(UnionMeta[Content], Content):
             parameters=self._parameters,
             mergebool=True,
         )
-        if simplified.length == 0:
+        if simplified.length is not unknown_length and simplified.length == 0:
             return ak.contents.NumpyArray(
                 self._backend.nplike.empty(0, dtype=np.int64),
                 parameters=None,
@@ -1365,7 +1374,7 @@ class UnionArray(UnionMeta[Content], Content):
         )
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
-        if self.length == 0:
+        if self.length is not unknown_length and self.length == 0:
             return self
 
         simplified = type(self).simplified(
@@ -1375,7 +1384,7 @@ class UnionArray(UnionMeta[Content], Content):
             parameters=self._parameters,
             mergebool=True,
         )
-        if simplified.length == 0:
+        if simplified.length is not unknown_length and simplified.length == 0:
             return simplified
 
         if isinstance(simplified, ak.contents.UnionArray):

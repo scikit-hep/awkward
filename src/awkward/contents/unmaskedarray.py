@@ -13,7 +13,7 @@ from awkward._meta.unmaskedmeta import UnmaskedMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
-from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone
 from awkward._parameters import (
     parameters_intersect,
@@ -39,7 +39,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.unmaskedform import UnmaskedForm
 from awkward.index import Index
 
@@ -136,6 +136,13 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
             self._content._form_with_key(getkey),
             parameters=self._parameters,
             form_key=form_key,
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> UnmaskedForm:
+        return self.form_cls(
+            self._content._form_with_key_path((*path, None)),
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
@@ -333,7 +340,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
             raise AxisError("axis=0 not allowed for flatten")
         else:
             offsets, flattened = self._content._offsets_and_flattened(axis, depth)
-            if offsets.length == 0:
+            if offsets.length is not unknown_length and offsets.length == 0:
                 return (
                     offsets,
                     UnmaskedArray(flattened, parameters=self._parameters),
@@ -392,12 +399,12 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._content.length == 0:
+        if self._content.length is not unknown_length and self._content.length == 0:
             return True
         return self._content._is_unique(negaxis, starts, parents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self._content.length == 0:
+        if self._content.length is not unknown_length and self._content.length == 0:
             return self
         return self._content._unique(negaxis, starts, parents, outlength)
 
@@ -497,6 +504,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         options: ToArrowOptions,
     ):
         return self._content._to_arrow(pyarrow, self, None, length, options)
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        return self._content._to_cudf(cudf, mask, length)
 
     def _to_backend_array(self, allow_missing, backend):
         content = self.content._to_backend_array(allow_missing, backend)

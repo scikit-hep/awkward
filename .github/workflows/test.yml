@@ -39,11 +39,11 @@ jobs:
           - ubuntu-latest
           - macos-13
         python-version:
+          - '3.13'
           - '3.12'
           - '3.11'
           - '3.10'
           - '3.9'
-          - '3.8'
         python-architecture:
           - x64
         dependencies-kind:
@@ -57,7 +57,7 @@ jobs:
             python-architecture: x86
             runs-on: windows-latest
             dependencies-kind: numpy1
-          - python-version: '3.8'
+          - python-version: '3.9'
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: minimal
@@ -65,6 +65,18 @@ jobs:
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: pypy
+          - python-version: '3.11'
+            python-architecture: x64
+            runs-on: ubuntu-latest
+            dependencies-kind: ml
+          - python-version: '3.13t'
+            python-architecture: x64
+            runs-on: ubuntu-latest
+            dependencies-kind: nogil
+          - python-version: '3.13t'
+            python-architecture: x64
+            runs-on: windows-latest
+            dependencies-kind: nogil
 
     runs-on: ${{ matrix.runs-on }}
 
@@ -77,7 +89,7 @@ jobs:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v5
+        uses: Quansight-Labs/setup-python@v5
         with:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
@@ -105,6 +117,11 @@ jobs:
         with:
           files: |
             awkward-cpp/dist/*.whl
+
+      - name: Add workaround for 3.13 + cramjam
+        if: matrix.python-version == '3.13'
+        run: echo 'PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1' >> $GITHUB_ENV
+        shell: bash
 
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
@@ -144,10 +161,10 @@ jobs:
 
       - name: Upload Codecov results
         if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
 
   Linux-ROOT:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     env:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
@@ -165,14 +182,14 @@ jobs:
           submodules: true
 
       - name: Setup Python via Conda
-        uses: mamba-org/setup-micromamba@v1
+        uses: mamba-org/setup-micromamba@v2
         with:
           # Cache invalidates daily by default
           cache-environment: true
           environment-name: awkward
-          # Need Python 3.8 for the cached wheels
+          # Need Python 3.9 for the cached wheels
           create-args: >-
-            python=3.8
+            python=3.9
             numpy
             root
 

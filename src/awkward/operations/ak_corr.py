@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._dispatch import high_level_function
 from awkward._layout import (
     HighLevelContext,
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
 )
+from awkward._namedaxis import _get_named_axis, _is_valid_named_axis
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -86,7 +88,10 @@ def corr(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
+    if _is_valid_named_axis(axis):
+        raise NotImplementedError("named axis not yet supported for ak.corr")
+
+    axis = regularize_axis(axis, none_allowed=True)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, y_layout, weight_layout = ensure_same_backend(
@@ -110,7 +115,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
             x,
             weight,
             axis,
-            False,
+            True,
             mask_identity,
             highlevel=True,
             behavior=ctx.behavior,
@@ -120,7 +125,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
             y,
             weight,
             axis,
-            False,
+            True,
             mask_identity,
             highlevel=True,
             behavior=ctx.behavior,
@@ -184,8 +189,19 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-        return ctx.wrap(
-            maybe_highlevel_to_lowlevel(sumwxy / ufuncs.sqrt(sumwxx * sumwyy)),
+
+        out = sumwxy / ufuncs.sqrt(sumwxx * sumwyy)
+
+        wrapped = ctx.wrap(
+            maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,
+        )
+        # propagate named axis to output
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped,
+            named_axis=_get_named_axis(attrs_of_obj(out)),
+            highlevel=highlevel,
+            behavior=None,
+            attrs=None,
         )
