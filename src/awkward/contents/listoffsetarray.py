@@ -311,8 +311,10 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        is_placeholder = isinstance(self._offsets.data, PlaceholderArray)
-        return is_placeholder or self._content._is_getitem_at_placeholder()
+        return (
+            isinstance(self._offsets.data, PlaceholderArray)
+            or self._content._is_getitem_at_placeholder()
+        )
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (

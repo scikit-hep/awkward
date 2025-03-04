@@ -313,8 +313,7 @@ class NumpyArray(NumpyMeta, Content):
         )
 
     def _is_getitem_at_placeholder(self) -> bool:
-        is_placeholder = isinstance(self._data, PlaceholderArray)
-        return is_placeholder
+        return isinstance(self._data, PlaceholderArray)
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (

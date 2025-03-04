@@ -312,10 +312,9 @@ class ListArray(ListMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        is_placeholder_starts = isinstance(self._starts.data, PlaceholderArray)
-        is_placeholder_stops = isinstance(self._stops.data, PlaceholderArray)
-        is_placeholder = is_placeholder_starts or is_placeholder_stops
-        return is_placeholder
+        return isinstance(self._starts.data, PlaceholderArray) or isinstance(
+            self._stops.data, PlaceholderArray
+        )
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual_starts = (

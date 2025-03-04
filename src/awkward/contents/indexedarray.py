@@ -290,8 +290,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        is_placeholder = isinstance(self._index.data, PlaceholderArray)
-        if is_placeholder:
+        if isinstance(self._index.data, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
 

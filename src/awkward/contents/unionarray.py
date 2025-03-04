@@ -543,10 +543,9 @@ class UnionArray(UnionMeta[Content], Content):
         return self._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        is_placeholder_tags = isinstance(self._tags.data, PlaceholderArray)
-        is_placeholder_index = isinstance(self._index.data, PlaceholderArray)
-        is_placeholder = is_placeholder_tags or is_placeholder_index
-        if is_placeholder:
+        if isinstance(self._tags, PlaceholderArray) or isinstance(
+            self._index, PlaceholderArray
+        ):
             return True
         for content in self._contents:
             if content._is_getitem_at_placeholder():
