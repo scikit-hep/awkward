@@ -272,7 +272,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return iter(array)
 
     def __dlpack_device__(self) -> tuple[int, int]:
-        return self.materialize().__dlpack_device__()
+        return self.materialize().__dlpack_device__()  # type: ignore[attr-defined]
 
     def __dlpack__(self, stream: Any = None) -> Any:
-        return self.materialize().__dlpack__(stream=stream)
+        return self.materialize().__dlpack__(stream=stream)  # type: ignore[attr-defined]
