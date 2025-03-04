@@ -8,7 +8,6 @@ import numpy
 
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.shape import ShapeItem
-from awkward._nplikes.virtual import VirtualArray
 from awkward._singleton import PublicSingleton
 from awkward._typing import (
     TYPE_CHECKING,
@@ -26,6 +25,7 @@ if TYPE_CHECKING:
     from numpy.typing import DTypeLike
 
     from awkward._nplikes.placeholder import PlaceholderArray
+    from awkward._nplikes.virtual import VirtualArray
 
 
 IndexType: TypeAlias = "int | ArrayLikeT"
