@@ -1575,24 +1575,22 @@ class UnionArray(UnionMeta[Content], Content):
     ) -> list[Content]:
         out = []
 
-        tags = numpy.atleast_1d(self._tags.raw(numpy))
-        index = numpy.atleast_1d(self._index.raw(numpy))
+        # typetracer
+        if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
+            # just flatten, ignore order, tags, index
+            for c in self._contents:
+                out.extend(c._remove_structure(backend, options))
+            return out
 
-        for i in range(len(tags)):
-            tag = tags[i]
-            idx_value = index[i]
-
+        # backends with concrete data
+        for i in range(self._tags.length):
             content = (
-                self._contents[tag]
-                ._carry(ak.index.Index(numpy.atleast_1d(idx_value)), False)
+                self._contents[self._tags.data[i]]
+                ._carry(ak.index.Index(self._index.data[i]), False)
                 ._remove_structure(backend, options)
             )
-
-            if isinstance(content, list):
-                out.extend(content)
-            else:
-                out.append(content)
-
+            out.extend(content)
         return out
 
     def _recursively_apply(
