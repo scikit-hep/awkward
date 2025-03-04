@@ -8,6 +8,7 @@ import numpy
 
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.virtual import VirtualArray
 from awkward._singleton import PublicSingleton
 from awkward._typing import (
     TYPE_CHECKING,
@@ -149,14 +150,14 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         *,
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
-    ) -> ArrayLikeT | PlaceholderArray: ...
+    ) -> ArrayLikeT | PlaceholderArray | VirtualArray: ...
 
     # FIXME: find a way to express TypeVar(..., OtherTypeVar(...), FOO) such that
     #        this function preserves the type identity of the input
     @abstractmethod
     def ascontiguousarray(
         self, x: ArrayLikeT | PlaceholderArray
-    ) -> ArrayLikeT | PlaceholderArray: ...
+    ) -> ArrayLikeT | PlaceholderArray | VirtualArray: ...
 
     @abstractmethod
     def frombuffer(
@@ -285,7 +286,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         shape: tuple[ShapeItem, ...],
         *,
         copy: bool | None = None,
-    ) -> ArrayLikeT | PlaceholderArray: ...
+    ) -> ArrayLikeT | PlaceholderArray | VirtualArray: ...
 
     @abstractmethod
     def nonzero(self, x: ArrayLikeT) -> tuple[ArrayLikeT, ...]: ...
