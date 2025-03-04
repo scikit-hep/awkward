@@ -761,7 +761,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLike]):
         suppress_small: bool | None = None,
     ):
         if isinstance(x, PlaceholderArray):
-            return "[XX ... XX]"
+            return "[?? ... ??]"
         if isinstance(x, VirtualArray) and not x.is_materialized:
             return "[?? ... ??]"
         (x,) = materialize_if_virtual(x)

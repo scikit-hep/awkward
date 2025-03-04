@@ -76,7 +76,7 @@ is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
 
 class PlaceholderValue:
     def __str__(self):
-        return "XX"
+        return "??"
 
 
 class VirtualValue:
