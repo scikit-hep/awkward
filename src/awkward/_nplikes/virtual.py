@@ -158,7 +158,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return copy.copy(self)
 
     def tolist(self) -> list:
-        return self.materialize().tolist()
+        return self.materialize().tolist()  # type: ignore[attr-defined]
 
     @property
     def ctypes(self):
