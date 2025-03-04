@@ -14,6 +14,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
+from awkward._nplikes.virtual import VirtualArray
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
@@ -314,6 +315,18 @@ class ListArray(ListMeta[Content], Content):
         return isinstance(self._starts.data, PlaceholderArray) or isinstance(
             self._stops.data, PlaceholderArray
         )
+
+    def _is_getitem_at_virtual(self) -> bool:
+        is_virtual_starts = (
+            isinstance(self._starts.data, VirtualArray)
+            and not self._starts.data.is_materialized
+        )
+        is_virtual_stops = (
+            isinstance(self._stops.data, VirtualArray)
+            and not self._stops.data.is_materialized
+        )
+        is_virtual = is_virtual_starts or is_virtual_stops
+        return is_virtual
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
@@ -1618,6 +1631,28 @@ class ListArray(ListMeta[Content], Content):
         starts = self._starts.to_nplike(backend.index_nplike)
         stops = self._stops.to_nplike(backend.index_nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
+
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        starts = self._starts.materialize()
+        stops = self._stops.materialize()
+        return ListArray(starts, stops, content, parameters=self._parameters)
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return (
+            self._content.is_all_materialized
+            and self._starts.is_all_materialized
+            and self._stops.is_all_materialized
+        )
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return (
+            self._content.is_any_materialized
+            or self._starts.is_any_materialized
+            or self._stops.is_any_materialized
+        )
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool

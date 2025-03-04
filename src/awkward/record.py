@@ -241,6 +241,17 @@ class Record:
         else:
             return Record(self._array._to_backend(backend), self._at)
 
+    def materialize(self) -> Self:
+        return Record(self._array._materialize(), self._at)
+
+    @property
+    def is_all_materialized(self) -> bool:
+        return self._array._is_all_materialized
+
+    @property
+    def is_any_materialized(self) -> bool:
+        return self._array._is_any_materialized
+
     def __copy__(self) -> Self:
         return self.copy()
 

@@ -8,6 +8,7 @@ from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
+from awkward._nplikes.virtual import materialize_if_virtual
 from awkward._typing import TYPE_CHECKING, Final, Literal
 
 if TYPE_CHECKING:
@@ -51,7 +52,8 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
         if isinstance(x, PlaceholderArray):
             return True
         else:
-            return x.flags["C_CONTIGUOUS"]  # type: ignore[attr-defined]
+            (x,) = materialize_if_virtual(x)
+            return x.flags["C_CONTIGUOUS"]  # type: ignore[union-attr]
 
     def packbits(
         self,

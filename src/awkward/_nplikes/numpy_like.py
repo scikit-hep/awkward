@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from numpy.typing import DTypeLike
 
     from awkward._nplikes.placeholder import PlaceholderArray
+    from awkward._nplikes.virtual import VirtualArray
 
 
 IndexType: TypeAlias = "int | ArrayLikeT"
@@ -138,6 +139,10 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
 
     ############################ array creation
 
+    @property
+    @abstractmethod
+    def ndarray(self) -> ArrayLikeT: ...
+
     @abstractmethod
     def asarray(
         self,
@@ -145,14 +150,14 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         *,
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
-    ) -> ArrayLikeT | PlaceholderArray: ...
+    ) -> ArrayLikeT | PlaceholderArray | VirtualArray: ...
 
     # FIXME: find a way to express TypeVar(..., OtherTypeVar(...), FOO) such that
     #        this function preserves the type identity of the input
     @abstractmethod
     def ascontiguousarray(
         self, x: ArrayLikeT | PlaceholderArray
-    ) -> ArrayLikeT | PlaceholderArray: ...
+    ) -> ArrayLikeT | PlaceholderArray | VirtualArray: ...
 
     @abstractmethod
     def frombuffer(
@@ -281,7 +286,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         shape: tuple[ShapeItem, ...],
         *,
         copy: bool | None = None,
-    ) -> ArrayLikeT | PlaceholderArray: ...
+    ) -> ArrayLikeT | PlaceholderArray | VirtualArray: ...
 
     @abstractmethod
     def nonzero(self, x: ArrayLikeT) -> tuple[ArrayLikeT, ...]: ...

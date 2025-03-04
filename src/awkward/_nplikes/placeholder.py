@@ -80,6 +80,14 @@ class PlaceholderArray(ArrayLike):
             shape = self._shape
         return type(self)(self._nplike, shape, dtype, self._field_path)
 
+    def __repr__(self):
+        dtype = repr(self._dtype)
+        if self.shape is None:
+            shape = ""
+        else:
+            shape = ", shape=" + repr(self._shape)
+        return f"PlaceholderArray({dtype}{shape})"
+
     def __getitem__(self, index):
         # Typetracers permit slices that don't touch data or shapes
         if isinstance(index, slice):
@@ -101,7 +109,9 @@ class PlaceholderArray(ArrayLike):
                 )
             else:
                 start, stop, step = index.indices(length)
-                new_length = (stop - start) // step
+                new_length = max(
+                    0, (stop - start + (step - (1 if step > 0 else -1))) // step
+                )
 
             return type(self)(
                 self._nplike, (new_length,), self._dtype, self._field_path
@@ -116,6 +126,9 @@ class PlaceholderArray(ArrayLike):
                 msg += "If this was supposed to happen automatically (e.g. you're using Dask), "
                 msg += "please report it to the developers at: https://github.com/scikit-hep/awkward/issues"
             raise TypeError(msg)
+
+    def tolist(self) -> list:
+        raise RuntimeError
 
     def __setitem__(self, key, value):
         raise RuntimeError
