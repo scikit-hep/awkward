@@ -162,12 +162,7 @@ class Index:
         return type(self)(data.forget_length(), metadata=self._metadata, nplike=tt)
 
     def raw(self, nplike: NumpyLike) -> ArrayLike:
-        data = (
-            self._data.materialize()
-            if isinstance(self._data, VirtualArray)
-            else self._data
-        )
-        return to_nplike(data, nplike, from_nplike=self._nplike)
+        return to_nplike(self.data, nplike, from_nplike=self._nplike)
 
     def materialize(self) -> Index:
         (out,) = materialize_if_virtual(self._data)

@@ -2186,9 +2186,10 @@ def test_numpyarray_to_buffers(numpyarray, virtual_numpyarray):
     # container
     assert out1[2].keys() == out2[2].keys()
     for key in out1[2]:
-        assert isinstance(out1[2][key], np.ndarray)
-        assert isinstance(out2[2][key], np.ndarray)
+        assert isinstance(out2[2][key], VirtualArray)
+        assert not out2[2][key].is_materialized
         assert np.all(out1[2][key] == out2[2][key])
+        assert out2[2][key].is_materialized
 
 
 def test_numpyarray_is_valid(numpyarray, virtual_numpyarray):
