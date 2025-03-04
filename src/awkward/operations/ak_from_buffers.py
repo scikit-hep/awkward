@@ -14,7 +14,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._nplikes.virtual import UNMATERIALIZED, VirtualArray
+from awkward._nplikes.virtual import VirtualArray
 from awkward._regularize import is_integer
 from awkward.forms.form import index_to_dtype, regularize_buffer_key
 
@@ -332,7 +332,8 @@ def _reconstitute(
                 0 if len(index) == 0 else max(0, backend.index_nplike.max(index) + 1)
             )
             # free memory
-            free(index)
+            if isinstance(index, VirtualArray):
+                index.unmaterialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -374,7 +375,8 @@ def _reconstitute(
                 )
             )
             # free memory
-            free(index)
+            if isinstance(index, VirtualArray):
+                index.unmaterialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -422,7 +424,10 @@ def _reconstitute(
                 0 if len(starts) == 0 else backend.index_nplike.max(reduced_stops)
             )
             # free memory
-            free(starts, stops)
+            if isinstance(starts, VirtualArray):
+                starts.unmaterialize()
+            if isinstance(stops, VirtualArray):
+                stops.unmaterialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -456,7 +461,8 @@ def _reconstitute(
         else:
             next_length = 0 if len(offsets) == 1 else offsets[-1]
             # free memory
-            free(offsets)
+            if isinstance(offsets, VirtualArray):
+                offsets.unmaterialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -543,7 +549,10 @@ def _reconstitute(
                 else:
                     lengths.append(backend.index_nplike.max(selected_index) + 1)
             # free memory
-            free(index, tags)
+            if isinstance(index, VirtualArray):
+                index.unmaterialize()
+            if isinstance(tags, VirtualArray):
+                tags.unmaterialize()
         contents = [
             _reconstitute(
                 content,
@@ -570,12 +579,3 @@ def _reconstitute(
 
     else:
         raise AssertionError("unexpected form node type: " + str(type(form)))
-
-
-def free(*arrays: ArrayLike) -> None:
-    """
-    Free any materialized resources associated with virtual array(s).
-    """
-    for array in arrays:
-        if isinstance(array, VirtualArray):
-            array._array = UNMATERIALIZED
