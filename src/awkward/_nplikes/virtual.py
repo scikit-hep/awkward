@@ -271,11 +271,8 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         array = self.materialize()
         return iter(array)
 
-    # TODO: The following can be implemented, but they will need materialization.
-    # Also older numpy versions don't support them.
-    # One needs them to use from_dlpack() on a virtual array.
     def __dlpack_device__(self) -> tuple[int, int]:
-        raise RuntimeError("cannot realise an unknown value")
+        return self.materialize().__dlpack_device__()
 
     def __dlpack__(self, stream: Any = None) -> Any:
-        raise RuntimeError("cannot realise an unknown value")
+        return self.materialize().__dlpack__(stream=stream)

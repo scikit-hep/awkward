@@ -597,13 +597,11 @@ def test_iter(virtual_array):
 
 # Test __dlpack__ and __dlpack_device__
 def test_dlpack_device(virtual_array):
-    with pytest.raises(RuntimeError, match=r"cannot realise an unknown value"):
-        virtual_array.__dlpack_device__()
+    virtual_array.__dlpack_device__()
 
 
 def test_dlpack(virtual_array):
-    with pytest.raises(RuntimeError, match=r"cannot realise an unknown value"):
-        virtual_array.__dlpack__()
+    virtual_array.__dlpack__()
 
 
 # Test __array_ufunc__
