@@ -1954,7 +1954,7 @@ def test_round_with_virtual_array(numpy_like):
 def test_array_str_with_virtual_array_unmaterialized(numpy_like, virtual_array):
     # Test array_str with unmaterialized VirtualArray
     result = numpy_like.array_str(virtual_array)
-    assert result == "[?? ... ??]"
+    assert result == "[## ... ##]"
 
 
 def test_array_str_with_virtual_array_materialized(numpy_like, virtual_array):
