@@ -150,8 +150,6 @@ def _impl(
     convert_bytes,
     convert_other,
 ):
-    array = ak.operations.materialize(array)
-
     if array is None or isinstance(array, (bool, str, bytes, Number)):
         out = ak.operations.from_iter([array], highlevel=False)
 

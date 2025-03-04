@@ -95,9 +95,7 @@ def _impl(
     extensionarray,
     count_nulls,
 ):
-    layout = ak.operations.to_layout(
-        ak.operations.materialize(array), allow_record=True, primitive_policy="error"
-    )
+    layout = ak.operations.to_layout(array, allow_record=True, primitive_policy="error")
     if isinstance(layout, ak.record.Record):
         layout = layout.array[layout.at : layout.at + 1]
         record_is_scalar = True
