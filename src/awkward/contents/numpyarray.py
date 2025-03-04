@@ -1213,6 +1213,8 @@ class NumpyArray(NumpyMeta, Content):
             )
 
         nparray = self._raw(numpy)
+        if isinstance(nparray, VirtualArray):
+            nparray = nparray.materialize()
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
@@ -1241,7 +1243,11 @@ class NumpyArray(NumpyMeta, Content):
         from cudf.core.column.column import as_column
 
         assert self._backend.nplike.known_data
-        data = as_column(self._data)
+        data = as_column(
+            self._data.materialize()
+            if isinstance(self._data, VirtualArray)
+            else self._data
+        )
         if mask is not None:
             m = cupy.packbits(cupy.asarray(mask), bitorder="little")
             if m.nbytes % 64:
@@ -1251,7 +1257,12 @@ class NumpyArray(NumpyMeta, Content):
         return data
 
     def _to_backend_array(self, allow_missing, backend):
-        return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
+        data = (
+            self._data.materialize()
+            if isinstance(self._data, VirtualArray)
+            else self._data
+        )
+        return to_nplike(data, backend.nplike, from_nplike=self._backend.nplike)
 
     def _remove_structure(
         self, backend: Backend, options: RemoveStructureOptions
