@@ -596,10 +596,18 @@ def test_iter(virtual_array):
 
 
 # Test __dlpack__ and __dlpack_device__
+@pytest.mark.skipif(
+    tuple(map(int, np.__version__.split(".")[:2])) < (1, 23),
+    reason="Test requires NumPy >= 1.23",
+)
 def test_dlpack_device(virtual_array):
     virtual_array.__dlpack_device__()
 
 
+@pytest.mark.skipif(
+    tuple(map(int, np.__version__.split(".")[:2])) < (1, 23),
+    reason="Test requires NumPy >= 1.23",
+)
 def test_dlpack(virtual_array):
     virtual_array.__dlpack__()
 
