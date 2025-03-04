@@ -164,7 +164,7 @@ jobs:
         uses: codecov/codecov-action@v5
 
   Linux-ROOT:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     env:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
