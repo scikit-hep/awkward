@@ -45,7 +45,7 @@ or
         ) from err
 
     # useful function that handles all possible input arrays
-    array = ak.to_layout(ak.operations.materialize(array), allow_record=False)
+    array = ak.to_layout(array, allow_record=False)
 
     # get the device array is on
     ak_device = ak.backend(array)

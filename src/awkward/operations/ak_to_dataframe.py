@@ -158,10 +158,7 @@ or
     if how is not None:
         out = None
         for df in to_dataframe(
-            ak.operations.materialize(array),
-            how=None,
-            levelname=levelname,
-            anonymous=anonymous,
+            array, how=None, levelname=levelname, anonymous=anonymous
         ):
             if out is None:
                 out = df
