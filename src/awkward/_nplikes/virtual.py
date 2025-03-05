@@ -99,7 +99,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             self._array = array
         return self._array  # type: ignore[return-value]
 
-    def unmaterialize(self) -> None:
+    def dematerialize(self) -> None:
         self._array = UNMATERIALIZED
 
     @property

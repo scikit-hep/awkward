@@ -333,7 +333,7 @@ def _reconstitute(
             )
             # free memory
             if isinstance(index, VirtualArray):
-                index.unmaterialize()
+                index.dematerialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -376,7 +376,7 @@ def _reconstitute(
             )
             # free memory
             if isinstance(index, VirtualArray):
-                index.unmaterialize()
+                index.dematerialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -425,9 +425,9 @@ def _reconstitute(
             )
             # free memory
             if isinstance(starts, VirtualArray):
-                starts.unmaterialize()
+                starts.dematerialize()
             if isinstance(stops, VirtualArray):
-                stops.unmaterialize()
+                stops.dematerialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -462,7 +462,7 @@ def _reconstitute(
             next_length = 0 if len(offsets) == 1 else offsets[-1]
             # free memory
             if isinstance(offsets, VirtualArray):
-                offsets.unmaterialize()
+                offsets.dematerialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -550,9 +550,9 @@ def _reconstitute(
                     lengths.append(backend.index_nplike.max(selected_index) + 1)
             # free memory
             if isinstance(index, VirtualArray):
-                index.unmaterialize()
+                index.dematerialize()
             if isinstance(tags, VirtualArray):
-                tags.unmaterialize()
+                tags.dematerialize()
         contents = [
             _reconstitute(
                 content,
