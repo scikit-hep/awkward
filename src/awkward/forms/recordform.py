@@ -127,7 +127,9 @@ class RecordForm(RecordMeta[Form], Form):
         if not fields and is_inside_record_or_union:
             return None
         else:
-            return self.copy(contents=contents, fields=fields)
+            return self.copy(
+                contents=contents, fields=None if self.is_tuple else fields
+            )
 
     def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         contents = []
@@ -145,7 +147,7 @@ class RecordForm(RecordMeta[Form], Form):
             contents.append(next_content)
             fields.append(field)
 
-        return self.copy(contents=contents, fields=fields)
+        return self.copy(contents=contents, fields=None if self.is_tuple else fields)
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
