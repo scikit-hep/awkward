@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike
+from awkward._nplikes.virtual import VirtualArray
 from awkward._typing import Any, TypeVar, cast
 from awkward._util import UNSET, Sentinel
 
@@ -44,6 +45,8 @@ def nplike_of_obj(
     except KeyError:
         # Try and find the nplike for this type
         # caching the result by type
+        if isinstance(obj, VirtualArray):
+            cls = obj.nplike.ndarray
         for nplike_cls in _nplike_classes:
             if nplike_cls.is_own_array_type(cls):
                 nplike = nplike_cls.instance()

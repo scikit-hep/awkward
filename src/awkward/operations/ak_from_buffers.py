@@ -14,6 +14,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.virtual import VirtualArray
 from awkward._regularize import is_integer
 from awkward.forms.form import index_to_dtype, regularize_buffer_key
 
@@ -163,6 +164,17 @@ def _from_buffer(
     byteorder: str,
     field_path: tuple,
 ) -> ArrayLike:
+    if callable(buffer):
+        # This is the case for VirtualArrays
+        # We use recursion here to pass down the from_buffer and byteorder transformations to the generator
+        return VirtualArray(
+            nplike=nplike,
+            shape=(count,),
+            dtype=dtype,
+            generator=lambda: _from_buffer(
+                nplike, buffer(), dtype, count, byteorder, field_path
+            ),
+        )
     # Unknown-length information implies that we didn't load shape-buffers (offsets, etc)
     # for the parent of this node. Thus, this node and its children *must* only
     # contain placeholders
@@ -319,6 +331,9 @@ def _reconstitute(
             next_length = (
                 0 if len(index) == 0 else max(0, backend.index_nplike.max(index) + 1)
             )
+            # free memory
+            if isinstance(index, VirtualArray):
+                index.dematerialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -359,6 +374,9 @@ def _reconstitute(
                     backend.index_nplike.max(index) + 1
                 )
             )
+            # free memory
+            if isinstance(index, VirtualArray):
+                index.dematerialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -405,6 +423,11 @@ def _reconstitute(
             next_length = (
                 0 if len(starts) == 0 else backend.index_nplike.max(reduced_stops)
             )
+            # free memory
+            if isinstance(starts, VirtualArray):
+                starts.dematerialize()
+            if isinstance(stops, VirtualArray):
+                stops.dematerialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -437,6 +460,9 @@ def _reconstitute(
             next_length = unknown_length
         else:
             next_length = 0 if len(offsets) == 1 else offsets[-1]
+            # free memory
+            if isinstance(offsets, VirtualArray):
+                offsets.dematerialize()
         content = _reconstitute(
             form.content,
             next_length,
@@ -522,6 +548,11 @@ def _reconstitute(
                     lengths.append(0)
                 else:
                     lengths.append(backend.index_nplike.max(selected_index) + 1)
+            # free memory
+            if isinstance(index, VirtualArray):
+                index.dematerialize()
+            if isinstance(tags, VirtualArray):
+                tags.dematerialize()
         contents = [
             _reconstitute(
                 content,
