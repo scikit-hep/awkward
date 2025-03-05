@@ -1592,13 +1592,23 @@ class UnionArray(UnionMeta[Content], Content):
         self, backend: Backend, options: RemoveStructureOptions
     ) -> list[Content]:
         out = []
-        for i in range(len(self._contents)):
-            index = self._index[self._tags.data == i]
-            out.extend(
-                self._contents[i]
-                ._carry(index, False)
+
+        # typetracer
+        if not self._backend.nplike.known_data:
+            self._touch_data(recursive=False)
+            # just flatten, ignore order, tags, index
+            for c in self._contents:
+                out.extend(c._remove_structure(backend, options))
+            return out
+
+        # backends with concrete data
+        for i in range(self._tags.length):
+            content = (
+                self._contents[self._tags.data[i]]
+                ._carry(ak.index.Index(self._index.data[i]), False)
                 ._remove_structure(backend, options)
             )
+            out.extend(content)
         return out
 
     def _recursively_apply(
