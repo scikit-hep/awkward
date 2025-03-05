@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Collection
 
+import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
@@ -71,10 +72,7 @@ def common_backend(backends: Collection[Backend]) -> Backend:
 
 
 def backend_of_obj(obj, default: D | Sentinel = UNSET) -> Backend | D:
-    if isinstance(obj, VirtualArray):
-        cls = obj.nplike.ndarray
-    else:
-        cls = type(obj)
+    cls = type(obj)
     try:
         lookup = _type_to_backend_lookup[cls]
         return lookup(obj)
@@ -133,3 +131,18 @@ def regularize_backend(backend: str | Backend) -> Backend:
         return _name_to_backend_cls[backend].instance()
     else:
         raise ValueError(f"No such backend {backend!r} exists.")
+
+
+@register_backend_lookup_factory
+def find_virtual_backend(obj: type):
+    if issubclass(obj, VirtualArray):
+
+        def finder(obj: VirtualArray):
+            if isinstance(obj.nplike, ak._nplikes.numpy.Numpy):
+                return _name_to_backend_cls["cpu"].instance()
+            elif isinstance(obj.nplike, ak._nplikes.cupy.Cupy):
+                return _name_to_backend_cls["cuda"].instance()
+            else:
+                raise TypeError("A virtual array can only have numpy or cupy backends")
+
+        return finder

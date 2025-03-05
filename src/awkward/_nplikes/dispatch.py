@@ -39,15 +39,14 @@ def nplike_of_obj(
     if it is set, otherwise `Numpy.instance()`.
     """
 
-    if isinstance(obj, VirtualArray):
-        cls = obj.nplike.ndarray
-    else:
-        cls = type(obj)
+    cls = type(obj)
     try:
         return _type_to_nplike[cls]
     except KeyError:
         # Try and find the nplike for this type
         # caching the result by type
+        if isinstance(obj, VirtualArray):
+            cls = obj.nplike.ndarray
         for nplike_cls in _nplike_classes:
             if nplike_cls.is_own_array_type(cls):
                 nplike = nplike_cls.instance()
