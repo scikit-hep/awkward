@@ -84,6 +84,9 @@ def from_buffers(
     #ak.forms.NumpyForm.
     If the values of `container` are recognised as arrays by the given backend,
     a view over their existing data will be used, where possible.
+    The `container` values are allowed to be callables with no arguments.
+    If that's the case, they will be turned into `VirtualArray` buffers whose generator
+    function is the callable and is used to materialize the buffer when required.
 
     The `buffer_key` should be the same as the one used in #ak.to_buffers.
 
