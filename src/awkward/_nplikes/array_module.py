@@ -40,6 +40,12 @@ ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
 
 
 class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
+    """
+    Some methods maintain virtualness while others are required to materialize the array.
+    The `materialize_if_virtual` function is used for that purpose.
+    If the input is not a virtual array, it's a zero cost operation.
+    """
+
     known_data: Final[bool] = True
     _module: Any
 
@@ -781,6 +787,13 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     @classmethod
     def is_own_array(cls, obj) -> bool:
+        # This kinda breaks the type(obj) -> ownership paradigm, but I don't see a simpler way for virtual arrays.
+        # We are required to know if different nplikes own virtual arrays throughout the code
+        # and that can only be determined by the underlying nplike of the virtual array
+        # as virtual arrays can generate either numpy or cupy ndarrays.
+        # The VirtualArray type is now enough. We need the underlying nplike to determine ownership.
+        # All nplikes implement an ndarray property so we can can use that.
+        # There is an extra isinstance check here but that has to live somewhere in the code either way to determine ownership.
         if isinstance(obj, VirtualArray):
             return cls.is_own_array_type(obj.nplike.ndarray)
         return cls.is_own_array_type(type(obj))

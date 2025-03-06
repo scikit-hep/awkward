@@ -28,6 +28,9 @@ def to_nplike(
     if from_nplike is nplike:
         return array
 
+    # We can always convert virtual arrays to typetracers
+    # but can only convert virtual arrays to other backends with known data only if they are intentionally materialized
+    # Only numpy and cupy nplikes are allowed for virtual arrays
     if isinstance(array, awkward._nplikes.virtual.VirtualArray):
         if not array.is_materialized and not isinstance(
             nplike, awkward._nplikes.typetracer.TypeTracer

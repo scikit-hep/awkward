@@ -72,6 +72,7 @@ def common_backend(backends: Collection[Backend]) -> Backend:
 
 
 def backend_of_obj(obj, default: D | Sentinel = UNSET) -> Backend | D:
+    # the backend of virtual arrays will be determined via the `find_virtual_backend` lookup
     cls = type(obj)
     try:
         lookup = _type_to_backend_lookup[cls]
@@ -135,6 +136,10 @@ def regularize_backend(backend: str | Backend) -> Backend:
 
 @register_backend_lookup_factory
 def find_virtual_backend(obj: type):
+    """
+    Implements a lookup for finding the backends of virtual arrays.
+    This is necessary to avoid calling `isinstance` inside `backend_of_obj` which may cause slowdown.
+    """
     if issubclass(obj, VirtualArray):
 
         def finder(obj: VirtualArray):

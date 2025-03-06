@@ -45,6 +45,9 @@ def nplike_of_obj(
     except KeyError:
         # Try and find the nplike for this type
         # caching the result by type
+        # For virtual arrays, this is checked in the except block
+        # to avoid the isinstance slowdown inside the try block
+        # because it's used often for non-virtual arrays
         if isinstance(obj, VirtualArray):
             cls = obj.nplike.ndarray
         for nplike_cls in _nplike_classes:
