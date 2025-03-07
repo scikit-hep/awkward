@@ -15,7 +15,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -1028,7 +1028,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             next = IndexedArray(self._index, self._content, parameters=next_parameters)
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-        index = self._index.raw(numpy)
+        (index,) = materialize_if_virtual(self._index.raw(numpy))
 
         if self.parameter("__array__") == "categorical":
             dictionary = self._content._to_arrow(

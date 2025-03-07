@@ -15,7 +15,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -1572,7 +1572,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
-        index = numpy.asarray(self._index.data, copy=True)
+        (index,) = materialize_if_virtual(numpy.asarray(self._index.data, copy=True))
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
 

@@ -18,7 +18,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
@@ -1505,8 +1505,8 @@ class UnionArray(UnionMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
-        nptags = self._tags.raw(numpy)
-        npindex = self._index.raw(numpy)
+        (nptags,) = materialize_if_virtual(self._tags.raw(numpy))
+        (npindex,) = materialize_if_virtual(self._index.raw(numpy))
         copied_index = False
 
         values = []

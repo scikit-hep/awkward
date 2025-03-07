@@ -13,6 +13,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.virtual import materialize_if_virtual
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -1336,7 +1337,7 @@ class RegularArray(RegularMeta[Content], Content):
                 self._length,
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
-                    pyarrow.py_buffer(akcontent._raw(numpy)),
+                    pyarrow.py_buffer(akcontent._raw(*materialize_if_virtual(numpy))),
                 ],
             )
 

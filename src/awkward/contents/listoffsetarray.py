@@ -16,7 +16,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer, is_unknown_scalar
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import (
     type_parameters_equal,
 )
@@ -1919,7 +1919,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             downsize = options["bytestring_to32"]
         else:
             downsize = options["list_to32"]
-        npoffsets = self._offsets.raw(numpy)
+        (npoffsets,) = materialize_if_virtual(self._offsets.raw(numpy))
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
         if len(npoffsets) > length + 1:
             npoffsets = npoffsets[: length + 1]
@@ -2023,7 +2023,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         from packaging.version import parse as parse_version
 
         cupy = Cupy.instance()
-        index = self._offsets.raw(cupy).astype("int32")
+        index = materialize_if_virtual(self._offsets.raw(cupy))[0].astype("int32")
         buf = cudf.core.buffer.as_buffer(index)
 
         if parse_version(cudf.__version__) >= parse_version("24.10.00"):

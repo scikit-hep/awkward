@@ -191,12 +191,7 @@ class NumpyArray(NumpyMeta, Content):
         return self._data.dtype
 
     def _raw(self, nplike=None):
-        data = (
-            self._data.materialize()
-            if isinstance(self._data, VirtualArray)
-            else self._data
-        )
-        return to_nplike(data, nplike, from_nplike=self._backend.nplike)
+        return to_nplike(self.data, nplike, from_nplike=self._backend.nplike)
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> NumpyForm:
         return self.form_cls(
@@ -1217,7 +1212,7 @@ class NumpyArray(NumpyMeta, Content):
                 pyarrow, mask_node, validbytes, length, options
             )
 
-        nparray = self._raw(numpy)
+        (nparray,) = materialize_if_virtual(self._raw(numpy))
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
@@ -1246,11 +1241,7 @@ class NumpyArray(NumpyMeta, Content):
         from cudf.core.column.column import as_column
 
         assert self._backend.nplike.known_data
-        data = as_column(
-            self._data.materialize()
-            if isinstance(self._data, VirtualArray)
-            else self._data
-        )
+        data = as_column(*materialize_if_virtual(self._data))
         if mask is not None:
             m = cupy.packbits(cupy.asarray(mask), bitorder="little")
             if m.nbytes % 64:
@@ -1260,12 +1251,11 @@ class NumpyArray(NumpyMeta, Content):
         return data
 
     def _to_backend_array(self, allow_missing, backend):
-        data = (
-            self._data.materialize()
-            if isinstance(self._data, VirtualArray)
-            else self._data
+        return to_nplike(
+            *materialize_if_virtual(self.data),
+            backend.nplike,
+            from_nplike=self._backend.nplike,
         )
-        return to_nplike(data, backend.nplike, from_nplike=self._backend.nplike)
 
     def _remove_structure(
         self, backend: Backend, options: RemoveStructureOptions

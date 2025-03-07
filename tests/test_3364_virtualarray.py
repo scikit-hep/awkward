@@ -2167,7 +2167,7 @@ def test_numpyarray_to_buffers(numpyarray, virtual_numpyarray):
     assert out1[2].keys() == out2[2].keys()
     for key in out1[2]:
         assert isinstance(out1[2][key], np.ndarray)
-        assert isinstance(out2[2][key], np.ndarray)
+        assert isinstance(out2[2][key], VirtualArray)
         assert np.all(out1[2][key] == out2[2][key])
 
 

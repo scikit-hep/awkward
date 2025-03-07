@@ -18,7 +18,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import (
     parameters_intersect,
 )
@@ -1075,7 +1075,9 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         cp = Cupy.instance()._module
 
         assert mask is None  # this class has its own mask
-        m = cp.packbits(cp.asarray(self._mask), bitorder="little")
+        m = cp.packbits(
+            cp.asarray(*materialize_if_virtual(self._mask.data)), bitorder="little"
+        )
         if m.nbytes % 64:
             m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
         m = cudf.core.buffer.as_buffer(m)

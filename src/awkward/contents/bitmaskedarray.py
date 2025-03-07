@@ -17,7 +17,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import (
@@ -712,12 +712,11 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         cp = Cupy.instance()._module
 
         assert mask is None  # this class has its own mask
+        (mask,) = materialize_if_virtual(self._mask.data)
         if not self.lsb_order:
-            m = cp.flip(
-                cp.packbits(cp.flip(cp.unpackbits(cp.asarray(self._mask.data))))
-            )
+            m = cp.flip(cp.packbits(cp.flip(cp.unpackbits(cp.asarray(mask)))))
         else:
-            m = self._mask.data
+            m = mask
 
         if m.nbytes % 64:
             m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
