@@ -89,7 +89,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def nbytes(self) -> ShapeItem:
-        if self.is_materialized:
+        if self._array is not UNMATERIALIZED:
             return self._array.nbytes  # type: ignore[union-attr]
         return 0
 
@@ -120,7 +120,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def T(self):
-        if self.is_materialized:
+        if self._array is not UNMATERIALIZED:
             return self._array.T
 
         return type(self)(
@@ -133,7 +133,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def view(self, dtype: DTypeLike) -> Self:
         dtype = np.dtype(dtype)
 
-        if self.is_materialized:
+        if self._array is not UNMATERIALIZED:
             return self.materialize().view(dtype)  # type: ignore[return-value]
 
         if len(self._shape) >= 1:
@@ -203,7 +203,9 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             self._generator,
         )
         new_virtual._array = (
-            copy.deepcopy(self._array, memo) if self.is_materialized else UNMATERIALIZED
+            copy.deepcopy(self._array, memo)
+            if self._array is not UNMATERIALIZED
+            else UNMATERIALIZED
         )
         return new_virtual
 
@@ -225,7 +227,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             return repr(self)
 
     def __getitem__(self, index):
-        if self.is_materialized:
+        if self._array is not UNMATERIALIZED:
             return self._array.__getitem__(index)
 
         if isinstance(index, slice):
