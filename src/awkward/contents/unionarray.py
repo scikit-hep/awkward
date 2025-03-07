@@ -1711,8 +1711,8 @@ class UnionArray(UnionMeta[Content], Content):
         if out is not None:
             return out
 
-        tags = self._tags.raw(numpy)
-        index = self._index.raw(numpy)
+        (tags,) = materialize_if_virtual(self._tags.raw(numpy))
+        (index,) = materialize_if_virtual(self._index.raw(numpy))
         contents = [x._to_list(behavior, json_conversions) for x in self._contents]
 
         out = [None] * tags.shape[0]

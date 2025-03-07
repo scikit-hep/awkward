@@ -1982,7 +1982,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
                     pyarrow.py_buffer(npoffsets),
-                    pyarrow.py_buffer(akcontent._raw(numpy)),
+                    pyarrow.py_buffer(*materialize_if_virtual(akcontent._raw(numpy))),
                 ],
             )
 
@@ -2292,8 +2292,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             raise TypeError("cannot convert typetracer arrays to Python lists")
 
         starts, stops = self.starts, self.stops
-        starts_data = starts.raw(numpy)
-        stops_data = stops.raw(numpy)[: len(starts_data)]
+        (starts_data,) = materialize_if_virtual(starts.raw(numpy))
+        (stops_data,) = materialize_if_virtual(stops.raw(numpy)[: len(starts_data)])
 
         nonempty = starts_data != stops_data
         if numpy.count_nonzero(nonempty) == 0:

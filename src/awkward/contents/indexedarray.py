@@ -1173,7 +1173,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         if out is not None:
             return out
 
-        index = self._index.raw(numpy)
+        (index,) = materialize_if_virtual(self._index.raw(numpy))
         nextcontent = self._content._carry(ak.index.Index(index), False)
         return nextcontent._to_list(behavior, json_conversions)
 

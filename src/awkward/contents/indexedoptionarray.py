@@ -1762,7 +1762,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         if out is not None:
             return out
 
-        index = self._index.raw(numpy)
+        (index,) = materialize_if_virtual(self._index.raw(numpy))
         not_missing = index >= 0
         content = ak.to_backend(self._content, "cpu", highlevel=False)
         nextcontent = content._carry(ak.index.Index(index[not_missing]), False)
