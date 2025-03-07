@@ -59,7 +59,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             )
         if any(not is_integer(dim) for dim in shape):
             raise TypeError(
-                f"{type(self).__name__} supports only shapes of integer dimensions. Received shape {shape}."
+                f"Only shapes of integer dimensions are supported for {type(self).__name__}. Received shape {shape}."
             )
 
         # array metadata
