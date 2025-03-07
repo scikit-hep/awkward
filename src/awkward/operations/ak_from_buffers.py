@@ -181,7 +181,7 @@ def _from_buffer(
     # Unknown-length information implies that we didn't load shape-buffers (offsets, etc)
     # for the parent of this node. Thus, this node and its children *must* only
     # contain placeholders
-    if count is unknown_length:
+    elif count is unknown_length:
         # We may actually have a known buffer here, but as we do not know the length,
         # we cannot safely trim it. Thus, introduce a placeholder anyway
         return PlaceholderArray(nplike, (unknown_length,), dtype, field_path)
