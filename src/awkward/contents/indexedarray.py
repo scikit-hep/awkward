@@ -15,6 +15,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -292,6 +293,15 @@ class IndexedArray(IndexedMeta[Content], Content):
         if isinstance(self._index.data, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
+
+    def _is_getitem_at_virtual(self) -> bool:
+        is_virtual = (
+            isinstance(self._index.data, VirtualArray)
+            and not self._index.data.is_materialized
+        )
+        if is_virtual:
+            return True
+        return self._content._is_getitem_at_virtual()
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
@@ -1018,7 +1028,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             next = IndexedArray(self._index, self._content, parameters=next_parameters)
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-        index = self._index.raw(numpy)
+        (index,) = materialize_if_virtual(self._index.raw(numpy))
 
         if self.parameter("__array__") == "categorical":
             dictionary = self._content._to_arrow(
@@ -1090,10 +1100,11 @@ class IndexedArray(IndexedMeta[Content], Content):
         ):
             npindex = self._index.data
             indexmin = self._backend.index_nplike.min(npindex)
+            indexmax = self._backend.index_nplike.max(npindex)
             index = ak.index.Index(
                 npindex - indexmin, nplike=self._backend.index_nplike
             )
-            content = self._content[indexmin : npindex.max() + 1]
+            content = self._content[indexmin : indexmax + 1]
         else:
             if not self._backend.nplike.known_data:
                 self._touch_data(recursive=False)
@@ -1162,7 +1173,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         if out is not None:
             return out
 
-        index = self._index.raw(numpy)
+        (index,) = materialize_if_virtual(self._index.raw(numpy))
         nextcontent = self._content._carry(ak.index.Index(index), False)
         return nextcontent._to_list(behavior, json_conversions)
 
@@ -1170,6 +1181,19 @@ class IndexedArray(IndexedMeta[Content], Content):
         content = self._content.to_backend(backend)
         index = self._index.to_nplike(backend.index_nplike)
         return IndexedArray(index, content, parameters=self._parameters)
+
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        index = self._index.materialize()
+        return IndexedArray(index, content, parameters=self._parameters)
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return self._content.is_all_materialized and self._index.is_all_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return self._content.is_any_materialized or self._index.is_any_materialized
 
     def _push_inside_record_or_project(self) -> Self | ak.contents.RecordArray:
         if self.content.is_record:

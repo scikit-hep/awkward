@@ -16,6 +16,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer, is_unknown_scalar
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import (
     type_parameters_equal,
 )
@@ -314,6 +315,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             isinstance(self._offsets.data, PlaceholderArray)
             or self._content._is_getitem_at_placeholder()
         )
+
+    def _is_getitem_at_virtual(self) -> bool:
+        is_virtual = (
+            isinstance(self._offsets.data, VirtualArray)
+            and not self._offsets.data.is_materialized
+        )
+        return is_virtual or self._content._is_getitem_at_virtual()
 
     def _getitem_at(self, where: IndexType):
         # Wrap `where` by length
@@ -1911,7 +1919,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             downsize = options["bytestring_to32"]
         else:
             downsize = options["list_to32"]
-        npoffsets = self._offsets.raw(numpy)
+        (npoffsets,) = materialize_if_virtual(self._offsets.raw(numpy))
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
         if len(npoffsets) > length + 1:
             npoffsets = npoffsets[: length + 1]
@@ -1974,7 +1982,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
                     pyarrow.py_buffer(npoffsets),
-                    pyarrow.py_buffer(akcontent._raw(numpy)),
+                    pyarrow.py_buffer(*materialize_if_virtual(akcontent._raw(numpy))),
                 ],
             )
 
@@ -2015,7 +2023,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         from packaging.version import parse as parse_version
 
         cupy = Cupy.instance()
-        index = self._offsets.raw(cupy).astype("int32")
+        index = materialize_if_virtual(self._offsets.raw(cupy))[0].astype("int32")
         buf = cudf.core.buffer.as_buffer(index)
 
         if parse_version(cudf.__version__) >= parse_version("24.10.00"):
@@ -2284,8 +2292,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             raise TypeError("cannot convert typetracer arrays to Python lists")
 
         starts, stops = self.starts, self.stops
-        starts_data = starts.raw(numpy)
-        stops_data = stops.raw(numpy)[: len(starts_data)]
+        (starts_data,) = materialize_if_virtual(starts.raw(numpy))
+        (stops_data,) = materialize_if_virtual(stops.raw(numpy)[: len(starts_data)])
 
         nonempty = starts_data != stops_data
         if numpy.count_nonzero(nonempty) == 0:
@@ -2340,6 +2348,19 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         content = self._content.to_backend(backend)
         offsets = self._offsets.to_nplike(backend.index_nplike)
         return ListOffsetArray(offsets, content, parameters=self._parameters)
+
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        offsets = self._offsets.materialize()
+        return ListOffsetArray(offsets, content, parameters=self._parameters)
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return self._content.is_all_materialized and self._offsets.is_all_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return self._content.is_any_materialized or self._offsets.is_any_materialized
 
     def _awkward_strings_to_nonfinite(self, nonfinit_dict):
         if self.parameter("__array__") == "string":

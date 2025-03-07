@@ -14,6 +14,7 @@ from awkward._typing import Final, cast
 class Jax(ArrayModuleNumpyLike):
     is_eager: Final = True
     supports_structured_dtypes: Final = False
+    supports_virtual_arrays: Final = False
 
     def __init__(self):
         jax = ak.jax.import_jax()
