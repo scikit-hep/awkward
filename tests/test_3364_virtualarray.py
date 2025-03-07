@@ -290,7 +290,9 @@ def test_init_invalid_nplike():
 
 def test_init_invalid_shape():
     nplike = Numpy.instance()
-    with pytest.raises(TypeError, match=r"Only shapes of integer dimensions are supported"):
+    with pytest.raises(
+        TypeError, match=r"Only shapes of integer dimensions are supported"
+    ):
         VirtualArray(
             nplike,
             shape=("not_an_integer", 5),
