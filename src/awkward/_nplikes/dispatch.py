@@ -49,7 +49,7 @@ def nplike_of_obj(
         # to avoid the isinstance slowdown inside the try block
         # because it's used often for non-virtual arrays
         if isinstance(obj, VirtualArray):
-            cls = obj.nplike.ndarray
+            return obj.nplike
         for nplike_cls in _nplike_classes:
             if nplike_cls.is_own_array_type(cls):
                 nplike = nplike_cls.instance()
