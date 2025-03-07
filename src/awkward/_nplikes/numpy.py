@@ -21,6 +21,7 @@ np = NumpyMetadata.instance()
 class Numpy(ArrayModuleNumpyLike["NDArray"]):
     is_eager: Final = True
     supports_structured_dtypes: Final = True
+    supports_virtual_arrays: Final = True
 
     def __init__(self):
         self._module = numpy

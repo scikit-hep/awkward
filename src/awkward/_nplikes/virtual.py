@@ -53,7 +53,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         dtype: DTypeLike,
         generator: Callable[[], ArrayLike],
     ) -> None:
-        if not isinstance(nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)):
+        if not nplike.supports_virtual_arrays:
             raise TypeError(
                 f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(nplike)}"
             )
@@ -161,9 +161,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def nplike(self) -> NumpyLike:
-        if not isinstance(
-            self._nplike, (ak._nplikes.numpy.Numpy, ak._nplikes.cupy.Cupy)
-        ):
+        if not self._nplike.supports_virtual_arrays:
             raise TypeError(
                 f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(self._nplike)}"
             )

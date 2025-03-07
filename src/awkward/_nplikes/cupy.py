@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 class Cupy(ArrayModuleNumpyLike):
     is_eager: Final = False
     supports_structured_dtypes: Final = False
+    supports_virtual_arrays: Final = True
 
     def __init__(self):
         import awkward._connect.cuda  # noqa: F401

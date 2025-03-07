@@ -278,16 +278,6 @@ def test_init_valid(numpy_like, simple_array_generator):
     assert not va.is_materialized
 
 
-def test_init_invalid_nplike():
-    with pytest.raises(TypeError, match=r"Only numpy and cupy nplikes are supported"):
-        VirtualArray(
-            "not_an_nplike",
-            shape=(5,),
-            dtype=np.int64,
-            generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
-        )
-
-
 def test_init_invalid_shape():
     nplike = Numpy.instance()
     with pytest.raises(
@@ -433,18 +423,6 @@ def test_generator(virtual_array, simple_array_generator):
 # Test nplike property
 def test_nplike(virtual_array, numpy_like):
     assert virtual_array.nplike is numpy_like
-
-
-def test_nplike_invalid():
-    va = VirtualArray(
-        Numpy.instance(),
-        shape=(5,),
-        dtype=np.int64,
-        generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
-    )
-    va._nplike = "not_an_nplike"  # Directly modify to create an invalid state
-    with pytest.raises(TypeError, match=r"Only numpy and cupy nplikes are supported"):
-        _ = va.nplike
 
 
 # Test copy

@@ -131,6 +131,10 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
 
     @property
     @abstractmethod
+    def supports_virtual_arrays(self) -> bool: ...
+
+    @property
+    @abstractmethod
     def known_data(self) -> bool: ...
 
     @property
