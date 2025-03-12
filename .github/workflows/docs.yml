@@ -33,7 +33,7 @@ jobs:
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures --tests
 
-    - uses: pypa/cibuildwheel@v2.22
+    - uses: pypa/cibuildwheel@v2.23
       with:
         package-dir: awkward-cpp
       env:
