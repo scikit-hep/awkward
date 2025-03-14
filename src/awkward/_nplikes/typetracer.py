@@ -580,6 +580,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             raise ValueError("TypeTracerArray does not support kwargs for ufuncs")
         return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
 
+    def tolist(self) -> list:
+        raise RuntimeError("cannot realise an unknown value")
+
     def __bool__(self) -> bool:
         raise RuntimeError("cannot realise an unknown value")
 
@@ -618,6 +621,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     known_data: Final = False
     is_eager: Final = True
     supports_structured_dtypes: Final = True
+    supports_virtual_arrays: Final = False
 
     def apply_ufunc(
         self,

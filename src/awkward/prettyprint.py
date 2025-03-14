@@ -79,9 +79,16 @@ class PlaceholderValue:
         return "??"
 
 
+class VirtualValue:
+    def __str__(self):
+        return "??"
+
+
 def get_at(data: Content, index: int):
     if data._layout._is_getitem_at_placeholder():
         return PlaceholderValue()
+    elif data._layout._is_getitem_at_virtual():
+        return VirtualValue()
     out = data._layout._getitem_at(index)
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
@@ -99,6 +106,8 @@ def get_field(data: Content, field: str):
     if isinstance(data._layout, ak.record.Record):
         if data._layout._array.content(field)._is_getitem_at_placeholder():
             return PlaceholderValue()
+        elif data._layout._array.content(field)._is_getitem_at_virtual():
+            return VirtualValue()
     out = data._layout._getitem_field(field)
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
