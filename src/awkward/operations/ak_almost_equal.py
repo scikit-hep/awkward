@@ -162,8 +162,8 @@ def _impl(
         # List-list
         elif left.is_list and right.is_list:
             # Check that indexes are equal
-            left_index = left.to_ListOffsetArray64(False).offsets
-            right_index = right.to_ListOffsetArray64(False).offsets
+            left_index = left.to_ListOffsetArray64(True).offsets
+            right_index = right.to_ListOffsetArray64(True).offsets
             if not backend.index_nplike.array_equal(left_index, right_index):
                 return False
             # Mixed regular-var
