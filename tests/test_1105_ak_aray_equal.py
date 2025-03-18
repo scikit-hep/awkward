@@ -39,6 +39,19 @@ def test_array_equal_on_listoffsets():
     assert ak.array_equal(a1, a2)
 
 
+def test_array_equal_on_doubly_jagged():
+    # double jagged array
+    a = ak.Array([[[1], [2, 3]], [[4, 5], [6]]])
+    assert ak.array_equal(a, a)
+
+    # different outer index, same inner index
+    a1 = ak.Array([[[], [1]], [[], [0]]])
+    a2 = ak.Array([[[], [1], []], [[0]]])
+    assert not ak.array_equal(a1, a2)
+    assert ak.array_equal(a1, a1)
+    assert ak.array_equal(a2, a2)
+
+
 def test_array_equal_mixed_content_type():
     a1 = ak.Array([[1, 2, 3], [4, 5, 6], [7, 8]])
     a1r = ak.to_regular(a1[:2])

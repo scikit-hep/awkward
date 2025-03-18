@@ -133,6 +133,25 @@ def test_behavior():
     assert not ak.almost_equal(other_array, another_array)
 
 
+def test_ragged():
+    # single jagged array
+    a = ak.Array([[1], [2, 3]])
+    b = ak.Array([[1], [2, 3]])
+    assert ak.almost_equal(a, b)
+
+    # double jagged array
+    a = ak.Array([[[1], [2, 3]], [[4, 5], [6]]])
+    b = ak.Array([[[1], [2, 3]], [[4, 5], [6]]])
+    assert ak.almost_equal(a, b)
+
+    # different outer index, same inner index
+    a = ak.Array([[[], [1]], [[], [0]]])
+    b = ak.Array([[[], [1], []], [[0]]])
+    assert not ak.almost_equal(a, b)
+    assert ak.almost_equal(a, a)
+    assert ak.almost_equal(b, b)
+
+
 def test_empty_outer_ragged():
     array = ak.Array([[1]])[0:0]
     assert not ak.almost_equal(array, [])
