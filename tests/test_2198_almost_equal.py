@@ -154,6 +154,16 @@ def test_ragged():
     b = ak.Array([[[], [1], []], [[0]]])
     assert not ak.almost_equal(a, b)
 
+    # same outer index, different inner index
+    a = ak.Array([[[0, 1], [1]], [[0], []]])
+    b = ak.Array([[[0], [1, 1]], [[], [0]]])
+    assert not ak.almost_equal(a, b)
+
+    # nested
+    a = ak.Array([[[[]], [[0, 1], [1]]], [[[0]], [[]]]])
+    b = ak.Array([[[[0]], [[1], [1]]], [[[]], [[0]]]])
+    assert not ak.almost_equal(a, b)
+
 
 def test_empty_outer_ragged():
     array = ak.Array([[1]])[0:0]
