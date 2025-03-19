@@ -1604,7 +1604,7 @@ class UnionArray(UnionMeta[Content], Content):
         # backends with concrete data
         for i in range(self._tags.length):
             content = (
-                self._contents[self._tags.data[i]]
+                self._contents[self._tags[i]]
                 ._carry(ak.index.Index(self._index.data[i]), False)
                 ._remove_structure(backend, options)
             )
