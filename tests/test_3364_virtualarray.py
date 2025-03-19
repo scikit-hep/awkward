@@ -314,7 +314,7 @@ def test_size(virtual_array, two_dim_virtual_array, scalar_virtual_array):
 
 
 def test_nbytes_unmaterialized(virtual_array):
-    assert virtual_array.nbytes == 0
+    assert virtual_array.nbytes == virtual_array.size * virtual_array.dtype.itemsize
 
 
 def test_nbytes_materialized(virtual_array):
@@ -875,15 +875,14 @@ def test_large_array_memory():
         generator=large_array_generator,
     )
 
-    # Before materialization, nbytes should be 0
-    assert va.nbytes == 0
+    assert va.nbytes == 1000 * 1000 * 8  # 8 bytes per float64 element
 
     # Access just one element to check if full materialization happens
     element = va[0, 0]
     assert element == 1.0
 
     # Now the array should be materialized
-    assert va.nbytes > 0
+    assert va.nbytes == 1000 * 1000 * 8  # Should still be the same
     assert va.is_materialized
 
 

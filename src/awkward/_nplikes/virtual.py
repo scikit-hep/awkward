@@ -88,9 +88,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def nbytes(self) -> ShapeItem:
-        if self._array is not UNMATERIALIZED:
-            return self._array.nbytes  # type: ignore[union-attr]
-        return 0
+        return self.size * self._dtype.itemsize
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
