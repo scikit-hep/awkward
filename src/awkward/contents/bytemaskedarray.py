@@ -340,7 +340,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
             if self._backend.nplike.known_data:
-                excess_length = int(math.ceil(self.length / 8.0))
+                excess_length = math.ceil(self.length / 8.0)
             else:
                 excess_length = unknown_length
             return ak.contents.BitMaskedArray(

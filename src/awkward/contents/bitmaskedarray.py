@@ -818,7 +818,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             )
 
         else:
-            excess_length = int(math.ceil(self._length / 8.0))
+            excess_length = math.ceil(self._length / 8.0)
             if (
                 self._mask.length is not unknown_length
                 and self._mask.length == excess_length

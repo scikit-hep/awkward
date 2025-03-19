@@ -46,7 +46,7 @@ numpy = Numpy.instance()
 
 
 def half(integer: int) -> int:
-    return int(math.ceil(integer / 2))
+    return math.ceil(integer / 2)
 
 
 def alternate(length: int):

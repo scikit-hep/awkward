@@ -255,7 +255,7 @@ def _reconstitute(
         if length is unknown_length:
             next_length = unknown_length
         else:
-            next_length = int(math.ceil(length / 8.0))
+            next_length = math.ceil(length / 8.0)
         mask = _from_buffer(
             backend.index_nplike,
             raw_array,
