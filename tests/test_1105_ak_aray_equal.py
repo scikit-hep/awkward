@@ -52,6 +52,16 @@ def test_array_equal_on_listoffsets():
     b = ak.Array([[[], [1], []], [[0]]])
     assert not ak.array_equal(a, b)
 
+    # same outer index, different inner index
+    a = ak.Array([[[0, 1], [1]], [[0], []]])
+    b = ak.Array([[[0], [1, 1]], [[], [0]]])
+    assert not ak.array_equal(a, b)
+
+    # nested
+    a = ak.Array([[[[]], [[0, 1], [1]]], [[[0]], [[]]]])
+    b = ak.Array([[[[0]], [[1], [1]]], [[[]], [[0]]]])
+    assert not ak.array_equal(a, b)
+
 
 def test_array_equal_mixed_content_type():
     a1 = ak.Array([[1, 2, 3], [4, 5, 6], [7, 8]])
