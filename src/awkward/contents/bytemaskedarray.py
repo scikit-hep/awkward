@@ -18,6 +18,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import (
     parameters_intersect,
 )
@@ -383,6 +384,15 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         if isinstance(self._mask, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
+
+    def _is_getitem_at_virtual(self) -> bool:
+        is_virtual = (
+            isinstance(self._mask.data, VirtualArray)
+            and not self._mask.data.is_materialized
+        )
+        if is_virtual:
+            return True
+        return self._content._is_getitem_at_virtual()
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
@@ -1065,7 +1075,9 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         cp = Cupy.instance()._module
 
         assert mask is None  # this class has its own mask
-        m = cp.packbits(cp.asarray(self._mask), bitorder="little")
+        m = cp.packbits(
+            cp.asarray(*materialize_if_virtual(self._mask.data)), bitorder="little"
+        )
         if m.nbytes % 64:
             m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
         m = cudf.core.buffer.as_buffer(m)
@@ -1199,6 +1211,21 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         return ByteMaskedArray(
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )
+
+    def _materialize(self) -> Self:
+        content = self._content._materialize()
+        mask = self._mask.materialize()
+        return ByteMaskedArray(
+            mask, content, valid_when=self._valid_when, parameters=self._parameters
+        )
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return self._content.is_all_materialized and self._mask.is_all_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return self._content.is_any_materialized or self._mask.is_any_materialized
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool

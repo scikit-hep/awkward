@@ -239,6 +239,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
     def _is_getitem_at_placeholder(self) -> bool:
         return self._content._is_getitem_at_placeholder()
 
+    def _is_getitem_at_virtual(self) -> bool:
+        return self._content._is_getitem_at_virtual()
+
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
@@ -600,6 +603,18 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
     def _to_backend(self, backend: Backend) -> Self:
         content = self._content.to_backend(backend)
         return UnmaskedArray(content, parameters=self._parameters)
+
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        return UnmaskedArray(content, parameters=self._parameters)
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return self._content.is_all_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return self._content.is_any_materialized
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool

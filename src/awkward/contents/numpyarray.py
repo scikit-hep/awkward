@@ -21,6 +21,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
@@ -313,6 +314,12 @@ class NumpyArray(NumpyMeta, Content):
 
     def _is_getitem_at_placeholder(self) -> bool:
         return isinstance(self._data, PlaceholderArray)
+
+    def _is_getitem_at_virtual(self) -> bool:
+        is_virtual = (
+            isinstance(self._data, VirtualArray) and not self._data.is_materialized
+        )
+        return is_virtual
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
@@ -1205,7 +1212,7 @@ class NumpyArray(NumpyMeta, Content):
                 pyarrow, mask_node, validbytes, length, options
             )
 
-        nparray = self._raw(numpy)
+        (nparray,) = materialize_if_virtual(self._raw(numpy))
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
@@ -1234,7 +1241,7 @@ class NumpyArray(NumpyMeta, Content):
         from cudf.core.column.column import as_column
 
         assert self._backend.nplike.known_data
-        data = as_column(self._data)
+        data = as_column(*materialize_if_virtual(self._data))
         if mask is not None:
             m = cupy.packbits(cupy.asarray(mask), bitorder="little")
             if m.nbytes % 64:
@@ -1244,7 +1251,11 @@ class NumpyArray(NumpyMeta, Content):
         return data
 
     def _to_backend_array(self, allow_missing, backend):
-        return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
+        return to_nplike(
+            *materialize_if_virtual(self.data),
+            backend.nplike,
+            from_nplike=self._backend.nplike,
+        )
 
     def _remove_structure(
         self, backend: Backend, options: RemoveStructureOptions
@@ -1376,6 +1387,24 @@ class NumpyArray(NumpyMeta, Content):
             parameters=self._parameters,
             backend=backend,
         )
+
+    def _materialize(self) -> Self:
+        (out,) = materialize_if_virtual(self._data)
+        return NumpyArray(out, parameters=self._parameters, backend=self._backend)
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        buffer = self._data
+        if isinstance(buffer, VirtualArray):
+            return buffer.is_materialized
+        return True
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        buffer = self._data
+        if isinstance(buffer, VirtualArray):
+            return buffer.is_materialized
+        return True
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool

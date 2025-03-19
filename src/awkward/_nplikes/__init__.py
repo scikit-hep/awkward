@@ -6,6 +6,7 @@ import awkward._nplikes.cupy
 import awkward._nplikes.jax
 import awkward._nplikes.numpy
 import awkward._nplikes.typetracer
+import awkward._nplikes.virtual
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._typing import TYPE_CHECKING
 
@@ -26,6 +27,24 @@ def to_nplike(
 
     if from_nplike is nplike:
         return array
+
+    # We can always convert virtual arrays to typetracers
+    # but can only convert virtual arrays to other backends with known data if they are intentionally materialized
+    # Only numpy and cupy nplikes are allowed for virtual arrays
+    if isinstance(array, awkward._nplikes.virtual.VirtualArray):
+        if not array.is_materialized and nplike.known_data:
+            raise TypeError(
+                "Cannot convert a VirtualArray to a different nplike with known data without materializing it first. Use ak.materialize on the array to do so."
+            )
+        else:
+            if nplike.supports_virtual_arrays:
+                array = array.materialize()
+            elif not nplike.known_data:
+                pass
+            else:
+                raise TypeError(
+                    f"Can only convert a VirtualArray to numpy, cupy or typetracer nplikes. Received {type(nplike)}"
+                )
 
     if nplike.known_data and not from_nplike.known_data:
         raise TypeError(
