@@ -354,13 +354,13 @@ def _impl(
     elif isinstance(compression, Mapping):
         replacement = {}
         for specifier, value in compression.items():
-            replacement.update({x: value for x in parquet_columns(specifier)})
+            replacement.update(dict.fromkeys(parquet_columns(specifier), value))
         compression = replacement
 
     if isinstance(compression_level, Mapping):
         replacement = {}
         for specifier, value in compression_level.items():
-            replacement.update({x: value for x in parquet_columns(specifier)})
+            replacement.update(dict.fromkeys(parquet_columns(specifier), value))
         compression_level = replacement
 
     if parquet_metadata_statistics is True:
@@ -370,7 +370,7 @@ def _impl(
     elif isinstance(parquet_metadata_statistics, Mapping):
         replacement = {}
         for specifier, value in parquet_metadata_statistics.items():
-            replacement.update({x: value for x in parquet_columns(specifier)})
+            replacement.update(dict.fromkeys(parquet_columns(specifier), value))
         parquet_metadata_statistics = [x for x, value in replacement.items() if value]
     elif isinstance(parquet_metadata_statistics, Sequence):
         replacement = []
@@ -386,7 +386,7 @@ def _impl(
         replacement = {}
         for specifier, value in parquet_dictionary_encoding.items():
             replacement.update(
-                {x: value for x in parquet_columns(specifier, only="string")}
+                dict.fromkeys(parquet_columns(specifier, only="string"), value)
             )
         parquet_dictionary_encoding = [x for x, value in replacement.items() if value]
 
@@ -398,7 +398,7 @@ def _impl(
         replacement = {}
         for specifier, value in parquet_byte_stream_split.items():
             replacement.update(
-                {x: value for x in parquet_columns(specifier, only="floating")}
+                dict.fromkeys(parquet_columns(specifier, only="floating"), value)
             )
         parquet_byte_stream_split = [x for x, value in replacement.items() if value]
 
