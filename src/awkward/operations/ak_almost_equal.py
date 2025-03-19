@@ -164,7 +164,7 @@ def _impl(
             # Check that indexes are equal
             left_index = left.to_ListOffsetArray64(True).offsets
             right_index = right.to_ListOffsetArray64(True).offsets
-            if not backend.index_nplike.array_equal(left_index, right_index):
+            if not backend.index_nplike.array_equal(left_index.data, right_index.data):
                 return False
             # Mixed regular-var
             if left.is_regular and not right.is_regular:
