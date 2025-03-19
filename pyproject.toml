@@ -261,6 +261,8 @@ extend-exclude = [
     "rapidjson",
     "docs-*",
     "src/awkward/_typeparser/generated_parser.py",
+    "src/awkward/types/_awkward_datashape_parser.py",
+    "src/awkward/_connect/cuda/_kernel_signatures.py",
 ]
 
 [tool.ruff.lint]
