@@ -136,7 +136,7 @@ class GrowableBuffer:
         self._length_inc(len(data))
 
     def _add_panel(self):
-        panel_length = int(math.ceil(len(self._panels[0]) * self._resize))
+        panel_length = math.ceil(len(self._panels[0]) * self._resize)
 
         self._panels.append(numpy.empty((panel_length,), dtype=self.dtype))
         self._pos = 0
