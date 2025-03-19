@@ -30,6 +30,11 @@ class Lookup:
 
 
 def tolookup(layout, positions):
+    if not layout.is_all_materialized:
+        raise TypeError(
+            "Only fully materialized arrays can be passed into lookups. Use ak.materialize to materialize the array before passing it to the kernel."
+        )
+
     if isinstance(layout, ak.contents.EmptyArray):
         return tolookup(layout.to_NumpyArray(np.dtype(np.float64)), positions)
 

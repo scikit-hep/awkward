@@ -21,8 +21,6 @@ def array_equal(
     check_named_axis: bool = True,
 ):
     """
-    True if two arrays have the same shape and elements, False otherwise.
-
     Args:
         a1: Array-like data (anything #ak.to_layout recognizes).
         a2: Array-like data (anything #ak.to_layout recognizes).
@@ -36,6 +34,8 @@ def array_equal(
         check_regular: bool (default=True) whether to consider ragged and regular dimensions as
             unequal.
         check_named_axis: bool (default=True) whether to consider named axes as unequal.
+
+    True if two arrays have the same shape and elements, False otherwise.
 
     TypeTracer arrays are not supported, as there is very little information to
     be compared.
