@@ -46,7 +46,7 @@ or
 
     # unwrap the awkward array if it was made with ak.Array function
     # also transforms a python list to awkward array
-    array = ak.to_layout(array, allow_record=False)
+    array = ak.to_layout(ak.operations.materialize(array), allow_record=False)
 
     # keep the same device
     ak_device = ak.backend(array)

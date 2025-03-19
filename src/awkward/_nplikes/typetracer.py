@@ -290,15 +290,11 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         if self.shape is None:
             shape = ""
         else:
-            shape = ", shape=" + repr(self._shape)
+            shape = f", shape={self._shape!r}"
         return f"TypeTracerArray({dtype}{shape})"
 
     def __str__(self):
-        if self.ndim == 0:
-            return "##"
-
-        else:
-            return repr(self)
+        return repr(self) if self._shape else "##"
 
     @property
     def T(self) -> Self:
@@ -580,6 +576,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             raise ValueError("TypeTracerArray does not support kwargs for ufuncs")
         return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
 
+    def tolist(self) -> list:
+        raise RuntimeError("cannot realise an unknown value")
+
     def __bool__(self) -> bool:
         raise RuntimeError("cannot realise an unknown value")
 
@@ -618,6 +617,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     known_data: Final = False
     is_eager: Final = True
     supports_structured_dtypes: Final = True
+    supports_virtual_arrays: Final = False
 
     def apply_ufunc(
         self,

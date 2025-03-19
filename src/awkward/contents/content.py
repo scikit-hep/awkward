@@ -790,6 +790,9 @@ class Content(Meta):
     def _is_getitem_at_placeholder(self) -> bool:
         raise NotImplementedError
 
+    def _is_getitem_at_virtual(self) -> bool:
+        return NotImplementedError
+
     def _getitem_at(self, where: IndexType):
         raise NotImplementedError
 
@@ -1301,6 +1304,28 @@ class Content(Meta):
             return self._to_backend(backend)
 
     def _to_backend(self, backend: Backend) -> Self:
+        raise NotImplementedError
+
+    def materialize(self) -> Self:
+        return self._materialize()
+
+    def _materialize(self) -> Self:
+        raise NotImplementedError
+
+    @property
+    def is_all_materialized(self) -> bool:
+        return self._is_all_materialized
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        raise NotImplementedError
+
+    @property
+    def is_any_materialized(self) -> bool:
+        return self._is_any_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
         raise NotImplementedError
 
     def with_parameter(self, key: str, value: Any) -> Self:

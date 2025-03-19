@@ -13,6 +13,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.virtual import materialize_if_virtual
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -290,6 +291,9 @@ class RegularArray(RegularMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
+        return False
+
+    def _is_getitem_at_virtual(self) -> bool:
         return False
 
     def _getitem_at(self, where: IndexType):
@@ -1333,7 +1337,7 @@ class RegularArray(RegularMeta[Content], Content):
                 self._length,
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
-                    pyarrow.py_buffer(akcontent._raw(numpy)),
+                    pyarrow.py_buffer(akcontent._raw(*materialize_if_virtual(numpy))),
                 ],
             )
 
@@ -1518,6 +1522,20 @@ class RegularArray(RegularMeta[Content], Content):
         return RegularArray(
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
+
+    def _materialize(self) -> Self:
+        content = self._content.materialize()
+        return RegularArray(
+            content, self._size, zeros_length=self._length, parameters=self._parameters
+        )
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return self._content.is_all_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return self._content.is_any_materialized
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool

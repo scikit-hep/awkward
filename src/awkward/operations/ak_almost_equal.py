@@ -161,6 +161,11 @@ def _impl(
             return (left.size == right.size) and visitor(left.content, right.content)
         # List-list
         elif left.is_list and right.is_list:
+            # Check that indexes are equal
+            left_index = left.to_ListOffsetArray64(True).offsets
+            right_index = right.to_ListOffsetArray64(True).offsets
+            if not backend.index_nplike.array_equal(left_index, right_index):
+                return False
             # Mixed regular-var
             if left.is_regular and not right.is_regular:
                 return (not check_regular) and visitor(
