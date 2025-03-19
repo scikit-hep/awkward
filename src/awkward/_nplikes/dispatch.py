@@ -48,6 +48,7 @@ def nplike_of_obj(
         # For virtual arrays, this is checked in the except block
         # to avoid the isinstance slowdown inside the try block
         # because it's used often for non-virtual arrays
+        # TODO: replace this whole function with a more generic lookup registration system
         if isinstance(obj, VirtualArray):
             return obj.nplike
         for nplike_cls in _nplike_classes:

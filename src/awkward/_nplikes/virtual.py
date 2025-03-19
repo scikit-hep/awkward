@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import copy
-from functools import reduce
-from operator import mul
 
 import awkward as ak
 from awkward._nplikes.array_like import ArrayLike
@@ -83,9 +81,10 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def size(self) -> ShapeItem:
-        if len(self._shape) == 0:
-            return 1
-        return reduce(mul, self._shape)
+        size: ShapeItem = 1
+        for item in self._shape:
+            size *= item
+        return size
 
     @property
     def nbytes(self) -> ShapeItem:
@@ -226,14 +225,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         if self.shape is None:
             shape = ""
         else:
-            shape = ", shape=" + repr(self._shape)
+            shape = f", shape={self._shape!r}"
         return f"VirtualArray(array={self._array}, {dtype}{shape})"
 
     def __str__(self):
-        if len(self._shape) == 0:
-            return "??"
-        else:
-            return repr(self)
+        return repr(self) if self._shape else "??"
 
     def __getitem__(self, index):
         if self._array is not UNMATERIALIZED:

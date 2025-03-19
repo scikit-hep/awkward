@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from functools import reduce
-from operator import mul
-
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -47,7 +44,10 @@ class PlaceholderArray(ArrayLike):
 
     @property
     def size(self) -> ShapeItem:
-        return reduce(mul, self._shape)
+        size: ShapeItem = 1
+        for item in self._shape:
+            size *= item
+        return size
 
     @property
     def nbytes(self) -> int:
@@ -85,7 +85,7 @@ class PlaceholderArray(ArrayLike):
         if self.shape is None:
             shape = ""
         else:
-            shape = ", shape=" + repr(self._shape)
+            shape = f", shape={self._shape!r}"
         return f"PlaceholderArray({dtype}{shape})"
 
     def __getitem__(self, index):

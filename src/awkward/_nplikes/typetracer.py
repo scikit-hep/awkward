@@ -290,15 +290,11 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         if self.shape is None:
             shape = ""
         else:
-            shape = ", shape=" + repr(self._shape)
+            shape = f", shape={self._shape!r}"
         return f"TypeTracerArray({dtype}{shape})"
 
     def __str__(self):
-        if self.ndim == 0:
-            return "##"
-
-        else:
-            return repr(self)
+        return repr(self) if self._shape else "##"
 
     @property
     def T(self) -> Self:
