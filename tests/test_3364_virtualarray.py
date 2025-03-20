@@ -439,10 +439,15 @@ def test_copy(virtual_array):
 def test_tolist(virtual_array):
     assert virtual_array.tolist() == [1, 2, 3, 4, 5]
 
+
 # Test tobytes
 def test_tobytes(virtual_array):
-    assert virtual_array.tobytes(order="C") == np.array([1, 2, 3, 4, 5], dtype=np.int64).tobytes(order="C")
-    assert virtual_array.tobytes(order="F") == np.array([1, 2, 3, 4, 5], dtype=np.int64).tobytes(order="F")
+    assert virtual_array.tobytes(order="C") == np.array(
+        [1, 2, 3, 4, 5], dtype=np.int64
+    ).tobytes(order="C")
+    assert virtual_array.tobytes(order="F") == np.array(
+        [1, 2, 3, 4, 5], dtype=np.int64
+    ).tobytes(order="F")
     assert virtual_array.is_materialized
 
 
