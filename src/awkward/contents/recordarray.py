@@ -1095,9 +1095,7 @@ class RecordArray(RecordMeta[Content], Content):
                 pyarrow.field(
                     self.index_to_field(i),
                     values[i].type,
-                    ak._connect.pyarrow.to_null_count(
-                        validbytes, options["count_nulls"]
-                    )
+                    (mask_node is not None and mask_node._arrow_needs_option_type())
                     or x._arrow_needs_option_type(),
                 )
                 for i, x in enumerate(self._contents)
