@@ -1095,7 +1095,13 @@ class RecordArray(RecordMeta[Content], Content):
                 pyarrow.field(
                     self.index_to_field(i),
                     values[i].type,
+<<<<<<< HEAD
                     (mask_node is not None and mask_node._arrow_needs_option_type())
+=======
+                    ak._connect.pyarrow.to_null_count(
+                        validbytes, options["count_nulls"]
+                    )
+>>>>>>> origin/ianna/parquet_190_support
                     or x._arrow_needs_option_type(),
                 )
                 for i, x in enumerate(self._contents)
