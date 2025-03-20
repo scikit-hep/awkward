@@ -194,9 +194,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def tobytes(self, order="C") -> bytes:
         return self.materialize().tobytes(order)  # type: ignore[attr-defined]
 
-    def tostring(self, order="C") -> bytes:
-        return self.materialize().tostring(order)  # type: ignore[attr-defined]
-
     def __copy__(self) -> VirtualArray:
         new_virtual = type(self)(
             self._nplike,
