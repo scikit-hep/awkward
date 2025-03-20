@@ -423,6 +423,9 @@ class RecordArray(RecordMeta[Content], Content):
     def _is_getitem_at_placeholder(self) -> bool:
         return False
 
+    def _is_getitem_at_virtual(self) -> bool:
+        return False
+
     def _getitem_at(self, where: IndexType):
         if self._backend.nplike.known_data and where < 0:
             where += self.length
@@ -1297,6 +1300,24 @@ class RecordArray(RecordMeta[Content], Content):
             parameters=self._parameters,
             backend=backend,
         )
+
+    def _materialize(self) -> Self:
+        contents = [content.materialize() for content in self._contents]
+        return RecordArray(
+            contents,
+            self._fields,
+            length=self._length,
+            parameters=self._parameters,
+            backend=self._backend,
+        )
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return all(content.is_all_materialized for content in self._contents)
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return any(content.is_any_materialized for content in self._contents)
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool

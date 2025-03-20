@@ -18,6 +18,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
@@ -548,6 +549,23 @@ class UnionArray(UnionMeta[Content], Content):
             return True
         for content in self._contents:
             if content._is_getitem_at_placeholder():
+                return True
+        return False
+
+    def _is_getitem_at_virtual(self) -> bool:
+        is_virtual_tags = (
+            isinstance(self._tags.data, VirtualArray)
+            and not self._tags.data.is_materialized
+        )
+        is_virtual_index = (
+            isinstance(self._index.data, VirtualArray)
+            and not self._index.data.is_materialized
+        )
+        is_virtual = is_virtual_tags or is_virtual_index
+        if is_virtual:
+            return True
+        for content in self._contents:
+            if content._is_getitem_at_virtual():
                 return True
         return False
 
@@ -1487,8 +1505,8 @@ class UnionArray(UnionMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
-        nptags = self._tags.raw(numpy)
-        npindex = self._index.raw(numpy)
+        (nptags,) = materialize_if_virtual(self._tags.raw(numpy))
+        (npindex,) = materialize_if_virtual(self._index.raw(numpy))
         copied_index = False
 
         values = []
@@ -1586,7 +1604,7 @@ class UnionArray(UnionMeta[Content], Content):
         # backends with concrete data
         for i in range(self._tags.length):
             content = (
-                self._contents[self._tags.data[i]]
+                self._contents[self._tags[i]]
                 ._carry(ak.index.Index(self._index.data[i]), False)
                 ._remove_structure(backend, options)
             )
@@ -1693,8 +1711,8 @@ class UnionArray(UnionMeta[Content], Content):
         if out is not None:
             return out
 
-        tags = self._tags.raw(numpy)
-        index = self._index.raw(numpy)
+        (tags,) = materialize_if_virtual(self._tags.raw(numpy))
+        (index,) = materialize_if_virtual(self._index.raw(numpy))
         contents = [x._to_list(behavior, json_conversions) for x in self._contents]
 
         out = [None] * tags.shape[0]
@@ -1711,6 +1729,33 @@ class UnionArray(UnionMeta[Content], Content):
             index,
             contents,
             parameters=self._parameters,
+        )
+
+    def _materialize(self) -> Self:
+        tags = self._tags.materialize()
+        index = self._index.materialize()
+        contents = [content.materialize() for content in self._contents]
+        return UnionArray(
+            tags,
+            index,
+            contents,
+            parameters=self._parameters,
+        )
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return (
+            self._tags.is_all_materialized
+            and self._index.is_all_materialized
+            and all(content.is_all_materialized for content in self._contents)
+        )
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return (
+            self._tags.is_any_materialized
+            or self._index.is_any_materialized
+            or any(content.is_any_materialized for content in self._contents)
         )
 
     def _is_equal_to(

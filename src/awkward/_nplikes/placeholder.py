@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from functools import reduce
-from operator import mul
-
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -47,7 +44,10 @@ class PlaceholderArray(ArrayLike):
 
     @property
     def size(self) -> ShapeItem:
-        return reduce(mul, self._shape)
+        size: ShapeItem = 1
+        for item in self._shape:
+            size *= item
+        return size
 
     @property
     def nbytes(self) -> int:
@@ -80,6 +80,14 @@ class PlaceholderArray(ArrayLike):
             shape = self._shape
         return type(self)(self._nplike, shape, dtype, self._field_path)
 
+    def __repr__(self):
+        dtype = repr(self._dtype)
+        if self.shape is None:
+            shape = ""
+        else:
+            shape = f", shape={self._shape!r}"
+        return f"PlaceholderArray({dtype}{shape})"
+
     def __getitem__(self, index):
         # Typetracers permit slices that don't touch data or shapes
         if isinstance(index, slice):
@@ -101,7 +109,9 @@ class PlaceholderArray(ArrayLike):
                 )
             else:
                 start, stop, step = index.indices(length)
-                new_length = (stop - start) // step
+                new_length = max(
+                    0, (stop - start + (step - (1 if step > 0 else -1))) // step
+                )
 
             return type(self)(
                 self._nplike, (new_length,), self._dtype, self._field_path
@@ -116,6 +126,9 @@ class PlaceholderArray(ArrayLike):
                 msg += "If this was supposed to happen automatically (e.g. you're using Dask), "
                 msg += "please report it to the developers at: https://github.com/scikit-hep/awkward/issues"
             raise TypeError(msg)
+
+    def tolist(self) -> list:
+        raise RuntimeError
 
     def __setitem__(self, key, value):
         raise RuntimeError

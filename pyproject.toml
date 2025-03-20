@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.7.4"
+version = "2.8.0"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.9"
@@ -40,7 +40,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==44",
+    "awkward_cpp==45",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.18.0",
     "packaging",
@@ -261,6 +261,8 @@ extend-exclude = [
     "rapidjson",
     "docs-*",
     "src/awkward/_typeparser/generated_parser.py",
+    "src/awkward/types/_awkward_datashape_parser.py",
+    "src/awkward/_connect/cuda/_kernel_signatures.py",
 ]
 
 [tool.ruff.lint]
