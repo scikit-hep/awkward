@@ -1323,7 +1323,7 @@ class UnionArray(UnionMeta[Content], Content):
                         n, replacement, recordlookup, parameters, axis, depth
                     )
                 )
-            return ak.unionarray.UnionArray(
+            return ak.contents.UnionArray(
                 self._tags,
                 self._index,
                 contents,
