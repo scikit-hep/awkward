@@ -45,8 +45,7 @@ def reverse_sum(array):
     return ak.sum(array[::-1], axis=0)
 ```
 
-We can then create an array with which to evaluate `reverse_sum`. The `backend` argument ensures that we build an Awkward Array that is backed by {class}`jax.Array` ({class}`jaxlib.xla_extension.ArrayImpl`) buffers, which power JAX's automatic differentiation and JIT compiling features. However, Awkward Array's JAX backend does not support JIT compilation on reducers as XLA requires array sizes to not be
-dependent on data values at compile-time.
+We can then create an array with which to evaluate `reverse_sum`. The `backend` argument ensures that we build an Awkward Array that is backed by {class}`jax.Array` ({class}`jaxlib.xla_extension.ArrayImpl`) buffers, which power JAX's automatic differentiation and JIT compiling features. However, Awkward Array's JAX backend does not support JIT compilation on reducers as XLA requires array sizes to not be dependent on data values at compile-time.
 
 ```{code-cell}
 array = ak.Array([[1.0, 2.0, 3.0], [], [4.0, 5.0]], backend="jax")
