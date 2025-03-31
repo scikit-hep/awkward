@@ -7,6 +7,10 @@ if(NOT DEFINED SKBUILD)
   set(SKBUILD_PROJECT_VERSION 0.0.0)
 endif()
 
+if(APPLE_CLASSIC)
+  set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+endif()
+
 # Project must be near the top
 project(
   ${SKBUILD_PROJECT_NAME}
