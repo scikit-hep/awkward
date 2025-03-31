@@ -1095,8 +1095,7 @@ class RecordArray(RecordMeta[Content], Content):
                 pyarrow.field(
                     self.index_to_field(i),
                     values[i].type,
-                    (mask_node is not None and mask_node._arrow_needs_option_type())
-                    or x._arrow_needs_option_type(),
+                    x._arrow_needs_option_type(),
                 )
                 for i, x in enumerate(self._contents)
             ]
