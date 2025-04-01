@@ -447,7 +447,7 @@ def test_unmaskedarray_numpyarray(tmp_path, extensionarray):
 
 @pytest.mark.parametrize("is_tuple", [False, True])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_recordarray(tmp_path, is_tuple, extensionarray):
+def test_recordarray_numpy_listoffset(tmp_path, is_tuple, extensionarray):
     akarray = ak.contents.RecordArray(
         [
             ak.contents.NumpyArray(
@@ -463,11 +463,17 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
         None if is_tuple else ["x", "y"],
         parameters={"which": "outer"},
     )
+
     paarray = akarray.to_arrow(extensionarray=extensionarray)
+
     if not is_tuple or extensionarray:
         arrow_round_trip(akarray, paarray, extensionarray)
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
+
+@pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_recordarray_bytemased_listoffset(tmp_path, is_tuple, extensionarray):
     akarray = ak.contents.RecordArray(
         [
             ak.contents.ByteMaskedArray(
@@ -492,6 +498,10 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
         arrow_round_trip(akarray, paarray, extensionarray)
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
+
+@pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_recordarray_bytemasked_unmasked(tmp_path, is_tuple, extensionarray):
     akarray = ak.contents.RecordArray(
         [
             ak.contents.ByteMaskedArray(
@@ -519,6 +529,10 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
         arrow_round_trip(akarray, paarray, extensionarray)
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
+
+@pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_indexedoption_recordarray_numpy_listoffset(tmp_path, is_tuple, extensionarray):
     akarray = ak.contents.IndexedOptionArray(
         ak.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
         ak.contents.RecordArray(
@@ -543,6 +557,12 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
         arrow_round_trip(akarray, paarray, extensionarray)
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
+
+@pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_indexedoption_recordarray_bytemasked_listoffset(
+    tmp_path, is_tuple, extensionarray
+):
     akarray = ak.contents.IndexedOptionArray(
         ak.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
         ak.contents.RecordArray(
@@ -578,9 +598,6 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
 )
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_numpyarray_datetime(tmp_path, extensionarray):
-    # pyarrow doesn't yet support datetime/duration conversions to Parquet.
-    # (FIXME: find or create a JIRA ticket.)
-
     akarray = ak.contents.NumpyArray(
         np.array(
             ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], dtype="datetime64[s]"
@@ -588,14 +605,14 @@ def test_numpyarray_datetime(tmp_path, extensionarray):
     )
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
-    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
     akarray = ak.contents.NumpyArray(
         np.array(["41", "1", "20"], dtype="timedelta64[s]")
     )
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
-    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
 @pytest.mark.parametrize("extensionarray", [False, True])
