@@ -1092,8 +1092,10 @@ class RecordArray(RecordMeta[Content], Content):
 
         types = pyarrow.struct(
             [
-                pyarrow.field(self.index_to_field(i), values[i].type).with_nullable(
-                    x._arrow_needs_option_type()
+                pyarrow.field(
+                    self.index_to_field(i),
+                    values[i].type,
+                    x._arrow_needs_option_type(),
                 )
                 for i, x in enumerate(self._contents)
             ]
