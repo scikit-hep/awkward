@@ -117,11 +117,11 @@ def _impl(
     axis = regularize_axis(axis, none_allowed=False)
 
     if maybe_posaxis(layout, axis, 1) == 0:
-        index_nplike = layout.backend.index_nplike
+        nplike = layout.backend.nplike
         if isinstance(layout, ak.record.Record):
-            return index_nplike.asarray(index_nplike.shape_item_as_index(1))
+            return nplike.asarray(nplike.shape_item_as_index(1))
         else:
-            return index_nplike.asarray(index_nplike.shape_item_as_index(layout.length))
+            return nplike.asarray(nplike.shape_item_as_index(layout.length))
 
     def action(layout, depth, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)

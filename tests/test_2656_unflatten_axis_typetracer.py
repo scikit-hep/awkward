@@ -91,13 +91,9 @@ def test():
     result = ak.unflatten(ttarray.muon.pt, ttarray.anindex, axis=1)
     assert result.layout.is_equal_to(
         ak.contents.ListOffsetArray(
-            ak.index.Index64(
-                backend.index_nplike.empty(unknown_length, dtype=np.int64)
-            ),
+            ak.index.Index64(backend.nplike.empty(unknown_length, dtype=np.int64)),
             ak.contents.ListOffsetArray(
-                ak.index.Index64(
-                    backend.index_nplike.empty(unknown_length, dtype=np.int64)
-                ),
+                ak.index.Index64(backend.nplike.empty(unknown_length, dtype=np.int64)),
                 ak.contents.NumpyArray(
                     backend.nplike.empty(unknown_length, dtype=np.int64)
                 ),

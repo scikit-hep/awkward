@@ -114,7 +114,7 @@ def prepare_advanced_indexing(items, backend: Backend):
         )
 
     # Then broadcast the index items
-    nplike = backend.index_nplike
+    nplike = backend.nplike
     broadcasted = nplike.broadcast_arrays(*[nplike.asarray(x) for x in broadcastable])
 
     # And re-assemble the index with the broadcasted items
@@ -203,7 +203,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
         return normalize_integer_like(item)
 
     elif isinstance(item, slice):
-        return normalize_slice(item, nplike=backend.index_nplike)
+        return normalize_slice(item, nplike=backend.nplike)
 
     elif isinstance(item, str):
         return item
@@ -222,7 +222,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
         return normalise_item(item.to_NumpyArray(np.int64), backend)
 
     elif isinstance(item, ak.contents.NumpyArray):
-        return to_nplike(item.data, backend.index_nplike)
+        return to_nplike(item.data, backend.nplike)
 
     elif isinstance(item, ak.contents.RegularArray):
         # Pure NumPy arrays (without masks) follow NumPy advanced indexing
@@ -239,7 +239,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
             return out
         else:
             return to_nplike(
-                as_numpy.data, backend.index_nplike, from_nplike=as_numpy.backend.nplike
+                as_numpy.data, backend.nplike, from_nplike=as_numpy.backend.nplike
             )
 
     # Ragged indexing should be performed with integer contents
@@ -271,7 +271,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
 
         # Empty index array
         elif len(item) == 0:
-            return backend.index_nplike.empty(0, dtype=np.int64)
+            return backend.nplike.empty(0, dtype=np.int64)
 
         # List of strings
         elif all(isinstance(x, str) for x in item):
@@ -397,7 +397,7 @@ def _normalise_item_nested(item: Content) -> Content:
         item,
         ak.contents.IndexedOptionArray,
     ):
-        nextindex = item.backend.index_nplike.astype(
+        nextindex = item.backend.nplike.astype(
             item.index.data, dtype=np.int64
         )  # this ALWAYS copies
         nonnull = nextindex >= 0
@@ -405,9 +405,14 @@ def _normalise_item_nested(item: Content) -> Content:
         projected = item.content._carry(ak.index.Index64(nextindex[nonnull]), False)
 
         # content has been projected; index must agree
-        nextindex[nonnull] = item.backend.index_nplike.arange(
-            projected.length, dtype=np.int64
-        )
+        if isinstance(item.backend, Jax):
+            nextindex = nextindex.at[nonnull].set(
+                item.backend.nplike.arange(projected.length, dtype=np.int64)
+            )
+        else:
+            nextindex[nonnull] = item.backend.nplike.arange(
+                projected.length, dtype=np.int64
+            )
 
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(nextindex),
@@ -424,21 +429,26 @@ def _normalise_item_nested(item: Content) -> Content:
         ),
     ):
         is_valid = item.mask_as_bool(valid_when=True)
-        positions_where_valid = item.backend.index_nplike.nonzero(is_valid)[0]
+        positions_where_valid = item.backend.nplike.nonzero(is_valid)[0]
 
         nextcontent = _normalise_item_nested(
             item.content._carry(ak.index.Index64(positions_where_valid), False)
         )
 
-        nextindex = item.backend.index_nplike.full(
-            is_valid.shape[0], -1, dtype=np.int64
-        )
-        nextindex[positions_where_valid] = item.backend.index_nplike.arange(
-            positions_where_valid.shape[0], dtype=np.int64
-        )
+        nextindex = item.backend.nplike.full(is_valid.shape[0], -1, dtype=np.int64)
+        if isinstance(item.backend.nplike, Jax):
+            nextindex = nextindex.at[positions_where_valid].set(
+                item.backend.nplike.arange(
+                    positions_where_valid.shape[0], dtype=np.int64
+                )
+            )
+        else:
+            nextindex[positions_where_valid] = item.backend.nplike.arange(
+                positions_where_valid.shape[0], dtype=np.int64
+            )
 
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(nextindex, nplike=item.backend.index_nplike),
+            ak.index.Index64(nextindex, nplike=item.backend.nplike),
             nextcontent,
             parameters=item.parameters,
         )
@@ -491,15 +501,23 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             assert flat_index.is_numpy and flat_mask.is_numpy
             nextcontent = flat_index.data[flat_mask.data]
 
-            cumsum = item_backend.index_nplike.empty(
+            cumsum = item_backend.nplike.empty(
                 flat_mask.data.shape[0] + 1, dtype=np.int64
             )
-            cumsum[0] = 0
-            cumsum[1:] = item_backend.index_nplike.asarray(
-                item_backend.nplike.cumsum(flat_mask.data)
-            )
+            if isinstance(item_backend.nplike, Jax):
+                cumsum = cumsum.at[0].set(0)
+                cumsum = cumsum.at[1:].set(
+                    item_backend.nplike.asarray(
+                        item_backend.nplike.cumsum(flat_mask.data)
+                    )
+                )
+            else:
+                cumsum[0] = 0
+                cumsum[1:] = item_backend.nplike.asarray(
+                    item_backend.nplike.cumsum(flat_mask.data)
+                )
 
-            item_offsets = item_backend.index_nplike.asarray(item.offsets)
+            item_offsets = item_backend.nplike.asarray(item.offsets.data)
             nextoffsets = ak.index.Index(cumsum[item_offsets])
 
         else:
@@ -523,9 +541,12 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                 raise TypeError("This slice is not supported for JAX differentiation.")
             # missing values as any integer other than -1 are extremely rare
             isnegative = item.content.index.data < 0
-            if item_backend.index_nplike.any(item.content.index.data < -1):
+            if item_backend.nplike.any(item.content.index.data < -1):
                 safeindex = item.content.index.data.copy()
-                safeindex[isnegative] = -1
+                if isinstance(item_backend.nplike, Jax):
+                    safeindex = safeindex.at[isnegative].set(-1)
+                else:
+                    safeindex[isnegative] = -1
             else:
                 safeindex = item.content.index.data
 
@@ -546,16 +567,21 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             # list offsets do include missing values
             expanded[isnegative] = True
             cumsum = item_backend.nplike.empty(expanded.shape[0] + 1, dtype=np.int64)
-            cumsum[0] = 0
-            cumsum[1:] = item_backend.nplike.cumsum(expanded)
-            item_offsets = item_backend.index_nplike.asarray(item.offsets)
+
+            if isinstance(item_backend.nplike, Jax):
+                cumsum = cumsum.at[0].set(0)
+                cumsum = cumsum.at[1:].set(item_backend.nplike.cumsum(expanded))
+            else:
+                cumsum[0] = 0
+                cumsum[1:] = item_backend.nplike.cumsum(expanded)
+            item_offsets = item_backend.nplike.asarray(item.offsets.data)
             nextoffsets = ak.index.Index(cumsum[item_offsets])
 
             # outindex fits into the lists; non-missing are sequential
             outindex = ak.index.Index64(
-                item_backend.index_nplike.full(nextoffsets[-1], -1, dtype=np.int64)
+                item_backend.nplike.full(nextoffsets[-1], -1, dtype=np.int64)
             )
-            outindex.data[~isnegative[expanded]] = item_backend.index_nplike.arange(
+            outindex[~isnegative[expanded]] = item_backend.nplike.arange(
                 nextcontent.shape[0], dtype=np.int64
             )
 
@@ -595,9 +621,12 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
 
                 # missing values as any integer other than -1 are extremely rare
                 isnegative = item.index.data < 0
-                if item_backend.index_nplike.any(item.index.data < -1):
+                if item_backend.nplike.any(item.index.data < -1):
                     safeindex = item.index.data.copy()
-                    safeindex[isnegative] = -1
+                    if isinstance(item_backend, Jax):
+                        safeindex = safeindex.at[isnegative].set(-1)
+                    else:
+                        safeindex[isnegative] = -1
                 else:
                     safeindex = item.index.data
 
@@ -620,12 +649,10 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                 # non-missing are sequential
                 non_negative = item_backend.nplike.logical_not(isnegative[expanded])
                 outindex = ak.index.Index64(
-                    item_backend.index_nplike.full(lenoutindex, -1, dtype=np.int64)
+                    item_backend.nplike.full(lenoutindex, -1, dtype=np.int64)
                 )
-                outindex.data[to_nplike(non_negative, item_backend.index_nplike)] = (
-                    item_backend.index_nplike.arange(
-                        nextcontent.shape[0], dtype=np.int64
-                    )
+                outindex[to_nplike(non_negative, item_backend.nplike)] = (
+                    item_backend.nplike.arange(nextcontent.shape[0], dtype=np.int64)
                 )
 
             else:

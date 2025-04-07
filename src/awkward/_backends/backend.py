@@ -29,11 +29,6 @@ class Backend(PublicSingleton, ABC):
     def nplike(self) -> NumpyLike:
         raise NotImplementedError
 
-    @property
-    @abstractmethod
-    def index_nplike(self) -> NumpyLike:
-        raise NotImplementedError
-
     def __getitem__(self, key: KernelKeyType) -> KernelType:
         raise NotImplementedError
 

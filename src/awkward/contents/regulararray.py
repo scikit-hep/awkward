@@ -127,7 +127,7 @@ class RegularArray(RegularMeta[Content], Content):
                 f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
         if size is unknown_length:
-            if content.backend.index_nplike.known_data:
+            if content.backend.nplike.known_data:
                 raise TypeError(
                     f"{type(self).__name__} 'size' must be a non-negative integer for backends with known shapes, not None"
                 )
@@ -297,22 +297,22 @@ class RegularArray(RegularMeta[Content], Content):
         return False
 
     def _getitem_at(self, where: IndexType):
-        index_nplike = self._backend.index_nplike
-        where = index_nplike.regularize_index_for_length(where, self._length)
-        size_scalar = index_nplike.shape_item_as_index(self._size)
+        nplike = self._backend.nplike
+        where = nplike.regularize_index_for_length(where, self._length)
+        size_scalar = nplike.shape_item_as_index(self._size)
         start, stop = where * size_scalar, (where + 1) * size_scalar
         return self._content._getitem_range(start, stop)
 
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
-        index_nplike = self._backend.index_nplike
-        if not index_nplike.known_data:
+        nplike = self._backend.nplike
+        if not nplike.known_data:
             self._touch_shape(recursive=False)
             return self
 
-        zeros_length = index_nplike.index_as_shape_item(stop - start)
+        zeros_length = nplike.index_as_shape_item(stop - start)
         substart, substop = (
-            start * index_nplike.shape_item_as_index(self._size),
-            stop * index_nplike.shape_item_as_index(self._size),
+            start * nplike.shape_item_as_index(self._size),
+            stop * nplike.shape_item_as_index(self._size),
         )
         return RegularArray(
             self._content._getitem_range(substart, substop),
@@ -348,29 +348,27 @@ class RegularArray(RegularMeta[Content], Content):
 
         copied = allow_lazy == "copied"
         if not issubclass(where.dtype.type, np.int64):
-            where = self._backend.index_nplike.astype(where, dtype=np.int64)
+            where = self._backend.nplike.astype(where, dtype=np.int64)
             copied = True
 
         negative = where < 0
-        if self._backend.index_nplike.known_data:
-            if self._backend.index_nplike.any(negative):
+        if self._backend.nplike.known_data:
+            if self._backend.nplike.any(negative):
                 if not copied:
                     where = where.copy()
                     copied = True
                 where[negative] += self._length
 
-            if self._backend.index_nplike.any(where >= self._length):
+            if self._backend.nplike.any(where >= self._length):
                 raise ak._errors.index_error(self, where)
 
         if where.shape[0] is unknown_length or self._size is unknown_length:
-            nextcarry = ak.index.Index64.empty(
-                unknown_length, self._backend.index_nplike
-            )
+            nextcarry = ak.index.Index64.empty(unknown_length, self._backend.nplike)
         else:
             nextcarry = ak.index.Index64.empty(
-                where.shape[0] * self._size, self._backend.index_nplike
+                where.shape[0] * self._size, self._backend.nplike
             )
-        assert nextcarry.nplike is self._backend.index_nplike
+        assert nextcarry.nplike is self._backend.nplike
         self._maybe_index_error(
             self._backend[
                 "awkward_RegularArray_getitem_carry",
@@ -393,31 +391,31 @@ class RegularArray(RegularMeta[Content], Content):
         )
 
     def _compact_offsets64(self, start_at_zero):
-        index_nplike = self._backend.index_nplike
+        nplike = self._backend.nplike
         if self._size is not unknown_length and self._size == 0:
-            return ak.index.Index64.zeros(self._length + 1, nplike=index_nplike)
+            return ak.index.Index64.zeros(self._length + 1, nplike=nplike)
         else:
             return ak.index.Index64(
-                index_nplike.arange(
+                nplike.arange(
                     0,
-                    index_nplike.shape_item_as_index(self._length * self._size) + 1,
-                    index_nplike.shape_item_as_index(self._size),
+                    nplike.shape_item_as_index(self._length * self._size) + 1,
+                    nplike.shape_item_as_index(self._size),
                     dtype=np.int64,
                 ),
-                nplike=index_nplike,
+                nplike=nplike,
             )
 
     def _broadcast_tooffsets64(self, offsets: Index) -> ListOffsetArray:
         self._touch_data(recursive=False)
         offsets._touch_data()
 
-        index_nplike = self._backend.index_nplike
-        assert offsets.nplike is index_nplike
+        nplike = self._backend.nplike
+        assert offsets.nplike is nplike
         if offsets.length is not unknown_length and offsets.length == 0:
             raise AssertionError(
                 "broadcast_tooffsets64 can only be used with non-empty offsets"
             )
-        elif index_nplike.known_data and offsets[0] != 0:
+        elif nplike.known_data and offsets[0] != 0:
             raise AssertionError(
                 f"broadcast_tooffsets64 can only be used with offsets that start at 0, not {offsets[0]}"
             )
@@ -434,25 +432,25 @@ class RegularArray(RegularMeta[Content], Content):
             count = offsets.data[1:] - offsets.data[:-1]
             # Sanity check that our kernel isn't losing values here
             assert (
-                not self._backend.index_nplike.known_data
+                not self._backend.nplike.known_data
                 or count.size is unknown_length
                 or count.size == 0
                 or count.dtype == np.intp
-                or self._backend.index_nplike.max(count) <= np.iinfo(np.intp).max
+                or self._backend.nplike.max(count) <= np.iinfo(np.intp).max
             )
             carry = ak.index.Index64(
-                index_nplike.repeat(
-                    index_nplike.arange(
-                        index_nplike.shape_item_as_index(self._length), dtype=np.int64
+                nplike.repeat(
+                    nplike.arange(
+                        nplike.shape_item_as_index(self._length), dtype=np.int64
                     ),
-                    index_nplike.astype(count, np.intp),
+                    nplike.astype(count, np.intp),
                 ),
-                nplike=index_nplike,
+                nplike=nplike,
             )
             next_content = self._content._carry(carry, True)
         else:
             this_offsets = self._compact_offsets64(True)
-            if index_nplike.known_data and not index_nplike.array_equal(
+            if nplike.known_data and not nplike.array_equal(
                 offsets.data, this_offsets.data
             ):
                 raise ValueError("cannot broadcast nested list")
@@ -474,15 +472,15 @@ class RegularArray(RegularMeta[Content], Content):
         tail: tuple[SliceItem, ...],
         advanced: Index | None,
     ) -> Content:
-        index_nplike = self._backend.index_nplike
+        nplike = self._backend.nplike
 
         if head is NO_HEAD:
             return self
 
         elif is_integer_like(head):
             nexthead, nexttail = ak._slicing.head_tail(tail)
-            nextcarry = ak.index.Index64.empty(self._length, index_nplike)
-            assert nextcarry.nplike is index_nplike
+            nextcarry = ak.index.Index64.empty(self._length, nplike)
+            assert nextcarry.nplike is nplike
             head = ak._slicing.normalize_integer_like(head)
             self._maybe_index_error(
                 self._backend[
@@ -500,12 +498,12 @@ class RegularArray(RegularMeta[Content], Content):
 
         elif isinstance(head, slice):
             nexthead, nexttail = ak._slicing.head_tail(tail)
-            start, stop, step, nextsize = index_nplike.derive_slice_for_length(
+            start, stop, step, nextsize = nplike.derive_slice_for_length(
                 head, length=self._size
             )
 
-            nextcarry = ak.index.Index64.empty(self._length * nextsize, index_nplike)
-            assert nextcarry.nplike is index_nplike
+            nextcarry = ak.index.Index64.empty(self._length * nextsize, nplike)
+            assert nextcarry.nplike is nplike
             self._maybe_index_error(
                 self._backend[
                     "awkward_RegularArray_getitem_next_range",
@@ -533,12 +531,9 @@ class RegularArray(RegularMeta[Content], Content):
                     parameters=self._parameters,
                 )
             else:
-                nextadvanced = ak.index.Index64.empty(nextcarry.length, index_nplike)
-                advanced = advanced.to_nplike(index_nplike)
-                assert (
-                    nextadvanced.nplike is index_nplike
-                    and advanced.nplike is index_nplike
-                )
+                nextadvanced = ak.index.Index64.empty(nextcarry.length, nplike)
+                advanced = advanced.to_nplike(nplike)
+                assert nextadvanced.nplike is nplike and advanced.nplike is nplike
                 self._maybe_index_error(
                     self._backend[
                         "awkward_RegularArray_getitem_next_range_spreadadvanced",
@@ -572,10 +567,10 @@ class RegularArray(RegularMeta[Content], Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak.index.Index64):
-            head = head.to_nplike(index_nplike)
-            flathead = index_nplike.reshape(index_nplike.asarray(head.data), (-1,))
-            regular_flathead = ak.index.Index64.empty(flathead.shape[0], index_nplike)
-            assert regular_flathead.nplike is index_nplike
+            head = head.to_nplike(nplike)
+            flathead = nplike.reshape(nplike.asarray(head.data), (-1,))
+            regular_flathead = ak.index.Index64.empty(flathead.shape[0], nplike)
+            assert regular_flathead.nplike is nplike
             self._maybe_index_error(
                 self._backend[
                     "awkward_RegularArray_getitem_next_array_regularize",
@@ -596,13 +591,13 @@ class RegularArray(RegularMeta[Content], Content):
             ):
                 nextcarry = ak.index.Index64.empty(
                     self._length * flathead.shape[0],
-                    index_nplike,
+                    nplike,
                 )
-                nextadvanced = ak.index.Index64.empty(nextcarry.length, index_nplike)
+                nextadvanced = ak.index.Index64.empty(nextcarry.length, nplike)
                 assert (
-                    nextcarry.nplike is index_nplike
-                    and nextadvanced.nplike is index_nplike
-                    and regular_flathead.nplike is index_nplike
+                    nextcarry.nplike is nplike
+                    and nextadvanced.nplike is nplike
+                    and regular_flathead.nplike is nplike
                 )
                 self._maybe_index_error(
                     self._backend[
@@ -631,20 +626,20 @@ class RegularArray(RegularMeta[Content], Content):
                     return out
 
             elif self._size == 0:
-                nextcarry = ak.index.Index64.empty(0, nplike=index_nplike)
-                nextadvanced = ak.index.Index64.empty(0, nplike=index_nplike)
+                nextcarry = ak.index.Index64.empty(0, nplike=nplike)
+                nextadvanced = ak.index.Index64.empty(0, nplike=nplike)
                 nextcontent = self._content._carry(nextcarry, True)
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
             else:
-                nextcarry = ak.index.Index64.empty(self._length, index_nplike)
-                nextadvanced = ak.index.Index64.empty(self._length, index_nplike)
-                advanced = advanced.to_nplike(index_nplike)
+                nextcarry = ak.index.Index64.empty(self._length, nplike)
+                nextadvanced = ak.index.Index64.empty(self._length, nplike)
+                advanced = advanced.to_nplike(nplike)
                 assert (
-                    nextcarry.nplike is index_nplike
-                    and nextadvanced.nplike is index_nplike
-                    and advanced.nplike is index_nplike
-                    and regular_flathead.nplike is index_nplike
+                    nextcarry.nplike is nplike
+                    and nextadvanced.nplike is nplike
+                    and advanced.nplike is nplike
+                    and regular_flathead.nplike is nplike
                 )
                 self._maybe_index_error(
                     self._backend[
@@ -684,14 +679,10 @@ class RegularArray(RegularMeta[Content], Content):
                     f"cannot fit jagged slice with length {head.length} into {type(self).__name__} of size {self._size}",
                 )
 
-            multistarts = ak.index.Index64.empty(
-                head.length * self._length, index_nplike
-            )
-            multistops = ak.index.Index64.empty(
-                head.length * self._length, index_nplike
-            )
+            multistarts = ak.index.Index64.empty(head.length * self._length, nplike)
+            multistops = ak.index.Index64.empty(head.length * self._length, nplike)
 
-            assert head.offsets.nplike is index_nplike
+            assert head.offsets.nplike is nplike
             self._maybe_index_error(
                 self._backend[
                     "awkward_RegularArray_getitem_jagged_expand",
@@ -794,7 +785,7 @@ class RegularArray(RegularMeta[Content], Content):
             return self._local_index_axis0()
         elif posaxis is not None and posaxis + 1 == depth + 1:
             localindex = ak.index.Index64.empty(
-                self._length * self._size, nplike=self._backend.index_nplike
+                self._length * self._size, nplike=self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend["awkward_RegularArray_localindex", np.int64](
@@ -890,7 +881,7 @@ class RegularArray(RegularMeta[Content], Content):
         return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        index_nplike = self._backend.index_nplike
+        nplike = self._backend.nplike
 
         posaxis = maybe_posaxis(self, axis, depth)
         if posaxis is not None and posaxis + 1 == depth:
@@ -921,25 +912,23 @@ class RegularArray(RegularMeta[Content], Content):
                     combinationslen = combinationslen // j
 
             totallen = combinationslen * self._length
-            tocarryraw = index_nplike.empty(n, dtype=np.intp)
+            tocarryraw = nplike.empty(n, dtype=np.intp)
             tocarry = []
             for i in range(n):
                 ptr = ak.index.Index64.empty(
                     totallen,
-                    nplike=index_nplike,
+                    nplike=nplike,
                     dtype=np.int64,
                 )
                 tocarry.append(ptr)
                 if self._backend.nplike.known_data:
                     tocarryraw[i] = ptr.ptr
 
-            toindex = ak.index.Index64.empty(n, index_nplike, dtype=np.int64)
-            fromindex = ak.index.Index64.empty(n, index_nplike, dtype=np.int64)
+            toindex = ak.index.Index64.empty(n, nplike, dtype=np.int64)
+            fromindex = ak.index.Index64.empty(n, nplike, dtype=np.int64)
 
             if self._size != 0:
-                assert (
-                    toindex.nplike is index_nplike and fromindex.nplike is index_nplike
-                )
+                assert toindex.nplike is nplike and fromindex.nplike is nplike
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_RegularArray_combinations_64",
@@ -976,7 +965,7 @@ class RegularArray(RegularMeta[Content], Content):
         else:
             length = self._length * self._size
             next = self._content._getitem_range(
-                0, index_nplike.shape_item_as_index(length)
+                0, nplike.shape_item_as_index(length)
             )._combinations(n, replacement, recordlookup, parameters, axis, depth + 1)
             return ak.contents.RegularArray(
                 next, self._size, self._length, parameters=self._parameters
@@ -994,16 +983,16 @@ class RegularArray(RegularMeta[Content], Content):
         keepdims,
         behavior,
     ):
-        index_nplike = self._backend.index_nplike
+        nplike = self._backend.nplike
         branch, depth = self.branch_depth
         nextlen = self._length * self._size
         if not branch and negaxis == depth:
-            nextcarry = ak.index.Index64.empty(nextlen, nplike=index_nplike)
-            nextparents = ak.index.Index64.empty(nextlen, nplike=index_nplike)
+            nextcarry = ak.index.Index64.empty(nextlen, nplike=nplike)
+            nextparents = ak.index.Index64.empty(nextlen, nplike=nplike)
             assert (
-                parents.nplike is index_nplike
-                and nextcarry.nplike is index_nplike
-                and nextparents.nplike is index_nplike
+                parents.nplike is nplike
+                and nextcarry.nplike is nplike
+                and nextparents.nplike is nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -1024,11 +1013,9 @@ class RegularArray(RegularMeta[Content], Content):
                 # The upper bound for this value is given by `nextlen` (each item in this list belonging
                 # to a distinct reduction), but the length of `starts` should equate to `maxnextparents - 1`.
                 starts.length * self._size,
-                nplike=index_nplike,
+                nplike=nplike,
             )
-            assert (
-                nextstarts.nplike is index_nplike and nextparents.nplike is index_nplike
-            )
+            assert nextstarts.nplike is nplike and nextparents.nplike is nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
@@ -1044,9 +1031,7 @@ class RegularArray(RegularMeta[Content], Content):
             if reducer.needs_position:
                 # Regular arrays have the same length rows, so there can be no "missing" values
                 # unlike ragged list types
-                nextshifts = ak.index.Index64.zeros(
-                    nextcarry.length, nplike=index_nplike
-                )
+                nextshifts = ak.index.Index64.zeros(nextcarry.length, nplike=nplike)
             else:
                 nextshifts = None
 
@@ -1073,9 +1058,9 @@ class RegularArray(RegularMeta[Content], Content):
                 out = ak.contents.RegularArray(out, 1, self._length, parameters=None)
             return out
         else:
-            nextparents = ak.index.Index64.empty(nextlen, index_nplike)
+            nextparents = ak.index.Index64.empty(nextlen, nplike)
 
-            assert nextparents.nplike is index_nplike
+            assert nextparents.nplike is nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_RegularArray_reduce_local_nextparents_64",
@@ -1089,14 +1074,14 @@ class RegularArray(RegularMeta[Content], Content):
 
             if self._size is not unknown_length and self._size > 0:
                 nextstarts = ak.index.Index64(
-                    index_nplike.arange(0, nextlen, self._size),
-                    nplike=index_nplike,
+                    nplike.arange(0, nextlen, self._size),
+                    nplike=nplike,
                 )
             else:
                 assert nextlen is unknown_length or nextlen == 0
                 nextstarts = ak.index.Index64(
-                    index_nplike.zeros(nextlen, dtype=np.int64),
-                    nplike=index_nplike,
+                    nplike.zeros(nextlen, dtype=np.int64),
+                    nplike=nplike,
                 )
 
             outcontent = self._content._reduce_next(
@@ -1167,8 +1152,8 @@ class RegularArray(RegularMeta[Content], Content):
                 else:
                     assert outcontent.is_regular
 
-            outoffsets = ak.index.Index64.empty(outlength + 1, index_nplike)
-            assert outoffsets.nplike is index_nplike and parents.nplike is index_nplike
+            outoffsets = ak.index.Index64.empty(outlength + 1, nplike)
+            assert outoffsets.nplike is nplike and parents.nplike is nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
@@ -1208,9 +1193,9 @@ class RegularArray(RegularMeta[Content], Content):
             else:
                 index = ak.index.Index64.empty(
                     self._length * target,
-                    self._backend.index_nplike,
+                    self._backend.nplike,
                 )
-                assert index.nplike is self._backend.index_nplike
+                assert index.nplike is self._backend.nplike
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
@@ -1239,7 +1224,7 @@ class RegularArray(RegularMeta[Content], Content):
         if array_param == "string":
             offsets = self._compact_offsets64(True)
             # Determine the widest string (in code points)
-            _max_code_points = backend.index_nplike.empty(1, dtype=np.int64)
+            _max_code_points = backend.nplike.empty(1, dtype=np.int64)
             backend[
                 "awkward_NumpyArray_prepare_utf8_to_utf32_padded",
                 self._content.dtype.type,
@@ -1251,9 +1236,7 @@ class RegularArray(RegularMeta[Content], Content):
                 offsets.length,
                 _max_code_points,
             )
-            max_code_points = backend.index_nplike.index_as_shape_item(
-                _max_code_points[0]
-            )
+            max_code_points = backend.nplike.index_as_shape_item(_max_code_points[0])
             # Ensure that we have at-least length-1 bytestrings
             if max_code_points is not unknown_length:
                 max_code_points = max(1, max_code_points)
@@ -1292,9 +1275,7 @@ class RegularArray(RegularMeta[Content], Content):
             # ShapeItem is a defined type, but some nplikes don't map onto the entire space; e.g.
             # NumPy never has `None` shape items. We require that if a shape-item is used between nplikes
             # they both be the same "known-shape-ness".
-            assert (
-                self._backend.index_nplike.known_data == self._backend.nplike.known_data
-            )
+            assert self._backend.nplike.known_data == self._backend.nplike.known_data
             return self._backend.nplike.reshape(
                 out[
                     : self._backend.nplike.shape_item_as_index(
@@ -1377,9 +1358,9 @@ class RegularArray(RegularMeta[Content], Content):
         ):
             return [self]
         else:
-            index_nplike = self._backend.index_nplike
+            nplike = self._backend.nplike
             content = self._content[
-                : index_nplike.shape_item_as_index(self._length * self._size)
+                : nplike.shape_item_as_index(self._length * self._size)
             ]
             contents = content._remove_structure(backend, options)
             if options["keepdims"]:
@@ -1457,9 +1438,9 @@ class RegularArray(RegularMeta[Content], Content):
             raise AssertionError(result)
 
     def to_packed(self, recursive: bool = True) -> Self:
-        index_nplike = self._backend.index_nplike
+        nplike = self._backend.nplike
         length = self._length * self._size
-        content = self._content[: index_nplike.shape_item_as_index(length)]
+        content = self._content[: nplike.shape_item_as_index(length)]
 
         return RegularArray(
             content.to_packed(True) if recursive else content,

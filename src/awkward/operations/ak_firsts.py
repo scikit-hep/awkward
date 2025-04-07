@@ -98,7 +98,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
             if posaxis == depth and layout.is_list:
                 # this is a copy of the raw array
-                index = starts = backend.index_nplike.asarray(
+                index = starts = backend.nplike.asarray(
                     layout.starts.data, dtype=np.int64, copy=True
                 )
 

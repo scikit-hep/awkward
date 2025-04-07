@@ -96,11 +96,11 @@ def _drop_option_preserving_form(layout, ensure_empty_mask: bool = False):
         elif isinstance(this, UnmaskedArray):
             return this.content
         else:
-            index_nplike = this.backend.index_nplike
+            nplike = this.backend.nplike
             assert not (
                 ensure_empty_mask
-                and index_nplike.known_data
-                and index_nplike.any(this.mask_as_bool(valid_when=False))
+                and nplike.known_data
+                and nplike.any(this.mask_as_bool(valid_when=False))
             ), "did not expect option type, but arrow returned a non-erasable option"
             # Re-write indexed options as indexed
             if isinstance(this, IndexedOptionArray):

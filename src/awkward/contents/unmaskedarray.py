@@ -189,9 +189,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         return "".join(out)
 
     def to_IndexedOptionArray64(self) -> IndexedOptionArray:
-        arange = self._backend.index_nplike.arange(self._content.length, dtype=np.int64)
+        arange = self._backend.nplike.arange(self._content.length, dtype=np.int64)
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(arange, nplike=self._backend.index_nplike),
+            ak.index.Index64(arange, nplike=self._backend.nplike),
             self._content,
             parameters=self._parameters,
         )
@@ -200,7 +200,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         return ak.contents.ByteMaskedArray(
             ak.index.Index8(
                 self.mask_as_bool(valid_when).view(np.int8),
-                nplike=self._backend.index_nplike,
+                nplike=self._backend.nplike,
             ),
             self._content,
             valid_when,
@@ -210,11 +210,11 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
     def to_BitMaskedArray(self, valid_when, lsb_order):
         bitlength = math.ceil(self._content.length / 8.0)
         if valid_when:
-            bitmask = self._backend.index_nplike.full(
+            bitmask = self._backend.nplike.full(
                 bitlength, np.uint8(255), dtype=np.uint8
             )
         else:
-            bitmask = self._backend.index_nplike.zeros(bitlength, dtype=np.uint8)
+            bitmask = self._backend.nplike.zeros(bitlength, dtype=np.uint8)
 
         return ak.contents.BitMaskedArray(
             ak.index.IndexU8(bitmask),
@@ -227,11 +227,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
 
     def mask_as_bool(self, valid_when: bool = True) -> ArrayLike:
         if valid_when:
-            return self._backend.index_nplike.ones(self._content.length, dtype=np.bool_)
+            return self._backend.nplike.ones(self._content.length, dtype=np.bool_)
         else:
-            return self._backend.index_nplike.zeros(
-                self._content.length, dtype=np.bool_
-            )
+            return self._backend.nplike.zeros(self._content.length, dtype=np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(0, 0)
@@ -279,9 +277,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         )
 
     def _nextcarry_outindex(self) -> tuple[int, ak.index.Index64, ak.index.Index64]:
-        counting = self._backend.index_nplike.arange(self._content.length)
-        nextcarry = ak.index.Index64(counting, nplike=self._backend.index_nplike)
-        outindex = ak.index.Index64(counting, nplike=self._backend.index_nplike)
+        counting = self._backend.nplike.arange(self._content.length)
+        nextcarry = ak.index.Index64(counting, nplike=self._backend.nplike)
+        outindex = ak.index.Index64(counting, nplike=self._backend.nplike)
         return 0, nextcarry, outindex
 
     def _getitem_next_jagged(

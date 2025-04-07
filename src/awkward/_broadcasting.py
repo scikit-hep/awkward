@@ -16,6 +16,7 @@ from awkward._namedaxis import (
     _add_named_axis,
     _unify_named_axis,
 )
+from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -93,7 +94,7 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
 
     for x in inputs:
         if isinstance(x, Record):
-            index = x.backend.index_nplike.full(maxlen, x.at, dtype=np.int64)
+            index = x.backend.nplike.full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
@@ -371,31 +372,29 @@ def broadcast_to_offsets_avoiding_carry(
     list_content: ak.contents.Content,
     offsets: ak.index.Index,
 ) -> ak.contents.Content:
-    index_nplike = list_content.backend.index_nplike
+    nplike = list_content.backend.nplike
 
     # Without known data, we can't perform these optimisations
-    if not index_nplike.known_data:
+    if not nplike.known_data:
         return list_content._broadcast_tooffsets64(offsets).content
 
     elif isinstance(list_content, ListOffsetArray):
-        if index_nplike.array_equal(offsets.data, list_content.offsets.data):
-            next_length = index_nplike.index_as_shape_item(offsets[-1])
+        if nplike.array_equal(offsets.data, list_content.offsets.data):
+            next_length = nplike.index_as_shape_item(offsets[-1])
             return list_content.content[:next_length]
         else:
             return list_content._broadcast_tooffsets64(offsets).content
     elif isinstance(list_content, ListArray):
         # Is this list contiguous?
-        if index_nplike.array_equal(
+        if nplike.array_equal(
             list_content.starts.data[1:], list_content.stops.data[:-1]
         ):
             # Does this list match the offsets?
-            if index_nplike.array_equal(
-                offsets.data[:-1], list_content.starts.data
-            ) and not (
+            if nplike.array_equal(offsets.data[:-1], list_content.starts.data) and not (
                 list_content.stops.data.shape[0] != 0
                 and offsets[-1] != list_content.stops[-1]
             ):
-                next_length = index_nplike.index_as_shape_item(offsets[-1])
+                next_length = nplike.index_as_shape_item(offsets[-1])
                 return list_content.content[:next_length]
             else:
                 return list_content._broadcast_tooffsets64(offsets).content
@@ -404,7 +403,7 @@ def broadcast_to_offsets_avoiding_carry(
 
     elif isinstance(list_content, RegularArray):
         my_offsets = list_content._compact_offsets64(True)
-        if index_nplike.array_equal(offsets.data, my_offsets.data):
+        if nplike.array_equal(offsets.data, my_offsets.data):
             return list_content.content[: list_content.size * list_content.length]
         else:
             return list_content._broadcast_tooffsets64(offsets).content
@@ -569,7 +568,7 @@ def apply_step(
         )
 
     def broadcast_any_list():
-        index_nplike = backend.index_nplike
+        nplike = backend.nplike
         # Under the category of "is_list", we have both strings and non-strings
         # The strings should behave like non-lists within these routines.
 
@@ -601,14 +600,14 @@ def apply_step(
                     ):
                         # For any (N, 1) array, we know we'll broadcast to (N, M) where M is maxsize
                         size_one_carry_index = Index64(
-                            index_nplike.repeat(
-                                index_nplike.arange(
-                                    index_nplike.shape_item_as_index(length),
+                            nplike.repeat(
+                                nplike.arange(
+                                    nplike.shape_item_as_index(length),
                                     dtype=np.int64,
                                 ),
-                                index_nplike.shape_item_as_index(dim_size),
+                                nplike.shape_item_as_index(dim_size),
                             ),
-                            nplike=index_nplike,
+                            nplike=nplike,
                         )
                 else:
                     inputs_are_strings.append(False)
@@ -799,22 +798,34 @@ def apply_step(
                 if mask is None:
                     mask = m
                 else:
-                    mask = backend.index_nplike.logical_or(mask, m, maybe_out=mask)
+                    mask = backend.nplike.logical_or(mask, m, maybe_out=mask)
 
         nextmask = Index8(mask.view(np.int8))
-        index = backend.index_nplike.full(mask.shape[0], np.int64(-1), dtype=np.int64)
-        index[~mask] = backend.index_nplike.arange(
-            backend.index_nplike.shape_item_as_index(mask.shape[0])
-            - backend.index_nplike.count_nonzero(mask),
-            dtype=np.int64,
-        )
-        index = Index64(index)
-        if any(not x.is_option for x in contents):
-            nextindex = backend.index_nplike.arange(
-                backend.index_nplike.shape_item_as_index(mask.shape[0]),
+        index = backend.nplike.full(mask.shape[0], np.int64(-1), dtype=np.int64)
+        if isinstance(backend.nplike, Jax):
+            index = index.at[~mask].set(
+                backend.nplike.arange(
+                    backend.nplike.shape_item_as_index(mask.shape[0])
+                    - backend.nplike.count_nonzero(mask),
+                    dtype=np.int64,
+                )
+            )
+        else:
+            index[~mask] = backend.nplike.arange(
+                backend.nplike.shape_item_as_index(mask.shape[0])
+                - backend.nplike.count_nonzero(mask),
                 dtype=np.int64,
             )
-            nextindex[mask] = -1
+        index = Index64(index)
+        if any(not x.is_option for x in contents):
+            nextindex = backend.nplike.arange(
+                backend.nplike.shape_item_as_index(mask.shape[0]),
+                dtype=np.int64,
+            )
+            if isinstance(backend.nplike, Jax):
+                nextindex = nextindex.at[mask].set(-1)
+            else:
+                nextindex[mask] = -1
             nextindex = Index64(nextindex)
 
         nextinputs = []
@@ -995,7 +1006,7 @@ def apply_step(
         union_tags, union_num_contents, length = [], [], unknown_length
         for x in contents:
             if x.is_union:
-                tags = x.tags.raw(backend.index_nplike)
+                tags = x.tags.raw(backend.nplike)
                 union_tags.append(tags)
                 union_num_contents.append(len(x.contents))
 
@@ -1009,11 +1020,11 @@ def apply_step(
                         f"with UnionArray of length {tags.shape[0]}{in_function(options)}"
                     )
 
-        tags = backend.index_nplike.empty(length, dtype=np.int8)
-        index = backend.index_nplike.empty(length, dtype=np.int64)
+        tags = backend.nplike.empty(length, dtype=np.int8)
+        index = backend.nplike.empty(length, dtype=np.int64)
 
         # Stack all union tags
-        combos = backend.index_nplike.stack(union_tags, axis=-1)
+        combos = backend.nplike.stack(union_tags, axis=-1)
 
         # Build array of indices (c1, c2, c3, ..., cn) of contents in
         # (union 1, union 2, union 3, ..., union n)
@@ -1023,12 +1034,20 @@ def apply_step(
         outcontents = []
 
         for tag, j_contents in enumerate(all_combos):
-            combo = backend.index_nplike.asarray(j_contents, dtype=np.int64)
-            mask = backend.index_nplike.all(combos == combo, axis=-1)
-            tags[mask] = tag
-            index[mask] = backend.index_nplike.arange(
-                backend.index_nplike.count_nonzero(mask), dtype=np.int64
-            )
+            combo = backend.nplike.asarray(j_contents, dtype=np.int64)
+            mask = backend.nplike.all(combos == combo, axis=-1)
+            if isinstance(backend.nplike, Jax):
+                tags = tags.at[mask].set(tag)
+                index = index.at[mask].set(
+                    backend.nplike.arange(
+                        backend.nplike.count_nonzero(mask), dtype=np.int64
+                    )
+                )
+            else:
+                tags[mask] = tag
+                index[mask] = backend.nplike.arange(
+                    backend.nplike.count_nonzero(mask), dtype=np.int64
+                )
             nextinputs = []
             it_j_contents = iter(j_contents)
             for x in inputs:
