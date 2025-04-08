@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import sys
 
 import numpy as np  # noqa: F401
@@ -34,6 +35,7 @@ def test_refcount():
     assert sys.getrefcount(array) == 5
 
     del f1
+    gc.collect()
     assert sys.getrefcount(array) == 4
 
 
