@@ -17,7 +17,7 @@ HighLevelType: TypeAlias = Callable[P, T]
 
 def high_level_function(
     module: str = "ak", name: str | None = None
-) -> Callable[[DispatcherType], HighLevelType]:
+) -> Callable[[DispatcherType[P, T]], HighLevelType[P, T]]:
     """Decorate a high-level function such that it may be overloaded by third-party array objects"""
 
     def capture_func(func: DispatcherType) -> HighLevelType:
@@ -30,7 +30,9 @@ def high_level_function(
     return capture_func
 
 
-def named_high_level_function(func: DispatcherType, name: str) -> HighLevelType:
+def named_high_level_function(
+    func: DispatcherType[P, T], name: str
+) -> HighLevelType[P, T]:
     """Decorate a named high-level function such that it may be overloaded by third-party array objects"""
 
     @wraps(func)
