@@ -37,6 +37,34 @@ class JAXReducer(Reducer):
         raise NotImplementedError
 
 
+def segment_argmin(data, segment_ids, num_segments=None):
+    """
+    Applies a segmented argmin-style reduction.
+
+    Parameters:
+        data: jax.numpy.ndarray — the values to reduce.
+        segment_ids: same shape as data — indicates segment groupings.
+        num_segments: number of segments (optional).
+
+    Returns:
+        jax.numpy.ndarray — indices of min within each segment.
+    """
+    if num_segments is None:
+        num_segments = ak.max(segment_ids) + 1
+    num_segments = int(num_segments)
+
+    data = jax.numpy.asarray(data)
+    segment_ids = jax.numpy.asarray(segment_ids)
+
+    # Create a 2D array where each row corresponds to one segment
+    segmented = jax.vmap(
+        lambda i: jax.numpy.where(segment_ids == i, data, jax.numpy.inf)
+    )(jax.numpy.arange(num_segments))
+
+    # Apply the argmin along axis 1 (within each segment)
+    return jax.numpy.argmin(segmented, axis=1)
+
+
 @overloads(_reducers.ArgMin)
 class ArgMin(JAXReducer):
     name: Final = "argmin"
@@ -45,7 +73,8 @@ class ArgMin(JAXReducer):
 
     @classmethod
     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        raise NotImplementedError
+        assert isinstance(reducer, _reducers.ArgMin)
+        return cls()
 
     @classmethod
     def _return_dtype(cls, given_dtype):
@@ -59,7 +88,39 @@ class ArgMin(JAXReducer):
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        raise NotImplementedError()
+        assert isinstance(array, ak.contents.NumpyArray)
+        result = segment_argmin(array.data, parents.data)
+        result = jax.numpy.asarray(result, dtype=array.dtype)
+
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+def segment_argmax(data, segment_ids, num_segments=None):
+    """
+    Applies a segmented argmax-style reduction.
+
+    Parameters:
+        data: jax.numpy.ndarray — the values to reduce.
+        segment_ids: same shape as data — indicates segment groupings.
+        num_segments: number of segments (optional).
+
+    Returns:
+        jax.numpy.ndarray — indices of min within each segment.
+    """
+    if num_segments is None:
+        num_segments = ak.max(segment_ids) + 1
+    num_segments = int(num_segments)
+
+    data = jax.numpy.asarray(data)
+    segment_ids = jax.numpy.asarray(segment_ids)
+
+    # Create a 2D array where each row corresponds to one segment
+    segmented = jax.vmap(
+        lambda i: jax.numpy.where(segment_ids == i, data, -jax.numpy.inf)
+    )(jax.numpy.arange(num_segments))
+
+    # Apply the argmax along axis 1 (within each segment)
+    return jax.numpy.argmax(segmented, axis=1)
 
 
 @overloads(_reducers.ArgMax)
@@ -85,7 +146,11 @@ class ArgMax(JAXReducer):
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        raise NotImplementedError()
+        assert isinstance(array, ak.contents.NumpyArray)
+        result = segment_argmax(array.data, parents.data)
+        result = jax.numpy.asarray(result, dtype=array.dtype)
+
+        return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 @overloads(_reducers.Count)
