@@ -119,7 +119,7 @@ def segment_argmax(data, segment_ids, num_segments=None):
         lambda i: jax.numpy.where(segment_ids == i, data, -jax.numpy.inf)
     )(jax.numpy.arange(num_segments))
 
-    # Apply the argmin along axis 1 (within each segment)
+    # Apply the argmax along axis 1 (within each segment)
     return jax.numpy.argmax(segmented, axis=1)
 
 
