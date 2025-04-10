@@ -113,10 +113,10 @@ def segment_argmax(data, segment_ids):
 
     # Find where the data equals the maximum value in each segment
     is_max = data == max_vals[segment_ids]
-    
+
     # Mask the indices where data matches the maximum value
     masked_indices = jax.numpy.where(is_max, indices, data.shape[0])
- 
+
     # Return the index of the first maximum value in each segment
     return jax.ops.segment_min(masked_indices, segment_ids, num_segments=num_segments)
 
