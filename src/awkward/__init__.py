@@ -1,39 +1,40 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-# Versioning
 from __future__ import annotations
+
+# Versioning
 from awkward._version import __version__
 
 # NumPy-like alternatives
-import awkward._backends
-import awkward._nplikes
+from awkward import _backends
+from awkward import _nplikes
 
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
-import awkward.index
-import awkward.contents
-import awkward.record
-import awkward.types
-import awkward.forms
+from awkward import index
+from awkward import contents
+from awkward import record
+from awkward import types
+from awkward import forms
 
 # internal
-import awkward._do
-import awkward._slicing
-import awkward._broadcasting
-import awkward._reducers
-import awkward._util
-import awkward._errors
-import awkward._lookup
-import awkward._ext  # strictly for unpickling from Awkward 1
-import awkward._namedaxis
+from awkward import _do
+from awkward import _slicing
+from awkward import _broadcasting
+from awkward import _reducers
+from awkward import _util
+from awkward import _errors
+from awkward import _lookup
+from awkward import _ext  # strictly for unpickling from Awkward 1
+from awkward import _namedaxis
 
 # third-party connectors
-import awkward._connect.numpy
-import awkward._connect.numexpr
-import awkward.numba
-import awkward.cppyy
-import awkward.jax
-import awkward.typetracer
-import awkward._typetracer  # todo: remove this after "deprecation" period
+from awkward._connect import numpy
+from awkward._connect import numexpr
+from awkward import numba
+from awkward import cppyy
+from awkward import jax
+from awkward import typetracer
+from awkward import _typetracer  # todo: remove this after "deprecation" period
 
 # high-level interface
 from awkward.highlevel import *
@@ -42,11 +43,11 @@ from awkward.highlevel import *
 from awkward.behaviors.mixins import *
 
 # exports
-import awkward.builder
-import awkward.forth
+from awkward import builder
+from awkward import forth
 
 # errors
-import awkward.errors
+from awkward import errors
 
 behavior: dict = {}
 

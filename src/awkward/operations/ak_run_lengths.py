@@ -110,7 +110,7 @@ def _impl(array, highlevel, behavior, attrs):
             size = ak.to_layout(data).length
 
         if size is not unknown_length and size == 0:
-            return backend.index_nplike.empty(0, dtype=np.int64), offsets
+            return backend.nplike.empty(0, dtype=np.int64), offsets
         else:
             diffs = backend.nplike.asarray(data[1:] != data[:-1])
             # Do we have list boundaries to consider?
@@ -125,25 +125,23 @@ def _impl(array, highlevel, behavior, attrs):
                 #                                      boundary diff ^
                 # To consider only the interior boundaries, we ignore the start and end
                 # offset values. These can be repeated with empty sublists, so we mask them out.
-                is_interior = backend.index_nplike.logical_and(
+                is_interior = backend.nplike.logical_and(
                     0 < offsets,
-                    offsets < backend.index_nplike.shape_item_as_index(size),
+                    offsets < backend.nplike.shape_item_as_index(size),
                 )
                 interior_offsets = offsets[is_interior]
                 diffs[interior_offsets - 1] = True
-            positions = backend.index_nplike.nonzero(diffs)[0]
-            full_positions = backend.index_nplike.empty(
-                positions.size + 2, dtype=np.int64
-            )
+            positions = backend.nplike.nonzero(diffs)[0]
+            full_positions = backend.nplike.empty(positions.size + 2, dtype=np.int64)
             full_positions[0] = 0
-            full_positions[-1] = backend.index_nplike.shape_item_as_index(size)
+            full_positions[-1] = backend.nplike.shape_item_as_index(size)
             full_positions[1:-1] = positions + 1
 
             nextcontent = full_positions[1:] - full_positions[:-1]
             if offsets is None:
                 nextoffsets = None
             else:
-                nextoffsets = backend.index_nplike.searchsorted(
+                nextoffsets = backend.nplike.searchsorted(
                     full_positions, offsets, side="left"
                 )
             return nextcontent, nextoffsets

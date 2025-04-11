@@ -85,10 +85,10 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 return None
 
             elif layout.is_option:
-                offsets = backend.index_nplike.empty(layout.length + 1, dtype=np.int64)
+                offsets = backend.nplike.empty(layout.length + 1, dtype=np.int64)
                 offsets[0] = 0
 
-                backend.index_nplike.cumsum(
+                backend.nplike.cumsum(
                     layout.mask_as_bool(valid_when=True), maybe_out=offsets[1:]
                 )
 

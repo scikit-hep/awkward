@@ -24,10 +24,6 @@ class TypeTracerBackend(Backend):
     def nplike(self) -> TypeTracer:
         return self._typetracer
 
-    @property
-    def index_nplike(self) -> TypeTracer:
-        return self._typetracer
-
     def __init__(self):
         self._typetracer = TypeTracer.instance()
 

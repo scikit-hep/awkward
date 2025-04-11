@@ -129,8 +129,8 @@ def _impl(base, what, where, highlevel, behavior, attrs):
                 if what is None:
                     what = ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            backend.index_nplike.full(base.length, -1, dtype=np.int64),
-                            nplike=backend.index_nplike,
+                            backend.nplike.full(base.length, -1, dtype=np.int64),
+                            nplike=backend.nplike,
                         ),
                         ak.contents.EmptyArray(),
                     )

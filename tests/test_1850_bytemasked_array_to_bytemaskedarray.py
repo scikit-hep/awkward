@@ -17,7 +17,7 @@ def test():
     result = layout.to_ByteMaskedArray(False)
     assert layout.to_list() == [None, 1, None, 3, None]
     assert result.to_list() == [None, 1, None, 3, None]
-    assert layout.backend.index_nplike.asarray(result.mask.data).tolist() == [
+    assert layout.backend.nplike.asarray(result.mask.data).tolist() == [
         1,
         0,
         1,

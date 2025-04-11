@@ -22,20 +22,13 @@ class JaxBackend(Backend):
     name: Final[str] = "jax"
 
     _jax: Jax
-    _numpy: Numpy
 
     @property
     def nplike(self) -> Jax:
         return self._jax
 
-    @property
-    def index_nplike(self) -> Numpy:
-        # we need to ensure Numpy like here for our awkward-cpp kernels (they don't work with Jax arrays)
-        return self._numpy
-
     def __init__(self):
         self._jax = Jax.instance()
-        self._numpy = Numpy.instance()
 
     def __getitem__(self, index: KernelKeyType) -> JaxKernel:
         # JAX uses Awkward's C++ kernels for index-only operations
