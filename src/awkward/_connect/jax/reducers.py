@@ -186,6 +186,28 @@ class Count(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
+def segment_count_nonzero(data, segment_ids, num_segments=None):
+    """
+    Counts the number of non-zero elements in `data` per segment.
+
+    Parameters:
+        data: jax.numpy.ndarray — input values to count.
+        segment_ids: jax.numpy.ndarray — same shape as data, segment assignment.
+        num_segments: int (optional) — total number of segments.
+
+    Returns:
+        jax.numpy.ndarray — count of non-zero values per segment.
+    """
+    if num_segments is None:
+        num_segments = int(jax.numpy.max(segment_ids).item()) + 1
+
+    # Create a binary mask where non-zero entries become 1
+    nonzero_mask = jax.numpy.where(data != 0, 1, 0)
+
+    # Sum the mask using segment_sum to count per segment
+    return jax.ops.segment_sum(nonzero_mask, segment_ids, num_segments=num_segments)
+
+
 @overloads(_reducers.CountNonzero)
 class CountNonzero(JAXReducer):
     name: Final = "count_nonzero"
@@ -209,7 +231,11 @@ class CountNonzero(JAXReducer):
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        raise NotImplementedError()
+        assert isinstance(array, ak.contents.NumpyArray)
+        result = segment_count_nonzero(array.data, parents.data)
+        result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
+
+        return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 @overloads(_reducers.Sum)
