@@ -52,11 +52,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     ) -> None:
         if not nplike.supports_virtual_arrays:
             raise TypeError(
-                f"The nplike {type(nplike)} does not support virtual arrays."
+                f"The nplike {type(nplike)} does not support virtual arrays"
             )
         if any(not is_integer(dim) for dim in shape):
             raise TypeError(
-                f"Only shapes of integer dimensions are supported for {type(self).__name__}. Received shape {shape}."
+                f"Only shapes of integer dimensions are supported for {type(self).__name__}. Received shape {shape}"
             )
 
         # array metadata
@@ -159,7 +159,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def nplike(self) -> NumpyLike:
         if not self._nplike.supports_virtual_arrays:
             raise TypeError(
-                f"The nplike {type(self._nplike)} does not support virtual arrays."
+                f"The nplike {type(self._nplike)} does not support virtual arrays"
             )
         return self._nplike
 
@@ -172,7 +172,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     @property
     def ctypes(self):
         if isinstance((self._nplike), ak._nplikes.cupy.Cupy):
-            raise AttributeError("Cupy ndarrays do not have a ctypes attribute.")
+            raise AttributeError("Cupy ndarrays do not have a ctypes attribute")
         return self.materialize().ctypes
 
     @property
@@ -244,7 +244,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                 or index.step is unknown_length
             ):
                 raise TypeError(
-                    f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided."
+                    f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided"
                 )
             else:
                 start, stop, step = index.indices(length)
@@ -273,13 +273,13 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         array = self.materialize()
         if len(array.shape) == 0:
             return int(array)
-        raise TypeError("Only scalar arrays can be converted to an int.")
+        raise TypeError("Only scalar arrays can be converted to an int")
 
     def __index__(self) -> int:
         array = self.materialize()
         if len(array.shape) == 0:
             return int(array)
-        raise TypeError("Only scalar arrays can be used as an index.")
+        raise TypeError("Only scalar arrays can be used as an index")
 
     def __len__(self) -> int:
         if len(self._shape) == 0:
