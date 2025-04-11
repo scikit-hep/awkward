@@ -151,7 +151,7 @@ def find_virtual_backend(obj: type):
                 return _name_to_backend_cls["jax"].instance()
             else:
                 raise TypeError(
-                    f"The nplike {type(obj.nplike)} does not support virtual arrays."
+                    f"The nplike {type(obj.nplike)} does not support virtual arrays"
                 )
 
         return finder
