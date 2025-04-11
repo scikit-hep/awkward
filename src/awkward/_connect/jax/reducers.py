@@ -181,7 +181,7 @@ class Count(JAXReducer):
         result = jax.numpy.ones_like(
             *materialize_if_virtual(array.data), dtype=array.dtype
         )
-        result = jax.ops.segment_sum(result, parents.data)
+        result = jax.ops.segment_sum(result, *materialize_if_virtual(parents.data))
 
         if np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
