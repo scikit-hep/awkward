@@ -37,32 +37,31 @@ class JAXReducer(Reducer):
         raise NotImplementedError
 
 
-def segment_argmin(data, segment_ids, num_segments=None):
+def segment_argmin(data, segment_ids):
     """
     Applies a segmented argmin-style reduction.
 
     Parameters:
         data: jax.numpy.ndarray — the values to reduce.
         segment_ids: same shape as data — indicates segment groupings.
-        num_segments: number of segments (optional).
 
     Returns:
         jax.numpy.ndarray — indices of min within each segment.
     """
-    if num_segments is None:
-        num_segments = ak.max(segment_ids) + 1
-    num_segments = int(num_segments)
+    num_segments = int(jax.numpy.max(segment_ids).item()) + 1
+    indices = jax.numpy.arange(data.shape[0])
 
-    data = jax.numpy.asarray(data)
-    segment_ids = jax.numpy.asarray(segment_ids)
+    # Find the minimum value in each segment
+    min_vals = jax.ops.segment_min(data, segment_ids, num_segments=num_segments)
 
-    # Create a 2D array where each row corresponds to one segment
-    segmented = jax.vmap(
-        lambda i: jax.numpy.where(segment_ids == i, data, jax.numpy.inf)
-    )(jax.numpy.arange(num_segments))
+    # Find where the data equals the minimum value in each segment
+    is_min = data == min_vals[segment_ids]
 
-    # Apply the argmin along axis 1 (within each segment)
-    return jax.numpy.argmin(segmented, axis=1)
+    # Mask the indices where data matches the minimum value
+    masked_indices = jax.numpy.where(is_min, indices, data.shape[0])
+
+    # Return the index of the first minimum value in each segment
+    return jax.ops.segment_min(masked_indices, segment_ids, num_segments=num_segments)
 
 
 @overloads(_reducers.ArgMin)
@@ -95,32 +94,31 @@ class ArgMin(JAXReducer):
         return ak.contents.NumpyArray(result, backend=array.backend)
 
 
-def segment_argmax(data, segment_ids, num_segments=None):
+def segment_argmax(data, segment_ids):
     """
     Applies a segmented argmax-style reduction.
 
     Parameters:
         data: jax.numpy.ndarray — the values to reduce.
         segment_ids: same shape as data — indicates segment groupings.
-        num_segments: number of segments (optional).
 
     Returns:
-        jax.numpy.ndarray — indices of min within each segment.
+        jax.numpy.ndarray — indices of max within each segment.
     """
-    if num_segments is None:
-        num_segments = ak.max(segment_ids) + 1
-    num_segments = int(num_segments)
+    num_segments = int(jax.numpy.max(segment_ids).item()) + 1
+    indices = jax.numpy.arange(data.shape[0])
 
-    data = jax.numpy.asarray(data)
-    segment_ids = jax.numpy.asarray(segment_ids)
+    # Find the maximum value in each segment
+    max_vals = jax.ops.segment_max(data, segment_ids, num_segments=num_segments)
 
-    # Create a 2D array where each row corresponds to one segment
-    segmented = jax.vmap(
-        lambda i: jax.numpy.where(segment_ids == i, data, -jax.numpy.inf)
-    )(jax.numpy.arange(num_segments))
+    # Find where the data equals the maximum value in each segment
+    is_max = data == max_vals[segment_ids]
 
-    # Apply the argmax along axis 1 (within each segment)
-    return jax.numpy.argmax(segmented, axis=1)
+    # Mask the indices where data matches the maximum value
+    masked_indices = jax.numpy.where(is_max, indices, data.shape[0])
+
+    # Return the index of the first maximum value in each segment
+    return jax.ops.segment_min(masked_indices, segment_ids, num_segments=num_segments)
 
 
 @overloads(_reducers.ArgMax)
@@ -188,6 +186,28 @@ class Count(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
+def segment_count_nonzero(data, segment_ids, num_segments=None):
+    """
+    Counts the number of non-zero elements in `data` per segment.
+
+    Parameters:
+        data: jax.numpy.ndarray — input values to count.
+        segment_ids: jax.numpy.ndarray — same shape as data, segment assignment.
+        num_segments: int (optional) — total number of segments.
+
+    Returns:
+        jax.numpy.ndarray — count of non-zero values per segment.
+    """
+    if num_segments is None:
+        num_segments = int(jax.numpy.max(segment_ids).item()) + 1
+
+    # Create a binary mask where non-zero entries become 1
+    nonzero_mask = jax.numpy.where(data != 0, 1, 0)
+
+    # Sum the mask using segment_sum to count per segment
+    return jax.ops.segment_sum(nonzero_mask, segment_ids, num_segments=num_segments)
+
+
 @overloads(_reducers.CountNonzero)
 class CountNonzero(JAXReducer):
     name: Final = "count_nonzero"
@@ -211,7 +231,11 @@ class CountNonzero(JAXReducer):
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        raise NotImplementedError()
+        assert isinstance(array, ak.contents.NumpyArray)
+        result = segment_count_nonzero(array.data, parents.data)
+        result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
+
+        return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 @overloads(_reducers.Sum)

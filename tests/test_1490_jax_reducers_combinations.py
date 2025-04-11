@@ -37,7 +37,6 @@ test_regulararray_tangent_jax = jax.numpy.array(
 )
 def test_reducer(func_ak, axis):
     func_jax = getattr(jax.numpy, func_ak.__name__)
-    print(func_jax)
 
     def func_ak_with_axis(x):
         return func_ak(x, axis=axis)
@@ -73,10 +72,9 @@ def test_reducer(func_ak, axis):
 
 
 @pytest.mark.parametrize("axis", [0, 1, None])
-@pytest.mark.parametrize("func_ak", [ak.argmin, ak.argmax])
+@pytest.mark.parametrize("func_ak", [ak.argmin, ak.argmax, ak.count_nonzero])
 def test_int_output_reducer(func_ak, axis):
     func_jax = getattr(jax.numpy, func_ak.__name__)
-    print(func_jax)
 
     def func_ak_with_axis(x):
         return func_ak(x, axis=axis)
@@ -112,7 +110,6 @@ def test_int_output_reducer(func_ak, axis):
 @pytest.mark.parametrize("func_ak", [ak.sort])
 def test_sort(func_ak, axis):
     func_jax = getattr(jax.numpy, func_ak.__name__)
-    print(func_jax)
 
     def func_ak_with_axis(x):
         return func_ak(x, axis=axis)
@@ -150,7 +147,6 @@ def test_sort(func_ak, axis):
 @pytest.mark.parametrize("func_ak", [ak.ravel])
 def test_ravel(func_ak):
     func_jax = getattr(jax.numpy, func_ak.__name__)
-    print(func_jax)
 
     def func_ak_no_axis(x):
         return func_ak(x)
