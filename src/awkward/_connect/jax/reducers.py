@@ -235,7 +235,9 @@ class CountNonzero(JAXReducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        result = segment_count_nonzero(array.data, parents.data)
+        result = segment_count_nonzero(
+            *materialize_if_virtual(array.data, parents.data)
+        )
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
 
         return ak.contents.NumpyArray(result, backend=array.backend)
