@@ -10,6 +10,7 @@ from awkward._namedaxis import (
     _named_axis_to_positional_axis,
     _remove_named_axis,
 )
+from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import regularize_axis
@@ -106,7 +107,10 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 stops = layout.stops.data
 
                 empties = starts == stops
-                index[empties] = -1
+                if isinstance(layout.backend.nplike, Jax):
+                    index = index.at[empties].set(-1)
+                else:
+                    index[empties] = -1
 
                 return ak.contents.IndexedOptionArray.simplified(
                     ak.index.Index64(index), layout._content
