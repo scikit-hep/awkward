@@ -34,8 +34,7 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
 class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     """
     Implements a virtual array to be used as a buffer inside layouts.
-    Virtual arrays are tied to specific nplikes and only numpy and cupy nplikes are allowed.
-    Therefore, virtual arrays are only allowed to generate `numpy.ndarray`s or `cupy.ndarray`s when materialized.
+    Virtual arrays are tied to specific nplikes.
     The arrays are generated via a generator function that is passed to the constructor.
     All virtual arrays also required to have a known dtype and shape and `unknown_length` is not currently allowed in the shape.
     Some operations (such as trivial slicing) maintain virtualness and return a new virtual array.
@@ -53,7 +52,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     ) -> None:
         if not nplike.supports_virtual_arrays:
             raise TypeError(
-                f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(nplike)}"
+                f"The nplike {type(nplike)} does not support virtual arrays."
             )
         if any(not is_integer(dim) for dim in shape):
             raise TypeError(
@@ -160,7 +159,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def nplike(self) -> NumpyLike:
         if not self._nplike.supports_virtual_arrays:
             raise TypeError(
-                f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(self._nplike)}"
+                f"The nplike {type(self._nplike)} does not support virtual arrays."
             )
         return self._nplike
 

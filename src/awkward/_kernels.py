@@ -100,6 +100,8 @@ class JaxKernel(NumpyKernel):
     def __call__(self, *args) -> None:
         assert len(args) == len(self._impl.argtypes)
 
+        args = materialize_if_virtual(*args)
+
         if not any(Jax.is_tracer_type(type(arg)) for arg in args):
             return super().__call__(*args)
 
