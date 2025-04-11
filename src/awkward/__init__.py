@@ -17,7 +17,7 @@ from awkward import types
 from awkward import forms
 
 # internal
-ifrom awkward import _do
+from awkward import _do
 from awkward import _slicing
 from awkward import _broadcasting
 from awkward import _reducers
