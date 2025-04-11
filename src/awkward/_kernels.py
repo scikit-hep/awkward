@@ -127,8 +127,6 @@ class JaxKernel(BaseKernel):
         args = materialize_if_virtual(*args)
 
         if not any(Jax.is_tracer_type(type(arg)) for arg in args):
-            args = materialize_if_virtual(*args)
-
             return self._impl(
                 *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
             )
