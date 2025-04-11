@@ -30,11 +30,10 @@ def to_nplike(
 
     # We can always convert virtual arrays to typetracers
     # but can only convert virtual arrays to other backends with known data if they are intentionally materialized
-    # Only numpy and cupy nplikes are allowed for virtual arrays
     if isinstance(array, awkward._nplikes.virtual.VirtualArray):
         if not array.is_materialized and nplike.known_data:
             raise TypeError(
-                "Cannot convert a VirtualArray to a different nplike with known data without materializing it first. Use ak.materialize on the array to do so."
+                "Cannot convert a VirtualArray to a different nplike with known data without materializing it first. Use ak.materialize on the array to do so"
             )
         else:
             if nplike.supports_virtual_arrays:
@@ -43,7 +42,7 @@ def to_nplike(
                 pass
             else:
                 raise TypeError(
-                    f"Can only convert a VirtualArray to numpy, cupy or typetracer nplikes. Received {type(nplike)}"
+                    f"The target nplike {type(nplike)} does not support virtual arrays"
                 )
 
     if nplike.known_data and not from_nplike.known_data:

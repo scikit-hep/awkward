@@ -34,8 +34,7 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
 class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     """
     Implements a virtual array to be used as a buffer inside layouts.
-    Virtual arrays are tied to specific nplikes and only numpy and cupy nplikes are allowed.
-    Therefore, virtual arrays are only allowed to generate `numpy.ndarray`s or `cupy.ndarray`s when materialized.
+    Virtual arrays are tied to specific nplikes.
     The arrays are generated via a generator function that is passed to the constructor.
     All virtual arrays also required to have a known dtype and shape and `unknown_length` is not currently allowed in the shape.
     Some operations (such as trivial slicing) maintain virtualness and return a new virtual array.
@@ -53,11 +52,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     ) -> None:
         if not nplike.supports_virtual_arrays:
             raise TypeError(
-                f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(nplike)}"
+                f"The nplike {type(nplike)} does not support virtual arrays"
             )
         if any(not is_integer(dim) for dim in shape):
             raise TypeError(
-                f"Only shapes of integer dimensions are supported for {type(self).__name__}. Received shape {shape}."
+                f"Only shapes of integer dimensions are supported for {type(self).__name__}. Received shape {shape}"
             )
 
         # array metadata
@@ -160,7 +159,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def nplike(self) -> NumpyLike:
         if not self._nplike.supports_virtual_arrays:
             raise TypeError(
-                f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(self._nplike)}"
+                f"The nplike {type(self._nplike)} does not support virtual arrays"
             )
         return self._nplike
 
@@ -173,7 +172,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     @property
     def ctypes(self):
         if isinstance((self._nplike), ak._nplikes.cupy.Cupy):
-            raise AttributeError("Cupy ndarrays do not have a ctypes attribute.")
+            raise AttributeError("Cupy ndarrays do not have a ctypes attribute")
         return self.materialize().ctypes
 
     @property
@@ -245,7 +244,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                 or index.step is unknown_length
             ):
                 raise TypeError(
-                    f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided."
+                    f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided"
                 )
             else:
                 start, stop, step = index.indices(length)
@@ -274,13 +273,13 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         array = self.materialize()
         if len(array.shape) == 0:
             return int(array)
-        raise TypeError("Only scalar arrays can be converted to an int.")
+        raise TypeError("Only scalar arrays can be converted to an int")
 
     def __index__(self) -> int:
         array = self.materialize()
         if len(array.shape) == 0:
             return int(array)
-        raise TypeError("Only scalar arrays can be used as an index.")
+        raise TypeError("Only scalar arrays can be used as an index")
 
     def __len__(self) -> int:
         if len(self._shape) == 0:
