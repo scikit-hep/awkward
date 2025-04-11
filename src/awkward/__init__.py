@@ -1,7 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-# Versioning
 from __future__ import annotations
+
+# Versioning
 from awkward._version import __version__
 
 # NumPy-like alternatives
@@ -9,11 +10,11 @@ import awkward._backends
 import awkward._nplikes
 
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
-import awkward.index
-import awkward.contents
-import awkward.record
-import awkward.types
-import awkward.forms
+from awkward import index
+from awkward import contents
+from awkward import record
+from awkward import types
+from awkward import forms
 
 # internal
 import awkward._do
@@ -27,12 +28,12 @@ import awkward._ext  # strictly for unpickling from Awkward 1
 import awkward._namedaxis
 
 # third-party connectors
-import awkward._connect.numpy
-import awkward._connect.numexpr
-import awkward.numba
-import awkward.cppyy
-import awkward.jax
-import awkward.typetracer
+from awkward._connect import numpy
+from awkward._connect import numexpr
+from awkward import numba
+from awkward import cppyy
+from awkward import jax
+from awkward import typetracer
 import awkward._typetracer  # todo: remove this after "deprecation" period
 
 # high-level interface
@@ -42,11 +43,11 @@ from awkward.highlevel import *
 from awkward.behaviors.mixins import *
 
 # exports
-import awkward.builder
-import awkward.forth
+from awkward import builder
+from awkward import forth
 
 # errors
-import awkward.errors
+from awkward import errors
 
 behavior: dict = {}
 
