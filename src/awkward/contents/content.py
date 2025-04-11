@@ -383,15 +383,15 @@ class Content(Meta):
         length = 1 if length is not unknown_length and length == 0 else length
         index = head.index
         indexlength = index.length
-        index = index.to_nplike(self._backend.index_nplike)
+        index = index.to_nplike(self._backend.nplike)
         outindex = Index64.empty(
             index.length * length,
-            self._backend.index_nplike,
+            self._backend.nplike,
         )
 
         assert (
-            outindex.nplike is self._backend.index_nplike
-            and index.nplike is self._backend.index_nplike
+            outindex.nplike is self._backend.nplike
+            and index.nplike is self._backend.nplike
         )
         self._maybe_index_error(
             self._backend[
@@ -427,16 +427,16 @@ class Content(Meta):
                 f"cannot fit masked jagged slice with length {index.length} into {type(that).__name__} of size {content.length}",
             )
 
-        outputmask = Index64.empty(index.length, self._backend.index_nplike)
-        starts = Index64.empty(index.length, self._backend.index_nplike)
-        stops = Index64.empty(index.length, self._backend.index_nplike)
+        outputmask = Index64.empty(index.length, self._backend.nplike)
+        starts = Index64.empty(index.length, self._backend.nplike)
+        stops = Index64.empty(index.length, self._backend.nplike)
 
         assert (
-            index.nplike is self._backend.index_nplike
-            and jagged._offsets.nplike is self._backend.index_nplike
-            and outputmask.nplike is self._backend.index_nplike
-            and starts.nplike is self._backend.index_nplike
-            and stops.nplike is self._backend.index_nplike
+            index.nplike is self._backend.nplike
+            and jagged._offsets.nplike is self._backend.nplike
+            and outputmask.nplike is self._backend.nplike
+            and starts.nplike is self._backend.nplike
+            and stops.nplike is self._backend.nplike
         )
         self._maybe_index_error(
             self._backend[
@@ -539,8 +539,8 @@ class Content(Meta):
 
         elif isinstance(where, slice) and where.step is None:
             # Ensure that start, stop are non-negative!
-            start, stop, _, _ = self._backend.index_nplike.derive_slice_for_length(
-                normalize_slice(where, nplike=self._backend.index_nplike), self.length
+            start, stop, _, _ = self._backend.nplike.derive_slice_for_length(
+                normalize_slice(where, nplike=self._backend.nplike), self.length
             )
             return self._getitem_range(start, stop)
 
@@ -669,33 +669,33 @@ class Content(Meta):
         elif isinstance(where, ak.contents.NumpyArray):
             data_as_index = to_nplike(
                 where.data,
-                self._backend.index_nplike,
+                self._backend.nplike,
                 from_nplike=self._backend.nplike,
             )
             if np.issubdtype(where.dtype, np.int64):
                 allow_lazy = True
                 carry = Index64(
-                    self._backend.index_nplike.reshape(data_as_index, (-1,)),
-                    nplike=self._backend.index_nplike,
+                    self._backend.nplike.reshape(data_as_index, (-1,)),
+                    nplike=self._backend.nplike,
                 )
             elif np.issubdtype(where.dtype, np.integer):
                 allow_lazy = "copied"  # True, but also can be modified in-place
                 carry = Index64(
-                    self._backend.index_nplike.reshape(
-                        self._backend.index_nplike.astype(
+                    self._backend.nplike.reshape(
+                        self._backend.nplike.astype(
                             data_as_index, dtype=np.int64, copy=True
                         ),
                         (-1,),
                     ),
-                    nplike=self._backend.index_nplike,
+                    nplike=self._backend.nplike,
                 )
             elif np.issubdtype(where.dtype, np.bool_):
                 if len(where.data.shape) == 1:
-                    where = self._backend.index_nplike.nonzero(data_as_index)[0]
-                    carry = Index64(where, nplike=self._backend.index_nplike)
+                    where = self._backend.nplike.nonzero(data_as_index)[0]
+                    carry = Index64(where, nplike=self._backend.nplike)
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
-                    wheres = self._backend.index_nplike.nonzero(data_as_index)
+                    wheres = self._backend.nplike.nonzero(data_as_index)
                     return self._getitem(wheres, named_axis)
             else:
                 raise TypeError(
@@ -752,7 +752,7 @@ class Content(Meta):
 
             elif len(where) == 0:
                 return self._carry(
-                    Index64.empty(0, self._backend.index_nplike),
+                    Index64.empty(0, self._backend.nplike),
                     allow_lazy=True,
                 )
             # Normally we would be worried about np.array et al. being treated
@@ -830,7 +830,7 @@ class Content(Meta):
         raise NotImplementedError
 
     def _local_index_axis0(self) -> NumpyArray:
-        localindex = Index64.empty(self.length, self._backend.index_nplike)
+        localindex = Index64.empty(self.length, self._backend.nplike)
         self._backend.maybe_kernel_error(
             self._backend["awkward_localindex", np.int64](
                 localindex.data,
@@ -940,24 +940,24 @@ class Content(Meta):
                     combinationslen = combinationslen * (size - j + 1)
                     combinationslen = combinationslen // j
 
-        tocarryraw = self._backend.index_nplike.empty(n, dtype=np.intp)
+        tocarryraw = self._backend.nplike.empty(n, dtype=np.intp)
         tocarry = []
         for i in range(n):
             ptr = Index64.empty(
                 combinationslen,
-                nplike=self._backend.index_nplike,
+                nplike=self._backend.nplike,
                 dtype=np.int64,
             )
             tocarry.append(ptr)
             if self._backend.nplike.known_data:
                 tocarryraw[i] = ptr.ptr
 
-        toindex = Index64.empty(n, self._backend.index_nplike, dtype=np.int64)
-        fromindex = Index64.empty(n, self._backend.index_nplike, dtype=np.int64)
+        toindex = Index64.empty(n, self._backend.nplike, dtype=np.int64)
+        fromindex = Index64.empty(n, self._backend.nplike, dtype=np.int64)
 
         assert (
-            toindex.nplike is self._backend.index_nplike
-            and fromindex.nplike is self._backend.index_nplike
+            toindex.nplike is self._backend.nplike
+            and fromindex.nplike is self._backend.nplike
         )
         self._backend.maybe_kernel_error(
             self._backend[
@@ -1046,14 +1046,14 @@ class Content(Meta):
     def _pad_none_axis0(self, target: int, clip: bool) -> Content:
         if not clip and (self.length is unknown_length or (target < self.length)):
             index = Index64(
-                self._backend.index_nplike.arange(self.length, dtype=np.int64),
-                nplike=self._backend.index_nplike,
+                self._backend.nplike.arange(self.length, dtype=np.int64),
+                nplike=self._backend.nplike,
             )
 
         else:
-            index = Index64.empty(target, self._backend.index_nplike)
+            index = Index64.empty(target, self._backend.nplike)
 
-            assert index.nplike is self._backend.index_nplike
+            assert index.nplike is self._backend.nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_index_rpad_and_clip_axis0",

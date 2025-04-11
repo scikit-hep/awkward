@@ -223,10 +223,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
                     return layout
 
                 tags = layout.tags.data
-                index = layout.backend.index_nplike.asarray(
-                    layout.index.data, copy=True
-                )
-                big_mask = layout.backend.index_nplike.empty(
+                index = layout.backend.nplike.asarray(layout.index.data, copy=True)
+                big_mask = layout.backend.nplike.empty(
                     layout.index.length, dtype=np.bool_
                 )
                 for tag, content in enumerate(layout.contents):

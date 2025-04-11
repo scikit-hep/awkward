@@ -8,6 +8,7 @@ from itertools import permutations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
@@ -631,7 +632,7 @@ def _recurse_option_any(
         if isinstance(type_.content, ak.types.UnknownType):
             return ak.contents.IndexedOptionArray(
                 ak.index.Index64(
-                    layout.backend.index_nplike.full(layout.length, -1, dtype=np.int64)
+                    layout.backend.nplike.full(layout.length, -1, dtype=np.int64)
                 ),
                 ak.forms.from_type(type_.content).length_zero_array(
                     backend=layout.backend
@@ -644,19 +645,28 @@ def _recurse_option_any(
                 # If so, convert to packed so that any non-referenced content items are trimmed
                 # This is required so that unused union items are seen to be safe to project out later
                 # We don't use to_packed(), as it recurses
-                index_nplike = layout.backend.index_nplike
-                new_index = index_nplike.empty(layout.length, dtype=np.int64)
+                nplike = layout.backend.nplike
+                new_index = nplike.empty(layout.length, dtype=np.int64)
 
                 is_none = layout.mask_as_bool(False)
-                num_none = index_nplike.count_nonzero(is_none)
+                num_none = nplike.count_nonzero(is_none)
 
-                new_index[is_none] = -1
-                new_index[~is_none] = index_nplike.arange(
-                    layout.length - num_none,
-                    dtype=new_index.dtype,
-                )
+                if isinstance(nplike, Jax):
+                    new_index = new_index.at[is_none].set(-1)
+                    new_index = new_index.at[~is_none].set(
+                        nplike.arange(
+                            layout.length - num_none,
+                            dtype=new_index.dtype,
+                        )
+                    )
+                else:
+                    new_index[is_none] = -1
+                    new_index[~is_none] = nplike.arange(
+                        layout.length - num_none,
+                        dtype=new_index.dtype,
+                    )
                 return ak.contents.IndexedOptionArray(
-                    ak.index.Index64(new_index, nplike=index_nplike),
+                    ak.index.Index64(new_index, nplike=nplike),
                     _enforce_type(layout.project(), type_.content),
                     parameters=layout._parameters,
                 )
@@ -671,7 +681,7 @@ def _recurse_option_any(
         # Check that we can build the content
         content_enforceable = _type_is_enforceable(layout.content, type_)
 
-        if layout.backend.index_nplike.any(layout.mask_as_bool(False)):
+        if layout.backend.nplike.any(layout.mask_as_bool(False)):
             raise ValueError(
                 "option types can only be removed if there are no missing values"
             )
@@ -699,7 +709,7 @@ def _recurse_any_option(
     if isinstance(type_.content, ak.types.UnknownType):
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(
-                layout.backend.index_nplike.full(layout.length, -1, dtype=np.int64)
+                layout.backend.nplike.full(layout.length, -1, dtype=np.int64)
             ),
             ak.forms.from_type(type_.content).length_zero_array(backend=layout.backend),
         )
@@ -806,7 +816,7 @@ def _recurse_union_union(
             layout_tags = layout.tags
         else:
             layout_tags = ak.index.Index8.empty(
-                layout.tags.length, layout.backend.index_nplike
+                layout.tags.length, layout.backend.nplike
             )
 
         # Ensure that the union references all of the tags of the permutation,
@@ -820,13 +830,9 @@ def _recurse_union_union(
                 layout_tags.data[layout_tag_is_i] = j
 
             # Keep track of the length of layout subcontent
-            _total_used_tags += layout.backend.index_nplike.count_nonzero(
-                layout_tag_is_i
-            )
+            _total_used_tags += layout.backend.nplike.count_nonzero(layout_tag_is_i)
         # Is the new union of the same length as the original?
-        total_used_tags = layout.backend.index_nplike.index_as_shape_item(
-            _total_used_tags
-        )
+        total_used_tags = layout.backend.nplike.index_as_shape_item(_total_used_tags)
         if not (
             total_used_tags is unknown_length
             or layout.length is unknown_length
@@ -890,11 +896,11 @@ def _recurse_union_union(
                             layout_content = layout.project(tag)
                             # Rebuild the index as an enumeration over the (dense) projection
                             # This ensures that it is packed!
-                            index_data = layout.backend.index_nplike.asarray(
+                            index_data = layout.backend.nplike.asarray(
                                 layout.index.data, copy=True
                             )
                             is_tag = layout.tags.data == tag
-                            index_data[is_tag] = layout.backend.index_nplike.arange(
+                            index_data[is_tag] = layout.backend.nplike.arange(
                                 layout_content.length, dtype=index_data.dtype
                             )
                             index = ak.index.Index(index_data)
@@ -922,19 +928,17 @@ def _recurse_union_union(
 def _recurse_union_non_union(
     layout: ak.contents.UnionArray, type_: ak.types.Type
 ) -> ak.contents.Content:
-    index_nplike = layout.backend.index_nplike
+    nplike = layout.backend.nplike
     if all(_type_is_enforceable(c, type_).is_enforceable for c in layout.contents):
         # Convert each projected content to the required type
         next_contents = []
-        index_data = index_nplike.empty(layout.length, dtype=np.int64)
+        index_data = nplike.empty(layout.length, dtype=np.int64)
         j = 0
         for tag in range(len(layout.contents)):
             tag_content = layout.project(tag)
             # Set the index of these tags to a simple range
-            i, j = j, j + index_nplike.shape_item_as_index(tag_content.length)
-            index_data[layout.tags.data == tag] = index_nplike.arange(
-                i, j, dtype=np.int64
-            )
+            i, j = j, j + nplike.shape_item_as_index(tag_content.length)
+            index_data[layout.tags.data == tag] = nplike.arange(i, j, dtype=np.int64)
             # Convert layout
             next_contents.append(_enforce_type(tag_content, type_))
 
@@ -959,7 +963,7 @@ def _recurse_union_non_union(
 
         # Require that we are the only content
         content_is_tag = layout.tags.data == tag
-        if index_nplike.known_data and not index_nplike.all(content_is_tag):
+        if nplike.known_data and not nplike.all(content_is_tag):
             raise ValueError(
                 f"UnionArray(s) can only be converted to {type_} if they are equivalent to their "
                 f"projections"
@@ -977,15 +981,15 @@ def _recurse_union_non_union(
 def _recurse_any_union(
     layout: ak.contents.Content, type_: ak.types.UnionType
 ) -> ak.contents.Content:
-    index_nplike = layout.backend.index_nplike
+    nplike = layout.backend.nplike
 
     for i, content_type in enumerate(type_.contents):
         if not _layout_has_type(layout, content_type):
             continue
 
         # Build zero-length contents from the new types
-        tags = index_nplike.zeros(layout.length, dtype=np.int8)
-        index = index_nplike.arange(layout.length, dtype=np.int64)
+        tags = nplike.zeros(layout.length, dtype=np.int8)
+        index = nplike.arange(layout.length, dtype=np.int64)
 
         other_contents = [
             ak.forms.from_type(t).length_zero_array(backend=layout.backend)
@@ -994,8 +998,8 @@ def _recurse_any_union(
         ]
 
         return ak.contents.UnionArray(
-            tags=ak.index.Index8(tags, nplike=index_nplike),
-            index=ak.index.Index64(index, nplike=index_nplike),
+            tags=ak.index.Index8(tags, nplike=nplike),
+            index=ak.index.Index64(index, nplike=nplike),
             contents=[
                 _enforce_type(layout, content_type),
                 *other_contents,
@@ -1129,7 +1133,7 @@ def _recurse_record_any(
                 next_contents.append(
                     ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            layout.backend.index_nplike.full(
+                            layout.backend.nplike.full(
                                 layout.length, -1, dtype=np.int64
                             )
                         ),
@@ -1176,7 +1180,7 @@ def _recurse_record_any(
                 next_contents.append(
                     ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            layout.backend.index_nplike.full(
+                            layout.backend.nplike.full(
                                 layout.length, -1, dtype=np.int64
                             )
                         ),

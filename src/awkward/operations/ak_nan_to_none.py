@@ -47,7 +47,7 @@ def _impl(array, highlevel: bool, behavior: Mapping | None, attrs: Mapping | Non
         if layout.is_numpy and np.issubdtype(layout.dtype, np.floating):
             mask = backend.nplike.isnan(layout.data)
             return ak.contents.ByteMaskedArray(
-                ak.index.Index8(mask, nplike=backend.index_nplike),
+                ak.index.Index8(mask, nplike=backend.nplike),
                 layout,
                 valid_when=False,
             )

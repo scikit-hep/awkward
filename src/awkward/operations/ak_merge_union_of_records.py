@@ -9,6 +9,7 @@ from awkward._namedaxis import (
     _get_named_axis,
     _named_axis_to_positional_axis,
 )
+from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import ArrayLike, NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
@@ -75,7 +76,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
     def invert_record_union(
         tags: ArrayLike, index: ArrayLike, contents
     ) -> ak.contents.RecordArray:
-        index_nplike = layout.backend.index_nplike
+        nplike = layout.backend.nplike
         # First, create an ordered list containing the union of all fields
         seen_fields = set()
         all_fields = []
@@ -89,8 +90,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
         # Build unions for each field
         outer_field_contents = []
         for field in all_fields:
-            field_tags = index_nplike.asarray(tags.data, copy=True)
-            field_index = index_nplike.asarray(index.data, copy=True)
+            field_tags = nplike.asarray(tags.data, copy=True)
+            field_index = nplike.asarray(index.data, copy=True)
 
             # Build contents for union representing current field
             field_contents = [c.content(field) for c in contents if c.has_field(field)]
@@ -111,11 +112,11 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 # Make the tagged content an option, growing by one to ensure we
                 # have a known `None` value to index into
                 tagged_content = field_contents[tag_for_missing]
-                indexedoption_index = index_nplike.arange(
+                indexedoption_index = nplike.arange(
                     tagged_content.length + 1, dtype=np.int64
                 )
                 indexedoption_index[
-                    index_nplike.shape_item_as_index(tagged_content.length)
+                    nplike.shape_item_as_index(tagged_content.length)
                 ] = -1
                 field_contents[tag_for_missing] = (
                     ak.contents.IndexedOptionArray.simplified(
@@ -124,7 +125,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 )
 
             # Index of None values in tagged content (content with extra None item at end)
-            index_missing = index_nplike.shape_item_as_index(
+            index_missing = nplike.shape_item_as_index(
                 field_contents[tag_for_missing].length - 1
             )
             # Now build contents for union, by looping over outermost index
@@ -160,13 +161,23 @@ def _impl(array, axis, highlevel, behavior, attrs):
         # Find dense (outer) index into non-null items.
         # This is in trivial order: the re-arranging is done by the union (below)
         is_none = index < 0
-        num_none = layout.backend.index_nplike.count_nonzero(is_none)
-        dense_index = layout.backend.index_nplike.empty(index.size, dtype=index.dtype)
-        dense_index[is_none] = -1
-        dense_index[~is_none] = layout.backend.index_nplike.arange(
-            index.size - num_none,
-            dtype=index.dtype,
-        )
+        num_none = layout.backend.nplike.count_nonzero(is_none)
+        dense_index = layout.backend.nplike.empty(index.size, dtype=index.dtype)
+
+        if isinstance(layout.backend.nplike, Jax):
+            dense_index = dense_index.at[is_none].set(-1)
+            dense_index = dense_index.at[~is_none].set(
+                layout.backend.nplike.arange(
+                    index.size - num_none,
+                    dtype=index.dtype,
+                )
+            )
+        else:
+            dense_index[is_none] = -1
+            dense_index[~is_none] = layout.backend.nplike.arange(
+                index.size - num_none,
+                dtype=index.dtype,
+            )
         return dense_index
 
     def apply(layout, depth, backend, **kwargs):
@@ -190,7 +201,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 # We'll rebuild the union to include only the non-null items.
                 inner_union_index_parts = []
                 next_contents = []
-                next_tags_data_sparse = backend.index_nplike.asarray(
+                next_tags_data_sparse = backend.nplike.asarray(
                     layout.tags.data, copy=True
                 )
                 for tag, content in enumerate(layout.contents):
@@ -214,7 +225,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
                         is_non_null = merged_index >= 0
                         inner_union_index_parts.append(merged_index[is_non_null])
                         # Mask out tags of items that are missing
-                        next_tags_data_sparse[is_this_tag] = backend.index_nplike.where(
+                        next_tags_data_sparse[is_this_tag] = backend.nplike.where(
                             is_non_null, tag, -1
                         )
 
@@ -234,7 +245,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 # Ignore missing items for inner union, creating a dense array of tags
                 next_tags_data = next_tags_data_sparse[next_tags_data_sparse >= 0]
                 # Build dense index from parts for each tag
-                next_index_data = backend.index_nplike.empty(
+                next_index_data = backend.nplike.empty(
                     next_tags_data.size, dtype=np.int64
                 )
                 for tag, content_index in enumerate(inner_union_index_parts):
@@ -249,7 +260,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
             # Any index types need to be re-written
             elif any(x.is_indexed for x in layout.contents):
                 # We'll create an outermost indexed-option type, which re-instates the missing values
-                next_index_data = backend.index_nplike.empty(
+                next_index_data = backend.nplike.empty(
                     layout.index.length, dtype=np.int64
                 )
 

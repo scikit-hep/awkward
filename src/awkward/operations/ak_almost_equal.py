@@ -164,7 +164,7 @@ def _impl(
             # Check that indexes are equal
             left_index = left.to_ListOffsetArray64(True).offsets
             right_index = right.to_ListOffsetArray64(True).offsets
-            if not backend.index_nplike.array_equal(left_index.data, right_index.data):
+            if not backend.nplike.array_equal(left_index.data, right_index.data):
                 return False
             # Mixed regular-var
             if left.is_regular and not right.is_regular:
@@ -221,7 +221,7 @@ def _impl(
                     and left.shape == right.shape
                 )
         elif left.is_option and right.is_option:
-            return backend.index_nplike.array_equal(
+            return backend.nplike.array_equal(
                 left.mask_as_bool(True), right.mask_as_bool(True)
             ) and visitor(left.project(), right.project())
         elif left.is_union and right.is_union:
@@ -234,16 +234,16 @@ def _impl(
                     unique,
                     unique_index,
                     *_,
-                ) = backend.index_nplike.unique_all(values)
+                ) = backend.nplike.unique_all(values)
                 # Now re-order `unique` by order of appearance (`unique_index`)
-                return values[backend.index_nplike.sort(unique_index)]
+                return values[backend.nplike.sort(unique_index)]
 
             # Find order of appearance for each union tags, and assume these are one-to-one maps
             left_tag_order = ordered_unique_values(left.tags.data)
             right_tag_order = ordered_unique_values(right.tags.data)
 
             # Create map from left tags to right tags
-            left_tag_to_right_tag = backend.index_nplike.empty(
+            left_tag_to_right_tag = backend.nplike.empty(
                 left_tag_order.size, dtype=np.int64
             )
             left_tag_to_right_tag[left_tag_order] = right_tag_order
@@ -251,7 +251,7 @@ def _impl(
             # Map left tags onto right, such that the result should equal right.tags
             # if the two tag arrays are equivalent
             new_left_tag = left_tag_to_right_tag[left.tags.data]
-            if not backend.index_nplike.all(new_left_tag == right.tags.data):
+            if not backend.nplike.all(new_left_tag == right.tags.data):
                 return False
 
             # Now project out the contents, and check for equality

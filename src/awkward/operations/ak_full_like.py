@@ -121,7 +121,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
 
     def action(layout, backend, **kwargs):
         nplike = backend.nplike
-        index_nplike = backend.index_nplike
+        nplike = backend.nplike
 
         if layout.is_numpy:
             original = nplike.asarray(layout.data)
@@ -166,12 +166,12 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
                 asbytes = nplike.frombuffer(b"", dtype=np.uint8)
                 result = ak.contents.ListArray(
                     ak.index.Index64(
-                        index_nplike.zeros(layout.length, dtype=np.int64),
-                        nplike=index_nplike,
+                        nplike.zeros(layout.length, dtype=np.int64),
+                        nplike=nplike,
                     ),
                     ak.index.Index64(
-                        index_nplike.zeros(layout.length, dtype=np.int64),
-                        nplike=index_nplike,
+                        nplike.zeros(layout.length, dtype=np.int64),
+                        nplike=nplike,
                     ),
                     ak.contents.NumpyArray(
                         asbytes,
@@ -197,11 +197,11 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
                 asbytes = nplike.frombuffer(asbytes, dtype=np.uint8)
                 result = ak.contents.ListArray(
                     ak.index.Index64(
-                        index_nplike.zeros(layout.length, dtype=np.int64),
-                        nplike=index_nplike,
+                        nplike.zeros(layout.length, dtype=np.int64),
+                        nplike=nplike,
                     ),
                     ak.index.Index64(
-                        index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
+                        nplike.full(layout.length, len(asbytes), dtype=np.int64)
                     ),
                     ak.contents.NumpyArray(
                         asbytes, parameters={"__array__": charlike_type}

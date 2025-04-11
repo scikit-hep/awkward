@@ -24,10 +24,6 @@ class CupyBackend(Backend):
     def nplike(self) -> Cupy:
         return self._cupy
 
-    @property
-    def index_nplike(self) -> Cupy:
-        return self._cupy
-
     def __init__(self):
         self._cupy = Cupy.instance()
 

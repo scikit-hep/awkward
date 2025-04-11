@@ -77,8 +77,8 @@ def _merge_as_union(
 ) -> ak.contents.UnionArray:
     length = sum(c.length for c in contents)
     first = contents[0]
-    tags = ak.index.Index8.empty(length, first.backend.index_nplike)
-    index = ak.index.Index64.empty(length, first.backend.index_nplike)
+    tags = ak.index.Index8.empty(length, first.backend.nplike)
+    index = ak.index.Index64.empty(length, first.backend.nplike)
 
     offset = 0
     for i, content in enumerate(contents):
@@ -256,7 +256,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                         )
                     sizes.append(regulararrays[-1].size)
 
-                prototype = backend.index_nplike.empty(sum(sizes), dtype=np.int8)
+                prototype = backend.nplike.empty(sum(sizes), dtype=np.int8)
                 start = 0
                 for tag, size in enumerate(sizes):
                     prototype[start : start + size] = tag
@@ -268,8 +268,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                     tags_cls = ak.index.Index64
 
                 tags = tags_cls(
-                    backend.index_nplike.reshape(
-                        backend.index_nplike.broadcast_to(
+                    backend.nplike.reshape(
+                        backend.nplike.broadcast_to(
                             prototype, (length, prototype.size)
                         ),
                         (-1,),
@@ -301,13 +301,11 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                         nextinputs.append(
                             ak.contents.ListOffsetArray(
                                 ak.index.Index64(
-                                    backend.index_nplike.arange(
-                                        backend.index_nplike.shape_item_as_index(
-                                            length + 1
-                                        ),
+                                    backend.nplike.arange(
+                                        backend.nplike.shape_item_as_index(length + 1),
                                         dtype=np.int64,
                                     ),
-                                    nplike=backend.index_nplike,
+                                    nplike=backend.nplike,
                                 ),
                                 ak.contents.NumpyArray(
                                     backend.nplike.broadcast_to(
@@ -317,26 +315,22 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                             )
                         )
 
-                counts = backend.index_nplike.zeros(
-                    nextinputs[0].length, dtype=np.int64
-                )
+                counts = backend.nplike.zeros(nextinputs[0].length, dtype=np.int64)
                 all_counts = []
                 all_flatten = []
 
                 for x in nextinputs:
                     o, f = x._offsets_and_flattened(axis=1, depth=1)
                     c = o.data[1:] - o.data[:-1]
-                    backend.index_nplike.add(counts, c, maybe_out=counts)
+                    backend.nplike.add(counts, c, maybe_out=counts)
                     all_counts.append(c)
                     all_flatten.append(f)
 
-                offsets = backend.index_nplike.empty(
-                    nextinputs[0].length + 1, dtype=np.int64
-                )
+                offsets = backend.nplike.empty(nextinputs[0].length + 1, dtype=np.int64)
                 offsets[0] = 0
-                backend.index_nplike.cumsum(counts, maybe_out=offsets[1:])
+                backend.nplike.cumsum(counts, maybe_out=offsets[1:])
 
-                offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
+                offsets = ak.index.Index64(offsets, nplike=backend.nplike)
 
                 if len(nextinputs) < 2**7:
                     tags_cls = ak.index.Index8
@@ -497,7 +491,7 @@ def enforce_concatenated_form(layout, form):
         # Otherwise, we move into the contents
         else:
             index = ak.index.Index64(
-                layout.backend.index_nplike.arange(layout.length, dtype=np.int64)
+                layout.backend.nplike.arange(layout.length, dtype=np.int64)
             )
             layout_to_merge = layout
 
@@ -539,9 +533,7 @@ def enforce_concatenated_form(layout, form):
                     )
 
         return ak.contents.UnionArray(
-            ak.index.Index8(
-                layout.backend.index_nplike.zeros(layout.length, dtype=np.int8)
-            ),
+            ak.index.Index8(layout.backend.nplike.zeros(layout.length, dtype=np.int8)),
             index,
             contents,
             parameters=form._parameters,
@@ -583,9 +575,7 @@ def enforce_concatenated_form(layout, form):
             ]
         )
         return ak.contents.UnionArray(
-            ak.index.Index8(
-                layout.backend.index_nplike.astype(layout.tags.data, np.int8)
-            ),
+            ak.index.Index8(layout.backend.nplike.astype(layout.tags.data, np.int8)),
             layout.index.to64(),
             next_contents,
             parameters=form._parameters,
@@ -630,7 +620,7 @@ def enforce_concatenated_form(layout, form):
     # Add index
     elif not layout.is_indexed and form.is_indexed:
         return ak.contents.IndexedArray(
-            ak.index.Index64(layout.backend.index_nplike.arange(layout.length)),
+            ak.index.Index64(layout.backend.nplike.arange(layout.length)),
             enforce_concatenated_form(layout, form.content),
             parameters=form._parameters,
         )

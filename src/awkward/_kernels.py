@@ -96,12 +96,40 @@ class NumpyKernel(BaseKernel):
         )
 
 
-class JaxKernel(NumpyKernel):
+class JaxKernel(BaseKernel):
+    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
+        super().__init__(impl, key)
+
+        self._jax = Jax.instance()
+
+    def _cast(self, x, t):
+        if issubclass(t, ctypes._Pointer):
+            # Do we have a JAX-owned array?
+            if self._jax.is_own_array(x):
+                assert self._jax.is_c_contiguous(x), "kernel expects contiguous array"
+                if x.ndim > 0:
+                    return ctypes.cast(x.unsafe_buffer_pointer(), t)
+                else:
+                    return x
+            # Or, do we have a ctypes type
+            elif hasattr(x, "_b_base_"):
+                return ctypes.cast(x, t)
+            else:
+                raise AssertionError(
+                    f"Only JAX buffers should be passed to JAX Kernels, received {type(t).__name__}"
+                )
+        else:
+            return x
+
     def __call__(self, *args) -> None:
         assert len(args) == len(self._impl.argtypes)
 
         if not any(Jax.is_tracer_type(type(arg)) for arg in args):
-            return super().__call__(*args)
+            args = materialize_if_virtual(*args)
+
+            return self._impl(
+                *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
+            )
 
 
 class CupyKernel(BaseKernel):

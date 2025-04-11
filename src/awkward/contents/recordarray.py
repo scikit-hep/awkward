@@ -219,7 +219,7 @@ class RecordArray(RecordMeta[Content], Content):
             # Ensure lengths are not smaller than given length.
             for content in contents:
                 if (
-                    backend.index_nplike.known_data
+                    backend.nplike.known_data
                     and content.length is not unknown_length
                     and content.length < length
                 ):
@@ -412,7 +412,7 @@ class RecordArray(RecordMeta[Content], Content):
         else:
             return ak.contents.IndexedOptionArray(
                 ak.index.Index64(
-                    self._backend.index_nplike.full(self.length, -1, dtype=np.int64)
+                    self._backend.nplike.full(self.length, -1, dtype=np.int64)
                 ),
                 ak.contents.EmptyArray(),
             )
@@ -438,7 +438,7 @@ class RecordArray(RecordMeta[Content], Content):
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
 
-        start, stop, _, length = self._backend.index_nplike.derive_slice_for_length(
+        start, stop, _, length = self._backend.nplike.derive_slice_for_length(
             slice(start, stop), self._length
         )
 
@@ -507,14 +507,14 @@ class RecordArray(RecordMeta[Content], Content):
                 where = where.copy()
 
             negative = where < 0
-            if self._backend.index_nplike.known_data:
-                if self._backend.index_nplike.any(negative):
+            if self._backend.nplike.known_data:
+                if self._backend.nplike.any(negative):
                     where[negative] += self._length
 
-                if self._backend.index_nplike.any(where >= self._length):
+                if self._backend.nplike.any(where >= self._length):
                     raise ak._errors.index_error(self, where)
 
-            nextindex = ak.index.Index64(where, nplike=self._backend.index_nplike)
+            nextindex = ak.index.Index64(where, nplike=self._backend.nplike)
             return ak.contents.IndexedArray(nextindex, self, parameters=None)
 
         else:
@@ -621,7 +621,7 @@ class RecordArray(RecordMeta[Content], Content):
                 contents.append(flattened)
             offsets = ak.index.Index64.zeros(
                 1,
-                nplike=self._backend.index_nplike,
+                nplike=self._backend.nplike,
                 dtype=np.int64,
             )
             return (
@@ -907,19 +907,19 @@ class RecordArray(RecordMeta[Content], Content):
             reducer_should_mask = mask and not reducer.needs_position
 
             # Convert parents into offsets to build a list for axis=1 reduction
-            offsets = ak.index.Index64.empty(outlength + 1, self._backend.index_nplike)
+            offsets = ak.index.Index64.empty(outlength + 1, self._backend.nplike)
             assert (
-                offsets.nplike is self._backend.index_nplike
-                and parents.nplike is self._backend.index_nplike
+                offsets.nplike is self._backend.nplike
+                and parents.nplike is self._backend.nplike
             )
             # `parents` are possibly non monotonic increasing, so we must re-order the result
             # This happens naturally for the `NumpyArray` reducers.
-            carry = ak.index.Index64.empty(outlength, self._backend.index_nplike)
+            carry = ak.index.Index64.empty(outlength, self._backend.nplike)
 
             # Note: if we knew that `negaxis == depth` exclusively for this layout, we could use
             # the simpler `ListOffsetArray_reduce_local_outoffsets_64`. However, if our parent was reduced,
             # we would still see `negaxis == depth`, so this kernel has to be used instead.
-            assert carry.nplike is self._backend.index_nplike
+            assert carry.nplike is self._backend.nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
@@ -959,8 +959,8 @@ class RecordArray(RecordMeta[Content], Content):
                 if shifts is None:
                     assert (
                         out.backend is self._backend
-                        and parents.nplike is self._backend.index_nplike
-                        and starts.nplike is self._backend.index_nplike
+                        and parents.nplike is self._backend.nplike
+                        and starts.nplike is self._backend.nplike
                     )
                     self._backend.maybe_kernel_error(
                         self._backend[
@@ -978,9 +978,9 @@ class RecordArray(RecordMeta[Content], Content):
                 else:
                     assert (
                         out.backend is self._backend
-                        and parents.nplike is self._backend.index_nplike
-                        and starts.nplike is self._backend.index_nplike
-                        and shifts.nplike is self._backend.index_nplike
+                        and parents.nplike is self._backend.nplike
+                        and starts.nplike is self._backend.nplike
+                        and shifts.nplike is self._backend.nplike
                     )
                     self._backend.maybe_kernel_error(
                         self._backend[
@@ -999,10 +999,10 @@ class RecordArray(RecordMeta[Content], Content):
                     )
 
             if mask:
-                outmask = ak.index.Index8.empty(outlength, self._backend.index_nplike)
+                outmask = ak.index.Index8.empty(outlength, self._backend.nplike)
                 assert (
-                    outmask.nplike is self._backend.index_nplike
-                    and parents.nplike is self._backend.index_nplike
+                    outmask.nplike is self._backend.nplike
+                    and parents.nplike is self._backend.nplike
                 )
                 self._backend.maybe_kernel_error(
                     self._backend[
@@ -1152,7 +1152,7 @@ class RecordArray(RecordMeta[Content], Content):
         for n, x in zip(self.fields, contents):
             if allow_missing and isinstance(x, self._backend.nplike.ma.MaskedArray):
                 if mask is None:
-                    mask = backend.index_nplike.ma.zeros(
+                    mask = backend.nplike.ma.zeros(
                         self.length, [(n, np.bool_) for n in self.fields]
                     )
                 if x.mask is not None:

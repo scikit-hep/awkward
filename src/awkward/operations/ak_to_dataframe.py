@@ -178,7 +178,7 @@ or
             starts, stops = offsets.data[:-1], offsets.data[1:]
             counts = stops - starts
             if ak._util.win or ak._util.bits32:
-                counts = layout.backend.index_nplike.astype(counts, np.int32)
+                counts = layout.backend.nplike.astype(counts, np.int32)
             if len(row_arrays) == 0:
                 newrows = [
                     numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)
@@ -325,9 +325,7 @@ def _union_to_record(unionarray, anonymous):
 
         missingarray = ak.contents.IndexedOptionArray(
             ak.index.Index64(
-                unionarray.backend.index_nplike.full(
-                    unionarray.length, -1, dtype=np.int64
-                )
+                unionarray.backend.nplike.full(unionarray.length, -1, dtype=np.int64)
             ),
             ak.contents.EmptyArray(),
         )

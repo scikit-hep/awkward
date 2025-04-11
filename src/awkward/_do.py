@@ -144,8 +144,8 @@ def combinations(
 
 def is_unique(layout, axis: Integral | None = None) -> bool:
     negaxis = axis if axis is None else -axis
-    starts = ak.index.Index64.zeros(1, nplike=layout._backend.index_nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.index_nplike)
+    starts = ak.index.Index64.zeros(1, nplike=layout._backend.nplike)
+    parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.nplike)
     return layout._is_unique(negaxis, starts, parents, 1)
 
 
@@ -174,10 +174,8 @@ def unique(layout: Content, axis=None):
                         f"axis={axis} exceeds the depth of this array ({depth})"
                     )
 
-        starts = ak.index.Index64.zeros(1, nplike=layout._backend.index_nplike)
-        parents = ak.index.Index64.zeros(
-            layout.length, nplike=layout._backend.index_nplike
-        )
+        starts = ak.index.Index64.zeros(1, nplike=layout._backend.nplike)
+        parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.nplike)
 
         return layout._unique(negaxis, starts, parents, 1)
 
@@ -249,8 +247,8 @@ def reduce(
         else:
             (layout,) = parts
 
-        starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
-        parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)
+        starts = ak.index.Index64.zeros(1, layout.backend.nplike)
+        parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)
         shifts = None
         next = layout._reduce_next(
             reducer,
@@ -290,8 +288,8 @@ def reduce(
                     f"(which is {depth})"
                 )
 
-        starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
-        parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)
+        starts = ak.index.Index64.zeros(1, layout.backend.nplike)
+        parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)
         shifts = None
         next = layout._reduce_next(
             reducer,
@@ -341,8 +339,8 @@ def argsort(
                 f"(which is {depth})"
             )
 
-    starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
+    starts = ak.index.Index64.zeros(1, nplike=layout.backend.nplike)
+    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.nplike)
     return layout._argsort_next(
         negaxis,
         starts,
@@ -380,8 +378,8 @@ def sort(
                 f"(which is {depth})"
             )
 
-    starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
+    starts = ak.index.Index64.zeros(1, nplike=layout.backend.nplike)
+    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.nplike)
     return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)
 
 

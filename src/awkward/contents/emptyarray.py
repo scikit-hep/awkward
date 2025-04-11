@@ -264,7 +264,7 @@ class EmptyArray(EmptyMeta, Content):
         if posaxis is not None and posaxis + 1 == depth:
             raise AxisError(self, "axis=0 not allowed for flatten")
         else:
-            offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
+            offsets = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
             return (
                 offsets,
                 EmptyArray(backend=self._backend),

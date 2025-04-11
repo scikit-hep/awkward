@@ -150,18 +150,16 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
         if not np.issubdtype(counts.dtype, np.integer):
             raise ValueError("counts must be integers")
 
-        current_offsets = maybe_counts_layout.backend.index_nplike.empty(
+        current_offsets = maybe_counts_layout.backend.nplike.empty(
             counts.size + 1, dtype=np.int64
         )
         current_offsets[0] = 0
-        maybe_counts_layout.backend.index_nplike.cumsum(
-            counts, maybe_out=current_offsets[1:]
-        )
+        maybe_counts_layout.backend.nplike.cumsum(counts, maybe_out=current_offsets[1:])
 
     def unflatten_this_layout(layout):
         nonlocal current_offsets
 
-        index_nplike = layout.backend.index_nplike
+        nplike = layout.backend.nplike
 
         if isinstance(counts, int) or counts is unknown_length:
             if (
@@ -174,11 +172,9 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
 
         else:
             position = (
-                index_nplike.searchsorted(
+                nplike.searchsorted(
                     current_offsets,
-                    index_nplike.asarray(
-                        [index_nplike.shape_item_as_index(layout.length)]
-                    ),
+                    nplike.asarray([nplike.shape_item_as_index(layout.length)]),
                     side="right",
                 )[0]
                 - 1
@@ -198,15 +194,15 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
                 )
 
             offsets = current_offsets[: position + 1]
-            current_offsets = current_offsets[
-                position:
-            ] - index_nplike.shape_item_as_index(layout.length)
+            current_offsets = current_offsets[position:] - nplike.shape_item_as_index(
+                layout.length
+            )
 
             out = ak.contents.ListOffsetArray(ak.index.Index64(offsets), layout)
             if not isinstance(mask, (bool, np.bool_)):
                 index = ak.index.Index8(
-                    index_nplike.asarray(mask, dtype=np.int8),
-                    nplike=index_nplike,
+                    nplike.asarray(mask, dtype=np.int8),
+                    nplike=nplike,
                 )
                 out = ak.contents.ByteMaskedArray(index, out, valid_when=False)
 
@@ -268,16 +264,13 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
                     inneroffsets = content.offsets
 
                 positions = (
-                    backend.index_nplike.searchsorted(
+                    backend.nplike.searchsorted(
                         inneroffsets.data, outeroffsets.data, side="right"
                     )
                     - 1
                 )
-                if (
-                    backend.index_nplike.known_data
-                    and not backend.index_nplike.array_equal(
-                        inneroffsets.data[positions], outeroffsets
-                    )
+                if backend.nplike.known_data and not backend.nplike.array_equal(
+                    inneroffsets.data[positions], outeroffsets
                 ):
                     raise ValueError(
                         "structure imposed by 'counts' does not fit in the array or partition "

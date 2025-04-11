@@ -195,12 +195,15 @@ def _from_buffer(
         copy = None if isinstance(nplike, Jax) else False  # Jax can not avoid this
         array = nplike.reshape(buffer.view(dtype), shape=(-1,), copy=copy)
 
-        if array.size < count:
-            raise TypeError(
-                f"size of array ({array.size}) is less than size of form ({count})"
-            )
-
-        return array[:count]
+        # we can't compare with count or slice when we're working with tracers
+        if not (isinstance(nplike, Jax) and nplike.is_currently_tracing()):
+            if array.size < count:
+                raise TypeError(
+                    f"size of array ({array.size}) is less than size of form ({count})"
+                )
+            return array[:count]
+        else:
+            return array
     else:
         array = nplike.frombuffer(buffer, dtype=dtype, count=count)
         return ak._util.native_to_byteorder(array, byteorder)
@@ -257,7 +260,7 @@ def _reconstitute(
         else:
             next_length = math.ceil(length / 8.0)
         mask = _from_buffer(
-            backend.index_nplike,
+            backend.nplike,
             raw_array,
             dtype=index_to_dtype[form.mask],
             count=next_length,
@@ -290,7 +293,7 @@ def _reconstitute(
     elif isinstance(form, ak.forms.ByteMaskedForm):
         raw_array = container[getkey(form, "mask")]
         mask = _from_buffer(
-            backend.index_nplike,
+            backend.nplike,
             raw_array,
             dtype=index_to_dtype[form.mask],
             count=length,
@@ -321,7 +324,7 @@ def _reconstitute(
     elif isinstance(form, ak.forms.IndexedOptionForm):
         raw_array = container[getkey(form, "index")]
         index = _from_buffer(
-            backend.index_nplike,
+            backend.nplike,
             raw_array,
             dtype=index_to_dtype[form.index],
             count=length,
@@ -332,7 +335,7 @@ def _reconstitute(
             next_length = unknown_length
         else:
             next_length = (
-                0 if len(index) == 0 else max(0, backend.index_nplike.max(index) + 1)
+                0 if len(index) == 0 else max(0, backend.nplike.max(index) + 1)
             )
             # free memory
             if isinstance(index, VirtualArray):
@@ -360,7 +363,7 @@ def _reconstitute(
     elif isinstance(form, ak.forms.IndexedForm):
         raw_array = container[getkey(form, "index")]
         index = _from_buffer(
-            backend.index_nplike,
+            backend.nplike,
             raw_array,
             dtype=index_to_dtype[form.index],
             count=length,
@@ -373,9 +376,7 @@ def _reconstitute(
             next_length = (
                 0
                 if len(index) == 0
-                else backend.index_nplike.index_as_shape_item(
-                    backend.index_nplike.max(index) + 1
-                )
+                else backend.nplike.index_as_shape_item(backend.nplike.max(index) + 1)
             )
             # free memory
             if isinstance(index, VirtualArray):
@@ -404,7 +405,7 @@ def _reconstitute(
         raw_array1 = container[getkey(form, "starts")]
         raw_array2 = container[getkey(form, "stops")]
         starts = _from_buffer(
-            backend.index_nplike,
+            backend.nplike,
             raw_array1,
             dtype=index_to_dtype[form.starts],
             count=length,
@@ -412,7 +413,7 @@ def _reconstitute(
             field_path=field_path,
         )
         stops = _from_buffer(
-            backend.index_nplike,
+            backend.nplike,
             raw_array2,
             dtype=index_to_dtype[form.stops],
             count=length,
@@ -423,9 +424,7 @@ def _reconstitute(
             next_length = unknown_length
         else:
             reduced_stops = stops[starts != stops]
-            next_length = (
-                0 if len(starts) == 0 else backend.index_nplike.max(reduced_stops)
-            )
+            next_length = 0 if len(starts) == 0 else backend.nplike.max(reduced_stops)
             # free memory
             if isinstance(starts, VirtualArray):
                 starts.dematerialize()
@@ -451,7 +450,7 @@ def _reconstitute(
     elif isinstance(form, ak.forms.ListOffsetForm):
         raw_array = container[getkey(form, "offsets")]
         offsets = _from_buffer(
-            backend.index_nplike,
+            backend.nplike,
             raw_array,
             dtype=index_to_dtype[form.offsets],
             count=length + 1,
@@ -526,7 +525,7 @@ def _reconstitute(
         raw_array1 = container[getkey(form, "tags")]
         raw_array2 = container[getkey(form, "index")]
         tags = _from_buffer(
-            backend.index_nplike,
+            backend.nplike,
             raw_array1,
             dtype=index_to_dtype[form.tags],
             count=length,
@@ -534,7 +533,7 @@ def _reconstitute(
             field_path=field_path,
         )
         index = _from_buffer(
-            backend.index_nplike,
+            backend.nplike,
             raw_array2,
             dtype=index_to_dtype[form.index],
             count=length,
@@ -550,7 +549,7 @@ def _reconstitute(
                 if len(selected_index) == 0:
                     lengths.append(0)
                 else:
-                    lengths.append(backend.index_nplike.max(selected_index) + 1)
+                    lengths.append(backend.nplike.max(selected_index) + 1)
             # free memory
             if isinstance(index, VirtualArray):
                 index.dematerialize()
