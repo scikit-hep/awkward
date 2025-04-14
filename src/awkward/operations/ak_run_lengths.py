@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 
@@ -130,12 +131,22 @@ def _impl(array, highlevel, behavior, attrs):
                     offsets < backend.nplike.shape_item_as_index(size),
                 )
                 interior_offsets = offsets[is_interior]
-                diffs[interior_offsets - 1] = True
+                if isinstance(backend.nplike, Jax):
+                    diffs = diffs.at[interior_offsets - 1].set(True)
+                else:
+                    diffs[interior_offsets - 1] = True
             positions = backend.nplike.nonzero(diffs)[0]
             full_positions = backend.nplike.empty(positions.size + 2, dtype=np.int64)
-            full_positions[0] = 0
-            full_positions[-1] = backend.nplike.shape_item_as_index(size)
-            full_positions[1:-1] = positions + 1
+            if isinstance(backend.nplike, Jax):
+                full_positions = full_positions.at[0].set(0)
+                full_positions = full_positions.at[-1].set(
+                    backend.nplike.shape_item_as_index(size)
+                )
+                full_positions = full_positions.at[1:-1].set(positions + 1)
+            else:
+                full_positions[0] = 0
+                full_positions[-1] = backend.nplike.shape_item_as_index(size)
+                full_positions[1:-1] = positions + 1
 
             nextcontent = full_positions[1:] - full_positions[:-1]
             if offsets is None:

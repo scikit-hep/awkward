@@ -405,7 +405,7 @@ def _normalise_item_nested(item: Content) -> Content:
         projected = item.content._carry(ak.index.Index64(nextindex[nonnull]), False)
 
         # content has been projected; index must agree
-        if isinstance(item.backend, Jax):
+        if isinstance(item.backend.nplike, Jax):
             nextindex = nextindex.at[nonnull].set(
                 item.backend.nplike.arange(projected.length, dtype=np.int64)
             )
@@ -623,7 +623,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                 isnegative = item.index.data < 0
                 if item_backend.nplike.any(item.index.data < -1):
                     safeindex = item.index.data.copy()
-                    if isinstance(item_backend, Jax):
+                    if isinstance(item_backend.nplike, Jax):
                         safeindex = safeindex.at[isnegative].set(-1)
                     else:
                         safeindex[isnegative] = -1
