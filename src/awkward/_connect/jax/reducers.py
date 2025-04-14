@@ -281,55 +281,38 @@ def segment_prod_with_negatives(data, segment_ids, num_segments):
     Returns:
         jax.numpy.ndarray — product of values per segment.
     """
-    # Convert boolean arrays to integers if needed
+    # Handle boolean arrays
     if data.dtype == jax.numpy.bool_:
-        # For booleans, the product is just whether ALL values are True
-        # We can use segment_min for this (since True=1, False=0, and prod is 0 if ANY is False)
         return jax.ops.segment_min(
             data.astype(jax.numpy.int32), segment_ids, num_segments
         )
 
-    # Extract signs
-    signs = jax.numpy.sign(data)
-    abs_data = jax.numpy.abs(data)
-
-    # Compute product of absolute values in log space
-    # Handle zeros separately to avoid log(0)
-    zeros_mask = abs_data == 0
+    # For numeric arrays, handle negative values and zeros
+    # Track zeros to set product to zero if any segment has zeros
+    is_zero = data == 0
     has_zeros = (
-        jax.ops.segment_sum(
-            zeros_mask.astype(jax.numpy.int32), segment_ids, num_segments
-        )
+        jax.ops.segment_sum(is_zero.astype(jax.numpy.int32), segment_ids, num_segments)
         > 0
     )
 
-    # For non-zero values, use log-sum-exp
-    safe_abs_data = jax.numpy.where(
-        zeros_mask, 1.0, abs_data
-    )  # Replace zeros with ones for log
-    log_abs = jax.numpy.log(safe_abs_data)
-    summed_logs = jax.ops.segment_sum(
-        jax.numpy.where(zeros_mask, 0.0, log_abs), segment_ids, num_segments
+    # Track signs to determine final sign of product
+    is_negative = data < 0
+    neg_count = jax.ops.segment_sum(
+        is_negative.astype(jax.numpy.int32), segment_ids, num_segments
     )
-    abs_products = jax.numpy.exp(summed_logs)
+    sign_products = 1 - 2 * (
+        neg_count % 2
+    )  # +1 for even negatives, -1 for odd negatives
 
-    # If any segment has a zero, its product is zero
-    abs_products = jax.numpy.where(has_zeros, 0.0, abs_products)
-
-    # Calculate product of signs separately
-    sign_products = (
-        jax.ops.segment_sum(
-            (signs < 0).astype(jax.numpy.int32), segment_ids, num_segments
-        )
-        % 2
+    # Calculate product of absolute values in log space
+    log_abs = jax.numpy.log(jax.numpy.where(is_zero, 1.0, jax.numpy.abs(data)))
+    log_products = jax.ops.segment_sum(
+        jax.numpy.where(is_zero, 0.0, log_abs), segment_ids, num_segments
     )
-    sign_products = 1 - 2 * sign_products  # Convert to +1/-1
+    abs_products = jax.numpy.exp(log_products)
 
-    # Zeros should have sign 0, not -1 or 1
-    sign_products = jax.numpy.where(has_zeros, 0.0, sign_products)
-
-    # Combine signs with absolute products
-    return sign_products * abs_products
+    # Apply zeros and signs
+    return jax.numpy.where(has_zeros, 0.0, sign_products * abs_products)
 
 
 @overloads(_reducers.Prod)
