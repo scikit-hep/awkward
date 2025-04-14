@@ -462,6 +462,7 @@ class Any(JAXReducer):
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.ops.segment_max(array.data, parents.data, outlength)
         if array.dtype is not np.dtype(bool):
+            result = result.at[result == 0].set(self._max_initial(None, array.dtype))
             result = result > self._max_initial(None, array.dtype)
         result = jax.numpy.asarray(result, dtype=bool)
 
