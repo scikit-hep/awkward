@@ -154,7 +154,7 @@ class ArgMax(JAXReducer):
 @overloads(_reducers.Count)
 class Count(JAXReducer):
     name: Final = "count"
-    preferred_dtype: Final = np.float64
+    preferred_dtype: Final = np.int64
     needs_position: Final = False
 
     @classmethod
@@ -177,6 +177,7 @@ class Count(JAXReducer):
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.numpy.ones_like(array.data, dtype=array.dtype)
         result = jax.ops.segment_sum(result, parents.data, outlength)
+        result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
 
         if np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
@@ -208,7 +209,7 @@ def segment_count_nonzero(data, segment_ids, num_segments):
 @overloads(_reducers.CountNonzero)
 class CountNonzero(JAXReducer):
     name: Final = "count_nonzero"
-    preferred_dtype: Final = np.float64
+    preferred_dtype: Final = np.int64
     needs_position: Final = False
 
     @classmethod
