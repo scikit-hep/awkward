@@ -154,7 +154,7 @@ class ArgMax(JAXReducer):
 @overloads(_reducers.Count)
 class Count(JAXReducer):
     name: Final = "count"
-    preferred_dtype: Final = np.int64
+    preferred_dtype: Final = np.float64
     needs_position: Final = False
 
     @classmethod
@@ -209,7 +209,7 @@ def segment_count_nonzero(data, segment_ids, num_segments):
 @overloads(_reducers.CountNonzero)
 class CountNonzero(JAXReducer):
     name: Final = "count_nonzero"
-    preferred_dtype: Final = np.int64
+    preferred_dtype: Final = np.float64
     needs_position: Final = False
 
     @classmethod
@@ -319,6 +319,25 @@ class Any(JAXReducer):
     def _return_dtype(cls, given_dtype):
         return np.bool_
 
+    @staticmethod
+    def _max_initial(initial, type):
+        if initial is None:
+            if type in (
+                np.int8,
+                np.int16,
+                np.int32,
+                np.int64,
+                np.uint8,
+                np.uint16,
+                np.uint32,
+                np.uint64,
+            ):
+                return np.iinfo(type).min
+            else:
+                return -np.inf
+
+        return initial
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -329,6 +348,8 @@ class Any(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.ops.segment_max(array.data, parents.data, outlength)
+        if array.dtype is not np.dtype(bool):
+            result = result > self._max_initial(None, array.dtype)
         result = jax.numpy.asarray(result, dtype=bool)
 
         return ak.contents.NumpyArray(result, backend=array.backend)
