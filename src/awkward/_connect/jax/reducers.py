@@ -37,18 +37,18 @@ class JAXReducer(Reducer):
         raise NotImplementedError
 
 
-def segment_argmin(data, segment_ids):
+def segment_argmin(data, segment_ids, num_segments):
     """
     Applies a segmented argmin-style reduction.
 
     Parameters:
         data: jax.numpy.ndarray — the values to reduce.
         segment_ids: same shape as data — indicates segment groupings.
+        num_segments: int — total number of segments.
 
     Returns:
         jax.numpy.ndarray — indices of min within each segment.
     """
-    num_segments = int(jax.numpy.max(segment_ids).item()) + 1
     indices = jax.numpy.arange(data.shape[0])
 
     # Find the minimum value in each segment
@@ -88,24 +88,24 @@ class ArgMin(JAXReducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        result = segment_argmin(array.data, parents.data)
+        result = segment_argmin(array.data, parents.data, outlength)
         result = jax.numpy.asarray(result, dtype=array.dtype)
 
         return ak.contents.NumpyArray(result, backend=array.backend)
 
 
-def segment_argmax(data, segment_ids):
+def segment_argmax(data, segment_ids, num_segments):
     """
     Applies a segmented argmax-style reduction.
 
     Parameters:
         data: jax.numpy.ndarray — the values to reduce.
         segment_ids: same shape as data — indicates segment groupings.
+        num_segments: int — total number of segments.
 
     Returns:
         jax.numpy.ndarray — indices of max within each segment.
     """
-    num_segments = int(jax.numpy.max(segment_ids).item()) + 1
     indices = jax.numpy.arange(data.shape[0])
 
     # Find the maximum value in each segment
@@ -145,7 +145,7 @@ class ArgMax(JAXReducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        result = segment_argmax(array.data, parents.data)
+        result = segment_argmax(array.data, parents.data, outlength)
         result = jax.numpy.asarray(result, dtype=array.dtype)
 
         return ak.contents.NumpyArray(result, backend=array.backend)
@@ -176,7 +176,7 @@ class Count(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.numpy.ones_like(array.data, dtype=array.dtype)
-        result = jax.ops.segment_sum(result, parents.data)
+        result = jax.ops.segment_sum(result, parents.data, outlength)
 
         if np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
@@ -186,21 +186,18 @@ class Count(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
-def segment_count_nonzero(data, segment_ids, num_segments=None):
+def segment_count_nonzero(data, segment_ids, num_segments):
     """
     Counts the number of non-zero elements in `data` per segment.
 
     Parameters:
         data: jax.numpy.ndarray — input values to count.
         segment_ids: jax.numpy.ndarray — same shape as data, segment assignment.
-        num_segments: int (optional) — total number of segments.
+        num_segments: int — total number of segments.
 
     Returns:
         jax.numpy.ndarray — count of non-zero values per segment.
     """
-    if num_segments is None:
-        num_segments = int(jax.numpy.max(segment_ids).item()) + 1
-
     # Create a binary mask where non-zero entries become 1
     nonzero_mask = jax.numpy.where(data != 0, 1, 0)
 
@@ -232,7 +229,7 @@ class CountNonzero(JAXReducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        result = segment_count_nonzero(array.data, parents.data)
+        result = segment_count_nonzero(array.data, parents.data, outlength)
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
 
         return ak.contents.NumpyArray(result, backend=array.backend)
@@ -261,7 +258,7 @@ class Sum(JAXReducer):
         if array.dtype.kind == "M":
             raise TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
 
-        result = jax.ops.segment_sum(array.data, parents.data)
+        result = jax.ops.segment_sum(array.data, parents.data, outlength)
 
         if array.dtype.kind == "m":
             return ak.contents.NumpyArray(
@@ -295,7 +292,7 @@ class Prod(JAXReducer):
         assert isinstance(array, ak.contents.NumpyArray)
         # See issue https://github.com/google/jax/issues/9296
         result = jax.numpy.exp(
-            jax.ops.segment_sum(jax.numpy.log(array.data), parents.data)
+            jax.ops.segment_sum(jax.numpy.log(array.data), parents.data, outlength)
         )
 
         if np.issubdtype(array.dtype, np.complexfloating):
@@ -360,7 +357,7 @@ class All(JAXReducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        result = jax.ops.segment_min(array.data, parents.data)
+        result = jax.ops.segment_min(array.data, parents.data, outlength)
         result = jax.numpy.asarray(result, dtype=bool)
 
         return ak.contents.NumpyArray(result, backend=array.backend)
@@ -413,7 +410,7 @@ class Min(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
 
-        result = jax.ops.segment_min(array.data, parents.data)
+        result = jax.ops.segment_min(array.data, parents.data, outlength)
         result = jax.numpy.minimum(result, self._min_initial(self.initial, array.dtype))
 
         if np.issubdtype(array.dtype, np.complexfloating):
@@ -474,9 +471,9 @@ class Max(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
 
-        result = jax.ops.segment_max(array.data, parents.data)
-
+        result = jax.ops.segment_max(array.data, parents.data, outlength)
         result = jax.numpy.maximum(result, self._max_initial(self.initial, array.dtype))
+
         if np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
                 array.backend.nplike.asarray(
