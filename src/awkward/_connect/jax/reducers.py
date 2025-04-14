@@ -246,7 +246,7 @@ class Count(JAXReducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        result = jax.numpy.ones_like(array.data, dtype=array.dtype)
+        result = jax.numpy.ones_like(array.data, dtype=self.preferred_dtype)
         result = jax.ops.segment_sum(result, parents.data, outlength)
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
 
@@ -330,7 +330,11 @@ class Sum(JAXReducer):
         if array.dtype.kind == "M":
             raise TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
 
-        result = jax.ops.segment_sum(array.data, parents.data, outlength)
+        if array.dtype.kind == "b":
+            input_array = array.data.astype(np.int64)
+        else:
+            input_array = array.data
+        result = jax.ops.segment_sum(input_array, parents.data, outlength)
 
         if array.dtype.kind == "m":
             return ak.contents.NumpyArray(
