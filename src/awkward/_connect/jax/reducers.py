@@ -327,7 +327,7 @@ class Any(JAXReducer):
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        result = jax.ops.segment_max(array.data, parents.data)
+        result = jax.ops.segment_max(array.data, parents.data, outlength)
         result = jax.numpy.asarray(result, dtype=bool)
 
         return ak.contents.NumpyArray(result, backend=array.backend)
