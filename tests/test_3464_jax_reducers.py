@@ -92,6 +92,9 @@ def test_single_jagged_arrays(reducer, kwargs, arr, axis):
     cpu_array = ak.Array(arr, backend="cpu")
     jax_array = ak.Array(arr, backend="jax")
 
+    if reducer is ak.prod and ak.any(cpu_array < 0):
+        pytest.skip("Jax prod does not support negative values")
+
     # Apply reducers to each backend's array
     cpu_result = reducer(cpu_array, axis=axis, **kwargs)
     jax_result = reducer(jax_array, axis=axis, **kwargs)
@@ -132,6 +135,9 @@ def test_double_jagged_arrays(reducer, kwargs, arr, axis):
     # Create arrays with different backends
     cpu_array = ak.Array(arr, backend="cpu")
     jax_array = ak.Array(arr, backend="jax")
+
+    if reducer is ak.prod and ak.any(cpu_array < 0):
+        pytest.skip("Jax prod does not support negative values")
 
     # Apply reducers to each backend's array
     cpu_result = reducer(cpu_array, axis=axis, **kwargs)
