@@ -271,6 +271,67 @@ class Sum(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
+def segment_prod_with_negatives(data, segment_ids, num_segments):
+    """
+    Computes the product of elements in each segment, handling negatives and booleans.
+    Parameters:
+        data: jax.numpy.ndarray — input values to reduce.
+        segment_ids: jax.numpy.ndarray — same shape as data, segment assignment.
+        num_segments: int — total number of segments.
+    Returns:
+        jax.numpy.ndarray — product of values per segment.
+    """
+    # Convert boolean arrays to integers if needed
+    if data.dtype == jax.numpy.bool_:
+        # For booleans, the product is just whether ALL values are True
+        # We can use segment_min for this (since True=1, False=0, and prod is 0 if ANY is False)
+        return jax.ops.segment_min(
+            data.astype(jax.numpy.int32), segment_ids, num_segments
+        )
+
+    # Extract signs
+    signs = jax.numpy.sign(data)
+    abs_data = jax.numpy.abs(data)
+
+    # Compute product of absolute values in log space
+    # Handle zeros separately to avoid log(0)
+    zeros_mask = abs_data == 0
+    has_zeros = (
+        jax.ops.segment_sum(
+            zeros_mask.astype(jax.numpy.int32), segment_ids, num_segments
+        )
+        > 0
+    )
+
+    # For non-zero values, use log-sum-exp
+    safe_abs_data = jax.numpy.where(
+        zeros_mask, 1.0, abs_data
+    )  # Replace zeros with ones for log
+    log_abs = jax.numpy.log(safe_abs_data)
+    summed_logs = jax.ops.segment_sum(
+        jax.numpy.where(zeros_mask, 0.0, log_abs), segment_ids, num_segments
+    )
+    abs_products = jax.numpy.exp(summed_logs)
+
+    # If any segment has a zero, its product is zero
+    abs_products = jax.numpy.where(has_zeros, 0.0, abs_products)
+
+    # Calculate product of signs separately
+    sign_products = (
+        jax.ops.segment_sum(
+            (signs < 0).astype(jax.numpy.int32), segment_ids, num_segments
+        )
+        % 2
+    )
+    sign_products = 1 - 2 * sign_products  # Convert to +1/-1
+
+    # Zeros should have sign 0, not -1 or 1
+    sign_products = jax.numpy.where(has_zeros, 0.0, sign_products)
+
+    # Combine signs with absolute products
+    return sign_products * abs_products
+
+
 @overloads(_reducers.Prod)
 class Prod(JAXReducer):
     name: Final = "prod"
@@ -292,9 +353,7 @@ class Prod(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         # See issue https://github.com/google/jax/issues/9296
-        result = jax.numpy.exp(
-            jax.ops.segment_sum(jax.numpy.log(array.data), parents.data, outlength)
-        )
+        result = segment_prod_with_negatives(array.data, parents.data, outlength)
 
         if np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
