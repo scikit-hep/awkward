@@ -37,6 +37,69 @@ class JAXReducer(Reducer):
         raise NotImplementedError
 
 
+def awkward_JAXArray_reduce_adjust_starts_64(toptr, outlength, parents, starts):
+    if outlength == 0 or parents.size == 0:
+        return toptr
+    sub_toptr = toptr[:outlength]
+    identity = jax.numpy.astype(jax.numpy.iinfo(jax.numpy.int64).max, toptr.dtype)
+    valid = sub_toptr != identity
+    safe_sub_toptr = jax.numpy.where(valid, sub_toptr, 0)
+    safe_sub_toptr_int = jax.numpy.astype(safe_sub_toptr, jax.numpy.int64)
+    parent_indices = parents[safe_sub_toptr_int]
+    adjustments = starts[jax.numpy.astype(parent_indices, jax.numpy.int64)]
+    updated = jax.numpy.where(valid, sub_toptr - adjustments, sub_toptr)
+    return jax.numpy.concatenate([updated, toptr[outlength:]])
+
+
+def awkward_JAXArray_reduce_adjust_starts_shifts_64(
+    toptr, outlength, parents, starts, shifts
+):
+    if outlength == 0 or parents.size == 0:
+        return toptr
+    sub_toptr = toptr[:outlength]
+    identity = jax.numpy.astype(jax.numpy.iinfo(jax.numpy.int64).max, toptr.dtype)
+    valid = sub_toptr != identity
+    safe_sub_toptr = jax.numpy.where(valid, sub_toptr, 0)
+    safe_sub_toptr_int = jax.numpy.astype(safe_sub_toptr, jax.numpy.int64)
+    parent_indices = parents[safe_sub_toptr_int]
+    delta = (
+        shifts[safe_sub_toptr_int]
+        - starts[jax.numpy.astype(parent_indices, jax.numpy.int64)]
+    )
+    updated = jax.numpy.where(valid, sub_toptr + delta, sub_toptr)
+    return jax.numpy.concatenate([updated, toptr[outlength:]])
+
+
+def apply_positional_corrections(
+    reduced: ak.contents.NumpyArray,
+    parents: ak.index.Index,
+    starts: ak.index.Index,
+    shifts: ak.index.Index | None,
+) -> ak._nplikes.ArrayLike:
+    if shifts is None:
+        assert (
+            parents.nplike is reduced.backend.nplike
+            and starts.nplike is reduced.backend.nplike
+        )
+        return awkward_JAXArray_reduce_adjust_starts_64(
+            reduced.data, reduced.length, parents.data, starts.data
+        )
+
+    else:
+        assert (
+            parents.nplike is reduced.backend.nplike
+            and starts.nplike is reduced.backend.nplike
+            and shifts.nplike is reduced.backend.nplike
+        )
+        return awkward_JAXArray_reduce_adjust_starts_shifts_64(
+            reduced.data,
+            reduced.length,
+            parents.data,
+            starts.data,
+            shifts.data,
+        )
+
+
 def segment_argmin(data, segment_ids, num_segments):
     """
     Applies a segmented argmin-style reduction.
@@ -68,7 +131,7 @@ def segment_argmin(data, segment_ids, num_segments):
 class ArgMin(JAXReducer):
     name: Final = "argmin"
     needs_position: Final = True
-    preferred_dtype: Final = np.int64
+    preferred_dtype: Final = np.float64
 
     @classmethod
     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
@@ -89,9 +152,12 @@ class ArgMin(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = segment_argmin(array.data, parents.data, outlength)
-        result = jax.numpy.asarray(result, dtype=array.dtype)
-
-        return ak.contents.NumpyArray(result, backend=array.backend)
+        result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
+        result_array = ak.contents.NumpyArray(result, backend=array.backend)
+        corrected_data = apply_positional_corrections(
+            result_array, parents, starts, shifts
+        )
+        return ak.contents.NumpyArray(corrected_data, backend=array.backend)
 
 
 def segment_argmax(data, segment_ids, num_segments):
@@ -125,7 +191,7 @@ def segment_argmax(data, segment_ids, num_segments):
 class ArgMax(JAXReducer):
     name: Final = "argmax"
     needs_position: Final = True
-    preferred_dtype: Final = np.int64
+    preferred_dtype: Final = np.float64
 
     @classmethod
     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
@@ -146,9 +212,12 @@ class ArgMax(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = segment_argmax(array.data, parents.data, outlength)
-        result = jax.numpy.asarray(result, dtype=array.dtype)
-
-        return ak.contents.NumpyArray(result, backend=array.backend)
+        result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
+        result_array = ak.contents.NumpyArray(result, backend=array.backend)
+        corrected_data = apply_positional_corrections(
+            result_array, parents, starts, shifts
+        )
+        return ak.contents.NumpyArray(corrected_data, backend=array.backend)
 
 
 @overloads(_reducers.Count)

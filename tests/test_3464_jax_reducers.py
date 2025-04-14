@@ -90,9 +90,6 @@ def compare_results(cpu_list, jax_list):
 @pytest.mark.parametrize("axis", AXES)
 def test_single_jagged_arrays(reducer, kwargs, arr, axis):
     """Test reducers on single jagged arrays with different axes."""
-    # Skip argmin and argmax tests
-    if reducer in [ak.argmin, ak.argmax]:
-        pytest.skip(f"Skipping {reducer.__name__} as it's not fully supported")
 
     # Create arrays with different backends
     cpu_array = ak.Array(arr, backend="cpu")
@@ -131,9 +128,6 @@ def test_single_jagged_arrays(reducer, kwargs, arr, axis):
 @pytest.mark.parametrize("axis", DOUBLE_JAGGED_AXES)
 def test_double_jagged_arrays(reducer, kwargs, arr, axis):
     """Test reducers on double jagged arrays with different axes."""
-    # Skip argmin and argmax tests
-    if reducer in [ak.argmin, ak.argmax]:
-        pytest.skip(f"Skipping {reducer.__name__} as it's not fully supported")
 
     # Create arrays with different backends
     cpu_array = ak.Array(arr, backend="cpu")
@@ -171,9 +165,6 @@ def test_double_jagged_arrays(reducer, kwargs, arr, axis):
 @pytest.mark.parametrize("reducer,kwargs", REDUCERS)
 def test_all_empty_arrays(reducer, kwargs):
     """Test with arrays that are entirely empty."""
-    # Skip argmin and argmax tests
-    if reducer in [ak.argmin, ak.argmax]:
-        pytest.skip(f"Skipping {reducer.__name__} as it's not fully supported")
 
     all_empty_data = [[], [], []]
     cpu_array = ak.Array(all_empty_data, backend="cpu")
@@ -208,9 +199,6 @@ def test_all_empty_arrays(reducer, kwargs):
 @pytest.mark.parametrize("reducer,kwargs", REDUCERS)
 def test_boolean_arrays(reducer, kwargs):
     """Test with boolean arrays."""
-    # Skip argmin and argmax tests
-    if reducer in [ak.argmin, ak.argmax]:
-        pytest.skip(f"Skipping {reducer.__name__} as it's not fully supported")
 
     bool_data = [[True, False], [], [True, True, False], [False]]
     cpu_array = ak.Array(bool_data, backend="cpu")
