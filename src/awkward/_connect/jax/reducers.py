@@ -40,15 +40,16 @@ class JAXReducer(Reducer):
 def awkward_JAXArray_reduce_adjust_starts_64(toptr, outlength, parents, starts):
     if outlength == 0 or parents.size == 0:
         return toptr
-    sub_toptr = toptr[:outlength]
+
     identity = jax.numpy.astype(jax.numpy.iinfo(jax.numpy.int64).max, toptr.dtype)
-    valid = sub_toptr != identity
-    safe_sub_toptr = jax.numpy.where(valid, sub_toptr, 0)
+    valid = toptr[:outlength] != identity
+    safe_sub_toptr = jax.numpy.where(valid, toptr[:outlength], 0)
     safe_sub_toptr_int = jax.numpy.astype(safe_sub_toptr, jax.numpy.int64)
     parent_indices = parents[safe_sub_toptr_int]
     adjustments = starts[jax.numpy.astype(parent_indices, jax.numpy.int64)]
-    updated = jax.numpy.where(valid, sub_toptr - adjustments, sub_toptr)
-    return jax.numpy.concatenate([updated, toptr[outlength:]])
+    updated = jax.numpy.where(valid, toptr[:outlength] - adjustments, toptr[:outlength])
+
+    return toptr.at[:outlength].set(updated)
 
 
 def awkward_JAXArray_reduce_adjust_starts_shifts_64(
@@ -56,18 +57,19 @@ def awkward_JAXArray_reduce_adjust_starts_shifts_64(
 ):
     if outlength == 0 or parents.size == 0:
         return toptr
-    sub_toptr = toptr[:outlength]
+
     identity = jax.numpy.astype(jax.numpy.iinfo(jax.numpy.int64).max, toptr.dtype)
-    valid = sub_toptr != identity
-    safe_sub_toptr = jax.numpy.where(valid, sub_toptr, 0)
+    valid = toptr[:outlength] != identity
+    safe_sub_toptr = jax.numpy.where(valid, toptr[:outlength], 0)
     safe_sub_toptr_int = jax.numpy.astype(safe_sub_toptr, jax.numpy.int64)
     parent_indices = parents[safe_sub_toptr_int]
     delta = (
         shifts[safe_sub_toptr_int]
         - starts[jax.numpy.astype(parent_indices, jax.numpy.int64)]
     )
-    updated = jax.numpy.where(valid, sub_toptr + delta, sub_toptr)
-    return jax.numpy.concatenate([updated, toptr[outlength:]])
+    updated = jax.numpy.where(valid, toptr[:outlength] + delta, toptr[:outlength])
+
+    return toptr.at[:outlength].set(updated)
 
 
 def apply_positional_corrections(
