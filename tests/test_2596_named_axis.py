@@ -123,6 +123,12 @@ def test_named_axis_indexing():
         named_array[()].named_axis == named_array.named_axis == {"x": 0, "y": 1, "z": 2}
     )
 
+    # single int as index slices always only first dim
+    assert named_array[0].named_axis == {"y": 0, "z": 1}
+    assert named_array[1].named_axis == {"y": 0, "z": 1}
+    assert named_array[2].named_axis == {"y": 0, "z": 1}
+    assert named_array[3].named_axis == {"y": 0, "z": 1}
+
     assert named_array[None, :, :, :].named_axis == {"x": 1, "y": 2, "z": 3}
     assert named_array[:, None, :, :].named_axis == {"x": 0, "y": 2, "z": 3}
     assert named_array[:, :, None, :].named_axis == {"x": 0, "y": 1, "z": 3}

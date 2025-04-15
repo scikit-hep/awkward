@@ -533,7 +533,7 @@ class Content(Meta):
         if is_integer_like(where):
             # propagate named_axis to output
             named_axis.mapping = _remove_named_axis(
-                named_axis.mapping, where, self.purelist_depth
+                named_axis.mapping, 0, self.purelist_depth
             )
             return self._getitem_at(ak._slicing.normalize_integer_like(where))
 
