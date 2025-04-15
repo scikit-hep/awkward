@@ -1121,10 +1121,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     attrs=self._attrs,
                 )
             else:
-                return wrap_layout(
+                return ak.operations.ak_without_named_axis._impl(
                     indexed_layout,
-                    self._behavior,
-                    allow_other=True,
+                    highlevel=True,
+                    behavior=self._behavior,
                     attrs=self._attrs,
                 )
 
