@@ -940,7 +940,7 @@ class Content(Meta):
                     combinationslen = combinationslen * (size - j + 1)
                     combinationslen = combinationslen // j
 
-        tocarryraw = self._backend.nplike.empty(n, dtype=np.intp)
+        tocarryraw = ak.index.Index.empty(n, dtype=np.intp, nplike=self._backend.nplike)
         tocarry = []
         for i in range(n):
             ptr = Index64.empty(
@@ -966,7 +966,7 @@ class Content(Meta):
                 toindex.data.dtype.type,
                 fromindex.data.dtype.type,
             ](
-                tocarryraw,
+                tocarryraw.data,
                 toindex.data,
                 fromindex.data,
                 n,
