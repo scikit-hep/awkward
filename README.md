@@ -236,7 +236,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/HavryliukAY"><img src="https://avatars.githubusercontent.com/u/58536463?v=4?s=100" width="100px;" alt="Havryliuk Artem "/><br /><sub><b>Havryliuk Artem </b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=HavryliukAY" title="Code">💻</a></td>
     </tr>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ikrommyd"><img src="https://avatars.githubusercontent.com/u/82155404?v=4?s=100" width="100px;" alt="Iason Krommydas"/><br /><sub><b>Iason Krommydas</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=ikrommyd" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ikrommyd"><img src="https://avatars.githubusercontent.com/u/82155404?v=4?s=100" width="100px;" alt="Iason Krommydas"/><br /><sub><b>Iason Krommydas</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=ikrommyd" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward/commits?author=ikrommyd" title="Tests">⚠️</a></td>
     </tr>
   </tbody>
 </table>
