@@ -208,7 +208,14 @@ def _impl(
         backend = TypeTracerBackend.instance()
 
         if obj.ndim == 0:
-            obj = backend.nplike.reshape(obj, (1,))
+            if primitive_policy == "pass-through":
+                return obj
+            elif primitive_policy == "error":
+                raise TypeError(
+                    f"Encountered a scalar ({type(obj).__name__}), but scalar conversion/promotion is disabled"
+                )
+            else:
+                obj = backend.nplike.reshape(obj, (1,))
 
         if obj.dtype.kind in {"S", "U"}:
             raise NotImplementedError(
