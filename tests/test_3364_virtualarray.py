@@ -284,7 +284,8 @@ def test_init_valid(numpy_like, simple_array_generator):
 def test_init_invalid_shape():
     nplike = Numpy.instance()
     with pytest.raises(
-        TypeError, match=r"Only shapes of integer dimensions are supported"
+        TypeError,
+        match=r"Only shapes of integer dimensions or unknown_length are supported",
     ):
         VirtualArray(
             nplike,
