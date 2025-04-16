@@ -66,7 +66,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             return obj
         if isinstance(obj, VirtualArray):
             if obj.is_materialized:
-                obj = obj.materialize()
+                obj = obj.materialize_data()
             else:
                 if obj.dtype == dtype or dtype is None:
                     return obj
@@ -75,7 +75,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                         obj.nplike,
                         obj.shape,
                         dtype,
-                        lambda: self.asarray(obj.materialize(), dtype=dtype),
+                        lambda: self.asarray(obj.materialize_data(), dtype=dtype),
                     )
         if copy:
             return self._module.array(obj, dtype=dtype, copy=True)
@@ -96,13 +96,13 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             return x
         elif isinstance(x, VirtualArray):
             if x.is_materialized:
-                return self._module.ascontiguousarray(x.materialize())
+                return self._module.ascontiguousarray(x.materialize_data())
             else:
                 return VirtualArray(
                     x.nplike,
                     x.shape,
                     x.dtype,
-                    lambda: self._module.ascontiguousarray(x.materialize()),
+                    lambda: self._module.ascontiguousarray(x.materialize_data()),
                 )
         else:
             return self._module.ascontiguousarray(x)
@@ -354,10 +354,10 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                     self,
                     next_shape,
                     x.dtype,
-                    lambda: self.reshape(x.materialize(), next_shape),  # type: ignore[union-attr]
+                    lambda: self.reshape(x.materialize_data(), next_shape),  # type: ignore[union-attr]
                 )
             else:
-                x = x.materialize()  # type: ignore[assignment]
+                x = x.materialize_data()  # type: ignore[assignment]
 
         if copy is None:
             return self._module.reshape(x, shape)
