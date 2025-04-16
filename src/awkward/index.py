@@ -140,6 +140,8 @@ class Index:
             return self._data.ctypes.data
         elif isinstance(self._nplike, Cupy):
             return self._data.data.ptr
+        elif isinstance(self._nplike, Jax):
+            return self._data.unsafe_buffer_pointer()
         elif isinstance(self._nplike, TypeTracer):
             return 0
         else:
@@ -257,7 +259,10 @@ class Index:
             return out
 
     def __setitem__(self, where, what):
-        self._data[where] = what
+        if isinstance(self._nplike, Jax):
+            self._data = self._data.at[where].set(what)
+        else:
+            self._data[where] = what
 
     def to64(self) -> Index:
         return Index(self._nplike.astype(self._data, dtype=np.int64))

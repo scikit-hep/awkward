@@ -13,6 +13,7 @@ from awkward._layout import (
     maybe_posaxis,
 )
 from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
     _get_named_axis,
     _named_axis_to_positional_axis,
 )
@@ -225,7 +226,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        wrapped = ctx.wrap(
+        wrapped = ctx.without_attr(NAMED_AXIS_KEY).wrap(
             maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,
