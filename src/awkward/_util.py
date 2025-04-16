@@ -11,6 +11,7 @@ from collections.abc import Collection
 import numpy as np  # noqa: TID251
 import packaging.version
 
+import awkward as ak
 from awkward._typing import TypeVar
 
 win = os.name == "nt"
@@ -117,3 +118,12 @@ def copy_behaviors(from_name: str, to_name: str, behavior: dict):
                 output[new_tuple] = value
 
     return output
+
+
+def non_materializing_shape(
+    array: ak._nplikes.ArrayLike,
+) -> tuple[ak._nplikes.shape.ShapeItem, ...]:
+    if isinstance(array, ak._nplikes.virtual.VirtualArray):
+        return array._shape
+    else:
+        return array.shape

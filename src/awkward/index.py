@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 
+import awkward as ak
 from awkward._nplikes import to_nplike
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.cupy import Cupy
@@ -67,7 +68,7 @@ class Index:
             self._nplike.asarray(data, dtype=self._expected_dtype)
         )
 
-        if len(self._data.shape) != 1:
+        if len(ak._util.non_materializing_shape(self._data)) != 1:
             raise TypeError("Index data must be one-dimensional")
 
         if np.issubdtype(self._data.dtype, np.longlong):
