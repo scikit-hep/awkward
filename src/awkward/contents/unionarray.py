@@ -1685,7 +1685,13 @@ class UnionArray(UnionMeta[Content], Content):
             if len(contents[tag]) > num_tag:
                 if original_index is index:
                     index = index.copy()
-                index[is_tag] = self._backend.nplike.arange(num_tag, dtype=index.dtype)
+                new_index_values = self._backend.nplike.arange(
+                    num_tag, dtype=index.dtype
+                )
+                if isinstance(self._backend.nplike, Jax):
+                    index = index.at[is_tag].set(new_index_values)
+                else:
+                    index[is_tag] = new_index_values
                 contents[tag] = self.project(tag)
 
             contents[tag] = (
