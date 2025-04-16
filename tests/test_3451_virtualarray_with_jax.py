@@ -659,7 +659,6 @@ def test_numpyarray_argcartesian(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_all_materialized
 
 
-@pytest.mark.skip("combinations not implemented for the jax backend")
 def test_numpyarray_combinations(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.array_equal(
@@ -670,7 +669,6 @@ def test_numpyarray_combinations(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
-@pytest.mark.skip("argcombinations not implemented for the jax backend")
 def test_numpyarray_argcombinations(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.array_equal(
@@ -1459,7 +1457,6 @@ def test_listoffsetarray_argcartesian(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_all_materialized
 
 
-@pytest.mark.skip("combinations not implemented for the jax backend")
 def test_listoffsetarray_combinations(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     # Need to use axis=1 for nested structures
@@ -1471,7 +1468,6 @@ def test_listoffsetarray_combinations(listoffsetarray, virtual_listoffsetarray):
     assert virtual_listoffsetarray.is_all_materialized
 
 
-@pytest.mark.skip("argcombinations not implemented for the jax backend")
 def test_listoffsetarray_argcombinations(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     # Need to use axis=1 for nested structures
@@ -2496,7 +2492,6 @@ def test_listarray_argcartesian(listarray, virtual_listarray):
     assert not virtual_listarray.is_all_materialized
 
 
-@pytest.mark.skip("combinations not implemented for the jax backend")
 def test_listarray_combinations(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     # Need to use axis=1 for nested structures
@@ -2508,7 +2503,6 @@ def test_listarray_combinations(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.skip("argcombinations not implemented for the jax backend")
 def test_listarray_argcombinations(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     # Need to use axis=1 for nested structures
@@ -3379,7 +3373,6 @@ def test_recordarray_local_index_y_field(recordarray, virtual_recordarray):
     assert not virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip("combinations not implemented for the jax backend")
 def test_recordarray_combinations_x_field(recordarray, virtual_recordarray):
     # Test combinations on the x field (ListOffsetArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3393,7 +3386,6 @@ def test_recordarray_combinations_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip("combinations not implemented for the jax backend")
 def test_recordarray_combinations_y_field(recordarray, virtual_recordarray):
     # Test combinations on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
