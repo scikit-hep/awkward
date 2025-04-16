@@ -912,7 +912,7 @@ class RegularArray(RegularMeta[Content], Content):
                     combinationslen = combinationslen // j
 
             totallen = combinationslen * self._length
-            tocarryraw = nplike.empty(n, dtype=np.intp)
+            tocarryraw = ak.index.Index.empty(n, dtype=np.intp, nplike=nplike)
             tocarry = []
             for i in range(n):
                 ptr = ak.index.Index64.empty(
@@ -936,7 +936,7 @@ class RegularArray(RegularMeta[Content], Content):
                         toindex.data.dtype.type,
                         fromindex.data.dtype.type,
                     ](
-                        tocarryraw,
+                        tocarryraw.data,
                         toindex.data,
                         fromindex.data,
                         n,
