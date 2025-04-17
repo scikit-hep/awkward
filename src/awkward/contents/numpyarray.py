@@ -123,7 +123,7 @@ class NumpyArray(NumpyMeta, Content):
         if not isinstance(backend.nplike, Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)
 
-        if len(ak._util.non_materializing_shape(self._data)) == 0:
+        if len(ak._util.non_materializing_shape_of(self._data)) == 0:
             raise TypeError(
                 f"{type(self).__name__} 'data' must be an array, not a scalar: {data!r}"
             )
@@ -131,7 +131,7 @@ class NumpyArray(NumpyMeta, Content):
         if parameters is not None and parameters.get("__array__") in ("char", "byte"):
             if (
                 data.dtype != np.dtype(np.uint8)
-                or len(ak._util.non_materializing_shape(data)) != 1
+                or len(ak._util.non_materializing_shape_of(data)) != 1
             ):
                 raise ValueError(
                     "{} is a {}, so its 'data' must be 1-dimensional and uint8, not {}".format(

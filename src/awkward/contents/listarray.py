@@ -142,7 +142,12 @@ class ListArray(ListMeta[Content], Content):
             raise TypeError(
                 f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
-        if content.backend.nplike.known_data and starts.length > stops.length:
+        if (
+            content.backend.nplike.known_data
+            and ak._util.non_materializing_length_of(starts) is not unknown_length
+            and ak._util.non_materializing_length_of(stops) is not unknown_length
+            and starts.length > stops.length
+        ):
             raise ValueError(
                 f"{type(self).__name__} len(starts) ({starts.length}) must be <= len(stops) ({stops.length})"
             )

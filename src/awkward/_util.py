@@ -120,10 +120,26 @@ def copy_behaviors(from_name: str, to_name: str, behavior: dict):
     return output
 
 
-def non_materializing_shape(
-    array: ak._nplikes.ArrayLike,
+def non_materializing_shape_of(
+    item: ak._nplikes.ArrayLike,
 ) -> tuple[ak._nplikes.shape.ShapeItem, ...]:
-    if isinstance(array, ak._nplikes.virtual.VirtualArray):
-        return array._shape
+    if isinstance(item, ak._nplikes.virtual.VirtualArray):
+        return item._shape
     else:
-        return array.shape
+        return item.shape
+
+
+def non_materializing_length_of(
+    item: ak.contents.Content | ak.index.Index,
+) -> ak._nplikes.shape.ShapeItem:
+    if isinstance(item, ak.contents.ListOffsetArray):
+        return non_materializing_length_of(item._offsets) - 1
+    elif isinstance(item, ak.contents.ListArray):
+        return non_materializing_length_of(item._starts)
+    elif isinstance(item, (ak.contents.NumpyArray, ak.index.Index)):
+        if isinstance(item._data, ak._nplikes.virtual.VirtualArray):
+            return item._data._shape[0]
+        else:
+            return item._data.shape[0]
+    else:
+        return item.length

@@ -38,7 +38,7 @@ def to_nplike(
             )
         else:
             if nplike.supports_virtual_arrays:
-                array = array.materialize_data()
+                array = array.materialize()
             elif not nplike.known_data:
                 pass
             else:

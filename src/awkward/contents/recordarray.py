@@ -220,7 +220,8 @@ class RecordArray(RecordMeta[Content], Content):
             for content in contents:
                 if (
                     backend.nplike.known_data
-                    and content.length is not unknown_length
+                    and ak._util.non_materializing_length_of(content)
+                    is not unknown_length
                     and content.length < length
                 ):
                     raise ValueError(

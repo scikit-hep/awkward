@@ -27,7 +27,7 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     A little helper function to materialize all virtual arrays in a list of arrays.
     """
     return tuple(
-        arg.materialize_data() if isinstance(arg, VirtualArray) else arg for arg in args
+        arg.materialize() if isinstance(arg, VirtualArray) else arg for arg in args
     )
 
 
@@ -49,7 +49,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         nplike: NumpyLike,
         shape: tuple[ShapeItem, ...],
         dtype: DTypeLike,
-        data_generator: Callable[[], ArrayLike],
+        generator: Callable[[], ArrayLike],
         shape_generator: Callable[[], tuple[ShapeItem, ...]] | None = None,
     ) -> None:
         if not nplike.supports_virtual_arrays:
@@ -66,7 +66,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         self._shape = shape
         self._dtype = np.dtype(dtype)
         self._array: Sentinel | ArrayLike = UNMATERIALIZED
-        self._data_generator = data_generator
+        self._generator = generator
         self._shape_generator = shape_generator
 
     @property
@@ -75,8 +75,14 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def shape(self) -> tuple[ShapeItem, ...]:
-        self.materialize_shape()
+        self.get_shape()
         return self._shape
+
+    @property
+    def inner_shape(self) -> tuple[ShapeItem, ...]:
+        if len(self._shape) > 1:
+            self.get_shape()
+        return self._shape[1:]
 
     @property
     def ndim(self) -> int:
@@ -95,14 +101,14 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
-        return self.materialize_data().strides  # type: ignore[attr-defined]
+        return self.materialize().strides  # type: ignore[attr-defined]
 
-    def materialize_shape(self) -> Self:
+    def get_shape(self) -> Self:
         if any(dim is unknown_length for dim in self._shape):
             if self._shape_generator is not None:
                 shape = self._shape_generator()
             else:
-                shape = self._data_generator().shape
+                shape = self.materialize().shape
             if len(shape) != len(self._shape):
                 raise TypeError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
@@ -115,9 +121,9 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             self._shape = shape
         return self
 
-    def materialize_data(self) -> ArrayLike:
+    def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
-            array = self._nplike.asarray(self._data_generator())
+            array = self._nplike.asarray(self._generator())
             if len(self._shape) != len(array.shape):
                 raise TypeError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
@@ -139,6 +145,10 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         self._array = UNMATERIALIZED
 
     @property
+    def has_known_shape(self) -> bool:
+        return all(is_integer(dim) for dim in self._shape)
+
+    @property
     def is_materialized(self) -> bool:
         return self._array is not UNMATERIALIZED
 
@@ -151,15 +161,15 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             self._nplike,
             self._shape[::-1],
             self._dtype,
-            lambda: self.materialize_data().T,
-            lambda: self.materialize_shape().shape[::-1],
+            lambda: self.materialize().T,
+            lambda: self.shape[::-1],
         )
 
     def view(self, dtype: DTypeLike) -> Self:
         dtype = np.dtype(dtype)
 
         if self._array is not UNMATERIALIZED:
-            return self.materialize_data().view(dtype)  # type: ignore[return-value]
+            return self.materialize().view(dtype)  # type: ignore[return-value]
 
         if len(self._shape) >= 1:
             last, remainder = divmod(
@@ -174,21 +184,17 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         else:
             shape = self._shape
 
-        def new_shape_generator():
-            self.materialize_shape()
-            return shape
-
         return type(self)(
             self._nplike,
             shape,
             dtype,
-            lambda: self.materialize_data().view(dtype),
-            new_shape_generator,
+            lambda: self.materialize().view(dtype),
+            lambda: shape,
         )
 
     @property
-    def data_generator(self) -> Callable:
-        return self._data_generator
+    def generator(self) -> Callable:
+        return self._generator
 
     @property
     def nplike(self) -> NumpyLike:
@@ -202,17 +208,17 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return copy.copy(self)
 
     def tolist(self) -> list:
-        return self.materialize_data().tolist()  # type: ignore[attr-defined]
+        return self.materialize().tolist()  # type: ignore[attr-defined]
 
     @property
     def ctypes(self):
         if isinstance((self._nplike), ak._nplikes.cupy.Cupy):
             raise AttributeError("Cupy ndarrays do not have a ctypes attribute")
-        return self.materialize_data().ctypes
+        return self.materialize().ctypes
 
     @property
     def data(self):
-        return self.materialize_data().data
+        return self.materialize().data
 
     def byteswap(self, inplace=False):
         if self._array is not UNMATERIALIZED:
@@ -222,19 +228,19 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             self._nplike,
             self._shape,
             self._dtype,
-            lambda: self.materialize_data().byteswap(inplace=inplace),
-            lambda: self.materialize_shape().shape,
+            lambda: self.materialize().byteswap(inplace=inplace),
+            lambda: self.shape,
         )
 
     def tobytes(self, order="C") -> bytes:
-        return self.materialize_data().tobytes(order)  # type: ignore[attr-defined]
+        return self.materialize().tobytes(order)  # type: ignore[attr-defined]
 
     def __copy__(self) -> VirtualArray:
         new_virtual = type(self)(
             self._nplike,
             self._shape,
             self._dtype,
-            self._data_generator,
+            self._generator,
             self._shape_generator,
         )
         new_virtual._array = self._array
@@ -245,7 +251,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             self._nplike,
             self._shape,
             self._dtype,
-            self._data_generator,
+            self._generator,
             self._shape_generator,
         )
         new_virtual._array = (
@@ -283,44 +289,40 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                     f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided"
                 )
             else:
-                self.materialize_shape()
+                self.get_shape()
                 length = self._shape[0]
                 start, stop, step = index.indices(length)
                 new_length = max(
                     0, (stop - start + (step - (1 if step > 0 else -1))) // step
                 )
 
-            def new_shape_generator():
-                self.materialize_shape()
-                return (new_length,) + self._shape[1:]
-
             return type(self)(
                 self._nplike,
                 (new_length,) + self._shape[1:],
                 self._dtype,
-                lambda: self.materialize_data()[index],
-                new_shape_generator,
+                lambda: self.materialize()[index],
+                lambda: (new_length,) + self.shape[1:],
             )
         else:
-            return self.materialize_data().__getitem__(index)
+            return self.materialize().__getitem__(index)
 
     def __setitem__(self, key, value):
-        array = self.materialize_data()
-        value = value.materialize_data() if isinstance(value, VirtualArray) else value
+        array = self.materialize()
+        value = value.materialize() if isinstance(value, VirtualArray) else value
         array.__setitem__(key, value)
 
     def __bool__(self) -> bool:
-        array = self.materialize_data()
+        array = self.materialize()
         return bool(array)
 
     def __int__(self) -> int:
-        array = self.materialize_data()
+        array = self.materialize()
         if len(array.shape) == 0:
             return int(array)
         raise TypeError("Only scalar arrays can be converted to an int")
 
     def __index__(self) -> int:
-        array = self.materialize_data()
+        array = self.materialize()
         if len(array.shape) == 0:
             return int(array)
         raise TypeError("Only scalar arrays can be used as an index")
@@ -331,11 +333,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return int(self._shape[0])
 
     def __iter__(self):
-        array = self.materialize_data()
+        array = self.materialize()
         return iter(array)
 
     def __dlpack_device__(self) -> tuple[int, int]:
-        return self.materialize_data().__dlpack_device__()  # type: ignore[attr-defined]
+        return self.materialize().__dlpack_device__()  # type: ignore[attr-defined]
 
     def __dlpack__(self, stream: Any = None) -> Any:
-        return self.materialize_data().__dlpack__(stream=stream)  # type: ignore[attr-defined]
+        return self.materialize().__dlpack__(stream=stream)  # type: ignore[attr-defined]

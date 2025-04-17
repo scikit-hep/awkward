@@ -68,7 +68,7 @@ class Index:
             self._nplike.asarray(data, dtype=self._expected_dtype)
         )
 
-        if len(ak._util.non_materializing_shape(self._data)) != 1:
+        if len(ak._util.non_materializing_shape_of(self._data)) != 1:
             raise TypeError("Index data must be one-dimensional")
 
         if np.issubdtype(self._data.dtype, np.longlong):

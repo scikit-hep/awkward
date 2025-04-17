@@ -132,8 +132,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
         if (
             content.backend.nplike.known_data
-            and offsets.length is not unknown_length
-            and offsets.length == 0
+            and ak._util.non_materializing_length_of(offsets) is not unknown_length
+            and ak._util.non_materializing_length_of(offsets) == 0
         ):
             raise ValueError(
                 f"{type(self).__name__} len(offsets) ({offsets.length}) must be >= 1"
