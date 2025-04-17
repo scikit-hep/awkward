@@ -8,7 +8,7 @@ from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpy_like import UfuncLike
 from awkward._nplikes.placeholder import PlaceholderArray
-from awkward._nplikes.virtual import materialize_if_virtual
+from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
 from awkward._typing import Final, cast
 
 
@@ -16,7 +16,7 @@ from awkward._typing import Final, cast
 class Jax(ArrayModuleNumpyLike):
     is_eager: Final = True
     supports_structured_dtypes: Final = False
-    supports_virtual_arrays: Final = False
+    supports_virtual_arrays: Final = True
 
     def __init__(self):
         jax = ak.jax.import_jax()
@@ -87,7 +87,10 @@ class Jax(ArrayModuleNumpyLike):
         return True
 
     def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
-        return x
+        if isinstance(x, VirtualArray) and x.is_materialized:
+            return x.materialize()
+        else:
+            return x
 
     def strides(self, x: ArrayLike) -> tuple[int, ...]:
         out: tuple[int, ...] = (x.dtype.itemsize,)
