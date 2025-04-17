@@ -282,7 +282,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         out = [indent, pre, "<ByteMaskedArray valid_when="]
         out.append(repr(json.dumps(self._valid_when)))
         out.append(" len=")
-        out.append(repr(str(self.length)))
+        out.append(repr(str(ak._util.non_materializing_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

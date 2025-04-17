@@ -132,14 +132,26 @@ def non_materializing_shape_of(
 def non_materializing_length_of(
     item: ak.contents.Content | ak.index.Index,
 ) -> ak._nplikes.shape.ShapeItem:
-    if isinstance(item, ak.contents.ListOffsetArray):
+    if isinstance(item, (ak.contents.NumpyArray, ak.index.Index)):
+        return non_materializing_shape_of(item._data)[0]
+    elif isinstance(item, ak.contents.ListOffsetArray):
         return non_materializing_length_of(item._offsets) - 1
     elif isinstance(item, ak.contents.ListArray):
         return non_materializing_length_of(item._starts)
-    elif isinstance(item, (ak.contents.NumpyArray, ak.index.Index)):
-        if isinstance(item._data, ak._nplikes.virtual.VirtualArray):
-            return item._data._shape[0]
-        else:
-            return item._data.shape[0]
+    elif isinstance(
+        item,
+        (ak.contents.RecordArray, ak.contents.RegularArray, ak.contents.BitMaskedArray),
+    ):
+        return item._length
+    elif isinstance(item, ak.contents.ByteMaskedArray):
+        return non_materializing_length_of(item._mask)
+    elif isinstance(item, (ak.contents.IndexedArray, ak.contents.IndexedOptionArray)):
+        return non_materializing_length_of(item._index)
+    elif isinstance(item, ak.contents.UnionArray):
+        return non_materializing_length_of(item._tags)
+    elif isinstance(item, ak.contents.UnmaskedArray):
+        return non_materializing_length_of(item._content)
+    elif isinstance(item, ak.contents.EmptyArray):
+        return 0
     else:
-        return item.length
+        raise TypeError(f"Invalid type {type(item)} for length calculation")

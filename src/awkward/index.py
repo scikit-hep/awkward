@@ -212,7 +212,7 @@ class Index:
         out = [indent, pre, "<Index dtype="]
         out.append(repr(str(self.dtype)))
         out.append(" len=")
-        out.append(repr(str(self._data.shape[0])))
+        out.append(repr(str(ak._util.non_materializing_length_of(self))))
 
         arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
             "\n"

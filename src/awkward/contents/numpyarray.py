@@ -253,12 +253,11 @@ class NumpyArray(NumpyMeta, Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<NumpyArray dtype="]
         out.append(repr(str(self.dtype)))
-        if len(self._data.shape) == 1:
-            out.append(" len=" + repr(str(self._data.shape[0])))
+        shape = ak._util.non_materializing_shape_of(self._data)
+        if len(shape) == 1:
+            out.append(" len=" + repr(str(shape[0])))
         else:
-            out.append(
-                " shape='({})'".format(", ".join(str(x) for x in self._data.shape))
-            )
+            out.append(" shape='({})'".format(", ".join(str(x) for x in shape)))
 
         extra = self._repr_extra(indent + "    ")
 

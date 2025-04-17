@@ -258,7 +258,7 @@ class RegularArray(RegularMeta[Content], Content):
         out = [indent, pre, "<RegularArray size="]
         out.append(repr(str(self._size)))
         out.append(" len=")
-        out.append(repr(str(self._length)))
+        out.append(repr(str(ak._util.non_materializing_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")
