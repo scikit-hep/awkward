@@ -91,6 +91,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     @property
     def size(self) -> ShapeItem:
         size: ShapeItem = 1
+        self.get_shape()
         for item in self._shape:
             size *= item
         return size
@@ -103,7 +104,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def strides(self) -> tuple[ShapeItem, ...]:
         return self.materialize().strides  # type: ignore[attr-defined]
 
-    def get_shape(self) -> Self:
+    def get_shape(self) -> None:
         if any(dim is unknown_length for dim in self._shape):
             if self._shape_generator is not None:
                 shape = self._shape_generator()
@@ -119,7 +120,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                         f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
                     )
             self._shape = shape
-        return self
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
@@ -167,6 +167,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def view(self, dtype: DTypeLike) -> Self:
         dtype = np.dtype(dtype)
+        self.get_shape()
 
         if self._array is not UNMATERIALIZED:
             return self.materialize().view(dtype)  # type: ignore[return-value]
@@ -195,6 +196,10 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     @property
     def generator(self) -> Callable:
         return self._generator
+
+    @property
+    def shape_generator(self) -> Callable | None:
+        return self._shape_generator
 
     @property
     def nplike(self) -> NumpyLike:
