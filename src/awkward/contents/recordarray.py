@@ -59,7 +59,11 @@ def _apply_record_reducer(reducer, layout: Content, mask: bool, behavior) -> Con
     return ak.to_layout(reducer(array, mask))
 
 
-def _calculate_recordarray_length(contents, length, backend):
+def _calculate_recordarray_length(
+    contents: Iterable[Content],
+    length: int | type[unknown_length] | None,
+    backend: Backend,
+) -> int | type[unknown_length]:
     if length is None:
         # Require a length if we have no contents
         if len(contents) == 0:
