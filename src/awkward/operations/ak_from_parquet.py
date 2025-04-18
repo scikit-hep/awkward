@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+
 import fsspec.parquet
 
 import awkward as ak
@@ -65,11 +68,8 @@ def from_parquet(
     See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
 
-    parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta = metadata(
-        path,
-        storage_options,
-        row_groups,
-        columns,
+    parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta, uuid = (
+        metadata(path, storage_options, row_groups, columns, calculate_uuid=True)
     )
     return _load(
         actual_paths,
@@ -95,6 +95,7 @@ def metadata(
     columns=None,
     ignore_metadata=False,
     scan_files=True,
+    calculate_uuid=False,
 ):
     # early exit if missing deps
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.from_parquet")
@@ -192,6 +193,25 @@ def metadata(
     parquet_columns = subform.columns(
         list_indicator=list_indicator, column_prefix=column_prefix
     )
+
+    # generate hash from the col_counts, first row_group and last row_group to calculate approximate parquet uuid
+    uuid = None
+    if calculate_uuid:
+        uuids = [str(col_counts)]
+        for row_group_index in (0, metadata.num_row_groups - 1):
+            row_group_info = metadata.row_group(row_group_index)
+            uuids.append(repr(row_group_info.to_dict()))
+        uuid = hashlib.sha256(json.dumps(",".join(uuids)).encode()).hexdigest()
+        return (
+            parquet_columns,
+            subform,
+            actual_paths,
+            fs,
+            subrg,
+            col_counts,
+            metadata,
+            uuid,
+        )
 
     return parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata
 
