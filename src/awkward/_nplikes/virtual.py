@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from numpy.typing import DTypeLike
 
 
-UNMATERIALIZED = Sentinel("<UNMATERIALIZED>", None)
+UNMATERIALIZED = Sentinel("UNMATERIALIZED", None)
 
 
 def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
