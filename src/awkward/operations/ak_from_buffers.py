@@ -268,8 +268,8 @@ def _reconstitute(
         real_length = _adjust_length(length)
 
         def _shape_generator():
-            length, *rest = shape_generator()
-            return (_adjust_length(length), *rest)
+            (length,) = shape_generator()
+            return (_adjust_length(length),)
 
         data = _from_buffer(
             backend.nplike,
@@ -312,8 +312,8 @@ def _reconstitute(
             return math.ceil(length / 8.0)
 
         def _shape_generator():
-            length, *rest = shape_generator()
-            return (_adjust_length(length), *rest)
+            (length,) = shape_generator()
+            return (_adjust_length(length),)
 
         if length is unknown_length:
             next_length = unknown_length
@@ -402,8 +402,7 @@ def _reconstitute(
             return 0 if len(index) == 0 else max(0, backend.nplike.max(index) + 1)
 
         def _shape_generator():
-            _, *rest = shape_generator()
-            return (_adjust_length(index), *rest)
+            return (_adjust_length(index),)
 
         if isinstance(index, (PlaceholderArray, VirtualArray)):
             next_length = unknown_length
@@ -450,8 +449,7 @@ def _reconstitute(
             )
 
         def _shape_generator():
-            _, *rest = shape_generator
-            return (_adjust_length(index), *rest)
+            return (_adjust_length(index),)
 
         if isinstance(index, (PlaceholderArray, VirtualArray)):
             next_length = unknown_length
@@ -505,8 +503,7 @@ def _reconstitute(
             return 0 if len(starts) == 0 else backend.nplike.max(reduced_stops)
 
         def _shape_generator():
-            _, *rest = shape_generator()
-            return (_adjust_length(starts, stops), *rest)
+            return (_adjust_length(starts, stops),)
 
         if isinstance(starts, (PlaceholderArray, VirtualArray)) or isinstance(
             stops, (PlaceholderArray, VirtualArray)
@@ -536,8 +533,8 @@ def _reconstitute(
         raw_array = container[getkey(form, "offsets")]
 
         def _shape_generator():
-            first, *rest = shape_generator()
-            return (first + 1, *rest)
+            (first,) = shape_generator()
+            return (first + 1,)
 
         offsets = _from_buffer(
             backend.nplike,
@@ -554,8 +551,7 @@ def _reconstitute(
             return 0 if len(offsets) == 1 else offsets[-1]
 
         def _shape_generator():
-            _, *rest = shape_generator()
-            return (_adjust_length(offsets), *rest)
+            return (_adjust_length(offsets),)
 
         if isinstance(offsets, (PlaceholderArray, VirtualArray)):
             next_length = unknown_length
@@ -587,8 +583,8 @@ def _reconstitute(
         next_length = _adjust_length(length)
 
         def _shape_generator():
-            first, *rest = shape_generator()
-            return (_adjust_length(first), *rest)
+            (first,) = shape_generator()
+            return (_adjust_length(first),)
 
         content = _reconstitute(
             form.content,
@@ -663,8 +659,7 @@ def _reconstitute(
         for tag in range(len(form.contents)):
 
             def _shape_generator(tag):
-                first, *rest = shape_generator()
-                return (_adjust_length(index, tags, tag), *rest)
+                return (_adjust_length(index, tags, tag),)
 
             _shape_generators.append(partial(_shape_generator, tag=tag))
 
