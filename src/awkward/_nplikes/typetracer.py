@@ -783,7 +783,10 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                 obj = numpy.asarray(obj)
 
             # Support array-like objects
-            if hasattr(obj, "shape") and hasattr(obj, "dtype"):
+            # Check for ._shape first because .shape might materialize
+            if (hasattr(obj, "_shape") or hasattr(obj, "shape")) and hasattr(
+                obj, "dtype"
+            ):
                 if obj.dtype.kind == "S":
                     raise TypeError("TypeTracerArray cannot be created from strings")
                 elif copy is False and dtype != obj.dtype:
@@ -791,7 +794,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                         "asarray was called with copy=False for an array of a different dtype"
                     )
                 else:
-                    return TypeTracerArray._new(obj.dtype, obj.shape)
+                    return TypeTracerArray._new(
+                        obj.dtype, ak._util.non_materializing_shape_of(obj)
+                    )
             # Python objects
             elif isinstance(obj, (Number, bool)):
                 as_array = numpy.asarray(obj)
