@@ -180,7 +180,19 @@ def _from_buffer(
 ) -> ArrayLike:
     if isinstance(buffer, VirtualArray):
         # This is the case for VirtualArrays
-        # TODO: should we make sure that dtype, count, etc are correct?
+        # just some checks to make sure the VirtualArray is correctly constructed
+        if nplike != buffer.nplike:
+            raise ValueError(
+                f"Mismatch of nplikes. Got {nplike}, but VirtualArray has {buffer.nplike}."
+            )
+        if dtype != buffer.dtype:
+            raise ValueError(
+                f"Mismatch of dtypes. Got {dtype}, but VirtualArray has {buffer.dtype}."
+            )
+        if count != buffer._shape[0]:
+            raise ValueError(
+                f"Mismatch of lengths. Got {count}, but VirtualArray has {buffer._shape[0]}."
+            )
         return buffer
 
     elif callable(buffer):
