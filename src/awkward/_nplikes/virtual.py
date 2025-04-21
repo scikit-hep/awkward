@@ -58,7 +58,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             raise TypeError(
                 f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(nplike)}"
             )
-        if any(not (is_integer(dim) or dim is unknown_length) for dim in shape):
+        if not all(is_integer(dim) or dim is unknown_length for dim in shape):
             raise TypeError(
                 f"Only shapes of integer dimensions or unknown_length are supported for {type(self).__name__}. Received shape {shape}"
             )

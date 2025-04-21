@@ -276,7 +276,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         if cls.runtime_typechecks:
             if not isinstance(shape, tuple):
                 raise TypeError("typetracer shape must be a tuple")
-            if not all(isinstance(x, int) or x is unknown_length for x in shape):
+            if not all(is_integer(x) or x is unknown_length for x in shape):
                 raise TypeError("typetracer shape must be integers or unknown-length")
             if not isinstance(dtype, np.dtype):
                 raise TypeError("typetracer dtype must be an instance of np.dtype")
