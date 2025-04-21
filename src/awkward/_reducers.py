@@ -437,7 +437,7 @@ class Sum(KernelReducer):
 
 class Prod(KernelReducer):
     name: Final = "prod"
-    preferred_dtype: Final = np.int64
+    preferred_dtype: Final = np.float64
     needs_position: Final = False
 
     def apply(

@@ -37,36 +37,31 @@ class JAXReducer(Reducer):
         raise NotImplementedError
 
 
-def awkward_JAXArray_reduce_adjust_starts_64(toptr, outlength, parents, starts):
+def awkward_JAXNumpyArray_reduce_adjust_starts_64(toptr, outlength, parents, starts):
     if outlength == 0 or parents.size == 0:
         return toptr
 
-    identity = jax.numpy.astype(jax.numpy.iinfo(jax.numpy.int64).max, toptr.dtype)
+    identity = jax.numpy.iinfo(jax.numpy.int64).max
     valid = toptr[:outlength] != identity
     safe_sub_toptr = jax.numpy.where(valid, toptr[:outlength], 0)
-    safe_sub_toptr_int = jax.numpy.astype(safe_sub_toptr, jax.numpy.int64)
-    parent_indices = parents[safe_sub_toptr_int]
-    adjustments = starts[jax.numpy.astype(parent_indices, jax.numpy.int64)]
+    parent_indices = parents[safe_sub_toptr]
+    adjustments = starts[parent_indices]
     updated = jax.numpy.where(valid, toptr[:outlength] - adjustments, toptr[:outlength])
 
     return toptr.at[:outlength].set(updated)
 
 
-def awkward_JAXArray_reduce_adjust_starts_shifts_64(
+def awkward_JAXNumpyArray_reduce_adjust_starts_shifts_64(
     toptr, outlength, parents, starts, shifts
 ):
     if outlength == 0 or parents.size == 0:
         return toptr
 
-    identity = jax.numpy.astype(jax.numpy.iinfo(jax.numpy.int64).max, toptr.dtype)
+    identity = jax.numpy.iinfo(jax.numpy.int64).max
     valid = toptr[:outlength] != identity
     safe_sub_toptr = jax.numpy.where(valid, toptr[:outlength], 0)
-    safe_sub_toptr_int = jax.numpy.astype(safe_sub_toptr, jax.numpy.int64)
-    parent_indices = parents[safe_sub_toptr_int]
-    delta = (
-        shifts[safe_sub_toptr_int]
-        - starts[jax.numpy.astype(parent_indices, jax.numpy.int64)]
-    )
+    parent_indices = parents[safe_sub_toptr]
+    delta = shifts[safe_sub_toptr] - starts[parent_indices]
     updated = jax.numpy.where(valid, toptr[:outlength] + delta, toptr[:outlength])
 
     return toptr.at[:outlength].set(updated)
@@ -83,7 +78,7 @@ def apply_positional_corrections(
             parents.nplike is reduced.backend.nplike
             and starts.nplike is reduced.backend.nplike
         )
-        return awkward_JAXArray_reduce_adjust_starts_64(
+        return awkward_JAXNumpyArray_reduce_adjust_starts_64(
             reduced.data, reduced.length, parents.data, starts.data
         )
 
@@ -93,7 +88,7 @@ def apply_positional_corrections(
             and starts.nplike is reduced.backend.nplike
             and shifts.nplike is reduced.backend.nplike
         )
-        return awkward_JAXArray_reduce_adjust_starts_shifts_64(
+        return awkward_JAXNumpyArray_reduce_adjust_starts_shifts_64(
             reduced.data,
             reduced.length,
             parents.data,
@@ -133,7 +128,7 @@ def segment_argmin(data, segment_ids, num_segments):
 class ArgMin(JAXReducer):
     name: Final = "argmin"
     needs_position: Final = True
-    preferred_dtype: Final = np.float64
+    preferred_dtype: Final = np.int64
 
     @classmethod
     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
@@ -193,7 +188,7 @@ def segment_argmax(data, segment_ids, num_segments):
 class ArgMax(JAXReducer):
     name: Final = "argmax"
     needs_position: Final = True
-    preferred_dtype: Final = np.float64
+    preferred_dtype: Final = np.int64
 
     @classmethod
     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
@@ -225,7 +220,7 @@ class ArgMax(JAXReducer):
 @overloads(_reducers.Count)
 class Count(JAXReducer):
     name: Final = "count"
-    preferred_dtype: Final = np.float64
+    preferred_dtype: Final = np.int64
     needs_position: Final = False
 
     @classmethod
@@ -280,7 +275,7 @@ def segment_count_nonzero(data, segment_ids, num_segments):
 @overloads(_reducers.CountNonzero)
 class CountNonzero(JAXReducer):
     name: Final = "count_nonzero"
-    preferred_dtype: Final = np.float64
+    preferred_dtype: Final = np.int64
     needs_position: Final = False
 
     @classmethod
@@ -387,13 +382,19 @@ def segment_prod_with_negatives(data, segment_ids, num_segments):
     abs_products = jax.numpy.exp(log_products)
 
     # Apply zeros and signs
-    return jax.numpy.where(has_zeros, 0.0, sign_products * abs_products)
+    product = jax.numpy.where(has_zeros, 0.0, sign_products * abs_products)
+    # floating point accuracy doesn't let us directly cast to integers
+    if np.issubdtype(data.dtype, np.integer):
+        result = jax.numpy.round(product).astype(data.dtype)
+    else:
+        result = product
+    return result
 
 
 @overloads(_reducers.Prod)
 class Prod(JAXReducer):
     name: Final = "prod"
-    preferred_dtype: Final = np.int64
+    preferred_dtype: Final = np.float64
     needs_position: Final = False
 
     @classmethod
