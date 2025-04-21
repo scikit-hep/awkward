@@ -283,7 +283,7 @@ def test_numpyarray_to_json(numpyarray, virtual_numpyarray):
 
 def test_numpyarray_to_numpy(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
-    assert np.all(
+    assert ak.all(
         ak.to_numpy(ak.materialize(virtual_numpyarray))
         == ak.to_numpy(ak.materialize(numpyarray))
     )
@@ -304,7 +304,7 @@ def test_numpyarray_to_buffers(numpyarray, virtual_numpyarray):
     for key in out1[2]:
         assert isinstance(out1[2][key], np.ndarray)
         assert isinstance(out2[2][key], VirtualArray)
-        assert np.all(out1[2][key] == out2[2][key])
+        assert ak.all(out1[2][key] == out2[2][key])
 
 
 def test_numpyarray_is_valid(numpyarray, virtual_numpyarray):
@@ -871,7 +871,7 @@ def test_listoffsetarray_to_numpy(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     flat_listoffsetarray = ak.flatten(listoffsetarray)
     flat_virtual_listoffsetarray = ak.flatten(virtual_listoffsetarray)
-    assert np.all(
+    assert ak.all(
         ak.to_numpy(ak.materialize(flat_virtual_listoffsetarray))
         == ak.to_numpy(ak.materialize(flat_listoffsetarray))
     )
@@ -892,10 +892,10 @@ def test_listoffsetarray_to_buffers(listoffsetarray, virtual_listoffsetarray):
     for key in out1[2]:
         if isinstance(out2[2][key], VirtualArray):
             assert not out2[2][key].is_materialized
-            assert np.all(out1[2][key] == out2[2][key])
+            assert ak.all(out1[2][key] == out2[2][key])
             assert out2[2][key].is_materialized
         else:
-            assert np.all(out1[2][key] == out2[2][key])
+            assert ak.all(out1[2][key] == out2[2][key])
 
 
 def test_listoffsetarray_is_valid(listoffsetarray, virtual_listoffsetarray):
@@ -1891,10 +1891,10 @@ def test_listarray_to_buffers(listarray, virtual_listarray):
     for key in out1[2]:
         if isinstance(out2[2][key], VirtualArray):
             assert not out2[2][key].is_materialized
-            assert np.all(out1[2][key] == out2[2][key])
+            assert ak.all(out1[2][key] == out2[2][key])
             assert out2[2][key].is_materialized
         else:
-            assert np.all(out1[2][key] == out2[2][key])
+            assert ak.all(out1[2][key] == out2[2][key])
 
 
 def test_listarray_is_valid(listarray, virtual_listarray):
@@ -2966,10 +2966,10 @@ def test_recordarray_to_buffers(recordarray, virtual_recordarray):
     for key in out1[2]:
         if isinstance(out2[2][key], VirtualArray):
             assert not out2[2][key].is_materialized
-            assert np.all(out1[2][key] == out2[2][key])
+            assert ak.all(out1[2][key] == out2[2][key])
             assert out2[2][key].is_materialized
         else:
-            assert np.all(out1[2][key] == out2[2][key])
+            assert ak.all(out1[2][key] == out2[2][key])
 
 
 def test_recordarray_is_valid(recordarray, virtual_recordarray):
