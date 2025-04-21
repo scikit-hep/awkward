@@ -344,6 +344,9 @@ def _reconstitute(
             make = ak.contents.BitMaskedArray.simplified
         else:
             make = ak.contents.BitMaskedArray
+        # We need to know the length of a BitMaskedArray to initialize it
+        # as it is an argument in __init__ and is not calculated from the content
+        (length,) = shape_generator()
         return make(
             ak.index.Index(mask),
             content,
