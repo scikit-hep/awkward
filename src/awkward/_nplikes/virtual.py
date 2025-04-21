@@ -337,7 +337,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def __len__(self) -> int:
         if len(self._shape) == 0:
             raise TypeError("len() of unsized object")
-        return int(self._shape[0])
+        return int(self.shape[0])
 
     def __iter__(self):
         array = self.materialize()
