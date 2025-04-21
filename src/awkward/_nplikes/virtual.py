@@ -37,7 +37,9 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     Virtual arrays are tied to specific nplikes and only numpy and cupy nplikes are allowed.
     Therefore, virtual arrays are only allowed to generate `numpy.ndarray`s or `cupy.ndarray`s when materialized.
     The arrays are generated via a generator function that is passed to the constructor.
-    All virtual arrays also required to have a known dtype and shape.
+    They optionally accept a shape generator function that is called when the shape of the array is unknown.
+    If it doesn't exist, the shape is generated from the materialized array.
+    All virtual arrays also required to have a known dtype and shape but can contain `unknown_length` dimensions.
     Some operations (such as trivial slicing) maintain virtualness and return a new virtual array.
     Others are required to access the underlying data of the array and therefore materialize it.
     The materialized arrays are cached on themselves in the `_array` property.
@@ -81,7 +83,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     @property
     def inner_shape(self) -> tuple[ShapeItem, ...]:
         if len(self._shape) > 1:
-            self.get_shape()
+            return self.shape[1:]
         return self._shape[1:]
 
     @property
@@ -91,8 +93,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     @property
     def size(self) -> ShapeItem:
         size: ShapeItem = 1
-        self.get_shape()
-        for item in self._shape:
+        for item in self.shape:
             size *= item
         return size
 
@@ -167,23 +168,22 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def view(self, dtype: DTypeLike) -> Self:
         dtype = np.dtype(dtype)
-        self.get_shape()
 
         if self._array is not UNMATERIALIZED:
             return self.materialize().view(dtype)  # type: ignore[return-value]
 
-        if len(self._shape) >= 1:
+        if len(self.shape) >= 1:
             last, remainder = divmod(
-                self._shape[-1] * self._dtype.itemsize, dtype.itemsize
+                self.shape[-1] * self._dtype.itemsize, dtype.itemsize
             )
             if remainder != 0:
                 raise ValueError(
                     "new size of array with larger dtype must be a "
                     "divisor of the total size in bytes (of the last axis of the array)"
                 )
-            shape = self._shape[:-1] + (last,)
+            shape = self.shape[:-1] + (last,)
         else:
-            shape = self._shape
+            shape = self.shape
 
         return type(self)(
             self._nplike,
@@ -256,7 +256,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             self._nplike,
             self._shape,
             self._dtype,
-            self._generator,
+            lambda: copy.deepcopy(self._generator(), memo),
             self._shape_generator,
         )
         new_virtual._array = (
@@ -294,8 +294,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                     f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided"
                 )
             else:
-                self.get_shape()
-                length = self._shape[0]
+                length = self.shape[0]
                 start, stop, step = index.indices(length)
                 new_length = max(
                     0, (stop - start + (step - (1 if step > 0 else -1))) // step
@@ -303,7 +302,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
             return type(self)(
                 self._nplike,
-                (new_length,) + self._shape[1:],
+                (new_length,) + self.shape[1:],
                 self._dtype,
                 lambda: self.materialize()[index],
                 lambda: (new_length,) + self.shape[1:],
