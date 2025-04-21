@@ -99,7 +99,10 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def nbytes(self) -> ShapeItem:
-        return self.size * self._dtype.itemsize
+        size: ShapeItem = 1
+        for item in self._shape:
+            size *= item
+        return size * self._dtype.itemsize
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
