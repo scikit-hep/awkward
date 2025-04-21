@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from functools import partial
 
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
@@ -16,6 +17,7 @@ from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.virtual import VirtualArray
 from awkward._regularize import is_integer
+from awkward._typing import Callable
 from awkward.forms.form import index_to_dtype, regularize_buffer_key
 
 __all__ = ("from_buffers",)
@@ -153,7 +155,15 @@ def _impl(
     getkey = regularize_buffer_key(buffer_key)
 
     out = _reconstitute(
-        form, length, container, getkey, backend, byteorder, simplify, field_path=()
+        form,
+        length,
+        container,
+        getkey,
+        backend,
+        byteorder,
+        simplify,
+        field_path=(),
+        shape_generator=lambda: (length,),
     )
 
     return wrap_layout(out, highlevel=highlevel, attrs=attrs, behavior=behavior)
@@ -161,22 +171,33 @@ def _impl(
 
 def _from_buffer(
     nplike: NumpyLike,
-    buffer,
+    buffer: Callable | ArrayLike,
     dtype: np.dtype,
     count: ShapeItem,
     byteorder: str,
     field_path: tuple,
+    shape_generator: Callable | None = None,
 ) -> ArrayLike:
-    if callable(buffer):
+    if isinstance(buffer, VirtualArray):
         # This is the case for VirtualArrays
+        # TODO: should we make sure that dtype, count, etc are correct?
+        return buffer
+
+    elif callable(buffer):
+        # This is the case where we automatically create VirtualArrays
         # We use recursion here to pass down the from_buffer and byteorder transformations to the generator
+        def generator():
+            (length,) = shape_generator()
+            return _from_buffer(
+                nplike, buffer(), dtype, length, byteorder, field_path, None
+            )
+
         return VirtualArray(
             nplike=nplike,
             shape=(count,),
             dtype=dtype,
-            generator=lambda: _from_buffer(
-                nplike, buffer(), dtype, count, byteorder, field_path
-            ),
+            generator=generator,
+            shape_generator=shape_generator,
         )
     # Unknown-length information implies that we didn't load shape-buffers (offsets, etc)
     # for the parent of this node. Thus, this node and its children *must* only
@@ -210,7 +231,15 @@ def _from_buffer(
 
 
 def _reconstitute(
-    form, length, container, getkey, backend, byteorder, simplify, field_path
+    form,
+    length,
+    container,
+    getkey,
+    backend,
+    byteorder,
+    simplify,
+    field_path,
+    shape_generator,
 ):
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:
@@ -220,7 +249,16 @@ def _reconstitute(
     elif isinstance(form, ak.forms.NumpyForm):
         dtype = ak.types.numpytype.primitive_to_dtype(form.primitive)
         raw_array = container[getkey(form, "data")]
-        real_length = length * math.prod(form.inner_shape)
+
+        def _adjust_length(length):
+            return length * math.prod(form.inner_shape)
+
+        real_length = _adjust_length(length)
+
+        def _shape_generator():
+            length, *rest = shape_generator()
+            return (_adjust_length(length), *rest)
+
         data = _from_buffer(
             backend.nplike,
             raw_array,
@@ -228,6 +266,7 @@ def _reconstitute(
             count=real_length,
             byteorder=byteorder,
             field_path=field_path,
+            shape_generator=_shape_generator,
         )
         if form.inner_shape != ():
             data = backend.nplike.reshape(data, (length, *form.inner_shape))
@@ -246,6 +285,7 @@ def _reconstitute(
             byteorder,
             simplify,
             field_path,
+            shape_generator,
         )
         if simplify:
             make = ak.contents.UnmaskedArray.simplified
@@ -255,10 +295,19 @@ def _reconstitute(
 
     elif isinstance(form, ak.forms.BitMaskedForm):
         raw_array = container[getkey(form, "mask")]
+
+        def _adjust_length(length):
+            return math.ceil(length / 8.0)
+
+        def _shape_generator():
+            length, *rest = shape_generator()
+            return (_adjust_length(length), *rest)
+
         if length is unknown_length:
             next_length = unknown_length
         else:
-            next_length = math.ceil(length / 8.0)
+            next_length = _adjust_length(length)
+
         mask = _from_buffer(
             backend.nplike,
             raw_array,
@@ -266,6 +315,7 @@ def _reconstitute(
             count=next_length,
             byteorder=byteorder,
             field_path=field_path,
+            shape_generator=_shape_generator,
         )
         content = _reconstitute(
             form.content,
@@ -276,6 +326,7 @@ def _reconstitute(
             byteorder,
             simplify,
             field_path,
+            _shape_generator,
         )
         if simplify:
             make = ak.contents.BitMaskedArray.simplified
@@ -299,6 +350,7 @@ def _reconstitute(
             count=length,
             byteorder=byteorder,
             field_path=field_path,
+            shape_generator=shape_generator,
         )
         content = _reconstitute(
             form.content,
@@ -309,6 +361,7 @@ def _reconstitute(
             byteorder,
             simplify,
             field_path,
+            shape_generator,
         )
         if simplify:
             make = ak.contents.ByteMaskedArray.simplified
@@ -330,16 +383,20 @@ def _reconstitute(
             count=length,
             byteorder=byteorder,
             field_path=field_path,
+            shape_generator=shape_generator,
         )
-        if isinstance(index, PlaceholderArray):
+
+        def _adjust_length(index):
+            return 0 if len(index) == 0 else max(0, backend.nplike.max(index) + 1)
+
+        def _shape_generator():
+            _, *rest = shape_generator()
+            return (_adjust_length(index), *rest)
+
+        if isinstance(index, (PlaceholderArray, VirtualArray)):
             next_length = unknown_length
         else:
-            next_length = (
-                0 if len(index) == 0 else max(0, backend.nplike.max(index) + 1)
-            )
-            # free memory
-            if isinstance(index, VirtualArray):
-                index.dematerialize()
+            next_length = _adjust_length(index)
         content = _reconstitute(
             form.content,
             next_length,
@@ -349,6 +406,7 @@ def _reconstitute(
             byteorder,
             simplify,
             field_path,
+            _shape_generator,
         )
         if simplify:
             make = ak.contents.IndexedOptionArray.simplified
@@ -369,18 +427,24 @@ def _reconstitute(
             count=length,
             byteorder=byteorder,
             field_path=field_path,
+            shape_generator=shape_generator,
         )
-        if isinstance(index, PlaceholderArray):
-            next_length = unknown_length
-        else:
-            next_length = (
+
+        def _adjust_length(index):
+            return (
                 0
                 if len(index) == 0
                 else backend.nplike.index_as_shape_item(backend.nplike.max(index) + 1)
             )
-            # free memory
-            if isinstance(index, VirtualArray):
-                index.dematerialize()
+
+        def _shape_generator():
+            _, *rest = shape_generator
+            return (_adjust_length(index), *rest)
+
+        if isinstance(index, (PlaceholderArray, VirtualArray)):
+            next_length = unknown_length
+        else:
+            next_length = _adjust_length(index)
         content = _reconstitute(
             form.content,
             next_length,
@@ -390,6 +454,7 @@ def _reconstitute(
             byteorder,
             simplify,
             field_path,
+            _shape_generator,
         )
         if simplify:
             make = ak.contents.IndexedArray.simplified
@@ -411,6 +476,7 @@ def _reconstitute(
             count=length,
             byteorder=byteorder,
             field_path=field_path,
+            shape_generator=shape_generator,
         )
         stops = _from_buffer(
             backend.nplike,
@@ -419,17 +485,23 @@ def _reconstitute(
             count=length,
             byteorder=byteorder,
             field_path=field_path,
+            shape_generator=shape_generator,
         )
-        if isinstance(stops, PlaceholderArray):
+
+        def _adjust_length(starts, stops):
+            reduced_stops = stops[starts != stops]
+            return 0 if len(starts) == 0 else backend.nplike.max(reduced_stops)
+
+        def _shape_generator():
+            _, *rest = shape_generator()
+            return (_adjust_length(starts, stops), *rest)
+
+        if isinstance(starts, (PlaceholderArray, VirtualArray)) or isinstance(
+            stops, (PlaceholderArray, VirtualArray)
+        ):
             next_length = unknown_length
         else:
-            reduced_stops = stops[starts != stops]
-            next_length = 0 if len(starts) == 0 else backend.nplike.max(reduced_stops)
-            # free memory
-            if isinstance(starts, VirtualArray):
-                starts.dematerialize()
-            if isinstance(stops, VirtualArray):
-                stops.dematerialize()
+            next_length = _adjust_length(starts, stops)
         content = _reconstitute(
             form.content,
             next_length,
@@ -439,6 +511,7 @@ def _reconstitute(
             byteorder,
             simplify,
             field_path,
+            _shape_generator,
         )
         return ak.contents.ListArray(
             ak.index.Index(starts),
@@ -449,6 +522,11 @@ def _reconstitute(
 
     elif isinstance(form, ak.forms.ListOffsetForm):
         raw_array = container[getkey(form, "offsets")]
+
+        def _shape_generator():
+            first, *rest = shape_generator()
+            return (first + 1, *rest)
+
         offsets = _from_buffer(
             backend.nplike,
             raw_array,
@@ -456,15 +534,22 @@ def _reconstitute(
             count=length + 1,
             byteorder=byteorder,
             field_path=field_path,
+            shape_generator=_shape_generator,
         )
 
-        if isinstance(offsets, PlaceholderArray):
+        # next length
+        def _adjust_length(offsets):
+            return 0 if len(offsets) == 1 else offsets[-1]
+
+        def _shape_generator():
+            _, *rest = shape_generator()
+            return (_adjust_length(offsets), *rest)
+
+        if isinstance(offsets, (PlaceholderArray, VirtualArray)):
             next_length = unknown_length
         else:
-            next_length = 0 if len(offsets) == 1 else offsets[-1]
-            # free memory
-            if isinstance(offsets, VirtualArray):
-                offsets.dematerialize()
+            next_length = _adjust_length(offsets)
+
         content = _reconstitute(
             form.content,
             next_length,
@@ -474,6 +559,7 @@ def _reconstitute(
             byteorder,
             simplify,
             field_path,
+            _shape_generator,
         )
         return ak.contents.ListOffsetArray(
             ak.index.Index(offsets),
@@ -482,7 +568,16 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.RegularForm):
-        next_length = length * form.size
+
+        def _adjust_length(length):
+            return length * form.size
+
+        next_length = _adjust_length(length)
+
+        def _shape_generator():
+            first, *rest = shape_generator()
+            return (_adjust_length(first), *rest)
+
         content = _reconstitute(
             form.content,
             next_length,
@@ -492,6 +587,7 @@ def _reconstitute(
             byteorder,
             simplify,
             field_path,
+            _shape_generator,
         )
         return ak.contents.RegularArray(
             content,
@@ -511,6 +607,7 @@ def _reconstitute(
                 byteorder,
                 simplify,
                 (*field_path, field),
+                shape_generator,
             )
             for content, field in zip(form.contents, form.fields)
         ]
@@ -531,6 +628,7 @@ def _reconstitute(
             count=length,
             byteorder=byteorder,
             field_path=field_path,
+            shape_generator=shape_generator,
         )
         index = _from_buffer(
             backend.nplike,
@@ -539,22 +637,34 @@ def _reconstitute(
             count=length,
             byteorder=byteorder,
             field_path=field_path,
+            shape_generator=shape_generator,
         )
-        if isinstance(index, PlaceholderArray) or isinstance(tags, PlaceholderArray):
+
+        def _adjust_length(index, tags, tag):
+            selected_index = index[tags == tag]
+            if len(selected_index) == 0:
+                return 0
+            else:
+                return backend.nplike.max(selected_index) + 1
+
+        _shape_generators = []
+        for tag in range(len(form.contents)):
+
+            def _shape_generator(tag):
+                first, *rest = shape_generator()
+                return (_adjust_length(index, tags, tag), *rest)
+
+            _shape_generators.append(partial(_shape_generator, tag=tag))
+
+        if isinstance(index, (PlaceholderArray, VirtualArray)) or isinstance(
+            tags, (PlaceholderArray, VirtualArray)
+        ):
             lengths = [unknown_length] * len(form.contents)
         else:
             lengths = []
             for tag in range(len(form.contents)):
-                selected_index = index[tags == tag]
-                if len(selected_index) == 0:
-                    lengths.append(0)
-                else:
-                    lengths.append(backend.nplike.max(selected_index) + 1)
-            # free memory
-            if isinstance(index, VirtualArray):
-                index.dematerialize()
-            if isinstance(tags, VirtualArray):
-                tags.dematerialize()
+                lengths.append(_adjust_length(index, tags, tag))
+
         contents = [
             _reconstitute(
                 content,
@@ -565,6 +675,7 @@ def _reconstitute(
                 byteorder,
                 simplify,
                 field_path,
+                _shape_generators[i],
             )
             for i, content in enumerate(form.contents)
         ]
