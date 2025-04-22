@@ -21,6 +21,7 @@ from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
 )
+from awkward._regularize import is_integer
 from awkward._slicing import NO_HEAD
 from awkward._typing import (
     TYPE_CHECKING,
@@ -378,6 +379,7 @@ class RecordArray(RecordMeta[Content], Content):
             self._length = _calculate_recordarray_length(
                 self._contents, None, self._backend
             )
+            assert is_integer(self._length)
         return self._length
 
     def __repr__(self):

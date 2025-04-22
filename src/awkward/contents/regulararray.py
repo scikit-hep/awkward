@@ -268,6 +268,7 @@ class RegularArray(RegularMeta[Content], Content):
             self._length = _calculate_regulararray_length(
                 self._content, self._size, self._length, materialize=True
             )
+            assert is_integer(self._length)
         return self._length
 
     def __repr__(self):
