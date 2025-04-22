@@ -115,30 +115,34 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             else:
                 shape = self.materialize().shape
             if len(shape) != len(self._shape):
-                raise TypeError(
+                raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
                 )
             for expected_dim, actual_dim in zip(self._shape, shape):
                 if expected_dim is not unknown_length and expected_dim != actual_dim:
-                    raise TypeError(
+                    raise ValueError(
                         f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
                     )
+            if not all(is_integer(dim) for dim in shape):
+                raise ValueError(
+                    f"Only shapes of integer dimensions are supported for materialized shapes. Received shape {shape}"
+                )
             self._shape = tuple(map(int, shape))
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
             array = self._nplike.asarray(self._generator())
             if len(self._shape) != len(array.shape):
-                raise TypeError(
+                raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
                 )
             for expected_dim, actual_dim in zip(self._shape, array.shape):
                 if expected_dim is not unknown_length and expected_dim != actual_dim:
-                    raise TypeError(
+                    raise ValueError(
                         f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
                     )
             if self._dtype != array.dtype:
-                raise TypeError(
+                raise ValueError(
                     f"{type(self).__name__} had dtype {self._dtype} before materialization while the materialized array has dtype {array.dtype}"
                 )
             self._shape = array.shape
@@ -147,10 +151,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def dematerialize(self) -> None:
         self._array = UNMATERIALIZED
-
-    @property
-    def has_known_shape(self) -> bool:
-        return all(is_integer(dim) for dim in self._shape)
 
     @property
     def is_materialized(self) -> bool:
@@ -195,14 +195,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             lambda: self.materialize().view(dtype),
             lambda: shape,
         )
-
-    @property
-    def generator(self) -> Callable:
-        return self._generator
-
-    @property
-    def shape_generator(self) -> Callable | None:
-        return self._shape_generator
 
     @property
     def nplike(self) -> NumpyLike:

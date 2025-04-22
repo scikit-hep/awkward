@@ -258,7 +258,7 @@ def test_materialize_shape_mismatch(numpy_like):
     )
     va.get_shape()
     with pytest.raises(
-        TypeError,
+        ValueError,
         match=r"had shape \(5,\) before materialization while the materialized array has shape \(3,\)",
     ):
         va.materialize()
@@ -267,7 +267,7 @@ def test_materialize_shape_mismatch(numpy_like):
 def test_materialize_dtype_mismatch(numpy_like):
     # Generator returns array with different dtype than declared
     with pytest.raises(
-        TypeError,
+        ValueError,
         match=r"had dtype int64 before materialization while the materialized array has dtype float64",
     ):
         va = VirtualArray(
@@ -327,7 +327,7 @@ def test_view_invalid_size():
 
 # Test generator property
 def test_generator(virtual_array, simple_array_generator):
-    assert virtual_array.generator is simple_array_generator
+    assert virtual_array._generator is simple_array_generator
 
 
 # Test nplike property
@@ -338,11 +338,11 @@ def test_nplike(virtual_array, numpy_like):
 # Test shape_generator property
 def test_shape_generator(virtual_array, shape_generator_param):
     if shape_generator_param is None:
-        assert virtual_array.shape_generator is None
+        assert virtual_array._shape_generator is None
     else:
-        assert virtual_array.shape_generator is not None
+        assert virtual_array._shape_generator is not None
         # Can't directly compare lambdas, so check if it's callable
-        assert callable(virtual_array.shape_generator)
+        assert callable(virtual_array._shape_generator)
 
 
 # Test copy
@@ -355,7 +355,7 @@ def test_copy(virtual_array, shape_generator_param):
     if shape_generator_param is None:
         assert copy.is_materialized
     assert id(copy) != id(virtual_array)  # Different objects
-    assert copy.generator is virtual_array.generator
+    assert copy._generator is virtual_array._generator
 
 
 # Test tolist
