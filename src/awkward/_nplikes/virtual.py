@@ -123,7 +123,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                     raise TypeError(
                         f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
                     )
-            self._shape = shape
+            self._shape = tuple(map(int, shape))
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
