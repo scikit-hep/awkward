@@ -121,37 +121,37 @@ def copy_behaviors(from_name: str, to_name: str, behavior: dict):
 
 
 def non_materializing_shape_of(
-    item: ak._nplikes.ArrayLike,
+    obj: ak._nplikes.ArrayLike,
 ) -> tuple[ak._nplikes.shape.ShapeItem, ...]:
-    if isinstance(item, ak._nplikes.virtual.VirtualArray):
-        return item._shape
+    if isinstance(obj, ak._nplikes.virtual.VirtualArray):
+        return obj._shape
     else:
-        return item.shape
+        return obj.shape
 
 
 def non_materializing_length_of(
-    item: ak.contents.Content | ak.index.Index,
+    obj: ak.contents.Content | ak.index.Index,
 ) -> ak._nplikes.shape.ShapeItem:
-    if isinstance(item, (ak.contents.NumpyArray, ak.index.Index)):
-        return non_materializing_shape_of(item._data)[0]
-    elif isinstance(item, ak.contents.ListOffsetArray):
-        return non_materializing_length_of(item._offsets) - 1
-    elif isinstance(item, ak.contents.ListArray):
-        return non_materializing_length_of(item._starts)
+    if isinstance(obj, (ak.contents.NumpyArray, ak.index.Index)):
+        return non_materializing_shape_of(obj._data)[0]
+    elif isinstance(obj, ak.contents.ListOffsetArray):
+        return non_materializing_length_of(obj._offsets) - 1
+    elif isinstance(obj, ak.contents.ListArray):
+        return non_materializing_length_of(obj._starts)
     elif isinstance(
-        item,
+        obj,
         (ak.contents.RecordArray, ak.contents.RegularArray, ak.contents.BitMaskedArray),
     ):
-        return item._length
-    elif isinstance(item, ak.contents.ByteMaskedArray):
-        return non_materializing_length_of(item._mask)
-    elif isinstance(item, (ak.contents.IndexedArray, ak.contents.IndexedOptionArray)):
-        return non_materializing_length_of(item._index)
-    elif isinstance(item, ak.contents.UnionArray):
-        return non_materializing_length_of(item._tags)
-    elif isinstance(item, ak.contents.UnmaskedArray):
-        return non_materializing_length_of(item._content)
-    elif isinstance(item, ak.contents.EmptyArray):
+        return obj._length
+    elif isinstance(obj, ak.contents.ByteMaskedArray):
+        return non_materializing_length_of(obj._mask)
+    elif isinstance(obj, (ak.contents.IndexedArray, ak.contents.IndexedOptionArray)):
+        return non_materializing_length_of(obj._index)
+    elif isinstance(obj, ak.contents.UnionArray):
+        return non_materializing_length_of(obj._tags)
+    elif isinstance(obj, ak.contents.UnmaskedArray):
+        return non_materializing_length_of(obj._content)
+    elif isinstance(obj, ak.contents.EmptyArray):
         return 0
     else:
-        raise TypeError(f"Invalid type {type(item)} for length calculation")
+        raise TypeError(f"Invalid type {type(obj)} for length calculation")
