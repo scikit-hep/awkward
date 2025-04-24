@@ -177,11 +177,22 @@ def form_popbuffers_finalize(out, awkwardarrow_type):
         )
 
 
+def get_meta_str(meta: dict[bytes, bytes] | None, key: bytes) -> str | None:
+    if not meta:
+        return None
+    key_str = key.decode("utf-8")
+    value = meta.get(key) or meta.get(key_str.encode("utf-8"))
+    return value.decode("utf-8") if value else None
+
+
+def get_field_option(field: pyarrow.Field, key: bytes) -> str | None:
+    return get_meta_str(field.metadata, key)
+
+
 def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitmasks):
     # Start by removing the ExtensionArray wrapper.
     if awkwardarrow_type is not None:
         paarray = paarray.storage
-
     ### Beginning of the big if-elif-elif chain!
 
     if isinstance(storage_type, pyarrow.lib.PyExtensionType):
@@ -365,11 +376,18 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             field_name = field.name
             keys.append(field_name)
 
+            option_str = get_field_option(field, b"option_type")
+
+            print(f"line #381 Field: {field_name}, Metadata:  option_type {option_str}")  # noqa: T201
+
+            # Build the awkward array content from field buffers
             a, b = to_awkwardarrow_storage_types(field.type)
             akcontent = popbuffers(
                 paarray.field(field_name), a, b, buffers, generate_bitmasks
             )
-            if not field.nullable:
+            print(akcontent)  # noqa: T201
+
+            if not field.nullable or option_str == "False":
                 # strip the dummy option-type node
                 akcontent = remove_optiontype(akcontent)
             contents.append(akcontent)
@@ -627,9 +645,15 @@ def form_popbuffers(awkwardarrow_type, storage_type):
             field_name = field.name
             keys.append(field_name)
 
+            option_str = get_field_option(field, b"option_type")
+
+            print(f"line #647 Field: {field_name}, Metadata: option_type {option_str}")  # noqa: T201
+
             a, b = to_awkwardarrow_storage_types(field.type)
             akcontent = form_popbuffers(a, b)
-            if not field.nullable:
+            print(akcontent)  # noqa: T201
+
+            if not field.nullable or option_str == "False":
                 # strip the dummy option-type node
                 akcontent = form_remove_optiontype(akcontent)
             contents.append(akcontent)
@@ -822,6 +846,8 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
             contents = []
             for i in range(obj.num_columns):
                 field = obj.schema.field(i)
+                option_str = get_field_option(field, b"option_type")
+
                 layout = handle_arrow(obj.column(i), generate_bitmasks)
                 if record_is_optiontype:
                     if record_mask is None:
@@ -829,8 +855,10 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                     else:
                         record_mask &= layout.mask_as_bool(valid_when=False)
                 if (
-                    record_is_optiontype and field.name not in optiontype_fields
-                ) or not field.nullable:
+                    (record_is_optiontype and field.name not in optiontype_fields)
+                    or not field.nullable
+                    or option_str == "False"
+                ):
                     contents.append(remove_optiontype(layout))
                 else:
                     contents.append(layout)
@@ -919,6 +947,13 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
 
 def form_handle_arrow(schema, pass_empty_field=False):
     if pass_empty_field and list(schema.names) == [""]:
+        print("line #948 HERE")  # noqa: T201
+        for i, _arrowtype in enumerate(schema.types):
+            field = schema.field(i)
+            option_str = get_field_option(field, b"option_type")
+
+            print(f"line #953 Field: {field.name}, Metadata: option_type {option_str}")  # noqa: T201
+
         awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(schema.types[0])
         akform = form_popbuffers(awkwardarrow_type, storage_type)
         if not schema.field(0).nullable:
@@ -951,12 +986,16 @@ def form_handle_arrow(schema, pass_empty_field=False):
         forms = []
         for i, arrowtype in enumerate(schema.types):
             field = schema.field(i)
+            option_str = get_field_option(field, b"option_type")
+
             awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(arrowtype)
             akform = form_popbuffers(awkwardarrow_type, storage_type)
 
             if (
-                record_is_optiontype and field.name not in optiontype_fields
-            ) or not field.nullable:
+                (record_is_optiontype and field.name not in optiontype_fields)
+                or not field.nullable
+                or option_str == "False"
+            ):
                 forms.append(form_remove_optiontype(akform))
             else:
                 forms.append(akform)

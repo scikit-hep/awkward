@@ -1095,11 +1095,31 @@ class RecordArray(RecordMeta[Content], Content):
                 pyarrow.field(
                     self.index_to_field(i),
                     values[i].type,
-                    x._arrow_needs_option_type(),
+                    nullable=(
+                        mask_node is not None and mask_node._arrow_needs_option_type()
+                    )
+                    or x._arrow_needs_option_type(),
+                    metadata={
+                        b"option_type": str(x._arrow_needs_option_type()).encode(
+                            "utf-8"
+                        ),
+                    },
                 )
                 for i, x in enumerate(self._contents)
             ]
         )
+
+        # Iterate through fields in the StructType and extract metadata
+        field_metadata = {
+            field.name: {
+                k.decode("utf-8"): v.decode("utf-8")
+                for k, v in (field.metadata or {}).items()
+            }
+            for field in types
+        }
+        # Print extracted metadata
+        for field_name, metadata in field_metadata.items():
+            print(f"Field: {field_name}, Metadata: {metadata}")  # noqa: T201
 
         return pyarrow.Array.from_buffers(
             ak._connect.pyarrow.to_awkwardarrow_type(
