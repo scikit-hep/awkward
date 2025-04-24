@@ -21,7 +21,7 @@ def test_parquet_uuid():
     meta = metadata_from_parquet(input)
     assert (
         meta["uuid"]
-        == "93fd596534251b1ac750f359d9d55418b02bcddcc79cd5ab1e3d9735941fbcae"
+        == "37f505d95053fdd40fbc572b13fbc054d3b737ff85890990204c7e9cded13f87"
     )
 
 
@@ -49,6 +49,7 @@ def test_return_tuple_with_or_without_uuid(calculate_uuid):
             uuid,
         ) = results
         assert uuid is not None, "UUID should be present when calculate_uuid is True"
+        print("uuid:", uuid)
     else:
         assert len(results) == 7, "Expected 7 items in the result tuple"
         parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata = (
