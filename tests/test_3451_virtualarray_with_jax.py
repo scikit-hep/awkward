@@ -482,6 +482,13 @@ def test_numpyarray_argmax(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
+def test_numpyarray_nanargmax(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.nanargmax(virtual_numpyarray, axis=0) == ak.nanargmax(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
 def test_numpyarray_sort(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.array_equal(
