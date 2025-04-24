@@ -202,11 +202,20 @@ def metadata(
             row_group_info = metadata.row_group(row_group_index).to_dict()
             for k, v in row_group_info.items():
                 if k in ["sorting_columns", "num_rows", "num_columns"]:
-                    uuids.append(repr({k:v}))
+                    uuids.append(repr({k: v}))
                 if k == "columns":
                     for subitem in v:
                         for subkey in subitem:
-                            if subkey not in ["file_offset", "file_path", "physical_type", "path_in_schema", "compression", "encodings", "total_compressed_size", "statistics"]:
+                            if subkey not in [
+                                "file_offset",
+                                "file_path",
+                                "physical_type",
+                                "path_in_schema",
+                                "compression",
+                                "encodings",
+                                "total_compressed_size",
+                                "statistics",
+                            ]:
                                 continue
                             uuids.append(repr({subkey: subitem[subkey]}))
         uuid = hashlib.sha256(json.dumps(",".join(uuids)).encode()).hexdigest()
