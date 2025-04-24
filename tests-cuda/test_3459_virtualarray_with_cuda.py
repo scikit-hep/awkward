@@ -459,6 +459,7 @@ def test_numpyarray_nanmax(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_numpyarray_argmin(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.argmin(virtual_numpyarray, axis=0) == ak.argmin(numpyarray, axis=0)
@@ -466,6 +467,7 @@ def test_numpyarray_argmin(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_numpyarray_nanargmin(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.nanargmin(virtual_numpyarray, axis=0) == ak.nanargmin(numpyarray, axis=0)
@@ -473,6 +475,7 @@ def test_numpyarray_nanargmin(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_numpyarray_argmax(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.argmax(virtual_numpyarray, axis=0) == ak.argmax(numpyarray, axis=0)
@@ -480,6 +483,15 @@ def test_numpyarray_argmax(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
+def test_numpyarray_nanargmax(numpyarray, virtual_numpyarray):
+    assert not virtual_numpyarray.is_any_materialized
+    assert ak.nanargmax(virtual_numpyarray, axis=0) == ak.nanargmax(numpyarray, axis=0)
+    assert virtual_numpyarray.is_any_materialized
+    assert virtual_numpyarray.is_all_materialized
+
+
+@pytest.mark.skip(reason="awkward_sort is not implemented")
 def test_numpyarray_sort(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.array_equal(
@@ -490,6 +502,7 @@ def test_numpyarray_sort(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_argsort is not implemented")
 def test_numpyarray_argsort(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.array_equal(
@@ -1108,6 +1121,7 @@ def test_listoffsetarray_nanmax(listoffsetarray, virtual_listoffsetarray):
     assert virtual_listoffsetarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_listoffsetarray_argmin(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     assert ak.array_equal(
@@ -1117,6 +1131,7 @@ def test_listoffsetarray_argmin(listoffsetarray, virtual_listoffsetarray):
     assert virtual_listoffsetarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_listoffsetarray_nanargmin(numpy_like):
     # Create arrays with NaN values to test nanargmin
     offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
@@ -1158,6 +1173,7 @@ def test_listoffsetarray_nanargmin(numpy_like):
     assert virtual_array.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_listoffsetarray_argmax(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     assert ak.array_equal(
@@ -1167,6 +1183,7 @@ def test_listoffsetarray_argmax(listoffsetarray, virtual_listoffsetarray):
     assert virtual_listoffsetarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_listoffsetarray_nanargmax(numpy_like):
     # Create arrays with NaN values to test nanargmax
     offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
@@ -1208,6 +1225,7 @@ def test_listoffsetarray_nanargmax(numpy_like):
     assert virtual_array.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_sort is not implemented")
 def test_listoffsetarray_sort(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     assert ak.array_equal(
@@ -1218,6 +1236,7 @@ def test_listoffsetarray_sort(listoffsetarray, virtual_listoffsetarray):
     assert virtual_listoffsetarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_argsort is not implemented")
 def test_listoffsetarray_argsort(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     assert ak.array_equal(
@@ -2083,6 +2102,7 @@ def test_listarray_nanmax(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_listarray_argmin(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(ak.argmin(virtual_listarray), ak.argmin(listarray))
@@ -2090,6 +2110,7 @@ def test_listarray_argmin(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_listarray_nanargmin(numpy_like):
     # Create arrays with NaN values to test nanargmin
     starts = np.array([0, 2, 4, 7], dtype=np.int64)
@@ -2141,6 +2162,7 @@ def test_listarray_nanargmin(numpy_like):
     assert virtual_array.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_listarray_argmax(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(ak.argmax(virtual_listarray), ak.argmax(listarray))
@@ -2148,6 +2170,7 @@ def test_listarray_argmax(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_listarray_nanargmax(numpy_like):
     # Create arrays with NaN values to test nanargmax
     starts = np.array([0, 2, 4, 7], dtype=np.int64)
@@ -2199,6 +2222,7 @@ def test_listarray_nanargmax(numpy_like):
     assert virtual_array.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_sort is not implemented")
 def test_listarray_sort(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(
@@ -2209,6 +2233,7 @@ def test_listarray_sort(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
+@pytest.mark.skip(reason="awkward_argsort is not implemented")
 def test_listarray_argsort(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(
@@ -3242,6 +3267,7 @@ def test_recordarray_max_y_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_recordarray_argmin_x_field(recordarray, virtual_recordarray):
     # Test argmin on the x field (ListOffsetArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3255,6 +3281,7 @@ def test_recordarray_argmin_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_recordarray_argmin_y_field(recordarray, virtual_recordarray):
     # Test argmin on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3268,6 +3295,7 @@ def test_recordarray_argmin_y_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_recordarray_argmax_x_field(recordarray, virtual_recordarray):
     # Test argmax on the x field (ListOffsetArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3281,6 +3309,7 @@ def test_recordarray_argmax_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
+@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_recordarray_argmax_y_field(recordarray, virtual_recordarray):
     # Test argmax on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3294,6 +3323,7 @@ def test_recordarray_argmax_y_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
+@pytest.mark.skip(reason="awkward_sort is not implemented")
 def test_recordarray_sort_x_field(recordarray, virtual_recordarray):
     # Test sort on the x field (ListOffsetArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3307,6 +3337,7 @@ def test_recordarray_sort_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
+@pytest.mark.skip(reason="awkward_sort is not implemented")
 def test_recordarray_sort_y_field(recordarray, virtual_recordarray):
     # Test sort on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3320,6 +3351,7 @@ def test_recordarray_sort_y_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
+@pytest.mark.skip(reason="awkward_argsort is not implemented")
 def test_recordarray_argsort_x_field(recordarray, virtual_recordarray):
     # Test argsort on the x field (ListOffsetArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3333,6 +3365,7 @@ def test_recordarray_argsort_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
+@pytest.mark.skip(reason="awkward_argsort is not implemented")
 def test_recordarray_argsort_y_field(recordarray, virtual_recordarray):
     # Test argsort on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
