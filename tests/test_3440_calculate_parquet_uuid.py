@@ -8,6 +8,8 @@ import pytest
 
 import awkward
 
+pytest.importorskip("pyarrow.parquet")
+
 metadata_from_parquet_submodule = pytest.importorskip(
     "awkward.operations.ak_metadata_from_parquet"
 )
