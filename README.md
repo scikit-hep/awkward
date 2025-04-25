@@ -237,6 +237,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ikrommyd"><img src="https://avatars.githubusercontent.com/u/82155404?v=4?s=100" width="100px;" alt="Iason Krommydas"/><br /><sub><b>Iason Krommydas</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=ikrommyd" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward/commits?author=ikrommyd" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/NJManganelli"><img src="https://avatars.githubusercontent.com/u/38217274?v=4?s=100" width="100px;" alt="Nick"/><br /><sub><b>Nick</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=NJManganelli" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
