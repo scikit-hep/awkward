@@ -99,7 +99,7 @@ def _calculate_recordarray_length(
         for content in contents:
             if (
                 backend.nplike.known_data
-                and ak._util.non_materializing_length_of(content) is not unknown_length
+                and ak._util.maybe_length_of(content) is not unknown_length
                 and content.length < length
             ):
                 raise ValueError(
@@ -389,7 +389,7 @@ class RecordArray(RecordMeta[Content], Content):
         out = [indent, pre, "<RecordArray is_tuple="]
         out.append(repr(json.dumps(self.is_tuple)))
         out.append(" len=")
-        out.append(repr(str(ak._util.non_materializing_length_of(self))))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

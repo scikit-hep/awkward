@@ -120,7 +120,7 @@ def copy_behaviors(from_name: str, to_name: str, behavior: dict):
     return output
 
 
-def non_materializing_shape_of(
+def maybe_shape_of(
     obj: ak._nplikes.ArrayLike,
 ) -> tuple[ak._nplikes.shape.ShapeItem, ...]:
     if isinstance(obj, ak._nplikes.virtual.VirtualArray):
@@ -129,28 +129,28 @@ def non_materializing_shape_of(
         return obj.shape
 
 
-def non_materializing_length_of(
+def maybe_length_of(
     obj: ak.contents.Content | ak.index.Index,
 ) -> ak._nplikes.shape.ShapeItem:
     if isinstance(obj, (ak.contents.NumpyArray, ak.index.Index)):
-        return non_materializing_shape_of(obj._data)[0]
+        return maybe_shape_of(obj._data)[0]
     elif isinstance(obj, ak.contents.ListOffsetArray):
-        return non_materializing_length_of(obj._offsets) - 1
+        return maybe_length_of(obj._offsets) - 1
     elif isinstance(obj, ak.contents.ListArray):
-        return non_materializing_length_of(obj._starts)
+        return maybe_length_of(obj._starts)
     elif isinstance(
         obj,
         (ak.contents.RecordArray, ak.contents.RegularArray, ak.contents.BitMaskedArray),
     ):
         return obj._length
     elif isinstance(obj, ak.contents.ByteMaskedArray):
-        return non_materializing_length_of(obj._mask)
+        return maybe_length_of(obj._mask)
     elif isinstance(obj, (ak.contents.IndexedArray, ak.contents.IndexedOptionArray)):
-        return non_materializing_length_of(obj._index)
+        return maybe_length_of(obj._index)
     elif isinstance(obj, ak.contents.UnionArray):
-        return non_materializing_length_of(obj._tags)
+        return maybe_length_of(obj._tags)
     elif isinstance(obj, ak.contents.UnmaskedArray):
-        return non_materializing_length_of(obj._content)
+        return maybe_length_of(obj._content)
     elif isinstance(obj, ak.contents.EmptyArray):
         return 0
     else:

@@ -794,9 +794,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                         "asarray was called with copy=False for an array of a different dtype"
                     )
                 else:
-                    return TypeTracerArray._new(
-                        obj.dtype, ak._util.non_materializing_shape_of(obj)
-                    )
+                    return TypeTracerArray._new(obj.dtype, ak._util.maybe_shape_of(obj))
             # Python objects
             elif isinstance(obj, (Number, bool)):
                 as_array = numpy.asarray(obj)

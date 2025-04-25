@@ -254,7 +254,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<IndexedOptionArray len="]
-        out.append(repr(str(ak._util.non_materializing_length_of(self))))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

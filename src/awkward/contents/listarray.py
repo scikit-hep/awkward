@@ -144,8 +144,8 @@ class ListArray(ListMeta[Content], Content):
             )
         if (
             content.backend.nplike.known_data
-            and ak._util.non_materializing_length_of(starts) is not unknown_length
-            and ak._util.non_materializing_length_of(stops) is not unknown_length
+            and ak._util.maybe_length_of(starts) is not unknown_length
+            and ak._util.maybe_length_of(stops) is not unknown_length
             and starts.length > stops.length
         ):
             raise ValueError(
@@ -273,7 +273,7 @@ class ListArray(ListMeta[Content], Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<ListArray len="]
-        out.append(repr(str(ak._util.non_materializing_length_of(self))))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")
