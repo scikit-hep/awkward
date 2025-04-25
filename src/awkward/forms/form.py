@@ -744,3 +744,35 @@ class Form(Meta):
             and not (form_key and self._form_key != other._form_key)
             and compare_parameters(self._parameters, other._parameters)
         )
+
+
+def form_with_unique_keys(form: Form, key: tuple) -> Form:
+    def impl(form: Form, key: tuple) -> None:
+        # Set form key as str
+        # Can be interpreted as tuple again with `ast.literal_eval(form_key)`
+        form.form_key = repr(key)
+
+        # If the form is a record we need to loop over all fields in the
+        # record and set form that include the field name; this will keep
+        # recursing as well.
+        if form.is_record:
+            for field in form.fields:
+                impl(form.content(field), (*key, field))  # type: ignore[attr-defined]
+
+        elif form.is_union:
+            for i, entry in enumerate(form.contents):  # type: ignore[attr-defined]
+                impl(entry, (*key, i))
+
+        # NumPy like array is easy
+        elif form.is_numpy or form.is_unknown:
+            pass
+
+        # Anything else grab the content and keep recursing
+        else:
+            # use `None` for anything else, could be more informative at some point, but there's no need for it right now
+            impl(form.content, (*key, None))  # type: ignore[attr-defined]
+
+    # Perform a "deep" copy without preserving references
+    form = ak.forms.from_dict(form.to_dict())
+    impl(form, key)
+    return form
