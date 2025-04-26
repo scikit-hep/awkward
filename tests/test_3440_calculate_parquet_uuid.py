@@ -23,7 +23,7 @@ def test_parquet_uuid():
     meta = metadata_from_parquet(input)
     assert (
         meta["uuid"]
-        == "37f505d95053fdd40fbc572b13fbc054d3b737ff85890990204c7e9cded13f87"
+        == "DEBUG"
     )
 
 
