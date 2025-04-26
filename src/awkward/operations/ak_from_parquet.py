@@ -197,7 +197,7 @@ def metadata(
     # generate hash from the col_counts, first row_group and last row_group to calculate approximate parquet uuid
     uuid = None
     if calculate_uuid:
-        uuids = [str(col_counts)]
+        uuids = [repr({"col_counts": col_counts})]
         for row_group_index in (0, metadata.num_row_groups - 1):
             row_group_info = metadata.row_group(row_group_index).to_dict()
             for k, v in row_group_info.items():
@@ -218,6 +218,12 @@ def metadata(
                             ]:
                                 continue
                             uuids.append(repr({subkey: subitem[subkey]}))
+        for testing in uuids:
+            print("key-value pair:", testing)
+        print("concatenate:", ",".join(uuids))
+        print("json:", json.dumps(",".join(uuids)))
+        print("encode:", json.dumps(",".join(uuids)).encode())
+        print("hash:", hashlib.sha256(json.dumps(",".join(uuids)).encode()).hexdigest())
         uuid = hashlib.sha256(json.dumps(",".join(uuids)).encode()).hexdigest()
         return (
             parquet_columns,
