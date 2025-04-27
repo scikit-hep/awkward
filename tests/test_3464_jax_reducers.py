@@ -227,3 +227,74 @@ def test_boolean_arrays(reducer, kwargs):
 
     # Compare with tolerance for numeric values
     compare_results(cpu_list, jax_list)
+
+
+# Test with None values
+@pytest.mark.parametrize("reducer,kwargs", REDUCERS)
+def test_none_arrays(reducer, kwargs):
+    """Test with arrays containing None values."""
+
+    none_data = [[None, 1], [2, None], [None, None], [3, 4]]
+    cpu_array = ak.Array(none_data, backend="cpu")
+    jax_array = ak.Array(none_data, backend="jax")
+
+    cpu_result = reducer(cpu_array, axis=1, **kwargs)
+    jax_result = reducer(jax_array, axis=1, **kwargs)
+
+    # Convert to lists for comparison
+    cpu_list = ak.to_list(cpu_result)
+    jax_list = ak.to_list(jax_result)
+
+    # Handle case where one might be a scalar and the other a list
+    if (
+        not isinstance(cpu_list, list)
+        and isinstance(jax_list, list)
+        and len(jax_list) == 1
+    ):
+        jax_list = jax_list[0]
+    elif (
+        isinstance(cpu_list, list)
+        and not isinstance(jax_list, list)
+        and len(cpu_list) == 1
+    ):
+        cpu_list = cpu_list[0]
+
+    # Compare with tolerance for numeric values
+    compare_results(cpu_list, jax_list)
+
+
+# test with NaN values
+@pytest.mark.skip(
+    reason="(arg)min/max and any do not work with NaNs in the jax backend"
+)
+@pytest.mark.parametrize("reducer,kwargs", REDUCERS)
+def test_nan_arrays(reducer, kwargs):
+    """Test with arrays containing NaN values."""
+
+    nan_data = [[np.nan, 1], [2, np.nan], [np.nan, np.nan], [3, 4]]
+    cpu_array = ak.Array(nan_data, backend="cpu")
+    jax_array = ak.Array(nan_data, backend="jax")
+
+    cpu_result = reducer(cpu_array, axis=1, **kwargs)
+    jax_result = reducer(jax_array, axis=1, **kwargs)
+
+    # Convert to lists for comparison
+    cpu_list = ak.to_list(cpu_result)
+    jax_list = ak.to_list(jax_result)
+
+    # Handle case where one might be a scalar and the other a list
+    if (
+        not isinstance(cpu_list, list)
+        and isinstance(jax_list, list)
+        and len(jax_list) == 1
+    ):
+        jax_list = jax_list[0]
+    elif (
+        isinstance(cpu_list, list)
+        and not isinstance(jax_list, list)
+        and len(cpu_list) == 1
+    ):
+        cpu_list = cpu_list[0]
+
+    # Compare with tolerance for numeric values
+    compare_results(cpu_list, jax_list)
