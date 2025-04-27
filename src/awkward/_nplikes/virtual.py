@@ -307,6 +307,8 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def __setitem__(self, key, value):
         array = self.materialize()
         value = value.materialize() if isinstance(value, VirtualArray) else value
+        if isinstance(self._nplike, ak._nplikes.jax.Jax):
+            self._array = array.at[key].set(value)
         array.__setitem__(key, value)
 
     def __bool__(self) -> bool:
