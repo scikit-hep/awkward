@@ -283,7 +283,8 @@ def test_init_valid(numpy_like, simple_array_generator):
 def test_init_invalid_shape():
     nplike = Numpy.instance()
     with pytest.raises(
-        TypeError, match=r"Only shapes of integer dimensions are supported"
+        TypeError,
+        match=r"Only shapes of integer dimensions or unknown_length are supported",
     ):
         VirtualArray(
             nplike,
@@ -346,7 +347,7 @@ def test_is_materialized(virtual_array):
 def test_materialize_shape_mismatch(numpy_like):
     # Generator returns array with different shape than declared
     with pytest.raises(
-        TypeError,
+        ValueError,
         match=r"had shape \(5,\) before materialization while the materialized array has shape \(3,\)",
     ):
         va = VirtualArray(
@@ -361,7 +362,7 @@ def test_materialize_shape_mismatch(numpy_like):
 def test_materialize_dtype_mismatch(numpy_like):
     # Generator returns array with different dtype than declared
     with pytest.raises(
-        TypeError,
+        ValueError,
         match=r"had dtype int64 before materialization while the materialized array has dtype float64",
     ):
         va = VirtualArray(
@@ -419,7 +420,7 @@ def test_view_invalid_size():
 
 # Test generator property
 def test_generator(virtual_array, simple_array_generator):
-    assert virtual_array.generator is simple_array_generator
+    assert virtual_array._generator is simple_array_generator
 
 
 # Test nplike property

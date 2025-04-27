@@ -123,13 +123,16 @@ class NumpyArray(NumpyMeta, Content):
         if not isinstance(backend.nplike, Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)
 
-        if len(self._data.shape) == 0:
+        if len(ak._util.maybe_shape_of(self._data)) == 0:
             raise TypeError(
                 f"{type(self).__name__} 'data' must be an array, not a scalar: {data!r}"
             )
 
         if parameters is not None and parameters.get("__array__") in ("char", "byte"):
-            if data.dtype != np.dtype(np.uint8) or len(data.shape) != 1:
+            if (
+                data.dtype != np.dtype(np.uint8)
+                or len(ak._util.maybe_shape_of(data)) != 1
+            ):
                 raise ValueError(
                     "{} is a {}, so its 'data' must be 1-dimensional and uint8, not {}".format(
                         type(self).__name__, parameters["__array__"], repr(data)
@@ -250,12 +253,11 @@ class NumpyArray(NumpyMeta, Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<NumpyArray dtype="]
         out.append(repr(str(self.dtype)))
-        if len(self._data.shape) == 1:
-            out.append(" len=" + repr(str(self._data.shape[0])))
+        shape = ak._util.maybe_shape_of(self._data)
+        if len(shape) == 1:
+            out.append(" len=" + repr(str(shape[0])))
         else:
-            out.append(
-                " shape='({})'".format(", ".join(str(x) for x in self._data.shape))
-            )
+            out.append(" shape='({})'".format(", ".join(str(x) for x in shape)))
 
         extra = self._repr_extra(indent + "    ")
 
