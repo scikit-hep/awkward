@@ -1374,7 +1374,7 @@ class ListArray(ListMeta[Content], Content):
             self.starts.length,
             self._content.length,
         )
-        if error.str is not None:
+        if error is not None and error.str is not None:
             if error.filename is None:
                 filename = ""
             else:

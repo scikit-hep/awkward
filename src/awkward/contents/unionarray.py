@@ -1452,7 +1452,7 @@ class UnionArray(UnionMeta[Content], Content):
             lencontents,
         )
 
-        if error.str is not None:
+        if error is not None and error.str is not None:
             if error.filename is None:
                 filename = ""
             else:
