@@ -72,10 +72,11 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                     return obj
                 else:
                     return VirtualArray(
-                        obj.nplike,
-                        obj.shape,
+                        obj._nplike,
+                        obj._shape,
                         dtype,
                         lambda: self.asarray(obj.materialize(), dtype=dtype),
+                        lambda: obj.shape,
                     )
         if copy:
             return self._module.array(obj, dtype=dtype, copy=True)
@@ -96,13 +97,14 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             return x
         elif isinstance(x, VirtualArray):
             if x.is_materialized:
-                return self._module.ascontiguousarray(x.materialize())
+                return self.ascontiguousarray(x.materialize())  #  type: ignore[arg-type]
             else:
                 return VirtualArray(
-                    x.nplike,
-                    x.shape,
-                    x.dtype,
-                    lambda: self._module.ascontiguousarray(x.materialize()),
+                    x._nplike,
+                    x._shape,
+                    x._dtype,
+                    lambda: self.ascontiguousarray(x.materialize()),  # type: ignore[arg-type]
+                    lambda: x.shape,
                 )
         else:
             return self._module.ascontiguousarray(x)
@@ -355,6 +357,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                     next_shape,
                     x.dtype,
                     lambda: self.reshape(x.materialize(), next_shape),  # type: ignore[union-attr]
+                    lambda: next_shape,
                 )
             else:
                 x = x.materialize()  # type: ignore[assignment]
