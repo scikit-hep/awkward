@@ -348,7 +348,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         out.append(" lsb_order=")
         out.append(repr(json.dumps(self._lsb_order)))
         out.append(" len=")
-        out.append(repr(str(self.length)))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

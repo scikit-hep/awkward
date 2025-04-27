@@ -11,6 +11,7 @@ from collections.abc import Collection
 import numpy as np  # noqa: TID251
 import packaging.version
 
+import awkward as ak
 from awkward._typing import TypeVar
 
 win = os.name == "nt"
@@ -117,3 +118,53 @@ def copy_behaviors(from_name: str, to_name: str, behavior: dict):
                 output[new_tuple] = value
 
     return output
+
+
+def maybe_shape_of(
+    obj: ak._nplikes.ArrayLike,
+) -> tuple[ak._nplikes.shape.ShapeItem, ...]:
+    """
+    Gets the shape of an object while keeping `unknown_length` in the shape tuple.
+    Virtual arrays `.shape` property materializes the shape so we use this function
+    to get the shape of objects without materializing it in the case of virtual arrays.
+    Unknown dimensions will be represted as `unknown_length`.
+    """
+    if isinstance(obj, ak._nplikes.virtual.VirtualArray):
+        return obj._shape
+    else:
+        return obj.shape
+
+
+def maybe_length_of(
+    obj: ak.contents.Content | ak.index.Index,
+) -> ak._nplikes.shape.ShapeItem:
+    """
+    Gets the length of an object if it is known, otherwise returns `unknown_length`.
+    We use this function to get the length of objects without materializing the underlying
+    virtual array buffers' shape.
+    Useful for example in `__init__` methods and `__repr__` where we don't want to
+    materialize the virtual array shapes.
+    """
+    if isinstance(obj, (ak.contents.NumpyArray, ak.index.Index)):
+        return maybe_shape_of(obj._data)[0]
+    elif isinstance(obj, ak.contents.ListOffsetArray):
+        return maybe_length_of(obj._offsets) - 1
+    elif isinstance(obj, ak.contents.ListArray):
+        return maybe_length_of(obj._starts)
+    elif isinstance(
+        obj,
+        (ak.contents.RecordArray, ak.contents.RegularArray, ak.contents.BitMaskedArray),
+    ):
+        return obj._length
+    elif isinstance(obj, ak.contents.ByteMaskedArray):
+        return maybe_length_of(obj._mask)
+    elif isinstance(obj, (ak.contents.IndexedArray, ak.contents.IndexedOptionArray)):
+        return maybe_length_of(obj._index)
+    elif isinstance(obj, ak.contents.UnionArray):
+        return maybe_length_of(obj._tags)
+    elif isinstance(obj, ak.contents.UnmaskedArray):
+        return maybe_length_of(obj._content)
+    elif isinstance(obj, ak.contents.EmptyArray):
+        return 0
+    else:
+        raise TypeError(f"Invalid type {type(obj)} for length calculation")
