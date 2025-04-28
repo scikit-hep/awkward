@@ -254,7 +254,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<IndexedOptionArray len="]
-        out.append(repr(str(self.length)))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")
@@ -1502,7 +1502,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         error = self._backend["awkward_IndexedArray_validity", self.index.dtype.type](
             self.index.data, self.index.length, self._content.length, True
         )
-        if error.str is not None:
+        if error is not None and error.str is not None:
             if error.filename is None:
                 filename = ""
             else:

@@ -142,7 +142,12 @@ class ListArray(ListMeta[Content], Content):
             raise TypeError(
                 f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
             )
-        if content.backend.nplike.known_data and starts.length > stops.length:
+        if (
+            content.backend.nplike.known_data
+            and ak._util.maybe_length_of(starts) is not unknown_length
+            and ak._util.maybe_length_of(stops) is not unknown_length
+            and starts.length > stops.length
+        ):
             raise ValueError(
                 f"{type(self).__name__} len(starts) ({starts.length}) must be <= len(stops) ({stops.length})"
             )
@@ -268,7 +273,7 @@ class ListArray(ListMeta[Content], Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<ListArray len="]
-        out.append(repr(str(self.length)))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")
@@ -1374,7 +1379,7 @@ class ListArray(ListMeta[Content], Content):
             self.starts.length,
             self._content.length,
         )
-        if error.str is not None:
+        if error is not None and error.str is not None:
             if error.filename is None:
                 filename = ""
             else:
