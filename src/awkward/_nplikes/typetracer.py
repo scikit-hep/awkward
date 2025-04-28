@@ -276,7 +276,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         if cls.runtime_typechecks:
             if not isinstance(shape, tuple):
                 raise TypeError("typetracer shape must be a tuple")
-            if not all(isinstance(x, int) or x is unknown_length for x in shape):
+            if not all(is_integer(x) or x is unknown_length for x in shape):
                 raise TypeError("typetracer shape must be integers or unknown-length")
             if not isinstance(dtype, np.dtype):
                 raise TypeError("typetracer dtype must be an instance of np.dtype")
@@ -783,7 +783,10 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                 obj = numpy.asarray(obj)
 
             # Support array-like objects
-            if hasattr(obj, "shape") and hasattr(obj, "dtype"):
+            # Check for ._shape first because .shape might materialize
+            if (hasattr(obj, "_shape") or hasattr(obj, "shape")) and hasattr(
+                obj, "dtype"
+            ):
                 if obj.dtype.kind == "S":
                     raise TypeError("TypeTracerArray cannot be created from strings")
                 elif copy is False and dtype != obj.dtype:
@@ -791,7 +794,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                         "asarray was called with copy=False for an array of a different dtype"
                     )
                 else:
-                    return TypeTracerArray._new(obj.dtype, obj.shape)
+                    return TypeTracerArray._new(obj.dtype, ak._util.maybe_shape_of(obj))
             # Python objects
             elif isinstance(obj, (Number, bool)):
                 as_array = numpy.asarray(obj)

@@ -280,7 +280,7 @@ class Count(KernelReducer):
 
 class CountNonzero(KernelReducer):
     name: Final = "count_nonzero"
-    preferred_dtype: Final = np.float64
+    preferred_dtype: Final = np.int64
     needs_position: Final = False
 
     def apply(
@@ -437,7 +437,7 @@ class Sum(KernelReducer):
 
 class Prod(KernelReducer):
     name: Final = "prod"
-    preferred_dtype: Final = np.int64
+    preferred_dtype: Final = np.float64
     needs_position: Final = False
 
     def apply(

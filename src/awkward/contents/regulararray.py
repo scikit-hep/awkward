@@ -50,6 +50,26 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+def _calculate_regulararray_length(
+    content: Content,
+    size: int | type[unknown_length],
+    zeros_length: int | type[unknown_length],
+    materialize: bool = False,
+) -> int | type[unknown_length]:
+    if materialize:
+        length_of_content = content.length
+    else:
+        length_of_content = ak._util.maybe_length_of(content)
+    if length_of_content is unknown_length or size is unknown_length:
+        length = unknown_length
+    elif size != 0:
+        length = content.length // size  # floor division
+    else:
+        length = zeros_length
+
+    return length
+
+
 @final
 class RegularArray(RegularMeta[Content], Content):
     """
@@ -156,12 +176,7 @@ class RegularArray(RegularMeta[Content], Content):
 
         self._content = content
         self._size = size
-        if content.length is unknown_length or size is unknown_length:
-            self._length = unknown_length
-        elif size != 0:
-            self._length = content.length // size  # floor division
-        else:
-            self._length = zeros_length
+        self._length = _calculate_regulararray_length(content, size, zeros_length)
         self._init(parameters, content.backend)
 
     @property
@@ -249,6 +264,11 @@ class RegularArray(RegularMeta[Content], Content):
 
     @property
     def length(self) -> ShapeItem:
+        if self._backend.nplike.known_data and self._length is unknown_length:
+            self._length = _calculate_regulararray_length(
+                self._content, self._size, self._length, materialize=True
+            )
+            assert is_integer(self._length)
         return self._length
 
     def __repr__(self):
@@ -258,7 +278,7 @@ class RegularArray(RegularMeta[Content], Content):
         out = [indent, pre, "<RegularArray size="]
         out.append(repr(str(self._size)))
         out.append(" len=")
-        out.append(repr(str(self._length)))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

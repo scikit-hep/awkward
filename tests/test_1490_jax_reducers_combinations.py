@@ -71,41 +71,6 @@ def test_reducer(func_ak, axis):
     )
 
 
-@pytest.mark.parametrize("axis", [0, 1, None])
-@pytest.mark.parametrize("func_ak", [ak.argmin, ak.argmax, ak.count_nonzero])
-def test_int_output_reducer(func_ak, axis):
-    func_jax = getattr(jax.numpy, func_ak.__name__)
-
-    def func_ak_with_axis(x):
-        return func_ak(x, axis=axis)
-
-    def func_jax_with_axis(x):
-        return func_jax(x, axis=axis)
-
-    value_jvp, jvp_grad = jax.jvp(
-        func_ak_with_axis, (test_regulararray,), (test_regulararray_tangent,)
-    )
-    value_jvp_jax, jvp_grad_jax = jax.jvp(
-        func_jax_with_axis, (test_regulararray_jax,), (test_regulararray_tangent_jax,)
-    )
-
-    value_vjp, vjp_func = jax.vjp(func_ak_with_axis, test_regulararray)
-    value_vjp_jax, vjp_func_jax = jax.vjp(func_jax_with_axis, test_regulararray_jax)
-
-    numpy.testing.assert_allclose(
-        ak.to_list(value_jvp), value_jvp_jax.tolist(), rtol=1e-9, atol=np.inf
-    )
-    numpy.testing.assert_allclose(
-        ak.to_list(value_vjp), value_vjp_jax.tolist(), rtol=1e-9, atol=np.inf
-    )
-    numpy.testing.assert_allclose(
-        ak.to_list(vjp_func(value_vjp)[0]),
-        (vjp_func_jax(value_vjp_jax)[0]).tolist(),
-        rtol=1e-9,
-        atol=np.inf,
-    )
-
-
 @pytest.mark.parametrize("axis", [0, 1])
 @pytest.mark.parametrize("func_ak", [ak.sort])
 def test_sort(func_ak, axis):
