@@ -150,7 +150,7 @@ class ArgMin(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = segment_argmin(
-            *materialize_if_virtual(array.data, parents.data, outlength)
+            *materialize_if_virtual(array.data, parents.data), outlength
         )
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
@@ -212,7 +212,7 @@ class ArgMax(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = segment_argmax(
-            *materialize_if_virtual(array.data, parents.data, outlength)
+            *materialize_if_virtual(array.data, parents.data), outlength
         )
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
@@ -306,7 +306,7 @@ class CountNonzero(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = segment_count_nonzero(
-            *materialize_if_virtual(array.data, parents.data, outlength)
+            *materialize_if_virtual(array.data, parents.data), outlength
         )
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
 
@@ -341,7 +341,7 @@ class Sum(JAXReducer):
         else:
             input_array = array.data
         result = jax.ops.segment_sum(
-            *materialize_if_virtual(input_array, parents.data, outlength)
+            *materialize_if_virtual(input_array, parents.data), outlength
         )
 
         if array.dtype.kind == "m":
@@ -426,7 +426,7 @@ class Prod(JAXReducer):
         assert isinstance(array, ak.contents.NumpyArray)
         # See issue https://github.com/google/jax/issues/9296
         result = segment_prod_with_negatives(
-            *materialize_if_virtual(array.data, parents.data, outlength)
+            *materialize_if_virtual(array.data, parents.data), outlength
         )
 
         if np.issubdtype(array.dtype, np.complexfloating):
@@ -481,7 +481,7 @@ class Any(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.ops.segment_max(
-            *materialize_if_virtual(array.data, parents.data, outlength)
+            *materialize_if_virtual(array.data, parents.data), outlength
         )
         if array.dtype is not np.dtype(bool):
             result = result.at[result == 0].set(self._max_initial(None, array.dtype))
@@ -516,7 +516,7 @@ class All(JAXReducer):
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.ops.segment_min(
-            *materialize_if_virtual(array.data, parents.data, outlength)
+            *materialize_if_virtual(array.data, parents.data), outlength
         )
         result = jax.numpy.asarray(result, dtype=bool)
 
@@ -571,7 +571,7 @@ class Min(JAXReducer):
         assert isinstance(array, ak.contents.NumpyArray)
 
         result = jax.ops.segment_min(
-            *materialize_if_virtual(array.data, parents.data, outlength)
+            *materialize_if_virtual(array.data, parents.data), outlength
         )
         result = jax.numpy.minimum(result, self._min_initial(self.initial, array.dtype))
 
@@ -634,7 +634,7 @@ class Max(JAXReducer):
         assert isinstance(array, ak.contents.NumpyArray)
 
         result = jax.ops.segment_max(
-            *materialize_if_virtual(array.data, parents.data, outlength)
+            *materialize_if_virtual(array.data, parents.data), outlength
         )
         result = jax.numpy.maximum(result, self._max_initial(self.initial, array.dtype))
 
