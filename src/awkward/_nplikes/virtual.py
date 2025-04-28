@@ -219,6 +219,10 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def data(self):
         return self.materialize().data
 
+    def unsafe_buffer_pointer(self):
+        assert isinstance(self._nplike, ak._nplikes.jax.Jax)
+        return self.materialize().unsafe_buffer_pointer()
+
     def byteswap(self, inplace=False):
         if self._array is not UNMATERIALIZED:
             return self._array.byteswap(inplace=inplace)
@@ -275,6 +279,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return repr(self) if self._shape else "??"
 
     def __getitem__(self, index):
+        (index,) = materialize_if_virtual(index)
         if self._array is not UNMATERIALIZED:
             return self._array.__getitem__(index)
 
@@ -306,7 +311,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __setitem__(self, key, value):
         array = self.materialize()
-        value = value.materialize() if isinstance(value, VirtualArray) else value
+        (value,) = materialize_if_virtual(value)
         if isinstance(self._nplike, ak._nplikes.jax.Jax):
             self._array = array.at[key].set(value)
         else:
