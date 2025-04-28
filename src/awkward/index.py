@@ -260,8 +260,13 @@ class Index:
             return out
 
     def __setitem__(self, where, what):
+        (data, where, what) = materialize_if_virtual(self._data, where, what)
         if isinstance(self._nplike, Jax):
-            self._data = self._data.at[where].set(what)
+            new_data = data.at[where].set(what)
+            if isinstance(self._data, VirtualArray):
+                self._data._array = new_data
+            else:
+                self._data = new_data
         else:
             self._data[where] = what
 
