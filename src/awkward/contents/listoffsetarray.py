@@ -132,8 +132,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
         if (
             content.backend.nplike.known_data
-            and offsets.length is not unknown_length
-            and offsets.length == 0
+            and ak._util.maybe_length_of(offsets) is not unknown_length
+            and ak._util.maybe_length_of(offsets) == 0
         ):
             raise ValueError(
                 f"{type(self).__name__} len(offsets) ({offsets.length}) must be >= 1"
@@ -250,7 +250,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<ListOffsetArray len="]
-        out.append(repr(str(self.length)))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")
@@ -1762,7 +1762,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             self.starts.length,
             self._content.length,
         )
-        if error.str is not None:
+        if error is not None and error.str is not None:
             if error.filename is None:
                 filename = ""
             else:

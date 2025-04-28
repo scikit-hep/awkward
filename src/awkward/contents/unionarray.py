@@ -537,7 +537,7 @@ class UnionArray(UnionMeta[Content], Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<UnionArray len="]
-        out.append(repr(str(self.length)))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")
@@ -1452,7 +1452,7 @@ class UnionArray(UnionMeta[Content], Content):
             lencontents,
         )
 
-        if error.str is not None:
+        if error is not None and error.str is not None:
             if error.filename is None:
                 filename = ""
             else:
