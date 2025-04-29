@@ -1133,9 +1133,6 @@ class RecordArray(RecordMeta[Content], Content):
             }
             for field in types
         }
-        # Print extracted metadata
-        for field_name, metadata in field_metadata.items():
-            print(f"Field: {field_name}, Metadata: {metadata}")  # noqa: T201
 
         return pyarrow.Array.from_buffers(
             ak._connect.pyarrow.to_awkwardarrow_type(

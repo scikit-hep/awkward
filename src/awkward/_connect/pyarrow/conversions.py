@@ -177,16 +177,27 @@ def form_popbuffers_finalize(out, awkwardarrow_type):
         )
 
 
-def get_meta_str(meta: dict[bytes, bytes] | None, key: bytes) -> str | None:
+# def get_meta_str(meta: dict[bytes, bytes] | None, key: bytes) -> str | None:
+#     if not meta:
+#         return None
+#     key_str = key.decode("utf-8")
+#     value = meta.get(key) or meta.get(key_str.encode("utf-8"))
+#     return value.decode("utf-8") if value else None
+
+def _get_meta_str(meta: dict[bytes, bytes] | None, key: bytes) -> str | None:
     if not meta:
         return None
     key_str = key.decode("utf-8")
-    value = meta.get(key) or meta.get(key_str.encode("utf-8"))
-    return value.decode("utf-8") if value else None
+    value = (
+        meta.get(key)
+        or meta.get(key_str.encode("utf-8"))
+        or meta.get(key_str)
+    )
+    return value.decode("utf-8") if isinstance(value, bytes) else value
 
 
 def get_field_option(field: pyarrow.Field, key: bytes) -> str | None:
-    return get_meta_str(field.metadata, key)
+    return _get_meta_str(field.metadata, key)
 
 
 def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitmasks):
@@ -376,14 +387,13 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             field_name = field.name
             keys.append(field_name)
 
-            option_str = get_field_option(field, b"option_type")
-
             # Build the awkward array content from field buffers
             a, b = to_awkwardarrow_storage_types(field.type)
             akcontent = popbuffers(
                 paarray.field(field_name), a, b, buffers, generate_bitmasks
             )
 
+            option_str = get_field_option(field, b"option_type")
             if not field.nullable or option_str == "False":
                 # strip the dummy option-type node
                 akcontent = remove_optiontype(akcontent)
@@ -642,11 +652,10 @@ def form_popbuffers(awkwardarrow_type, storage_type):
             field_name = field.name
             keys.append(field_name)
 
-            option_str = get_field_option(field, b"option_type")
-
             a, b = to_awkwardarrow_storage_types(field.type)
             akcontent = form_popbuffers(a, b)
 
+            option_str = get_field_option(field, b"option_type")
             if not field.nullable or option_str == "False":
                 # strip the dummy option-type node
                 akcontent = form_remove_optiontype(akcontent)
