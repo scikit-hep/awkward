@@ -201,7 +201,9 @@ def metadata(
         for row_group_index in (0, metadata.num_row_groups - 1):
             row_group_info = metadata.row_group(row_group_index).to_dict()
             for k, v in row_group_info.items():
-                if k in ["sorting_columns", "num_rows", "num_columns"]:
+                # sorting columns, and columns::statistics have some version skew in underlying library
+                # with latter's 'distinct_counts' showing None vs 0 for example, so they're not used
+                if k in ["num_rows", "num_columns"]:
                     uuids.append(repr({k: v}))
                 if k == "columns":
                     for subitem in v:
@@ -214,7 +216,6 @@ def metadata(
                                 "compression",
                                 "encodings",
                                 "total_compressed_size",
-                                "statistics",
                             ]:
                                 continue
                             uuids.append(repr({subkey: subitem[subkey]}))
