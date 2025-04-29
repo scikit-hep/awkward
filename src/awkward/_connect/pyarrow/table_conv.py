@@ -153,13 +153,6 @@ def native_arrow_field_to_akarraytype(
     ntv_field: pyarrow.Field, metadata: dict
 ) -> pyarrow.Field:
     option_str = _get_option_type_from_metadata(metadata)
-    # nullable = ntv_field.nullable
-
-    # if metadata is not None:
-    #     non_nullable = metadata.get("is_nonnullable_nulltype", None)
-
-    # if option_str == "False":
-    #     nullable = False
 
     if isinstance(ntv_field, AwkwardArrowType):
         raise ValueError(f"field {ntv_field} is already an AwkwardArrowType")
