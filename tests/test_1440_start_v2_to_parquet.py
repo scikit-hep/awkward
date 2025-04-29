@@ -20,7 +20,6 @@ def parquet_round_trip(
     akarray, extensionarray, tmp_path, categorical_as_dictionary=False
 ):
     filename = os.path.join(tmp_path, "whatever.parquet")
-    print("writing to_parquet")
 
     ak.to_parquet(
         akarray,
@@ -28,7 +27,6 @@ def parquet_round_trip(
         extensionarray=extensionarray,
         categorical_as_dictionary=categorical_as_dictionary,
     )
-    print("now reading from_parquet")
     akarray2 = ak.from_parquet(filename)
 
     assert to_list(akarray2) == to_list(akarray)

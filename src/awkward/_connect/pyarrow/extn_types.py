@@ -41,6 +41,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
         record_is_tuple,
         record_is_scalar,
         is_nonnullable_nulltype=False,
+        option_type=False,
     ):
         self._mask_type = mask_type
         self._node_type = node_type
@@ -49,6 +50,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
         self._record_is_tuple = record_is_tuple
         self._record_is_scalar = record_is_scalar
         self._is_nonnullable_nulltype = is_nonnullable_nulltype
+        self._option_type = option_type
         super().__init__(storage_type, "awkward")
 
     def __str__(self):
@@ -96,6 +98,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
             "record_is_tuple": self._record_is_tuple,
             "record_is_scalar": self._record_is_scalar,
             "is_nonnullable_nulltype": self._is_nonnullable_nulltype,
+            "option_type": self._option_type,
         }
 
     @classmethod
@@ -115,6 +118,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
             metadata["record_is_tuple"],
             metadata["record_is_scalar"],
             is_nonnullable_nulltype=metadata.get("is_nonnullable_nulltype", False),
+            option_type=metadata.get("option_type", False),
         )
 
     @property

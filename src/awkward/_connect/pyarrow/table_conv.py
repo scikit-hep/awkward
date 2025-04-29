@@ -35,7 +35,7 @@ def convert_awkward_arrow_table_to_native(aatable: pyarrow.Table) -> pyarrow.Tab
         new_metadata = aatable.schema.metadata.copy()
     new_metadata[AWKWARD_INFO_KEY] = metadata_serial
     new_schema = pyarrow.schema(new_fields, metadata=new_metadata)
-    # return = aatable.cast(new_schema)
+
     return replace_schema(aatable, new_schema)
 
 
@@ -67,6 +67,18 @@ def convert_native_arrow_table_to_awkward(table: pyarrow.Table) -> pyarrow.Table
     return replace_schema(table, new_schema)
 
 
+def get_meta_str(meta: dict[bytes, bytes] | None, key: bytes) -> str | None:
+    if not meta:
+        return None
+    key_str = key.decode("utf-8")
+    value = meta.get(key) or meta.get(key_str.encode("utf-8"))
+    return value.decode("utf-8") if value else None
+
+
+def get_field_option(field: pyarrow.Field, key: bytes) -> str | None:
+    return get_meta_str(field.metadata, key)
+
+
 def collect_ak_arr_type_metadata(aafield: pyarrow.Field) -> dict | list | None:
     """
     Given a Field, collect ArrowExtensionArray metadata as an object.
@@ -75,11 +87,17 @@ def collect_ak_arr_type_metadata(aafield: pyarrow.Field) -> dict | list | None:
     This recurses down the whole type structure.
     """
     typ = aafield.type
+
+    option_str = get_field_option(aafield, b"option_type")
+
     if not isinstance(typ, AwkwardArrowType):
         return None  # Not expected to reach here
     subfields = _fields_of_strg_type(typ.storage_type)
     metadata = typ._metadata_as_dict()
     metadata["field_name"] = aafield.name
+    if option_str == "False":
+        metadata["option_type"] = option_str
+
     if len(subfields) == 0:
         # Simple type
         return metadata
@@ -121,9 +139,28 @@ def awkward_arrow_field_to_native(aafield: pyarrow.Field) -> pyarrow.Field:
     return new_field
 
 
+def _get_option_type_from_metadata(metadata):
+    """
+    Get the option_type from a single metadata dict.
+    Returns None if metadata is None or option_type key is missing.
+    """
+    if metadata is None:
+        return None
+    return metadata.get("option_type", None)
+
+
 def native_arrow_field_to_akarraytype(
     ntv_field: pyarrow.Field, metadata: dict
 ) -> pyarrow.Field:
+    option_str = _get_option_type_from_metadata(metadata)
+    # nullable = ntv_field.nullable
+
+    # if metadata is not None:
+    #     non_nullable = metadata.get("is_nonnullable_nulltype", None)
+
+    # if option_str == "False":
+    #     nullable = False
+
     if isinstance(ntv_field, AwkwardArrowType):
         raise ValueError(f"field {ntv_field} is already an AwkwardArrowType")
     storage_type = ntv_field.type
@@ -159,7 +196,11 @@ def native_arrow_field_to_akarraytype(
         storage_type = _make_pyarrow_type_like(storage_type, awkwardized_fields)
 
     ak_type = AwkwardArrowType._from_metadata_object(storage_type, metadata)
-    return pyarrow.field(ntv_field.name, type=ak_type, nullable=ntv_field.nullable)
+    return pyarrow.field(
+        ntv_field.name,
+        type=ak_type,
+        nullable=False if option_str == "False" else ntv_field.nullable,
+    )
 
 
 def _fields_of_strg_type(typ: pyarrow.Type) -> list[pyarrow.Field]:

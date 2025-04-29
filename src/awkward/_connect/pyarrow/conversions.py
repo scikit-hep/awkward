@@ -378,14 +378,11 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
             option_str = get_field_option(field, b"option_type")
 
-            print(f"line #381 Field: {field_name}, Metadata:  option_type {option_str}")  # noqa: T201
-
             # Build the awkward array content from field buffers
             a, b = to_awkwardarrow_storage_types(field.type)
             akcontent = popbuffers(
                 paarray.field(field_name), a, b, buffers, generate_bitmasks
             )
-            print(akcontent)  # noqa: T201
 
             if not field.nullable or option_str == "False":
                 # strip the dummy option-type node
@@ -647,11 +644,8 @@ def form_popbuffers(awkwardarrow_type, storage_type):
 
             option_str = get_field_option(field, b"option_type")
 
-            print(f"line #647 Field: {field_name}, Metadata: option_type {option_str}")  # noqa: T201
-
             a, b = to_awkwardarrow_storage_types(field.type)
             akcontent = form_popbuffers(a, b)
-            print(akcontent)  # noqa: T201
 
             if not field.nullable or option_str == "False":
                 # strip the dummy option-type node
@@ -947,12 +941,8 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
 
 def form_handle_arrow(schema, pass_empty_field=False):
     if pass_empty_field and list(schema.names) == [""]:
-        print("line #948 HERE")  # noqa: T201
         for i, _arrowtype in enumerate(schema.types):
             field = schema.field(i)
-            option_str = get_field_option(field, b"option_type")
-
-            print(f"line #953 Field: {field.name}, Metadata: option_type {option_str}")  # noqa: T201
 
         awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(schema.types[0])
         akform = form_popbuffers(awkwardarrow_type, storage_type)
