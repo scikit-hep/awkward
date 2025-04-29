@@ -68,18 +68,6 @@ def convert_native_arrow_table_to_awkward(table: pyarrow.Table) -> pyarrow.Table
     return replace_schema(table, new_schema)
 
 
-# def get_meta_str(meta: dict[bytes, bytes] | None, key: bytes) -> str | None:
-#     if not meta:
-#         return None
-#     key_str = key.decode("utf-8")
-#     value = meta.get(key) or meta.get(key_str.encode("utf-8"))
-#     return value.decode("utf-8") if value else None
-
-
-# def get_field_option(field: pyarrow.Field, key: bytes) -> str | None:
-#     return get_meta_str(field.metadata, key)
-
-
 def collect_ak_arr_type_metadata(aafield: pyarrow.Field) -> dict | list | None:
     """
     Given a Field, collect ArrowExtensionArray metadata as an object.

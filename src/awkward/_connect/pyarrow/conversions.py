@@ -931,9 +931,6 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
 
 def form_handle_arrow(schema, pass_empty_field=False):
     if pass_empty_field and list(schema.names) == [""]:
-        for i, _arrowtype in enumerate(schema.types):
-            field = schema.field(i)
-
         awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(schema.types[0])
         akform = form_popbuffers(awkwardarrow_type, storage_type)
         if not schema.field(0).nullable:
