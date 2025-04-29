@@ -21,7 +21,10 @@ input = SAMPLES_DIR / "nullable-record-primitives.parquet"
 
 def test_parquet_uuid():
     meta = metadata_from_parquet(input)
-    assert meta["uuid"] == "582dabdb8c87bfa17bc930676ed26b8d4ab22a900f92357751dc380c41acb593"
+    assert (
+        meta["uuid"]
+        == "582dabdb8c87bfa17bc930676ed26b8d4ab22a900f92357751dc380c41acb593"
+    )
 
 
 @pytest.mark.parametrize("calculate_uuid", [True, False])
