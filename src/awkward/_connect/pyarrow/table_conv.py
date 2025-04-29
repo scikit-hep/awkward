@@ -175,10 +175,6 @@ def native_arrow_field_to_akarraytype(
 
     ak_type = AwkwardArrowType._from_metadata_object(storage_type, metadata)
 
-    """
-    Given a native Arrow field and its associated metadata,
-    adjust the field based on the 'option_type' metadata.
-    """
     option_type = _get_option_type_from_metadata(metadata)
 
     # Determine nullability: if option_type is 'False', force nullable to False
