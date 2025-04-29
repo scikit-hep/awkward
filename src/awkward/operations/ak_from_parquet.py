@@ -219,12 +219,6 @@ def metadata(
                             ]:
                                 continue
                             uuids.append(repr({subkey: subitem[subkey]}))
-        for testing in uuids:
-            print("key-value pair:", testing)
-        print("concatenate:", ",".join(uuids))
-        print("json:", json.dumps(",".join(uuids)))
-        print("encode:", json.dumps(",".join(uuids)).encode())
-        print("hash:", hashlib.sha256(json.dumps(",".join(uuids)).encode()).hexdigest())
         uuid = hashlib.sha256(json.dumps(",".join(uuids)).encode()).hexdigest()
         return (
             parquet_columns,
