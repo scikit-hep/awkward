@@ -1125,14 +1125,14 @@ class RecordArray(RecordMeta[Content], Content):
             ]
         )
 
-        # Iterate through fields in the StructType and extract metadata
-        field_metadata = {
-            field.name: {
-                k.decode("utf-8"): v.decode("utf-8")
-                for k, v in (field.metadata or {}).items()
-            }
-            for field in types
-        }
+        # # Iterate through fields in the StructType and extract metadata
+        # field_metadata = {
+        #     field.name: {
+        #         k.decode("utf-8"): v.decode("utf-8")
+        #         for k, v in (field.metadata or {}).items()
+        #     }
+        #     for field in types
+        # }
 
         return pyarrow.Array.from_buffers(
             ak._connect.pyarrow.to_awkwardarrow_type(

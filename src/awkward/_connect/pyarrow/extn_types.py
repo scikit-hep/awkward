@@ -143,3 +143,15 @@ def to_awkwardarrow_storage_types(arrowtype):
         return arrowtype, arrowtype.storage_type
     else:
         return None, arrowtype
+
+
+def _get_meta_str(meta: dict[bytes, bytes] | None, key: bytes) -> str | None:
+    if not meta:
+        return None
+    key_str = key.decode("utf-8")
+    value = meta.get(key) or meta.get(key_str.encode("utf-8")) or meta.get(key_str)
+    return value.decode("utf-8") if isinstance(value, bytes) else value
+
+
+def get_field_option(field: pyarrow.Field, key: bytes) -> str | None:
+    return _get_meta_str(field.metadata, key)

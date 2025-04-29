@@ -14,7 +14,11 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_union
 
-from .extn_types import AwkwardArrowType, to_awkwardarrow_storage_types
+from .extn_types import (
+    AwkwardArrowType,
+    get_field_option,
+    to_awkwardarrow_storage_types,
+)
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -175,29 +179,6 @@ def form_popbuffers_finalize(out, awkwardarrow_type):
             ),
             out,
         )
-
-
-# def get_meta_str(meta: dict[bytes, bytes] | None, key: bytes) -> str | None:
-#     if not meta:
-#         return None
-#     key_str = key.decode("utf-8")
-#     value = meta.get(key) or meta.get(key_str.encode("utf-8"))
-#     return value.decode("utf-8") if value else None
-
-def _get_meta_str(meta: dict[bytes, bytes] | None, key: bytes) -> str | None:
-    if not meta:
-        return None
-    key_str = key.decode("utf-8")
-    value = (
-        meta.get(key)
-        or meta.get(key_str.encode("utf-8"))
-        or meta.get(key_str)
-    )
-    return value.decode("utf-8") if isinstance(value, bytes) else value
-
-
-def get_field_option(field: pyarrow.Field, key: bytes) -> str | None:
-    return _get_meta_str(field.metadata, key)
 
 
 def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitmasks):
