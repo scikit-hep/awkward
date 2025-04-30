@@ -118,7 +118,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
             metadata["record_is_tuple"],
             metadata["record_is_scalar"],
             is_nonnullable_nulltype=metadata.get("is_nonnullable_nulltype", False),
-            option_type=metadata["option_type"],
+            option_type=metadata.get("option_type", False),
         )
 
     @property
