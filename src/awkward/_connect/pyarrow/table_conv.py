@@ -77,15 +77,15 @@ def collect_ak_arr_type_metadata(aafield: pyarrow.Field) -> dict | list | None:
     """
     typ = aafield.type
 
-    option_str = get_field_option(aafield, b"option_type")
+    option_type = get_field_option(aafield, b"option_type")
 
     if not isinstance(typ, AwkwardArrowType):
         return None  # Not expected to reach here
     subfields = _fields_of_strg_type(typ.storage_type)
     metadata = typ._metadata_as_dict()
     metadata["field_name"] = aafield.name
-    if option_str == "False":
-        metadata["option_type"] = option_str
+    if option_type is False:
+        metadata["option_type"] = "False"
 
     if len(subfields) == 0:
         # Simple type
@@ -128,14 +128,6 @@ def awkward_arrow_field_to_native(aafield: pyarrow.Field) -> pyarrow.Field:
     return new_field
 
 
-def _get_option_type_from_metadata(metadata: dict | None) -> str | None:
-    """
-    Extracts 'option_type' from a metadata dict, if present.
-    Returns None if metadata is None or missing the key.
-    """
-    return metadata.get("option_type") if metadata else None
-
-
 def native_arrow_field_to_akarraytype(
     ntv_field: pyarrow.Field, metadata: dict
 ) -> pyarrow.Field:
@@ -175,10 +167,10 @@ def native_arrow_field_to_akarraytype(
 
     ak_type = AwkwardArrowType._from_metadata_object(storage_type, metadata)
 
-    option_type = _get_option_type_from_metadata(metadata)
+    option_str = metadata.get("option_type") if metadata else None
 
     # Determine nullability: if option_type is 'False', force nullable to False
-    nullable = False if option_type == "False" else ntv_field.nullable
+    nullable = False if option_str == "False" else ntv_field.nullable
 
     return pyarrow.field(
         ntv_field.name,

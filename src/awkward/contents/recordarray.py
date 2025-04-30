@@ -1116,9 +1116,9 @@ class RecordArray(RecordMeta[Content], Content):
                     )
                     or x._arrow_needs_option_type(),
                     metadata={
-                        b"option_type": str(x._arrow_needs_option_type()).encode(
-                            "utf-8"
-                        ),
+                        b"option_type": b"True"
+                        if x._arrow_needs_option_type()
+                        else b"False",
                     },
                 )
                 for i, x in enumerate(self._contents)

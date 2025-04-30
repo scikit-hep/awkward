@@ -118,7 +118,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
             metadata["record_is_tuple"],
             metadata["record_is_scalar"],
             is_nonnullable_nulltype=metadata.get("is_nonnullable_nulltype", False),
-            option_type=metadata.get("option_type", False),
+            option_type=metadata["option_type"],
         )
 
     @property
@@ -145,13 +145,23 @@ def to_awkwardarrow_storage_types(arrowtype):
         return None, arrowtype
 
 
-def _get_meta_str(meta: dict[bytes, bytes] | None, key: bytes) -> str | None:
+def get_field_option(field: pyarrow.Field, key: bytes) -> bool | None:
+    """
+    Retrieves the metadata value for a given key from a field's metadata,
+    interpreting the value as a boolean if it's b'True' or b'False'.
+    Returns None if the key is missing.
+    """
+    meta = field.metadata
     if not meta:
         return None
-    key_str = key.decode("utf-8")
-    value = meta.get(key) or meta.get(key_str.encode("utf-8")) or meta.get(key_str)
-    return value.decode("utf-8") if isinstance(value, bytes) else value
 
+    value = meta.get(key)
+    if value is None:
+        return None
 
-def get_field_option(field: pyarrow.Field, key: bytes) -> str | None:
-    return _get_meta_str(field.metadata, key)
+    if value == b"False":
+        return False
+    elif value == b"True":
+        return True
+    else:
+        return None
