@@ -510,7 +510,7 @@ class RecordArray(RecordMeta[Content], Content):
                     self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
                 ]
         return RecordArray(
-            contents, fields, self.length, parameters=None, backend=self._backend
+            contents, fields, self._length, parameters=None, backend=self._backend
         )
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
