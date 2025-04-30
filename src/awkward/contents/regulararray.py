@@ -347,7 +347,7 @@ class RegularArray(RegularMeta[Content], Content):
         return RegularArray(
             self._content._getitem_field(where, only_fields),
             self._size,
-            self._length,
+            self.length,
             parameters=None,
         )
 
@@ -357,7 +357,7 @@ class RegularArray(RegularMeta[Content], Content):
         return RegularArray(
             self._content._getitem_fields(where, only_fields),
             self._size,
-            self._length,
+            self.length,
             parameters=None,
         )
 
