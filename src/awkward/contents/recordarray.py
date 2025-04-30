@@ -1309,7 +1309,7 @@ class RecordArray(RecordMeta[Content], Content):
         return RecordArray(
             contents,
             self._fields,
-            length=self.length,
+            length=self._length,
             parameters=self._parameters,
             backend=backend,
         )

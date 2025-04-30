@@ -401,7 +401,7 @@ class Content(Meta):
                 index.data,
                 index.length,
                 length,
-                raw._size,
+                raw.size,
             ),
             slicer=head,
         )
