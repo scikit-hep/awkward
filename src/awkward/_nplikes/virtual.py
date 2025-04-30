@@ -127,6 +127,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                     f"Only shapes of integer dimensions are supported for materialized shapes. Received shape {shape}"
                 )
             self._shape = tuple(map(int, shape))
+            self._shape_generator = None
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
