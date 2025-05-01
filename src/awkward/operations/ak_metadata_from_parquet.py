@@ -76,9 +76,17 @@ def _impl(
     path, storage_options, row_groups=None, ignore_metadata=False, scan_files=True
 ):
     results = ak.operations.ak_from_parquet.metadata(
-        path, storage_options, row_groups, None, ignore_metadata, scan_files
+        path,
+        storage_options,
+        row_groups,
+        None,
+        ignore_metadata,
+        scan_files,
+        calculate_uuid=True,
     )
-    parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata = results
+    parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata, uuid = (
+        results
+    )
 
     out = {
         "form": subform,
@@ -86,6 +94,7 @@ def _impl(
         "paths": actual_paths,
         "col_counts": col_counts,
         "columns": parquet_columns,
+        "uuid": uuid,
     }
     if col_counts:
         out["num_rows"] = sum(col_counts)

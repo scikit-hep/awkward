@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+
 import fsspec.parquet
 
 import awkward as ak
@@ -65,11 +68,8 @@ def from_parquet(
     See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
 
-    parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta = metadata(
-        path,
-        storage_options,
-        row_groups,
-        columns,
+    parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta, uuid = (
+        metadata(path, storage_options, row_groups, columns, calculate_uuid=True)
     )
     return _load(
         actual_paths,
@@ -95,6 +95,7 @@ def metadata(
     columns=None,
     ignore_metadata=False,
     scan_files=True,
+    calculate_uuid=False,
 ):
     # early exit if missing deps
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.from_parquet")
@@ -192,6 +193,43 @@ def metadata(
     parquet_columns = subform.columns(
         list_indicator=list_indicator, column_prefix=column_prefix
     )
+
+    # generate hash from the col_counts, first row_group and last row_group to calculate approximate parquet uuid
+    uuid = None
+    if calculate_uuid:
+        uuids = [repr({"col_counts": col_counts})]
+        for row_group_index in (0, metadata.num_row_groups - 1):
+            row_group_info = metadata.row_group(row_group_index).to_dict()
+            for k, v in row_group_info.items():
+                # sorting columns, and columns::statistics have some version skew in underlying library
+                # with latter's 'distinct_counts' showing None vs 0 for example, so they're not used
+                if k in ["num_rows", "num_columns"]:
+                    uuids.append(repr({k: v}))
+                if k == "columns":
+                    for subitem in v:
+                        for subkey in subitem:
+                            if subkey not in [
+                                "file_offset",
+                                "file_path",
+                                "physical_type",
+                                "path_in_schema",
+                                "compression",
+                                "encodings",
+                                "total_compressed_size",
+                            ]:
+                                continue
+                            uuids.append(repr({subkey: subitem[subkey]}))
+        uuid = hashlib.sha256(json.dumps(",".join(uuids)).encode()).hexdigest()
+        return (
+            parquet_columns,
+            subform,
+            actual_paths,
+            fs,
+            subrg,
+            col_counts,
+            metadata,
+            uuid,
+        )
 
     return parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata
 
