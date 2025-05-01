@@ -22,6 +22,10 @@ if TYPE_CHECKING:
 UNMATERIALIZED = Sentinel("UNMATERIALIZED", None)
 
 
+def assert_never():
+    raise AssertionError("this shape_generator should never be run!")
+
+
 def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     """
     A little helper function to materialize all virtual arrays in a list of arrays.
@@ -34,8 +38,7 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
 class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     """
     Implements a virtual array to be used as a buffer inside layouts.
-    Virtual arrays are tied to specific nplikes and only numpy and cupy nplikes are allowed.
-    Therefore, virtual arrays are only allowed to generate `numpy.ndarray`s or `cupy.ndarray`s when materialized.
+    Virtual arrays are tied to specific nplikes.
     The arrays are generated via a generator function that is passed to the constructor.
     They optionally accept a shape generator function that is called when the shape of the array is unknown.
     If it doesn't exist, the shape is generated from the materialized array.
@@ -56,7 +59,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     ) -> None:
         if not nplike.supports_virtual_arrays:
             raise TypeError(
-                f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(nplike)}"
+                f"The nplike {type(nplike)} does not support virtual arrays"
             )
         if not all(is_integer(dim) or dim is unknown_length for dim in shape):
             raise TypeError(
@@ -128,6 +131,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                     f"Only shapes of integer dimensions are supported for materialized shapes. Received shape {shape}"
                 )
             self._shape = tuple(map(int, shape))
+            self._shape_generator = assert_never
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
@@ -200,7 +204,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def nplike(self) -> NumpyLike:
         if not self._nplike.supports_virtual_arrays:
             raise TypeError(
-                f"Only numpy and cupy nplikes are supported for {type(self).__name__}. Received {type(self._nplike)}"
+                f"The nplike {type(self._nplike)} does not support virtual arrays"
             )
         return self._nplike
 
@@ -313,7 +317,10 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def __setitem__(self, key, value):
         array = self.materialize()
         (value,) = materialize_if_virtual(value)
-        array.__setitem__(key, value)
+        if isinstance(self._nplike, ak._nplikes.jax.Jax):
+            self._array = array.at[key].set(value)
+        else:
+            array.__setitem__(key, value)
 
     def __bool__(self) -> bool:
         array = self.materialize()
