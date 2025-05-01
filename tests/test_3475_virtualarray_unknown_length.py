@@ -338,11 +338,23 @@ def test_nplike(virtual_array, numpy_like):
 # Test shape_generator property
 def test_shape_generator(virtual_array, shape_generator_param):
     if shape_generator_param is None:
+        assert virtual_array._shape == (unknown_length,)
         assert virtual_array._shape_generator is None
+        virtual_array.get_shape()
+        assert virtual_array.is_materialized
+        assert virtual_array._shape == (5,)
     else:
+        assert virtual_array._shape == (unknown_length,)
         assert virtual_array._shape_generator is not None
         # Can't directly compare lambdas, so check if it's callable
         assert callable(virtual_array._shape_generator)
+        virtual_array.get_shape()
+        assert virtual_array._shape == (5,)
+        assert not virtual_array.is_materialized
+        with pytest.raises(
+            AssertionError, match="this shape_generator should never be run!"
+        ):
+            assert virtual_array._shape_generator() == (5,)
 
 
 # Test copy
