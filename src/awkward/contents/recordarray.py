@@ -1111,7 +1111,15 @@ class RecordArray(RecordMeta[Content], Content):
                 pyarrow.field(
                     self.index_to_field(i),
                     values[i].type,
-                    x._arrow_needs_option_type(),
+                    nullable=(
+                        mask_node is not None and mask_node._arrow_needs_option_type()
+                    )
+                    or x._arrow_needs_option_type(),
+                    metadata={
+                        b"option_type": b"True"
+                        if x._arrow_needs_option_type()
+                        else b"False",
+                    },
                 )
                 for i, x in enumerate(self._contents)
             ]
