@@ -17,7 +17,7 @@ np = NumpyMetadata.instance()
 
 
 class AwkwardArrowArray(pyarrow.ExtensionArray):
-    def to_pylist(self):
+    def to_pylist(self, maps_as_pydicts=None):
         out = super().to_pylist()
         if (
             isinstance(self.type, AwkwardArrowType)
