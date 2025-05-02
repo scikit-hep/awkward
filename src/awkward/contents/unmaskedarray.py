@@ -418,9 +418,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
 
         if isinstance(out, ak.contents.RegularArray):
             tmp = ak.contents.UnmaskedArray.simplified(out._content, parameters=None)
-            return ak.contents.RegularArray(
-                tmp, out._size, out._length, parameters=None
-            )
+            return ak.contents.RegularArray(tmp, out.size, out.length, parameters=None)
 
         else:
             return out
@@ -436,7 +434,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
             )
 
             return ak.contents.RegularArray(
-                tmp, out._size, out._length, parameters=self._parameters
+                tmp, out.size, out.length, parameters=self._parameters
             )
 
         else:
