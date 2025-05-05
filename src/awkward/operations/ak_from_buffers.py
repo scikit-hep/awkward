@@ -207,6 +207,10 @@ def _from_buffer(
                 nplike, buffer(), dtype, length, byteorder, field_path, None
             )
 
+        # also store a ref to the original/raw buffer generator
+        # this allows us to access it later again
+        generator.__awkward_raw_generator__ = buffer
+
         return VirtualArray(
             nplike=nplike,
             shape=(count,),
