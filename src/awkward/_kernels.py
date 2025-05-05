@@ -81,7 +81,7 @@ class NumpyKernel(BaseKernel):
                 return ctypes.cast(x, t)
             else:
                 raise AssertionError(
-                    f"Only NumPy buffers should be passed to Numpy Kernels, received {type(t).__name__}"
+                    f"Only NumPy buffers should be passed to Numpy Kernels, received {x} (ptr type={type(t).__name__})"
                 )
         else:
             return x
