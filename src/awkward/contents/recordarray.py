@@ -379,7 +379,9 @@ class RecordArray(RecordMeta[Content], Content):
             self._length = _calculate_recordarray_length(
                 self._contents, None, self._backend
             )
-            assert is_integer(self._length)
+            assert is_integer(self._length), (
+                "RecordArray length must be an integer for an array with concrete data"
+            )
         return self._length
 
     def __repr__(self):
