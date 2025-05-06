@@ -380,7 +380,7 @@ class RecordArray(RecordMeta[Content], Content):
                 self._contents, None, self._backend
             )
             assert is_integer(self._length), (
-                "RecordArray length must be an integer for an array with concrete data"
+                f"RecordArray length must be an integer for an array with concrete data, not {type(self._length)}"
             )
         return self._length
 
