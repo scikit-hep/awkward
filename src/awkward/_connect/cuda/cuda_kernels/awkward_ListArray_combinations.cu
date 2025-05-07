@@ -5,24 +5,18 @@
 //     (tocarry, toindex, fromindex, n, replacement, starts, stops, length, invocation_index, err_code) = args
 //     scan_in_array_offsets = cupy.zeros(length + 1, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_a", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))(grid, block, (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, invocation_index, err_code))
-//     scan_in_array_offsets = cupy.cumsum(scan_in_array_offsets)
+//     cupy.cumsum(scan_in_array_offsets, out = scan_in_array_offsets)
 //     scan_in_array_parents = cupy.zeros(int(scan_in_array_offsets[length]), dtype=cupy.int64)
 //     scan_in_array_local_indices = cupy.zeros(int(scan_in_array_offsets[length]), dtype=cupy.int64)
-//     for i in range(1, length + 1):
-//         scan_in_array_parents[scan_in_array_offsets[i - 1]:scan_in_array_offsets[i]] = i - 1
-//     if int(scan_in_array_offsets[length]) < 1024:
-//         block_size = int(scan_in_array_offsets[length])
-//     else:
-//         block_size = 1024
-//     if block_size > 0:
-//         grid_size = math.floor((int(scan_in_array_offsets[length]) + block_size - 1) / block_size)
-//     else:
-//         grid_size = 1
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_b", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
+//     block_size = min(1024, int(scan_in_array_offsets[length]))
+//     grid_size = (int(scan_in_array_offsets[length]) + block_size - 1)//block_size
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_b", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_c", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_d", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
 // out["awkward_ListArray_combinations_a", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_b", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_c", {dtype_specializations}] = None
+// out["awkward_ListArray_combinations_d", {dtype_specializations}] = None
 // END PYTHON
 
 enum class LISTARRAY_COMBINATIONS_ERRORS {
@@ -62,6 +56,32 @@ awkward_ListArray_combinations_a(
 template <typename T, typename C, typename U, typename V, typename W>
 __global__ void
 awkward_ListArray_combinations_b(
+  T** tocarry,
+  C* toindex,
+  U* fromindex,
+  int64_t n,
+  bool replacement,
+  const V* starts,
+  const W* stops,
+  int64_t length,
+  const int64_t* scan_in_array_offsets,
+  int64_t* scan_in_array_parents,
+  uint64_t invocation_index,
+  uint64_t* err_code) {
+  int64_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (tid >= length) return;
+
+  int64_t start = scan_in_array_offsets[tid];
+  int64_t stop  = scan_in_array_offsets[tid + 1];
+
+  for (int64_t i = start; i < stop; i++) {
+    scan_in_array_parents[i] = tid;
+  }
+}
+
+template <typename T, typename C, typename U, typename V, typename W>
+__global__ void
+awkward_ListArray_combinations_c(
     T** tocarry,
     C* toindex,
     U* fromindex,
@@ -90,7 +110,7 @@ awkward_ListArray_combinations_b(
 
 template <typename T, typename C, typename U, typename V, typename W>
 __global__ void
-awkward_ListArray_combinations_c(
+awkward_ListArray_combinations_d(
     T** tocarry,
     C* toindex,
     U* fromindex,
