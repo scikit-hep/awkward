@@ -73,7 +73,7 @@
     generated/ak.to_packed
     generated/ak.copy
 
- .. toctree::
+.. toctree::
     :caption: Materializing virtual arrays
 
     generated/ak.materialize

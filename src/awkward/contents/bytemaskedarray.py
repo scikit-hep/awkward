@@ -1195,7 +1195,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         )
 
     def _materialize(self) -> Self:
-        content = self._content._materialize()
+        content = self._content.materialize()
         mask = self._mask.materialize()
         return ByteMaskedArray(
             mask, content, valid_when=self._valid_when, parameters=self._parameters
