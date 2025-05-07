@@ -26,9 +26,9 @@ def materialize(
             high-level.
 
     Traverses the input array and materializes any virtual buffers.
-    If the input array is not one of #ak.Array, #ak.Record, #ak.contents.Content, or #ak.record.Record,
+    If the input array is not an #ak.Array or an #ak.contents.Content,
     it will just be cast to an #ak.Array.
-    The buffers of the returned array are no longer `VirtualArray` objects if there were any.
+    The buffers of the returned array are no longer `VirtualArray` objects even if there were any.
     They will become one of `numpy.ndarray`, `cupy.ndarray`, or `jax.numpy.ndarray` objects,
     depending on the array's backend.
     """
@@ -41,6 +41,8 @@ def materialize(
 
 def _impl(array, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, primitive_policy="error", string_policy="error")
+        layout = ctx.unwrap(
+            array, allow_record=False, primitive_policy="error", string_policy="error"
+        )
     out = layout.materialize()
     return ctx.wrap(out, highlevel=highlevel)
