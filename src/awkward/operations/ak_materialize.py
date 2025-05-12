@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 from __future__ import annotations
 
+import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 
@@ -40,9 +41,18 @@ def materialize(
 
 
 def _impl(array, highlevel, behavior, attrs):
+    if not isinstance(array, (ak.highlevel.Array, ak.contents.Content)):
+        raise TypeError(
+            f"Only an ak.Array (or low-level equivalent) should be passed into ak.materialize. Received {type(array)}"
+        )
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(
-            array, allow_record=False, primitive_policy="error", string_policy="error"
+            array,
+            allow_record=False,
+            primitive_policy="error",
+            string_policy="error",
+            use_from_iter=False,
         )
     out = layout.materialize()
     return ctx.wrap(out, highlevel=highlevel)
