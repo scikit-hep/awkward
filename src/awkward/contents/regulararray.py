@@ -268,7 +268,9 @@ class RegularArray(RegularMeta[Content], Content):
             self._length = _calculate_regulararray_length(
                 self._content, self._size, self._length, materialize=True
             )
-            assert is_integer(self._length)
+            assert is_integer(self._length), (
+                f"RegularArray length must be an integer for an array with concrete data, not {type(self._length)}"
+            )
         return self._length
 
     def __repr__(self):

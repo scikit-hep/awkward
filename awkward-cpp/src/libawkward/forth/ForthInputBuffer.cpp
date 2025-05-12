@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthInputBuffer.cpp", line)
 
 #include "awkward/forth/ForthInputBuffer.h"
+#include <cmath>
 
 namespace awkward {
   ForthInputBuffer::ForthInputBuffer(const std::shared_ptr<void> ptr,
@@ -192,9 +193,8 @@ namespace awkward {
     return result;
   }
 
-  uint64_t bits_infinity = 0x7ff0000000000000;
-  double positive_infinity = *(double*)&bits_infinity;
-  double negative_infinity = -positive_infinity;
+  double positive_infinity = std::numeric_limits<double>::infinity();
+  double negative_infinity = -std::numeric_limits<double>::infinity();
 
   double exponents[616] = {
     1e-307, 1e-306, 1e-305, 1e-304, 1e-303, 1e-302, 1e-301, 1e-300,
