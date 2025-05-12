@@ -7,6 +7,8 @@
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_a", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))(grid, block, (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, invocation_index, err_code))
 //     cupy.cumsum(scan_in_array_offsets, out = scan_in_array_offsets)
 //     totallen=int(scan_in_array_offsets[length])
+//     if totallen == 0:
+//         return  # Nothing to do if no combinations, skip the rest
 //     block_size = min(1024, totallen)
 //     grid_size = (totallen + block_size - 1)//block_size
 //     scan_in_array_parents = cupy.zeros(totallen, dtype=cupy.int64)
