@@ -58,7 +58,7 @@ awkward_ListArray_combinations_length_a(
 
   scan_out[thread_id] = combinationslen;
 }
-    
+
 template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_ListArray_combinations_length_b(
