@@ -90,26 +90,3 @@ awkward_ListArray_combinations_length_b(
     tooffsets[thread_id + 1] = scan_out[thread_id];
   }
 }
-// template <typename T, typename C, typename U, typename V>
-// __global__ void
-// awkward_ListArray_combinations_length_b(
-//     T* totallen,
-//     C* tooffsets,
-//     int64_t n,
-//     bool replacement,
-//     const U* starts,
-//     const V* stops,
-//     int64_t length,
-//     int64_t* scan_out,
-//     uint64_t invocation_index,
-//     uint64_t* err_code) {
-//   if (err_code[0] == NO_ERROR) {
-//     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-//     *totallen = length > 0 ? scan_out[length - 1] : 0;
-//     tooffsets[0] = 0;
-
-//     if (thread_id < length) {
-//       tooffsets[thread_id + 1] = scan_out[thread_id];
-//     }
-//   }
-// }
