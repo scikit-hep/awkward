@@ -162,11 +162,7 @@ class CupyKernel(BaseKernel):
             # Do we have a CuPy-owned array?
             if self._cupy.is_own_array(x):
                 assert self._cupy.is_c_contiguous(x)
-                return x
-            else:
-                raise AssertionError(
-                    f"Only CuPy buffers should be passed to CuPy Kernels, received {x} (ptr type={type(type_).__name__})"
-                )
+            return x
         else:
             return x
 
