@@ -634,6 +634,7 @@ def _reconstitute(
             None if form.is_tuple else form.fields,
             length,
             parameters=form._parameters,
+            backend=backend,
         )
 
     elif isinstance(form, ak.forms.UnionForm):
