@@ -263,7 +263,7 @@ def _reconstitute(
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:
             raise ValueError(f"EmptyForm node, but the expected length is {length}")
-        return ak.contents.EmptyArray()
+        return ak.contents.EmptyArray(backend=backend)
 
     elif isinstance(form, ak.forms.NumpyForm):
         dtype = ak.types.numpytype.primitive_to_dtype(form.primitive)
