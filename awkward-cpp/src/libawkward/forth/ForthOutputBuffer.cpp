@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthOutputBuffer.cpp", line)
 
 #include <cmath>
+#include <cstring>
 #include <sstream>
 
 #include "awkward/forth/ForthOutputBuffer.h"
@@ -14,10 +15,11 @@ namespace awkward {
   void byteswap16(int64_t num_items, T& value) {
     T* ptr = &value;
     while (num_items != 0) {
-      uint16_t integer = *reinterpret_cast<uint16_t*>(ptr);
+      uint16_t integer;
+      std::memcpy(&integer, ptr, sizeof(uint16_t));
       uint16_t output = ((integer >> 8) & 0x00ff) |
                         ((integer << 8) & 0xff00);
-      *ptr = *reinterpret_cast<T*>(&output);
+      std::memcpy(ptr, &output, sizeof(T));
       ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 2);
       num_items--;
     }
@@ -27,12 +29,13 @@ namespace awkward {
   void byteswap32(int64_t num_items, T& value) {
     T* ptr = &value;
     while (num_items != 0) {
-      uint32_t integer = *reinterpret_cast<uint32_t*>(ptr);
+      uint32_t integer;
+      std::memcpy(&integer, ptr, sizeof(uint32_t));
       uint32_t output = ((integer >> 24) & 0x000000ff) |
                         ((integer >>  8) & 0x0000ff00) |
                         ((integer <<  8) & 0x00ff0000) |
                         ((integer << 24) & 0xff000000);
-      *ptr = *reinterpret_cast<T*>(&output);
+      std::memcpy(ptr, &output, sizeof(T));
       ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 4);
       num_items--;
     }
@@ -42,7 +45,8 @@ namespace awkward {
   void byteswap64(int64_t num_items, T& value) {
     T* ptr = &value;
     while (num_items != 0) {
-      uint64_t integer = *reinterpret_cast<uint64_t*>(ptr);
+      uint64_t integer;
+      std::memcpy(&integer, ptr, sizeof(uint64_t));
       uint64_t output = ((integer >> 56) & 0x00000000000000ff) |
                         ((integer >> 40) & 0x000000000000ff00) |
                         ((integer >> 24) & 0x0000000000ff0000) |
@@ -51,7 +55,7 @@ namespace awkward {
                         ((integer << 24) & 0x0000ff0000000000) |
                         ((integer << 40) & 0x00ff000000000000) |
                         ((integer << 56) & 0xff00000000000000);
-      *ptr = *reinterpret_cast<T*>(&output);
+      std::memcpy(ptr, &output, sizeof(T));
       ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 8);
       num_items--;
     }
@@ -62,12 +66,13 @@ namespace awkward {
     T* ptr = &value;
     if (sizeof(ssize_t) == 4) {
       while (num_items != 0) {
-        uint32_t integer = *reinterpret_cast<uint32_t*>(ptr);
+        uint32_t integer;
+        std::memcpy(&integer, ptr, sizeof(uint32_t));
         uint32_t output = ((integer >> 24) & 0x000000ff) |
                           ((integer >>  8) & 0x0000ff00) |
                           ((integer <<  8) & 0x00ff0000) |
                           ((integer << 24) & 0xff000000);
-        *ptr = *reinterpret_cast<T*>(&output);
+        std::memcpy(ptr, &output, sizeof(T));
         ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 4);
         num_items--;
       }
@@ -83,7 +88,7 @@ namespace awkward {
                           ((integer << 24) & 0x0000ff0000000000) |
                           ((integer << 40) & 0x00ff000000000000) |
                           ((integer << 56) & 0xff00000000000000);
-        *ptr = *reinterpret_cast<T*>(&output);
+        std::memcpy(ptr, &output, sizeof(T));
         ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 8);
         num_items--;
       }
