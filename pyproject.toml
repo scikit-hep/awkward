@@ -1,8 +1,5 @@
 [build-system]
-requires = [
-    "hatchling>=1.10.0",
-    "hatch-fancy-pypi-readme"
-]
+requires = ["hatchling>=1.10.0", "hatch-fancy-pypi-readme"]
 build-backend = "hatchling.build"
 
 [project]
@@ -10,10 +7,8 @@ name = "awkward"
 version = "2.8.2"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = { text = "BSD-3-Clause" }
-requires-python = ">=3.9"
-authors = [
-    { name = "Jim Pivarski", email = "jpivarski@gmail.com" },
-]
+requires-python = ">=3.11"
+authors = [{ name = "Jim Pivarski", email = "jpivarski@gmail.com" }]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -42,14 +37,13 @@ classifiers = [
 dependencies = [
     "awkward_cpp==45",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
-    "numpy>=1.18.0",
+    # "numpy>=1.18.0",
+    "numpy @ git+https://github.com/seberg/numpy@try-0d-preservation-rebase",
     "packaging",
     "typing_extensions>=4.1.0; python_version < \"3.11\"",
-    "fsspec>=2022.11.0"
+    "fsspec>=2022.11.0",
 ]
-dynamic = [
-    "readme"
-]
+dynamic = ["readme"]
 
 [project.entry-points.numba_extensions]
 init = "awkward.numba:_register"
@@ -67,7 +61,7 @@ init = "awkward.numba:_register"
 packages = ["src/awkward"]
 artifacts = [
     "/src/awkward/_connect/header-only",
-    "/src/awkward/_connect/cuda/_kernel_signatures.py"
+    "/src/awkward/_connect/cuda/_kernel_signatures.py",
 ]
 
 [tool.hatch.build.targets.wheel.force-include]
@@ -88,13 +82,16 @@ include = [
     "/README.md",
     "/juliapkg.json",
     "/requirements-test-full.txt",
-    "/requirements-test-minimal.txt"
+    "/requirements-test-minimal.txt",
 ]
 artifacts = [
     "/tests-cuda-kernels",
     "/src/awkward/_connect/header-only",
-    "/src/awkward/_connect/cuda/_kernel_signatures.py"
+    "/src/awkward/_connect/cuda/_kernel_signatures.py",
 ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
 content-type = "text/markdown"
@@ -113,18 +110,8 @@ end-before = "<!-- readme-pypi-ignore-after -->"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-norecursedirs = [
-    "src",
-    "pybind11",
-    "rapidjson",
-    "studies",
-]
-addopts = [
-    "-ra",
-    "--showlocals",
-    "--strict-markers",
-    "--strict-config",
-]
+norecursedirs = ["src", "pybind11", "rapidjson", "studies"]
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
 xfail_strict = true
 filterwarnings = [
     "error",
@@ -139,17 +126,13 @@ log_cli_level = "info"
 [tool.pylint]
 py-version = "3.9"
 jobs = "0"
-ignore-paths = [
-    "src/awkward/_typeparser/generated_parser.py",
-]
+ignore-paths = ["src/awkward/_typeparser/generated_parser.py"]
 
 [tool.pylint.reports]
 output-format = "colorized"
 
 [tool.pylint.messages_control]
-enable = [
-    "useless-suppression",
-]
+enable = ["useless-suppression"]
 disable = [
     "abstract-method",
     "arguments-differ",
@@ -217,16 +200,14 @@ disable = [
     "unused-variable",
     "use-a-generator",
     "use-implicit-booleaness-not-len",
-    "used-before-assignment", # TODO
+    "used-before-assignment",          # TODO
     "wrong-import-order",
     "wrong-import-position",
 ]
 
 [tool.mypy]
 files = ["src/awkward/**/*.py"]
-plugins = [
-    "numpy.typing.mypy_plugin"
-]
+plugins = ["numpy.typing.mypy_plugin"]
 python_version = "3.11"
 ignore_errors = true
 ignore_missing_imports = true
@@ -248,9 +229,7 @@ ignore_errors = false
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = [
-    'awkward.types._awkward_datashape_parser'
-]
+module = ['awkward.types._awkward_datashape_parser']
 ignore_errors = true
 ignore_missing_imports = true
 
@@ -267,21 +246,21 @@ extend-exclude = [
 
 [tool.ruff.lint]
 extend-select = [
-    "B",           # flake8-bugbear
-    "I",           # isort
-    "C4",          # flake8-comprehensions
-    "ISC",         # flake8-implicit-str-concat
-    "G",           # flake8-logging-format
-    "PGH",         # pygrep-hooks
-    "PIE",         # flake8-pie
-    "PL",          # pylint
-    "RUF",         # Ruff-specific
-    "T20",         # flake8-print
-    "UP",          # pyupgrade
-    "YTT",         # flake8-2020
-    "EXE",         # flake8-executable
-    "NPY",         # NumPy specific rules
-    "TID251",      # flake8-tidy-imports
+    "B",      # flake8-bugbear
+    "I",      # isort
+    "C4",     # flake8-comprehensions
+    "ISC",    # flake8-implicit-str-concat
+    "G",      # flake8-logging-format
+    "PGH",    # pygrep-hooks
+    "PIE",    # flake8-pie
+    "PL",     # pylint
+    "RUF",    # Ruff-specific
+    "T20",    # flake8-print
+    "UP",     # pyupgrade
+    "YTT",    # flake8-2020
+    "EXE",    # flake8-executable
+    "NPY",    # NumPy specific rules
+    "TID251", # flake8-tidy-imports
 ]
 ignore = [
     "E501",    # Line too long

@@ -248,3 +248,18 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 💻: code, 📖: documentation, 🚇: infrastructure, 🚧: maintenance, ⚠: tests and feedback, 🤔: foundational ideas.
+
+
+---
+
+### Test NEP 57
+
+```shell
+uv venv ".venv/NEP57" --python=3.12
+source .venv/NEP57/bin/activate
+
+uv pip install -e .
+uv pip install -r requirements-test-full.txt
+
+uv run --active pytest tests
+```
