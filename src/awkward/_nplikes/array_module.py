@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import inspect
 import math
+import operator
 from functools import lru_cache
 
 from awkward._nplikes.numpy_like import (
@@ -376,11 +377,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             return result
 
     def shape_item_as_index(self, x1: ShapeItem) -> int:
-        # try to cast to int
-        try:
-            x1 = int(x1)
-        except Exception:
-            pass
+        x1 = operator.index(x1)
         if x1 is unknown_length:
             raise TypeError("array module nplikes do not support unknown lengths")
         elif isinstance(x1, int):

@@ -263,3 +263,10 @@ uv pip install -r requirements-test-full.txt
 
 uv run --active pytest tests
 ```
+
+Results in:
+```shell
+FAILED tests/test_0331_pandas_indexedarray.py::test - assert [[1], [2], [3]] == [1, 2, 3]
+FAILED tests/test_0331_pandas_indexedarray.py::test_broken - assert [[1], [1], [1...[2], [2], ...] == [1, 1, 1, 2, 2, 2, ...]
+======================================================================== 2 failed, 4106 passed, 69 skipped in 39.93s =========================================================================
+```
