@@ -10,6 +10,7 @@ T = TypeVar("T", bound=Meta)
 
 class UnmaskedMeta(Meta, Generic[T]):
     is_option = True
+    is_unmasked = True
     _content: T
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:

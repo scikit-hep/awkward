@@ -21,6 +21,7 @@ class Meta:
     is_record: ClassVar[bool] = False
     is_union: ClassVar[bool] = False
     is_leaf: ClassVar[bool] = False
+    is_unmasked: ClassVar[bool] = False
 
     _parameters: JSONMapping | None
 
