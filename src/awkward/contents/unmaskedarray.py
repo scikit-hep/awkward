@@ -123,6 +123,10 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
                 contents=[cls.simplified(x) for x in content.contents],
                 parameters=parameters_union(content._parameters, parameters),
             )
+        elif content.is_unmasked:
+            return content.copy(
+                parameters=parameters_union(content._parameters, parameters)
+            )
         elif content.is_indexed or content.is_option:
             return content.to_IndexedOptionArray64().copy(
                 parameters=parameters_union(content._parameters, parameters)
