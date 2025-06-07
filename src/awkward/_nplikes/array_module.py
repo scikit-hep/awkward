@@ -379,6 +379,8 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             raise TypeError("array module nplikes do not support unknown lengths")
         elif isinstance(x1, int):
             return x1
+        elif isinstance(x1, (np.int64, np.int32, np.uint64, np.uint32)):
+            return int(x1)
         else:
             raise TypeError(f"expected None or int type, received {x1}")
 
