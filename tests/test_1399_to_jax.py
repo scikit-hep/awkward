@@ -12,7 +12,7 @@ jax = pytest.importorskip("jax")
 ak.jax.register_and_check()
 
 
-def test_from_jax_1():
+def test_to_jax_1():
     ak_array_1d = ak.Array(np.arange(10))
     ak_array_2d = ak.Array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]])
 
@@ -27,7 +27,7 @@ def test_from_jax_1():
             assert jax_array_2d[i][j] == ak_array_2d[i][j]
 
 
-def test_from_jax_2():
+def test_to_jax_2():
     content0 = ak.Array(np.array([1, 2, 3], dtype=np.int64)).layout
     content1 = ak.contents.numpyarray.NumpyArray(
         np.array([1, 2, 3, 4, 5], dtype=np.int32)
