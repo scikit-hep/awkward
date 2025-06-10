@@ -17,6 +17,7 @@ from awkward._nplikes.numpy_like import (
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._regularize import is_integer_like
 from awkward._typing import TYPE_CHECKING, Any, DType, Final, Literal, TypeVar, cast
 
 if TYPE_CHECKING:
@@ -377,9 +378,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     def shape_item_as_index(self, x1: ShapeItem) -> int:
         if x1 is unknown_length:
             raise TypeError("array module nplikes do not support unknown lengths")
-        elif isinstance(x1, int):
-            return x1
-        elif isinstance(x1, (np.int64, np.int32, np.uint64, np.uint32)):
+        elif is_integer_like(x1):
             return int(x1)
         else:
             raise TypeError(f"expected None or int type, received {x1}")

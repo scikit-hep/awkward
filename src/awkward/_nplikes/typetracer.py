@@ -22,7 +22,7 @@ from awkward._nplikes.numpy_like import (
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._operators import NDArrayOperatorsMixin
-from awkward._regularize import is_integer, is_non_string_like_sequence
+from awkward._regularize import is_integer, is_integer_like, is_non_string_like_sequence
 from awkward._typing import (
     TYPE_CHECKING,
     Any,
@@ -1040,8 +1040,8 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     def shape_item_as_index(self, x1: ShapeItem) -> IndexType:
         if x1 is unknown_length:
             return TypeTracerArray._new(np.dtype(np.int64), shape=())
-        elif isinstance(x1, int):
-            return x1
+        elif is_integer_like(x1):
+            return int(x1)
         else:
             raise TypeError(f"expected unknown_length or int type, received {x1}")
 
