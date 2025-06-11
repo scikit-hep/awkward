@@ -78,7 +78,6 @@ cmake.version = ">=3.29"
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
-free-threaded-support = true
 test-requires = ["pytest>=6", "."]
 test-command = ["echo {project}:", "ls {project}", "echo {package}:", "ls {package}",
 """
@@ -91,7 +90,6 @@ pytest -p no:cacheprovider \
 """]
 skip = [
     "pp*win*",
-    "pp*-manylinux_i686",
 ]
 test-skip = [
     "*universal2:arm64",
@@ -99,6 +97,7 @@ test-skip = [
     "*musllinux*",
 ]
 build-verbosity = 1
+enable = ["pypy", "cpython-freethreading"]
 
 [tool.cibuildwheel.environment]
 PIP_ONLY_BINARY = "cmake,numpy"
