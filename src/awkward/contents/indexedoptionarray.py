@@ -1721,10 +1721,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             nplike = self._backend.nplike
             original_index = self._index.data
             is_none = original_index < 0
-            num_none = nplike.count_nonzero(is_none)
+            num_none = int(nplike.count_nonzero(is_none))
             new_index = nplike.empty(self._index.length, dtype=self._index.dtype)
             if isinstance(nplike, Jax):
-                num_none = num_none.item()
                 new_index = new_index.at[is_none].set(-1)
                 new_index = new_index.at[~is_none].set(
                     nplike.arange(
