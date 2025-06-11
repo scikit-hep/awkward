@@ -77,13 +77,26 @@ def evaluate(
 ):
     numexpr = _import_numexpr()
 
+    if parse_version(numexpr.__version__) >= parse_version("2.11.0"):
+        if not hasattr(numexpr.necompiler._numexpr_last, "l"):
+            numexpr.necompiler._numexpr_last.l = numexpr.utils.ContextDict()
+        if not hasattr(numexpr.necompiler._names_cache, "c"):
+            numexpr.necompiler._names_cache.c = numexpr.utils.CacheDict(256)
+        if not hasattr(numexpr.necompiler._numexpr_cache, "c"):
+            numexpr.necompiler._numexpr_cache.c = numexpr.utils.CacheDict(256)
+        _numexpr_last = numexpr.necompiler._numexpr_last.l
+        _names_cache = numexpr.necompiler._names_cache.c
+        _numexpr_cache = numexpr.necompiler._numexpr_cache.c
+    else:
+        _numexpr_last = numexpr.necompiler._numexpr_last
+        _names_cache = numexpr.necompiler._names_cache
+        _numexpr_cache = numexpr.necompiler._numexpr_cache
+
     context = numexpr.necompiler.getContext(kwargs)
     expr_key = (expression, tuple(sorted(context.items())))
-    if expr_key not in numexpr.necompiler._names_cache:
-        numexpr.necompiler._names_cache[expr_key] = numexpr.necompiler.getExprNames(
-            expression, context
-        )
-    names, ex_uses_vml = numexpr.necompiler._names_cache[expr_key]
+    if expr_key not in _names_cache:
+        _names_cache[expr_key] = numexpr.necompiler.getExprNames(expression, context)
+    names, ex_uses_vml = _names_cache[expr_key]
     arguments = getArguments(names, local_dict, global_dict)
 
     arrays = [ak.operations.to_layout(x, allow_unknown=True) for x in arguments]
@@ -141,11 +154,18 @@ evaluate.evaluate = evaluate
 def re_evaluate(local_dict=None):
     numexpr = _import_numexpr()
 
+    if parse_version(numexpr.__version__) >= parse_version("2.11.0"):
+        if not hasattr(numexpr.necompiler._numexpr_last, "l"):
+            numexpr.necompiler._numexpr_last.l = numexpr.utils.ContextDict()
+        _numexpr_last = numexpr.necompiler._numexpr_last.l
+    else:
+        _numexpr_last = numexpr.necompiler._numexpr_last
+
     try:
-        compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
+        compiled_ex = _numexpr_last["ex"]  # noqa: F841
     except KeyError as err:
         raise RuntimeError("not a previous evaluate() execution found") from err
-    names = numexpr.necompiler._numexpr_last["argnames"]
+    names = _numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
 
     arrays = [ak.operations.to_layout(x, allow_unknown=True) for x in arguments]
