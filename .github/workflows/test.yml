@@ -39,7 +39,7 @@ jobs:
           - ubuntu-latest
           - macos-13
         python-version:
-          - '3.13.3'
+          - '3.13'
           - '3.12'
           - '3.11'
           - '3.10'
@@ -89,9 +89,18 @@ jobs:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
+        if: runner.os != 'windows' or matrix.python-version != '3.13'
         uses: actions/setup-python@v5
         with:
           python-version: '${{ matrix.python-version }}'
+          architecture: '${{ matrix.python-architecture }}'
+          allow-prereleases: true
+
+      - name: 'Python 3.13.3 on Windows'
+        if: runner.os == 'windows' and matrix.python-version == '3.13'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.3'
           architecture: '${{ matrix.python-architecture }}'
           allow-prereleases: true
 
