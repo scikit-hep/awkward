@@ -89,7 +89,7 @@ jobs:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: Quansight-Labs/setup-python@v5
+        uses: actions/setup-python@v5
         with:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
