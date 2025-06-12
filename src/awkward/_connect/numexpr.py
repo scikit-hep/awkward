@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import sys
 import warnings
 from functools import reduce
@@ -15,10 +16,12 @@ from awkward._layout import wrap_layout
 from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 
 _has_checked_version = False
+_numexpr_version_ge_2_11_0 = False
 
 
 def _import_numexpr():
     global _has_checked_version
+    global _numexpr_version_ge_2_11_0
     try:
         import numexpr
     except ModuleNotFoundError as err:
@@ -33,14 +36,17 @@ or
         ) from err
     else:
         if not _has_checked_version:
-            if parse_version(numexpr.__version__) < parse_version("2.7.1"):
+            _numexpr_version = importlib.metadata.version("numexpr")
+            if parse_version(_numexpr_version) < parse_version("2.7.1"):
                 warnings.warn(
                     "Awkward Array is only known to work with numexpr 2.7.1 or later"
-                    f"(you have version {numexpr.__version__})",
+                    f"(you have version {_numexpr_version})",
                     RuntimeWarning,
                     stacklevel=1,
                 )
             _has_checked_version = True
+            if parse_version(_numexpr_version) >= parse_version("2.11.0"):
+                _numexpr_version_ge_2_11_0 = True
         return numexpr
 
 
@@ -77,7 +83,7 @@ def evaluate(
 ):
     numexpr = _import_numexpr()
 
-    if parse_version(numexpr.__version__) >= parse_version("2.11.0"):
+    if _numexpr_version_ge_2_11_0:
         if not hasattr(numexpr.necompiler._numexpr_last, "l"):
             numexpr.necompiler._numexpr_last.l = numexpr.utils.ContextDict()
         if not hasattr(numexpr.necompiler._names_cache, "c"):
@@ -154,7 +160,7 @@ evaluate.evaluate = evaluate
 def re_evaluate(local_dict=None):
     numexpr = _import_numexpr()
 
-    if parse_version(numexpr.__version__) >= parse_version("2.11.0"):
+    if _numexpr_version_ge_2_11_0:
         if not hasattr(numexpr.necompiler._numexpr_last, "l"):
             numexpr.necompiler._numexpr_last.l = numexpr.utils.ContextDict()
         _numexpr_last = numexpr.necompiler._numexpr_last.l
