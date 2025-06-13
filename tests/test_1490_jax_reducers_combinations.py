@@ -71,6 +71,7 @@ def test_reducer(func_ak, axis):
     )
 
 
+# TODO: Enable this when https://github.com/scikit-hep/awkward/issues/3541 is resolved.
 # @pytest.mark.parametrize("axis", [0, 1])
 # @pytest.mark.parametrize("func_ak", [ak.sort])
 # def test_sort(func_ak, axis):
