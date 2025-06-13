@@ -55,22 +55,25 @@ def test_reducer(func_ak, axis):
     value_vjp_jax, vjp_func_jax = jax.vjp(func_jax_with_axis, test_regulararray_jax)
 
     numpy.testing.assert_allclose(
-        ak.to_list(value_jvp), value_jvp_jax.tolist(), rtol=1e-9, atol=np.inf
+        ak.to_list(value_jvp), value_jvp_jax.tolist(), rtol=1e-9, atol=1e-9
     )
     numpy.testing.assert_allclose(
-        ak.to_list(value_vjp), value_vjp_jax.tolist(), rtol=1e-9, atol=np.inf
+        ak.to_list(value_vjp), value_vjp_jax.tolist(), rtol=1e-9, atol=1e-9
     )
     numpy.testing.assert_allclose(
-        ak.to_list(jvp_grad), jvp_grad_jax.tolist(), rtol=1e-9, atol=np.inf
+        ak.to_list(jvp_grad), jvp_grad_jax.tolist(), rtol=1e-9, atol=1e-9
     )
     numpy.testing.assert_allclose(
         ak.to_list(vjp_func(value_vjp)[0]),
         (vjp_func_jax(value_vjp_jax)[0]).tolist(),
         rtol=1e-9,
-        atol=np.inf,
+        atol=1e-9,
     )
 
 
+@pytest.mark.xfail(
+    reason="Sorting in the jax backend gives wrong JVP and VJP results. See issue #3541."
+)
 @pytest.mark.parametrize("axis", [0, 1])
 @pytest.mark.parametrize("func_ak", [ak.sort])
 def test_sort(func_ak, axis):
@@ -93,19 +96,19 @@ def test_sort(func_ak, axis):
     value_vjp_jax, vjp_func_jax = jax.vjp(func_jax_with_axis, test_regulararray_jax)
 
     numpy.testing.assert_allclose(
-        ak.to_list(value_jvp), value_jvp_jax.tolist(), rtol=1e-9, atol=np.inf
+        ak.to_list(value_jvp), value_jvp_jax.tolist(), rtol=1e-9, atol=1e-9
     )
     numpy.testing.assert_allclose(
-        ak.to_list(value_vjp), value_vjp_jax.tolist(), rtol=1e-9, atol=np.inf
+        ak.to_list(value_vjp), value_vjp_jax.tolist(), rtol=1e-9, atol=1e-9
     )
     numpy.testing.assert_allclose(
-        ak.to_list(jvp_grad), jvp_grad_jax.tolist(), rtol=1e-9, atol=np.inf
+        ak.to_list(jvp_grad), jvp_grad_jax.tolist(), rtol=1e-9, atol=1e-9
     )
     numpy.testing.assert_allclose(
         ak.to_list(vjp_func(value_vjp)[0]),
         (vjp_func_jax(value_vjp_jax)[0]).tolist(),
         rtol=1e-9,
-        atol=np.inf,
+        atol=1e-9,
     )
 
 
@@ -130,19 +133,19 @@ def test_ravel(func_ak):
     value_vjp_jax, vjp_func_jax = jax.vjp(func_jax_no_axis, test_regulararray_jax)
 
     numpy.testing.assert_allclose(
-        ak.to_list(value_jvp), value_jvp_jax.tolist(), rtol=1e-9, atol=np.inf
+        ak.to_list(value_jvp), value_jvp_jax.tolist(), rtol=1e-9, atol=1e-9
     )
     numpy.testing.assert_allclose(
-        ak.to_list(value_vjp), value_vjp_jax.tolist(), rtol=1e-9, atol=np.inf
+        ak.to_list(value_vjp), value_vjp_jax.tolist(), rtol=1e-9, atol=1e-9
     )
     numpy.testing.assert_allclose(
-        ak.to_list(jvp_grad), jvp_grad_jax.tolist(), rtol=1e-9, atol=np.inf
+        ak.to_list(jvp_grad), jvp_grad_jax.tolist(), rtol=1e-9, atol=1e-9
     )
     numpy.testing.assert_allclose(
         ak.to_list(vjp_func(value_vjp)[0]),
         (vjp_func_jax(value_vjp_jax)[0]).tolist(),
         rtol=1e-9,
-        atol=np.inf,
+        atol=1e-9,
     )
 
 
@@ -176,7 +179,7 @@ def test_bool_returns(func_ak, axis):
         ak.to_list(vjp_func(value_vjp)[0]),
         (vjp_func_jax(value_vjp_jax)[0]).tolist(),
         rtol=1e-9,
-        atol=np.inf,
+        atol=1e-9,
     )
 
 
