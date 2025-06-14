@@ -110,7 +110,7 @@ class JaxKernel(BaseKernel):
                     jax_module = ak.jax.import_jax()
                     # general message for any invalid JAX input type
                     msg = f"Encountered {x} as an (invalid) input to the '{self._key[0]}' Awkward C++ kernel."
-                    # message specification for autodiff (i.e. when encountaring a JVPTracer)
+                    # message specification for autodiff (i.e. when encountering a JVPTracer)
                     if isinstance(x, jax_module._src.interpreters.ad.JVPTracer):
                         msg += " This kernel is not differentiable by the JAX backend."
                     raise ValueError(msg)
