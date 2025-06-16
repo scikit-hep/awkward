@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 import google_benchmark
 from util import Flat, Jagged, benchmark
 
@@ -35,6 +37,8 @@ def _general_reducer_benchmark(state, **kwargs):
 
     # run measurement
     while state:
+        if reducer.__name__ == "all":
+            time.sleep(0.1)
         reducer(ak_array, axis=axis)
 
     # track how many elements per second are processed
