@@ -87,11 +87,16 @@ jobs:
         run: |
           cd benchmarks/
           ./run_action.sh
-          echo "comparison=$(cat $(echo $BASE_OUTPUT_DIR)/comparison.md)" >> $GITHUB_OUTPUT
+          COMPARISON=$(cat $(echo $BASE_OUTPUT_DIR)/comparison.md)
+          {
+            echo 'comparison<<EOF'
+            echo "${COMPARISON}"
+            echo EOF
+          } >> $GITHUB_OUTPUT
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.base.ref }} # usually: main
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # feature branch
-          BASE_OUTPUT_DIR: results_PR${{ inputs.pr-number }}
+          BASE_OUTPUT_DIR: results
         continue-on-error: true # failed benchmarking shouldn't stop the rest of the steps
 
       - name: Comment on PR
@@ -107,4 +112,6 @@ jobs:
             })
 
       - name: Cleanup Benchmark Outputs
-        run: rm -r ${{ steps.benchmark_and_compare.env.BASE_OUTPUT_DIR }}
+        run: rm -r $BASE_OUTPUT_DIR
+        env:
+          BASE_OUTPUT_DIR: results
