@@ -89,9 +89,9 @@ jobs:
           ./run_action.sh
           COMPARISON=$(cat $(echo $BASE_OUTPUT_DIR)/comparison.md)
           {
-            echo 'comparison<<EOF'
+            echo "comparison<<EOF"
             echo "${COMPARISON}"
-            echo EOF
+            echo "EOF"
           } >> $GITHUB_OUTPUT
           cd ..
         env:
@@ -109,8 +109,10 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `${{ steps.benchmark_and_compare.outputs.comparison }}`
+              body: process.env.COMPARISON
             })
+        env:
+          COMPARISON: ${{ steps.benchmark_and_compare.outputs.comparison }}
 
       - name: Cleanup Benchmark Outputs
         run: rm -r benchmarks/$BASE_OUTPUT_DIR
