@@ -81,28 +81,15 @@ jobs:
       - name: Print versions
         run: python -m pip list
 
-      - name: Get PR target branch
-        id: get_target_branch
-        uses: actions/github-script@v7
-        with:
-          result-encoding: string
-          script: |
-            const { data: pullRequest } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: "awkward",
-              pull_number: "${{ inputs.pr-number }}",
-            });
-            return pullRequest.base.ref;
-
       - name: Run Benchmark and Comparisons
         id: benchmark_and_compare
         shell: bash
         run: |
           cd benchmarks/
           ./run_action.sh
-          echo "comparison='$(cat BASE_OUTPUT_DIR)/comparison.md'" >> $GITHUB_OUTPUT
+          echo "comparison='$(cat $BASE_OUTPUT_DIR)/comparison.md'" >> $GITHUB_OUTPUT
         env:
-          TARGET_BRANCH: ${{ steps.get_target_branch.outputs.result }} # usually: main
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }} # usually: main
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # feature branch
           BASE_OUTPUT_DIR: results_PR${{ inputs.pr-number }}
           continue-on-error: true # failed benchmarking shouldn't stop the rest of the steps
