@@ -24,7 +24,7 @@
    * [Awkward Array in Tiled](https://indico.cern.ch/event/1311780/) on October 25, 2023: integration with the Tiled database.
    * [Awkward Array in Julia](https://indico.cern.ch/event/1292759/contributions/5613061/) on November 6, 2023: AwkwardArray.jl.
    * [Awkward family (poster)](https://github.com/jpivarski-talks/2024-03-11-acat2024-awkward-family-poster/blob/main/pivarski-acat2024-poster.pdf) on March 11, 2024: the ecosystem built around Awkward Array.
-   * [MODE workshop talk](https://indi.to/8WZTS) on June 11, 2025: differentiable Computation with Awkward Array and JAX.
+   * [MODE workshop talk](https://indi.to/8WZTS) on June 11, 2025: differentiable computation with Awkward Array and JAX.
 
 ## Tutorials
 
