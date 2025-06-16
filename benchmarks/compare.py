@@ -19,7 +19,7 @@ def format_benchmark_name(name: str) -> str:
     try:
         parts = name.split("/")
         base = parts[0]
-        params = {k: v for k, v in (part.split("=", 1) for part in parts[1:])}
+        params = dict(part.split("=", 1) for part in parts[1:])
 
         array = params.pop("array", "??")
         length = params.pop("length", "??")
@@ -62,7 +62,7 @@ def compare_benchmarks(
 
     found_diffs = False
 
-    for name in bm1:
+    for name in bm1:  # noqa: PLC0206
         if name in bm2:
             b1 = bm1[name]
             b2 = bm2[name]
@@ -106,7 +106,7 @@ def compare_benchmarks(
                 output_lines.append("\n</details>\n")
 
     if not found_diffs:
-        print(
+        print(  # noqa: T201
             f"No significant differences (over {threshold * 100:.1f}%) in cpu_time found."
         )
         return
@@ -115,18 +115,18 @@ def compare_benchmarks(
     markdown_output = "\n".join(header + output_lines)
 
     # Print to terminal
-    print(markdown_output)
+    print(markdown_output)  # noqa: T201
 
     # Save to file
     with open(output_file, "w") as f:
         f.write(markdown_output + "\n")
 
-    print(f"\n✅ Detailed Markdown saved to `{output_file}`")
+    print(f"\n✅ Detailed Markdown saved to `{output_file}`")  # noqa: T201
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print(f"Usage: python {os.path.basename(__file__)} file1.json file2.json")
+        print(f"Usage: python {os.path.basename(__file__)} file1.json file2.json")  # noqa: T201
         sys.exit(1)
 
     file1 = sys.argv[1]

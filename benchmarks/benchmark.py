@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import google_benchmark
-import misc_benchmark  # noqa
 
 # explicit imports to register all benchmarks
-import reducer_benchmark  # noqa
+import misc_benchmark  # noqa: F401
+import reducer_benchmark  # noqa: F401
 
 if __name__ == "__main__":
     google_benchmark.main()

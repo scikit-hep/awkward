@@ -4,7 +4,7 @@ import functools
 import math
 
 import google_benchmark
-import numpy as np
+import numpy as np  # noqa: TID251
 
 import awkward as ak
 
