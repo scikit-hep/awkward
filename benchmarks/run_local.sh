@@ -2,7 +2,8 @@
 
 action() {
     # setup output dir
-    local current_git_hash=$(git rev-parse --verify HEAD)
+    local current_git_hash
+    current_git_hash=$(git rev-parse --verify HEAD)
     local results_dir=results/${current_git_hash}
 
     # create
