@@ -1,0 +1,123 @@
+name: Benchmarks
+
+on:
+  pull_request:
+    paths-ignore:
+      - README.md
+      - CONTRIBUTING.md
+      - CITATION.cff
+      - LICENSE
+      - .readthedocs.yml
+      - docs-img/**
+      - docs/**
+      - awkward-cpp/docs/**
+      - studies/**
+
+  workflow_dispatch:
+
+concurrency:
+  group: "benchmark-${{ github.head_ref || github.run_id }}"
+  cancel-in-progress: true
+
+jobs:
+  run-tests:
+    name: Run Benchmarks
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on:
+          - ubuntu-latest
+        python-version:
+          - "3.13"
+        python-architecture:
+          - x64
+
+    runs-on: ${{ matrix.runs-on }}
+
+    env:
+      PIP_ONLY_BINARY: numpy
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: "Python ${{ matrix.python-version }}"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python-version }}"
+          architecture: "${{ matrix.python-architecture }}"
+          allow-prereleases: true
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v4
+        with:
+          path: awkward-cpp/dist
+          key: ${{ github.job }}-${{ matrix.runs-on }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w awkward-cpp
+
+      - name: Find built wheel
+        uses: tj-actions/glob@v22
+        id: find-wheel
+        with:
+          files: |
+            awkward-cpp/dist/*.whl
+
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
+
+      - name: Setup Benchmark Env
+        run: python -m pip install -r benchmarks/requirements-benchmark.txt
+
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Get PR target branch
+        id: get_target_branch
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: "awkward",
+              pull_number: "${{ inputs.pr-number }}",
+            });
+            return pullRequest.base.ref;
+
+      - name: Run Benchmark and Comparisons
+        id: benchmark_and_compare
+        shell: bash
+        run: |
+          cd benchmarks/
+          ./run_action.sh
+          echo "comparison='$(cat BASE_OUTPUT_DIR)/comparison.md'" >> $GITHUB_OUTPUT
+        env:
+          TARGET_BRANCH: ${{ steps.get_target_branch.outputs.result }} # usually: main
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # feature branch
+          BASE_OUTPUT_DIR: results_PR${{ inputs.pr-number }}
+          continue-on-error: true # failed benchmarking shouldn't stop the rest of the steps
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        if: ${{ hashFiles(format('{0}/comparison.md', ${{ steps.benchmark_and_compare.env.BASE_OUTPUT_DIR }})) != '' }} # if there's no comparison.md, we won't post anything
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${{ steps.benchmark_and_compare.outputs.comparison }}`
+            })
+
+      - name: Cleanup Benchmark Outputs
+        run: rm -r ${{ steps.benchmark_and_compare.env.BASE_OUTPUT_DIR }}
