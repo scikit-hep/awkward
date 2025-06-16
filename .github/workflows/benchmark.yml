@@ -87,12 +87,12 @@ jobs:
         run: |
           cd benchmarks/
           ./run_action.sh
-          echo "comparison='$(cat $BASE_OUTPUT_DIR)/comparison.md'" >> $GITHUB_OUTPUT
+          echo "comparison=$(cat $(echo $BASE_OUTPUT_DIR)/comparison.md)" >> $GITHUB_OUTPUT
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.base.ref }} # usually: main
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # feature branch
           BASE_OUTPUT_DIR: results_PR${{ inputs.pr-number }}
-          continue-on-error: true # failed benchmarking shouldn't stop the rest of the steps
+        continue-on-error: true # failed benchmarking shouldn't stop the rest of the steps
 
       - name: Comment on PR
         uses: actions/github-script@v7
