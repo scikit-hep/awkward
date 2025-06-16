@@ -1,7 +1,9 @@
-import awkward as ak
-import google_benchmark
+from __future__ import annotations
 
-from util import benchmark, Jagged, Flat
+import google_benchmark
+from util import Flat, Jagged, benchmark
+
+import awkward as ak
 
 
 def _prepare_fun_benchmark(fun):

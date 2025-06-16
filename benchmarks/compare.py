@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import json
-import sys
 import os
 import pathlib
+import sys
 
 
 def load_json(filepath):
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         return json.load(f)
 
 
@@ -32,7 +34,7 @@ def format_benchmark_name(name: str) -> str:
         pretty_name = f"{base}({array}<{length},{dtype_short}>"
 
         # any extra parameters to the function, e.g. `axis=0`
-        for k,v in params.items():
+        for k, v in params.items():
             pretty_name += f", {k}={v}"
 
         pretty_name += ")"
@@ -96,7 +98,7 @@ def compare_benchmarks(
                     f"| `cpu_time` ({time_unit}) | {cpu1:.6e} | {cpu2:.6e} |",
                     f"| `real_time` ({time_unit}) | {b1['real_time']:.6e} | {b2['real_time']:.6e} |",
                 ]
-                eps = "elements_per_second" # potential extra info
+                eps = "elements_per_second"  # potential extra info
                 if eps in b1 and eps in b2:
                     table += [f"| `elements/s` (Hz) | {b1[eps]:.2e} | {b2[eps]:.2e} |"]
 
@@ -104,7 +106,9 @@ def compare_benchmarks(
                 output_lines.append("\n</details>\n")
 
     if not found_diffs:
-        print(f"No significant differences (over {threshold * 100:.1f}%) in cpu_time found.")
+        print(
+            f"No significant differences (over {threshold * 100:.1f}%) in cpu_time found."
+        )
         return
 
     header = ["## Benchmarks"]

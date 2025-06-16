@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 import functools
 import math
-import awkward as ak
-import numpy as np
+
 import google_benchmark
+import numpy as np
+
+import awkward as ak
 
 
 # reproducible rng
@@ -25,9 +29,11 @@ def benchmark(*args):
 
 
 def _generate_counts(sum_upto: int, how_many: int) -> np.ndarray:
-    counts = rng().multinomial(
-        sum_upto, rng().dirichlet(np.ones(how_many) * 0.3)
-    ).astype("int")
+    counts = (
+        rng()
+        .multinomial(sum_upto, rng().dirichlet(np.ones(how_many) * 0.3))
+        .astype("int")
+    )
     assert np.sum(counts) == sum_upto
     return counts
 
