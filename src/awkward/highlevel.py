@@ -2435,7 +2435,10 @@ class Record(NDArrayOperatorsMixin):
         sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
 
         n_cols = max(
-            len(line) for line in itertools.chain(header_lines, sorted_rows, type_lines)
+            len(line)
+            for line in itertools.chain(
+                header_lines, sorted_rows, type_lines[0].splitlines()
+            )
         )
         body_lines = header_lines
         body_lines.append("-" * n_cols)
