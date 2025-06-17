@@ -5,6 +5,4 @@ numba>=0.60
 numba-cuda
 pyarrow
 pytest>=6
-pytest-cov
-pytest-xdist
 uproot>=5
