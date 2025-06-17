@@ -179,8 +179,8 @@ jobs:
     steps:
       - name: Clean the workspace and mamba
         run: |
-          rm -rf * .[!.]*
-          rm -rf ~/micromamba*
+          rm -rf * .[!.]* || echo "Nothing to clean"
+          rm -rf ~/micromamba* || echo "Nothing to clean"
 
       - uses: actions/checkout@v4
         with:
@@ -193,7 +193,6 @@ jobs:
           init-shell: bash
           create-args: >-
             python=3.13
-            cudatoolkit
 
       - name: Generate build files
         run: |
