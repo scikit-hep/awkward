@@ -232,10 +232,10 @@ jobs:
         run: python -m pip list
 
       - name: Test CUDA kernels
-        run: python -m pytest -vv -rs awkward-cpp/tests-cuda-kernels
+        run: python -m pytest -vv -rs tests-cuda-kernels
 
       - name: Test CUDA kernels with explicitly defined values
-        run: python -m pytest -vv -rs awkward-cpp/tests-cuda-kernels-explicit
+        run: python -m pytest -vv -rs tests-cuda-kernels-explicit
 
       - name: Test CUDA non-kernel (Python)
         run: >-
