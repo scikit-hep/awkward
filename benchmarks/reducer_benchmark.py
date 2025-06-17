@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import time
-
 import google_benchmark
 from util import Flat, Jagged, benchmark
 
