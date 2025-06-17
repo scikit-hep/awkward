@@ -55,3 +55,24 @@ def Jagged(length, dtype):
 def Flat(length, dtype):
     """creates a flat array"""
     return ak.Array(rng().random(length, dtype))
+
+
+def format_benchmark_name(params: dict) -> str:
+    base = "ak." + params.pop("op_name", "??")
+    array = params.pop("array", "??")
+    length = params.pop("length", "??")
+    dtype_short = (
+        params.pop("dtype", "??")
+        .replace("float", "f")
+        .replace("int", "i")
+        .replace("complex", "c")
+    )
+
+    pretty_name = f"{base}({array}<{dtype_short}[{length}]>"
+
+    # any extra parameters to the function, e.g. `axis=0`
+    for k, v in params.items():
+        pretty_name += f", {k}={v}"
+
+    pretty_name += ")"
+    return pretty_name

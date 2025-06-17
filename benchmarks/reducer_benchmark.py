@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import google_benchmark
-from util import Flat, Jagged, benchmark
+from util import Jagged, benchmark, format_benchmark_name
 
 import awkward as ak
 
@@ -9,14 +9,22 @@ import awkward as ak
 def _prepare_reducer_benchmark(reducer):
     return [
         {
-            "name": f"ak.{reducer.__name__}/array={mkarr.__name__}/{length=}/{dtype=}/{axis=}",
+            "name": format_benchmark_name(
+                {
+                    "op_name": reducer.__name__,
+                    "array": mkarr.__name__,
+                    "length": length,
+                    "dtype": dtype,
+                    "axis": axis,
+                }
+            ),
             "mkarr": mkarr,
             "length": length,
             "dtype": dtype,
             "reducer": reducer,
             "axis": axis,
         }
-        for mkarr in (Jagged, Flat)
+        for mkarr in [Jagged]
         for length in [1 << i for i in (12, 16, 20)]
         for dtype in ["float64"]
         for axis in ([None, 0, 1] if mkarr is Jagged else [None])

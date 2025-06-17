@@ -15,34 +15,6 @@ def relative_difference(val1, val2):
     return abs(val1 - val2) / min(val1, val2)
 
 
-def format_benchmark_name(name: str) -> str:
-    try:
-        parts = name.split("/")
-        base = parts[0]
-        params = dict(part.split("=", 1) for part in parts[1:])
-
-        array = params.pop("array", "??")
-        length = params.pop("length", "??")
-        dtype = params.pop("dtype", "").replace("'", "")
-        dtype_short = {
-            "float64": "f64",
-            "float32": "f32",
-            "int64": "i64",
-            "int32": "i32",
-        }.get(dtype, dtype)
-
-        pretty_name = f"{base}({array}<{length},{dtype_short}>"
-
-        # any extra parameters to the function, e.g. `axis=0`
-        for k, v in params.items():
-            pretty_name += f", {k}={v}"
-
-        pretty_name += ")"
-        return pretty_name
-    except Exception:
-        return name  # fallback
-
-
 def compare_benchmarks(
     file1_path,
     file2_path,
@@ -70,7 +42,7 @@ def compare_benchmarks(
 
             if rel_diff > threshold:
                 found_diffs = True
-                display_name = format_benchmark_name(name)
+                display_name = name
 
                 direction = "🟢 **Improvement**" if cpu2 < cpu1 else "🔴 **Regression**"
                 diff_line = f"**Relative CPU Time Difference:** `{rel_diff * 100:.1f}%` — {direction}"
@@ -146,4 +118,6 @@ if __name__ == "__main__":
         pathlib.Path(os.getenv("BASE_OUTPUT_DIR", "results"))
         / pathlib.Path("comparison.md")
     )
-    compare_benchmarks(file1, file2, output_file)
+    compare_benchmarks(
+        file1, file2, output_file, threshold=0.1
+    )  # increase threshold if it's too noisy

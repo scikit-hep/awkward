@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import google_benchmark
-from util import Flat, Jagged, benchmark
+from util import Jagged, benchmark, format_benchmark_name
 
 import awkward as ak
 
@@ -9,13 +9,20 @@ import awkward as ak
 def _prepare_fun_benchmark(fun):
     return [
         {
-            "name": f"ak.{fun.__name__}/array={mkarr.__name__}/{length=}/{dtype=}",
+            "name": format_benchmark_name(
+                {
+                    "op_name": fun.__name__,
+                    "array": mkarr.__name__,
+                    "length": length,
+                    "dtype": dtype,
+                }
+            ),
             "mkarr": mkarr,
             "length": length,
             "dtype": dtype,
             "fun": fun,
         }
-        for mkarr in (Jagged, Flat)
+        for mkarr in [Jagged]
         for length in [1 << i for i in (12, 16, 20)]
         for dtype in ["float64"]
     ]
@@ -29,6 +36,10 @@ def _general_fun_benchmark(state, **kwargs):
 
     # create singely jagged awkward array
     ak_array = mkarr(length, dtype)
+
+    # for ak.imag/real we need to add imaginary component
+    if fun in (ak.imag, ak.real):
+        ak_array = ak_array + 1j * ak_array
 
     # run measurement
     while state:
