@@ -37,8 +37,6 @@ def _general_reducer_benchmark(state, **kwargs):
 
     # run measurement
     while state:
-        if reducer.__name__ == "all" and axis is None:
-            time.sleep(0.1)
         reducer(ak_array, axis=axis)
 
     # track how many elements per second are processed

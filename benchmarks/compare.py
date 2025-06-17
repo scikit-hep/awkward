@@ -55,9 +55,6 @@ def compare_benchmarks(
     bm1 = {b["name"]: b for b in data1["benchmarks"]}
     bm2 = {b["name"]: b for b in data2["benchmarks"]}
 
-    file1_short = os.path.basename(file1_path)
-    file2_short = os.path.basename(file2_path)
-
     output_lines = []
 
     found_diffs = False
@@ -86,7 +83,13 @@ def compare_benchmarks(
                     "<details><summary>Show full comparison</summary>\n\n"
                 )
 
-                headers = ["Metric", f"{file1_short}", f"{file2_short}"]
+                def _parse_branch_sha(file_path):
+                    assert file_path.endswith(".json")
+                    file_path = file_path.replace(".json", "")
+                    branch, sha = file_path.rsplit("__", 1)
+                    return f"branch: {branch} (sha: {sha})"
+
+                headers = ["Metric", _parse_branch_sha(file1_path), _parse_branch_sha(file2_path)]
                 time_unit = b1.get("time_unit", "")
                 assert time_unit == b2.get("time_unit", ""), (
                     "Can't compare difference units"
