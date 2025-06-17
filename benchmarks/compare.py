@@ -89,7 +89,11 @@ def compare_benchmarks(
                     branch, sha = file_path.rsplit("__", 1)
                     return f"branch: {branch} (sha: {sha})"
 
-                headers = ["Metric", _parse_branch_sha(file1_path), _parse_branch_sha(file2_path)]
+                headers = [
+                    "Metric",
+                    _parse_branch_sha(file1_path),
+                    _parse_branch_sha(file2_path),
+                ]
                 time_unit = b1.get("time_unit", "")
                 assert time_unit == b2.get("time_unit", ""), (
                     "Can't compare difference units"
