@@ -85,9 +85,11 @@ def compare_benchmarks(
 
                 def _parse_branch_sha(file_path):
                     assert file_path.endswith(".json")
-                    file_path = file_path.replace(".json", "") # remove file ending
-                    file_path = file_path.replace(os.getenv("BASE_OUTPUT_DIR", "results") + "/", "", 1) # remove base dir
-                    branch, sha = file_path.rsplit("__", 1) # get branch & SHA
+                    file_path = file_path.replace(".json", "")  # remove file ending
+                    file_path = file_path.replace(
+                        os.getenv("BASE_OUTPUT_DIR", "results") + "/", "", 1
+                    )  # remove base dir
+                    branch, sha = file_path.rsplit("__", 1)  # get branch & SHA
                     return f"branch: `{branch}` (sha: {sha})"
 
                 headers = [
