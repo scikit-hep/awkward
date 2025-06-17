@@ -1,0 +1,10 @@
+cudf-cu12
+cupy-cuda12x
+fsspec>=2022.11.0
+numba>=0.60
+numba-cuda
+pyarrow
+pytest>=6
+pytest-cov
+pytest-xdist
+uproot>=5
