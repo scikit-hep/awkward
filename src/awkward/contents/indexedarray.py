@@ -58,7 +58,7 @@ class IndexedArray(IndexedMeta[Content], Content):
     IndexedArray is a general-purpose tool for *lazily* changing the order of
     and/or duplicating some `content` with a
     [np.take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
-    over the integer buffer `index.
+    over the integer buffer `index`.
 
     It has many uses:
 

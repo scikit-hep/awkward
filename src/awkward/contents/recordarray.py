@@ -379,7 +379,9 @@ class RecordArray(RecordMeta[Content], Content):
             self._length = _calculate_recordarray_length(
                 self._contents, None, self._backend
             )
-            assert is_integer(self._length)
+            assert is_integer(self._length), (
+                f"RecordArray length must be an integer for an array with concrete data, not {type(self._length)}"
+            )
         return self._length
 
     def __repr__(self):
@@ -1111,7 +1113,15 @@ class RecordArray(RecordMeta[Content], Content):
                 pyarrow.field(
                     self.index_to_field(i),
                     values[i].type,
-                    x._arrow_needs_option_type(),
+                    nullable=(
+                        mask_node is not None and mask_node._arrow_needs_option_type()
+                    )
+                    or x._arrow_needs_option_type(),
+                    metadata={
+                        b"option_type": b"True"
+                        if x._arrow_needs_option_type()
+                        else b"False",
+                    },
                 )
                 for i, x in enumerate(self._contents)
             ]
@@ -1309,7 +1319,7 @@ class RecordArray(RecordMeta[Content], Content):
         return RecordArray(
             contents,
             self._fields,
-            length=self.length,
+            length=self._length,
             parameters=self._parameters,
             backend=backend,
         )

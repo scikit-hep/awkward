@@ -75,7 +75,9 @@ def _impl(
     length = None
     for name, array in arrays.items():
         layouts[name] = ak.operations.ak_to_layout._impl(
-            ak.operations.materialize(array),
+            ak.operations.materialize(array)
+            if isinstance(array, (ak.highlevel.Array, ak.contents.Content))
+            else array,
             allow_record=False,
             allow_unknown=False,
             none_policy="error",

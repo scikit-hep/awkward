@@ -123,6 +123,10 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
                 contents=[cls.simplified(x) for x in content.contents],
                 parameters=parameters_union(content._parameters, parameters),
             )
+        elif content.is_unmasked:
+            return content.copy(
+                parameters=parameters_union(content._parameters, parameters)
+            )
         elif content.is_indexed or content.is_option:
             return content.to_IndexedOptionArray64().copy(
                 parameters=parameters_union(content._parameters, parameters)
@@ -418,9 +422,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
 
         if isinstance(out, ak.contents.RegularArray):
             tmp = ak.contents.UnmaskedArray.simplified(out._content, parameters=None)
-            return ak.contents.RegularArray(
-                tmp, out._size, out._length, parameters=None
-            )
+            return ak.contents.RegularArray(tmp, out.size, out.length, parameters=None)
 
         else:
             return out
@@ -436,7 +438,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
             )
 
             return ak.contents.RegularArray(
-                tmp, out._size, out._length, parameters=self._parameters
+                tmp, out.size, out.length, parameters=self._parameters
             )
 
         else:

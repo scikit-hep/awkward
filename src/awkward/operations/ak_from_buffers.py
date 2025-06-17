@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from functools import partial
+from functools import lru_cache, partial
 
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
@@ -198,18 +198,25 @@ def _from_buffer(
     elif callable(buffer):
         # This is the case where we automatically create VirtualArrays
         # We use recursion here to pass down the from_buffer and byteorder transformations to the generator
+        assert callable(shape_generator), "shape_generator must be callable"
+        cached_shape_generator = lru_cache(maxsize=1)(shape_generator)
+
         def generator():
-            (length,) = shape_generator()
+            (length,) = cached_shape_generator()
             return _from_buffer(
                 nplike, buffer(), dtype, length, byteorder, field_path, None
             )
+
+        # also store a ref to the original/raw buffer generator
+        # this allows us to access it later again
+        generator.__awkward_raw_generator__ = buffer
 
         return VirtualArray(
             nplike=nplike,
             shape=(count,),
             dtype=dtype,
             generator=generator,
-            shape_generator=shape_generator,
+            shape_generator=cached_shape_generator,
         )
     # Unknown-length information implies that we didn't load shape-buffers (offsets, etc)
     # for the parent of this node. Thus, this node and its children *must* only
@@ -256,7 +263,7 @@ def _reconstitute(
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:
             raise ValueError(f"EmptyForm node, but the expected length is {length}")
-        return ak.contents.EmptyArray()
+        return ak.contents.EmptyArray(backend=backend)
 
     elif isinstance(form, ak.forms.NumpyForm):
         dtype = ak.types.numpytype.primitive_to_dtype(form.primitive)
@@ -627,6 +634,7 @@ def _reconstitute(
             None if form.is_tuple else form.fields,
             length,
             parameters=form._parameters,
+            backend=backend,
         )
 
     elif isinstance(form, ak.forms.UnionForm):
