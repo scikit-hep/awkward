@@ -20,44 +20,48 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  run-tests:
+  run-benchmarks:
     name: Run Benchmarks
-    strategy:
-      fail-fast: false
-      matrix:
-        runs-on:
-          - ubuntu-latest
-        python-version:
-          - "3.13"
-        python-architecture:
-          - x64
 
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: self-hosted
 
     env:
       PIP_ONLY_BINARY: numpy
 
+    # Required for miniconda to activate conda
+    defaults:
+      run:
+        shell: bash -l {0}
+
     steps:
+      - name: Clean the workspace and mamba
+        run: |
+          rm -rf * .[!.]* || echo "Nothing to clean"
+          rm -rf ~/micromamba* || echo "Nothing to clean"
+
       - uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: "Python ${{ matrix.python-version }}"
-        uses: actions/setup-python@v5
+      - name: Get micromamba
+        uses: mamba-org/setup-micromamba@v2
         with:
-          python-version: "${{ matrix.python-version }}"
-          architecture: "${{ matrix.python-architecture }}"
-          allow-prereleases: true
+          environment-name: test-env
+          init-shell: bash
+          create-args: >-
+            python=3.13
 
       - name: Generate build files
-        run: pipx run nox -s prepare -- --headers --signatures --tests
+        run: |
+          pip install pipx
+          pipx run nox -s prepare -- --headers --signatures --tests
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
         uses: actions/cache@v4
         with:
           path: awkward-cpp/dist
-          key: ${{ github.job }}-${{ matrix.runs-on }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -72,6 +76,10 @@ jobs:
           files: |
             awkward-cpp/dist/*.whl
 
+      - name: Add workaround for 3.13 + cramjam
+        run: echo 'PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1' >> $GITHUB_ENV
+        shell: bash
+
       - name: Install awkward, awkward-cpp, and dependencies
         run: python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
 
@@ -83,28 +91,37 @@ jobs:
 
       - name: Run Benchmark and Comparisons
         id: benchmark_and_compare
-        shell: bash
         run: |
           cd benchmarks/
           ./run_action.sh
-          echo "comparison='$(cat $BASE_OUTPUT_DIR)/comparison.md'" >> $GITHUB_OUTPUT
+          COMPARISON=$(cat $(echo $BASE_OUTPUT_DIR)/comparison.md)
+          {
+            echo "comparison<<EOF"
+            echo "${COMPARISON}"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          cd ..
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.base.ref }} # usually: main
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }} # feature branch
-          BASE_OUTPUT_DIR: results_PR${{ inputs.pr-number }}
-          continue-on-error: true # failed benchmarking shouldn't stop the rest of the steps
+          BASE_OUTPUT_DIR: results
+        continue-on-error: true # failed benchmarking shouldn't stop the rest of the steps
 
       - name: Comment on PR
         uses: actions/github-script@v7
-        if: ${{ hashFiles(format('{0}/comparison.md', steps.benchmark_and_compare.env.BASE_OUTPUT_DIR)) != '' }} # if there's no comparison.md, we won't post anything
+        if: ${{ hashFiles('benchmarks/results/comparison.md') != '' }} # if there's no comparison.md, we won't post anything
         with:
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `${{ steps.benchmark_and_compare.outputs.comparison }}`
+              body: process.env.COMPARISON
             })
+        env:
+          COMPARISON: ${{ steps.benchmark_and_compare.outputs.comparison }}
 
       - name: Cleanup Benchmark Outputs
-        run: rm -r ${{ steps.benchmark_and_compare.env.BASE_OUTPUT_DIR }}
+        run: rm -r benchmarks/$BASE_OUTPUT_DIR
+        env:
+          BASE_OUTPUT_DIR: results

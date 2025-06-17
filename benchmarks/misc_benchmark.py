@@ -41,7 +41,6 @@ def _general_fun_benchmark(state, **kwargs):
 
 
 # extend for more misc funs
-# some of them don't make much sense to benchmark I suppose...
 FUNS = [
     ak.angle,
     ak.drop_none,

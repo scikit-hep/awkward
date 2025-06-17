@@ -4,10 +4,9 @@ action() {
     # This is for the HEAD@PR (including main merged)
 
     # setup output dir
-    local current_git_hash
-    current_git_hash=$(git rev-parse --verify HEAD)
-    local results_dir=${BASE_OUTPUT_DIR}/${BRANCH_NAME}__${current_git_hash}
-    local output_path_feature=${results_dir}/${bm_script}.json
+    local orig_git_hash
+    orig_git_hash=$(git rev-parse --verify HEAD)
+    local output_path_feature=${BASE_OUTPUT_DIR}/${BRANCH_NAME}__${orig_git_hash}.json
 
     # Temporarily merge the target branch
     git checkout -b pr_branch
@@ -17,11 +16,9 @@ action() {
     git merge --no-commit --no-ff origin/"${TARGET_BRANCH}" || (echo "***\nError: There are merge conflicts that need to be resolved.\n***" && false)
 
     # create
-    mkdir -p "$results_dir"
+    mkdir -p "$(dirname "${output_path_feature}")"
 
-    local bm_script="benchmark.py"
-
-    python $bm_script \
+    python benchmark.py \
         --benchmark_time_unit=ms \
         --benchmark_out="${output_path_feature}" \
         --benchmark_out_format=json
@@ -31,22 +28,23 @@ action() {
     git stash
     git checkout origin/"${TARGET_BRANCH}"
 
-    local current_git_hash
-    current_git_hash=$(git rev-parse --verify HEAD)
-    local results_dir=${BASE_OUTPUT_DIR}/${TARGET_BRANCH}__${current_git_hash}
-    local output_path_target=${results_dir}/${bm_script}.json
+    local target_git_hash
+    target_git_hash=$(git rev-parse --verify HEAD)
+    local output_path_target=${BASE_OUTPUT_DIR}/${TARGET_BRANCH}__${target_git_hash}.json
 
     # create
-    mkdir -p "$results_dir"
+    mkdir -p "$(dirname "${output_path_target}")"
 
-    local bm_script="benchmark.py"
-
-    python $bm_script \
+    python benchmark.py \
         --benchmark_time_unit=ms \
         --benchmark_out="${output_path_target}" \
         --benchmark_out_format=json
 
     # Compare both
+    # first: switch back to original commit
+    git stash
+    git checkout "${orig_git_hash}"
+
     python compare.py "${output_path_target}" "${output_path_feature}"
 }
 action "$@"
