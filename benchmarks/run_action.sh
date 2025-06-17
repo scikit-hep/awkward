@@ -16,7 +16,7 @@ action() {
     git merge --no-commit --no-ff origin/"${TARGET_BRANCH}" || (echo "***\nError: There are merge conflicts that need to be resolved.\n***" && false)
 
     # create
-    mkdir -p "$(dirname ${output_path_feature})"
+    mkdir -p "$(dirname "${output_path_feature}")"
 
     python benchmark.py \
         --benchmark_time_unit=ms \
@@ -33,7 +33,7 @@ action() {
     local output_path_target=${BASE_OUTPUT_DIR}/${TARGET_BRANCH}__${current_git_hash}.json
 
     # create
-    mkdir -p "$(dirname ${output_path_target})"
+    mkdir -p "$(dirname "${output_path_target}")"
 
     python benchmark.py \
         --benchmark_time_unit=ms \
