@@ -6,8 +6,7 @@ action() {
     # setup output dir
     local current_git_hash
     current_git_hash=$(git rev-parse --verify HEAD)
-    local results_dir=${BASE_OUTPUT_DIR}/${BRANCH_NAME}__${current_git_hash}
-    local output_path_feature=${results_dir}/${bm_script}.json
+    local output_path_feature=${BASE_OUTPUT_DIR}/${BRANCH_NAME}__${current_git_hash}.json
 
     # Temporarily merge the target branch
     git checkout -b pr_branch
@@ -17,11 +16,9 @@ action() {
     git merge --no-commit --no-ff origin/"${TARGET_BRANCH}" || (echo "***\nError: There are merge conflicts that need to be resolved.\n***" && false)
 
     # create
-    mkdir -p "$results_dir"
+    mkdir -p "${BASE_OUTPUT_DIR}"
 
-    local bm_script="benchmark.py"
-
-    python $bm_script \
+    python benchmark.py \
         --benchmark_time_unit=ms \
         --benchmark_out="${output_path_feature}" \
         --benchmark_out_format=json
@@ -33,15 +30,12 @@ action() {
 
     local current_git_hash
     current_git_hash=$(git rev-parse --verify HEAD)
-    local results_dir=${BASE_OUTPUT_DIR}/${TARGET_BRANCH}__${current_git_hash}
-    local output_path_target=${results_dir}/${bm_script}.json
+    local output_path_target=${BASE_OUTPUT_DIR}/${TARGET_BRANCH}__${current_git_hash}.json
 
     # create
-    mkdir -p "$results_dir"
+    mkdir -p "${BASE_OUTPUT_DIR}"
 
-    local bm_script="benchmark.py"
-
-    python $bm_script \
+    python benchmark.py \
         --benchmark_time_unit=ms \
         --benchmark_out="${output_path_target}" \
         --benchmark_out_format=json
