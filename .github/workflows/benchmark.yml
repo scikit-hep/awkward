@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         runs-on:
-          - ubuntu-latest
+          - self-hosted
         python-version:
           - "3.13"
         python-architecture:
