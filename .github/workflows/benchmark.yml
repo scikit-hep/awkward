@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  run-tests:
+  run-benchmarks:
     name: Run Benchmarks
 
     runs-on: self-hosted
@@ -91,7 +91,6 @@ jobs:
 
       - name: Run Benchmark and Comparisons
         id: benchmark_and_compare
-        shell: bash
         run: |
           cd benchmarks/
           ./run_action.sh
