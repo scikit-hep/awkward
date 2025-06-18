@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+action() {
+    # This is for the HEAD@PR (including main merged)
+
+    # setup output dir
+    local orig_git_hash
+    orig_git_hash=$(git rev-parse --verify HEAD)
+    local output_path_feature=${BASE_OUTPUT_DIR}/${BRANCH_NAME}__${orig_git_hash}.json
+
+    # Temporarily merge the target branch
+    git checkout -b pr_branch
+    git fetch --unshallow || echo "" # It might be worth switching actions/checkout to use depth 0 later on
+    git config user.email "gha@example.com" && git config user.name "GHA" # For some reason this is needed even though nothing is being committed
+    # shellcheck disable=SC2028
+    git merge --no-commit --no-ff origin/"${TARGET_BRANCH}" || (echo "***\nError: There are merge conflicts that need to be resolved.\n***" && false)
+
+    # create
+    mkdir -p "$(dirname "${output_path_feature}")"
+
+    python benchmark.py \
+        --benchmark_time_unit=ms \
+        --benchmark_out="${output_path_feature}" \
+        --benchmark_out_format=json
+
+
+    # This is for HEAD@main (usually main, not necessarily though)
+    git stash
+    git checkout origin/"${TARGET_BRANCH}"
+
+    local target_git_hash
+    target_git_hash=$(git rev-parse --verify HEAD)
+    local output_path_target=${BASE_OUTPUT_DIR}/${TARGET_BRANCH}__${target_git_hash}.json
+
+    # create
+    mkdir -p "$(dirname "${output_path_target}")"
+
+    python benchmark.py \
+        --benchmark_time_unit=ms \
+        --benchmark_out="${output_path_target}" \
+        --benchmark_out_format=json
+
+    # Compare both
+    # first: switch back to original commit
+    git stash
+    git checkout "${orig_git_hash}"
+
+    python compare.py "${output_path_target}" "${output_path_feature}"
+}
+action "$@"
