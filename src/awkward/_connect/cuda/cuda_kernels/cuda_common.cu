@@ -60,7 +60,7 @@ typedef unsigned long long uintmax_t;
 const int64_t  kMaxInt64  = 9223372036854775806;   // 2**63 - 2: see below
 const int64_t  kSliceNone = kMaxInt64 + 1;         // for Slice::none()
 
-void
+__device__ void
 awkward_regularize_rangeslice(
     int64_t* start,
     int64_t* stop,
