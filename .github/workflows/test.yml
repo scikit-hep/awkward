@@ -231,7 +231,13 @@ jobs:
       - name: Print versions
         run: python -m pip list
 
-      - name: Run GPU tests
+      - name: Test CUDA kernels
+        run: python -m pytest -vv -rs tests-cuda-kernels
+
+      - name: Test CUDA kernels with explicitly defined values
+        run: python -m pytest -vv -rs tests-cuda-kernels-explicit
+
+      - name: Test CUDA non-kernel (Python)
         run: >-
           python -m pytest -vv -rs tests-cuda
 
