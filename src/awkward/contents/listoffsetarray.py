@@ -2024,7 +2024,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             m = None
         if self.parameters.get("__array__") == "string":
             from cudf.core.column.string import StringColumn
-
             from cudf.utils.dtypes import CUDF_STRING_DTYPE
 
             data = cudf.core.buffer.as_buffer(cupy.asarray(self._content.data))
