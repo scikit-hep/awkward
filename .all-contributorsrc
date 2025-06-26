@@ -538,6 +538,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "APN-Pucky",
+      "name": "Alexander Puck Neuwirth",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4533248?v=4",
+      "profile": "https://apn-pucky.github.io/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
