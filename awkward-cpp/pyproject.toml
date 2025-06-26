@@ -24,7 +24,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
@@ -44,7 +43,8 @@ classifiers = [
     "Topic :: Software Development",
     "Topic :: Utilities",
 ]
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause AND MIT"
+license-files = ["LICENSE", "rapidjson/license.txt"]
 requires-python = ">=3.9"
 
 [project.urls]
@@ -69,6 +69,9 @@ sdist.include = [
     "tests-spec-explicit",
     "tests-cpu-kernels",
     "tests-cpu-kernels-explicit"
+]
+sdist.exclude = [
+  "rapidjson/bin",
 ]
 
 [[tool.scikit-build.overrides]]
