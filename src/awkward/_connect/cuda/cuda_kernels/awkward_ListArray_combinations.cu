@@ -166,7 +166,7 @@ awkward_ListArray_combinations_d(
     }
     return;
   }
- 
+
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
   int64_t offsetslength = scan_in_array_offsets[length];
   int64_t i = 0;
