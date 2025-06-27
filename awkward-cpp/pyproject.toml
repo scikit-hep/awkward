@@ -91,10 +91,8 @@ pytest -p no:cacheprovider \
 """]
 skip = [
     "pp*win*",
-    "pp*-manylinux_i686",
 ]
 test-skip = [
-    "*universal2:arm64",
     "pp*",
     "*musllinux*",
 ]
@@ -102,11 +100,13 @@ build-verbosity = 1
 
 [tool.cibuildwheel.environment]
 PIP_ONLY_BINARY = "cmake,numpy"
-
-[[tool.cibuildwheel.overrides]]
-select = "cp313*"
-environment.PYO3_USE_ABI3_FORWARD_COMPATIBILITY = "1"
+UV_ONLY_BINARY = "cmake,numpy"
 
 [[tool.cibuildwheel.overrides]]
 select = "*pyodide*"
 build-frontend = {name = "build", args = ["--exports", "whole_archive"]}
+
+# Use older manylinux for Python 3.9 and 3.10
+[[tool.cibuildwheel.overrides]]
+select = "cp3{9,10}-manylinux*"
+manylinux-x86_64-image = "manylinux2014"

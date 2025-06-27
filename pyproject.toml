@@ -134,7 +134,7 @@ filterwarnings = [
     "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
     "ignore:Jitify is performing a one-time only warm-up",
 ]
-log_cli_level = "info"
+log_cli_level = "INFO"
 
 [tool.pylint]
 py-version = "3.9"
