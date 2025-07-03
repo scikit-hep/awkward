@@ -180,3 +180,8 @@ class Cupy(ArrayModuleNumpyLike):
         else:
             (x,) = materialize_if_virtual(x)
             return x.flags["C_CONTIGUOUS"]  # type: ignore[attr-defined]
+
+    def memory_ptr(self, x: ArrayLike) -> int:
+        (x,) = materialize_if_virtual(x)
+        assert not isinstance(x, PlaceholderArray)
+        return x.data.ptr  # type: ignore[attr-defined]

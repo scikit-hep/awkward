@@ -73,7 +73,7 @@ class NumpyKernel(BaseKernel):
             if numpy.is_own_array(x):
                 assert numpy.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
-                    return ctypes.cast(x.ctypes.data, t)
+                    return ctypes.cast(numpy.memory_ptr(x), t)
                 else:
                     return x
             # Or, do we have a ctypes type
@@ -116,7 +116,7 @@ class JaxKernel(BaseKernel):
                     raise ValueError(msg)
                 assert self._jax.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
-                    return ctypes.cast(x.unsafe_buffer_pointer(), t)
+                    return ctypes.cast(self._jax.memory_ptr(x), t)
                 else:
                     return x
             # Or, do we have a ctypes type

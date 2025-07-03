@@ -800,3 +800,6 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         if isinstance(obj, VirtualArray):
             return cls.is_own_array_type(obj.nplike.ndarray)
         return cls.is_own_array_type(type(obj))
+
+    def memory_ptr(self, x: ArrayLikeT) -> int:
+        raise NotImplementedError()

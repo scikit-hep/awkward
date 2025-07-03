@@ -1674,6 +1674,10 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         assert isinstance(x, TypeTracerArray)
         return True
 
+    def memory_ptr(self, x: TypeTracerArray | PlaceholderArray) -> int:
+        assert isinstance(x, TypeTracerArray)
+        return 0
+
     def __dlpack_device__(self) -> tuple[int, int]:
         raise NotImplementedError
 

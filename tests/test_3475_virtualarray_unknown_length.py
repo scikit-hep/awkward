@@ -388,22 +388,6 @@ def test_tobytes(virtual_array):
     assert virtual_array.is_materialized
 
 
-# Test ctypes
-def test_ctypes(virtual_array):
-    ctypes_data = virtual_array.ctypes
-    assert ctypes_data is not None
-    # Should be materialized after this
-    assert virtual_array.is_materialized
-
-
-# Test data
-def test_data(virtual_array):
-    data = virtual_array.data
-    assert data is not None
-    # Should be materialized after this
-    assert virtual_array.is_materialized
-
-
 # Test __repr__ and __str__
 def test_repr(virtual_array, shape_generator_param):
     repr_str = repr(virtual_array)

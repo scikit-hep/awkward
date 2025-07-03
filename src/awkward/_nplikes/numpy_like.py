@@ -521,3 +521,6 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     @classmethod
     @abstractmethod
     def is_own_array_type(cls, type_: type) -> bool: ...
+
+    @abstractmethod
+    def memory_ptr(self, x: ArrayLikeT) -> int: ...
