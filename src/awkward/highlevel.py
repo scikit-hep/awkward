@@ -1504,7 +1504,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         # but we sort it from longest to shortest for _repr_mimebundle_
         sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
 
-        n_cols = max(map(len, header_lines))
+        n_cols = max(map(len, header_lines), default=0)
         body_lines = header_lines
         body_lines.append("-" * n_cols)
         body_lines.extend(sorted_rows)
@@ -2446,7 +2446,7 @@ class Record(NDArrayOperatorsMixin):
         # but we sort it from longest to shortest for _repr_mimebundle_
         sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
 
-        n_cols = max(map(len, header_lines))
+        n_cols = max(map(len, header_lines), default=0)
         body_lines = header_lines
         body_lines.append("-" * n_cols)
         body_lines.extend(sorted_rows)
