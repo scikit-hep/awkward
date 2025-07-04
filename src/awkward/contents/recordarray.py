@@ -341,16 +341,8 @@ class RecordArray(RecordMeta[Content], Content):
         byteorder: str,
     ):
         assert isinstance(form, self.form_cls)
-        if self._fields is None:
-            for i, content in enumerate(self._contents):
-                content._to_buffers(
-                    form.content(i), getkey, container, backend, byteorder
-                )
-        else:
-            for field, content in zip(self._fields, self._contents):
-                content._to_buffers(
-                    form.content(field), getkey, container, backend, byteorder
-                )
+        for i, content in enumerate(self._contents):
+            content._to_buffers(form.content(i), getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         backend = TypeTracerBackend.instance()
