@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import awkward as ak
 import pickle
+
+import awkward as ak
 
 
 def test_to_from_buffers():
