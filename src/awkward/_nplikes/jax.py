@@ -155,3 +155,8 @@ class Jax(ArrayModuleNumpyLike):
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         return self._module.divide(x1, x2)
+
+    def memory_ptr(self, x: ArrayLike) -> int:
+        (x,) = materialize_if_virtual(x)
+        assert not isinstance(x, PlaceholderArray)
+        return x.unsafe_buffer_pointer()  # type: ignore[attr-defined]

@@ -76,3 +76,8 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
     ):
         assert not isinstance(x, PlaceholderArray)
         return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)  # type: ignore[arg-type]
+
+    def memory_ptr(self, x: NDArray) -> int:
+        (x,) = materialize_if_virtual(x)
+        assert not isinstance(x, PlaceholderArray)
+        return x.ctypes.data
