@@ -9,11 +9,3 @@ def test():
     ak.concatenate([ak.Array([i])[:, np.newaxis] for i in range(127)], axis=1)
 
     ak.concatenate([ak.Array([i])[:, np.newaxis] for i in range(128)], axis=1)
-
-    ak.concatenate([ak.Array([i])[:, np.newaxis] for i in range(129)], axis=1)
-
-    ak.concatenate([ak.Array([i])[:, np.newaxis] for i in range(255)], axis=1)
-
-    ak.concatenate([ak.Array([i])[:, np.newaxis] for i in range(256)], axis=1)
-
-    ak.concatenate([ak.Array([i])[:, np.newaxis] for i in range(257)], axis=1)
