@@ -8,11 +8,24 @@ import awkward as ak
 
 
 def test():
-    ak.concatenate([ak.to_regular([[i, i], [i, i]]) for i in range(64)], axis=0)
-    ak.concatenate([ak.to_regular([[i, i], [i, i]]) for i in range(127)], axis=0)
-    ak.concatenate([ak.to_regular([[i, i], [i, i]]) for i in range(128)], axis=0)
-    ak.concatenate([ak.to_regular([[i, i], [i, i]]) for i in range(129)], axis=0)
-    ak.concatenate([ak.to_regular([[i, i], [i, i]]) for i in range(256)], axis=0)
+    ak.concatenate([ak.to_regular([[i, i], [i, i]]) for i in range(64)], axis=1)
+    ak.concatenate([ak.to_regular([[i, i], [i, i]]) for i in range(127)], axis=1)
+    ak.concatenate([ak.to_regular([[i, i], [i, i]]) for i in range(128)], axis=1)
+    ak.concatenate([ak.to_regular([[i, i], [i, i]]) for i in range(129)], axis=1)
+    ak.concatenate([ak.to_regular([[i, i], [i, i]]) for i in range(256)], axis=1)
+
+    ak.concatenate(
+        [ak.to_regular([[i, str(i)], [str(i), i]]) for i in range(64)], axis=1
+    )
+    ak.concatenate(
+        [ak.to_regular([[i, str(i)], [str(i), i]]) for i in range(127)], axis=1
+    )
+    ak.concatenate(
+        [ak.to_regular([[i, str(i)], [str(i), i]]) for i in range(128)], axis=1
+    )
+    ak.concatenate(
+        [ak.to_regular([[i, str(i)], [str(i), i]]) for i in range(129)], axis=1
+    )
 
     ak.concatenate(
         [ak.to_regular([[i, str(i)], [str(i), i]]) for i in range(64)], axis=0
