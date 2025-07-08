@@ -214,20 +214,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def tolist(self) -> list:
         return self.materialize().tolist()  # type: ignore[attr-defined]
 
-    @property
-    def ctypes(self):
-        if isinstance((self._nplike), ak._nplikes.cupy.Cupy):
-            raise AttributeError("Cupy ndarrays do not have a ctypes attribute")
-        return self.materialize().ctypes
-
-    @property
-    def data(self):
-        return self.materialize().data
-
-    def unsafe_buffer_pointer(self):
-        assert isinstance(self._nplike, ak._nplikes.jax.Jax)
-        return self.materialize().unsafe_buffer_pointer()
-
     def byteswap(self, inplace=False):
         if self._array is not UNMATERIALIZED:
             return self._array.byteswap(inplace=inplace)

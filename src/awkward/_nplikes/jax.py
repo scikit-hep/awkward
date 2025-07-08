@@ -104,54 +104,59 @@ class Jax(ArrayModuleNumpyLike):
         self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
         del maybe_out
+        x1, x2 = materialize_if_virtual(x1, x2)
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
-        x1, x2 = materialize_if_virtual(x1, x2)
         return self._module.add(x1, x2)
 
     def logical_or(
         self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
         del maybe_out
+        x1, x2 = materialize_if_virtual(x1, x2)
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
-        x1, x2 = materialize_if_virtual(x1, x2)
         return self._module.logical_or(x1, x2)
 
     def logical_and(
         self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
         del maybe_out
+        x1, x2 = materialize_if_virtual(x1, x2)
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
-        x1, x2 = materialize_if_virtual(x1, x2)
         return self._module.logical_and(x1, x2)
 
     def logical_not(
         self, x: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
         del maybe_out
-        assert not isinstance(x, PlaceholderArray)
         (x,) = materialize_if_virtual(x)
+        assert not isinstance(x, PlaceholderArray)
         return self._module.logical_not(x)
 
     def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
         del maybe_out
-        assert not isinstance(x, PlaceholderArray)
         (x,) = materialize_if_virtual(x)
+        assert not isinstance(x, PlaceholderArray)
         return self._module.sqrt(x)
 
     def exp(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
         del maybe_out
-        assert not isinstance(x, PlaceholderArray)
         (x,) = materialize_if_virtual(x)
+        assert not isinstance(x, PlaceholderArray)
         return self._module.exp(x)
 
     def divide(
         self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
     ) -> ArrayLike:
         del maybe_out
+        x1, x2 = materialize_if_virtual(x1, x2)
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
-        x1, x2 = materialize_if_virtual(x1, x2)
         return self._module.divide(x1, x2)
+
+    def memory_ptr(self, x: ArrayLike) -> int:
+        (x,) = materialize_if_virtual(x)
+        assert not isinstance(x, PlaceholderArray)
+        return x.unsafe_buffer_pointer()  # type: ignore[attr-defined]
