@@ -2024,13 +2024,15 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             m = None
         if self.parameters.get("__array__") == "string":
             from cudf.core.column.string import StringColumn
+            from cudf.utils.dtypes import CUDF_STRING_DTYPE
 
             data = cudf.core.buffer.as_buffer(cupy.asarray(self._content.data))
-            # docs for StringColumn says there should be two children instead of a data=
             return StringColumn(
                 data=data,
-                children=(ind_buf,),
+                size=len(ind_buf) - 1,
+                dtype=CUDF_STRING_DTYPE,
                 mask=m,
+                children=(ind_buf,),
             )
 
         if parse_version(cudf.__version__) >= parse_version("24.10.00"):

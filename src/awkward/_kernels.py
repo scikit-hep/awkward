@@ -73,7 +73,7 @@ class NumpyKernel(BaseKernel):
             if numpy.is_own_array(x):
                 assert numpy.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
-                    return ctypes.cast(x.ctypes.data, t)
+                    return ctypes.cast(numpy.memory_ptr(x), t)
                 else:
                     return x
             # Or, do we have a ctypes type
@@ -106,9 +106,17 @@ class JaxKernel(BaseKernel):
         if issubclass(t, ctypes._Pointer):
             # Do we have a JAX-owned array?
             if self._jax.is_own_array(x):
+                if self._jax.is_tracer_type(type(x)):
+                    jax_module = ak.jax.import_jax()
+                    # general message for any invalid JAX input type
+                    msg = f"Encountered {x} as an (invalid) input to the '{self._key[0]}' Awkward C++ kernel."
+                    # message specification for autodiff (i.e. when encountering a JVPTracer)
+                    if isinstance(x, jax_module._src.interpreters.ad.JVPTracer):
+                        msg += " This kernel is not differentiable by the JAX backend."
+                    raise ValueError(msg)
                 assert self._jax.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
-                    return ctypes.cast(x.unsafe_buffer_pointer(), t)
+                    return ctypes.cast(self._jax.memory_ptr(x), t)
                 else:
                     return x
             # Or, do we have a ctypes type
@@ -126,10 +134,9 @@ class JaxKernel(BaseKernel):
 
         args = materialize_if_virtual(*args)
 
-        if not any(Jax.is_tracer_type(type(arg)) for arg in args):
-            return self._impl(
-                *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
-            )
+        return self._impl(
+            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
+        )
 
 
 class CupyKernel(BaseKernel):
