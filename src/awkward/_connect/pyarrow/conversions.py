@@ -370,9 +370,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
             # Build the awkward array content from field buffers
             a, b = to_awkwardarrow_storage_types(field.type)
-            akcontent = popbuffers(
-                paarray.field(field_name), a, b, buffers, generate_bitmasks
-            )
+            akcontent = popbuffers(paarray.field(i), a, b, buffers, generate_bitmasks)
 
             option_type = get_field_option(field, b"option_type")
             if not field.nullable or option_type is False:
