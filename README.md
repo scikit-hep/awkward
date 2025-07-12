@@ -142,7 +142,7 @@ To cite Awkward Array in a paper, see the "Cite this repository" drop-down menu 
 
 ```bibtex
 @software{Pivarski_Awkward_Array_2018,
-author = {Pivarski, Jim and Osborne, Ianna and Ifrim, Ioana and Schreiner, Henry and Hollands, Angus and Biswas, Anish and Das, Pratyush and Roy Choudhury, Santam and Smith, Nicholas and Goyal, Manasvi},
+author = {Pivarski, Jim and Osborne, Ianna and Ifrim, Ioana and Schreiner, Henry and Hollands, Angus and Biswas, Anish and Das, Pratyush and Roy Choudhury, Santam and Smith, Nicholas and Goyal, Manasvi and Fackeldey, Peter and Krommydas, Iason},
 doi = {10.5281/zenodo.4341376},
 month = {10},
 title = {{Awkward Array}},
