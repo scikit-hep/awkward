@@ -212,7 +212,7 @@ class Index:
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
+                arraystr_lines = [*arraystr_lines[:2], " ...", *arraystr_lines[-2:]]
             out.append(">\n" + indent + "    ")
             if self._metadata is not None:
                 for k, v in self._metadata.items():
@@ -223,7 +223,7 @@ class Index:
             out.append("\n" + indent + "</Index>")
         else:
             if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
+                arraystr_lines = [*arraystr_lines[:2], " ...", *arraystr_lines[-2:]]
             out.append(">")
             out.append(arraystr_lines[0])
             out.append("</Index>")

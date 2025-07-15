@@ -270,7 +270,7 @@ class NumpyArray(NumpyMeta, Content):
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
+                arraystr_lines = [*arraystr_lines[:2], " ...", *arraystr_lines[-2:]]
             out.append(">")
             out.extend(extra)
             out.append("\n" + indent + "    ")
@@ -309,7 +309,7 @@ class NumpyArray(NumpyMeta, Content):
     def _getitem_nothing(self):
         tmp = self._data[0:0]
         return NumpyArray(
-            self._backend.nplike.reshape(tmp, ((0,) + tmp.shape[2:])),
+            self._backend.nplike.reshape(tmp, (0, *tmp.shape[2:])),
             parameters=None,
             backend=self._backend,
         )
