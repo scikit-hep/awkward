@@ -77,6 +77,7 @@ sdist.exclude = [
 [[tool.scikit-build.overrides]]
 if.platform-system = "darwin"
 cmake.version = ">=3.29"
+build.verbose = true
 
 
 [tool.cibuildwheel]
