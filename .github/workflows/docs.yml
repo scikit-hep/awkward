@@ -27,8 +27,6 @@ jobs:
 
     - name: Setup Python
       uses: actions/setup-python@v5
-      with:
-        python-version: "3.12"
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures --tests
@@ -38,6 +36,9 @@ jobs:
         package-dir: awkward-cpp
       env:
         CIBW_PLATFORM: pyodide
+        CIBW_BUILD: "cp313*"
+        CIBW_PYODIDE_VERSION: "0.28.0"
+        CIBW_ENABLE: "pyodide-prerelease"
 
     - name: Upload wheel
       uses: actions/upload-artifact@v4
