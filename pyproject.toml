@@ -293,6 +293,7 @@ ignore = [
     "PLW0603", # Using the global statement to update is discouraged
     "PLC1901", # x == "" can be simplified to not x (empty string is falsey)
     "ISC001",  # Conflicts with the formatter in 0.1.2
+    "PLC0415",  # imports outside top level
 ]
 typing-modules = ["awkward._typing"]
 external = []
