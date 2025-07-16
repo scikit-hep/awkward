@@ -256,16 +256,17 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                         )
                     sizes.append(regulararrays[-1].size)
 
-                prototype = backend.nplike.empty(sum(sizes), dtype=np.int8)
+                if len(regulararrays) < 2**7:
+                    prototype = backend.nplike.empty(sum(sizes), dtype=np.int8)
+                    tags_cls = ak.index.Index8
+                else:
+                    prototype = backend.nplike.empty(sum(sizes), dtype=np.int64)
+                    tags_cls = ak.index.Index64
+
                 start = 0
                 for tag, size in enumerate(sizes):
                     prototype[start : start + size] = tag
                     start += size
-
-                if len(regulararrays) < 2**7:
-                    tags_cls = ak.index.Index8
-                else:
-                    tags_cls = ak.index.Index64
 
                 tags = tags_cls(
                     backend.nplike.reshape(
