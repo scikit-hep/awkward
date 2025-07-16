@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import maybe_posaxis
+from awkward._layout import HighLevelContext, maybe_posaxis
+from awkward._namedaxis import _get_named_axis, _named_axis_to_positional_axis
 
 __all__ = ("to_record_of_lists",)
 
@@ -19,9 +20,15 @@ def to_record_of_lists(array, axis=0):
 
 
 def _impl(array, axis):
-    list_found = False
+    with HighLevelContext() as ctx:
+        layout = ctx.unwrap(array)
+
     if axis is not None:
-        axis = maybe_posaxis(array.layout, axis, 1)
+        named_axis = _get_named_axis(ctx)
+        axis = _named_axis_to_positional_axis(named_axis, axis)
+        axis = maybe_posaxis(layout, axis, 1)
+
+    list_found = False
 
     def transform(layout, depth, **kwargs):
         nonlocal list_found

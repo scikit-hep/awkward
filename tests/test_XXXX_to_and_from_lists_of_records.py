@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+from __future__ import annotations
 
 import awkward as ak
 
@@ -36,10 +37,7 @@ def test_to_lists_of_records_2D():
             [{"a": [7, 8], "b": [9, 10]}, {"a": [], "b": []}],
         ]
     )
-    assert (
-        ak.to_lists_of_records(b).typestr
-        == "2 * var * var * {a: int64, b: int64}"
-    )
+    assert ak.to_lists_of_records(b).typestr == "2 * var * var * {a: int64, b: int64}"
     assert ak.to_lists_of_records(b).tolist() == [
         [[{"a": 1, "b": 4}, {"a": 2, "b": 5}, {"a": 3, "b": 6}]],
         [[{"a": 7, "b": 9}, {"a": 8, "b": 10}], []],
@@ -104,6 +102,24 @@ def test_to_record_of_lists_axis_1():
         == "2 * var * {a: var * int64, b: var * int64}"
     )
     assert ak.to_record_of_lists(b, axis=1).tolist() == [
+        [{"a": [1, 2, 3], "b": [4, 5, 6]}],
+        [{"a": [7, 8], "b": [9, 10]}, {"a": [], "b": []}],
+    ]
+
+
+def test_to_record_of_lists_axis_1_named():
+    b = ak.Array(
+        [
+            [[{"a": 1, "b": 4}, {"a": 2, "b": 5}, {"a": 3, "b": 6}]],
+            [[{"a": 7, "b": 9}, {"a": 8, "b": 10}], []],
+        ],
+        named_axis=("outer", "inner"),
+    )
+    assert (
+        ak.to_record_of_lists(b, axis="inner").typestr
+        == "2 * var * {a: var * int64, b: var * int64}"
+    )
+    assert ak.to_record_of_lists(b, axis="inner").tolist() == [
         [{"a": [1, 2, 3], "b": [4, 5, 6]}],
         [{"a": [7, 8], "b": [9, 10]}, {"a": [], "b": []}],
     ]
