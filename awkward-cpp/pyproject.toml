@@ -77,7 +77,6 @@ sdist.exclude = [
 [[tool.scikit-build.overrides]]
 if.platform-system = "darwin"
 cmake.version = ">=3.29"
-build.verbose = true
 
 
 [tool.cibuildwheel]
@@ -100,6 +99,7 @@ test-skip = [
     "pp*",
     "*musllinux*",
 ]
+build-verbosity = 1
 
 [tool.cibuildwheel.environment]
 PIP_ONLY_BINARY = "cmake,numpy"
