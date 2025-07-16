@@ -69,7 +69,7 @@ The expression using Awkward Arrays is more concise, using idioms familiar from 
 
 Awkward Array is even faster when used in [Numba](https://numba.pydata.org/)'s JIT-compiled functions.
 
-See the [Getting started](https://awkward-array.org/doc/main/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.org/doc/main/getting-started/try-awkward-array.html) you can try in your web browser.
+See the [Getting started](https://awkward-array.org/doc/main/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.org/doc/main/_static/try-it.html) you can try in your web browser.
 
 # Getting help
 
