@@ -25,9 +25,6 @@ jobs:
       with:
         submodules: true
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures --tests
 

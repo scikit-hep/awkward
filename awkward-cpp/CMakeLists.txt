@@ -44,8 +44,6 @@ else()
   set(CMAKE_INSTALL_RPATH "\$ORIGIN")
 endif()
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)],
 # libawkward (C++), and Python modules.
@@ -118,12 +116,16 @@ find_package(pybind11 CONFIG REQUIRED)
 file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
 pybind11_add_module(_ext MODULE ${LAYOUT_SOURCES})
 target_link_libraries(_ext PRIVATE awkward)
-target_link_options(_ext PRIVATE "-Wl,-rpath=\$ORIGIN")
 set_target_properties(
   _ext
   PROPERTIES CXX_VISIBILITY_PRESET hidden
              VISIBILITY_INLINES_HIDDEN ON
              CXX_EXTENSIONS NO)
+
+# This has to be passed explicitly to make Pyodide 0.28 happy
+if(CMAKE_SYSTEM_NAME MATCHES Emscripten)
+  target_link_options(_ext PRIVATE "-Wl,-rpath=\$ORIGIN")
+endif()
 
 # Install pure-python files
 file(GLOB_RECURSE PYTHON_SOURCES "src/${SKBUILD_PROJECT_NAME}/*.py")
