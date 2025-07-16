@@ -375,7 +375,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     "new size of array with larger dtype must be a "
                     "divisor of the total size in bytes (of the last axis of the array)"
                 )
-            shape = self._shape[:-1] + (last,)
+            shape = (*self._shape[:-1], last)
         else:
             shape = self._shape
         return self._new(
@@ -385,7 +385,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def forget_length(self) -> Self:
         return self._new(
             self._dtype,
-            (unknown_length,) + self._shape[1:],
+            (unknown_length, *self._shape[1:]),
             self._form_key,
             self._report,
         )

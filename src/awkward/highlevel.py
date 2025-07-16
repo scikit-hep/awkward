@@ -1493,12 +1493,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         # some reasonable number (2 for beginning and end + 10 fields -> 12)
         if len(type_lines) > 12:
             n_white_spaces = len(type_lines[1]) - len(type_lines[1].lstrip())
-            type_lines = (
-                [type_lines[0]]
-                + type_lines[1:11]
-                + [n_white_spaces * " " + "..."]
-                + [type_lines[-1]]
-            )
+            type_lines = [
+                type_lines[0],
+                *type_lines[1:11],
+                n_white_spaces * " " + "...",
+                type_lines[-1],
+            ]
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from longest to shortest for _repr_mimebundle_
@@ -2435,12 +2435,12 @@ class Record(NDArrayOperatorsMixin):
         # some reasonable number (2 for beginning and end + 10 fields -> 12)
         if len(type_lines) > 12:
             n_white_spaces = len(type_lines[1]) - len(type_lines[1].lstrip())
-            type_lines = (
-                [type_lines[0]]
-                + type_lines[1:11]
-                + [n_white_spaces * " " + "..."]
-                + [type_lines[-1]]
-            )
+            type_lines = [
+                type_lines[0],
+                *type_lines[1:11],
+                n_white_spaces * " " + "...",
+                type_lines[-1],
+            ]
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from longest to shortest for _repr_mimebundle_
