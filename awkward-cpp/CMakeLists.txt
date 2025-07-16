@@ -46,7 +46,6 @@ endif()
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-list(APPEND CMAKE_SHARED_LINKER_FLAGS [=[-rpath=\$ORIGIN]=])
 
 # Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)],
 # libawkward (C++), and Python modules.
@@ -119,6 +118,7 @@ find_package(pybind11 CONFIG REQUIRED)
 file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
 pybind11_add_module(_ext MODULE ${LAYOUT_SOURCES})
 target_link_libraries(_ext PRIVATE awkward)
+target_link_options(_ext PRIVATE "-Wl,-rpath=\$ORIGIN")
 set_target_properties(
   _ext
   PROPERTIES CXX_VISIBILITY_PRESET hidden
