@@ -1442,20 +1442,22 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 )
             )
             contents = []
-            if n==3:
+            if n == 3:
                 result = argchoose(starts.data, stops.data, n)
                 # each _ptr is cupy array representing the indices of the combinations
                 for _ptr in result:
-                    ptr = ak.index.Index64(ak.values_astype(ak.from_cupy(_ptr), 'int64'))
+                    ptr = ak.index.Index64(
+                        ak.values_astype(ak.from_cupy(_ptr), "int64")
+                    )
                     contents.append(self._content._carry(ptr, True))
-            elif n==2:
+            elif n == 2:
                 for ptr in tocarry:
                     contents.append(self._content._carry(ptr, True))
             else:
                 raise NotImplementedError(
                     "awkward.combinations with n > 3 is not implemented"
                 )
-                
+
             recordarray = ak.contents.RecordArray(
                 contents,
                 recordlookup,
