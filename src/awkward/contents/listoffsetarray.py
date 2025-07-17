@@ -1443,10 +1443,12 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 )
             )
             contents = []
-            if n>2 and n <6:
+            if n > 2 and n < 6:
                 result = argchoose(starts.data, stops.data, n)
                 for _ptr in result:
-                    ptr = ak.index.Index64(ak.values_astype(ak.from_cupy(_ptr), 'int64'))
+                    ptr = ak.index.Index64(
+                        ak.values_astype(ak.from_cupy(_ptr), "int64")
+                    )
                     print(f"ptr: {ptr}")
                     contents.append(self._content._carry(ptr, True))
             else:
