@@ -75,7 +75,7 @@ def argchoose(starts, stops, n, absolute=False, replacement=False):
             starts_parents = starts[parents]
             for idx in [i1, i2, i3, i4, i5]:
                 idx += starts_parents
-        out = cp.vstack((i1, i2, i3, i4, i5))
+        out = (i1, i2, i3, i4, i5)
 
     elif n == 4:
         k4 = indices - offsets[parents]
@@ -90,7 +90,7 @@ def argchoose(starts, stops, n, absolute=False, replacement=False):
             starts_parents = starts[parents]
             for idx in [i1, i2, i3, i4]:
                 idx += starts_parents
-        out = cp.vstack((i1, i2, i3, i4))
+        out = (i1, i2, i3, i4)
 
     elif n == 3:
         k3 = indices - offsets[parents]
@@ -103,5 +103,5 @@ def argchoose(starts, stops, n, absolute=False, replacement=False):
             starts_parents = starts[parents]
             for idx in [i1, i2, i3]:
                 idx += starts_parents
-        out = cp.vstack((i1, i2, i3))
+        out = (i1, i2, i3)
     return out

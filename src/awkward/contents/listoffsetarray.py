@@ -1401,7 +1401,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
             totallen = self._backend.nplike.index_as_shape_item(_totallen[0])
 
-            print(f"totallen calculated in AK: {totallen}")
             tocarryraw = ak.index.Index.empty(n, dtype=np.intp, nplike=nplike)
             tocarry = []
 
@@ -1443,20 +1442,20 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 )
             )
             contents = []
-            if n > 2 and n < 6:
+            if n==3:
                 result = argchoose(starts.data, stops.data, n)
+                # each _ptr is cupy array representing the indices of the combinations
                 for _ptr in result:
-                    ptr = ak.index.Index64(
-                        ak.values_astype(ak.from_cupy(_ptr), "int64")
-                    )
-                    print(f"ptr: {ptr}")
+                    ptr = ak.index.Index64(ak.values_astype(ak.from_cupy(_ptr), 'int64'))
+                    contents.append(self._content._carry(ptr, True))
+            elif n==2:
+                for ptr in tocarry:
                     contents.append(self._content._carry(ptr, True))
             else:
-                for ptr in tocarry:
-                    print(f"ptr: {ptr}")
-                    contents.append(self._content._carry(ptr, True))
-
-            print(f"content after ptr carry: {contents}")
+                raise NotImplementedError(
+                    "awkward.combinations with n > 3 is not implemented"
+                )
+                
             recordarray = ak.contents.RecordArray(
                 contents,
                 recordlookup,
