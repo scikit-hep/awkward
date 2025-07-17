@@ -7,6 +7,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._connect.cuda.combinations import argchoose
 from awkward._layout import maybe_posaxis
 from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._nplikes.array_like import ArrayLike
@@ -1400,6 +1401,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
             totallen = self._backend.nplike.index_as_shape_item(_totallen[0])
 
+            print(f"totallen calculated in AK: {totallen}")
             tocarryraw = ak.index.Index.empty(n, dtype=np.intp, nplike=nplike)
             tocarry = []
 
@@ -1441,10 +1443,18 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 )
             )
             contents = []
+            if n>2 and n <6:
+                result = argchoose(starts.data, stops.data, n)
+                for _ptr in result:
+                    ptr = ak.index.Index64(ak.values_astype(ak.from_cupy(_ptr), 'int64'))
+                    print(f"ptr: {ptr}")
+                    contents.append(self._content._carry(ptr, True))
+            else:
+                for ptr in tocarry:
+                    print(f"ptr: {ptr}")
+                    contents.append(self._content._carry(ptr, True))
 
-            for ptr in tocarry:
-                contents.append(self._content._carry(ptr, True))
-
+            print(f"content after ptr carry: {contents}")
             recordarray = ak.contents.RecordArray(
                 contents,
                 recordlookup,
