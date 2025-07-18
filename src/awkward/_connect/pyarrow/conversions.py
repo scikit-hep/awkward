@@ -25,7 +25,7 @@ from .extn_types import (
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 _pyarrow_version = importlib.metadata.version("pyarrow")
-_pyarrow_version_le_21_0_0 = parse_version(_pyarrow_version) < parse_version("21.0.0")
+_pyarrow_version_lt_21_0_0 = parse_version(_pyarrow_version) < parse_version("21.0.0")
 
 
 def and_validbytes(validbytes1, validbytes2):
@@ -190,7 +190,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
     if awkwardarrow_type is not None:
         paarray = paarray.storage
     ### Beginning of the big if-elif-elif chain!
-    if _pyarrow_version_le_21_0_0 and isinstance(
+    if _pyarrow_version_lt_21_0_0 and isinstance(
         storage_type, pyarrow.lib.ExtensionType
     ):
         raise ValueError(
@@ -500,7 +500,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 def form_popbuffers(awkwardarrow_type, storage_type):
     ### Beginning of the big if-elif-elif chain!
 
-    if _pyarrow_version_le_21_0_0 and isinstance(
+    if _pyarrow_version_lt_21_0_0 and isinstance(
         storage_type, pyarrow.lib.ExtensionType
     ):
         raise ValueError(
