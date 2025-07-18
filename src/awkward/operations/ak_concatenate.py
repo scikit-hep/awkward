@@ -34,7 +34,14 @@ np = NumpyMetadata.instance()
 @ak._connect.numpy.implements("concatenate")
 @high_level_function()
 def concatenate(
-    arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None, attrs=None
+    arrays,
+    axis=0,
+    *,
+    mergebool=True,
+    with_name=None,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
 ):
     """
     Args:
@@ -47,6 +54,9 @@ def concatenate(
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with
             distinct types (using an #ak.contents.UnionArray).
+        with_name (None or str): Assigns a `"__record__"` name to the records or tuples.
+            It is equivalent to calling #ak.with_name on the result
+            and is provided as a shortcut.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -69,7 +79,7 @@ def concatenate(
         yield arrays
 
     # Implementation
-    return _impl(arrays, axis, mergebool, highlevel, behavior, attrs)
+    return _impl(arrays, axis, mergebool, with_name, highlevel, behavior, attrs)
 
 
 def _merge_as_union(
@@ -99,7 +109,7 @@ def _merge_as_union(
     )
 
 
-def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
+def _impl(arrays, axis, mergebool, with_name, highlevel, behavior, attrs):
     # Simple single-array, axis=0 fast-path
     if (
         # Is an array with a known backend
@@ -375,13 +385,18 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
     )
 
     # propagate named axis to output
-    return ak.operations.ak_with_named_axis._impl(
+    array = ak.operations.ak_with_named_axis._impl(
         wrapped_out,
         named_axis=out_named_axis,
         highlevel=highlevel,
         behavior=ctx.behavior,
         attrs=ctx.attrs,
     )
+    if with_name is not None:
+        return ak.operations.ak_with_name._impl(
+            array, with_name, highlevel, ctx.behavior, ctx.attrs
+        )
+    return array
 
 
 def _form_has_type(form, type_):

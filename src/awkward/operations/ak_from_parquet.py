@@ -276,6 +276,7 @@ def _load(
             arrays,
             axis=0,
             mergebool=True,
+            with_name=None,
             highlevel=highlevel,
             behavior=behavior,
             attrs=attrs,
