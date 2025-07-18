@@ -16,6 +16,7 @@ from awkward._dispatch import high_level_function
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.torch import Torch
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import TypeTracer
 
@@ -24,6 +25,7 @@ __all__ = ("to_layout",)
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 numpy_backend = NumpyBackend.instance()
+torch = Torch.instance()
 typetracer_backend = TypeTracerBackend.instance()
 
 

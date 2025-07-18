@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward._nplikes.cupy
 import awkward._nplikes.jax
 import awkward._nplikes.numpy
+import awkward._nplikes.torch
 import awkward._nplikes.typetracer
 import awkward._nplikes.virtual
 from awkward._nplikes.dispatch import nplike_of_obj

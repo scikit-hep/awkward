@@ -10,6 +10,7 @@ import awkward as ak
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.torch import Torch
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import try_touch_data
 from awkward._nplikes.virtual import materialize_if_virtual
@@ -82,6 +83,41 @@ class NumpyKernel(BaseKernel):
             else:
                 raise AssertionError(
                     f"Only NumPy buffers should be passed to Numpy Kernels, received {x} (ptr type={type(t).__name__})"
+                )
+        else:
+            return x
+
+    def __call__(self, *args) -> None:
+        assert len(args) == len(self._impl.argtypes)
+
+        args = materialize_if_virtual(*args)
+
+        return self._impl(
+            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
+        )
+    
+
+class TorchKernel(BaseKernel):
+    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
+        super().__init__(impl, key)
+
+        self._torch = Torch.instance()
+
+    def _cast(self, x, t):
+        if issubclass(t, ctypes._Pointer):
+            # Do we have a Torch-owned array?
+            if self._torch.is_own_array(x):
+                assert self._torch.is_c_contiguous(x), "kernel expects contiguous array"
+                if x.ndim > 0:
+                    return ctypes.cast(self._torch.memory_ptr(x), t)
+                else:
+                    return x
+            # Or, do we have a ctypes type
+            elif hasattr(x, "_b_base_"):
+                return ctypes.cast(x, t)
+            else:
+                raise AssertionError(
+                    f"Only Torch buffers should be passed to Torch Kernels, received {x} (ptr type={type(t).__name__})"
                 )
         else:
             return x

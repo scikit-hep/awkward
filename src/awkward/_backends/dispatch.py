@@ -149,6 +149,8 @@ def find_virtual_backend(obj: type):
                 return _name_to_backend_cls["cuda"].instance()
             elif isinstance(obj.nplike, ak._nplikes.jax.Jax):
                 return _name_to_backend_cls["jax"].instance()
+            elif isinstance(obj.nplike, ak._nplikes.torch.Torch):
+                return _name_to_backend_cls["torch"].instance()
             else:
                 raise TypeError(
                     f"The nplike {type(obj.nplike)} does not support virtual arrays"
