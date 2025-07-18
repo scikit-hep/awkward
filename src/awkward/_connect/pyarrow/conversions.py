@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 from collections.abc import Iterable, Sized
 from functools import lru_cache
 
 import pyarrow
+from packaging.version import parse as parse_version
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
@@ -22,6 +24,8 @@ from .extn_types import (
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
+_pyarrow_version = importlib.metadata.version("pyarrow")
+_pyarrow_version_le_21_0_0 = parse_version(_pyarrow_version) < parse_version("21.0.0")
 
 
 def and_validbytes(validbytes1, validbytes2):
@@ -186,8 +190,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
     if awkwardarrow_type is not None:
         paarray = paarray.storage
     ### Beginning of the big if-elif-elif chain!
-
-    if isinstance(storage_type, pyarrow.lib.PyExtensionType):
+    if _pyarrow_version_le_21_0_0 and isinstance(
+        storage_type, pyarrow.lib.ExtensionType
+    ):
         raise ValueError(
             "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
         )
@@ -495,7 +500,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 def form_popbuffers(awkwardarrow_type, storage_type):
     ### Beginning of the big if-elif-elif chain!
 
-    if isinstance(storage_type, pyarrow.lib.PyExtensionType):
+    if _pyarrow_version_le_21_0_0 and isinstance(
+        storage_type, pyarrow.lib.ExtensionType
+    ):
         raise ValueError(
             "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
         )
