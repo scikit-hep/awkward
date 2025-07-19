@@ -192,7 +192,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
                 "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
             )
     except AttributeError:
-        # pyarrow >= 21.0.0 does not have PyExtensionType.
+        # PyExtensionType is deprecated in pyarrow 21.0.0.
         pass
 
     if isinstance(storage_type, pyarrow.lib.ExtensionType):
@@ -504,7 +504,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
                 "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
             )
     except AttributeError:
-        # pyarrow >= 21.0.0 does not have PyExtensionType.
+        # PyExtensionType is deprecated in pyarrow 21.0.0.
         pass
 
     if isinstance(storage_type, pyarrow.lib.ExtensionType):
