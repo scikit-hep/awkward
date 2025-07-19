@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import importlib
 import json
 from collections.abc import Iterable, Sized
 from functools import lru_cache
 
 import pyarrow
-from packaging.version import parse as parse_version
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
@@ -24,8 +22,6 @@ from .extn_types import (
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
-_pyarrow_version = importlib.metadata.version("pyarrow")
-_pyarrow_version_lt_21_0_0 = parse_version(_pyarrow_version) < parse_version("21.0.0")
 
 
 def and_validbytes(validbytes1, validbytes2):
@@ -190,14 +186,16 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
     if awkwardarrow_type is not None:
         paarray = paarray.storage
     ### Beginning of the big if-elif-elif chain!
-    if _pyarrow_version_lt_21_0_0 and isinstance(
-        storage_type, pyarrow.lib.PyExtensionType
-    ):
-        raise ValueError(
-            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
-        )
+    try:
+        if isinstance(storage_type, pyarrow.lib.PyExtensionType):
+            raise ValueError(
+                "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+            )
+    except AttributeError:
+        # pyarrow >= 21.0.0 does not have PyExtensionType.
+        pass
 
-    elif isinstance(storage_type, pyarrow.lib.ExtensionType):
+    if isinstance(storage_type, pyarrow.lib.ExtensionType):
         # AwkwardArrowType should already be unwrapped; this must be some other ExtensionType.
         assert not isinstance(storage_type, AwkwardArrowType)
         # In that case, just ignore its logical type and use its storage type.
@@ -500,14 +498,16 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 def form_popbuffers(awkwardarrow_type, storage_type):
     ### Beginning of the big if-elif-elif chain!
 
-    if _pyarrow_version_lt_21_0_0 and isinstance(
-        storage_type, pyarrow.lib.PyExtensionType
-    ):
-        raise ValueError(
-            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
-        )
+    try:
+        if isinstance(storage_type, pyarrow.lib.PyExtensionType):
+            raise ValueError(
+                "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+            )
+    except AttributeError:
+        # pyarrow >= 21.0.0 does not have PyExtensionType.
+        pass
 
-    elif isinstance(storage_type, pyarrow.lib.ExtensionType):
+    if isinstance(storage_type, pyarrow.lib.ExtensionType):
         # AwkwardArrowType should already be unwrapped; this must be some other ExtensionType.
         assert not isinstance(storage_type, AwkwardArrowType)
         # In that case, just ignore its logical type and use its storage type.
