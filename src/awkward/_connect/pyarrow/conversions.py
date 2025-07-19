@@ -191,7 +191,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         paarray = paarray.storage
     ### Beginning of the big if-elif-elif chain!
     if _pyarrow_version_lt_21_0_0 and isinstance(
-        storage_type, pyarrow.lib.ExtensionType
+        storage_type, pyarrow.lib.PyExtensionType
     ):
         raise ValueError(
             "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
@@ -501,7 +501,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
     ### Beginning of the big if-elif-elif chain!
 
     if _pyarrow_version_lt_21_0_0 and isinstance(
-        storage_type, pyarrow.lib.ExtensionType
+        storage_type, pyarrow.lib.PyExtensionType
     ):
         raise ValueError(
             "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
