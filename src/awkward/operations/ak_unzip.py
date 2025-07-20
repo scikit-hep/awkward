@@ -40,6 +40,8 @@ def unzip(array, *, highlevel=True, behavior=None, attrs=None):
         <Array [1.1, 2.2, 3.3] type='3 * float64'>
         >>> y
         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
+
+    See also #ak.to_record_of_lists.
     """
     # Dispatch
     yield (array,)
