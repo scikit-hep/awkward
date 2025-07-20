@@ -12,6 +12,48 @@ __all__ = ("to_record_of_lists",)
 
 @high_level_function()
 def to_record_of_lists(array, axis=0):
+    """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        axis (None or int): Keep records in a common list up to the specified axis.
+            None is equivalent to `0` in this case. A list has to be present at the given axis,
+            otherwise an error will be raised.
+
+    Converts lists of records to a record of lists. Think of it as applying
+    #ak.unzip, but returning an Array instead of a tuple.
+
+    For example, consider this array of lists of lists of records:
+
+        >>> a = ak.Array(
+        ...     [
+        ...         [[{"a": 1, "b": 4}, {"a": 2, "b": 5}, {"a": 3, "b": 6}]],
+        ...         [[{"a": 7, "b": 9}, {"a": 8, "b": 10}], []],
+        ...     ]
+        ... )
+        >>> a.type.show()
+        2 * var * var * {
+            a: int64,
+            b: int64
+        }
+
+    Using the default `axis=0`, this will become an array of records of lists of lists:
+
+        >>> ak.to_record_of_lists(a).type.show()
+        2 * {
+            a: var * var * int64,
+            b: var * var * int64
+        }
+
+    Using `axis=1`, the outermost list will remain common to both records:
+
+        >>> ak.to_record_of_lists(a, axis=1).type.show()
+        2 * var * {
+            a: var * int64,
+            b: var * int64
+        }
+
+    See also #ak.unzip, #ak.to_lists_of_records.
+    """
     # Dispatch
     yield (array,)
 
