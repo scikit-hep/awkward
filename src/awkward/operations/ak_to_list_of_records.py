@@ -9,7 +9,9 @@ __all__ = ("to_lists_of_records",)
 
 
 @high_level_function()
-def to_lists_of_records(array, depth_limit=None):
+def to_lists_of_records(
+    array, depth_limit=None, *, highlevel=True, behavior=None, attrs=None, **kwargs
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -17,6 +19,13 @@ def to_lists_of_records(array, depth_limit=None):
             `array` to all levels. If an int, limit the number of dimensions
             that get broadcasted. The minimum value is `1`, for no
             broadcasting.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
+        kwargs: Keyword arguments to be forwarded to #ak.zip.
 
     Combines records of lists with common lengths into lists of records.
 
@@ -67,15 +76,17 @@ def to_lists_of_records(array, depth_limit=None):
     yield (array,)
 
     # Implementation
-    return _impl(array, depth_limit)
+    return _impl(array, depth_limit, highlevel, behavior, attrs, **kwargs)
 
 
-def _impl(array, depth_limit):
-    def transform(layout, depth, **kwargs):
+def _impl(array, depth_limit, highlevel, behavior, attrs, **zip_kwargs):
+    def transform(layout, depth, **transform_kwargs):
         if layout.is_record:
             obj = ak.unzip(layout, highlevel=False)
             if not layout.is_tuple:
                 obj = dict(zip(layout.fields, obj))
-            return ak.zip(obj, depth_limit=depth_limit, highlevel=False)
+            return ak.zip(obj, depth_limit=depth_limit, highlevel=False, **zip_kwargs)
 
-    return ak.transform(transform, array)
+    return ak.transform(
+        transform, array, highlevel=highlevel, behavior=behavior, attrs=attrs
+    )

@@ -11,13 +11,19 @@ __all__ = ("to_record_of_lists",)
 
 
 @high_level_function()
-def to_record_of_lists(array, axis=0):
+def to_record_of_lists(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int): Keep records in a common list up to the specified axis.
             None is equivalent to `0` in this case. A list has to be present at the given axis,
             otherwise an error will be raised.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
 
     Converts lists of records to a record of lists. Think of it as applying
     #ak.unzip, but returning an Array instead of a tuple.
@@ -58,10 +64,10 @@ def to_record_of_lists(array, axis=0):
     yield (array,)
 
     # Implementation
-    return _impl(array, axis)
+    return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis):
+def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext() as ctx:
         layout = ctx.unwrap(array)
 
@@ -83,7 +89,9 @@ def _impl(array, axis):
                 None if layout.is_tuple else layout.fields,
             )
 
-    result = ak.transform(transform, array)
+    result = ak.transform(
+        transform, array, highlevel=highlevel, behavior=behavior, attrs=attrs
+    )
     if not list_found:
         raise ValueError(f"No list found using axis={axis} in the given array")
     return result
