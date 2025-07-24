@@ -6,7 +6,7 @@ import awkward as ak
 from awkward.operations import to_list
 
 
-def test_ak_where_single_argument_with_missing_values():
+def test():
     onedim = ak.Array([1, 2, 3, None, 4, 5])
     result = ak.where(onedim)
     assert to_list(result[0]) == [0, 1, 2, 4, 5]
