@@ -90,6 +90,8 @@
     generated/ak.zip
     generated/ak.zip_no_broadcast
     generated/ak.unzip
+    generated/ak.to_lists_of_records
+    generated/ak.to_record_of_lists
     generated/ak.merge_union_of_records
     generated/ak.merge_option_of_records
 
