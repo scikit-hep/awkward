@@ -300,7 +300,7 @@ class RegularArray(RegularMeta[Content], Content):
         content = self._content[: self.length * self._size].maybe_to_NumpyArray()
 
         if content is not None:
-            shape = (self.length, self._size) + content.data.shape[1:]
+            shape = (self.length, self._size, *content.data.shape[1:])
             return ak.contents.NumpyArray(
                 self._backend.nplike.reshape(content.data, shape),
                 parameters=parameters_union(self._parameters, content.parameters),
@@ -1292,7 +1292,7 @@ class RegularArray(RegularMeta[Content], Content):
                 return self._content.data.view(np.dtype(("S", self._size)))
         else:
             out = self._content._to_backend_array(allow_missing, backend)
-            shape = (self.length, self._size) + out.shape[1:]
+            shape = (self.length, self._size, *out.shape[1:])
 
             # ShapeItem is a defined type, but some nplikes don't map onto the entire space; e.g.
             # NumPy never has `None` shape items. We require that if a shape-item is used between nplikes

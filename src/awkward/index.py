@@ -137,18 +137,7 @@ class Index:
 
     @property
     def ptr(self):
-        if isinstance(self._nplike, Numpy):
-            return self._data.ctypes.data
-        elif isinstance(self._nplike, Cupy):
-            return self._data.data.ptr
-        elif isinstance(self._nplike, Jax):
-            return self._data.unsafe_buffer_pointer()
-        elif isinstance(self._nplike, TypeTracer):
-            return 0
-        else:
-            raise NotImplementedError(
-                f"this function hasn't been implemented for the {type(self._nplike).__name__} backend"
-            )
+        return self._nplike.memory_ptr(self._data)
 
     @property
     def length(self) -> ShapeItem:
@@ -223,7 +212,7 @@ class Index:
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
+                arraystr_lines = [*arraystr_lines[:2], " ...", *arraystr_lines[-2:]]
             out.append(">\n" + indent + "    ")
             if self._metadata is not None:
                 for k, v in self._metadata.items():
@@ -234,7 +223,7 @@ class Index:
             out.append("\n" + indent + "</Index>")
         else:
             if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
+                arraystr_lines = [*arraystr_lines[:2], " ...", *arraystr_lines[-2:]]
             out.append(">")
             out.append(arraystr_lines[0])
             out.append("</Index>")

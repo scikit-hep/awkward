@@ -38,12 +38,12 @@ Please check https://github.com/scikit-hep/awkward#installation-for-developers t
 endif()
 
 # Setup the RPATH for built libraries
-set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 if(APPLE)
   set(CMAKE_INSTALL_RPATH "@loader_path")
 else()
   set(CMAKE_INSTALL_RPATH "\$ORIGIN")
 endif()
+set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 
 # Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)],
 # libawkward (C++), and Python modules.
@@ -121,6 +121,11 @@ set_target_properties(
   PROPERTIES CXX_VISIBILITY_PRESET hidden
              VISIBILITY_INLINES_HIDDEN ON
              CXX_EXTENSIONS NO)
+
+# This has to be passed explicitly to make Pyodide 0.28 happy
+if(CMAKE_SYSTEM_NAME MATCHES Emscripten)
+  target_link_options(_ext PRIVATE "-Wl,-rpath=\$ORIGIN")
+endif()
 
 # Install pure-python files
 file(GLOB_RECURSE PYTHON_SOURCES "src/${SKBUILD_PROJECT_NAME}/*.py")
