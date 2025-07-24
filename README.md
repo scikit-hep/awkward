@@ -69,7 +69,7 @@ The expression using Awkward Arrays is more concise, using idioms familiar from 
 
 Awkward Array is even faster when used in [Numba](https://numba.pydata.org/)'s JIT-compiled functions.
 
-See the [Getting started](https://awkward-array.org/doc/main/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.org/doc/main/getting-started/try-awkward-array.html) you can try in your web browser.
+See the [Getting started](https://awkward-array.org/doc/main/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.org/doc/main/_static/try-it.html) you can try in your web browser.
 
 # Getting help
 
@@ -142,7 +142,7 @@ To cite Awkward Array in a paper, see the "Cite this repository" drop-down menu 
 
 ```bibtex
 @software{Pivarski_Awkward_Array_2018,
-author = {Pivarski, Jim and Osborne, Ianna and Ifrim, Ioana and Schreiner, Henry and Hollands, Angus and Biswas, Anish and Das, Pratyush and Roy Choudhury, Santam and Smith, Nicholas and Goyal, Manasvi},
+author = {Pivarski, Jim and Osborne, Ianna and Ifrim, Ioana and Schreiner, Henry and Hollands, Angus and Biswas, Anish and Das, Pratyush and Roy Choudhury, Santam and Smith, Nicholas and Goyal, Manasvi and Fackeldey, Peter and Krommydas, Iason},
 doi = {10.5281/zenodo.4341376},
 month = {10},
 title = {{Awkward Array}},

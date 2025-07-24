@@ -75,7 +75,7 @@ class PlaceholderArray(ArrayLike):
                     "new size of array with larger dtype must be a "
                     "divisor of the total size in bytes (of the last axis of the array)"
                 )
-            shape = self._shape[:-1] + (last,)
+            shape = (*self._shape[:-1], last)
         else:
             shape = self._shape
         return type(self)(self._nplike, shape, dtype, self._field_path)

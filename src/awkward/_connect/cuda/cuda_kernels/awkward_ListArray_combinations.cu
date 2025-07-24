@@ -9,11 +9,11 @@
 //     totallen=int(scan_in_array_offsets[length])
 //     if totallen == 0:
 //         return  # Nothing to do if no combinations, skip the rest
-//     block_size = min(1024, totallen)
-//     grid_size = (totallen + block_size - 1)//block_size
+//     block_size = min(totallen, 1024)
+//     grid_size = max(1, math.ceil(totallen / block_size))
 //     scan_in_array_parents = cupy.zeros(totallen, dtype=cupy.int64)
 //     scan_in_array_local_indices = cupy.zeros(totallen, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_b", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_b", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_c", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_d", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
 // out["awkward_ListArray_combinations_a", {dtype_specializations}] = None
@@ -53,16 +53,12 @@ awkward_ListArray_combinations_a(
   }
 
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
-  // Grid-stride loop for general scalability
-  for (int64_t i = thread_id; i < length; i += gridDim.x * blockDim.x) {
-    V start = starts[i];
-    W stop  = stops[i];
-    int64_t counts = stop - start;
+  if (thread_id < length) {
+    int64_t counts = stops[thread_id] - starts[thread_id];
     int64_t result = replacement
                         ? counts * (counts + 1) / 2
                         : counts * (counts - 1) / 2;
-    scan_in_array_offsets[i + 1] = result;
+    scan_in_array_offsets[thread_id + 1] = result;
   }
 }
 
@@ -79,17 +75,32 @@ awkward_ListArray_combinations_b(
     int64_t length,
     const int64_t* __restrict__ scan_in_array_offsets,
     int64_t* __restrict__ scan_in_array_parents,
+    int64_t* scan_in_array_local_indices,
     uint64_t invocation_index,
     uint64_t* err_code) {
-  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-  if (thread_id >= length) return;
+  long thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+  long offsetslength = scan_in_array_offsets[length];
 
-  int64_t start = scan_in_array_offsets[thread_id];
-  int64_t stop  = scan_in_array_offsets[thread_id + 1];
+  if (thread_id >= offsetslength) return;
 
-  for (int64_t i = start; i < stop; i++) {
-    scan_in_array_parents[i] = thread_id;
+  // Binary search for parent index i such that
+  // scan_in_array_offsets[i] <= thread_id < scan_in_array_offsets[i+1]
+  long left = 0;
+  long right = length;
+
+  while (left < right) {
+    long mid = (left + right) / 2;
+    if (thread_id >= scan_in_array_offsets[mid + 1]) {
+      left = mid + 1;
+    } else if (thread_id < scan_in_array_offsets[mid]) {
+      right = mid;
+    } else {
+      left = mid;
+      break;
+    }
   }
+
+  scan_in_array_parents[thread_id] = left;
 }
 
 template <typename T, typename C, typename U, typename V, typename W>
@@ -103,8 +114,8 @@ awkward_ListArray_combinations_c(
     const V* starts,
     const W* stops,
     int64_t length,
-    int64_t* scan_in_array_offsets,
-    int64_t* scan_in_array_parents,
+    const int64_t* __restrict__ scan_in_array_offsets,
+    int64_t* __restrict__ scan_in_array_parents,
     int64_t* scan_in_array_local_indices,
     uint64_t invocation_index,
     uint64_t* err_code) {
@@ -120,13 +131,11 @@ awkward_ListArray_combinations_c(
     return;
   }
 
-  int64_t offsetslength = scan_in_array_offsets[length];
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+  int64_t offsetslength = scan_in_array_offsets[length];
 
-  // Grid-stride loop
-  for (int64_t i = thread_id; i < offsetslength; i += gridDim.x * blockDim.x) {
-    int64_t parent_offset = scan_in_array_offsets[scan_in_array_parents[i]];
-    scan_in_array_local_indices[i] = i - parent_offset;
+  if (thread_id < offsetslength) {
+    scan_in_array_local_indices[thread_id] = thread_id - scan_in_array_offsets[scan_in_array_parents[thread_id]];
   }
 }
 
@@ -158,42 +167,38 @@ awkward_ListArray_combinations_d(
     return;
   }
 
-  int64_t offsetslength = scan_in_array_offsets[length];
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+  int64_t offsetslength = scan_in_array_offsets[length];
+  int64_t i = 0;
+  int64_t j = 0;
 
-  // Grid-stride loop
-  for (int64_t idx = thread_id; idx < offsetslength; idx += gridDim.x * blockDim.x) {
+  if (thread_id < offsetslength) {
 
-    int64_t parent = scan_in_array_parents[idx];
-    V start = starts[parent];
-    W stop  = stops[parent];
-    int64_t count = stop - start;
-    int64_t local_index = scan_in_array_local_indices[idx];
-
-    float discriminant;
-    int64_t i, j;
+    int64_t parent = scan_in_array_parents[thread_id];
+    int64_t count = stops[parent] - starts[parent];
+    int64_t local_index = scan_in_array_local_indices[thread_id];
 
     if (replacement) {
       int64_t b = 2 * count + 1;
-      discriminant = sqrtf(float(b * b - 8 * local_index));
-      i = (int64_t)((b - discriminant) / 2.0f);
+      double discriminant = sqrt((double)(b * b - 8 * local_index));
+      i = (int64_t)((b - discriminant) / 2);
       j = local_index + i * (i - b + 2) / 2;
     } else {
       int64_t b = 2 * count - 1;
-      discriminant = sqrtf(float(b * b - 8 * local_index));
-      i = (int64_t)((b - discriminant) / 2.0f);
+      double discriminant = sqrt((double)(b * b - 8 * local_index));
+      i = (int64_t)((b - discriminant) / 2);
       j = local_index + i * (i - b + 2) / 2 + 1;
     }
 
-    i += start;
-    j += start;
+    i += starts[parent];
+    j += starts[parent];
 
-    tocarry[0][idx] = i;
-    tocarry[1][idx] = j;
+    tocarry[0][thread_id] = i;
+    tocarry[1][thread_id] = j;
   }
 
-  // Set toindex[0] and [1] only once per kernel call (thread 0 of block 0)
-  if (threadIdx.x == 0 && blockIdx.x == 0) {
+  // Write toindex once
+  if (thread_id == 0) {
     toindex[0] = offsetslength;
     toindex[1] = offsetslength;
   }

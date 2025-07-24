@@ -188,7 +188,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                     "new size of array with larger dtype must be a "
                     "divisor of the total size in bytes (of the last axis of the array)"
                 )
-            shape = self.shape[:-1] + (last,)
+            shape = (*self.shape[:-1], last)
         else:
             shape = self.shape
 
@@ -292,10 +292,10 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
             return type(self)(
                 self._nplike,
-                (new_length,) + self.shape[1:],
+                (new_length, *self.shape[1:]),
                 self._dtype,
                 lambda: self.materialize()[index],
-                lambda: (new_length,) + self.shape[1:],
+                lambda: (new_length, *self.shape[1:]),
             )
         else:
             return self.materialize().__getitem__(index)

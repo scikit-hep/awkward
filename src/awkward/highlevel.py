@@ -1493,18 +1493,18 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         # some reasonable number (2 for beginning and end + 10 fields -> 12)
         if len(type_lines) > 12:
             n_white_spaces = len(type_lines[1]) - len(type_lines[1].lstrip())
-            type_lines = (
-                [type_lines[0]]
-                + type_lines[1:11]
-                + [n_white_spaces * " " + "..."]
-                + [type_lines[-1]]
-            )
+            type_lines = [
+                type_lines[0],
+                *type_lines[1:11],
+                n_white_spaces * " " + "...",
+                type_lines[-1],
+            ]
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from longest to shortest for _repr_mimebundle_
         sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
 
-        n_cols = max(map(len, header_lines))
+        n_cols = max(map(len, header_lines), default=0)
         body_lines = header_lines
         body_lines.append("-" * n_cols)
         body_lines.extend(sorted_rows)
@@ -2435,18 +2435,18 @@ class Record(NDArrayOperatorsMixin):
         # some reasonable number (2 for beginning and end + 10 fields -> 12)
         if len(type_lines) > 12:
             n_white_spaces = len(type_lines[1]) - len(type_lines[1].lstrip())
-            type_lines = (
-                [type_lines[0]]
-                + type_lines[1:11]
-                + [n_white_spaces * " " + "..."]
-                + [type_lines[-1]]
-            )
+            type_lines = [
+                type_lines[0],
+                *type_lines[1:11],
+                n_white_spaces * " " + "...",
+                type_lines[-1],
+            ]
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from longest to shortest for _repr_mimebundle_
         sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
 
-        n_cols = max(map(len, header_lines))
+        n_cols = max(map(len, header_lines), default=0)
         body_lines = header_lines
         body_lines.append("-" * n_cols)
         body_lines.extend(sorted_rows)
