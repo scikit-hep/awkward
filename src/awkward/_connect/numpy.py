@@ -507,9 +507,6 @@ def action_for_matmul(inputs):
     raise NotImplementedError
 
 
-def convert_to_array(layout, dtype=None):
+def convert_to_array(layout, dtype=None, copy=None):
     out = ak.operations.to_numpy(layout, allow_missing=False)
-    if dtype is None:
-        return out
-    else:
-        return numpy.array(out, dtype=dtype)
+    return numpy.asarray(out, dtype=dtype, copy=copy)
