@@ -513,7 +513,7 @@ def convert_to_array(layout, dtype=None, copy=None):
     if copy is False:
         if needs_copy_for_dtype:
             raise ValueError(
-                "ValueError: Unable to avoid copy while creating an array as requested"
+                "Unable to avoid copy while creating an array as requested"
             )
         return out
     elif copy is True:
