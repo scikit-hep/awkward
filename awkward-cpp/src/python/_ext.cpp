@@ -9,7 +9,7 @@
 #include "awkward/python/forth.h"
 
 namespace py = pybind11;
-PYBIND11_MODULE(_ext, m, py::mod_gil_not_used()) {
+PYBIND11_MODULE(_ext, m, py::mod_gil_not_used(), py::multiple_interpreters::per_interpreter_gil()) {
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
 #else
