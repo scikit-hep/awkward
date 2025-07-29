@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.10",
-    "pybind11",
+    "scikit-build-core>=0.11",
+    "pybind11>=3",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -36,6 +36,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Scientific/Engineering :: Mathematics",
