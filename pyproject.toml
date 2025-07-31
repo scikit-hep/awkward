@@ -336,3 +336,4 @@ awkward = { path = ".", editable = true }
 [tool.pixi.dependencies]
 ipython = ">=8.37.0,<9"
 six = ">=1.17.0,<2"
+pip = ">=25.2,<26"
