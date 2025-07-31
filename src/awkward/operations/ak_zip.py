@@ -142,6 +142,8 @@ def zip(
 
         >>> ak.zip([one, two], optiontype_outside_record=True)
         <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
+
+    See also #ak.to_lists_of_records.
     """
     # Dispatch
     if isinstance(arrays, Mapping):

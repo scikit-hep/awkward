@@ -97,6 +97,7 @@ from awkward.operations.ak_to_jax import *
 from awkward.operations.ak_to_json import *
 from awkward.operations.ak_to_layout import *
 from awkward.operations.ak_to_list import *
+from awkward.operations.ak_to_list_of_records import *
 from awkward.operations.ak_to_numpy import *
 from awkward.operations.ak_to_packed import *
 from awkward.operations.ak_to_parquet import *
@@ -104,6 +105,7 @@ from awkward.operations.ak_to_parquet_dataset import *
 from awkward.operations.ak_to_parquet_row_groups import *
 from awkward.operations.ak_to_raggedtensor import *
 from awkward.operations.ak_to_rdataframe import *
+from awkward.operations.ak_to_record_of_lists import *
 from awkward.operations.ak_to_regular import *
 from awkward.operations.ak_to_tensorflow import *
 from awkward.operations.ak_to_torch import *
