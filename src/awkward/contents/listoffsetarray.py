@@ -7,6 +7,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
+from awkward._connect.cuda.combinations import argchoose
 from awkward._layout import maybe_posaxis
 from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._nplikes.array_like import ArrayLike
@@ -1441,9 +1442,19 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 )
             )
             contents = []
-
-            for ptr in tocarry:
-                contents.append(self._content._carry(ptr, True))
+            if n == 2 or isinstance(starts.data, numpy.ndarray):
+                for ptr in tocarry:
+                    contents.append(self._content._carry(ptr, True))
+            elif n == 3:
+                result = argchoose(starts.data, stops.data, n)
+                # each _ptr is cupy array representing the indices of the combinations
+                for _ptr in result:
+                    ptr = ak.index.Index64(_ptr)
+                    contents.append(self._content._carry(ptr, True))
+            else:
+                raise NotImplementedError(
+                    "awkward.combinations with n > 3 is not implemented"
+                )
 
             recordarray = ak.contents.RecordArray(
                 contents,
