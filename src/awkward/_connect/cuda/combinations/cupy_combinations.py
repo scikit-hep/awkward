@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+
 def root2(a):
     import cupy as cp
+
     return cp.floor((1 + cp.sqrt(8 * a + 1)) / 2)
 
 
 def root3(a):
     import cupy as cp
+
     out = 2 * cp.ones(a.shape)
     mask = a > 0
     rad = cp.power(cp.sqrt(3) * cp.sqrt(243 * a[mask] ** 2 - 1) + 27 * a[mask], 1.0 / 3)
@@ -19,12 +22,14 @@ def root3(a):
 
 def root4(a):
     import cupy as cp
+
     # good to (at least) 100 choose 4
     return cp.floor((cp.sqrt(4 * cp.sqrt(24 * a + 1) + 5) + 3) / 2)
 
 
 def repeat(x, repeats):
     import cupy as cp
+
     all_stops = cp.cumsum(repeats)
     parents = cp.zeros(all_stops[-1].item(), dtype=int)
     stops, stop_counts = cp.unique(all_stops[:-1], return_counts=True)
@@ -35,6 +40,7 @@ def repeat(x, repeats):
 
 def argchoose(starts, stops, n, absolute=False, replacement=False):
     import cupy as cp
+
     counts = stops - starts
     if n > 5:
         raise NotImplementedError
