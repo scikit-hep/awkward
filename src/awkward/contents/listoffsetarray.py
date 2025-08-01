@@ -1442,14 +1442,14 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 )
             )
             contents = []
-            if n == 3:
+            if n == 2 or starts.data is numpy.ndarray:
+                for ptr in tocarry:
+                    contents.append(self._content._carry(ptr, True))
+            elif n == 3:
                 result = argchoose(starts.data, stops.data, n)
                 # each _ptr is cupy array representing the indices of the combinations
                 for _ptr in result:
                     ptr = ak.index.Index64(_ptr)
-                    contents.append(self._content._carry(ptr, True))
-            elif n == 2:
-                for ptr in tocarry:
                     contents.append(self._content._carry(ptr, True))
             else:
                 raise NotImplementedError(
