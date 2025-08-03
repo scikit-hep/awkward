@@ -40,6 +40,7 @@ from awkward.operations.ak_from_cupy import *
 from awkward.operations.ak_from_dlpack import *
 from awkward.operations.ak_from_feather import *
 from awkward.operations.ak_from_iter import *
+from awkward.operations.ak_from_jax import *
 from awkward.operations.ak_from_json import *
 from awkward.operations.ak_from_numpy import *
 from awkward.operations.ak_from_parquet import *
@@ -92,6 +93,7 @@ from awkward.operations.ak_to_cudf import *
 from awkward.operations.ak_to_cupy import *
 from awkward.operations.ak_to_dataframe import *
 from awkward.operations.ak_to_feather import *
+from awkward.operations.ak_to_jax import *
 from awkward.operations.ak_to_json import *
 from awkward.operations.ak_to_layout import *
 from awkward.operations.ak_to_list import *

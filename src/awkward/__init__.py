@@ -32,6 +32,7 @@ from awkward._connect import numpy
 from awkward._connect import numexpr
 from awkward import numba
 from awkward import cppyy
+from awkward import jax
 from awkward import typetracer
 from awkward import _typetracer  # todo: remove this after "deprecation" period
 
