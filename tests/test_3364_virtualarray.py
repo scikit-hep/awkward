@@ -1014,8 +1014,7 @@ def test_backend_of_obj(virtual_array, float_virtual_array):
 # Test array creation methods with VirtualArray
 def test_asarray_virtual_array_unmaterialized(numpy_like, virtual_array):
     # Test with unmaterialized VirtualArray
-    result = numpy_like.asarray(virtual_array)
-    assert result is virtual_array  # Should return the same object
+    numpy_like.asarray(virtual_array)
     assert not virtual_array.is_materialized
 
 
@@ -1045,6 +1044,54 @@ def test_asarray_virtual_array_with_copy(numpy_like, virtual_array):
     ):
         # Should raise because we're trying to change the dtype without copying
         numpy_like.asarray(virtual_array, dtype=np.float64, copy=False)
+
+
+def test_asarray_virtual_array_copy_true_same_dtype(numpy_like, virtual_array):
+    # Test copy=True with same dtype returns new VirtualArray
+    result = numpy_like.asarray(virtual_array, copy=True)
+    assert isinstance(result, VirtualArray)
+    assert result is not virtual_array
+    assert not result.is_materialized
+
+
+def test_asarray_virtual_array_copy_none_preserves_lazy(numpy_like, virtual_array):
+    # Test copy=None preserves lazy evaluation with same dtype
+    result = numpy_like.asarray(virtual_array, copy=None)
+    assert isinstance(result, VirtualArray)
+    assert not result.is_materialized
+
+
+def test_asarray_virtual_array_copy_false_same_dtype(numpy_like, virtual_array):
+    # Test VirtualArray with copy=False and same dtype - creates new VirtualArray with same dtype
+    result = numpy_like.asarray(virtual_array, copy=False)
+    assert isinstance(result, VirtualArray)
+    assert result.dtype == virtual_array.dtype
+    assert not result.is_materialized
+
+
+def test_asarray_virtual_array_copy_false_different_dtype_creates_new(numpy_like, virtual_array):
+    # Test VirtualArray copy=False with dtype change creates new VirtualArray (no error for unmaterialized)
+    result = numpy_like.asarray(virtual_array, dtype=np.float64, copy=False)
+    assert isinstance(result, VirtualArray)
+    assert result.dtype == np.dtype(np.float64)
+    assert not result.is_materialized
+
+
+def test_asarray_virtual_array_materialized_copy_false_dtype_error(numpy_like, virtual_array):
+    # Test materialized VirtualArray copy=False with dtype change raises error
+    virtual_array.materialize()
+    with pytest.raises(
+        ValueError,
+        match="asarray was called with copy=False for an array of a different dtype",
+    ):
+        numpy_like.asarray(virtual_array, dtype=np.float64, copy=False)
+
+
+def test_asarray_virtual_array_dtype_none_behavior(numpy_like, virtual_array):
+    # Test VirtualArray with dtype=None preserves original dtype
+    result = numpy_like.asarray(virtual_array, dtype=None)
+    assert isinstance(result, VirtualArray)
+    assert result.dtype == virtual_array.dtype
 
 
 def test_ascontiguousarray_unmaterialized(numpy_like, virtual_array):

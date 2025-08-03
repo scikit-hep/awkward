@@ -66,24 +66,21 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             return obj
         if isinstance(obj, VirtualArray):
             if obj.is_materialized:
-                obj = obj.materialize()
+                return self.asarray(obj.materialize(), dtype=dtype, copy=copy)
             else:
-                if obj.dtype == dtype or dtype is None:
-                    return obj
-                else:
-                    return VirtualArray(
-                        obj._nplike,
-                        obj._shape,
-                        dtype,
-                        lambda: self.asarray(obj.materialize(), dtype=dtype),
-                        lambda: obj.shape,
-                    )
+                return VirtualArray(
+                    obj._nplike,
+                    obj._shape,
+                    obj._dtype if dtype is None else dtype,
+                    lambda: self.asarray(obj.materialize(), dtype=dtype, copy=copy),
+                    lambda: obj.shape,
+                )
         if copy:
             return self._module.array(obj, dtype=dtype, copy=True)
         elif copy is None:
             return self._module.asarray(obj, dtype=dtype)
         else:
-            if getattr(obj, "dtype", dtype) != dtype:
+            if dtype is not None and getattr(obj, "dtype", dtype) != dtype:
                 raise ValueError(
                     "asarray was called with copy=False for an array of a different dtype"
                 )
