@@ -514,7 +514,7 @@ def convert_to_array(layout, dtype=None, copy=None):
     elif copy is None:
         return numpy.asarray(out, dtype=dtype)
     else:
-        if getattr(out, "dtype", dtype) != dtype:
+        if dtype is not None and getattr(out, "dtype", dtype) != dtype:
             raise ValueError(
                 "Unable to avoid copy while creating an array as requested"
             )
