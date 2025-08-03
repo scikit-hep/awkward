@@ -321,5 +321,4 @@ isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "numpy".msg = "Use `numpy = ak._nplikes.Numpy.instance()` instead"
-"jax".msg = "Use `jax = ak._nplikes.Jax.instance()` instead"
 "cupy".msg = "Use `cupy = ak._nplikes.Cupy.instance()` instead"

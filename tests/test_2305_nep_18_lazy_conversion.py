@@ -15,15 +15,3 @@ def test_binary():
         # ak.array_equal now overrides np.array_equal, and requires
         # both arrays to be valid within awkward.
         assert np.array_equal(ak_array, np_array)
-
-
-def test_different_backend():
-    pytest.importorskip("jax")
-    ak.jax.register_and_check()
-
-    left = ak.Array([0, 1, 2], backend="jax")
-    right = ak.Array([0, 1, 2], backend="cpu")
-    with pytest.raises(
-        ValueError, match="cannot operate on arrays with incompatible backends"
-    ):
-        assert np.array_equal(left, right)

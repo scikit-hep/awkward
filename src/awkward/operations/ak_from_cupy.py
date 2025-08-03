@@ -41,7 +41,7 @@ def from_cupy(
     * #ak.contents.NumpyArray
     * #ak.contents.RegularArray if `regulararray=True`.
 
-    See also #ak.to_cupy, #ak.from_numpy and #ak.from_jax.
+    See also #ak.to_cupy, #ak.from_numpy.
     """
     return wrap_layout(
         from_arraylib(array, regulararray, False, primitive_policy=primitive_policy),

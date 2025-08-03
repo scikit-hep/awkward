@@ -11,7 +11,6 @@ from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.indexedoptionmeta import IndexedOptionMeta
 from awkward._nplikes.array_like import ArrayLike
-from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -1724,20 +1723,11 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             is_none = original_index < 0
             num_none = operator.index(nplike.count_nonzero(is_none))
             new_index = nplike.empty(self._index.length, dtype=self._index.dtype)
-            if isinstance(nplike, Jax):
-                new_index = new_index.at[is_none].set(-1)
-                new_index = new_index.at[~is_none].set(
-                    nplike.arange(
-                        nplike.shape_item_as_index(new_index.size - num_none),
-                        dtype=self._index.dtype,
-                    )
-                )
-            else:
-                new_index[is_none] = -1
-                new_index[~is_none] = nplike.arange(
-                    nplike.shape_item_as_index(new_index.size - num_none),
-                    dtype=self._index.dtype,
-                )
+            new_index[is_none] = -1
+            new_index[~is_none] = nplike.arange(
+                nplike.shape_item_as_index(new_index.size - num_none),
+                dtype=self._index.dtype,
+            )
             projected = self.project()
             return ak.contents.IndexedOptionArray(
                 ak.index.Index(new_index, nplike=self._backend.nplike),

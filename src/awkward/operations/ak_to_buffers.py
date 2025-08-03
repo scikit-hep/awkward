@@ -45,7 +45,7 @@ def to_buffers(
         id_start (int): Starting `id` to use in `form_key` and hence `buffer_key`.
             This integer increases in a depth-first walk over the `array` nodes and
             can be used to generate unique keys for each Form.
-        backend (`"cpu"`, `"cuda"`, `"jax"`, None): Backend to use to
+        backend (`"cpu"`, `"cuda"`, None): Backend to use to
             generate values that are put into the `container`. The default,
             `"cpu"`, makes NumPy arrays, which are in main memory
             (e.g. not GPU) and satisfy Python's Buffer protocol. If all the

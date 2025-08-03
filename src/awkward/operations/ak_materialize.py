@@ -30,7 +30,7 @@ def materialize(
     If the input array is not an #ak.Array or an #ak.contents.Content,
     an error will be raised.
     The buffers of the returned array are no longer `VirtualArray` objects even if there were any.
-    They will become one of `numpy.ndarray`, `cupy.ndarray`, or `jax.numpy.ndarray` objects,
+    They will become one of `numpy.ndarray`, `cupy.ndarray` objects,
     depending on the array's backend.
     """
     # Dispatch

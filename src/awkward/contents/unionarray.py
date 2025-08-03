@@ -13,7 +13,6 @@ from awkward._layout import maybe_posaxis
 from awkward._meta.unionmeta import UnionMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.cupy import Cupy
-from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -421,26 +420,14 @@ class UnionArray(UnionMeta[Content], Content):
                 # only want to affect the part of the UnionArray.index for this tag
                 selection = tags.data == tag
 
-                if isinstance(backend.nplike, Jax):
-                    # function-composition of this part of the UnionArray.index with the IndexedArray.index
-                    index._data = content.index.data.at[selection].set(
-                        content.index.data[index.data[selection]]
+                # function-composition of this part of the UnionArray.index with the IndexedArray.index
+                index.data[selection] = content.index.data[index.data[selection]]
+                # now we don't have an IndexedArray anymore, but we want to preserve its parameters
+                contents[tag] = content.content.copy(
+                    parameters=parameters_union(
+                        content.content.parameters, content.parameters
                     )
-                    # now we don't have an IndexedArray anymore, but we want to preserve its parameters
-                    contents[tag] = content.content.copy(
-                        parameters=parameters_union(
-                            content.content.parameters, content.parameters
-                        )
-                    )
-                else:
-                    # function-composition of this part of the UnionArray.index with the IndexedArray.index
-                    index.data[selection] = content.index.data[index.data[selection]]
-                    # now we don't have an IndexedArray anymore, but we want to preserve its parameters
-                    contents[tag] = content.content.copy(
-                        parameters=parameters_union(
-                            content.content.parameters, content.parameters
-                        )
-                    )
+                )
 
         # If any contents are options, ensure all contents are options!
         if any(c.is_option for c in contents):
@@ -1688,10 +1675,7 @@ class UnionArray(UnionMeta[Content], Content):
                 new_index_values = self._backend.nplike.arange(
                     num_tag, dtype=index.dtype
                 )
-                if isinstance(self._backend.nplike, Jax):
-                    index = index.at[is_tag].set(new_index_values)
-                else:
-                    index[is_tag] = new_index_values
+                index[is_tag] = new_index_values
                 contents[tag] = self.project(tag)
 
             contents[tag] = (

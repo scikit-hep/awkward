@@ -9,7 +9,6 @@ from awkward._nplikes import to_nplike
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.dispatch import nplike_of_obj
-from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
@@ -243,21 +242,14 @@ class Index:
 
         if hasattr(out, "shape") and len(out.shape) != 0:
             return Index(out, metadata=self.metadata, nplike=self._nplike)
-        elif (Jax.is_own_array(out) or Cupy.is_own_array(out)) and len(out.shape) == 0:
+        elif (Cupy.is_own_array(out)) and len(out.shape) == 0:
             return out.item()
         else:
             return out
 
     def __setitem__(self, where, what):
         (data, where, what) = materialize_if_virtual(self._data, where, what)
-        if isinstance(self._nplike, Jax):
-            new_data = data.at[where].set(what)
-            if isinstance(self._data, VirtualArray):
-                self._data._array = new_data
-            else:
-                self._data = new_data
-        else:
-            self._data[where] = what
+        self._data[where] = what
 
     def to64(self) -> Index:
         return Index(self._nplike.astype(self._data, dtype=np.int64))
