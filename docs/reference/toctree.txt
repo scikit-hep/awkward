@@ -20,8 +20,6 @@
     generated/ak.from_cupy
     generated/ak.to_cupy
     generated/ak.from_dlpack
-    generated/ak.from_jax
-    generated/ak.to_jax
 
 .. toctree::
     :caption: Reading and writing files
@@ -338,10 +336,6 @@
     :caption: Third-party integration
 
     generated/ak.numba.register_and_check
-    generated/ak.jax.assert_registered
-    generated/ak.jax.import_jax
-    generated/ak.jax.register_and_check
-    generated/ak.jax.register_behavior_class
 
 .. toctree::
     :caption: High-level data types
