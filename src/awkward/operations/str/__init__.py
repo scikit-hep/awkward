@@ -236,95 +236,58 @@ def _get_split_action(
     bytestring_to_string=False,
     **kwargs,
 ):
-    from awkward._backends.typetracer import TypeTracerBackend
-    from awkward.forms import ListOffsetForm, NumpyForm
-
-    typetracer = TypeTracerBackend.instance()
-
-    # FIXME: this workaround for typetracer is required because
-    #        split_XXX does not support length-zero arrays
-    #        c.f. https://github.com/apache/arrow/issues/37437
     def action(layout, **_):
-        if layout.backend is typetracer:
-            if layout.is_list and layout.parameter("__array__") == "string":
-                return (
-                    ListOffsetForm(
-                        "i32",
-                        ListOffsetForm(
-                            layout.form.offsets,
-                            NumpyForm("uint8", parameters={"__array__": "char"}),
+        if layout.is_list and layout.parameter("__array__") == "string":
+            return _drop_option_preserving_form(
+                _apply_through_arrow(
+                    utf8_function,
+                    layout,
+                    *args,
+                    generate_bitmasks=generate_bitmasks,
+                    **kwargs,
+                )
+            )
+
+        elif layout.is_list and layout.parameter("__array__") == "bytestring":
+            if bytestring_to_string:
+                out = _drop_option_preserving_form(
+                    _apply_through_arrow(
+                        ascii_function,
+                        layout.copy(
+                            content=layout.content.copy(
+                                parameters={"__array__": "char"}
+                            ),
                             parameters={"__array__": "string"},
                         ),
+                        *args,
+                        generate_bitmasks=generate_bitmasks,
+                        **kwargs,
                     )
-                    .length_zero_array()
-                    .to_typetracer(forget_length=True)
+                )
+                assert out.is_list
+
+                assert (
+                    out.content.is_list
+                    and out.content.parameter("__array__") == "string"
+                )
+                return out.copy(
+                    content=out.content.copy(
+                        content=out.content.content.copy(
+                            parameters={"__array__": "byte"}
+                        ),
+                        parameters={"__array__": "bytestring"},
+                    ),
                 )
 
-            elif layout.is_list and layout.parameter("__array__") == "bytestring":
-                return (
-                    ListOffsetForm(
-                        "i32",
-                        ListOffsetForm(
-                            layout.form.offsets,
-                            NumpyForm("uint8", parameters={"__array__": "byte"}),
-                            parameters={"__array__": "bytestring"},
-                        ),
-                    )
-                    .length_zero_array()
-                    .to_typetracer(forget_length=True)
-                )
-        else:
-            if layout.is_list and layout.parameter("__array__") == "string":
+            else:
                 return _drop_option_preserving_form(
                     _apply_through_arrow(
-                        utf8_function,
+                        ascii_function,
                         layout,
                         *args,
                         generate_bitmasks=generate_bitmasks,
                         **kwargs,
                     )
                 )
-
-            elif layout.is_list and layout.parameter("__array__") == "bytestring":
-                if bytestring_to_string:
-                    out = _drop_option_preserving_form(
-                        _apply_through_arrow(
-                            ascii_function,
-                            layout.copy(
-                                content=layout.content.copy(
-                                    parameters={"__array__": "char"}
-                                ),
-                                parameters={"__array__": "string"},
-                            ),
-                            *args,
-                            generate_bitmasks=generate_bitmasks,
-                            **kwargs,
-                        )
-                    )
-                    assert out.is_list
-
-                    assert (
-                        out.content.is_list
-                        and out.content.parameter("__array__") == "string"
-                    )
-                    return out.copy(
-                        content=out.content.copy(
-                            content=out.content.content.copy(
-                                parameters={"__array__": "byte"}
-                            ),
-                            parameters={"__array__": "bytestring"},
-                        ),
-                    )
-
-                else:
-                    return _drop_option_preserving_form(
-                        _apply_through_arrow(
-                            ascii_function,
-                            layout,
-                            *args,
-                            generate_bitmasks=generate_bitmasks,
-                            **kwargs,
-                        )
-                    )
 
     return action
