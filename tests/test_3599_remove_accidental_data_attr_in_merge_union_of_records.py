@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import copy
-
-import numpy as np  # noqa: F401
-
 import awkward as ak
 
 
 def virtualize(array):
     form, length, container = ak.to_buffers(array)
     new_container = {k: lambda v=v: v for k, v in container.items()}
-    return ak.from_buffers(copy.deepcopy(form), length, new_container)
+    return ak.from_buffers(form, length, new_container)
 
 
 def test_merge_union_of_records():
