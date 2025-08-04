@@ -209,7 +209,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         return self._nplike
 
     def copy(self) -> VirtualArray:
-        return copy.copy(self)
+        return copy.deepcopy(self)
 
     def tolist(self) -> list:
         return self.materialize().tolist()  # type: ignore[attr-defined]
