@@ -1723,7 +1723,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             original_index = self._index.data
             is_none = original_index < 0
             num_none = nplike.count_nonzero(is_none)
-            if not isinstance(nplike, TypeTracer):
+            if nplike.known_data:
                 num_none = operator.index(num_none)
             new_index = nplike.empty(self._index.length, dtype=self._index.dtype)
             if isinstance(nplike, Jax):
@@ -1736,7 +1736,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 )
             else:
                 new_index[is_none] = -1
-                if not isinstance(nplike, TypeTracer):
+                if nplike.known_data:
                     stop = new_index.size - num_none
                 else:
                     stop = unknown_length
