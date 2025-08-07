@@ -1674,7 +1674,9 @@ class UnionArray(UnionMeta[Content], Content):
     def to_packed(self, recursive: bool = True) -> Self:
         nplike = self._backend.nplike
         tags = self._tags.data
-        original_index = index = self._index[: tags.shape[0]].data
+        original_index = index = self._index.data[
+            : nplike.shape_item_as_index(tags.shape[0])
+        ]
 
         contents = list(self._contents)
 
