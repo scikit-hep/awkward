@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import warnings
+
 import awkward_cpp
 
 import awkward as ak
@@ -28,6 +30,12 @@ class JaxBackend(Backend):
         return self._jax
 
     def __init__(self):
+        warnings.warn(
+            "The JAX backend is deprecated and will be removed in a future release of Awkward Array. "
+            "Please plan to migrate your code accordingly.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._jax = Jax.instance()
 
     def __getitem__(self, index: KernelKeyType) -> JaxKernel:
