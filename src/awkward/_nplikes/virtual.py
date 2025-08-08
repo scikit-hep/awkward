@@ -165,6 +165,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         if self._array is not UNMATERIALIZED:
             return self._array.T
 
+        # if the existing array is 0D or 1D, we can return self directly
+        # this avoids unnecessary VirtualArray creation and method-chaining
+        if self.ndim <= 1:
+            return self
+
         return type(self)(
             self._nplike,
             self._shape[::-1],
@@ -178,6 +183,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
         if self._array is not UNMATERIALIZED:
             return self.materialize().view(dtype)  # type: ignore[return-value]
+
+        # if the dtype is _exactly_ the dtype of the existing array, we can return self directly
+        # this avoids unnecessary VirtualArray creation and method-chaining
+        if self._dtype == dtype:
+            return self
 
         if len(self.shape) >= 1:
             last, remainder = divmod(
@@ -286,6 +296,10 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             else:
                 length = self.shape[0]
                 start, stop, step = index.indices(length)
+                # if the slice is _exactly_ slicing the whole array, we can return self directly
+                # this avoids unnecessary VirtualArray creation and method-chaining
+                if start == 0 and step == 1 and stop == length:
+                    return self
                 new_length = max(
                     0, (stop - start + (step - (1 if step > 0 else -1))) // step
                 )
