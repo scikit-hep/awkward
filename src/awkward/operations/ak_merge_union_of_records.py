@@ -90,8 +90,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
         # Build unions for each field
         outer_field_contents = []
         for field in all_fields:
-            field_tags = nplike.asarray(tags.data, copy=True)
-            field_index = nplike.asarray(index.data, copy=True)
+            field_tags = nplike.asarray(tags, copy=True)
+            field_index = nplike.asarray(index, copy=True)
 
             # Build contents for union representing current field
             field_contents = [c.content(field) for c in contents if c.has_field(field)]
