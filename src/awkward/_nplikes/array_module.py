@@ -355,7 +355,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                     self,
                     next_shape,
                     x.dtype,
-                    lambda: self.reshape(x.materialize(), next_shape),  # type: ignore[arg-type]
+                    lambda: self.reshape(x.materialize(), next_shape, copy=copy),  # type: ignore[arg-type]
                     lambda: next_shape,
                 )
 
