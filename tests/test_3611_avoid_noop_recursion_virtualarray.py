@@ -2,11 +2,13 @@
 #
 from __future__ import annotations
 
-import awkward as ak
-import numpy as np
-from awkward._nplikes.virtual import VirtualArray
-from awkward._nplikes.numpy import Numpy
 import sys
+
+import numpy as np
+
+import awkward as ak
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.virtual import VirtualArray
 
 
 def test():
