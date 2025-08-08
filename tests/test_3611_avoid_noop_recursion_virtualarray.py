@@ -47,3 +47,16 @@ def test_transpose():
     for _ in range(sys.getrecursionlimit() + 1):
         vc = vc.T
     assert vc.materialize()
+
+
+def test_reshape():
+    numpy_like = Numpy.instance()
+    vc = VirtualArray(
+        numpy_like,
+        shape=(1,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([1], dtype=np.int64),
+    )
+    for _ in range(sys.getrecursionlimit() + 1):
+        vc = numpy_like.reshape(vc, (1,), copy=False)
+    assert vc.materialize()
