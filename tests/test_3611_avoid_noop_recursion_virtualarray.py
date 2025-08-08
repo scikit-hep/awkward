@@ -6,12 +6,11 @@ import sys
 
 import numpy as np
 
-import awkward as ak
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.virtual import VirtualArray
 
 
-def test():
+def test_getitem():
     numpy_like = Numpy.instance()
     vc = VirtualArray(
         numpy_like,
@@ -19,9 +18,32 @@ def test():
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([1], dtype=np.int64),
     )
-    v = ak.contents.NumpyArray(vc)
-
     for _ in range(sys.getrecursionlimit() + 1):
-        v = v[:]
+        vc = vc[:]
+    assert vc.materialize()
 
-    assert ak.materialize(v)
+
+def test_view():
+    numpy_like = Numpy.instance()
+    vc = VirtualArray(
+        numpy_like,
+        shape=(1,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([1], dtype=np.int64),
+    )
+    for _ in range(sys.getrecursionlimit() + 1):
+        vc = vc.view(np.dtype(np.int64))
+    assert vc.materialize()
+
+
+def test_transpose():
+    numpy_like = Numpy.instance()
+    vc = VirtualArray(
+        numpy_like,
+        shape=(1,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([1], dtype=np.int64),
+    )
+    for _ in range(sys.getrecursionlimit() + 1):
+        vc = vc.T
+    assert vc.materialize()
