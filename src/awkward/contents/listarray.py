@@ -10,7 +10,6 @@ from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.listmeta import ListMeta
 from awkward._nplikes.array_like import ArrayLike
-from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -294,17 +293,10 @@ class ListArray(ListMeta[Content], Content):
         if (not nplike.known_data) or nplike.array_equal(starts[1:], stops[:-1]):
             offsets = nplike.empty(lenoffsets, dtype=starts.dtype)
             if lenoffsets is not unknown_length and lenoffsets == 1:
-                if isinstance(nplike, Jax):
-                    offsets = offsets.at[0].set(0)
-                else:
-                    offsets[0] = 0
+                offsets[0] = 0
             else:
-                if isinstance(nplike, Jax):
-                    offsets = offsets.at[:-1].set(starts)
-                    offsets = offsets.at[-1].set(stops[-1])
-                else:
-                    offsets[:-1] = starts
-                    offsets[-1] = stops[-1]
+                offsets[:-1] = starts
+                offsets[-1] = stops[-1]
             return ListOffsetArray(
                 ak.index.Index(offsets, nplike=self._backend.nplike),
                 self._content,

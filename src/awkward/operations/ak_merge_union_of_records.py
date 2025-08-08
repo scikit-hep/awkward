@@ -9,7 +9,6 @@ from awkward._namedaxis import (
     _get_named_axis,
     _named_axis_to_positional_axis,
 )
-from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import ArrayLike, NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
@@ -164,20 +163,11 @@ def _impl(array, axis, highlevel, behavior, attrs):
         num_none = layout.backend.nplike.count_nonzero(is_none)
         dense_index = layout.backend.nplike.empty(index.size, dtype=index.dtype)
 
-        if isinstance(layout.backend.nplike, Jax):
-            dense_index = dense_index.at[is_none].set(-1)
-            dense_index = dense_index.at[~is_none].set(
-                layout.backend.nplike.arange(
-                    index.size - num_none,
-                    dtype=index.dtype,
-                )
-            )
-        else:
-            dense_index[is_none] = -1
-            dense_index[~is_none] = layout.backend.nplike.arange(
-                index.size - num_none,
-                dtype=index.dtype,
-            )
+        dense_index[is_none] = -1
+        dense_index[~is_none] = layout.backend.nplike.arange(
+            index.size - num_none,
+            dtype=index.dtype,
+        )
         return dense_index
 
     def apply(layout, depth, backend, **kwargs):

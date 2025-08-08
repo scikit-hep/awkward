@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import copy
 
-import awkward as ak
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -303,10 +302,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def __setitem__(self, key, value):
         array = self.materialize()
         (value,) = materialize_if_virtual(value)
-        if isinstance(self._nplike, ak._nplikes.jax.Jax):
-            self._array = array.at[key].set(value)
-        else:
-            array.__setitem__(key, value)
+        array.__setitem__(key, value)
 
     def __bool__(self) -> bool:
         array = self.materialize()

@@ -6,7 +6,6 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._nplikes import to_nplike
 from awkward._nplikes.dispatch import nplike_of_obj
-from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_array_like, is_integer_like, is_sized_iterable
@@ -405,14 +404,9 @@ def _normalise_item_nested(item: Content) -> Content:
         projected = item.content._carry(ak.index.Index64(nextindex[nonnull]), False)
 
         # content has been projected; index must agree
-        if isinstance(item.backend.nplike, Jax):
-            nextindex = nextindex.at[nonnull].set(
-                item.backend.nplike.arange(projected.length, dtype=np.int64)
-            )
-        else:
-            nextindex[nonnull] = item.backend.nplike.arange(
-                projected.length, dtype=np.int64
-            )
+        nextindex[nonnull] = item.backend.nplike.arange(
+            projected.length, dtype=np.int64
+        )
 
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(nextindex),
@@ -436,16 +430,9 @@ def _normalise_item_nested(item: Content) -> Content:
         )
 
         nextindex = item.backend.nplike.full(is_valid.shape[0], -1, dtype=np.int64)
-        if isinstance(item.backend.nplike, Jax):
-            nextindex = nextindex.at[positions_where_valid].set(
-                item.backend.nplike.arange(
-                    positions_where_valid.shape[0], dtype=np.int64
-                )
-            )
-        else:
-            nextindex[positions_where_valid] = item.backend.nplike.arange(
-                positions_where_valid.shape[0], dtype=np.int64
-            )
+        nextindex[positions_where_valid] = item.backend.nplike.arange(
+            positions_where_valid.shape[0], dtype=np.int64
+        )
 
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(nextindex, nplike=item.backend.nplike),
@@ -504,18 +491,10 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             cumsum = item_backend.nplike.empty(
                 flat_mask.data.shape[0] + 1, dtype=np.int64
             )
-            if isinstance(item_backend.nplike, Jax):
-                cumsum = cumsum.at[0].set(0)
-                cumsum = cumsum.at[1:].set(
-                    item_backend.nplike.asarray(
-                        item_backend.nplike.cumsum(flat_mask.data)
-                    )
-                )
-            else:
-                cumsum[0] = 0
-                cumsum[1:] = item_backend.nplike.asarray(
-                    item_backend.nplike.cumsum(flat_mask.data)
-                )
+            cumsum[0] = 0
+            cumsum[1:] = item_backend.nplike.asarray(
+                item_backend.nplike.cumsum(flat_mask.data)
+            )
 
             item_offsets = item_backend.nplike.asarray(item.offsets.data)
             nextoffsets = ak.index.Index(cumsum[item_offsets])
@@ -537,16 +516,11 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         and np.issubdtype(item.content.content.dtype, np.bool_)
     ):
         if item_backend.nplike.known_data:
-            if isinstance(item_backend.nplike, Jax):
-                raise TypeError("This slice is not supported for JAX differentiation.")
             # missing values as any integer other than -1 are extremely rare
             isnegative = item.content.index.data < 0
             if item_backend.nplike.any(item.content.index.data < -1):
                 safeindex = item.content.index.data.copy()
-                if isinstance(item_backend.nplike, Jax):
-                    safeindex = safeindex.at[isnegative].set(-1)
-                else:
-                    safeindex[isnegative] = -1
+                safeindex[isnegative] = -1
             else:
                 safeindex = item.content.index.data
 
@@ -568,12 +542,8 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             expanded[isnegative] = True
             cumsum = item_backend.nplike.empty(expanded.shape[0] + 1, dtype=np.int64)
 
-            if isinstance(item_backend.nplike, Jax):
-                cumsum = cumsum.at[0].set(0)
-                cumsum = cumsum.at[1:].set(item_backend.nplike.cumsum(expanded))
-            else:
-                cumsum[0] = 0
-                cumsum[1:] = item_backend.nplike.cumsum(expanded)
+            cumsum[0] = 0
+            cumsum[1:] = item_backend.nplike.cumsum(expanded)
             item_offsets = item_backend.nplike.asarray(item.offsets.data)
             nextoffsets = ak.index.Index(cumsum[item_offsets])
 
@@ -614,19 +584,11 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             item.content.dtype.type, (bool, np.bool_)
         ):
             if item_backend.nplike.known_data:
-                if isinstance(item_backend.nplike, Jax):
-                    raise TypeError(
-                        "This slice is not supported for JAX differentiation."
-                    )
-
                 # missing values as any integer other than -1 are extremely rare
                 isnegative = item.index.data < 0
                 if item_backend.nplike.any(item.index.data < -1):
                     safeindex = item.index.data.copy()
-                    if isinstance(item_backend.nplike, Jax):
-                        safeindex = safeindex.at[isnegative].set(-1)
-                    else:
-                        safeindex[isnegative] = -1
+                    safeindex[isnegative] = -1
                 else:
                     safeindex = item.index.data
 

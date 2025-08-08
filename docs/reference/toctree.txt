@@ -20,8 +20,6 @@
     generated/ak.from_cupy
     generated/ak.to_cupy
     generated/ak.from_dlpack
-    generated/ak.from_jax
-    generated/ak.to_jax
 
 .. toctree::
     :caption: Reading and writing files

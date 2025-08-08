@@ -7,7 +7,6 @@ from itertools import permutations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
-from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
@@ -650,20 +649,11 @@ def _recurse_option_any(
                 is_none = layout.mask_as_bool(False)
                 num_none = nplike.count_nonzero(is_none)
 
-                if isinstance(nplike, Jax):
-                    new_index = new_index.at[is_none].set(-1)
-                    new_index = new_index.at[~is_none].set(
-                        nplike.arange(
-                            layout.length - num_none,
-                            dtype=new_index.dtype,
-                        )
-                    )
-                else:
-                    new_index[is_none] = -1
-                    new_index[~is_none] = nplike.arange(
-                        layout.length - num_none,
-                        dtype=new_index.dtype,
-                    )
+                new_index[is_none] = -1
+                new_index[~is_none] = nplike.arange(
+                    layout.length - num_none,
+                    dtype=new_index.dtype,
+                )
                 return ak.contents.IndexedOptionArray(
                     ak.index.Index64(new_index, nplike=nplike),
                     _enforce_type(layout.project(), type_.content),

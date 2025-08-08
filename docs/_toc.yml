@@ -165,11 +165,4 @@ subtrees:
                       - file: user-guide/how-to-use-in-cpp-cppyy
                         title: "JIT compiling operations with C++ in cppyy"
 
-              - file: user-guide/how-to-specialize
-                title: "Special topics"
-                subtrees:
-                  - entries:
-                      - file: user-guide/how-to-specialize-differentiate-jax
-                        title: "Differentiation using JAX"
-
       - file: reference/index
