@@ -1442,7 +1442,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 )
             )
             contents = []
-            if n == 2 or isinstance(starts.data, numpy.ndarray):
+            if n == 2 or not isinstance(nplike, Cupy):
                 for ptr in tocarry:
                     contents.append(self._content._carry(ptr, True))
             elif n == 3:
