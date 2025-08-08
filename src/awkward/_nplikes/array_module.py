@@ -347,17 +347,17 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             next_shape = self._compute_compatible_shape(shape, x.shape)
             return PlaceholderArray(self, next_shape, x.dtype, x._field_path)
         if isinstance(x, VirtualArray):
-            if not x.is_materialized:
+            if x.is_materialized:
+                return self.reshape(x.materialize(), shape, copy=copy)  # type: ignore[arg-type]
+            else:
                 next_shape = self._compute_compatible_shape(shape, x.shape)
                 return VirtualArray(
                     self,
                     next_shape,
                     x.dtype,
-                    lambda: self.reshape(x.materialize(), next_shape),  # type: ignore[union-attr]
+                    lambda: self.reshape(x.materialize(), next_shape),  # type: ignore[arg-type]
                     lambda: next_shape,
                 )
-            else:
-                x = x.materialize()  # type: ignore[assignment]
 
         if copy is None:
             return self._module.reshape(x, shape)
