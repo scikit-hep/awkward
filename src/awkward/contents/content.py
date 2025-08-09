@@ -1180,7 +1180,9 @@ class Content(Meta):
         )
 
     def to_packed(self, recursive: bool = True) -> Content:
-        return self.materialize()._to_packed(recursive)
+        if recursive:
+            return self.materialize()._to_packed(True)
+        return self._to_packed(False)
 
     def _to_packed(self, recursive: bool = True) -> Content:
         raise NotImplementedError
