@@ -1662,7 +1662,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return numba.typeof(self._numbaview)
 
     def __reduce_ex__(self, protocol: int) -> tuple:
-        result = custom_reduce(self, protocol)
+        result = custom_reduce(ak.operations.materialize(self), protocol)
         if result is not NotImplemented:
             return result
 
