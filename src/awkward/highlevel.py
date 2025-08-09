@@ -1662,7 +1662,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return numba.typeof(self._numbaview)
 
     def __reduce_ex__(self, protocol: int) -> tuple:
-        result = custom_reduce(ak.operations.materialize(self), protocol)
+        materialized = wrap_layout(
+            self._layout.materialize(),
+            self._behavior,
+            attrs=self._attrs,
+        )
+        result = custom_reduce(materialized, protocol)
         if result is not NotImplemented:
             return result
 
@@ -2496,7 +2501,12 @@ class Record(NDArrayOperatorsMixin):
 
     def __reduce_ex__(self, protocol: int) -> tuple:
         # Allow third-party libraries to customise pickling
-        result = custom_reduce(self, protocol)
+        materialized = wrap_layout(
+            self._layout.materialize(),
+            self._behavior,
+            attrs=self._attrs,
+        )
+        result = custom_reduce(materialized, protocol)
         if result is not NotImplemented:
             return result
 
