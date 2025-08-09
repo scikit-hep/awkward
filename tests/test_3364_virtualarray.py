@@ -594,6 +594,18 @@ def test_dlpack(virtual_array):
     virtual_array.__dlpack__()
 
 
+def test_pickling(virtual_array):
+    import pickle
+
+    pickled = pickle.dumps(virtual_array)
+    unpickled = pickle.loads(pickled)
+    assert isinstance(unpickled, np.ndarray)
+    np.testing.assert_array_equal(unpickled, virtual_array.materialize())
+    assert unpickled.shape == virtual_array.shape
+    assert unpickled.dtype == virtual_array.dtype
+    assert virtual_array.is_materialized
+
+
 # Test __array_ufunc__
 def test_array_ufunc(virtual_array, monkeypatch):
     # Call a ufunc on the virtual array
