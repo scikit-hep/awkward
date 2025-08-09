@@ -2723,6 +2723,17 @@ def test_numpyarray_full_like(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_all_materialized
 
 
+def test_numpyarray_pickling(numpyarray, virtual_numpyarray):
+    import pickle
+
+    assert not virtual_numpyarray.is_any_materialized
+    pickled = pickle.dumps(virtual_numpyarray)
+    assert virtual_numpyarray.is_all_materialized
+    unpickled = pickle.loads(pickled)
+    assert ak.array_equal(unpickled, virtual_numpyarray)
+    assert unpickled.is_all_materialized
+
+
 def test_listoffsetarray_to_list(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     assert ak.to_list(virtual_listoffsetarray) == ak.to_list(listoffsetarray)
@@ -3716,6 +3727,17 @@ def test_listoffsetarray_arithmetics(listoffsetarray, virtual_listoffsetarray):
 
     assert virtual_list_array.layout.is_any_materialized
     assert virtual_list_array.layout.is_all_materialized
+
+
+def test_listoffsetarray_pickling(listoffsetarray, virtual_listoffsetarray):
+    import pickle
+
+    assert not virtual_listoffsetarray.is_any_materialized
+    pickled = pickle.dumps(virtual_listoffsetarray)
+    assert virtual_listoffsetarray.is_all_materialized
+    unpickled = pickle.loads(pickled)
+    assert ak.array_equal(unpickled, virtual_listoffsetarray)
+    assert unpickled.is_all_materialized
 
 
 def test_listarray_to_list(listarray, virtual_listarray):
@@ -4799,6 +4821,17 @@ def test_listarray_arithmetics(listarray, virtual_listarray):
 
     assert virtual_list_array.layout.is_any_materialized
     assert virtual_list_array.layout.is_all_materialized
+
+
+def test_listarray_pickling(listarray, virtual_listarray):
+    import pickle
+
+    assert not virtual_listarray.is_any_materialized
+    pickled = pickle.dumps(virtual_listarray)
+    assert virtual_listarray.is_all_materialized
+    unpickled = pickle.loads(pickled)
+    assert ak.array_equal(unpickled, virtual_listarray)
+    assert unpickled.is_all_materialized
 
 
 def test_recordarray_to_list(recordarray, virtual_recordarray):
@@ -6374,3 +6407,14 @@ def test_recordarray_advanced_indexing(recordarray, virtual_recordarray):
     assert ak.array_equal(mask_result, expected_mask)
 
     assert virtual_record_array.layout.is_any_materialized
+
+
+def test_recordarray_pickling(recordarray, virtual_recordarray):
+    import pickle
+
+    assert not virtual_recordarray.is_any_materialized
+    pickled = pickle.dumps(virtual_recordarray)
+    assert virtual_recordarray.is_all_materialized
+    unpickled = pickle.loads(pickled)
+    assert ak.array_equal(unpickled, virtual_recordarray)
+    assert unpickled.is_all_materialized
