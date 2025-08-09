@@ -1616,7 +1616,7 @@ class ListArray(ListMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         return self.to_ListOffsetArray64(True).to_packed(recursive)
 
     def _to_list(self, behavior, json_conversions):

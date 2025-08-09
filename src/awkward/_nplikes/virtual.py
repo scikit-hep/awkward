@@ -338,3 +338,6 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __dlpack__(self, stream: Any = None) -> Any:
         return self.materialize().__dlpack__(stream=stream)  # type: ignore[attr-defined]
+
+    def __reduce__(self):
+        return self.materialize().__reduce__()

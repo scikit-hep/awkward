@@ -795,7 +795,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         if self._content.is_record:
             next = self.to_IndexedOptionArray64()
 
