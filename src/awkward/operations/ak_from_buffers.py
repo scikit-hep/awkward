@@ -345,7 +345,7 @@ def _reconstitute(
             byteorder,
             simplify,
             field_path,
-            _shape_generator,
+            shape_generator,
         )
         if simplify:
             make = ak.contents.BitMaskedArray.simplified

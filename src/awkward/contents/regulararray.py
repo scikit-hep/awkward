@@ -1457,7 +1457,7 @@ class RegularArray(RegularMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         nplike = self._backend.nplike
         length = self.length * self._size
         content = self._content[: nplike.shape_item_as_index(length)]

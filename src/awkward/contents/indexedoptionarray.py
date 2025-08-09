@@ -1711,7 +1711,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         if self.parameter("__array__") == "categorical":
             content = self._content.to_packed(True) if recursive else self._content
             return ak.contents.IndexedOptionArray(
