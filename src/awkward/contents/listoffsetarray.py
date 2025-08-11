@@ -1446,7 +1446,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 for ptr in tocarry:
                     contents.append(self._content._carry(ptr, True))
             elif n == 3:
-                result = argchoose(starts.data, stops.data, n)
+                cupy_offsets, result = argchoose(starts.data, stops.data, n)
+                offsets = Index64(cupy_offsets)
                 # each _ptr is cupy array representing the indices of the combinations
                 for _ptr in result:
                     ptr = ak.index.Index64(_ptr)

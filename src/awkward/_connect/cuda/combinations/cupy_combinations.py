@@ -112,4 +112,4 @@ def argchoose(starts, stops, n, absolute=False, replacement=False):
             for idx in [i1, i2, i3]:
                 idx += starts_parents
         out = (i1, i2, i3)
-    return out
+    return offsets, out
