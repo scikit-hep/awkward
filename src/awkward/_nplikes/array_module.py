@@ -357,7 +357,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                     next_shape,
                     x.dtype,
                     lambda: self.reshape(x.materialize(), next_shape),  # type: ignore[union-attr]
-                    lambda: next_shape,
+                    None,
                 )
             else:
                 x = x.materialize()  # type: ignore[assignment]
