@@ -1371,7 +1371,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             starts = self.starts
             stops = self.stops
 
-            _totallen = Index64.empty(1, nplike, dtype=np.int64)
+            _totallen = Index64.zeros(1, nplike, dtype=np.int64)
             offsets = Index64.empty(
                 self.length + 1,
                 nplike,
