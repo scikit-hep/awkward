@@ -1451,7 +1451,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 # each _ptr is cupy array representing the indices of the combinations
                 for _ptr in result:
                     ptr = ak.index.Index64(_ptr)
-                    contents.append(self._content._carry(ptr, True))
+                    contents.append(self._content._carry(ptr, False))
             else:
                 raise NotImplementedError(
                     "awkward.combinations with n > 3 is not implemented"
