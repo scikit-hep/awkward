@@ -9,12 +9,12 @@ from typing import Any, Callable
 from packaging.version import parse as parse_version
 
 import awkward as ak
+from awkward._nplikes.array_like import maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import try_touch_data
-from awkward._nplikes.array_like import maybe_materialize
 from awkward._typing import Protocol, TypeAlias
 
 KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
