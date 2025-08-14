@@ -319,6 +319,12 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._shape
 
     @property
+    def strides(self):
+        raise AssertionError(
+            "bug in Awkward Array: attempt to get the strides of a TypeTracerArray"
+        )
+
+    @property
     def inner_shape(self) -> tuple[ShapeItem, ...]:
         if len(self._shape) > 1:
             self.touch_shape()

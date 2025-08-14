@@ -7,6 +7,7 @@ from abc import abstractmethod
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import (
     TYPE_CHECKING,
+    Any,
     DType,
     EllipsisType,
     Protocol,
@@ -31,6 +32,10 @@ class ArrayLike(Protocol):
     @property
     @abstractmethod
     def shape(self) -> tuple[ShapeItem, ...]: ...
+
+    @property
+    @abstractmethod
+    def strides(self) -> tuple[ShapeItem, ...]: ...
 
     @property
     @abstractmethod
@@ -133,3 +138,18 @@ class ArrayLike(Protocol):
 
     @abstractmethod
     def __invert__(self) -> Self: ...
+
+
+def maybe_materialize(*args: Any) -> tuple[Any, ...]:
+    """
+    A little helper function to materialize all materializable arrays in a list of arrays.
+    """
+    return tuple(
+        arg.materialize() if isinstance(arg, MaterializableArray) else arg
+        for arg in args
+    )
+
+
+class MaterializableArray(ArrayLike):
+    @abstractmethod
+    def materialize(self) -> ArrayLike: ...

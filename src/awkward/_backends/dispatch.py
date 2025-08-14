@@ -8,7 +8,7 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._typing import Callable, TypeAlias, TypeVar, cast
 from awkward._util import UNSET, Sentinel
 
@@ -140,9 +140,9 @@ def find_virtual_backend(obj: type):
     Implements a lookup for finding the backends of virtual arrays.
     This is necessary to avoid calling `isinstance` inside `backend_of_obj` which may cause slowdown.
     """
-    if issubclass(obj, VirtualArray):
+    if issubclass(obj, VirtualNDArray):
 
-        def finder(obj: VirtualArray):
+        def finder(obj: VirtualNDArray):
             if isinstance(obj.nplike, ak._nplikes.numpy.Numpy):
                 return _name_to_backend_cls["cpu"].instance()
             elif isinstance(obj.nplike, ak._nplikes.cupy.Cupy):

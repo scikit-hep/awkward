@@ -193,7 +193,7 @@ def from_dict(input: Mapping) -> Form:
             form_key=form_key,
         )
 
-    elif input["class"] == "VirtualArray":
+    elif input["class"] == "VirtualNDArray":
         raise ValueError("Awkward 1.x VirtualArrays are not supported")
 
     else:

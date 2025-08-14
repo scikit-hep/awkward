@@ -5,7 +5,11 @@ from __future__ import annotations
 import copy
 
 import awkward as ak
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import (
+    ArrayLike,
+    MaterializableArray,
+    maybe_materialize,
+)
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._operators import NDArrayOperatorsMixin
@@ -26,16 +30,7 @@ def assert_never():
     raise AssertionError("this shape_generator should never be run!")
 
 
-def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
-    """
-    A little helper function to materialize all virtual arrays in a list of arrays.
-    """
-    return tuple(
-        arg.materialize() if isinstance(arg, VirtualArray) else arg for arg in args
-    )
-
-
-class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
+class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
     """
     Implements a virtual array to be used as a buffer inside layouts.
     Virtual arrays are tied to specific nplikes.
@@ -208,7 +203,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             )
         return self._nplike
 
-    def copy(self) -> VirtualArray:
+    def copy(self) -> VirtualNDArray:
         return copy.copy(self)
 
     def tolist(self) -> list:
@@ -229,7 +224,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def tobytes(self, order="C") -> bytes:
         return self.materialize().tobytes(order)  # type: ignore[attr-defined]
 
-    def __copy__(self) -> VirtualArray:
+    def __copy__(self) -> VirtualNDArray:
         new_virtual = type(self)(
             self._nplike,
             self._shape,
@@ -240,7 +235,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         new_virtual._array = self._array
         return new_virtual
 
-    def __deepcopy__(self, memo) -> VirtualArray:
+    def __deepcopy__(self, memo) -> VirtualNDArray:
         new_virtual = type(self)(
             self._nplike,
             self._shape,
@@ -264,13 +259,13 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             shape = ""
         else:
             shape = f", shape={self._shape!r}"
-        return f"VirtualArray(array={self._array}, {dtype}{shape})"
+        return f"VirtualNDArray(array={self._array}, {dtype}{shape})"
 
     def __str__(self):
         return repr(self) if self._shape else "??"
 
     def __getitem__(self, index):
-        (index,) = materialize_if_virtual(index)
+        (index,) = maybe_materialize(index)
         if self._array is not UNMATERIALIZED:
             return self._array.__getitem__(index)
 
@@ -302,7 +297,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __setitem__(self, key, value):
         array = self.materialize()
-        (value,) = materialize_if_virtual(value)
+        (value,) = maybe_materialize(value)
         if isinstance(self._nplike, ak._nplikes.jax.Jax):
             self._array = array.at[key].set(value)
         else:
@@ -338,3 +333,17 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __dlpack__(self, stream: Any = None) -> Any:
         return self.materialize().__dlpack__(stream=stream)  # type: ignore[attr-defined]
+
+
+# backward compatibility
+class VirtualArray(NDArrayOperatorsMixin, MaterializableArray):
+    def __init__(self, *args, **kwargs):
+        import warnings
+
+        warnings.warn(
+            "The `VirtualArray` class is deprecated and will be removed in a future release of Awkward Array. "
+            "Please plan to migrate your code to use the `VirtualNDArray` class instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)

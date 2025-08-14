@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import MaterializableArray
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import TYPE_CHECKING, Any, DType, Self
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from numpy.typing import DTypeLike
 
 
-class PlaceholderArray(ArrayLike):
+class PlaceholderArray(MaterializableArray):
     def __init__(
         self,
         nplike: NumpyLike,
@@ -52,6 +52,13 @@ class PlaceholderArray(ArrayLike):
     @property
     def nbytes(self) -> int:
         return 0
+
+    def materialize(self):
+        msg = f"{self} should never been encountered. "
+        if self.field_path:
+            msg += f"Awkward-array attempted to access a field '{self.field_path}', but it's only a placeholder. "
+        msg += "Please report it to the developers at: https://github.com/scikit-hep/awkward/issues"
+        raise RuntimeError(msg)
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
