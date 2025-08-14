@@ -336,7 +336,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
 
 # backward compatibility
-class VirtualArray(NDArrayOperatorsMixin, MaterializableArray):
+class VirtualArray(VirtualNDArray):
     def __init__(self, *args, **kwargs):
         import warnings
 
