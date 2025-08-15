@@ -63,7 +63,8 @@ class PlaceholderArray(MaterializableArray):
         msg += (
             " This is unexpected behavior — please open an issue at "
             "https://github.com/scikit-hep/awkward/issues with a minimal example."
-    )
+        )
+
     raise RuntimeError(msg)
 
     @property
