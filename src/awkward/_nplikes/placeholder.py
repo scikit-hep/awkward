@@ -147,13 +147,13 @@ class PlaceholderArray(MaterializableArray):
         del key
         maybe_materialize(self, value)
 
-    def __bool__(self):
+    def __bool__(self):  # pylint: disable=E0304
         self.materialize()
 
     def __int__(self):
         self.materialize()
 
-    def __index__(self):  # noqa: PLE0305
+    def __index__(self):  # noqa: PLE0305 # pylint: disable=E0305
         self.materialize()
 
     def __len__(self) -> int:
