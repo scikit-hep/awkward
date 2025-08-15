@@ -142,7 +142,17 @@ class ArrayLike(Protocol):
 
 def maybe_materialize(*args: Any) -> tuple[Any, ...]:
     """
-    A little helper function to materialize all materializable arrays in a list of arrays.
+    Returns a tuple where all `MaterializableArray` arguments have been replaced
+    by the result of calling their `.materialize()` method.
+
+    Other `ArrayLike` or `Any` arguments are returned unchanged.
+
+    Args:
+        *args: Variable length argument list of MaterializableArray or ArrayLike or Any objects.
+
+    Returns:
+        tuple: A tuple where each MaterializableArray is replaced by its materialized form,
+        and other ArrayLike or Any objects are returned unchanged.
     """
     return tuple(
         arg.materialize() if isinstance(arg, MaterializableArray) else arg

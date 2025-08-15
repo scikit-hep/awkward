@@ -64,8 +64,7 @@ class PlaceholderArray(MaterializableArray):
             " This is unexpected behavior — please open an issue at "
             "https://github.com/scikit-hep/awkward/issues with a minimal example."
         )
-
-    raise RuntimeError(msg)
+        raise RuntimeError(msg)
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
