@@ -54,11 +54,17 @@ class PlaceholderArray(MaterializableArray):
         return 0
 
     def materialize(self):
-        msg = f"{self} should never been encountered. "
+        msg = f"{self} should never have been encountered."
         if self.field_path:
-            msg += f"Awkward-array attempted to access a field '{self.field_path}', but it's only a placeholder. "
-        msg += "Please report it to the developers at: https://github.com/scikit-hep/awkward/issues"
-        raise RuntimeError(msg)
+            msg += (
+                f" Awkward Array tried to access a field '{self.field_path}', "
+                "but it exists only as a placeholder."
+            )
+        msg += (
+            " This is unexpected behavior — please open an issue at "
+            "https://github.com/scikit-hep/awkward/issues with a minimal example."
+    )
+    raise RuntimeError(msg)
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
