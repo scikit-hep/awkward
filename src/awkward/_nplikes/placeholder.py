@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from awkward._nplikes.array_like import MaterializableArray
+from awkward._nplikes.array_like import MaterializableArray, maybe_materialize
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._typing import TYPE_CHECKING, Any, DType, Self
@@ -140,67 +140,69 @@ class PlaceholderArray(MaterializableArray):
                 msg += "please report it to the developers at: https://github.com/scikit-hep/awkward/issues"
             raise TypeError(msg)
 
-    def tolist(self) -> list:
-        raise RuntimeError
+    def tolist(self):
+        self.materialize()
 
     def __setitem__(self, key, value):
-        raise RuntimeError
+        del key
+        maybe_materialize(self, value)
 
-    def __bool__(self) -> bool:
-        raise RuntimeError
+    def __bool__(self):
+        self.materialize()
 
-    def __int__(self) -> int:
-        raise RuntimeError
+    def __int__(self):
+        self.materialize()
 
-    def __index__(self) -> int:
-        raise RuntimeError
+    def __index__(self):  # noqa: PLE0305
+        self.materialize()
 
     def __len__(self) -> int:
         return int(self._shape[0])
 
     def __add__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __and__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __eq__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __floordiv__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __ge__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __gt__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __invert__(self):
-        raise RuntimeError
+        self.materialize()
 
     def __le__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __lt__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __mul__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __or__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __sub__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     def __truediv__(self, other):
-        raise RuntimeError
+        maybe_materialize(self, other)
 
     __iter__: None = None
 
-    def __dlpack_device__(self) -> tuple[int, int]:
-        raise RuntimeError
+    def __dlpack_device__(self):
+        self.materialize()
 
-    def __dlpack__(self, stream: Any = None) -> Any:
-        raise RuntimeError
+    def __dlpack__(self, stream: Any = None):
+        del stream
+        self.materialize()
