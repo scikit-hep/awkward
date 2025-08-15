@@ -320,8 +320,8 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     @property
     def strides(self):
-        raise RuntimeError(
-            "Cannot get the strides of a TypeTracerArray because its not a concrete array"
+        raise AssertionError(
+            "Bug in Awkward Array: cannot get the strides of a TypeTracerArray because its not a concrete array"
         )
 
     @property
@@ -397,12 +397,14 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         )
 
     def __iter__(self):
-        raise RuntimeError(
-            "Cannot iterate over TypeTracerArray because its not a concrete array"
+        raise AssertionError(
+            "Bug in Awkward Array: cannot iterate over TypeTracerArray because its not a concrete array"
         )
 
     def __array__(self, dtype=None):
-        raise RuntimeError("Cannot convert TypeTracerArray into a concrete array")
+        raise AssertionError(
+            "Bug in Awkward Array: cannot convert TypeTracerArray into a concrete array"
+        )
 
     class _CTypes:
         data = 0
@@ -412,8 +414,8 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._CTypes
 
     def __len__(self):
-        raise RuntimeError(
-            "Cannot get length of a TypeTracerArray because its not a concrete array"
+        raise AssertionError(
+            "Bug in Awkward Array: cannot get length of a TypeTracerArray because its not a concrete array"
         )
 
     def __getitem__(
