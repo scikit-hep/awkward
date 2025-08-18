@@ -170,17 +170,18 @@ __device__ float atomicMin<float>(float* addr, float value) {
 }
 
 // atomicMin() specialization for double
-// https://stackoverflow.com/a/55145948
 template <>
 __device__ double atomicMin<double>(double* address, double val) {
-    unsigned long long int* addr_as_ull = (unsigned long long int*)address;
-    unsigned long long int old = *addr_as_ull, assumed;
+    unsigned long long int* addr_as_ull =
+        reinterpret_cast<unsigned long long int*>(address);
+    unsigned long long int old = *addr_as_ull;
+    unsigned long long int assumed;
 
     do {
         assumed = old;
         double assumed_val = __longlong_as_double(assumed);
-        if (val >= assumed_val) break;
-        old = atomicCAS(addr_as_ull, assumed, __double_as_longlong(val));
+        double new_val = fmin(val, assumed_val);
+        old = atomicCAS(addr_as_ull, assumed, __double_as_longlong(new_val));
     } while (assumed != old);
 
     return __longlong_as_double(old);
@@ -260,17 +261,18 @@ __device__ float atomicMax<float>(float* addr, float value) {
 }
 
 // atomicMax() specialization for double
-// https://stackoverflow.com/a/55145948
 template <>
 __device__ double atomicMax<double>(double* address, double val) {
-    unsigned long long int* address_as_ull = (unsigned long long int*)address;
-    unsigned long long int old = *address_as_ull, assumed;
+    unsigned long long int* addr_as_ull =
+        reinterpret_cast<unsigned long long int*>(address);
+    unsigned long long int old = *addr_as_ull;
+    unsigned long long int assumed;
 
     do {
         assumed = old;
         double assumed_val = __longlong_as_double(assumed);
-        if (val <= assumed_val) break; // Already larger or equal, no update needed
-        old = atomicCAS(address_as_ull, assumed, __double_as_longlong(val));
+        double new_val = fmax(val, assumed_val);
+        old = atomicCAS(addr_as_ull, assumed, __double_as_longlong(new_val));
     } while (assumed != old);
 
     return __longlong_as_double(old);
