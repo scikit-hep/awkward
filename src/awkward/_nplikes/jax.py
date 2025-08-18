@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import warnings
+
 import awkward as ak
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
@@ -19,6 +21,12 @@ class Jax(ArrayModuleNumpyLike):
     supports_virtual_arrays: Final = True
 
     def __init__(self):
+        warnings.warn(
+            "The JAX backend is deprecated and will be removed in a future release of Awkward Array. "
+            "Please plan to migrate your code accordingly.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         jax = ak.jax.import_jax()
         self._module = jax.numpy
 
