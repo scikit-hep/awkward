@@ -68,13 +68,19 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             if obj.is_materialized:
                 return self.asarray(obj.materialize(), dtype=dtype, copy=copy)
             else:
-                return VirtualArray(
-                    obj._nplike,
-                    obj._shape,
-                    obj._dtype if dtype is None else dtype,
-                    lambda: self.asarray(obj.materialize(), dtype=dtype, copy=copy),
-                    lambda: obj.shape,
-                )
+                # if we are not copying and the dtype is _exactly_ the dtype of the existing array
+                # or dtype is None, we can return the VirtualArray directly
+                # this avoids unnecessary VirtualArray creation and method-chaining
+                if not copy and (obj.dtype == dtype or dtype is None):
+                    return obj
+                else:
+                    return VirtualArray(
+                        obj._nplike,
+                        obj._shape,
+                        obj._dtype if dtype is None else dtype,
+                        lambda: self.asarray(obj.materialize(), dtype=dtype, copy=copy),
+                        lambda: obj.shape,
+                    )
         if copy:
             return self._module.array(obj, dtype=dtype, copy=True)
         elif copy is None:
