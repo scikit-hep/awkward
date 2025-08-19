@@ -274,8 +274,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [build-docs]
     name: Deploy Branch Preview
-    # We can only deploy for PRs on host repo
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event_name == 'pull_request' }}
     permissions:
       id-token: write
       contents: read
