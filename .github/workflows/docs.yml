@@ -270,35 +270,16 @@ jobs:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
 
-  branch-preview:
-    runs-on: ubuntu-24.04
-    needs: [build-docs]
-    name: Deploy Branch Preview
-    if: ${{ github.event_name == 'pull_request' }}
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      S3_BUCKET: "preview.awkward-array.org"
-      DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
-    environment:
-      name: docs
-      url: "${{ env.DEPLOY_URL }}/${{ github.head_ref }}"
-    steps:
-    - uses: actions/checkout@v4
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: eu-west-2
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
-    - name: Download rendered docs
-      uses: actions/download-artifact@v4
-      with:
-        name: docs
-        path: built-docs
-    - name: Sync artefacts
+    - name: Save PR number
+      env:
+        PR_NUMBER: ${{ github.event.number }}
       run: |
-        aws s3 sync built-docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
+        mkdir -p ./pr
+        echo $PR_NUMBER > ./pr/pr_number.txt
+    - uses: actions/upload-artifact@v4
+      with:
+        name: pr_number
+        path: pr/
 
   deploy:
     runs-on: ubuntu-24.04
