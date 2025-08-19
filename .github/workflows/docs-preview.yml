@@ -22,7 +22,7 @@ jobs:
       DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
     environment:
       name: docs
-      url: "${{ env.DEPLOY_URL }}/${{ github.head_ref }}"
+      url: "${{ env.DEPLOY_URL }}/PR$${{ steps.pr_number.outputs.pr_number }}"
     steps:
     # - name: Configure AWS credentials
     #   uses: aws-actions/configure-aws-credentials@v4
@@ -66,12 +66,15 @@ jobs:
           fs.writeFileSync(path.join(temp, 'pr_number.zip'), Buffer.from(downloadPRNumber.data));
     - name: Unzip artifacts
       run: |
-        unzip docs.zip -d "${{ runner.temp }}/artifacts"
-        unzip pr_number.zip -d "${{ runner.temp }}/artifacts"
+        unzip "${{ runner.temp }}/artifacts/docs.zip" -d "${{ runner.temp }}/artifacts"
+        unzip "${{ runner.temp }}/artifacts/pr_number.zip" -d "${{ runner.temp }}/artifacts"
     - name: Read PR number
+      id: pr_number
       run: |
-        echo "PR_NUMBER=$(cat ${{ runner.temp }}/artifacts/pr_number.txt)" >> $GITHUB_ENV
-        rm ${{ runner.temp }}/artifacts/pr_number.txt
+        echo "pr_number=$(cat ${{ runner.temp }}/artifacts/pr_number.txt)" >> $GITHUB_OUTPUT
+        rm "${{ runner.temp }}/artifacts/pr_number.txt"
+        rm "${{ runner.temp }}/artifacts/docs.zip"
+        rm "${{ runner.temp }}/artifacts/pr_number.zip"
     - name: Sync artifacts
       run: |
-        aws s3 sync ${{ runner.temp }}/artifacts/ "s3://${S3_BUCKET}/PR${{ env.PR_NUMBER }}"
+        aws s3 sync ${{ runner.temp }}/artifacts/ "s3://${S3_BUCKET}/PR${{ steps.pr_number.outputs.pr_number }}"
