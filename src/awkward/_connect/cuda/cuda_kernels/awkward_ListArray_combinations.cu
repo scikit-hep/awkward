@@ -9,9 +9,9 @@
 //     - fromindex: kept for signature parity
 //     """
 //     import math, cupy
-// 
+//
 //     (tocarry, toindex, fromindex, n, replacement, starts, stops, length, invocation_index, err_code) = args
-// 
+//
 //     # Pass A: per-list counts (offsets[0] must be 0)
 //     scan_in_array_offsets = cupy.zeros(length + 1, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization([
@@ -22,24 +22,24 @@
 //         (tocarry, toindex, fromindex, n, bool(replacement), starts, stops, length,
 //          scan_in_array_offsets, invocation_index, err_code)
 //     )
-// 
+//
 //     # Inclusive scan (device-only)
 //     scan_in_array_offsets = cupy.cumsum(scan_in_array_offsets)
-// 
+//
 //     # Allocate parents/local_indices (device-only), sized to total outputs
 //     total = int(scan_in_array_offsets[length])
 //     scan_in_array_parents = cupy.zeros(total, dtype=cupy.int64)
 //     scan_in_array_local_indices = cupy.zeros(total, dtype=cupy.int64)
-// 
+//
 //     # Fill parents as a run-length expansion of [0..length-1]
 //     # (pure device write in a trivial loop would be another kernel; your original loop is fine)
 //     for i in range(1, length + 1):
 //         scan_in_array_parents[scan_in_array_offsets[i - 1]:scan_in_array_offsets[i]] = i - 1
-// 
+//
 //     # Choose launch for passes B and C
 //     block_size = min(1024, total) if total > 0 else 1
 //     grid_size = (total + block_size - 1)//block_size if block_size > 0 else 1
-// 
+//
 //     # Pass B: compute local ranks
 //     cuda_kernel_templates.get_function(fetch_specialization([
 //         "awkward_ListArray_combinations_b",
@@ -50,7 +50,7 @@
 //          scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices,
 //          invocation_index, err_code)
 //     )
-// 
+//
 //     # Pass C: unrank and write carries
 //     cuda_kernel_templates.get_function(fetch_specialization([
 //         "awkward_ListArray_combinations_c",
@@ -61,7 +61,7 @@
 //          scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices,
 //          invocation_index, err_code)
 //     )
-// 
+//
 // out["awkward_ListArray_combinations_a", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_b", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_c", {dtype_specializations}] = None

@@ -1,11 +1,11 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 // BEGIN PYTHON
-// 
+//
 // def f(grid, block, args):
 //     """
 //     Device-only two-pass launcher for combinations length with general n.
-// 
+//
 //     Parameters
 //     ----------
 //     grid, block : CUDA launch config
@@ -21,12 +21,12 @@
 //         - err_code: cupy.ndarray shape (1,), dtype=uint64
 //     """
 //     import cupy
-// 
+//
 //     (totallen, tooffsets, n, replacement, starts, stops, length, invocation_index, err_code) = args
-// 
+//
 //     scan_in_array_totallen = cupy.empty(length, dtype=cupy.int64)
 //     scan_in_array_tooffsets = cupy.empty(length, dtype=cupy.int64)
-// 
+//
 //     # Pass A: compute per-list combination counts (unsummed)
 //     cuda_kernel_templates.get_function(fetch_specialization([
 //         "awkward_ListArray_combinations_length_a",
@@ -37,12 +37,12 @@
 //          scan_in_array_totallen, scan_in_array_tooffsets,
 //          invocation_index, err_code)
 //     )
-// 
+//
 //     # Device-only inclusive scans, **in-place** (no new allocations):
 //     # (CuPy supports 'out='; we use it to avoid extra temporaries.)
 //     cupy.cumsum(scan_in_array_totallen, out=scan_in_array_totallen)
 //     cupy.cumsum(scan_in_array_tooffsets, out=scan_in_array_tooffsets)
-// 
+//
 //     # Pass B: finalize totallen and tooffsets using the scans
 //     cuda_kernel_templates.get_function(fetch_specialization([
 //         "awkward_ListArray_combinations_length_b",
@@ -53,7 +53,7 @@
 //          scan_in_array_totallen, scan_in_array_tooffsets,
 //          invocation_index, err_code)
 //     )
-// 
+//
 // # Register specializations (handled elsewhere by your template system):
 // out["awkward_ListArray_combinations_length_a", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_length_b", {dtype_specializations}] = None
