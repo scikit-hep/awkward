@@ -19,7 +19,7 @@ env:
 jobs:
   awkward-cpp-wasm:
     name: Build C++ WASM
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
       with:
@@ -45,7 +45,7 @@ jobs:
 
 
   awkward-cpp-x86-64:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build C++ x86
     defaults:
       run:
@@ -100,7 +100,7 @@ jobs:
         path: awkward-cpp/dist/awkward*.whl
 
   awkward:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build Python
     steps:
     - uses: actions/checkout@v4
@@ -121,7 +121,7 @@ jobs:
 
   execute-cppyy:
     needs: [awkward-cpp-x86-64, awkward]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Execute cppyy notebook
     steps:
     - uses: actions/checkout@v4
@@ -167,7 +167,7 @@ jobs:
         path: docs/user-guide/how-to-use-in-cpp-cppyy.ipynb
 
   build-docs:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [awkward-cpp-x86-64, awkward, execute-cppyy]
     name: Build Docs
     defaults:
@@ -271,7 +271,7 @@ jobs:
         path: docs/_build/.jupyter_cache
 
   branch-preview:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [build-docs]
     name: Deploy Branch Preview
     if: ${{ github.event_name == 'pull_request' }}
@@ -301,7 +301,7 @@ jobs:
         aws s3 sync built-docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
 
   deploy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [ build-docs ]
     # We can only deploy for PRs on host repo
     if: github.event_name == 'push' || github.event_name == 'release'
