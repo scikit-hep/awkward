@@ -154,13 +154,13 @@ def test_numpy1(iterable):
     assert np.array_equal(out, nparray)
 
     if np.issubdtype(nparray.dtype, np.floating):
-        # asarray with dtype=None, copy only if required
+        # asarray with dtype=None, no copy is required
         out = np.asarray(akarray, dtype=None)
         assert np.array_equal(out, nparray)
         assert np.shares_memory(akarray.layout.data, nparray)
         assert np.shares_memory(out, nparray)
 
-        # asarray with same dtype, copy only if required
+        # asarray with same dtype, no copy is required
         out = np.asarray(akarray, dtype=np.float64)
         assert np.array_equal(out, nparray)
         assert np.shares_memory(akarray.layout.data, nparray)
@@ -190,13 +190,13 @@ def test_numpy1(iterable):
         assert np.shares_memory(akarray.layout.data, nparray)
         assert not np.shares_memory(out, nparray)
 
-        # copy=False and dtype=None, copy only if required
+        # copy=False and dtype=None, no copy is required
         out = np.array(akarray, dtype=None, copy=False)
         assert np.array_equal(out, nparray)
         assert np.shares_memory(akarray.layout.data, nparray)
         assert np.shares_memory(out, nparray)
 
-        # copy=False and the same dtype is requested, copy only if required
+        # copy=False and the same dtype is requested, no copy is required
         out = np.array(akarray, dtype=np.float64, copy=False)
         assert np.array_equal(out, nparray)
         assert np.shares_memory(akarray.layout.data, nparray)
