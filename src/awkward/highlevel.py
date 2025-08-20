@@ -1666,6 +1666,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self._layout.materialize(),
             self._behavior,
             attrs=self._attrs,
+            highlevel=True,
         )
         result = custom_reduce(materialized, protocol)
         if result is not NotImplemented:
@@ -2505,6 +2506,7 @@ class Record(NDArrayOperatorsMixin):
             self._layout.materialize(),
             self._behavior,
             attrs=self._attrs,
+            highlevel=True,
         )
         result = custom_reduce(materialized, protocol)
         if result is not NotImplemented:
