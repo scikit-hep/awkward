@@ -9,7 +9,7 @@ jobs:
   branch-preview:
     runs-on: ubuntu-24.04
     name: Deploy Branch Preview
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
     permissions:
       id-token: write
       contents: read
