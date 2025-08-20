@@ -352,7 +352,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         if isinstance(x, VirtualArray):
             if not x.is_materialized:
                 next_shape = self._compute_compatible_shape(shape, x.shape)
-                # if the reshape is _exactly_ shaping the array as it is already, we can return self directly
+                # if the reshape is _exactly_ shaping the array as it is already, we can return the VirtualArray directly
                 # this avoids unnecessary VirtualArray creation and method-chaining
                 if next_shape == x.shape and not copy:
                     return x
