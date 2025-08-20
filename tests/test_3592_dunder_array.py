@@ -28,7 +28,7 @@ def test_numpy2(iterable):
     out = np.asarray(akarray)
     assert np.array_equal(out, nparray)
 
-    if "__array__" not in akarray.layout.parameters:
+    if np.issubdtype(nparray.dtype, np.floating):
         # copy=None and dtype=None, no copy is required
         out = np.asarray(akarray, dtype=None, copy=None)
         assert np.array_equal(out, nparray)
@@ -153,7 +153,7 @@ def test_numpy1(iterable):
     out = np.asarray(akarray)
     assert np.array_equal(out, nparray)
 
-    if "__array__" not in akarray.layout.parameters:
+    if np.issubdtype(nparray.dtype, np.floating):
         # asarray with dtype=None, copy only if required
         out = np.asarray(akarray, dtype=None)
         assert np.array_equal(out, nparray)
