@@ -17,6 +17,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-requests: write
     env:
       S3_BUCKET: "preview.awkward-array.org"
       DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
