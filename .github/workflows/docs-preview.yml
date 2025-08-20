@@ -91,4 +91,4 @@ jobs:
       with:
         issue-number: ${{ steps.pr_number.outputs.pr_number }}
         body: |
-          The documentation preview is ready to be viewed at <${{ env.DEPLOY_URL }}/PR$${{ steps.pr_number.outputs.pr_number }}>
+          The documentation preview is ready to be viewed at <${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}>
