@@ -75,6 +75,20 @@ jobs:
         rm "${{ runner.temp }}/artifacts/pr_number.txt"
         rm "${{ runner.temp }}/artifacts/docs.zip"
         rm "${{ runner.temp }}/artifacts/pr_number.zip"
-    - name: Sync artifacts
-      run: |
-        aws s3 sync ${{ runner.temp }}/artifacts/ "s3://${S3_BUCKET}/PR${{ steps.pr_number.outputs.pr_number }}"
+    # - name: Sync artifacts
+    #   run: |
+    #     aws s3 sync ${{ runner.temp }}/artifacts/ "s3://${S3_BUCKET}/PR${{ steps.pr_number.outputs.pr_number }}"
+    - name: Try to find previous bot comment
+      uses: peter-evans/find-comment@v3
+      id: fc
+      with:
+        issue-number: ${{ steps.pr_number.outputs.pr_number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: The documentation preview is ready to be viewed
+    - name: Create comment with preview link
+      if: steps.fc.outputs.comment-id == ''
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        issue-number: ${{ steps.pr_number.outputs.pr_number }}
+        body: |
+          The documentation preview is ready to be viewed at <${{ env.DEPLOY_URL }}/PR$${{ steps.pr_number.outputs.pr_number }}>
