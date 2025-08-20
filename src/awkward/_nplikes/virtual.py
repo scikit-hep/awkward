@@ -35,6 +35,19 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     )
 
 
+def _wrap_generator_asarray(
+    nplike: NumpyLike, generator: Callable[[], ArrayLike]
+) -> Callable[[], ArrayLike]:
+    """
+    Wraps a generator function to ensure it returns an array-like object.
+    """
+
+    def wrapped_generator() -> ArrayLike:
+        return nplike.asarray(generator())
+
+    return wrapped_generator
+
+
 class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     """
     Implements a virtual array to be used as a buffer inside layouts.
@@ -56,6 +69,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         dtype: DTypeLike,
         generator: Callable[[], ArrayLike],
         shape_generator: Callable[[], tuple[ShapeItem, ...]] | None = None,
+        __wrap_generator_asarray__: bool = False,
     ) -> None:
         if not nplike.supports_virtual_arrays:
             raise TypeError(
@@ -71,6 +85,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         self._shape = shape
         self._dtype = np.dtype(dtype)
         self._array: Sentinel | ArrayLike = UNMATERIALIZED
+
+        # this ensures that the generator returns an array-like object according to the nplike
+        if __wrap_generator_asarray__:
+            generator = _wrap_generator_asarray(nplike, generator)
+
         self._generator = generator
         self._shape_generator = shape_generator
 
@@ -135,7 +154,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
-            array = self._nplike.asarray(self._generator())
+            array = _wrap_generator_asarray(self._nplike, self._generator)()
             if len(self._shape) != len(array.shape):
                 raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"

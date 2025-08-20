@@ -60,3 +60,29 @@ def test_reshape():
     for _ in range(sys.getrecursionlimit() + 1):
         vc = numpy_like.reshape(vc, (1,), copy=False)
     assert vc.materialize()
+
+
+def test_asarray():
+    numpy_like = Numpy.instance()
+
+    # copy=False
+    vc = VirtualArray(
+        numpy_like,
+        shape=(1,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([1], dtype=np.int64),
+    )
+    for _ in range(sys.getrecursionlimit() + 1):
+        vc = numpy_like.asarray(vc, dtype=np.dtype(np.int64), copy=False)
+    assert vc.materialize()
+
+    # copy=None
+    vc = VirtualArray(
+        numpy_like,
+        shape=(1,),
+        dtype=np.dtype(np.int64),
+        generator=lambda: np.array([1], dtype=np.int64),
+    )
+    for _ in range(sys.getrecursionlimit() + 1):
+        vc = numpy_like.asarray(vc, dtype=np.dtype(np.int64), copy=None)
+    assert vc.materialize()
