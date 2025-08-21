@@ -9,9 +9,9 @@
 //     - fromindex: kept for signature parity
 //     """
 //     import math, cupy
-//
+
 //     (tocarry, toindex, fromindex, n, replacement, starts, stops, length, invocation_index, err_code) = args
-//
+
 //     # Pass A: per-list counts (offsets[0] must be 0)
 //     scan_in_array_offsets = cupy.zeros(length + 1, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization([
@@ -22,24 +22,24 @@
 //         (tocarry, toindex, fromindex, n, bool(replacement), starts, stops, length,
 //          scan_in_array_offsets, invocation_index, err_code)
 //     )
-//
+
 //     # Inclusive scan (device-only)
 //     scan_in_array_offsets = cupy.cumsum(scan_in_array_offsets)
-//
+
 //     # Allocate parents/local_indices (device-only), sized to total outputs
 //     total = int(scan_in_array_offsets[length])
 //     scan_in_array_parents = cupy.zeros(total, dtype=cupy.int64)
 //     scan_in_array_local_indices = cupy.zeros(total, dtype=cupy.int64)
-//
+
 //     # Fill parents as a run-length expansion of [0..length-1]
 //     # (pure device write in a trivial loop would be another kernel; your original loop is fine)
 //     for i in range(1, length + 1):
 //         scan_in_array_parents[scan_in_array_offsets[i - 1]:scan_in_array_offsets[i]] = i - 1
-//
+
 //     # Choose launch for passes B and C
 //     block_size = min(1024, total) if total > 0 else 1
 //     grid_size = (total + block_size - 1)//block_size if block_size > 0 else 1
-//
+
 //     # Pass B: compute local ranks
 //     cuda_kernel_templates.get_function(fetch_specialization([
 //         "awkward_ListArray_combinations_b",
@@ -50,7 +50,7 @@
 //          scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices,
 //          invocation_index, err_code)
 //     )
-//
+
 //     # Pass C: unrank and write carries
 //     cuda_kernel_templates.get_function(fetch_specialization([
 //         "awkward_ListArray_combinations_c",
@@ -61,104 +61,19 @@
 //          scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices,
 //          invocation_index, err_code)
 //     )
-//
+
 // out["awkward_ListArray_combinations_a", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_b", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_c", {dtype_specializations}] = None
 // END PYTHON
 
 
-template <typename I>
-__device__ __forceinline__ I dgcd(I a, I b) {
-  while (b != 0) { I t = a % b; a = b; b = t; }
-  return a;
-}
-
-template <typename I>
-__device__ __forceinline__ bool mul_will_overflow(I a, I b) {
-  if (a == 0 || b == 0) return false;
-  const unsigned long long ua = (unsigned long long)a;
-  const unsigned long long ub = (unsigned long long)b;
-  const unsigned long long umax = 0x7fffffffffffffffULL;
-  return ua > umax / ub;
-}
-
-template <typename I>
-__device__ __forceinline__ bool binom_safe(I n, I k, I& out) {
-  if (k < 0 || n < 0 || k > n) { out = 0; return true; }
-  if (k == 0 || k == n) { out = 1; return true; }
-  if (k + k > n) k = n - k;
-  I result = 1;
-  for (I j = 1; j <= k; ++j) {
-    I a = n - j + 1;
-    I b = j;
-    I g1 = dgcd(a, b); a /= g1; b /= g1;
-    I g2 = dgcd(result, b); result /= g2; b /= g2;
-    if (b != 1 || mul_will_overflow(result, a)) return false;
-    result *= a;
-  }
-  out = result;
-  return true;
-}
-
-/**
- * Unrank the k-th combination (lexicographic) of size r from m items.
- * - Without replacement: strictly increasing indices in [0, m-1].
- * - With replacement: nondecreasing indices (via stars-and-bars block sizes).
- *
- * Returns false on overflow; true otherwise. On failure, out[] is unspecified.
- */
-__device__ bool unrank_lex_general(
-    int64_t m, int64_t r, int64_t k, bool replacement,
-    int64_t* out /* length r */) {
-
-  if (r == 0) return k == 0;  // single empty tuple when k==0
-
-  int64_t prev = -1;  // last chosen index
-  for (int64_t pos = 0; pos < r; ++pos) {
-    // minimal allowed value for this position
-    int64_t v = replacement ? (prev < 0 ? 0 : prev) : (prev + 1);
-
-    // walk v upward until the remaining block covers k
-    while (true) {
-      if (v >= m) return false;  // out of range
-
-      int64_t rem = r - pos - 1;
-      int64_t block_count = 0;
-
-      if (rem == 0) {
-        block_count = 1;
-      } else if (replacement) {
-        // number of (nondecreasing) tails of length rem starting at v
-        // = C((m - v) + rem - 1, rem)
-        int64_t n_top = (m - v) + rem - 1;
-        if (!binom_safe(n_top, rem, block_count)) return false;
-      } else {
-        // number of (strictly increasing) tails from v+1
-        // = C(m - (v + 1), rem)
-        int64_t n_top = m - (v + 1);
-        if (!binom_safe(n_top, rem, block_count)) return false;
-      }
-
-      if (k < block_count) {
-        out[pos] = v;
-        prev = v;
-        break;
-      } else {
-        k -= block_count;
-        ++v;
-      }
-    }
-  }
-  return true;
-}
-
 template <typename T, typename C, typename U, typename V, typename W>
 __global__ void
 awkward_ListArray_combinations_a(
-    T** tocarry,                 // not used in pass A
-    C* toindex,                  // not used in pass A
-    U* fromindex,                // not used in pass A
+    T** /*tocarry*/,                 // not used in pass A
+    C* /*toindex*/,                  // not used in pass A
+    U* /*fromindex*/,                // not used in pass A
     int64_t n,
     bool replacement,
     const V* starts,
@@ -174,7 +89,7 @@ awkward_ListArray_combinations_a(
   if (tid >= length) return;
 
   if (n < 0) {
-    RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::N_NEGATIVE)
+    RAISE_ERROR(ARRAY_COMBINATIONS_ERRORS::N_NEGATIVE)
   }
 
   int64_t m = (int64_t)(stops[tid] - starts[tid]);
@@ -187,8 +102,8 @@ awkward_ListArray_combinations_a(
     if (n > m) {
       count = 0;
     } else {
-      if (!binom_safe<int64_t>(m, n, count)) {
-        RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
+      if (!binom_safe<int64_t>(m, n, count, err_code)) {
+        RAISE_ERROR(ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
       }
     }
   } else { // with replacement
@@ -197,8 +112,8 @@ awkward_ListArray_combinations_a(
       count = (n == 0) ? 1 : 0;
     } else {
       int64_t top = m + n - 1;
-      if (!binom_safe<int64_t>(top, n, count)) {
-        RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
+      if (!binom_safe<int64_t>(top, n, count, err_code)) {
+        RAISE_ERROR(ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
       }
     }
   }
@@ -276,12 +191,12 @@ awkward_ListArray_combinations_c(
     int64_t* idxbuf = idxbuf_local;
     if (n > MAX_N) {
       // If you need arbitrarily large n, rework with heap or split passes.
-      RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
+      RAISE_ERROR(ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
       return;
     }
 
-    if (!unrank_lex_general(m, n, k, replacement, idxbuf)) {
-      RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
+    if (!unrank_lex_general(m, n, k, replacement, idxbuf, err_code)) {
+      RAISE_ERROR(ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
       return;
     }
 

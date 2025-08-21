@@ -483,6 +483,7 @@ __device__ void atomicMulComplex(float* addr_real, float* addr_imag, float val_r
            atomicCAS(addr_imag_int, old_imag, new_imag) != old_imag);
 }
 
+
 // atomicMulComplex() specialization for double
 __device__ void atomicMulComplex(double* addr_real, double* addr_imag, double val_real, double val_imag) {
   unsigned long long int old_real, old_imag, new_real, new_imag;
@@ -493,4 +494,144 @@ __device__ void atomicMulComplex(double* addr_real, double* addr_imag, double va
       new_imag = __double_as_longlong(__longlong_as_double(old_real) * val_imag + __longlong_as_double(old_imag) * val_real);
   } while (atomicCAS((unsigned long long int*)addr_real, old_real, new_real) != old_real ||
            atomicCAS((unsigned long long int*)addr_imag, old_imag, new_imag) != old_imag);
+}
+
+
+enum class ARRAY_COMBINATIONS_ERRORS : uint64_t {
+    N_NEGATIVE = 1,               // message: "n must be >= 0"
+    OVERFLOW_IN_COMBINATORICS = 2 // message: "binomial overflow"
+};
+
+
+template <typename I>
+__device__ __forceinline__ I dgcd(I a, I b) {
+  // Euclidean algorithm; inputs non-negative
+  while (b != 0) { I t = a % b; a = b; b = t; }
+  return a;
+}
+
+
+template <typename I>
+__device__ __forceinline__ bool mul_will_overflow(I a, I b) {
+  // check a * b > INT64_MAX (for signed I=int64_t)
+  if (a == 0 || b == 0) return false;
+  if (a < 0 || b < 0) return true; // not expected here
+  const unsigned long long ua = (unsigned long long)a;
+  const unsigned long long ub = (unsigned long long)b;
+  const unsigned long long umax = 0x7fffffffffffffffULL;
+  return ua > umax / ub;
+}
+
+
+template <typename I>
+__device__ __forceinline__ bool binom_safe(
+    I n, I k, I& out, uint64_t* err_code) {
+  // Compute C(n,k) exactly using gcd reductions to keep intermediates small.
+  // Returns false on overflow (err_code set) or invalid inputs.
+  if (k < 0 || n < 0 || k > n) { out = 0; return true; }
+  if (k == 0 || k == n) { out = 1; return true; }
+  if (k + k > n) k = n - k;
+
+  I result = 1;
+  I denom = 1;
+
+  for (I j = 1; j <= k; ++j) {
+    I a = n - j + 1;   // numerator factor
+    I b = j;           // denominator factor
+
+    // Reduce with current numerator/denominator
+    I g1 = dgcd(a, b);
+    a /= g1; b /= g1;
+
+    // Further reduce denominator against current result
+    I g2 = dgcd(result, b);
+    result /= g2; b /= g2;
+
+    // b should now be 1; multiply result *= a with overflow check
+    if (mul_will_overflow<I>(result, a)) {
+        // signal overflow
+        err_code[0] = (err_code[0] < static_cast<uint64_t>(
+            ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS))
+            ? static_cast<uint64_t>(
+                ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
+            : err_code[0];
+        out = 0;
+        return false;
+    }
+    result *= a;
+    // b must be 1 now if inputs were valid
+  }
+
+  out = result;
+  return true;
+}
+
+// template <typename I>
+// __device__ __forceinline__ bool binom_safe(I n, I k, I& out) {
+//   if (k < 0 || n < 0 || k > n) { out = 0; return true; }
+//   if (k == 0 || k == n) { out = 1; return true; }
+//   if (k + k > n) k = n - k;
+//   I result = 1;
+//   for (I j = 1; j <= k; ++j) {
+//     I a = n - j + 1;
+//     I b = j;
+//     I g1 = dgcd(a, b); a /= g1; b /= g1;
+//     I g2 = dgcd(result, b); result /= g2; b /= g2;
+//     if (b != 1 || mul_will_overflow(result, a)) return false;
+//     result *= a;
+//   }
+//   out = result;
+//   return true;
+// }
+
+/**
+ * Unrank the k-th combination (lexicographic) of size r from m items.
+ * - Without replacement: strictly increasing indices in [0, m-1].
+ * - With replacement: nondecreasing indices (via stars-and-bars block sizes).
+ *
+ * Returns false on overflow; true otherwise. On failure, out[] is unspecified.
+ */
+__device__ bool unrank_lex_general(
+    int64_t m, int64_t r, int64_t k, bool replacement,
+    int64_t* out /* length r */, uint64_t* err_code) {
+
+  if (r == 0) return k == 0;  // single empty tuple when k==0
+
+  int64_t prev = -1;  // last chosen index
+  for (int64_t pos = 0; pos < r; ++pos) {
+    // minimal allowed value for this position
+    int64_t v = replacement ? (prev < 0 ? 0 : prev) : (prev + 1);
+
+    // walk v upward until the remaining block covers k
+    while (true) {
+      if (v >= m) return false;  // out of range
+
+      int64_t rem = r - pos - 1;
+      int64_t block_count = 0;
+
+      if (rem == 0) {
+        block_count = 1;
+      } else if (replacement) {
+        // number of (nondecreasing) tails of length rem starting at v
+        // = C((m - v) + rem - 1, rem)
+        int64_t n_top = (m - v) + rem - 1;
+        if (!binom_safe(n_top, rem, block_count, err_code)) return false;
+      } else {
+        // number of (strictly increasing) tails from v+1
+        // = C(m - (v + 1), rem)
+        int64_t n_top = m - (v + 1);
+        if (!binom_safe(n_top, rem, block_count, err_code)) return false;
+      }
+
+      if (k < block_count) {
+        out[pos] = v;
+        prev = v;
+        break;
+      } else {
+        k -= block_count;
+        ++v;
+      }
+    }
+  }
+  return true;
 }
