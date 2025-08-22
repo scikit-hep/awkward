@@ -170,6 +170,8 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                 )
             self._shape = array.shape
             self._array = array
+            self._shape_generator = assert_never
+            self._generator = assert_never
         return self._array  # type: ignore[return-value]
 
     def dematerialize(self) -> None:
