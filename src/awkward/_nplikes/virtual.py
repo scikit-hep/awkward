@@ -35,7 +35,7 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     )
 
 
-def _wrap_generator_asarray(
+def _lazy_asarray(
     nplike: NumpyLike, generator: Callable[[], ArrayLike]
 ) -> Callable[[], ArrayLike]:
     """
@@ -88,7 +88,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
         # this ensures that the generator returns an array-like object according to the nplike
         if __wrap_generator_asarray__:
-            generator = _wrap_generator_asarray(nplike, generator)
+            generator = _lazy_asarray(nplike, generator)
 
         self._generator = generator
         self._shape_generator = shape_generator
@@ -154,7 +154,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
-            array = _wrap_generator_asarray(self._nplike, self._generator)()
+            array = _lazy_asarray(self._nplike, self._generator)()
             if len(self._shape) != len(array.shape):
                 raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
