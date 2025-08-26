@@ -9,12 +9,12 @@ from typing import Any, Callable
 from packaging.version import parse as parse_version
 
 import awkward as ak
+from awkward._nplikes.array_like import maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import try_touch_data
-from awkward._nplikes.virtual import materialize_if_virtual
 from awkward._typing import Protocol, TypeAlias
 
 KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
@@ -91,7 +91,7 @@ class NumpyKernel(BaseKernel):
     def __call__(self, *args) -> None:
         assert len(args) == len(self._impl.argtypes)
 
-        args = materialize_if_virtual(*args)
+        args = maybe_materialize(*args)
 
         return self._impl(
             *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
@@ -138,7 +138,7 @@ class JaxKernel(BaseKernel):
     def __call__(self, *args) -> None:
         assert len(args) == len(self._impl.argtypes)
 
-        args = materialize_if_virtual(*args)
+        args = maybe_materialize(*args)
 
         return self._impl(
             *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
@@ -182,7 +182,7 @@ class CupyKernel(BaseKernel):
     def __call__(self, *args) -> None:
         import awkward._connect.cuda as ak_cuda
 
-        args = materialize_if_virtual(*args)
+        args = maybe_materialize(*args)
 
         cupy = ak_cuda.import_cupy("Awkward Arrays with CUDA")
         maxlength = self.max_length(args)

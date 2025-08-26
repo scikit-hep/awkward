@@ -9,7 +9,7 @@ import pytest
 
 import awkward as ak
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualNDArray
 
 
 def virtualize(array):
@@ -19,7 +19,7 @@ def virtualize(array):
 
 
 def test_virtualarray_pickling():
-    v = VirtualArray(
+    v = VirtualNDArray(
         Numpy.instance(),
         shape=(5,),
         dtype=np.int64,
@@ -47,7 +47,7 @@ def test_numpy_array_to_packed(recursive):
     assert layout.is_all_materialized
     assert packed.is_all_materialized
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     for _key, buffer in ak.to_buffers(packed)[2].items():
         assert isinstance(buffer, np.ndarray)
 
@@ -84,7 +84,7 @@ def test_empty_array_to_packed(recursive):
     assert layout.is_all_materialized
     assert packed.is_all_materialized
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     for _key, buffer in ak.to_buffers(packed)[2].items():
         assert isinstance(buffer, np.ndarray)
 
@@ -122,7 +122,7 @@ def test_indexed_option_array_to_packed(recursive):
     assert layout.is_all_materialized
     assert packed.is_all_materialized
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     for _key, buffer in ak.to_buffers(packed)[2].items():
         assert isinstance(buffer, np.ndarray)
 
@@ -162,7 +162,7 @@ def test_indexed_array_to_packed(recursive):
     assert layout.is_all_materialized
     assert packed.is_all_materialized
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     for _key, buffer in ak.to_buffers(packed)[2].items():
         assert isinstance(buffer, np.ndarray)
 
@@ -181,7 +181,7 @@ def test_list_array_to_packed(recursive):
     layout = virtualize(tmp)
     packed = layout.to_packed(recursive)
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     if recursive:
         assert layout.is_all_materialized
         assert packed.is_all_materialized
@@ -196,7 +196,7 @@ def test_list_array_to_packed(recursive):
             if _key == "node0-offsets":
                 assert isinstance(buffer, np.ndarray)
             elif _key == "node1-data":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")
 
@@ -239,7 +239,7 @@ def test_list_offset_array_to_packed(recursive):
     layout = virtualize(tmp)
     packed = layout.to_packed(recursive)
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     if recursive:
         assert layout.is_all_materialized
         assert packed.is_all_materialized
@@ -254,7 +254,7 @@ def test_list_offset_array_to_packed(recursive):
             if _key == "node0-offsets":
                 assert isinstance(buffer, np.ndarray)
             elif _key == "node1-data":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")
 
@@ -295,7 +295,7 @@ def test_unmasked_array_to_packed(recursive):
     layout = virtualize(tmp)
     packed = layout.to_packed(recursive)
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     if recursive:
         assert layout.is_all_materialized
         assert packed.is_all_materialized
@@ -308,7 +308,7 @@ def test_unmasked_array_to_packed(recursive):
         assert not packed.is_any_materialized
         for _key, buffer in ak.to_buffers(packed)[2].items():
             if _key == "node1-data":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")
 
@@ -352,7 +352,7 @@ def test_union_array_to_packed(recursive):
     layout = virtualize(tmp)
     packed = layout.to_packed(recursive)
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     if recursive:
         assert layout.is_all_materialized
         assert packed.is_all_materialized
@@ -371,7 +371,7 @@ def test_union_array_to_packed(recursive):
             elif _key == "node1-data":
                 assert isinstance(buffer, np.ndarray)
             elif _key == "node3-data":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")
 
@@ -414,7 +414,7 @@ def test_record_array_to_packed(recursive):
     layout = virtualize(tmp)
     packed = layout.to_packed(recursive)
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     if recursive:
         assert layout.is_all_materialized
         assert packed.is_all_materialized
@@ -427,9 +427,9 @@ def test_record_array_to_packed(recursive):
         assert not packed.is_any_materialized
         for _key, buffer in ak.to_buffers(packed)[2].items():
             if _key == "node1-data":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             elif _key == "node2-data":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")
 
@@ -466,7 +466,7 @@ def test_regular_array_to_packed(recursive):
     layout = virtualize(tmp)
     packed = layout.to_packed(recursive)
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     if recursive:
         assert layout.is_all_materialized
         assert packed.is_all_materialized
@@ -479,7 +479,7 @@ def test_regular_array_to_packed(recursive):
         assert not packed.is_any_materialized
         for _key, buffer in ak.to_buffers(packed)[2].items():
             if _key == "node1-data":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")
 
@@ -516,7 +516,7 @@ def test_bit_masked_array_to_packed(recursive):
     layout = virtualize(tmp)
     packed = layout.to_packed(recursive)
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     if recursive:
         assert layout.is_all_materialized
         assert packed.is_all_materialized
@@ -529,9 +529,9 @@ def test_bit_masked_array_to_packed(recursive):
         assert not packed.is_any_materialized
         for _key, buffer in ak.to_buffers(packed)[2].items():
             if _key == "node0-mask":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             elif _key == "node1-data":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")
 
@@ -573,7 +573,7 @@ def test_byte_masked_array_to_packed(recursive):
     layout = virtualize(tmp)
     packed = layout.to_packed(recursive)
     for _key, buffer in ak.to_buffers(layout)[2].items():
-        assert isinstance(buffer, VirtualArray)
+        assert isinstance(buffer, VirtualNDArray)
     if recursive:
         assert layout.is_all_materialized
         assert packed.is_all_materialized
@@ -586,9 +586,9 @@ def test_byte_masked_array_to_packed(recursive):
         assert not packed.is_any_materialized
         for _key, buffer in ak.to_buffers(packed)[2].items():
             if _key == "node0-mask":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             elif _key == "node1-data":
-                assert isinstance(buffer, VirtualArray)
+                assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")
 

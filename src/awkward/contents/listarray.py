@@ -15,7 +15,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
@@ -329,11 +329,11 @@ class ListArray(ListMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual_starts = (
-            isinstance(self._starts.data, VirtualArray)
+            isinstance(self._starts.data, VirtualNDArray)
             and not self._starts.data.is_materialized
         )
         is_virtual_stops = (
-            isinstance(self._stops.data, VirtualArray)
+            isinstance(self._stops.data, VirtualNDArray)
             and not self._stops.data.is_materialized
         )
         is_virtual = is_virtual_starts or is_virtual_stops
