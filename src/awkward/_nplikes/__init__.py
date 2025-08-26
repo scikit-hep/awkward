@@ -30,10 +30,11 @@ def to_nplike(
 
     # We can always convert virtual arrays to typetracers
     # but can only convert virtual arrays to other backends with known data if they are intentionally materialized
-    if isinstance(array, awkward._nplikes.virtual.VirtualArray):
+    if isinstance(array, awkward._nplikes.virtual.VirtualNDArray):
         if not array.is_materialized and nplike.known_data:
             raise TypeError(
-                "Cannot convert a VirtualArray to a different nplike with known data without materializing it first. Use ak.materialize on the array to do so"
+                "Cannot convert a `VirtualNDArray` to a different `nplike` when its data is not yet materialized."
+                " Call `ak.materialize(array)` first to load the data before converting."
             )
         else:
             if nplike.supports_virtual_arrays:

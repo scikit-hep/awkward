@@ -7,12 +7,12 @@ import sys
 import numpy as np
 
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualNDArray
 
 
 def test_getitem():
     numpy_like = Numpy.instance()
-    vc = VirtualArray(
+    vc = VirtualNDArray(
         numpy_like,
         shape=(1,),
         dtype=np.dtype(np.int64),
@@ -25,7 +25,7 @@ def test_getitem():
 
 def test_view():
     numpy_like = Numpy.instance()
-    vc = VirtualArray(
+    vc = VirtualNDArray(
         numpy_like,
         shape=(1,),
         dtype=np.dtype(np.int64),
@@ -38,7 +38,7 @@ def test_view():
 
 def test_transpose():
     numpy_like = Numpy.instance()
-    vc = VirtualArray(
+    vc = VirtualNDArray(
         numpy_like,
         shape=(1,),
         dtype=np.dtype(np.int64),
@@ -51,7 +51,7 @@ def test_transpose():
 
 def test_reshape():
     numpy_like = Numpy.instance()
-    vc = VirtualArray(
+    vc = VirtualNDArray(
         numpy_like,
         shape=(1,),
         dtype=np.dtype(np.int64),
@@ -66,7 +66,7 @@ def test_asarray():
     numpy_like = Numpy.instance()
 
     # copy=False
-    vc = VirtualArray(
+    vc = VirtualNDArray(
         numpy_like,
         shape=(1,),
         dtype=np.dtype(np.int64),
@@ -77,7 +77,7 @@ def test_asarray():
     assert vc.materialize()
 
     # copy=None
-    vc = VirtualArray(
+    vc = VirtualNDArray(
         numpy_like,
         shape=(1,),
         dtype=np.dtype(np.int64),

@@ -129,7 +129,7 @@ def maybe_shape_of(
     to get the shape of objects without materializing it in the case of virtual arrays.
     Unknown dimensions will be represted as `unknown_length`.
     """
-    if isinstance(obj, ak._nplikes.virtual.VirtualArray):
+    if isinstance(obj, ak._nplikes.virtual.VirtualNDArray):
         return obj._shape
     else:
         return obj.shape
