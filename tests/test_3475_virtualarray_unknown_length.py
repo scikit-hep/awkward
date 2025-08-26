@@ -1195,10 +1195,10 @@ def test_asarray_virtual_array_with_dtype(
     )
 
 
-def test_asarray_virtual_array_with_copy(
+def test_asarray_virtual_array_materialized_copy_false_dtype_error(
     numpy_like, virtual_array, shape_generator_param
 ):
-    # Test with copy parameter
+    # Test materialized VirtualArray with copy=False and different dtype raises error
     virtual_array.materialize()
     with pytest.raises(
         ValueError,
