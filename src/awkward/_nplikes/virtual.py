@@ -35,7 +35,7 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     A little helper function to materialize all virtual arrays in a list of arrays.
     """
     return tuple(
-        arg.materialize() if isinstance(arg, VirtualArray) else arg for arg in args
+        arg.materialize() if isinstance(arg, VirtualNDArray) else arg for arg in args
     )
 
 
@@ -197,7 +197,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             return self._array.T
 
         # if the existing array is 0D or 1D, we can return self directly
-        # this avoids unnecessary VirtualArray creation and method-chaining
+        # this avoids unnecessary VirtualNDArray creation and method-chaining
         if self.ndim <= 1:
             return self
 
@@ -216,7 +216,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             return self.materialize().view(dtype)  # type: ignore[return-value]
 
         # if the dtype is _exactly_ the dtype of the existing array, we can return self directly
-        # this avoids unnecessary VirtualArray creation and method-chaining
+        # this avoids unnecessary VirtualNDArray creation and method-chaining
         if self._dtype == dtype:
             return self
 
@@ -328,7 +328,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                 length = self.shape[0]
                 start, stop, step = index.indices(length)
                 # if the slice is _exactly_ slicing the whole array, we can return self directly
-                # this avoids unnecessary VirtualArray creation and method-chaining
+                # this avoids unnecessary VirtualNDArray creation and method-chaining
                 if start == 0 and step == 1 and stop == length:
                     return self
                 new_length = max(

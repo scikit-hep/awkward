@@ -1014,7 +1014,7 @@ def test_generator_error():
         va.get_shape()
 
 
-# Test nested VirtualArrays (generator returns another VirtualNDArray)
+# Test nested VirtualNDArrays (generator returns another VirtualNDArray)
 def test_nested_virtual_arrays(shape_generator_param):
     nplike = Numpy.instance()
 
@@ -1321,7 +1321,7 @@ def test_meshgrid_with_virtual_array(numpy_like, virtual_array):
 def test_array_equal_with_virtual_arrays(
     numpy_like, virtual_array, shape_generator_param
 ):
-    # Create two identical VirtualArrays
+    # Create two identical VirtualNDArrays
     va1 = virtual_array
     if shape_generator_param is None:
         va2 = VirtualNDArray(
@@ -1442,7 +1442,7 @@ def test_apply_ufunc_with_virtual_arrays(
     result = numpy_like.apply_ufunc(np.add, "__call__", [virtual_array, 10])
     np.testing.assert_array_equal(result, np.array([11, 12, 13, 14, 15]))
 
-    # Test apply_ufunc with multiple VirtualArrays
+    # Test apply_ufunc with multiple VirtualNDArrays
     if shape_generator_param is None:
         va2 = VirtualNDArray(
             numpy_like,
@@ -1467,7 +1467,7 @@ def test_apply_ufunc_with_virtual_arrays(
 def test_broadcast_arrays_with_virtual_arrays(
     numpy_like, virtual_array, shape_generator_param
 ):
-    # Test broadcast_arrays with VirtualArrays
+    # Test broadcast_arrays with VirtualNDArrays
     if shape_generator_param is None:
         va2 = VirtualNDArray(
             numpy_like,
@@ -1562,7 +1562,7 @@ def test_nonzero_with_virtual_array(numpy_like, virtual_array):
 
 
 def test_where_with_virtual_arrays(numpy_like, virtual_array, shape_generator_param):
-    # Test where with VirtualArrays
+    # Test where with VirtualNDArrays
     if shape_generator_param is None:
         condition = VirtualNDArray(
             numpy_like,
@@ -1695,7 +1695,7 @@ def test_sort_with_virtual_array(numpy_like, shape_generator_param):
 
 
 def test_concat_with_virtual_arrays(numpy_like, virtual_array, shape_generator_param):
-    # Test concat with VirtualArrays
+    # Test concat with VirtualNDArrays
     if shape_generator_param is None:
         va2 = VirtualNDArray(
             numpy_like,
@@ -1778,7 +1778,7 @@ def test_repeat_with_virtual_array(numpy_like, virtual_array, shape_generator_pa
 
 
 def test_stack_with_virtual_arrays(numpy_like, virtual_array, shape_generator_param):
-    # Test stack with VirtualArrays
+    # Test stack with VirtualNDArrays
     if shape_generator_param is None:
         va2 = VirtualNDArray(
             numpy_like,
@@ -1876,7 +1876,7 @@ def test_strides_with_virtual_array(numpy_like, virtual_array):
 
 # Test addition and logical operations
 def test_add_with_virtual_arrays(numpy_like, virtual_array, shape_generator_param):
-    # Test add with VirtualArrays
+    # Test add with VirtualNDArrays
     if shape_generator_param is None:
         va2 = VirtualNDArray(
             numpy_like,
@@ -1898,7 +1898,7 @@ def test_add_with_virtual_arrays(numpy_like, virtual_array, shape_generator_para
 
 
 def test_logical_or_with_virtual_arrays(numpy_like, shape_generator_param):
-    # Test logical_or with VirtualArrays
+    # Test logical_or with VirtualNDArrays
     if shape_generator_param is None:
         va1 = VirtualNDArray(
             numpy_like,
@@ -1933,7 +1933,7 @@ def test_logical_or_with_virtual_arrays(numpy_like, shape_generator_param):
 
 
 def test_logical_and_with_virtual_arrays(numpy_like, shape_generator_param):
-    # Test logical_and with VirtualArrays
+    # Test logical_and with VirtualNDArrays
     if shape_generator_param is None:
         va1 = VirtualNDArray(
             numpy_like,
@@ -2035,7 +2035,7 @@ def test_exp_with_virtual_array(numpy_like, shape_generator_param):
 
 
 def test_divide_with_virtual_arrays(numpy_like, shape_generator_param):
-    # Test divide with VirtualArrays
+    # Test divide with VirtualNDArrays
     if shape_generator_param is None:
         va1 = VirtualNDArray(
             numpy_like,
@@ -2101,7 +2101,7 @@ def test_nan_to_num_with_virtual_array(numpy_like, shape_generator_param):
 
 
 def test_isclose_with_virtual_arrays(numpy_like, shape_generator_param):
-    # Test isclose with VirtualArrays
+    # Test isclose with VirtualNDArrays
     if shape_generator_param is None:
         va1 = VirtualNDArray(
             numpy_like,
@@ -2582,7 +2582,7 @@ def test_can_cast_with_virtual_array_dtype(numpy_like, virtual_array):
 def test_materialize_if_virtual_function(numpy_like, shape_generator_param):
     # Test the maybe_materialize utility function directly
 
-    # Create a mix of VirtualArrays and regular arrays
+    # Create a mix of VirtualNDArrays and regular arrays
     if shape_generator_param is None:
         va1 = VirtualNDArray(
             numpy_like,
@@ -2621,11 +2621,11 @@ def test_materialize_if_virtual_function(numpy_like, shape_generator_param):
     np.testing.assert_array_equal(results[1], np.array([4, 5, 6]))
     np.testing.assert_array_equal(results[2], np.array([7, 8, 9]))
 
-    # Check that the VirtualArrays were materialized
+    # Check that the VirtualNDArrays were materialized
     assert va1.is_materialized
     assert va2.is_materialized
 
-    # Test with already materialized VirtualArrays
+    # Test with already materialized VirtualNDArrays
     if shape_generator_param is None:
         va3 = VirtualNDArray(
             numpy_like,
@@ -2651,7 +2651,7 @@ def test_materialize_if_virtual_function(numpy_like, shape_generator_param):
 
 
 def test_operations_with_multiple_virtual_arrays(numpy_like, shape_generator_param):
-    # Test a complex operation involving multiple VirtualArrays
+    # Test a complex operation involving multiple VirtualNDArrays
     if shape_generator_param is None:
         va1 = VirtualNDArray(
             numpy_like,
@@ -2695,14 +2695,14 @@ def test_operations_with_multiple_virtual_arrays(numpy_like, shape_generator_par
         )
 
     # Expression: (va1 + va2) * va3
-    # Should materialize all VirtualArrays
+    # Should materialize all VirtualNDArrays
     result = numpy_like.add(va1, va2) * va3
     np.testing.assert_array_equal(
         result,
         np.array([35.0, 56.0, 81.0]),  # (1+4)*7, (2+5)*8, (3+6)*9
     )
 
-    # Check that all VirtualArrays were materialized
+    # Check that all VirtualNDArrays were materialized
     assert va1.is_materialized
     assert va2.is_materialized
     assert va3.is_materialized
@@ -2799,7 +2799,7 @@ def test_virtual_array_with_empty_array(numpy_like, shape_generator_param):
 
 
 def test_chained_operations_materialization(numpy_like, shape_generator_param):
-    # Test that chained operations correctly materialize VirtualArrays
+    # Test that chained operations correctly materialize VirtualNDArrays
     if shape_generator_param is None:
         va = VirtualNDArray(
             numpy_like,

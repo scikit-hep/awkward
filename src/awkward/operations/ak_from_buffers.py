@@ -179,7 +179,7 @@ def _from_buffer(
     shape_generator: Callable | None = None,
 ) -> ArrayLike:
     if isinstance(buffer, VirtualNDArray):
-        # This is the case for VirtualArrays
+        # This is the case for VirtualNDArrays
         # just some checks to make sure the VirtualNDArray is correctly constructed
         if nplike != buffer.nplike:
             raise ValueError(
@@ -196,7 +196,7 @@ def _from_buffer(
         return buffer
 
     elif callable(buffer):
-        # This is the case where we automatically create VirtualArrays
+        # This is the case where we automatically create VirtualNDArrays
         # We use recursion here to pass down the from_buffer and byteorder transformations to the generator
         assert callable(shape_generator), "shape_generator must be callable"
         cached_shape_generator = lru_cache(maxsize=1)(shape_generator)

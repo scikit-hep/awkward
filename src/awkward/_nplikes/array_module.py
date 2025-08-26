@@ -70,8 +70,8 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                 obj = obj.materialize()
             else:
                 # if we are not copying and the dtype is _exactly_ the dtype of the existing array
-                # or dtype is None, we can return the VirtualArray directly
-                # this avoids unnecessary VirtualArray creation and method-chaining
+                # or dtype is None, we can return the VirtualNDArray directly
+                # this avoids unnecessary VirtualNDArray creation and method-chaining
                 if not copy and (obj.dtype == dtype or dtype is None):
                     return obj
                 else:
@@ -345,8 +345,8 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         if isinstance(x, VirtualNDArray):
             if not x.is_materialized:
                 next_shape = self._compute_compatible_shape(shape, x.shape)
-                # if the reshape is _exactly_ shaping the array as it is already, we can return the VirtualArray directly
-                # this avoids unnecessary VirtualArray creation and method-chaining
+                # if the reshape is _exactly_ shaping the array as it is already, we can return the VirtualNDArray directly
+                # this avoids unnecessary VirtualNDArray creation and method-chaining
                 if next_shape == x.shape and not copy:
                     return x
                 return VirtualNDArray(

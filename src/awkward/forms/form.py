@@ -194,7 +194,7 @@ def from_dict(input: Mapping) -> Form:
         )
 
     elif input["class"] == "VirtualNDArray":
-        raise ValueError("Awkward 1.x VirtualArrays are not supported")
+        raise ValueError("Awkward 1.x VirtualNDArrays are not supported")
 
     else:
         raise ValueError(
