@@ -368,7 +368,7 @@ def test_copy(virtual_array, shape_generator_param):
     if shape_generator_param is None:
         assert copy.is_materialized
     assert id(copy) != id(virtual_array)  # Different objects
-    assert copy._generator is virtual_array._generator
+    assert copy._generator is not virtual_array._generator
 
 
 # Test tolist

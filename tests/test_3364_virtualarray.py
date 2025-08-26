@@ -437,6 +437,7 @@ def test_copy(virtual_array):
     assert copy.dtype == virtual_array.dtype
     assert not copy.is_materialized  # Copy should not be materialized
     assert id(copy) != id(virtual_array)  # Different objects
+    assert copy._generator is not virtual_array._generator
 
 
 # Test tolist

@@ -69,14 +69,17 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             if obj.is_materialized:
                 obj = obj.materialize()
             else:
-                if obj.dtype == dtype or dtype is None:
+                # if we are not copying and the dtype is _exactly_ the dtype of the existing array
+                # or dtype is None, we can return the VirtualArray directly
+                # this avoids unnecessary VirtualArray creation and method-chaining
+                if not copy and (obj.dtype == dtype or dtype is None):
                     return obj
                 else:
                     return VirtualNDArray(
                         obj._nplike,
                         obj._shape,
                         dtype,
-                        lambda: self.asarray(obj.materialize(), dtype=dtype),
+                        lambda: self.asarray(obj.materialize(), dtype=dtype, copy=copy),
                         lambda: obj.shape,
                     )
         if copy:
@@ -342,12 +345,16 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         if isinstance(x, VirtualNDArray):
             if not x.is_materialized:
                 next_shape = self._compute_compatible_shape(shape, x.shape)
+                # if the reshape is _exactly_ shaping the array as it is already, we can return the VirtualArray directly
+                # this avoids unnecessary VirtualArray creation and method-chaining
+                if next_shape == x.shape and not copy:
+                    return x
                 return VirtualNDArray(
                     self,
                     next_shape,
                     x.dtype,
-                    lambda: self.reshape(x.materialize(), next_shape),  # type: ignore[union-attr]
-                    lambda: next_shape,
+                    lambda: self.reshape(x.materialize(), next_shape, copy=copy),  # type: ignore[union-attr]
+                    None,
                 )
             else:
                 x = x.materialize()  # type: ignore[assignment]
