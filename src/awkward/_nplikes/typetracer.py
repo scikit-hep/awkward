@@ -705,7 +705,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         ]
         # Build proxy (empty) arrays
         proxy_args = [
-            (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+            cast(
+                ArrayLike, (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+            )
             for x in non_generic_value_promoted_args
         ]
         # Determine result dtype from proxy call
