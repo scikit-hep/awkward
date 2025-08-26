@@ -395,7 +395,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
             "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         raise AssertionError(
             "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
         )
