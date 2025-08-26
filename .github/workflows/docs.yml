@@ -19,7 +19,7 @@ env:
 jobs:
   awkward-cpp-wasm:
     name: Build C++ WASM
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v5
       with:
@@ -45,7 +45,7 @@ jobs:
 
 
   awkward-cpp-x86-64:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build C++ x86
     defaults:
       run:
@@ -100,7 +100,7 @@ jobs:
         path: awkward-cpp/dist/awkward*.whl
 
   awkward:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build Python
     steps:
     - uses: actions/checkout@v5
@@ -121,7 +121,7 @@ jobs:
 
   execute-cppyy:
     needs: [awkward-cpp-x86-64, awkward]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Execute cppyy notebook
     steps:
     - uses: actions/checkout@v5
@@ -167,7 +167,7 @@ jobs:
         path: docs/user-guide/how-to-use-in-cpp-cppyy.ipynb
 
   build-docs:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [awkward-cpp-x86-64, awkward, execute-cppyy]
     name: Build Docs
     defaults:
@@ -270,39 +270,20 @@ jobs:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
 
-  branch-preview:
-    runs-on: ubuntu-22.04
-    needs: [build-docs]
-    name: Deploy Branch Preview
-    # We can only deploy for PRs on host repo
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      S3_BUCKET: "preview.awkward-array.org"
-      DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
-    environment:
-      name: docs
-      url: "${{ env.DEPLOY_URL }}/${{ github.head_ref }}"
-    steps:
-    - uses: actions/checkout@v5
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: eu-west-2
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
-    - name: Download rendered docs
-      uses: actions/download-artifact@v5
-      with:
-        name: docs
-        path: built-docs
-    - name: Sync artefacts
+    - name: Save PR number
+      env:
+        PR_NUMBER: ${{ github.event.number }}
       run: |
-        aws s3 sync built-docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
+        mkdir -p ./pr
+        echo $PR_NUMBER > ./pr/pr_number.txt
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: pr_number
+        path: pr/
 
   deploy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [ build-docs ]
     # We can only deploy for PRs on host repo
     if: github.event_name == 'push' || github.event_name == 'release'
