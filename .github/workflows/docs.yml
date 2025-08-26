@@ -21,7 +21,7 @@ jobs:
     name: Build C++ WASM
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
@@ -52,7 +52,7 @@ jobs:
         # Ensure conda env is activated
         shell: "bash -l {0}"
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Build Python
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
@@ -124,7 +124,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Execute cppyy notebook
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
@@ -141,13 +141,13 @@ jobs:
         destination: "/tmp/wheels/"
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: awkward
         path: /tmp/wheels/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: awkward-cpp-x86-64
         path: /tmp/wheels/
@@ -177,7 +177,7 @@ jobs:
     env:
         DOCS_CANONICAL_VERSION: main
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
       # TODO: remove this once mamba-org/mamba#1726 is fixed
       #       and replace with `-r requirements.txt` in a
@@ -202,7 +202,7 @@ jobs:
            doxygen
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: awkward
         path: dist
@@ -213,7 +213,7 @@ jobs:
         cp dist/awkward*.whl docs/lite/pypi/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: awkward-cpp-x86-64
         path: dist
@@ -243,7 +243,7 @@ jobs:
         echo "DOCS_VERSION=main" >> $GITHUB_ENV
 
     - name: Download cppyy notebook
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide
@@ -276,6 +276,7 @@ jobs:
       run: |
         mkdir -p ./pr
         echo $PR_NUMBER > ./pr/pr_number.txt
+
     - uses: actions/upload-artifact@v4
       with:
         name: pr_number
@@ -298,14 +299,14 @@ jobs:
       name: docs
       url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
       - name: Download rendered docs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: docs
           path: built-docs
