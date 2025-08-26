@@ -507,9 +507,16 @@ def action_for_matmul(inputs):
     raise NotImplementedError
 
 
-def convert_to_array(layout, dtype=None):
+def convert_to_array(layout, dtype=None, copy=None):
     out = ak.operations.to_numpy(layout, allow_missing=False)
-    if dtype is None:
-        return out
+    if copy:
+        return numpy.array(out, dtype=dtype, copy=True)
+    elif copy is None:
+        return numpy.asarray(out, dtype=dtype)
     else:
-        return numpy.array(out, dtype=dtype)
+        if dtype is not None and getattr(out, "dtype", dtype) != dtype:
+            raise ValueError(
+                "Unable to avoid copy while creating an array as requested"
+            )
+        else:
+            return numpy.asarray(out, dtype=dtype)
