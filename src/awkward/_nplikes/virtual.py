@@ -234,7 +234,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             shape,
             dtype,
             lambda: self.materialize().view(dtype),
-            lambda: shape,
+            None,
         )
 
     @property
@@ -336,7 +336,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                 (new_length, *self.shape[1:]),
                 self._dtype,
                 lambda: self.materialize()[index],
-                lambda: (new_length, *self.shape[1:]),
+                None,
             )
         else:
             return self.materialize().__getitem__(index)
