@@ -68,13 +68,19 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             if obj.is_materialized:
                 return self.asarray(obj.materialize(), dtype=dtype, copy=copy)
             else:
-                return VirtualArray(
-                    obj._nplike,
-                    obj._shape,
-                    obj._dtype if dtype is None else dtype,
-                    lambda: self.asarray(obj.materialize(), dtype=dtype, copy=copy),
-                    lambda: obj.shape,
-                )
+                # if we are not copying and the dtype is _exactly_ the dtype of the existing array
+                # or dtype is None, we can return the VirtualArray directly
+                # this avoids unnecessary VirtualArray creation and method-chaining
+                if not copy and (obj.dtype == dtype or dtype is None):
+                    return obj
+                else:
+                    return VirtualArray(
+                        obj._nplike,
+                        obj._shape,
+                        obj._dtype if dtype is None else dtype,
+                        lambda: self.asarray(obj.materialize(), dtype=dtype, copy=copy),
+                        lambda: obj.shape,
+                    )
         if copy:
             return self._module.array(obj, dtype=dtype, copy=True)
         elif copy is None:
@@ -351,12 +357,16 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                 return self.reshape(x.materialize(), shape, copy=copy)  # type: ignore[arg-type]
             else:
                 next_shape = self._compute_compatible_shape(shape, x.shape)
+                # if the reshape is _exactly_ shaping the array as it is already, we can return the VirtualArray directly
+                # this avoids unnecessary VirtualArray creation and method-chaining
+                if next_shape == x.shape and not copy:
+                    return x
                 return VirtualArray(
                     self,
                     next_shape,
                     x.dtype,
-                    lambda: self.reshape(x.materialize(), next_shape, copy=copy),  # type: ignore[arg-type]
-                    lambda: next_shape,
+                    lambda: self.reshape(x.materialize(), next_shape, copy=copy),  # type: ignore[union-attr]
+                    None,
                 )
 
         if copy is None:
