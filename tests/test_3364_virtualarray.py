@@ -432,6 +432,7 @@ def test_nplike(virtual_array, numpy_like):
 def test_copy(virtual_array):
     copy = virtual_array.copy()
     assert isinstance(copy, VirtualArray)
+    assert copy._generator is not virtual_array._generator
     assert copy.shape == virtual_array.shape
     assert copy.dtype == virtual_array.dtype
     assert not copy.is_materialized  # Copy should not be materialized

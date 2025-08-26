@@ -74,7 +74,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs
 def _impl1(condition, mergebool, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(condition, allow_record=False, primitive_policy="error")
-    out = layout.backend.nplike.nonzero(layout.to_backend_array(allow_missing=False))
+    out = layout.backend.nplike.nonzero(layout.to_backend_array(allow_missing=True))
 
     return tuple(
         ctx.wrap(ak.contents.NumpyArray(x, backend=layout.backend), highlevel=highlevel)
