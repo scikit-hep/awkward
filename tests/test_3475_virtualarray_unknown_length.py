@@ -1161,7 +1161,7 @@ def test_asarray_virtual_array_unmaterialized(
 ):
     # Test with unmaterialized VirtualArray
     result = numpy_like.asarray(virtual_array)
-    assert isinstance(result, VirtualArray)  # Should be a VirtualArray
+    assert result is virtual_array  # Should return the same object
     assert result.dtype == virtual_array.dtype  # Should have same dtype
     assert not virtual_array.is_materialized
     assert not result.is_materialized

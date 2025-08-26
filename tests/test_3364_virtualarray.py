@@ -1016,7 +1016,7 @@ def test_backend_of_obj(virtual_array, float_virtual_array):
 def test_asarray_virtual_array_unmaterialized(numpy_like, virtual_array):
     # Test with unmaterialized VirtualArray
     result = numpy_like.asarray(virtual_array)
-    assert isinstance(result, VirtualArray)
+    assert result is virtual_array  # Should return the same object
     assert not virtual_array.is_materialized
     assert not result.is_materialized
     # Check materialized values are correct
