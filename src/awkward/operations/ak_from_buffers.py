@@ -217,6 +217,7 @@ def _from_buffer(
             dtype=dtype,
             generator=generator,
             shape_generator=cached_shape_generator,
+            __wrap_generator_asarray__=True,
         )
     # Unknown-length information implies that we didn't load shape-buffers (offsets, etc)
     # for the parent of this node. Thus, this node and its children *must* only

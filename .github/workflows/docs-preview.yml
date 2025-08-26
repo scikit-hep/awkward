@@ -1,0 +1,91 @@
+name: Docs Preview
+on:
+  workflow_run:
+    workflows: [Docs]
+    types:
+      - completed
+
+jobs:
+  branch-preview:
+    runs-on: ubuntu-24.04
+    name: Deploy Branch Preview
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    env:
+      S3_BUCKET: "preview.awkward-array.org"
+      DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
+    environment:
+      name: docs
+      url: "${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}"
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: eu-west-2
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
+    - name: Download rendered docs
+      uses: actions/github-script@v7
+      with:
+        script: |
+          let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
+          });
+          let docsArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+            return artifact.name == "docs"
+          })[0];
+          let PRNumberArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+            return artifact.name == "pr_number"
+          })[0];
+          let downloadDocs = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: docsArtifact.id,
+              archive_format: 'zip',
+          });
+          let downloadPRNumber = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: PRNumberArtifact.id,
+              archive_format: 'zip',
+          });
+          const fs = require('fs');
+          const path = require('path');
+          const temp = '${{ runner.temp }}/artifacts';
+          if (!fs.existsSync(temp)){
+            fs.mkdirSync(temp);
+          }
+          fs.writeFileSync(path.join(temp, 'docs.zip'), Buffer.from(downloadDocs.data));
+          fs.writeFileSync(path.join(temp, 'pr_number.zip'), Buffer.from(downloadPRNumber.data));
+    - name: Unzip artifacts
+      run: |
+        unzip "${{ runner.temp }}/artifacts/docs.zip" -d "${{ runner.temp }}/artifacts"
+        unzip "${{ runner.temp }}/artifacts/pr_number.zip" -d "${{ runner.temp }}/artifacts"
+    - name: Read PR number
+      id: pr_number
+      run: |
+        echo "pr_number=$(cat ${{ runner.temp }}/artifacts/pr_number.txt)" >> $GITHUB_OUTPUT
+        rm "${{ runner.temp }}/artifacts/pr_number.txt"
+        rm "${{ runner.temp }}/artifacts/docs.zip"
+        rm "${{ runner.temp }}/artifacts/pr_number.zip"
+    - name: Sync artifacts
+      run: |
+        aws s3 sync ${{ runner.temp }}/artifacts/ "s3://${S3_BUCKET}/PR${{ steps.pr_number.outputs.pr_number }}"
+    - name: Try to find previous bot comment
+      uses: peter-evans/find-comment@v3
+      id: fc
+      with:
+        issue-number: ${{ steps.pr_number.outputs.pr_number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: The documentation preview is ready to be viewed
+    - name: Create comment with preview link
+      if: steps.fc.outputs.comment-id == ''
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        issue-number: ${{ steps.pr_number.outputs.pr_number }}
+        body: |
+          The documentation preview is ready to be viewed at <${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}>

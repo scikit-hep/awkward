@@ -35,6 +35,19 @@ def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
     )
 
 
+def _lazy_asarray(
+    nplike: NumpyLike, generator: Callable[[], ArrayLike]
+) -> Callable[[], ArrayLike]:
+    """
+    Wraps a generator function to ensure it returns an array-like object.
+    """
+
+    def wrapped_generator() -> ArrayLike:
+        return nplike.asarray(generator())
+
+    return wrapped_generator
+
+
 class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     """
     Implements a virtual array to be used as a buffer inside layouts.
@@ -49,6 +62,15 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     Subsequent virtual arrays that originate from some virtual array will hit the cache of their parents if there is any.
     """
 
+    __slots__ = (
+        "_array",
+        "_dtype",
+        "_generator",
+        "_nplike",
+        "_shape",
+        "_shape_generator",
+    )
+
     def __init__(
         self,
         nplike: NumpyLike,
@@ -56,6 +78,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         dtype: DTypeLike,
         generator: Callable[[], ArrayLike],
         shape_generator: Callable[[], tuple[ShapeItem, ...]] | None = None,
+        __wrap_generator_asarray__: bool = False,
     ) -> None:
         if not nplike.supports_virtual_arrays:
             raise TypeError(
@@ -71,6 +94,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
         self._shape = shape
         self._dtype = np.dtype(dtype)
         self._array: Sentinel | ArrayLike = UNMATERIALIZED
+
+        # this ensures that the generator returns an array-like object according to the nplike
+        if __wrap_generator_asarray__:
+            generator = _lazy_asarray(nplike, generator)
+
         self._generator = generator
         self._shape_generator = shape_generator
 
@@ -135,7 +163,7 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
     def materialize(self) -> ArrayLike:
         if self._array is UNMATERIALIZED:
-            array = self._nplike.asarray(self._generator())
+            array = _lazy_asarray(self._nplike, self._generator)()
             if len(self._shape) != len(array.shape):
                 raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
@@ -151,10 +179,9 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
                 )
             self._shape = array.shape
             self._array = array
+            self._shape_generator = assert_never
+            self._generator = assert_never
         return self._array  # type: ignore[return-value]
-
-    def dematerialize(self) -> None:
-        self._array = UNMATERIALIZED
 
     @property
     def is_materialized(self) -> bool:
@@ -164,6 +191,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
     def T(self):
         if self._array is not UNMATERIALIZED:
             return self._array.T
+
+        # if the existing array is 0D or 1D, we can return self directly
+        # this avoids unnecessary VirtualArray creation and method-chaining
+        if self.ndim <= 1:
+            return self
 
         return type(self)(
             self._nplike,
@@ -178,6 +210,11 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
 
         if self._array is not UNMATERIALIZED:
             return self.materialize().view(dtype)  # type: ignore[return-value]
+
+        # if the dtype is _exactly_ the dtype of the existing array, we can return self directly
+        # this avoids unnecessary VirtualArray creation and method-chaining
+        if self._dtype == dtype:
+            return self
 
         if len(self.shape) >= 1:
             last, remainder = divmod(
@@ -286,6 +323,10 @@ class VirtualArray(NDArrayOperatorsMixin, ArrayLike):
             else:
                 length = self.shape[0]
                 start, stop, step = index.indices(length)
+                # if the slice is _exactly_ slicing the whole array, we can return self directly
+                # this avoids unnecessary VirtualArray creation and method-chaining
+                if start == 0 and step == 1 and stop == length:
+                    return self
                 new_length = max(
                     0, (stop - start + (step - (1 if step > 0 else -1))) // step
                 )
