@@ -4,7 +4,7 @@
 // import cuda.cccl.parallel.experimental as parallel
 // from awkward._connect.cuda import min_op
 // import numpy as np
-// 
+//
 // def f(grid, block, args):
 //     (toptr, fromptr, parents, lenparents, outlength, identity, invocation_index, err_code) = args
 //     """
@@ -12,7 +12,7 @@
 //     (toptr, fromptr, parents, lenparents, outlength, identity, invocation_index, err_code)
 //     """
 //     (toptr, fromptr, parents, lenparents, outlength, identity, invocation_index, err_code) = args
-// 
+//
 //     identity = np.asarray(identity, dtype=fromptr.dtype)
 //     # fromptr: input CuPy array
 //     # toptr: output CuPy array
@@ -20,7 +20,7 @@
 //     # outlength: length of the output array
 //     # identity: identity value for min (max integer)
 //     # parents: segment labels, e.g., [0,0,1,1,1,2]
-// 
+//
 //     if parents is not None and len(parents) > 0:
 //         # Compute segment start/end offsets from parent labels
 //         parents = cupy.asarray(parents)
@@ -28,7 +28,7 @@
 //         # End indices: next start or total length
 //         end_indices = cupy.append(start_indices[1:], lenparents)
 //         n_segments = unique_parents.size
-// 
+//
 //         parallel.segmented_reduce(
 //             fromptr, toptr, start_indices, end_indices, min_op, identity, n_segments
 //         )
@@ -36,7 +36,7 @@
 //         # Simple reduction over entire array
 //         parallel.reduce_into(fromptr, toptr, min_op, lenparents, identity)
 // END PYTHON
-          
+
 // //     if block[0] > 0:
 // //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 // //     else:
