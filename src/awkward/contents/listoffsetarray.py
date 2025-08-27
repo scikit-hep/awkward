@@ -2256,7 +2256,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         next = self.to_ListOffsetArray64(True)
         next_content = next._content[: next._offsets[-1]]
         return ListOffsetArray(

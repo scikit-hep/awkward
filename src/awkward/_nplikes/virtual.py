@@ -384,6 +384,9 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
     def __dlpack__(self, stream: Any = None) -> Any:
         return self.materialize().__dlpack__(stream=stream)  # type: ignore[attr-defined]
 
+    def __reduce__(self):
+        return self.materialize().__reduce__()
+
 
 # backward compatibility
 class VirtualArray(VirtualNDArray):

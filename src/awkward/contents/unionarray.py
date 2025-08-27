@@ -1671,7 +1671,7 @@ class UnionArray(UnionMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         nplike = self._backend.nplike
         tags = self._tags.data
         original_index = index = self._index.data[
