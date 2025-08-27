@@ -67,27 +67,26 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             return obj
         if isinstance(obj, VirtualNDArray):
             if obj.is_materialized:
-                obj = obj.materialize()
+                return self.asarray(obj.materialize(), dtype=dtype, copy=copy)
             else:
                 # if we are not copying and the dtype is _exactly_ the dtype of the existing array
                 # or dtype is None, we can return the VirtualNDArray directly
                 # this avoids unnecessary VirtualNDArray creation and method-chaining
                 if not copy and (obj.dtype == dtype or dtype is None):
                     return obj
-                else:
-                    return VirtualNDArray(
-                        obj._nplike,
-                        obj._shape,
-                        dtype,
-                        lambda: self.asarray(obj.materialize(), dtype=dtype, copy=copy),
-                        lambda: obj.shape,
-                    )
+                return VirtualNDArray(
+                    obj._nplike,
+                    obj._shape,
+                    obj._dtype if dtype is None else dtype,
+                    lambda: self.asarray(obj.materialize(), dtype=dtype, copy=copy),
+                    lambda: obj.shape,
+                )
         if copy:
             return self._module.array(obj, dtype=dtype, copy=True)
         elif copy is None:
             return self._module.asarray(obj, dtype=dtype)
         else:
-            if getattr(obj, "dtype", dtype) != dtype:
+            if dtype is not None and getattr(obj, "dtype", dtype) != dtype:
                 raise ValueError(
                     "asarray was called with copy=False for an array of a different dtype"
                 )
@@ -343,7 +342,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             next_shape = self._compute_compatible_shape(shape, x.shape)
             return PlaceholderArray(self, next_shape, x.dtype, x._field_path)
         if isinstance(x, VirtualNDArray):
-            if not x.is_materialized:
+            if x.is_materialized:
+                return self.reshape(x.materialize(), shape, copy=copy)  # type: ignore[arg-type]
+            else:
                 next_shape = self._compute_compatible_shape(shape, x.shape)
                 # if the reshape is _exactly_ shaping the array as it is already, we can return the VirtualNDArray directly
                 # this avoids unnecessary VirtualNDArray creation and method-chaining
@@ -353,11 +354,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                     self,
                     next_shape,
                     x.dtype,
-                    lambda: self.reshape(x.materialize(), next_shape, copy=copy),  # type: ignore[union-attr]
+                    lambda: self.reshape(x.materialize(), next_shape, copy=copy),  # type: ignore[arg-type]
                     None,
                 )
-            else:
-                x = x.materialize()  # type: ignore[assignment]
 
         if copy is None:
             return self._module.reshape(x, shape)

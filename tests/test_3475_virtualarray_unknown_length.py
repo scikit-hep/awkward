@@ -1163,7 +1163,11 @@ def test_asarray_virtual_array_unmaterialized(
     # Test with unmaterialized VirtualNDArray
     result = numpy_like.asarray(virtual_array)
     assert result is virtual_array  # Should return the same object
+    assert result.dtype == virtual_array.dtype  # Should have same dtype
     assert not virtual_array.is_materialized
+    assert not result.is_materialized
+    # Check materialized values are correct
+    np.testing.assert_array_equal(result.materialize(), np.array([1, 2, 3, 4, 5]))
 
 
 def test_asarray_virtual_array_materialized(
@@ -1180,17 +1184,22 @@ def test_asarray_virtual_array_with_dtype(
     numpy_like, virtual_array, shape_generator_param
 ):
     # Test with dtype parameter
-    out = numpy_like.asarray(virtual_array, dtype=np.float64)
-    assert isinstance(out, VirtualNDArray)
-    assert out.dtype == np.dtype(np.float64)
-    assert not out.is_materialized
-    assert out.materialize().dtype == np.dtype(np.float64)
+    result = numpy_like.asarray(virtual_array, dtype=np.float64)
+    assert isinstance(result, VirtualNDArray)
+    assert result.dtype == np.dtype(np.float64)
+    assert not result.is_materialized
+    # Check materialized values have correct dtype and values
+    materialized = result.materialize()
+    assert materialized.dtype == np.dtype(np.float64)
+    np.testing.assert_array_equal(
+        materialized, np.array([1, 2, 3, 4, 5], dtype=np.float64)
+    )
 
 
-def test_asarray_virtual_array_with_copy(
+def test_asarray_virtual_array_materialized_copy_false_dtype_error(
     numpy_like, virtual_array, shape_generator_param
 ):
-    # Test with copy parameter
+    # Test materialized VirtualNDArray with copy=False and different dtype raises error
     virtual_array.materialize()
     with pytest.raises(
         ValueError,
@@ -1198,6 +1207,159 @@ def test_asarray_virtual_array_with_copy(
     ):
         # Should raise because we're trying to change the dtype without copying
         numpy_like.asarray(virtual_array, dtype=np.float64, copy=False)
+
+
+def test_asarray_virtual_array_copy_true_same_dtype(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test copy=True with same dtype returns new VirtualNDArray
+    result = numpy_like.asarray(virtual_array, copy=True)
+    assert isinstance(result, VirtualNDArray)
+    assert result is not virtual_array
+    assert not result.is_materialized
+    assert result.dtype == virtual_array.dtype
+    # Check materialized values are correct
+    np.testing.assert_array_equal(result.materialize(), np.array([1, 2, 3, 4, 5]))
+
+
+def test_asarray_virtual_array_copy_true_different_dtype(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test copy=True with different dtype
+    result = numpy_like.asarray(virtual_array, dtype=np.float64, copy=True)
+    assert isinstance(result, VirtualNDArray)
+    assert result.dtype == np.dtype(np.float64)
+    assert not result.is_materialized
+    # Check materialized values have correct dtype and values
+    materialized = result.materialize()
+    assert materialized.dtype == np.dtype(np.float64)
+    np.testing.assert_array_equal(
+        materialized, np.array([1, 2, 3, 4, 5], dtype=np.float64)
+    )
+
+
+def test_asarray_virtual_array_copy_none_same_dtype(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test copy=None preserves lazy evaluation with same dtype
+    result = numpy_like.asarray(virtual_array, copy=None)
+    assert isinstance(result, VirtualNDArray)
+    assert not result.is_materialized
+    assert result.dtype == virtual_array.dtype
+    # Check materialized values are correct
+    np.testing.assert_array_equal(result.materialize(), np.array([1, 2, 3, 4, 5]))
+
+
+def test_asarray_virtual_array_copy_none_different_dtype(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test copy=None with different dtype
+    result = numpy_like.asarray(virtual_array, dtype=np.float64, copy=None)
+    assert isinstance(result, VirtualNDArray)
+    assert result.dtype == np.dtype(np.float64)
+    assert not result.is_materialized
+    # Check materialized values have correct dtype and values
+    materialized = result.materialize()
+    assert materialized.dtype == np.dtype(np.float64)
+    np.testing.assert_array_equal(
+        materialized, np.array([1, 2, 3, 4, 5], dtype=np.float64)
+    )
+
+
+def test_asarray_virtual_array_copy_false_same_dtype(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test VirtualNDArray with copy=False and same dtype
+    result = numpy_like.asarray(virtual_array, copy=False)
+    assert isinstance(result, VirtualNDArray)
+    assert result.dtype == virtual_array.dtype
+    assert not result.is_materialized
+    # Check materialized values are correct
+    np.testing.assert_array_equal(result.materialize(), np.array([1, 2, 3, 4, 5]))
+
+
+def test_asarray_virtual_array_copy_false_different_dtype(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test VirtualNDArray copy=False with dtype change - should create VirtualNDArray but error on materialization
+    result = numpy_like.asarray(virtual_array, dtype=np.float64, copy=False)
+    assert isinstance(result, VirtualNDArray)
+    assert result.dtype == np.dtype(np.float64)
+    assert not result.is_materialized
+
+    # Should error when trying to materialize due to copy=False constraint
+    with pytest.raises(
+        ValueError,
+        match="asarray was called with copy=False for an array of a different dtype",
+    ):
+        result.materialize()
+
+
+def test_asarray_virtual_array_dtype_none_behavior(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test VirtualNDArray with dtype=None preserves original dtype
+    result = numpy_like.asarray(virtual_array, dtype=None)
+    assert isinstance(result, VirtualNDArray)
+    assert result.dtype == virtual_array.dtype
+    assert not result.is_materialized
+    # Check materialized values are correct
+    np.testing.assert_array_equal(result.materialize(), np.array([1, 2, 3, 4, 5]))
+
+
+def test_asarray_virtual_array_materialized_copy_true(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test materialized VirtualNDArray with copy=True
+    virtual_array.materialize()
+    result = numpy_like.asarray(virtual_array, copy=True)
+    assert isinstance(result, np.ndarray)
+    np.testing.assert_array_equal(result, np.array([1, 2, 3, 4, 5]))
+    # Should be a copy - modifying result shouldn't affect original
+    result[0] = 999
+    assert virtual_array.materialize()[0] == 1
+
+
+def test_asarray_virtual_array_materialized_copy_false_same_dtype(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test materialized VirtualNDArray with copy=False and same dtype
+    virtual_array.materialize()
+    result = numpy_like.asarray(virtual_array, copy=False)
+    assert isinstance(result, np.ndarray)
+    np.testing.assert_array_equal(result, np.array([1, 2, 3, 4, 5]))
+
+
+def test_asarray_virtual_array_materialized_dtype_conversion(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test materialized VirtualNDArray with dtype conversion
+    virtual_array.materialize()
+    result = numpy_like.asarray(virtual_array, dtype=np.float64)
+    assert isinstance(result, np.ndarray)
+    assert result.dtype == np.dtype(np.float64)
+    np.testing.assert_array_equal(result, np.array([1, 2, 3, 4, 5], dtype=np.float64))
+
+
+def test_asarray_virtual_array_complex_dtype_chain(
+    numpy_like, virtual_array, shape_generator_param
+):
+    # Test chaining dtype conversions with VirtualNDArray
+    float_result = numpy_like.asarray(virtual_array, dtype=np.float32)
+    assert isinstance(float_result, VirtualNDArray)
+    assert float_result.dtype == np.dtype(np.float32)
+
+    # Further conversion
+    double_result = numpy_like.asarray(float_result, dtype=np.float64)
+    assert isinstance(double_result, VirtualNDArray)
+    assert double_result.dtype == np.dtype(np.float64)
+
+    # Check final materialized values
+    materialized = double_result.materialize()
+    assert materialized.dtype == np.dtype(np.float64)
+    np.testing.assert_array_equal(
+        materialized, np.array([1, 2, 3, 4, 5], dtype=np.float64)
+    )
 
 
 def test_ascontiguousarray_unmaterialized(
