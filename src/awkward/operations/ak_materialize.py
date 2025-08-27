@@ -29,7 +29,7 @@ def materialize(
     Traverses the input array and materializes any virtual buffers.
     If the input array is not an #ak.Array or an #ak.contents.Content,
     an error will be raised.
-    The buffers of the returned array are no longer `VirtualArray` objects even if there were any.
+    The buffers of the returned array are no longer `VirtualNDArray` objects even if there were any.
     They will become one of `numpy.ndarray`, `cupy.ndarray`, or `jax.numpy.ndarray` objects,
     depending on the array's backend.
     """

@@ -11,7 +11,7 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.unionmeta import UnionMeta
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -19,7 +19,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import OneOf, TypeTracer
-from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import parameters_intersect, parameters_union
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
@@ -568,11 +568,11 @@ class UnionArray(UnionMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual_tags = (
-            isinstance(self._tags.data, VirtualArray)
+            isinstance(self._tags.data, VirtualNDArray)
             and not self._tags.data.is_materialized
         )
         is_virtual_index = (
-            isinstance(self._index.data, VirtualArray)
+            isinstance(self._index.data, VirtualNDArray)
             and not self._index.data.is_materialized
         )
         is_virtual = is_virtual_tags or is_virtual_index
@@ -1505,8 +1505,8 @@ class UnionArray(UnionMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
-        (nptags,) = materialize_if_virtual(self._tags.raw(numpy))
-        (npindex,) = materialize_if_virtual(self._index.raw(numpy))
+        (nptags,) = maybe_materialize(self._tags.raw(numpy))
+        (npindex,) = maybe_materialize(self._index.raw(numpy))
         copied_index = False
 
         values = []
@@ -1671,7 +1671,7 @@ class UnionArray(UnionMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         nplike = self._backend.nplike
         tags = self._tags.data
         original_index = index = self._index.data[: tags.shape[0]]
@@ -1713,8 +1713,8 @@ class UnionArray(UnionMeta[Content], Content):
         if out is not None:
             return out
 
-        (tags,) = materialize_if_virtual(self._tags.raw(numpy))
-        (index,) = materialize_if_virtual(self._index.raw(numpy))
+        (tags,) = maybe_materialize(self._tags.raw(numpy))
+        (index,) = maybe_materialize(self._index.raw(numpy))
         contents = [x._to_list(behavior, json_conversions) for x in self._contents]
 
         out = [None] * tags.shape[0]

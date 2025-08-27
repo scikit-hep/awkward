@@ -304,7 +304,7 @@ class Content(Meta):
             "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak.highlevel.Array"
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         raise TypeError(
             "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak.highlevel.Array"
         )
@@ -1180,6 +1180,11 @@ class Content(Meta):
         )
 
     def to_packed(self, recursive: bool = True) -> Content:
+        if recursive:
+            return self.materialize()._to_packed(True)
+        return self._to_packed(False)
+
+    def _to_packed(self, recursive: bool = True) -> Content:
         raise NotImplementedError
 
     def to_list(self, behavior: dict | None = None) -> list:
