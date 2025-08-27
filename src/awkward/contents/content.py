@@ -1180,6 +1180,11 @@ class Content(Meta):
         )
 
     def to_packed(self, recursive: bool = True) -> Content:
+        if recursive:
+            return self.materialize()._to_packed(True)
+        return self._to_packed(False)
+
+    def _to_packed(self, recursive: bool = True) -> Content:
         raise NotImplementedError
 
     def to_list(self, behavior: dict | None = None) -> list:
