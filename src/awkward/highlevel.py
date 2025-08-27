@@ -1516,10 +1516,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             "text/plain": repr(self),
         }
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         """
         Intercepts attempts to convert this Array into a NumPy array and
-        either performs a zero-copy conversion or raises an error.
+        either performs a conversion if possible or raises an error.
+        The array may be copied depending on the values of `dtype` and `copy`.
+        The rules for copying are specified in the
+        [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
+        documentation.
 
         This function is also called by the
         [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
@@ -1542,11 +1546,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         cannot be sliced as dimensions.
         """
         with ak._errors.OperationErrorContext(
-            "numpy.asarray", (self,), {"dtype": dtype}
+            "numpy.asarray", (self,), {"dtype": dtype, "copy": copy}
         ):
             from awkward._connect.numpy import convert_to_array
 
-            return convert_to_array(self._layout, dtype=dtype)
+            return convert_to_array(self._layout, dtype=dtype, copy=copy)
 
     def __arrow_array__(self, type=None):
         with ak._errors.OperationErrorContext(
@@ -1662,7 +1666,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return numba.typeof(self._numbaview)
 
     def __reduce_ex__(self, protocol: int) -> tuple:
-        result = custom_reduce(self, protocol)
+        materialized = wrap_layout(
+            self._layout.materialize(),
+            self._behavior,
+            attrs=self._attrs,
+            highlevel=True,
+        )
+        result = custom_reduce(materialized, protocol)
         if result is not NotImplemented:
             return result
 
@@ -2496,7 +2506,13 @@ class Record(NDArrayOperatorsMixin):
 
     def __reduce_ex__(self, protocol: int) -> tuple:
         # Allow third-party libraries to customise pickling
-        result = custom_reduce(self, protocol)
+        materialized = wrap_layout(
+            self._layout.materialize(),
+            self._behavior,
+            attrs=self._attrs,
+            highlevel=True,
+        )
+        result = custom_reduce(materialized, protocol)
         if result is not NotImplemented:
             return result
 
@@ -2879,20 +2895,19 @@ class ArrayBuilder(Sized):
             formatter=formatter_impl,
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         """
         Intercepts attempts to convert a #snapshot of this array into a
-        NumPy array and either performs a zero-copy conversion or raises
-        an error.
+        NumPy array and either performs a conversion if possible or raises an error.
 
         See #ak.Array.__array__ for a more complete description.
         """
         with ak._errors.OperationErrorContext(
-            "numpy.asarray", (self,), {"dtype": dtype}
+            "numpy.asarray", (self,), {"dtype": dtype, "copy": copy}
         ):
             from awkward._connect.numpy import convert_to_array
 
-            return convert_to_array(self.snapshot(), dtype=dtype)
+            return convert_to_array(self.snapshot(), dtype=dtype, copy=copy)
 
     def __arrow_array__(self, type=None):
         with ak._errors.OperationErrorContext(

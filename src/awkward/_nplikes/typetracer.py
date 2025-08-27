@@ -319,6 +319,12 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._shape
 
     @property
+    def strides(self):
+        raise AssertionError(
+            "Bug in Awkward Array: cannot get the strides of a TypeTracerArray because its not a concrete array"
+        )
+
+    @property
     def inner_shape(self) -> tuple[ShapeItem, ...]:
         if len(self._shape) > 1:
             self.touch_shape()
@@ -392,12 +398,12 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __iter__(self):
         raise AssertionError(
-            "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
+            "Bug in Awkward Array: cannot iterate over TypeTracerArray because its not a concrete array"
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         raise AssertionError(
-            "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
+            "Bug in Awkward Array: cannot convert TypeTracerArray into a concrete array"
         )
 
     class _CTypes:
@@ -409,7 +415,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __len__(self):
         raise AssertionError(
-            "bug in Awkward Array: attempt to get length of a TypeTracerArray"
+            "Bug in Awkward Array: cannot get length of a TypeTracerArray because its not a concrete array"
         )
 
     def __getitem__(
@@ -705,7 +711,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         ]
         # Build proxy (empty) arrays
         proxy_args = [
-            (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+            cast(
+                ArrayLike, (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+            )
             for x in non_generic_value_promoted_args
         ]
         # Determine result dtype from proxy call
@@ -821,7 +829,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                         shape.append(len(node))
 
                     if isinstance(node, TypeTracerArray):
-                        raise AssertionError(
+                        raise TypeError(
                             "typetracer arrays inside sequences not currently supported"
                         )
                     # Found leaf!

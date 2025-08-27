@@ -10,14 +10,14 @@ from collections.abc import Mapping, MutableMapping, Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._meta.bitmaskedmeta import BitMaskedMeta
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
-from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._regularize import is_integer, is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import (
@@ -476,7 +476,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
-            isinstance(self._mask.data, VirtualArray)
+            isinstance(self._mask.data, VirtualNDArray)
             and not self._mask.data.is_materialized
         )
         if is_virtual:
@@ -704,7 +704,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         cp = Cupy.instance()._module
 
         assert mask is None  # this class has its own mask
-        (mask,) = materialize_if_virtual(self._mask.data)
+        (mask,) = maybe_materialize(self._mask.data)
         if not self.lsb_order:
             m = cp.flip(cp.packbits(cp.flip(cp.unpackbits(cp.asarray(mask)))))
         else:
@@ -795,7 +795,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         if self._content.is_record:
             next = self.to_IndexedOptionArray64()
 

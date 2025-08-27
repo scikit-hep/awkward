@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy_like import NumpyLike
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._typing import Any, TypeVar, cast
 from awkward._util import UNSET, Sentinel
 
@@ -49,7 +49,7 @@ def nplike_of_obj(
         # to avoid the isinstance slowdown inside the try block
         # because it's used often for non-virtual arrays
         # TODO: replace this whole function with a more generic lookup registration system
-        if isinstance(obj, VirtualArray):
+        if isinstance(obj, VirtualNDArray):
             return obj.nplike
         for nplike_cls in _nplike_classes:
             if nplike_cls.is_own_array_type(cls):
