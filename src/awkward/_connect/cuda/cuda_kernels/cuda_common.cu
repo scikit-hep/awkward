@@ -60,6 +60,9 @@ typedef unsigned long long uintmax_t;
 const int64_t  kMaxInt64  = 9223372036854775806;   // 2**63 - 2: see below
 const int64_t  kSliceNone = kMaxInt64 + 1;         // for Slice::none()
 
+// constexpr auto min_op = cuda::minimum<type>{};
+// constexpr auto init   = cuda::std::numeric_limits<type>::max();
+
 __device__ void
 awkward_regularize_rangeslice(
     int64_t* start,

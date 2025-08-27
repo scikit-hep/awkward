@@ -2,8 +2,7 @@
 
 // BEGIN PYTHON
 // import cuda.cccl.parallel.experimental as parallel
-// from awkward._connect.cuda import min_op
-// import numpy as np
+// import awkward._connect.cuda
 // 
 // def f(grid, block, args):
 //     (toptr, fromptr, parents, lenparents, outlength, identity, invocation_index, err_code) = args
@@ -13,28 +12,24 @@
 //     """
 //     (toptr, fromptr, parents, lenparents, outlength, identity, invocation_index, err_code) = args
 // 
-//     identity = np.asarray(identity, dtype=fromptr.dtype)
 //     # fromptr: input CuPy array
 //     # toptr: output CuPy array
 //     # lenparents: length of the input array (or segments)
 //     # outlength: length of the output array
 //     # identity: identity value for min (max integer)
-//     # parents: segment labels, e.g., [0,0,1,1,1,2]
-// 
+//       
+//     # If segmented reduction
 //     if parents is not None and len(parents) > 0:
-//         # Compute segment start/end offsets from parent labels
-//         parents = cupy.asarray(parents)
-//         unique_parents, start_indices = cupy.unique(parents, return_index=True)
-//         # End indices: next start or total length
-//         end_indices = cupy.append(start_indices[1:], lenparents)
-//         n_segments = unique_parents.size
-// 
+//         # parents defines segment offsets
+//         start_o = cp.array(parents[:-1], dtype=np.int64)
+//         end_o = cp.array(parents[1:], dtype=np.int64)
+//         n_segments = outlength
 //         parallel.segmented_reduce(
-//             fromptr, toptr, start_indices, end_indices, min_op, identity, n_segments
+//             fromptr, toptr, start_o, end_o, awkward._connect.cuda.min_op, identity, n_segments
 //         )
 //     else:
-//         # Simple reduction over entire array
-//         parallel.reduce_into(fromptr, toptr, min_op, lenparents, identity)
+//         # Simple reduction over whole array
+//         parallel.reduce_into(fromptr, toptr, awkward._connect.cuda.min_op, lenparents, identity)
 // END PYTHON
           
 // //     if block[0] > 0:

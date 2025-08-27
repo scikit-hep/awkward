@@ -47,6 +47,9 @@ dtype_to_ctype = {
 }
 
 
+def min_op(a, b):
+    return a if a < b else b
+
 def fetch_specialization(keys):
     specialized_name = keys[0].replace("'", "") + "<"
 
