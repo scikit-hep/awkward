@@ -125,6 +125,7 @@ cuda_kernels_impl = [
     "awkward_reduce_max_complex",
     "awkward_reduce_min",
     "awkward_reduce_min_complex",
+    "awkward_reduce_argmin",
     "awkward_reduce_sum",
     "awkward_reduce_sum_bool",
     "awkward_reduce_sum_bool_complex",

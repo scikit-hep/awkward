@@ -47,8 +47,30 @@ dtype_to_ctype = {
 }
 
 
-def min_op(a, b):
+def argmin_op(i, j, values):
+    """Return index of smaller value."""
+    return i if values[i] <= values[j] else j
+
+
+def argmin_reducer(i, j, data):
+    # i and j are indices; data is device array
+    return argmin_op(i, j, data)
+
+
+def min_op_real(a, b):
     return a if a < b else b
+
+
+def min_op_complex(a, b):
+    if abs(a) < abs(b):
+        return a
+    elif abs(b) < abs(a):
+        return b
+    else:
+        if a.real != b.real:
+            return a if a.real < b.real else b
+        else:
+            return a if a.imag < b.imag else b
 
 def fetch_specialization(keys):
     specialized_name = keys[0].replace("'", "") + "<"
@@ -139,6 +161,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_max_complex",
         "awkward_reduce_min",
         "awkward_reduce_min_complex",
+        "awkward_reduce_argmin",
         "awkward_sorting_ranges",
         "awkward_sorting_ranges_length",
         "awkward_UnionArray_flatten_length",
