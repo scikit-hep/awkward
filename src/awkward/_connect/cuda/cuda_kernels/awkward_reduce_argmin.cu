@@ -4,7 +4,6 @@
 // import cupy as cp
 // import numpy as np
 // import cuda.cccl.parallel.experimental as parallel
-// #from awkward._connect.cuda import argmin_reducer
 // 
 // def f(grid, block, args):
 //     """
