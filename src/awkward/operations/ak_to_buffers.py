@@ -21,7 +21,7 @@ def to_buffers(
     *,
     id_start=0,
     backend=None,
-    byteorder="<",
+    byteorder=ak._util.native_byteorder,
 ):
     """
     Args:

@@ -373,11 +373,11 @@ def regularize_buffer_key(buffer_key: str | Callable) -> Callable[[Form, str], s
 
 
 index_to_dtype: Final[dict[str, DType]] = {
-    "i8": np.dtype("<i1"),
-    "u8": np.dtype("<u1"),
-    "i32": np.dtype("<i4"),
-    "u32": np.dtype("<u4"),
-    "i64": np.dtype("<i8"),
+    "i8": np.dtype("i1"),
+    "u8": np.dtype("u1"),
+    "i32": np.dtype("i4"),
+    "u32": np.dtype("u4"),
+    "i64": np.dtype("i8"),
 }
 
 
