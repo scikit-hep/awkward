@@ -193,4 +193,3 @@ def test_2754_highlevel_behavior_missing_reducers(func):
         ).behavior
         == behavior_1
     )
-)

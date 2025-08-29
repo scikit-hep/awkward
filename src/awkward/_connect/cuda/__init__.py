@@ -47,14 +47,19 @@ dtype_to_ctype = {
 }
 
 
-def argmin_op(i, j, values):
-    """Return index of smaller value."""
-    return i if values[i] <= values[j] else j
+# Reducer: return element with smaller value
+def argmin_reducer(x, y):
+    return x if x.val < y.val else y
 
 
-def argmin_reducer(i, j, data):
-    # i and j are indices; data is device array
-    return argmin_op(i, j, data)
+# def argmin_op(i, j, values):
+#     """Return index of smaller value."""
+#     return i if values[i] <= values[j] else j
+
+
+# def argmin_reducer(i, j, data):
+#     # i and j are indices; data is device array
+#     return argmin_op(i, j, data)
 
 
 def min_op_real(a, b):
@@ -71,6 +76,7 @@ def min_op_complex(a, b):
             return a if a.real < b.real else b
         else:
             return a if a.imag < b.imag else b
+
 
 def fetch_specialization(keys):
     specialized_name = keys[0].replace("'", "") + "<"

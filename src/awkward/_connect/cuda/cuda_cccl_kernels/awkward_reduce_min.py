@@ -1,19 +1,35 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
+import cuda.cccl.parallel.experimental as parallel
 import cupy as cp
 import numpy as np
-import cuda.cccl.parallel.experimental as parallel
-from awkward._connect.cuda import min_op_real, min_op_complex
+
+from awkward._connect.cuda import min_op_complex, min_op_real
+
 
 def f(grid, block, args):
     """
     Min reduction for sorted, present parents on device:
     (toptr, fromptr, parents, lenparents, outlength, identity, invocation_index, err_code)
     """
-    toptr, fromptr, parents, lenparents, outlength, identity, invocation_index, err_code = args
+    (
+        toptr,
+        fromptr,
+        parents,
+        lenparents,
+        outlength,
+        identity,
+        invocation_index,
+        err_code,
+    ) = args
 
     # Pick the operation by dtype
-    min_op = min_op_complex if np.issubdtype(fromptr.dtype, np.complexfloating) else min_op_real
+    min_op = (
+        min_op_complex
+        if np.issubdtype(fromptr.dtype, np.complexfloating)
+        else min_op_real
+    )
 
     # Initialize output on device
     toptr[:outlength] = identity
@@ -22,7 +38,9 @@ def f(grid, block, args):
     identity_host = np.asarray(identity, dtype=fromptr.dtype)
 
     # Parents are already sorted and on device
-    unique_parents, start_indices, counts = cp.unique(parents, return_index=True, return_counts=True)
+    unique_parents, start_indices, counts = cp.unique(
+        parents, return_index=True, return_counts=True
+    )
 
     # Build full counts array for all segments
     full_counts = cp.zeros(outlength, dtype=cp.int64)
