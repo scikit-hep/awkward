@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // import math
 // import cupy
-//
+// 
 // def f(grid, block, args):
 //     (toptr_indices, fromptr, parents, lenparents, outlength,
 //      invocation_index, err_code) = args
