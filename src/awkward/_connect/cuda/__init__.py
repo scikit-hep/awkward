@@ -261,7 +261,10 @@ def initialize_cuda_kernels(cupy):
             )
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
-                options=("--std=c++11",),
+                options=(
+                    "--std=c++11",
+                    "--diag-suppress=186",
+                ),
                 name_expressions=template_specializations,
             )
             kernel = awkward._connect.cuda._kernel_signatures.by_signature(
