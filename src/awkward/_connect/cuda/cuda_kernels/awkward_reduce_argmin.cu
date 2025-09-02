@@ -7,19 +7,19 @@
 // def f(grid, block, args):
 //     (toptr_indices, fromptr, parents, lenparents, outlength,
 //      invocation_index, err_code) = args
-//
+// 
 //     identity = -1  # hardcoded identity
-//
+// 
 //     # determine grid size
 //     if block[0] > 0:
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
-//
+// 
 //     # allocate temporary buffers for values and indices
 //     temp_values = cupy.full(lenparents, cupy.array([identity], dtype=fromptr.dtype), dtype=fromptr.dtype)
 //     temp_indices = cupy.arange(lenparents, dtype=cupy.int64)
-//
+// 
 //     # launch kernel pass a (initialize toptr_indices)
 //     cuda_kernel_templates.get_function(
 //         fetch_specialization([
@@ -32,7 +32,7 @@
 //         toptr_indices, fromptr, parents, lenparents, outlength,
 //         temp_values, temp_indices, invocation_index, err_code
 //     ))
-//
+// 
 //     # launch kernel pass b (compute argmin per segment)
 //     cuda_kernel_templates.get_function(
 //         fetch_specialization([
@@ -45,7 +45,7 @@
 //         toptr_indices, fromptr, parents, lenparents, outlength,
 //         temp_values, temp_indices, err_code
 //     ))
-//
+// 
 // out[f"awkward_argmin_a", {dtype_specializations}] = None
 // out[f"awkward_argmin_b", {dtype_specializations}] = None
 // END PYTHON
