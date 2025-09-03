@@ -9,17 +9,17 @@
 //         grid_size = 1
 //     atomic_toptr = cupy.array(toptr, dtype=cupy.uint64)
 //     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-// out["awkward_reduce_argmin_a", {dtype_specializations}] = None
-// out["awkward_reduce_argmin_b", {dtype_specializations}] = None
-// out["awkward_reduce_argmin_c", {dtype_specializations}] = None
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmax_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmax_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmax_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+// out["awkward_reduce_argmax_a", {dtype_specializations}] = None
+// out["awkward_reduce_argmax_b", {dtype_specializations}] = None
+// out["awkward_reduce_argmax_c", {dtype_specializations}] = None
 // END PYTHON
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_argmin_a(
+awkward_reduce_argmax_a(
 
     T* toptr,
     const C* fromptr,
@@ -39,9 +39,10 @@ awkward_reduce_argmin_a(
   }
 }
 
+
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_argmin_b(
+awkward_reduce_argmax_b(
     T* toptr,
     const C* fromptr,
     const U* parents,
@@ -57,11 +58,10 @@ awkward_reduce_argmin_b(
     int64_t idx = threadIdx.x;
     int64_t thread_id = blockIdx.x * blockDim.x + idx;
 
-    // copy global index into temp for threads that exist
+    // Initialize temp with the global index for valid threads; keep out-of-range as -1
     if (thread_id < lenparents) {
       temp[thread_id] = thread_id;
     } else {
-      // keep out-of-range slots as -1 to be safe
       if (thread_id < outlength) {
         temp[thread_id] = -1;
       }
@@ -69,75 +69,74 @@ awkward_reduce_argmin_b(
     __syncthreads();
 
     if (thread_id < lenparents) {
-      // intra-block tree-reduction producing index of block-local winner in temp[thread_id]
+      // Intra-block tree reduction to compute block-local winner index in temp[thread_id]
       for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
         int64_t index = -1;
         if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
           index = temp[thread_id - stride];
         }
-        __syncthreads(); // ensure index is read after producers write
+        __syncthreads(); // ensure producers finished
         if (index != -1 && (temp[thread_id] == -1 ||
-            fromptr[index] < fromptr[temp[thread_id]] ||
-            (fromptr[index] == fromptr[temp[thread_id]] && index < temp[thread_id]))) {
+            fromptr[index] > fromptr[temp[thread_id]] ||
+            (fromptr[index] == fromptr[temp[thread_id]] && index > temp[thread_id]))) {
           temp[thread_id] = index;
         }
         __syncthreads();
       }
 
       int64_t parent = parents[thread_id];
-      // only the boundary thread for each parent writes a block-local candidate
+      // boundary thread for each parent emits the block-local candidate
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        uint64_t candidate = (uint64_t) temp[thread_id]; // candidate global index
+        uint64_t candidate = (uint64_t) temp[thread_id];
         if (candidate != (uint64_t)-1) {
-          // CAS loop: read current winner, compare values, attempt to replace only if candidate is better
+          // CAS loop: install or replace only when candidate is strictly better
           uint64_t cur = atomic_toptr[parent];
           while (true) {
-            // if empty slot, try to install candidate
+            // If empty, try to install candidate directly
             if (cur == EMPTY) {
               uint64_t prev = atomicCAS(&atomic_toptr[parent], EMPTY, candidate);
               if (prev == EMPTY) {
-                // succeeded installing our candidate
+                // installed successfully
                 break;
               } else {
-                // someone else installed; update cur and re-evaluate
+                // someone else wrote; update cur and re-evaluate
                 cur = prev;
                 continue;
               }
             } else {
-              // compare stored winner (cur) with our candidate
               int64_t old_idx = (int64_t) cur;
               int64_t new_idx = (int64_t) candidate;
 
-              // Note: fromptr is indexed by global indices; ensure idx's are valid
               C old_val = fromptr[old_idx];
               C new_val = fromptr[new_idx];
 
-              // Candidate is better if new_val < old_val, or equal but lower index.
-              if (new_val < old_val || (new_val == old_val && new_idx < old_idx)) {
+              // Candidate is better if new_val > old_val, or equal but larger index (tie-breaker preserved)
+              if (new_val > old_val || (new_val == old_val && new_idx > old_idx)) {
                 uint64_t prev = atomicCAS(&atomic_toptr[parent], cur, candidate);
                 if (prev == cur) {
-                  // succeeded replacing the previous winner
+                  // replaced successfully
                   break;
                 } else {
-                  // CAS failed: somebody else changed value; re-read and loop
+                  // lost race, refresh cur and retry
                   cur = prev;
                   continue;
                 }
               } else {
-                // Stored winner is better or equal (and lower index) -> we're done
+                // stored winner is better (or equal with preferred index) -> done
                 break;
               }
             }
           } // end CAS loop
-        } // end candidate != -1 check
-      } // end boundary-thread check
-    } // end if thread_id < lenparents
+        } // end candidate valid
+      } // end boundary check
+    } // end valid thread
   } // end err_code check
 }
 
+
 template <typename T, typename C, typename U>
 __global__ void
-awkward_reduce_argmin_c(
+awkward_reduce_argmax_c(
     T* toptr,
     const C* fromptr,
     const U* parents,

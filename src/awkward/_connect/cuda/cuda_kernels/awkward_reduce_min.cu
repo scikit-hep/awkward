@@ -12,7 +12,7 @@
 //     """
 //     toptr, fromptr, parents, lenparents, outlength, identity, invocation_index, err_code = args
 //     # Pick the operation by dtype
-//     min_op = min_op_complex if np.issubdtype(fromptr.dtype, np.complexfloating) else min_op_real
+//     min_op = min_op_real #min_op_complex if np.issubdtype(fromptr.dtype, np.complexfloating) else min_op_real
 //     # Initialize output on device
 //     toptr[:outlength] = identity
 //     # Keep host copy of identity for segmented_reduce

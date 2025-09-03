@@ -168,6 +168,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_min",
         "awkward_reduce_min_complex",
         "awkward_reduce_argmin",
+        "awkward_reduce_argmax",
         "awkward_sorting_ranges",
         "awkward_sorting_ranges_length",
         "awkward_UnionArray_flatten_length",
