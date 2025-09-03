@@ -39,7 +39,6 @@ awkward_reduce_argmax_a(
   }
 }
 
-
 template <typename T, typename C, typename U>
 __global__ void
 awkward_reduce_argmax_b(
@@ -52,6 +51,7 @@ awkward_reduce_argmax_b(
     T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
+
   if (err_code[0] == NO_ERROR) {
     const uint64_t EMPTY = (uint64_t)(-1); // sentinel for "no winner yet"
 
@@ -78,7 +78,8 @@ awkward_reduce_argmax_b(
         __syncthreads(); // ensure producers finished
         if (index != -1 && (temp[thread_id] == -1 ||
             fromptr[index] > fromptr[temp[thread_id]] ||
-            (fromptr[index] == fromptr[temp[thread_id]] && index > temp[thread_id]))) {
+            (fromptr[index] == fromptr[temp[thread_id]] && index < temp[thread_id]))) {
+          // NOTE: tie-break changed to index < temp[...] so we pick first occurrence on ties
           temp[thread_id] = index;
         }
         __syncthreads();
@@ -110,8 +111,8 @@ awkward_reduce_argmax_b(
               C old_val = fromptr[old_idx];
               C new_val = fromptr[new_idx];
 
-              // Candidate is better if new_val > old_val, or equal but larger index (tie-breaker preserved)
-              if (new_val > old_val || (new_val == old_val && new_idx > old_idx)) {
+              // Candidate is better if new_val > old_val, or equal but lower index (first occurrence)
+              if (new_val > old_val || (new_val == old_val && new_idx < old_idx)) {
                 uint64_t prev = atomicCAS(&atomic_toptr[parent], cur, candidate);
                 if (prev == cur) {
                   // replaced successfully
@@ -132,7 +133,6 @@ awkward_reduce_argmax_b(
     } // end valid thread
   } // end err_code check
 }
-
 
 template <typename T, typename C, typename U>
 __global__ void
