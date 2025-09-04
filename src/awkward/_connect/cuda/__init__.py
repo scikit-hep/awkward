@@ -62,7 +62,7 @@ def argmin_reducer(x, y):
 #     return argmin_op(i, j, data)
 
 
-def min_op_real(a, b):
+def min_op(a, b):
     return a if a < b else b
 
 
