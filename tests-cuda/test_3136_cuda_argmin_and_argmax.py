@@ -12,7 +12,7 @@ to_list = ak.operations.to_list
 def cleanup_cuda():
     yield
     cp._default_memory_pool.free_all_blocks()
-    # FIXME cp.cuda.Device().synchronize()
+    cp.cuda.Device().synchronize()
 
 
 def test_0835_argmin_argmax_axis_None():

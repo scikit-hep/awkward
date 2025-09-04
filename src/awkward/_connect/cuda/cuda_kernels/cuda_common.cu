@@ -60,9 +60,6 @@ typedef unsigned long long uintmax_t;
 const int64_t  kMaxInt64  = 9223372036854775806;   // 2**63 - 2: see below
 const int64_t  kSliceNone = kMaxInt64 + 1;         // for Slice::none()
 
-// constexpr auto min_op = cuda::minimum<type>{};
-// constexpr auto init   = cuda::std::numeric_limits<type>::max();
-
 __device__ void
 awkward_regularize_rangeslice(
     int64_t* start,
@@ -569,23 +566,6 @@ __device__ __forceinline__ bool binom_safe(
   return true;
 }
 
-// template <typename I>
-// __device__ __forceinline__ bool binom_safe(I n, I k, I& out) {
-//   if (k < 0 || n < 0 || k > n) { out = 0; return true; }
-//   if (k == 0 || k == n) { out = 1; return true; }
-//   if (k + k > n) k = n - k;
-//   I result = 1;
-//   for (I j = 1; j <= k; ++j) {
-//     I a = n - j + 1;
-//     I b = j;
-//     I g1 = dgcd(a, b); a /= g1; b /= g1;
-//     I g2 = dgcd(result, b); result /= g2; b /= g2;
-//     if (b != 1 || mul_will_overflow(result, a)) return false;
-//     result *= a;
-//   }
-//   out = result;
-//   return true;
-// }
 
 /**
  * Unrank the k-th combination (lexicographic) of size r from m items.
