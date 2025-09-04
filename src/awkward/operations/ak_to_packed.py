@@ -71,6 +71,56 @@ def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
     #ak.to_buffers (though conversions through Arrow, #ak.to_arrow and
     #ak.to_parquet, do not need this because packing is part of that conversion).
 
+    This operation recursively touches the whole array so make sure to use it on things you need.
+    For example if we construct an array of records from the array above,
+    notice how both fields `x` and `y` get packed:
+
+        >>> d = ak.Array({"x": b, "y": b})
+        >>> e = ak.to_packed(d)
+        >>> e.layout
+        <RecordArray is_tuple='false' len='5'>
+            <content index='0' field='x'>
+                <ListOffsetArray len='5'>
+                    <offsets><Index dtype='int64' len='6'>[ 0  4  5  7  7 10]</Index></offsets>
+                    <content><NumpyArray dtype='int64' len='10'>
+                        [ 7  8  9 10  6  4  5  1  2  3]
+                    </NumpyArray></content>
+                </ListOffsetArray>
+            </content>
+            <content index='1' field='y'>
+                <ListOffsetArray len='5'>
+                    <offsets><Index dtype='int64' len='6'>[ 0  4  5  7  7 10]</Index></offsets>
+                    <content><NumpyArray dtype='int64' len='10'>
+                        [ 7  8  9 10  6  4  5  1  2  3]
+                    </NumpyArray></content>
+                </ListOffsetArray>
+            </content>
+        </RecordArray>
+
+    Therefore, only pack the things you need to pack.
+    If you want to only send the x-field into #ak.to_buffers, only pack that field for example:
+
+        >>> f = ak.to_packed(d.x)
+        >>> f.layout
+        <ListOffsetArray len='5'>
+            <offsets><Index dtype='int64' len='6'>[ 0  4  5  7  7 10]</Index></offsets>
+            <content><NumpyArray dtype='int64' len='10'>
+                [ 7  8  9 10  6  4  5  1  2  3]
+            </NumpyArray></content>
+        </ListOffsetArray>
+        >>> d.y.layout
+        <ListArray len='5'>
+            <starts><Index dtype='int64' len='5'>
+                [6 5 3 3 0]
+            </Index></starts>
+            <stops><Index dtype='int64' len='5'>
+                [10  6  5  3  3]
+            </Index></stops>
+            <content><NumpyArray dtype='int64' len='10'>
+                [ 1  2  3  4  5  6  7  8  9 10]
+            </NumpyArray></content>
+        </ListArray>
+
     See also #ak.to_buffers.
     """
     # Dispatch
