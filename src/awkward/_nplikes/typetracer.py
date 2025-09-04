@@ -1680,6 +1680,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
 
     def is_c_contiguous(self, x: TypeTracerArray | PlaceholderArray) -> bool:
         assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
         return True
 
     def memory_ptr(self, x: TypeTracerArray | PlaceholderArray) -> int:
