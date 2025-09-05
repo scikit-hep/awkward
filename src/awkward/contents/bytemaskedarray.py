@@ -335,7 +335,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
     def to_BitMaskedArray(self, valid_when, lsb_order):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            if self._backend.nplike.known_data:
+            if self.length is not unknown_length:
                 excess_length = math.ceil(self.length / 8.0)
             else:
                 excess_length = unknown_length

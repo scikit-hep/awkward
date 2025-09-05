@@ -810,7 +810,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             )
 
         else:
-            if self._backend.nplike.known_data:
+            if self.length is not unknown_length:
                 excess_length = math.ceil(self.length / 8.0)
             else:
                 excess_length = unknown_length
