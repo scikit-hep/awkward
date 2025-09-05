@@ -140,9 +140,14 @@ class ArrayLike(Protocol):
     def __invert__(self) -> Self: ...
 
 
-def maybe_materialize(*args: Any) -> tuple[Any, ...]:
+class MaterializableArray(ArrayLike):
+    @abstractmethod
+    def materialize(self) -> ArrayLike: ...
+
+
+def maybe_materialize(*args: Any, type_=MaterializableArray) -> tuple[Any, ...]:
     """
-    Returns a tuple where all `MaterializableArray` arguments have been replaced
+    Returns a tuple where all arguments that are instances of `type_` have been replaced
     by the result of calling their `.materialize()` method.
 
     Other `ArrayLike` or `Any` arguments are returned unchanged.
@@ -151,15 +156,7 @@ def maybe_materialize(*args: Any) -> tuple[Any, ...]:
         *args: Variable length argument list of MaterializableArray or ArrayLike or Any objects.
 
     Returns:
-        tuple: A tuple where each MaterializableArray is replaced by its materialized form,
+        tuple: A tuple where each instance of `type_` is replaced by its materialized form,
         and other ArrayLike or Any objects are returned unchanged.
     """
-    return tuple(
-        arg.materialize() if isinstance(arg, MaterializableArray) else arg
-        for arg in args
-    )
-
-
-class MaterializableArray(ArrayLike):
-    @abstractmethod
-    def materialize(self) -> ArrayLike: ...
+    return tuple(arg.materialize() if isinstance(arg, type_) else arg for arg in args)

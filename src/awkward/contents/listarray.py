@@ -1631,10 +1631,10 @@ class ListArray(ListMeta[Content], Content):
         stops = self._stops.to_nplike(backend.nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        starts = self._starts.materialize()
-        stops = self._stops.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        starts = self._starts.materialize(type_)
+        stops = self._stops.materialize(type_)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
     @property
