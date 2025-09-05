@@ -95,6 +95,13 @@ awkward_regularize_rangeslice(
   }
 }
 
+// Device helper: load flattened complex as (real, imag)
+template <typename C>
+__device__ inline void load_complex(const C* fromptr, int64_t idx, double& real, double& imag) {
+  // idx may be -1 in some checks; caller must avoid calling with idx == -1.
+  real = (double)fromptr[2 * idx];
+  imag = (double)fromptr[2 * idx + 1];
+}
 
 // atomicMin() specializations
 template <typename T>

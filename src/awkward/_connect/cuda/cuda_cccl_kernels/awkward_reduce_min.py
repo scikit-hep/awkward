@@ -5,7 +5,7 @@ import cuda.cccl.parallel.experimental as parallel
 import cupy as cp
 import numpy as np
 
-from awkward._connect.cuda import min_op_complex, min_op_real
+from awkward._connect.cuda_cccl_kernels import min_op_complex, min_op_real
 
 
 def f(grid, block, args):

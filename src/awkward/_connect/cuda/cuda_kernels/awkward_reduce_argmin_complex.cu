@@ -20,9 +20,8 @@
 template <typename T, typename C, typename U>
 __global__ void
 awkward_reduce_argmin_complex_a(
-
     T* toptr,
-    const C* fromptr,
+    const C* fromptr,   // [real, imag] pairs
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
@@ -32,9 +31,8 @@ awkward_reduce_argmin_complex_a(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
     if (thread_id < outlength) {
-      atomic_toptr[thread_id] = -1;
+      atomic_toptr[thread_id] = (uint64_t)(-1);
     }
   }
 }
@@ -45,7 +43,7 @@ template <typename T, typename C, typename U>
 __global__ void
 awkward_reduce_argmin_complex_b(
     T* toptr,
-    const C* fromptr,   // complex<T>
+    const C* fromptr,   // flattened [real, imag] array
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
@@ -62,14 +60,13 @@ awkward_reduce_argmin_complex_b(
 
     if (thread_id < lenparents) {
       temp[thread_id] = thread_id;
-    } else {
-      if (thread_id < outlength) {
-        temp[thread_id] = -1;
-      }
+    } else if (thread_id < outlength) {
+      temp[thread_id] = -1;
     }
     __syncthreads();
 
     if (thread_id < lenparents) {
+      // intra-block reduction
       for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
         int64_t index = -1;
         if (idx >= stride && parents[thread_id] == parents[thread_id - stride]) {
@@ -78,23 +75,24 @@ awkward_reduce_argmin_complex_b(
         __syncthreads();
 
         if (index != -1) {
-          C old_val = fromptr[temp[thread_id]];
-          C new_val = fromptr[index];
+          // load old candidate
+          int64_t old_idx = temp[thread_id];
+          double old_real = (double)fromptr[2 * old_idx];
+          double old_imag = (double)fromptr[2 * old_idx + 1];
+          double old_mag = old_real * old_real + old_imag * old_imag;
 
-          auto old_mag = (double)old_val.real() * old_val.real() +
-                         (double)old_val.imag() * old_val.imag();
-          auto new_mag = (double)new_val.real() * new_val.real() +
-                         (double)new_val.imag() * new_val.imag();
+          // load new candidate
+          double new_real = (double)fromptr[2 * index];
+          double new_imag = (double)fromptr[2 * index + 1];
+          double new_mag = new_real * new_real + new_imag * new_imag;
 
           bool better = (new_mag < old_mag) ||
-                        (new_mag == old_mag && new_val.real() < old_val.real()) ||
-                        (new_mag == old_mag && new_val.real() == old_val.real() &&
-                         new_val.imag() < old_val.imag()) ||
-                        (new_mag == old_mag && new_val.real() == old_val.real() &&
-                         new_val.imag() == old_val.imag() &&
-                         index < temp[thread_id]);
+                        (new_mag == old_mag && new_real < old_real) ||
+                        (new_mag == old_mag && new_real == old_real && new_imag < old_imag) ||
+                        (new_mag == old_mag && new_real == old_real && new_imag == old_imag &&
+                         index < old_idx);
 
-          if (temp[thread_id] == -1 || better) {
+          if (old_idx == -1 || better) {
             temp[thread_id] = index;
           }
         }
@@ -117,20 +115,18 @@ awkward_reduce_argmin_complex_b(
               int64_t old_idx = (int64_t)cur;
               int64_t new_idx = (int64_t)candidate;
 
-              C old_val = fromptr[old_idx];
-              C new_val = fromptr[new_idx];
+              double old_real = (double)fromptr[2 * old_idx];
+              double old_imag = (double)fromptr[2 * old_idx + 1];
+              double old_mag = old_real * old_real + old_imag * old_imag;
 
-              auto old_mag = (double)old_val.real() * old_val.real() +
-                             (double)old_val.imag() * old_val.imag();
-              auto new_mag = (double)new_val.real() * new_val.real() +
-                             (double)new_val.imag() * new_val.imag();
+              double new_real = (double)fromptr[2 * new_idx];
+              double new_imag = (double)fromptr[2 * new_idx + 1];
+              double new_mag = new_real * new_real + new_imag * new_imag;
 
               bool better = (new_mag < old_mag) ||
-                            (new_mag == old_mag && new_val.real() < old_val.real()) ||
-                            (new_mag == old_mag && new_val.real() == old_val.real() &&
-                             new_val.imag() < old_val.imag()) ||
-                            (new_mag == old_mag && new_val.real() == old_val.real() &&
-                             new_val.imag() == old_val.imag() &&
+                            (new_mag == old_mag && new_real < old_real) ||
+                            (new_mag == old_mag && new_real == old_real && new_imag < old_imag) ||
+                            (new_mag == old_mag && new_real == old_real && new_imag == old_imag &&
                              new_idx < old_idx);
 
               if (better) {
@@ -153,7 +149,7 @@ template <typename T, typename C, typename U>
 __global__ void
 awkward_reduce_argmin_complex_c(
     T* toptr,
-    const C* fromptr,
+    const C* fromptr,   // unused
     const U* parents,
     int64_t lenparents,
     int64_t outlength,
@@ -163,7 +159,6 @@ awkward_reduce_argmin_complex_c(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
     if (thread_id < outlength) {
       toptr[thread_id] = (T)(atomic_toptr[thread_id]);
     }

@@ -3,19 +3,16 @@
 from __future__ import annotations
 
 try:
-    import cupy
+    import cuda.cccl.parallel.experimental as parallel
 
     error_message = None
 
 except ModuleNotFoundError:
-    cupy = None
-    error_message = """to use {0}, you must install cupy:
+    parallel = None
+    error_message = """to use {0}, you must install cuda.cccl:
 
-    pip install cupy
+    pip install cuda-cccl
 
-or
-
-    conda install -c conda-forge cupy
 """
 
 
