@@ -13,6 +13,7 @@ from awkward._typing import (
     Protocol,
     Self,
     SupportsIndex,
+    Tuple,
     overload,
 )
 
@@ -145,7 +146,9 @@ class MaterializableArray(ArrayLike):
     def materialize(self) -> ArrayLike: ...
 
 
-def maybe_materialize(*args: Any, type_=MaterializableArray) -> tuple[Any, ...]:
+def maybe_materialize(
+    *args: Any, type_: type | Tuple[type] = MaterializableArray
+) -> tuple[Any, ...]:
     """
     Returns a tuple where all arguments that are instances of `type_` have been replaced
     by the result of calling their `.materialize()` method.
@@ -154,6 +157,7 @@ def maybe_materialize(*args: Any, type_=MaterializableArray) -> tuple[Any, ...]:
 
     Args:
         *args: Variable length argument list of MaterializableArray or ArrayLike or Any objects.
+        type_: The class or tuple of classes to check for materialization. The default is `MaterializableArray`.
 
     Returns:
         tuple: A tuple where each instance of `type_` is replaced by its materialized form,
