@@ -10,14 +10,14 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.indexedoptionmeta import IndexedOptionMeta
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
-from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -317,7 +317,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
-            isinstance(self._index.data, VirtualArray)
+            isinstance(self._index.data, VirtualNDArray)
             and not self._index.data.is_materialized
         )
         if is_virtual:
@@ -1556,7 +1556,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
-        (index,) = materialize_if_virtual(numpy.asarray(self._index.data, copy=True))
+        (index,) = maybe_materialize(numpy.asarray(self._index.data, copy=True))
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
 
@@ -1711,7 +1711,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         if self.parameter("__array__") == "categorical":
             content = self._content.to_packed(True) if recursive else self._content
             return ak.contents.IndexedOptionArray(
@@ -1753,7 +1753,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         if out is not None:
             return out
 
-        (index,) = materialize_if_virtual(self._index.raw(numpy))
+        (index,) = maybe_materialize(self._index.raw(numpy))
         not_missing = index >= 0
         content = ak.to_backend(self._content, "cpu", highlevel=False)
         nextcontent = content._carry(ak.index.Index(index[not_missing]), False)

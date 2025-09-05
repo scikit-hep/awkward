@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import numpy
 
+from awkward._nplikes.array_like import maybe_materialize
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
-from awkward._nplikes.virtual import materialize_if_virtual
 from awkward._typing import TYPE_CHECKING, Final, Literal
 
 if TYPE_CHECKING:
@@ -53,7 +53,7 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
         if isinstance(x, PlaceholderArray):
             return True
         else:
-            (x,) = materialize_if_virtual(x)
+            (x,) = maybe_materialize(x)
             return x.flags["C_CONTIGUOUS"]  # type: ignore[union-attr]
 
     def packbits(
@@ -63,7 +63,7 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ):
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         return numpy.packbits(x, axis=axis, bitorder=bitorder)  # type: ignore[arg-type]
 
     def unpackbits(
@@ -74,10 +74,9 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ):
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)  # type: ignore[arg-type]
 
     def memory_ptr(self, x: NDArray) -> int:
-        (x,) = materialize_if_virtual(x)
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         return x.ctypes.data
