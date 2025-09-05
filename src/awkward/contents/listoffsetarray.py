@@ -2327,9 +2327,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         offsets = self._offsets.to_nplike(backend.nplike)
         return ListOffsetArray(offsets, content, parameters=self._parameters)
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        offsets = self._offsets.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        offsets = self._offsets.materialize(type_)
         return ListOffsetArray(offsets, content, parameters=self._parameters)
 
     @property

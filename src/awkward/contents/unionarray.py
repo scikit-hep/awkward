@@ -1733,10 +1733,10 @@ class UnionArray(UnionMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _materialize(self) -> Self:
-        tags = self._tags.materialize()
-        index = self._index.materialize()
-        contents = [content.materialize() for content in self._contents]
+    def _materialize(self, type_) -> Self:
+        tags = self._tags.materialize(type_)
+        index = self._index.materialize(type_)
+        contents = [content.materialize(type_) for content in self._contents]
         return UnionArray(
             tags,
             index,

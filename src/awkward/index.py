@@ -156,8 +156,8 @@ class Index:
     def raw(self, nplike: NumpyLike) -> ArrayLike:
         return to_nplike(self.data, nplike, from_nplike=self._nplike)
 
-    def materialize(self) -> Index:
-        (out,) = maybe_materialize(self._data)
+    def materialize(self, type_) -> Index:
+        (out,) = maybe_materialize(self._data, type_=type_)
         return Index(out, metadata=self.metadata, nplike=self._nplike)
 
     @property

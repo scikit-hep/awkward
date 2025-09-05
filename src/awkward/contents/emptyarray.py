@@ -463,7 +463,7 @@ class EmptyArray(EmptyMeta, Content):
     def _to_backend(self, backend: Backend) -> Self:
         return EmptyArray(backend=backend)
 
-    def _materialize(self) -> Self:
+    def _materialize(self, type_) -> Self:
         return self
 
     @property

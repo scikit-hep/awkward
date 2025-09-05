@@ -865,9 +865,9 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        mask = self._mask.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        mask = self._mask.materialize(type_)
         return BitMaskedArray(
             mask,
             content,
