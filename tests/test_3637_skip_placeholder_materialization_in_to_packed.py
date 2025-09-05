@@ -14,8 +14,8 @@ from awkward._nplikes.virtual import VirtualNDArray
 
 def test():
     numpy = Numpy.instance()
-    a = ak.contents.NumpyArray(np.arange(10))
-    b = ak.contents.NumpyArray(PlaceholderArray(numpy, (10,), np.int64))
+    a = ak.contents.NumpyArray(np.arange(10, dtype=np.float32))
+    b = ak.contents.NumpyArray(PlaceholderArray(numpy, (10,), np.float32))
     layout = ak.contents.RecordArray([a, b], None, 5)
     layout.materialize(VirtualNDArray)
     layout.to_packed()
@@ -23,9 +23,11 @@ def test():
         layout.materialize(MaterializableArray)
 
     a = ak.contents.NumpyArray(
-        VirtualNDArray(numpy, (10,), np.int64, lambda: np.arange(10))
+        VirtualNDArray(
+            numpy, (10,), np.float32, lambda: np.arange(10, dtype=np.float32)
+        )
     )
-    b = ak.contents.NumpyArray(PlaceholderArray(Numpy.instance(), (10,), np.int64))
+    b = ak.contents.NumpyArray(PlaceholderArray(Numpy.instance(), (10,), np.float32))
     layout = ak.contents.RecordArray([a, b], None, 5)
     layout.materialize(VirtualNDArray)
     layout.to_packed()
