@@ -1316,8 +1316,8 @@ class RecordArray(RecordMeta[Content], Content):
             backend=backend,
         )
 
-    def _materialize(self) -> Self:
-        contents = [content.materialize() for content in self._contents]
+    def _materialize(self, type_) -> Self:
+        contents = [content.materialize(type_) for content in self._contents]
         return RecordArray(
             contents,
             self._fields,

@@ -1170,9 +1170,9 @@ class IndexedArray(IndexedMeta[Content], Content):
         index = self._index.to_nplike(backend.nplike)
         return IndexedArray(index, content, parameters=self._parameters)
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        index = self._index.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        index = self._index.materialize(type_)
         return IndexedArray(index, content, parameters=self._parameters)
 
     @property
