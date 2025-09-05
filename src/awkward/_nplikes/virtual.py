@@ -30,15 +30,6 @@ def assert_never():
     raise AssertionError("this shape_generator should never be run!")
 
 
-def materialize_if_virtual(*args: Any) -> tuple[Any, ...]:
-    """
-    A little helper function to materialize all virtual arrays in a list of arrays.
-    """
-    return tuple(
-        arg.materialize() if isinstance(arg, VirtualNDArray) else arg for arg in args
-    )
-
-
 def _lazy_asarray(
     nplike: NumpyLike, generator: Callable[[], ArrayLike]
 ) -> Callable[[], ArrayLike]:
