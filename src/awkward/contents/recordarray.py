@@ -17,6 +17,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
@@ -451,6 +452,11 @@ class RecordArray(RecordMeta[Content], Content):
         start, stop, _, length = self._backend.nplike.derive_slice_for_length(
             slice(start, stop), self.length
         )
+
+        # in non-typetracer mode we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
+            return self
 
         if len(self._contents) == 0:
             return RecordArray(
