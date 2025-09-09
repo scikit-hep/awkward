@@ -27,13 +27,11 @@ UNMATERIALIZED = Sentinel("UNMATERIALIZED", None)
 
 
 def assert_never():
-    msg = "This generator should never have been encountered."
-    msg += (
-        " Awkward Array tried to use a generator function, "
-        "but this generator function should never be run."
-    )
-    msg += (
-        " This is unexpected behavior — please open an issue at "
+    msg = (
+        "This generator should never have been encountered. "
+        "Awkward Array tried to use a generator function, "
+        "but this generator function should never be run. "
+        "This is unexpected behavior — please open an issue at "
         "https://github.com/scikit-hep/awkward/issues with a minimal example."
     )
     raise RuntimeError(msg)
