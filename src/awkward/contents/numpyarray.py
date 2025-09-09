@@ -341,11 +341,7 @@ class NumpyArray(NumpyMeta, Content):
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
         # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
-        if (
-            self._backend.nplike.known_data
-            and self.length is not unknown_length
-            and (start == 0 and stop == self.length)
-        ):
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
             return self
 
         try:
