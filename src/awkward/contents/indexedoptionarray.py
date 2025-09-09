@@ -346,7 +346,6 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
         if (
             self._backend.nplike.known_data
-            and self.length is not unknown_length
             and (start == 0 and stop == self.length)
         ):
             return self
