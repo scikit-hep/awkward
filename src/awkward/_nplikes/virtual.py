@@ -27,7 +27,16 @@ UNMATERIALIZED = Sentinel("UNMATERIALIZED", None)
 
 
 def assert_never():
-    raise AssertionError("this shape_generator should never be run!")
+    msg = "This generator should never have been encountered."
+    msg += (
+        " Awkward Array tried to use a generator function, "
+        "but this generator function should never be run."
+    )
+    msg += (
+        " This is unexpected behavior — please open an issue at "
+        "https://github.com/scikit-hep/awkward/issues with a minimal example."
+    )
+    raise RuntimeError(msg)
 
 
 def _lazy_asarray(
@@ -273,11 +282,12 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         return new_virtual
 
     def __deepcopy__(self, memo) -> VirtualNDArray:
+        current_generator = self._generator
         new_virtual = type(self)(
             self._nplike,
             self._shape,
             self._dtype,
-            lambda: copy.deepcopy(self._generator(), memo),
+            lambda: copy.deepcopy(current_generator(), memo),
             self._shape_generator,
         )
         new_virtual._array = (
