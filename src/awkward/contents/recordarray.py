@@ -452,6 +452,13 @@ class RecordArray(RecordMeta[Content], Content):
             slice(start, stop), self.length
         )
 
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (
+            start == 0 and stop == length == self.length
+        ):
+            return self
+
         if len(self._contents) == 0:
             return RecordArray(
                 [],

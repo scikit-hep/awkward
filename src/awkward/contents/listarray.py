@@ -356,6 +356,11 @@ class ListArray(ListMeta[Content], Content):
             self._touch_shape(recursive=False)
             return self
 
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
+            return self
+
         return ListArray(
             self._starts[start:stop],
             self._stops[start:stop],
