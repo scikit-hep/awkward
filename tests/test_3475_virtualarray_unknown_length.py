@@ -353,7 +353,7 @@ def test_shape_generator(virtual_array, shape_generator_param):
         assert virtual_array._shape == (5,)
         assert not virtual_array.is_materialized
         with pytest.raises(
-            AssertionError, match="this shape_generator should never be run!"
+            RuntimeError, match="this generator function should never be run"
         ):
             assert virtual_array._shape_generator() == (5,)
 
