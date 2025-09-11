@@ -25,10 +25,12 @@ from awkward._namedaxis import (
     _remove_named_axis,
 )
 from awkward._nplikes import to_nplike
+from awkward._nplikes.array_like import MaterializableArray
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_are_equal,
     type_parameters_equal,
@@ -1181,7 +1183,7 @@ class Content(Meta):
 
     def to_packed(self, recursive: bool = True) -> Content:
         if recursive:
-            return self.materialize()._to_packed(True)
+            return self.materialize(VirtualNDArray)._to_packed(True)
         return self._to_packed(False)
 
     def _to_packed(self, recursive: bool = True) -> Content:
@@ -1311,10 +1313,10 @@ class Content(Meta):
     def _to_backend(self, backend: Backend) -> Self:
         raise NotImplementedError
 
-    def materialize(self) -> Self:
-        return self._materialize()
+    def materialize(self, type_: type = MaterializableArray) -> Self:
+        return self._materialize(type_)
 
-    def _materialize(self) -> Self:
+    def _materialize(self, type_) -> Self:
         raise NotImplementedError
 
     @property

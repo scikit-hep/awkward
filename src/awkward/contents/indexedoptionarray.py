@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import operator
 from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
@@ -341,6 +340,11 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
+            return self
+
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
             return self
 
         return IndexedOptionArray(
@@ -1722,7 +1726,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             nplike = self._backend.nplike
             original_index = self._index.data
             is_none = original_index < 0
-            num_none = operator.index(nplike.count_nonzero(is_none))
+            num_none = nplike.index_as_shape_item(nplike.count_nonzero(is_none))
             new_index = nplike.empty(self._index.length, dtype=self._index.dtype)
             if isinstance(nplike, Jax):
                 new_index = new_index.at[is_none].set(-1)
@@ -1770,9 +1774,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         index = self._index.to_nplike(backend.nplike)
         return IndexedOptionArray(index, content, parameters=self._parameters)
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        index = self._index.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        index = self._index.materialize(type_)
         return IndexedOptionArray(index, content, parameters=self._parameters)
 
     @property

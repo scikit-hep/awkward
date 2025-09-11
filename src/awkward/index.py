@@ -156,8 +156,8 @@ class Index:
     def raw(self, nplike: NumpyLike) -> ArrayLike:
         return to_nplike(self.data, nplike, from_nplike=self._nplike)
 
-    def materialize(self) -> Index:
-        (out,) = maybe_materialize(self._data)
+    def materialize(self, type_) -> Index:
+        (out,) = maybe_materialize(self._data, type_=type_)
         return Index(out, metadata=self.metadata, nplike=self._nplike)
 
     @property
@@ -238,6 +238,13 @@ class Index:
     def __getitem__(self, where):
         if isinstance(where, slice):
             where = normalize_slice(where, nplike=self.nplike)
+
+            # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+            # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+            if self._nplike.known_data and (
+                where.step == 1 and where.start == 0 and where.stop == self.length
+            ):
+                return self
 
         out = self._data[where]
 

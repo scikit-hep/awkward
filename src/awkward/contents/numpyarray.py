@@ -339,6 +339,11 @@ class NumpyArray(NumpyMeta, Content):
             return out
 
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
+            return self
+
         try:
             out = self._data[start:stop]
         except IndexError as err:
@@ -1382,8 +1387,8 @@ class NumpyArray(NumpyMeta, Content):
             backend=backend,
         )
 
-    def _materialize(self) -> Self:
-        (out,) = maybe_materialize(self._data)
+    def _materialize(self, type_) -> Self:
+        (out,) = maybe_materialize(self._data, type_=type_)
         return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
     @property
