@@ -152,7 +152,7 @@ def touch_data(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Recursively touches the data and returns a shall copy of the given array.
+    Recursively touches the data and returns a shallow copy of the given array.
     """
 
     if type(array).__module__.startswith("dask_awkward."):
