@@ -353,7 +353,7 @@ def test_shape_generator(virtual_array, shape_generator_param):
         assert virtual_array._shape == (5,)
         assert not virtual_array.is_materialized
         with pytest.raises(
-            AssertionError, match="this shape_generator should never be run!"
+            RuntimeError, match="this generator function should never be run"
         ):
             assert virtual_array._shape_generator() == (5,)
 
@@ -563,7 +563,7 @@ def test_array_ufunc(virtual_array, monkeypatch):
 
 
 # Test the helper function maybe_materialize
-def test_materialize_if_virtual():
+def test_maybe_materialize():
     nplike = Numpy.instance()
     va1 = VirtualNDArray(
         nplike,
@@ -2741,7 +2741,7 @@ def test_can_cast_with_virtual_array_dtype(numpy_like, virtual_array):
 
 
 # Test various combinations and edge cases
-def test_materialize_if_virtual_function(numpy_like, shape_generator_param):
+def test_maybe_materialize_function(numpy_like, shape_generator_param):
     # Test the maybe_materialize utility function directly
 
     # Create a mix of VirtualNDArrays and regular arrays

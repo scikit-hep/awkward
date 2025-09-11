@@ -600,6 +600,11 @@ class UnionArray(UnionMeta[Content], Content):
             self._touch_shape(recursive=False)
             return self
 
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
+            return self
+
         return UnionArray(
             self._tags[start:stop],
             self._index[start:stop],
@@ -1674,7 +1679,9 @@ class UnionArray(UnionMeta[Content], Content):
     def _to_packed(self, recursive: bool = True) -> Self:
         nplike = self._backend.nplike
         tags = self._tags.data
-        original_index = index = self._index.data[: tags.shape[0]]
+        original_index = index = self._index.data[
+            : nplike.shape_item_as_index(tags.shape[0])
+        ]
 
         contents = list(self._contents)
 
@@ -1682,7 +1689,11 @@ class UnionArray(UnionMeta[Content], Content):
             is_tag = tags == tag
             num_tag = nplike.index_as_shape_item(nplike.count_nonzero(is_tag))
 
-            if len(contents[tag]) > num_tag:
+            if (
+                contents[tag].length is not unknown_length
+                and num_tag is not unknown_length
+                and contents[tag].length > num_tag
+            ):
                 if original_index is index:
                     index = index.copy()
                 new_index_values = self._backend.nplike.arange(
@@ -1733,10 +1744,10 @@ class UnionArray(UnionMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _materialize(self) -> Self:
-        tags = self._tags.materialize()
-        index = self._index.materialize()
-        contents = [content.materialize() for content in self._contents]
+    def _materialize(self, type_) -> Self:
+        tags = self._tags.materialize(type_)
+        index = self._index.materialize(type_)
+        contents = [content.materialize(type_) for content in self._contents]
         return UnionArray(
             tags,
             index,

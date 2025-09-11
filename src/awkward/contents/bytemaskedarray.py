@@ -335,7 +335,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
     def to_BitMaskedArray(self, valid_when, lsb_order):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            if self._backend.nplike.known_data:
+            if self.length is not unknown_length:
                 excess_length = math.ceil(self.length / 8.0)
             else:
                 excess_length = unknown_length
@@ -407,6 +407,11 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
+            return self
+
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
             return self
 
         return ByteMaskedArray(
@@ -1194,9 +1199,9 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        mask = self._mask.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        mask = self._mask.materialize(type_)
         return ByteMaskedArray(
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )

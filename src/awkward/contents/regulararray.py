@@ -1523,8 +1523,8 @@ class RegularArray(RegularMeta[Content], Content):
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
         return RegularArray(
             content, self._size, zeros_length=self.length, parameters=self._parameters
         )
