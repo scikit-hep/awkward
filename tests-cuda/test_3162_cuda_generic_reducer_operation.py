@@ -811,7 +811,6 @@ def test_0115_generic_reducer_operation_mask():
     )
     offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 6, 6, 9], dtype=np.int64))
     array = ak.contents.ListOffsetArray(offsets, content)
-    print("Array:", ak.to_list(array))
     array = ak.to_backend(array, "cuda", highlevel=False)
 
     assert to_list(ak.min(array, axis=-1, mask_identity=False, highlevel=False)) == [
