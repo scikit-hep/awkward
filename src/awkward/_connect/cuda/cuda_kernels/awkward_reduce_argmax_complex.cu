@@ -17,6 +17,7 @@
 // out["awkward_reduce_argmax_complex_c", {dtype_specializations}] = None
 // END PYTHON
 
+// argmax: lexicographic compare (real, then imag), tie-breaker: lower index
 template <typename T, typename C, typename U>
 __global__ void
 awkward_reduce_argmax_complex_a(
@@ -77,18 +78,14 @@ awkward_reduce_argmax_complex_b(
           int64_t old_idx = temp[thread_id];
           double old_real = (double)fromptr[2 * old_idx];
           double old_imag = (double)fromptr[2 * old_idx + 1];
-          double old_mag = old_real * old_real + old_imag * old_imag;
-
           // load new candidate
           double new_real = (double)fromptr[2 * index];
           double new_imag = (double)fromptr[2 * index + 1];
-          double new_mag = new_real * new_real + new_imag * new_imag;
 
-          bool better = (new_mag > old_mag) ||
-                        (new_mag == old_mag && new_real > old_real) ||
-                        (new_mag == old_mag && new_real == old_real && new_imag > old_imag) ||
-                        (new_mag == old_mag && new_real == old_real && new_imag == old_imag &&
-                         index < old_idx);
+          // NUMPY LEXICOGRAPHIC (real, then imag), prefer lower index on ties
+          bool better = (new_real > old_real) ||
+                        (new_real == old_real && new_imag > old_imag) ||
+                        (new_real == old_real && new_imag == old_imag && index < old_idx);
 
           if (old_idx == -1 || better) {
             temp[thread_id] = index;
@@ -115,17 +112,12 @@ awkward_reduce_argmax_complex_b(
 
               double old_real = (double)fromptr[2 * old_idx];
               double old_imag = (double)fromptr[2 * old_idx + 1];
-              double old_mag = old_real * old_real + old_imag * old_imag;
-
               double new_real = (double)fromptr[2 * new_idx];
               double new_imag = (double)fromptr[2 * new_idx + 1];
-              double new_mag = new_real * new_real + new_imag * new_imag;
 
-              bool better = (new_mag > old_mag) ||
-                            (new_mag == old_mag && new_real > old_real) ||
-                            (new_mag == old_mag && new_real == old_real && new_imag > old_imag) ||
-                            (new_mag == old_mag && new_real == old_real && new_imag == old_imag &&
-                             new_idx < old_idx);
+              bool better = (new_real > old_real) ||
+                            (new_real == old_real && new_imag > old_imag) ||
+                            (new_real == old_real && new_imag == old_imag && new_idx < old_idx);
 
               if (better) {
                 uint64_t prev = atomicCAS(&atomic_toptr[parent], cur, candidate);
