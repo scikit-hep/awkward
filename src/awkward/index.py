@@ -239,6 +239,13 @@ class Index:
         if isinstance(where, slice):
             where = normalize_slice(where, nplike=self.nplike)
 
+            # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+            # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+            if self._nplike.known_data and (
+                where.step == 1 and where.start == 0 and where.stop == self.length
+            ):
+                return self
+
         out = self._data[where]
 
         if hasattr(out, "shape") and len(out.shape) != 0:
