@@ -1211,9 +1211,6 @@ class NumpyArray(NumpyMeta, Content):
                 pyarrow, mask_node, validbytes, length, options
             )
         (nparray,) = maybe_materialize(self._raw(numpy))
-        storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
-        if issubclass(nparray.dtype.type, (bool, np.bool_)):
-            nparray = numpy.packbits(nparray, bitorder="little")
 
         if (
             np.issubdtype(nparray.dtype, np.datetime64)
@@ -1223,6 +1220,9 @@ class NumpyArray(NumpyMeta, Content):
             storage_type = pyarrow.date32()
         else:
             storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
+
+        if issubclass(nparray.dtype.type, (bool, np.bool_)):
+            nparray = numpy.packbits(nparray, bitorder="little")
 
         return pyarrow.Array.from_buffers(
             ak._connect.pyarrow.to_awkwardarrow_type(
