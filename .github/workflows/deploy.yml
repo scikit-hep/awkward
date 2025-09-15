@@ -135,7 +135,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: gh attestation verify dist/awkward-*.whl --repo ${{ github.repository }}
 
-    - uses: pypa/gh-action-pypi-publish@v1.12.4
+    - uses: pypa/gh-action-pypi-publish@v1.13.0
 
   publish-headers:
     name: "Publish header-only libraries alongside release"
