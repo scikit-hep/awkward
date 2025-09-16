@@ -468,10 +468,6 @@ class Prod(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
-    @classmethod
-    def axis_none_reducer(cls) -> Reducer | None:
-        return AxisNoneProd()
-
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -556,25 +552,6 @@ class Prod(KernelReducer):
                 result.view(self._promote_integer_rank(array.dtype)),
                 backend=array.backend,
             )
-
-
-class AxisNoneProd(Prod):
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        del parents, starts, shifts, outlength  # Unused
-        assert isinstance(array, ak.contents.NumpyArray)
-        if array.dtype.kind.upper() == "M":
-            raise ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
-        reduce_fn = getattr(array.backend.nplike, self.name)
-        return ak.contents.NumpyArray(
-            [reduce_fn(array.data, axis=None)], backend=array.backend
-        )
 
 
 class Any(KernelReducer):

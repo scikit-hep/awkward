@@ -154,21 +154,6 @@ class Cupy(ArrayModuleNumpyLike):
         else:
             return out
 
-    def prod(
-        self,
-        x: ArrayLike,
-        *,
-        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
-        keepdims: bool = False,
-        maybe_out: ArrayLike | None = None,
-    ) -> ArrayLike:
-        (x,) = maybe_materialize(x)
-        out = self._module.prod(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
-            return out.item()
-        else:
-            return out
-
     def max(
         self,
         x: ArrayLike,

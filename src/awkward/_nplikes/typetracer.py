@@ -1656,16 +1656,6 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     ) -> TypeTracerArray:
         return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
 
-    def prod(
-        self,
-        x: TypeTracerArray,
-        *,
-        axis: int | tuple[int, ...] | None = None,
-        keepdims: bool = False,
-        maybe_out: TypeTracerArray | None = None,
-    ) -> TypeTracerArray:
-        return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
-
     def array_str(
         self,
         x: TypeTracerArray,
