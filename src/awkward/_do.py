@@ -226,6 +226,10 @@ def reduce(
 ):
     reducer = layout.backend.prepare_reducer(reducer)
 
+    # a flat array can only be reduced with axis=None
+    if isinstance(layout, ak.contents.NumpyArray) and layout.data.ndim <= 1:
+        axis = None
+
     if axis is None:
         parts = remove_structure(
             layout,
@@ -246,6 +250,16 @@ def reduce(
             layout = ak.contents.EmptyArray()
         else:
             (layout,) = parts
+
+        # Check if we're running with concrete data and if the reducer has a axis=None specialization.
+        # If both are true, we use the specialized reducer. This allows us to use optimized implementations
+        # from e.g. NumPy, but also make use of potentially better algorithms, i.e. Kahan summation for sum.
+        if (
+            layout.backend.nplike.known_data
+            and (specialization := reducer.axis_none_reducer()) is not None
+        ):
+            # overwrite reducer if it has an axis=None version
+            reducer = specialization
 
         starts = ak.index.Index64.zeros(1, layout.backend.nplike)
         parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)
