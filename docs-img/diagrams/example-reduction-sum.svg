@@ -8,8 +8,8 @@
    width="358.54877"
    height="196.20869"
    viewBox="0 0 358.54876 196.20869"
-   sodipodi:docname="example-reduction.svg"
-   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="example-reduction-sum.svg"
+   inkscape:version="1.2.1 (9c6d41e, 2022-07-14)"
    inkscape:export-filename="/home/jpivarski/irishep/awkward-1.0/docs-img/diagrams/example-reduction.png"
    inkscape:export-xdpi="214.2"
    inkscape:export-ydpi="214.2"
@@ -69,22 +69,24 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="2560"
-     inkscape:window-height="1371"
+     inkscape:window-width="1374"
+     inkscape:window-height="847"
      id="namedview4"
      showgrid="false"
      fit-margin-top="5"
      fit-margin-left="5"
      fit-margin-right="5"
      fit-margin-bottom="5"
-     inkscape:zoom="5.3732905"
-     inkscape:cx="210.48555"
-     inkscape:cy="131.39062"
-     inkscape:window-x="1920"
-     inkscape:window-y="32"
+     inkscape:zoom="2.6866453"
+     inkscape:cx="210.85776"
+     inkscape:cy="131.94894"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
      inkscape:window-maximized="1"
      inkscape:current-layer="g10"
-     inkscape:pagecheckerboard="0" /><g
+     inkscape:pagecheckerboard="0"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1" /><g
      id="g10"
      inkscape:groupmode="layer"
      inkscape:label="reduction"
@@ -175,32 +177,13 @@
      id="path68"
      inkscape:connector-curvature="0" /></g>
 
-<text
-   transform="translate(61.87354,64.536097)"
-   style="font-variant:normal;font-weight:bold;font-size:10.90909863px;font-family:'Nimbus Mono PS';-inkscape-font-specification:NimbusMonL-Bold;writing-mode:lr-tb;fill:#008000;fill-opacity:1;fill-rule:nonzero;stroke:none"
-   id="text84"><tspan
-     x="0 6.5454593 13.090919 19.636377"
-     y="0"
-     sodipodi:role="line"
-     id="tspan82">None</tspan></text>
 
 
 
 
 
-<text
-   id="text941"
-   style="font-variant:normal;font-size:10.90909863px;font-family:'Nimbus Mono PS';-inkscape-font-specification:NimbusMonL-Regu;writing-mode:lr-tb;opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
-   x="88.047012"
-   y="50.989902"><tspan
-     id="tspan933"
-     sodipodi:role="line"
-     y="60.641899"
-     x="88.047012" /><tspan
-     id="tspan935"
-     sodipodi:role="line"
-     y="64.53891"
-     x="55.320011 166.59282">[]</tspan></text>
+
+
 
 <text
    xml:space="preserve"
@@ -521,16 +504,6 @@
      style="stroke-width:0.9"
      x="173.01352"
      y="64.353935">],</tspan></text><text
-   xml:space="preserve"
-   style="font-weight:bold;font-size:10.8px;line-height:1.25;font-family:'Nimbus Mono PS';-inkscape-font-specification:'Nimbus Mono PS Bold';text-align:center;text-anchor:middle;stroke-width:0.9"
-   x="169.7877"
-   y="64.349739"
-   id="text94389"><tspan
-     sodipodi:role="line"
-     id="tspan94387"
-     style="stroke-width:0.9"
-     x="169.7877"
-     y="64.349739">]</tspan></text><text
    xml:space="preserve"
    style="font-weight:bold;font-size:10.8px;line-height:1.25;font-family:'Nimbus Mono PS';-inkscape-font-specification:'Nimbus Mono PS Bold';text-align:center;text-anchor:middle;stroke-width:0.9"
    x="169.7877"
