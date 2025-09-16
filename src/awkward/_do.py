@@ -227,7 +227,7 @@ def reduce(
     reducer = layout.backend.prepare_reducer(reducer)
 
     # a flat array can only be reduced with axis=None
-    if isinstance(layout, ak.contents.NumpyArray) and layout.data.ndim <= 1:
+    if layout.purelist_depth <= 1:
         axis = None
 
     if axis is None:
