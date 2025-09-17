@@ -230,7 +230,7 @@ def reduce(
 
     if axis is None:
         del original_reducer  # not used below this point
-        
+
         parts = remove_structure(
             layout,
             flatten_records=False,
