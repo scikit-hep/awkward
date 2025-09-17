@@ -304,7 +304,7 @@ def reduce(
 
             # a flat array can be fully reduced with axis=None or axis=0 or axis=-1,
             # so we treat them as equivalent and recurse to the axis=None specialization
-            if depth <= 1 and negaxis in {0, 1}:
+            if depth == negaxis == 1:
                 return reduce(
                     layout=layout,
                     reducer=original_reducer,
