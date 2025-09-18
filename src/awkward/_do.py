@@ -224,9 +224,13 @@ def reduce(
     keepdims: bool = False,
     behavior: dict | None = None,
 ):
+    # store the original reducer for potential reuse later
+    original_reducer = reducer
     reducer = layout.backend.prepare_reducer(reducer)
 
     if axis is None:
+        del original_reducer  # not used below this point
+
         parts = remove_structure(
             layout,
             flatten_records=False,
@@ -246,6 +250,16 @@ def reduce(
             layout = ak.contents.EmptyArray()
         else:
             (layout,) = parts
+
+        # Check if we're running with concrete data and if the reducer has a axis=None specialization.
+        # If both are true, we use the specialized reducer. This allows us to use optimized implementations
+        # from e.g. NumPy, but also make use of potentially better algorithms, i.e. Kahan summation for sum.
+        if (
+            layout.backend.nplike.known_data
+            and (specialization := reducer.axis_none_reducer()) is not None
+        ):
+            # overwrite reducer if it has an axis=None version
+            reducer = specialization
 
         starts = ak.index.Index64.zeros(1, layout.backend.nplike)
         parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)
@@ -287,6 +301,19 @@ def reduce(
                     f"axis={axis} exceeds the depth of the nested list structure "
                     f"(which is {depth})"
                 )
+
+            # a flat array can be fully reduced with axis=None or axis=0 or axis=-1,
+            # so we treat them as equivalent and recurse to the axis=None specialization
+            if depth == negaxis == 1:
+                return reduce(
+                    layout=layout,
+                    reducer=original_reducer,
+                    axis=None,
+                    mask=mask,
+                    keepdims=keepdims,
+                    behavior=behavior,
+                )
+            del original_reducer  # not used below this point
 
         starts = ak.index.Index64.zeros(1, layout.backend.nplike)
         parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)

@@ -758,7 +758,6 @@ def test_block_boundary_countnonzero_complex_2():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax_complex is not implemented")
 def test_block_boundary_argmax_complex1():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(5, size=6000)
@@ -780,7 +779,6 @@ def test_block_boundary_argmax_complex1():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax_complex is not implemented")
 def test_block_boundary_argmax_complex2():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(6000, size=6000)
@@ -802,7 +800,6 @@ def test_block_boundary_argmax_complex2():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin_complex is not implemented")
 def test_block_boundary_argmin_complex1():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(5, size=6000)
@@ -824,7 +821,6 @@ def test_block_boundary_argmin_complex1():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin_complex is not implemented")
 def test_block_boundary_argmin_complex2():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(6000, size=6000)
