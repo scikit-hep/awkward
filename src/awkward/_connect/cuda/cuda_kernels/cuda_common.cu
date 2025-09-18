@@ -95,6 +95,13 @@ awkward_regularize_rangeslice(
   }
 }
 
+// Device helper: load flattened complex as (real, imag)
+template <typename C>
+__device__ inline void load_complex(const C* fromptr, int64_t idx, double& real, double& imag) {
+  // idx may be -1 in some checks; caller must avoid calling with idx == -1.
+  real = (double)fromptr[2 * idx];
+  imag = (double)fromptr[2 * idx + 1];
+}
 
 // atomicMin() specializations
 template <typename T>
@@ -170,17 +177,18 @@ __device__ float atomicMin<float>(float* addr, float value) {
 }
 
 // atomicMin() specialization for double
-// https://stackoverflow.com/a/55145948
 template <>
 __device__ double atomicMin<double>(double* address, double val) {
-    unsigned long long int* addr_as_ull = (unsigned long long int*)address;
-    unsigned long long int old = *addr_as_ull, assumed;
+    unsigned long long int* addr_as_ull =
+        reinterpret_cast<unsigned long long int*>(address);
+    unsigned long long int old = *addr_as_ull;
+    unsigned long long int assumed;
 
     do {
         assumed = old;
         double assumed_val = __longlong_as_double(assumed);
-        if (val >= assumed_val) break;
-        old = atomicCAS(addr_as_ull, assumed, __double_as_longlong(val));
+        double new_val = fmin(val, assumed_val);
+        old = atomicCAS(addr_as_ull, assumed, __double_as_longlong(new_val));
     } while (assumed != old);
 
     return __longlong_as_double(old);
@@ -260,17 +268,18 @@ __device__ float atomicMax<float>(float* addr, float value) {
 }
 
 // atomicMax() specialization for double
-// https://stackoverflow.com/a/55145948
 template <>
 __device__ double atomicMax<double>(double* address, double val) {
-    unsigned long long int* address_as_ull = (unsigned long long int*)address;
-    unsigned long long int old = *address_as_ull, assumed;
+    unsigned long long int* addr_as_ull =
+        reinterpret_cast<unsigned long long int*>(address);
+    unsigned long long int old = *addr_as_ull;
+    unsigned long long int assumed;
 
     do {
         assumed = old;
         double assumed_val = __longlong_as_double(assumed);
-        if (val <= assumed_val) break; // Already larger or equal, no update needed
-        old = atomicCAS(address_as_ull, assumed, __double_as_longlong(val));
+        double new_val = fmax(val, assumed_val);
+        old = atomicCAS(addr_as_ull, assumed, __double_as_longlong(new_val));
     } while (assumed != old);
 
     return __longlong_as_double(old);
@@ -363,132 +372,254 @@ __device__ double atomicMul<double>(double* address, double val) {
   return __longlong_as_double(old);
 }
 
-
-// atomicMinComplex() specialization for float
-__device__ void atomicMinComplex(float* result_real, float* result_imag, float data_real, float data_imag) {
-  unsigned int* real_addr = reinterpret_cast<unsigned int*>(result_real);
-  unsigned int* imag_addr = reinterpret_cast<unsigned int*>(result_imag);
-
-  unsigned int val_real_int = __float_as_uint(data_real);
-  unsigned int val_imag_int = __float_as_uint(data_imag);
-  unsigned int old_real_int = atomicCAS(real_addr, *real_addr, *real_addr);
-
-  while (true) {
-      unsigned int assumed_real = old_real_int;
-      float old_real = __uint_as_float(old_real_int);
-
-      if (data_real < old_real || (data_real == old_real && data_imag < __uint_as_float(atomicCAS(imag_addr, *imag_addr, *imag_addr)))) {
-          old_real_int = atomicCAS(real_addr, assumed_real, val_real_int);
-          if (old_real_int == assumed_real) {
-              atomicCAS(imag_addr, *imag_addr, val_imag_int);
-              break;
-          }
-      } else {
-          break;
-      }
+// simple spin-lock helpers
+__device__ inline void acquire_lock(int32_t* lockptr) {
+  while (atomicExch(lockptr, 1) != 0) {
+    // optional: __nanosleep or __threadfence(); but busy spin is simple
   }
 }
-
-// atomicMinComplex() specialization for double
-__device__ void atomicMinComplex(double* result_real, double* result_imag, double data_real, double data_imag) {
-  unsigned long long* real_addr = reinterpret_cast<unsigned long long*>(result_real);
-  unsigned long long* imag_addr = reinterpret_cast<unsigned long long*>(result_imag);
-
-  unsigned long long val_real_ll = __double_as_longlong(data_real);
-  unsigned long long val_imag_ll = __double_as_longlong(data_imag);
-  unsigned long long old_real_ll = atomicCAS(real_addr, *real_addr, *real_addr);
-
-  while (true) {
-      unsigned long long assumed_real = old_real_ll;
-      double old_real = __longlong_as_double(old_real_ll);
-
-      if (data_real < old_real || (data_real == old_real && data_imag < __longlong_as_double(atomicCAS(imag_addr, *imag_addr, *imag_addr)))) {
-          old_real_ll = atomicCAS(real_addr, assumed_real, val_real_ll);
-          if (old_real_ll == assumed_real) {
-              atomicCAS(imag_addr, *imag_addr, val_imag_ll);
-              break;
-          }
-      } else {
-          break;
-      }
-  }
+__device__ inline void release_lock(int32_t* lockptr) {
+  atomicExch(lockptr, 0);
 }
 
-// atomicMinComplex() specialization for float
-__device__ void atomicMaxComplex(float* result_real, float* result_imag, float data_real, float data_imag) {
-  unsigned int* real_addr = reinterpret_cast<unsigned int*>(result_real);
-  unsigned int* imag_addr = reinterpret_cast<unsigned int*>(result_imag);
+#include <cuda_runtime.h>
 
-  unsigned int val_real_int = __float_as_uint(data_real);
-  unsigned int val_imag_int = __float_as_uint(data_imag);
-  unsigned int old_real_int = atomicCAS(real_addr, *real_addr, *real_addr);
-
-  while (true) {
-      unsigned int assumed_real = old_real_int;
-      float old_real = __uint_as_float(old_real_int);
-
-      if (data_real > old_real || (data_real == old_real && data_imag > __uint_as_float(atomicCAS(imag_addr, *imag_addr, *imag_addr)))) {
-          old_real_int = atomicCAS(real_addr, assumed_real, val_real_int);
-          if (old_real_int == assumed_real) {
-              atomicCAS(imag_addr, *imag_addr, val_imag_int);
-              break;
-          }
-      } else {
-          break;
-      }
-  }
+// ---------------------------
+// AtomicCAS helpers
+// ---------------------------
+__device__ inline float atomicCAS_wrapper(float* addr, float oldval, float newval) {
+    int* addr_as_int = reinterpret_cast<int*>(addr);
+    int old_int = __float_as_int(oldval);
+    int new_int = __float_as_int(newval);
+    int prev = atomicCAS(addr_as_int, old_int, new_int);
+    return __int_as_float(prev);
 }
 
-// atomicMinComplex() specialization for double
-__device__ void atomicMaxComplex(double* result_real, double* result_imag, double data_real, double data_imag) {
-  unsigned long long* real_addr = reinterpret_cast<unsigned long long*>(result_real);
-  unsigned long long* imag_addr = reinterpret_cast<unsigned long long*>(result_imag);
+__device__ inline double atomicCAS_wrapper(double* addr, double oldval, double newval) {
+    unsigned long long* addr_as_ull = reinterpret_cast<unsigned long long*>(addr);
+    unsigned long long old_ull = __double_as_longlong(oldval);
+    unsigned long long new_ull = __double_as_longlong(newval);
+    unsigned long long prev = atomicCAS(addr_as_ull, old_ull, new_ull);
+    return __longlong_as_double(prev);
+}
 
-  unsigned long long val_real_ll = __double_as_longlong(data_real);
-  unsigned long long val_imag_ll = __double_as_longlong(data_imag);
-  unsigned long long old_real_ll = atomicCAS(real_addr, *real_addr, *real_addr);
+// ---------------------------
+// Atomic min complex (lexicographic)
+// ---------------------------
+template <typename T>
+__device__ void atomicMinComplex(T* result_real, T* result_imag, T val_real, T val_imag) {
+    // static_assert(std::is_floating_point<T>::value, "T must be float or double");
+    T old_real, old_imag;
+    do {
+        old_real = *result_real;
+        old_imag = *result_imag;
+        if (!(val_real < old_real || (val_real == old_real && val_imag < old_imag))) {
+            return;
+        }
+    } while (atomicCAS_wrapper(result_real, old_real, val_real) != old_real);
 
-  while (true) {
-      unsigned long long assumed_real = old_real_ll;
-      double old_real = __longlong_as_double(old_real_ll);
+    *result_imag = val_imag;
+}
 
-      if (data_real > old_real || (data_real == old_real && data_imag > __longlong_as_double(atomicCAS(imag_addr, *imag_addr, *imag_addr)))) {
-          old_real_ll = atomicCAS(real_addr, assumed_real, val_real_ll);
-          if (old_real_ll == assumed_real) {
-              atomicCAS(imag_addr, *imag_addr, val_imag_ll);
-              break;
-          }
-      } else {
-          break;
-      }
-  }
+// ---------------------------
+// Atomic max complex (lexicographic)
+// ---------------------------
+template <typename T>
+__device__ void atomicMaxComplex(T* result_real, T* result_imag, T val_real, T val_imag) {
+    // static_assert(std::is_floating_point<T>::value, "T must be float or double");
+    T old_real, old_imag;
+    do {
+        old_real = *result_real;
+        old_imag = *result_imag;
+        if (!(val_real > old_real || (val_real == old_real && val_imag > old_imag))) {
+            return;
+        }
+    } while (atomicCAS_wrapper(result_real, old_real, val_real) != old_real);
+
+    *result_imag = val_imag;
+}
+
+// ---------------------------
+// Atomic product complex
+// ---------------------------
+template <typename T>
+__device__ void atomicProdComplex(T* result_real, T* result_imag, T val_real, T val_imag) {
+    // static_assert(std::is_floating_point<T>::value, "T must be float or double");
+    T old_real, old_imag, new_real, new_imag;
+    do {
+        old_real = *result_real;
+        old_imag = *result_imag;
+        new_real = old_real * val_real - old_imag * val_imag;
+        new_imag = old_real * val_imag + old_imag * val_real;
+    } while (atomicCAS_wrapper(result_real, old_real, new_real) != old_real);
+
+    *result_imag = new_imag;
 }
 
 
 // atomicMulComplex() specialization for float
-__device__ void atomicMulComplex(float* addr_real, float* addr_imag, float val_real, float val_imag) {
-  unsigned int* addr_real_int = (unsigned int*)addr_real;
-  unsigned int* addr_imag_int = (unsigned int*)addr_imag;
+__device__ void atomicMulComplex(float* addr_real, float* addr_imag,
+                                 float val_real, float val_imag) {
+    // Treat real+imag as one 64-bit value
+    unsigned long long* addr = (unsigned long long*)addr_real;
 
-  unsigned int old_real, old_imag, new_real, new_imag;
-  do {
-      old_real = *addr_real_int;
-      old_imag = *addr_imag_int;
+    unsigned long long old_val, new_val;
+    float2 old_c, new_c;
 
-      new_real = __float_as_int(__int_as_float(old_real) * val_real - __int_as_float(old_imag) * val_imag);
-      new_imag = __float_as_int(__int_as_float(old_real) * val_imag + __int_as_float(old_imag) * val_real);
-  } while (atomicCAS(addr_real_int, old_real, new_real) != old_real ||
-           atomicCAS(addr_imag_int, old_imag, new_imag) != old_imag);
+    do {
+        old_val = *addr;
+        old_c = *reinterpret_cast<float2*>(&old_val);
+
+        new_c.x = old_c.x * val_real - old_c.y * val_imag;
+        new_c.y = old_c.x * val_imag + old_c.y * val_real;
+
+        new_val = *reinterpret_cast<unsigned long long*>(&new_c);
+    } while (atomicCAS(addr, old_val, new_val) != old_val);
 }
 
+
 // atomicMulComplex() specialization for double
-__device__ void atomicMulComplex(double* addr_real, double* addr_imag, double val_real, double val_imag) {
-  unsigned long long int old_real, old_imag, new_real, new_imag;
-  do {
-      old_real = __double_as_longlong(*addr_real);
-      old_imag = __double_as_longlong(*addr_imag);
-      new_real = __double_as_longlong(__longlong_as_double(old_real) * val_real - __longlong_as_double(old_imag) * val_imag);
-      new_imag = __double_as_longlong(__longlong_as_double(old_real) * val_imag + __longlong_as_double(old_imag) * val_real);
-  } while (atomicCAS((unsigned long long int*)addr_real, old_real, new_real) != old_real ||
-           atomicCAS((unsigned long long int*)addr_imag, old_imag, new_imag) != old_imag);
+__device__ void atomicMulComplex(double* addr_real, double* addr_imag,
+                                 double val_real, double val_imag) {
+    // Pack two doubles into unsigned long long[2]
+    unsigned long long* addr = (unsigned long long*)addr_real;
+
+    unsigned long long old0, old1;
+    double2 old_c, new_c;
+
+    do {
+        old0 = addr[0];
+        old1 = addr[1];
+
+        old_c.x = __longlong_as_double(old0);
+        old_c.y = __longlong_as_double(old1);
+
+        new_c.x = old_c.x * val_real - old_c.y * val_imag;
+        new_c.y = old_c.x * val_imag + old_c.y * val_real;
+
+    } while (atomicCAS(&addr[0], old0, __double_as_longlong(new_c.x)) != old0 ||
+             atomicCAS(&addr[1], old1, __double_as_longlong(new_c.y)) != old1);
+}
+
+
+enum class ARRAY_COMBINATIONS_ERRORS : uint64_t {
+    N_NEGATIVE = 1,               // message: "n must be >= 0"
+    OVERFLOW_IN_COMBINATORICS = 2 // message: "binomial overflow"
+};
+
+
+template <typename I>
+__device__ __forceinline__ I dgcd(I a, I b) {
+  // Euclidean algorithm; inputs non-negative
+  while (b != 0) { I t = a % b; a = b; b = t; }
+  return a;
+}
+
+
+template <typename I>
+__device__ __forceinline__ bool mul_will_overflow(I a, I b) {
+  // check a * b > INT64_MAX (for signed I=int64_t)
+  if (a == 0 || b == 0) return false;
+  if (a < 0 || b < 0) return true; // not expected here
+  const unsigned long long ua = (unsigned long long)a;
+  const unsigned long long ub = (unsigned long long)b;
+  const unsigned long long umax = 0x7fffffffffffffffULL;
+  return ua > umax / ub;
+}
+
+
+template <typename I>
+__device__ __forceinline__ bool binom_safe(
+    I n, I k, I& out, uint64_t* err_code) {
+  // Compute C(n,k) exactly using gcd reductions to keep intermediates small.
+  // Returns false on overflow (err_code set) or invalid inputs.
+  if (k < 0 || n < 0 || k > n) { out = 0; return true; }
+  if (k == 0 || k == n) { out = 1; return true; }
+  if (k + k > n) k = n - k;
+
+  I result = 1;
+  I denom = 1;
+
+  for (I j = 1; j <= k; ++j) {
+    I a = n - j + 1;   // numerator factor
+    I b = j;           // denominator factor
+
+    // Reduce with current numerator/denominator
+    I g1 = dgcd(a, b);
+    a /= g1; b /= g1;
+
+    // Further reduce denominator against current result
+    I g2 = dgcd(result, b);
+    result /= g2; b /= g2;
+
+    // b should now be 1; multiply result *= a with overflow check
+    if (mul_will_overflow<I>(result, a)) {
+        // signal overflow
+        err_code[0] = (err_code[0] < static_cast<uint64_t>(
+            ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS))
+            ? static_cast<uint64_t>(
+                ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
+            : err_code[0];
+        out = 0;
+        return false;
+    }
+    result *= a;
+    // b must be 1 now if inputs were valid
+  }
+
+  out = result;
+  return true;
+}
+
+
+/**
+ * Unrank the k-th combination (lexicographic) of size r from m items.
+ * - Without replacement: strictly increasing indices in [0, m-1].
+ * - With replacement: nondecreasing indices (via stars-and-bars block sizes).
+ *
+ * Returns false on overflow; true otherwise. On failure, out[] is unspecified.
+ */
+__device__ bool unrank_lex_general(
+    int64_t m, int64_t r, int64_t k, bool replacement,
+    int64_t* out /* length r */, uint64_t* err_code) {
+
+  if (r == 0) return k == 0;  // single empty tuple when k==0
+
+  int64_t prev = -1;  // last chosen index
+  for (int64_t pos = 0; pos < r; ++pos) {
+    // minimal allowed value for this position
+    int64_t v = replacement ? (prev < 0 ? 0 : prev) : (prev + 1);
+
+    // walk v upward until the remaining block covers k
+    while (true) {
+      if (v >= m) return false;  // out of range
+
+      int64_t rem = r - pos - 1;
+      int64_t block_count = 0;
+
+      if (rem == 0) {
+        block_count = 1;
+      } else if (replacement) {
+        // number of (nondecreasing) tails of length rem starting at v
+        // = C((m - v) + rem - 1, rem)
+        int64_t n_top = (m - v) + rem - 1;
+        if (!binom_safe(n_top, rem, block_count, err_code)) return false;
+      } else {
+        // number of (strictly increasing) tails from v+1
+        // = C(m - (v + 1), rem)
+        int64_t n_top = m - (v + 1);
+        if (!binom_safe(n_top, rem, block_count, err_code)) return false;
+      }
+
+      if (k < block_count) {
+        out[pos] = v;
+        prev = v;
+        break;
+      } else {
+        k -= block_count;
+        ++v;
+      }
+    }
+  }
+  return true;
 }

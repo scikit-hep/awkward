@@ -844,7 +844,6 @@ def test_0115_generic_reducer_operation_mask():
     del array
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_0115_generic_reducer_operation_ByteMaskedArray():
     content = ak.operations.from_iter(
         [
