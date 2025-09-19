@@ -24,8 +24,8 @@ Please [make the pull request a draft](https://github.blog/2019-02-14-introducin
 
 Currently, we have two regular reviewers of pull requests:
 
-  * Jim Pivarski ([jpivarski](https://github.com/jpivarski))
-  * Topher Cawlfield ([tcawlfield](https://github.com/tcawlfield))
+  * Ianna Osborne ([ianna](https://github.com/ianna))
+  * Peter Fackeldey ([pfackeldey](https://github.com/pfackeldey))
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
 
@@ -39,7 +39,7 @@ If you want to contribute frequently, we'll grant you write access to the `sciki
 
 Unless you ask us not to, we might commit directly to your pull request as a way of communicating what needs to be changed. That said, most of the commits on a pull request are from a single author: corrections and suggestions are exceptions.
 
-Therefore, we prefer git branches to be named with your GitHub userid, such as `jpivarski/write-contributing-md`.
+Therefore, we prefer git branches to be named with your GitHub userid, such as `ianna/write-contributing-md`.
 
 The titles of pull requests (and therefore the merge commit messages) should follow [these conventions](https://www.conventionalcommits.org/en/v1.0.0/#summary). Mostly, this means prefixing the title with one of these words and a colon:
 
@@ -284,7 +284,7 @@ The `main-v1` branch was split from `main` just before Awkward 1.x code was remo
 
 Currently, only one person can deploy releases:
 
-  * Jim Pivarski ([jpivarski](https://github.com/jpivarski))
+  * Ianna Osborne ([ianna](https://github.com/ianna))
 
 There are two kinds of releases: (1) `awkward-cpp` updates, which only occur when the C++ is updated (rare) and involves compilation on many platforms (takes hours), and (2) `awkward` updates, which can happen with any bug-fix. The [releases listed in GitHub](https://github.com/scikit-hep/awkward/releases) are `awkward` releases, not `awkward-cpp`.
 
