@@ -10,6 +10,7 @@ import warnings
 from collections.abc import Mapping
 from contextlib import contextmanager
 
+import awkward as ak
 from awkward._typing import TYPE_CHECKING, Any, JSONMapping, Protocol, runtime_checkable
 
 if sys.version_info < (3, 12):
@@ -113,7 +114,7 @@ def unpickle_array_schema_1(
         attrs=attrs,
         highlevel=True,
         buffer_key="{form_key}-{attribute}",
-        byteorder="<",
+        byteorder=ak._util.native_byteorder,
         simplify=False,
     )
 
@@ -139,7 +140,7 @@ def unpickle_record_schema_1(
         attrs=attrs,
         highlevel=False,
         buffer_key="{form_key}-{attribute}",
-        byteorder="<",
+        byteorder=ak._util.native_byteorder,
         simplify=False,
     )
     layout = LowLevelRecord(array_layout, at)
