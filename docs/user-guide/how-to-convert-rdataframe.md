@@ -76,7 +76,7 @@ From RDataFrame to Awkward
 
 The function for `RDataFrame`  → Awkward conversion is {func}`ak.from_rdataframe`. The argument to this function accepts a tuple of strings that are the `RDataFrame` column names. By default this function returns
 
-   * {class}`ak.Array`
+   * `ak.Array`
 
 type.
 
