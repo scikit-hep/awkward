@@ -22,7 +22,7 @@ class PlaceholderArray(MaterializableArray):
         field_path: tuple[str, ...] = (),
     ):
         self._nplike = nplike
-        self._shape = shape
+        self._shape = tuple(dim if dim is unknown_length else int(dim) for dim in shape)
         self._dtype = np.dtype(dtype)
         self._field_path = field_path
 
