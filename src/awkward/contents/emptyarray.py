@@ -274,7 +274,7 @@ class EmptyArray(EmptyMeta, Content):
         return True
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
-        others = [other for other in others if not isinstance(other, EmptyArray)]
+        others = [other for other in others if not other.is_unknown]
         if len(others) == 0:
             return self
         elif len(others) == 1:

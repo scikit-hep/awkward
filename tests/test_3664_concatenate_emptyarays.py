@@ -7,11 +7,13 @@ import numpy as np
 import awkward as ak
 
 
-def test():
+def test_all_empty():
     ak.concatenate([ak.Array([None]) for _ in range(5000)], axis=0)
     ak.concatenate([ak.Array([{"x": None}]) for _ in range(5000)], axis=0)
     ak.concatenate([ak.Array([{"x": i, "y": None}]) for i in range(5000)], axis=0)
 
+
+def test_empty_and_nonempty():
     arrays = []
     for i in range(5000):
         if np.random.choice([True, False]):
