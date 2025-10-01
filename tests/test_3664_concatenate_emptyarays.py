@@ -2,38 +2,73 @@
 
 from __future__ import annotations
 
+import sys
+
 import numpy as np
 
 import awkward as ak
 
 
 def test_all_empty():
-    ak.concatenate([ak.Array([None]) for _ in range(5000)], axis=0)
-    ak.concatenate([ak.Array([{"x": None}]) for _ in range(5000)], axis=0)
-    ak.concatenate([ak.Array([{"x": i, "y": None}]) for i in range(5000)], axis=0)
+    result = ak.concatenate([ak.Array([None]) for _ in range(5000)], axis=0)
+    expected = ak.Array([None] * 5000)
+    assert ak.array_equal(result, expected)
+
+    result = ak.concatenate([ak.Array([{"x": None}]) for _ in range(5000)], axis=0)
+    expected = ak.Array([{"x": None}] * 5000)
+    assert ak.array_equal(result, expected)
+
+    result = ak.concatenate(
+        [ak.Array([{"x": i, "y": None}]) for i in range(5000)], axis=0
+    )
+    expected = ak.Array([{"x": i, "y": None} for i in range(5000)])
+    assert ak.array_equal(result, expected)
 
 
 def test_empty_and_nonempty():
-    arrays = []
-    for i in range(5000):
-        if np.random.choice([True, False]):
-            arrays.append(ak.Array([None]))
-        else:
-            arrays.append(ak.Array([i]))
-    ak.concatenate(arrays, axis=0)
+    N = sys.getrecursionlimit()
+    np.random.seed(42)
+    choices1 = np.concatenate(
+        (np.array([True, True]), np.random.choice([True, False], size=N))
+    )
+    choices2 = np.concatenate(
+        (np.array([False, False]), np.random.choice([True, False], size=N))
+    )
+    choices3 = np.concatenate(
+        (np.array([True, False]), np.random.choice([True, False], size=N))
+    )
+    choices4 = np.concatenate(
+        (np.array([False, True]), np.random.choice([True, False], size=N))
+    )
+    all_choices = [choices1, choices2, choices3, choices4]
 
-    arrays = []
-    for i in range(5000):
-        if np.random.choice([True, False]):
-            arrays.append(ak.Array([{"x": None}]))
-        else:
-            arrays.append(ak.Array([{"x": i}]))
-    ak.concatenate(arrays, axis=0)
+    for choices in all_choices:
+        rows = []
+        for i in range(N):
+            if choices[i]:
+                rows.append(None)
+            else:
+                rows.append(i)
+        result = ak.concatenate([ak.Array([row]) for row in rows], axis=0)
+        expected = ak.Array(rows)
+        assert ak.array_equal(result, expected)
 
-    arrays = []
-    for i in range(5000):
-        if np.random.choice([True, False]):
-            arrays.append(ak.Array([{"x": i, "y": None}]))
-        else:
-            arrays.append(ak.Array([{"x": i, "y": i}]))
-    ak.concatenate(arrays, axis=0)
+        rows = []
+        for i in range(N):
+            if choices[i]:
+                rows.append({"x": None})
+            else:
+                rows.append({"x": i})
+        result = ak.concatenate([ak.Array([row]) for row in rows], axis=0)
+        expected = ak.Array(rows)
+        assert ak.array_equal(result, expected)
+
+        rows = []
+        for i in range(N):
+            if choices[i]:
+                rows.append({"x": i, "y": None})
+            else:
+                rows.append({"x": i, "y": i})
+        result = ak.concatenate([ak.Array([row]) for row in rows], axis=0)
+        expected = ak.Array(rows)
+        assert ak.array_equal(result, expected)
