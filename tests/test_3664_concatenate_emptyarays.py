@@ -27,18 +27,18 @@ def test_all_empty():
 
 def test_empty_and_nonempty():
     N = sys.getrecursionlimit()
-    np.random.seed(42)
+    rng = np.random.default_rng(42)
     choices1 = np.concatenate(
-        (np.array([True, True]), np.random.choice([True, False], size=N))
+        (np.array([True, True]), rng.choice([True, False], size=N))
     )
     choices2 = np.concatenate(
-        (np.array([False, False]), np.random.choice([True, False], size=N))
+        (np.array([False, False]), rng.choice([True, False], size=N))
     )
     choices3 = np.concatenate(
-        (np.array([True, False]), np.random.choice([True, False], size=N))
+        (np.array([True, False]), rng.choice([True, False], size=N))
     )
     choices4 = np.concatenate(
-        (np.array([False, True]), np.random.choice([True, False], size=N))
+        (np.array([False, True]), rng.choice([True, False], size=N))
     )
     all_choices = [choices1, choices2, choices3, choices4]
 
