@@ -93,7 +93,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
         # array metadata
         self._nplike = nplike
-        self._shape = shape
+        self._shape = tuple(dim if dim is unknown_length else int(dim) for dim in shape)
         self._dtype = np.dtype(dtype)
         self._array: Sentinel | ArrayLike = UNMATERIALIZED
 
