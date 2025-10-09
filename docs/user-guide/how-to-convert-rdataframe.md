@@ -48,13 +48,13 @@ array_z = ak.Array([[1.1], [2.1, 2.3, 2.4], [3.1], [4.1, 4.2, 4.3], [5.1]])
 
 The arrays given for each column have to be equal length:
 
-```{code-cell} ipython3
+```python
 assert len(array_x) == len(array_y) == len(array_z)
 ```
 
 The dictionary key defines a column name in RDataFrame.
 
-```{code-cell} ipython3
+```python
 df = ak.to_rdataframe({"x": array_x, "y": array_y, "z": array_z})
 ```
 
@@ -62,7 +62,7 @@ The {func}`ak.to_rdataframe` function presents a generated-on-demand Awkward Arr
 
 The column readers are generated based on the run-time type of the views. Here is a description of the `RDataFrame` columns:
 
-```{code-cell} ipython3
+```python
 df.Describe().Print()
 ```
 
@@ -80,7 +80,7 @@ The function for `RDataFrame`  → Awkward conversion is {func}`ak.from_rdatafra
 
 type.
 
-```{code-cell} ipython3
+```python
 array = ak.from_rdataframe(
     df,
     columns=(
@@ -94,7 +94,7 @@ array
 
 When `RDataFrame` runs multi-threaded event loops, the entry processing order is not guaranteed:
 
-```{code-cell} ipython3
+```python
 ROOT.ROOT.EnableImplicitMT()
 ```
 
@@ -102,7 +102,7 @@ ROOT.ROOT.EnableImplicitMT()
 
 Let's recreate the dataframe, to reflect the new multi-threading mode
 
-```{code-cell} ipython3
+```python
 df = ak.to_rdataframe({"x": array_x, "y": array_y, "z": array_z})
 ```
 
@@ -110,7 +110,7 @@ df = ak.to_rdataframe({"x": array_x, "y": array_y, "z": array_z})
 
 If the `keep_order` parameter set to `True`, the columns will keep order after filtering:
 
-```{code-cell} ipython3
+```python
 df = df.Filter("y % 2 == 0")
 
 array = ak.from_rdataframe(

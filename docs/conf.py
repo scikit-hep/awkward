@@ -158,6 +158,8 @@ nb_ipywidgets_js = {
     },
 }
 nb_execution_show_tb = True
+# Increase cell execution timeout (seconds)
+nb_execution_timeout = 120  # two minutes per cell
 
 if not run_cuda_notebooks:
     nb_execution_excludepatterns = [
