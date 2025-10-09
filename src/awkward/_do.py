@@ -191,7 +191,7 @@ def pad_none(
 
 
 def flatten(layout: Content, axis: int = 1) -> Content:
-    offsets, flattened = layout._offsets_and_flattened(axis, 1)
+    _offsets, flattened = layout._offsets_and_flattened(axis, 1)
     return flattened
 
 
