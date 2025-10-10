@@ -458,7 +458,7 @@ def apply_step(
                         o = RegularArray(o, 1, o.length)
                         # track new dimensions for named axis
                         # rightbroadcasting adds a new first(!) dimension at depth
-                        seen_named_axis, seen_ndim = seen_named_axes[i]
+                        seen_named_axis, _seen_ndim = seen_named_axes[i]
                         named_axis = _add_named_axis(named_axis, depth, ndim)
                         depth_context[NAMED_AXIS_KEY][i] = (
                             _unify_named_axis(named_axis, seen_named_axis),
