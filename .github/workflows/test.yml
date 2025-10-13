@@ -190,10 +190,6 @@ jobs:
           rm -rf * .[!.]* || echo "Nothing to clean"
           rm -rf ~/micromamba* || echo "Nothing to clean"
 
-      - uses: actions/checkout@v5
-        with:
-          submodules: true
-
       - name: Get micromamba
         uses: mamba-org/setup-micromamba@v2
         with:
@@ -202,10 +198,15 @@ jobs:
           create-args: >-
             -c rapidsai
             -c nvidia
+            git
             python=3.13
             cudf
             cupy
             cuda-version=${{ matrix.cuda-version }}
+
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
 
       - name: Generate build files
         run: |
