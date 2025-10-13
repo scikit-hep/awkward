@@ -102,7 +102,7 @@ def evaluate(
     expr_key = (expression, tuple(sorted(context.items())))
     if expr_key not in _names_cache:
         _names_cache[expr_key] = numexpr.necompiler.getExprNames(expression, context)
-    names, ex_uses_vml = _names_cache[expr_key]
+    names, _ex_uses_vml = _names_cache[expr_key]
     arguments = getArguments(names, local_dict, global_dict)
 
     arrays = [ak.operations.to_layout(x, allow_unknown=True) for x in arguments]
