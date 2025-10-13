@@ -407,7 +407,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         elif is_integer_like(head) or isinstance(
             head, (slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            nexthead, nexttail = ak._slicing.head_tail(tail)
+            _nexthead, _nexttail = ak._slicing.head_tail(tail)
 
             nextcarry = ak.index.Index64.empty(self._index.length, self._backend.nplike)
             assert (
