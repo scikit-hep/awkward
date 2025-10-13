@@ -68,7 +68,7 @@ def from_parquet(
     See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
 
-    parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta, uuid = (
+    parquet_columns, subform, actual_paths, fs, subrg, _row_counts, _meta, _uuid = (
         metadata(path, storage_options, row_groups, columns, calculate_uuid=True)
     )
     return _load(

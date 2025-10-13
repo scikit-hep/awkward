@@ -162,7 +162,7 @@ class IndexedForm(IndexedMeta[Form], Form):
             # read data pickled in Awkward 1.x
 
             # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L279-L285
-            has_identities, parameters, form_key, index, content = state
+            _has_identities, parameters, form_key, index, content = state
 
             if form_key is not None:
                 form_key = "part0-" + form_key  # only the first partition
