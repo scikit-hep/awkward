@@ -79,11 +79,11 @@ def test_sort(func_ak, axis):
 
     match = r".*This kernel is not differentiable by the JAX backend.*"
     with pytest.raises(ValueError, match=match):
-        value_jvp, jvp_grad = jax.jvp(
+        _value_jvp, _jvp_grad = jax.jvp(
             func_ak_with_axis, (test_regulararray,), (test_regulararray_tangent,)
         )
     with pytest.raises(ValueError, match=match):
-        value_vjp, vjp_func = jax.vjp(func_ak_with_axis, test_regulararray)
+        _value_vjp, _vjp_func = jax.vjp(func_ak_with_axis, test_regulararray)
 
 
 @pytest.mark.parametrize("func_ak", [ak.ravel])
@@ -164,6 +164,6 @@ def test_bool_raises(func_ak, axis):
         return func_ak(x, axis=axis)
 
     with pytest.raises(
-        TypeError, match=".*Make sure that you are not computing the derivative.*"
+        TypeError, match=r".*Make sure that you are not computing the derivative.*"
     ):
         jax.jvp(func_with_axis, (test_regulararray,), (test_regulararray_tangent,))

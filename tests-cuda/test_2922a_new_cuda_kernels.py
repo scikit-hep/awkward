@@ -446,7 +446,7 @@ def test_2660_expected_container_keys_from_form_UnionArray_NumpyArray():
 
     cuda_array = ak.to_backend(array, "cuda")
 
-    form, length, container = ak.to_buffers(cuda_array)
+    form, _length, container = ak.to_buffers(cuda_array)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -474,7 +474,7 @@ def test_2660_expected_container_keys_from_form_UnionArray_RecordArray_NumpyArra
 
     cuda_array = ak.to_backend(array, "cuda")
 
-    form, length, container = ak.to_buffers(cuda_array)
+    form, _length, container = ak.to_buffers(cuda_array)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -736,7 +736,7 @@ def test_2410_string_broadcast_deep_string_string():
     cuda_a = ak.to_backend(a, "cuda")
     cuda_b = ak.to_backend(b, "cuda")
 
-    left, right = ak.broadcast_arrays(cuda_a, cuda_b)
+    _left, right = ak.broadcast_arrays(cuda_a, cuda_b)
     assert right.to_list() == [["x", "x"], ["y", "y", "y", "y"]]
 
 
@@ -747,7 +747,7 @@ def test_2410_string_broadcast_deep_numbers_string():
     cuda_a = ak.to_backend(a, "cuda")
     cuda_b = ak.to_backend(b, "cuda")
 
-    left, right = ak.broadcast_arrays(cuda_a, cuda_b)
+    _left, right = ak.broadcast_arrays(cuda_a, cuda_b)
     assert right.to_list() == [["x", "x"], ["y", "y", "y", "y"]]
 
 

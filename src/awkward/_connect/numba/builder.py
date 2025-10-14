@@ -457,7 +457,7 @@ def lower_null(context, builder, sig, args):
 
 @numba.extending.lower_builtin("boolean", ArrayBuilderType, numba.types.Boolean)
 def lower_boolean(context, builder, sig, args):
-    arraybuildertype, xtype = sig.args
+    arraybuildertype, _xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     x = builder.zext(xval, context.get_value_type(numba.uint8))
@@ -575,14 +575,14 @@ def lower_timedelta(context, builder, sig, args):
 
 @numba.extending.lower_builtin("string", ArrayBuilderType, numba.types.UnicodeType)
 def lower_string(context, builder, sig, args):
-    arraybuildertype, xtype = sig.args
+    arraybuildertype, _xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
 
     pyapi = context.get_python_api(builder)
     gil = pyapi.gil_ensure()
 
-    is_ok, out, length = pyapi.string_as_string_and_size(xval.value)
+    _is_ok, out, length = pyapi.string_as_string_and_size(xval.value)
     length = ak._connect.numba.layout.castint(
         context, builder, numba.ssize_t, numba.int64, length
     )
@@ -678,7 +678,7 @@ def lower_beginrecord(context, builder, sig, args):
 )
 def lower_beginrecord_field(context, builder, sig, args):
     arraybuildertype, nametype = sig.args
-    arraybuilderval, nameval = args
+    arraybuilderval, _nameval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     name = globalstring(context, builder, nametype.literal_value)
     call(
@@ -693,7 +693,7 @@ def lower_beginrecord_field(context, builder, sig, args):
 @numba.extending.lower_builtin("field", ArrayBuilderType, numba.types.StringLiteral)
 def lower_field(context, builder, sig, args):
     arraybuildertype, keytype = sig.args
-    arraybuilderval, keyval = args
+    arraybuilderval, _keyval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     key = globalstring(context, builder, keytype.literal_value)
     call(
@@ -718,8 +718,8 @@ def lower_endrecord(context, builder, sig, args):
     "append", ArrayBuilderType, ak._connect.numba.arrayview.ArrayViewType
 )
 def lower_append_array(context, builder, sig, args):
-    arraybuildertype, viewtype = sig.args
-    arraybuilderval, viewval = args
+    arraybuildertype, _viewtype = sig.args
+    arraybuilderval, _viewval = args
 
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     call(context, builder, libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,))
