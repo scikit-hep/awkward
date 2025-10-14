@@ -71,7 +71,7 @@ class Jax(ArrayModuleNumpyLike):
         Return `True` if the given object is a jax buffer, otherwise `False`.
 
         """
-        module, _, suffix = type_.__module__.partition(".")
+        module, _, _suffix = type_.__module__.partition(".")
         return module == "jaxlib"
 
     def is_currently_tracing(self) -> bool:
@@ -87,7 +87,7 @@ class Jax(ArrayModuleNumpyLike):
         Return `True` if the given object is a jax tracer, otherwise `False`.
 
         """
-        module, _, suffix = type_.__module__.partition(".")
+        module, _, _suffix = type_.__module__.partition(".")
         return module == "jax"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:

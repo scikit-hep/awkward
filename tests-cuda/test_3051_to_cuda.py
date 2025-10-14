@@ -4,7 +4,7 @@ import pytest
 
 import awkward as ak
 
-cudf = pytest.importorskip("cudf")
+cudf = pytest.importorskip("cudf", exc_type=ImportError)
 cupy = pytest.importorskip("cupy")
 
 
