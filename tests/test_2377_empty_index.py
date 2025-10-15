@@ -63,7 +63,7 @@ EMPTY_INDEXES = (
 
 @pytest.mark.parametrize("a", AWKWARD_ARRAYS)
 @pytest.mark.parametrize("idx", EMPTY_INDEXES)
-def test_non_empty_array(a: ak.Array, idx: Iterable) -> None:
+def test_empty_index(a: ak.Array, idx: Iterable) -> None:
     """Assert indexing with an empty array preserves the type."""
     result = a[idx]
 
