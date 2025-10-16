@@ -34,7 +34,7 @@ def from_buffers(
     buffer_key="{form_key}-{attribute}",
     *,
     backend="cpu",
-    byteorder="<",
+    byteorder=ak._util.native_byteorder,
     allow_noncanonical_form=False,
     highlevel=True,
     behavior=None,
@@ -235,6 +235,7 @@ def _from_buffer(
         # Require 1D buffers
         copy = None if isinstance(nplike, Jax) else False  # Jax can not avoid this
         array = nplike.reshape(buffer.view(dtype), shape=(-1,), copy=copy)
+        array = ak._util.native_to_byteorder(array, byteorder)
 
         # we can't compare with count or slice when we're working with tracers
         if not (isinstance(nplike, Jax) and nplike.is_currently_tracing()):
