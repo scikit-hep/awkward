@@ -517,9 +517,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 # Slice
                 elif isinstance(item, slice):
                     (
-                        start,
-                        stop,
-                        step,
+                        _start,
+                        _stop,
+                        _step,
                         slice_length,
                     ) = self.nplike.derive_slice_for_length(item, dimension_length)
                     result_shape_parts.append((slice_length,))

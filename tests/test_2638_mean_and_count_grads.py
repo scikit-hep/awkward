@@ -15,7 +15,7 @@ def test():
     array = ak.Array([[1.0, 2.0, 3.0], [], [4.0, 5.0]], backend="jax")
 
     val_mean, grad_mean = jax.value_and_grad(ak.mean, argnums=0)(array)
-    _, grad_sum = jax.value_and_grad(ak.sum, argnums=0)(array)
+    _, _grad_sum = jax.value_and_grad(ak.sum, argnums=0)(array)
 
     assert val_mean == 3
     assert ak.all(

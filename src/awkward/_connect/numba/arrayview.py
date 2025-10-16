@@ -489,7 +489,7 @@ def lower_getitem_range(context, builder, sig, args):
 )
 def lower_getitem_field(context, builder, sig, args):
     _, (viewtype, wheretype) = sig.return_type, sig.args
-    viewval, whereval = args
+    viewval, _whereval = args
     return viewtype.type.lower_getitem_field(
         context, builder, viewtype, viewval, wheretype.literal_value
     )
@@ -750,7 +750,7 @@ class type_getitem_record(numba.core.typing.templates.AbstractTemplate):
 )
 def lower_getitem_field_record(context, builder, sig, args):
     _, (recordviewtype, wheretype) = sig.return_type, sig.args
-    recordviewval, whereval = args
+    recordviewval, _whereval = args
     return recordviewtype.arrayviewtype.type.lower_getitem_field_record(
         context, builder, recordviewtype, recordviewval, wheretype.literal_value
     )
