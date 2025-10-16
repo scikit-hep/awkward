@@ -503,9 +503,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         elif is_integer_like(head) or isinstance(
             head, (slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            nexthead, nexttail = ak._slicing.head_tail(tail)
+            _nexthead, _nexttail = ak._slicing.head_tail(tail)
 
-            numnull, nextcarry, outindex = self._nextcarry_outindex()
+            _numnull, nextcarry, outindex = self._nextcarry_outindex()
 
             next = self._content._carry(nextcarry, True)
             out = next._getitem_next(head, tail, advanced)
@@ -983,7 +983,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
         index_length = self._index.length
 
-        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
+        next, nextparents, _numnull, _outindex = self._rearrange_prepare_next(parents)
 
         out = next._unique(
             negaxis,
@@ -1340,7 +1340,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         )
         branch, depth = self.branch_depth
 
-        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
+        next, nextparents, _numnull, outindex = self._rearrange_prepare_next(parents)
 
         out = next._sort_next(
             negaxis, starts, nextparents, outlength, ascending, stable
@@ -1399,7 +1399,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     ):
         branch, depth = self.branch_depth
 
-        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
+        next, nextparents, _numnull, outindex = self._rearrange_prepare_next(parents)
 
         if reducer.needs_position and (not branch and negaxis == depth):
             nextshifts = self._rearrange_nextshifts(nextparents, shifts)

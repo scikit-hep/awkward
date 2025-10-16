@@ -63,7 +63,7 @@ def _impl(array, generate_bitmasks, highlevel, behavior, attrs):
     if isinstance(array, (pyarrow.lib.Array, pyarrow.lib.ChunkedArray)):
         (
             awkwardarrow_type,
-            storage_type,
+            _storage_type,
         ) = awkward._connect.pyarrow.to_awkwardarrow_storage_types(array.type)
 
         if awkwardarrow_type is None:
