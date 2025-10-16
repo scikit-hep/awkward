@@ -1,5 +1,8 @@
-cudf-cu12
-cupy-cuda12x
+# The CI installs cudf and cupy using conda
+# If you are using this file manually uncomment the following lines and
+# set the cuda version matching your system.
+# cudf-cu12
+# cupy-cuda12x
 fsspec>=2022.11.0
 numba>=0.60
 numba-cuda
