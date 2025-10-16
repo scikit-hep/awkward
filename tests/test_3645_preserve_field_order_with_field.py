@@ -55,9 +55,7 @@ def test_setitem_addition_appends():
 
 def test_nested_field_replacement_preserves_order():
     """Test that replacing a nested field preserves order at both levels."""
-    array = ak.Array(
-        [{"a": {"x": 1, "y": 2, "z": 3}, "b": 10, "c": 20}]
-    )
+    array = ak.Array([{"a": {"x": 1, "y": 2, "z": 3}, "b": 10, "c": 20}])
 
     # Replace nested field "y" inside "a"
     result = ak.with_field(array, [100], ["a", "y"])
@@ -68,9 +66,7 @@ def test_nested_field_replacement_preserves_order():
 
 def test_nested_field_replacement_with_setitem():
     """Test nested field replacement using setitem syntax."""
-    array = ak.Array(
-        [{"a": {"x": 1, "y": 2, "z": 3}, "b": 10, "c": 20}]
-    )
+    array = ak.Array([{"a": {"x": 1, "y": 2, "z": 3}, "b": 10, "c": 20}])
 
     # Replace nested field using setitem
     array["a", "y"] = [100]
@@ -81,9 +77,7 @@ def test_nested_field_replacement_with_setitem():
 
 def test_nested_field_addition():
     """Test that adding a new nested field appends it."""
-    array = ak.Array(
-        [{"a": {"x": 1, "y": 2, "z": 3}, "b": 10, "c": 20}]
-    )
+    array = ak.Array([{"a": {"x": 1, "y": 2, "z": 3}, "b": 10, "c": 20}])
 
     # Add new nested field
     result = ak.with_field(array, [100], ["a", "w"])
@@ -110,10 +104,12 @@ def test_multiple_replacements_preserve_order():
 
 def test_replacement_with_array_data():
     """Test field replacement with various array structures."""
-    array = ak.Array([
-        {"x": 1, "y": [1, 2], "z": 3},
-        {"x": 2, "y": [3, 4, 5], "z": 4},
-    ])
+    array = ak.Array(
+        [
+            {"x": 1, "y": [1, 2], "z": 3},
+            {"x": 2, "y": [3, 4, 5], "z": 4},
+        ]
+    )
 
     # Replace field with different array structure
     result = ak.with_field(array, [[10, 20], [30, 40, 50]], "y")
@@ -126,11 +122,13 @@ def test_replacement_with_array_data():
 
 def test_replacement_with_scalar_broadcast():
     """Test field replacement with scalar broadcasting."""
-    array = ak.Array([
-        {"x": 1, "y": 2, "z": 3},
-        {"x": 4, "y": 5, "z": 6},
-        {"x": 7, "y": 8, "z": 9},
-    ])
+    array = ak.Array(
+        [
+            {"x": 1, "y": 2, "z": 3},
+            {"x": 4, "y": 5, "z": 6},
+            {"x": 7, "y": 8, "z": 9},
+        ]
+    )
 
     # Replace with scalar (should broadcast)
     result = ak.with_field(array, 100, "y")
@@ -163,34 +161,16 @@ def test_single_field_replacement():
 
 def test_deeply_nested_replacement():
     """Test replacing a deeply nested field."""
-    array = ak.Array([{
-        "a": {
-            "b": {
-                "x": 1,
-                "y": 2,
-                "z": 3
-            },
-            "c": 10
-        },
-        "d": 100
-    }])
+    array = ak.Array([{"a": {"b": {"x": 1, "y": 2, "z": 3}, "c": 10}, "d": 100}])
 
     # Replace deeply nested field
     result = ak.with_field(array, [999], ["a", "b", "y"])
     assert ak.fields(result) == ["a", "d"]
     assert ak.fields(result["a"]) == ["b", "c"]
     assert ak.fields(result["a", "b"]) == ["x", "y", "z"]
-    assert result.to_list() == [{
-        "a": {
-            "b": {
-                "x": 1,
-                "y": 999,
-                "z": 3
-            },
-            "c": 10
-        },
-        "d": 100
-    }]
+    assert result.to_list() == [
+        {"a": {"b": {"x": 1, "y": 999, "z": 3}, "c": 10}, "d": 100}
+    ]
 
 
 def test_where_none_always_appends():
@@ -233,10 +213,12 @@ def test_mixed_operations():
 
 def test_replacement_in_list_of_records():
     """Test field replacement in a list of records."""
-    array = ak.Array([
-        [{"x": 1, "y": 2, "z": 3}, {"x": 4, "y": 5, "z": 6}],
-        [{"x": 7, "y": 8, "z": 9}],
-    ])
+    array = ak.Array(
+        [
+            [{"x": 1, "y": 2, "z": 3}, {"x": 4, "y": 5, "z": 6}],
+            [{"x": 7, "y": 8, "z": 9}],
+        ]
+    )
 
     result = ak.with_field(array, [[100, 200], [300]], "y")
     assert ak.fields(result) == ["x", "y", "z"]

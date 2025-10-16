@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 from functools import reduce
 
 import awkward as ak
