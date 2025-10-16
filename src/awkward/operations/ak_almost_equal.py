@@ -231,7 +231,7 @@ def _impl(
                 # First, find unique values and their appearance (from smallest to largest)
                 # unique_index is in ascending order of `unique` value
                 (
-                    unique,
+                    _unique,
                     unique_index,
                     *_,
                 ) = backend.nplike.unique_all(values)

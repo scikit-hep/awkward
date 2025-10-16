@@ -519,7 +519,7 @@ class RegularArray(RegularMeta[Content], Content):
 
         elif isinstance(head, slice):
             nexthead, nexttail = ak._slicing.head_tail(tail)
-            start, stop, step, nextsize = nplike.derive_slice_for_length(
+            start, _stop, step, nextsize = nplike.derive_slice_for_length(
                 head, length=self._size
             )
 

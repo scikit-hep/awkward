@@ -21,10 +21,10 @@ def test_typetracer_with_report():
     layout = ak.to_layout(array)
     form = layout.form_with_key("node{id}")
 
-    meta, report = typetracer_with_report(form, highlevel=True, attrs=SOME_ATTRS)
+    meta, _report = typetracer_with_report(form, highlevel=True, attrs=SOME_ATTRS)
     assert meta.attrs == SOME_ATTRS
 
-    meta, report = typetracer_with_report(form, highlevel=True, attrs=None)
+    meta, _report = typetracer_with_report(form, highlevel=True, attrs=None)
     assert meta._attrs is None
 
 

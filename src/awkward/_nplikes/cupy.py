@@ -178,7 +178,7 @@ class Cupy(ArrayModuleNumpyLike):
         Return `True` if the given object is a cupy buffer, otherwise `False`.
 
         """
-        module, _, suffix = type_.__module__.partition(".")
+        module, _, _suffix = type_.__module__.partition(".")
         return module == "cupy"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
