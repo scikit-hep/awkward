@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-# ruff: noqa: B023
 
 from __future__ import annotations
 
@@ -342,7 +341,7 @@ def _type_is_enforceable(
             else:
                 return _type_is_enforceable(layout.content, type_.content)
         else:
-            content_is_enforceable, content_needs_packed = _type_is_enforceable(
+            content_is_enforceable, _content_needs_packed = _type_is_enforceable(
                 layout.content, type_
             )
             return _TypeEnforceableResult(

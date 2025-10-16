@@ -11,14 +11,14 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.bytemaskedmeta import ByteMaskedMeta
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
-from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
 )
@@ -335,7 +335,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
     def to_BitMaskedArray(self, valid_when, lsb_order):
         if not self._backend.nplike.known_data:
             self._touch_data(recursive=False)
-            if self._backend.nplike.known_data:
+            if self.length is not unknown_length:
                 excess_length = math.ceil(self.length / 8.0)
             else:
                 excess_length = unknown_length
@@ -383,7 +383,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
-            isinstance(self._mask.data, VirtualArray)
+            isinstance(self._mask.data, VirtualNDArray)
             and not self._mask.data.is_materialized
         )
         if is_virtual:
@@ -407,6 +407,11 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
+            return self
+
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
             return self
 
         return ByteMaskedArray(
@@ -1058,7 +1063,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
 
         assert mask is None  # this class has its own mask
         m = cp.packbits(
-            cp.asarray(*materialize_if_virtual(self._mask.data)), bitorder="little"
+            cp.asarray(*maybe_materialize(self._mask.data)), bitorder="little"
         )
         if m.nbytes % 64:
             m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
@@ -1143,7 +1148,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         if self._content.is_record:
             next = self.to_IndexedOptionArray64()
 
@@ -1194,9 +1199,9 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        mask = self._mask.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        mask = self._mask.materialize(type_)
         return ByteMaskedArray(
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )

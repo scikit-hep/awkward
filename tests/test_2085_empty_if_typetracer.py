@@ -28,7 +28,7 @@ def test_typetracer(function):
         else:
             assert len(radius) == 1
 
-        hist_contents, hist_edges = np.histogram(ak.flatten(radius, axis=None))
+        hist_contents, _hist_edges = np.histogram(ak.flatten(radius, axis=None))
 
         return hist_contents
 

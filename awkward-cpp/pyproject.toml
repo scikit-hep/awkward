@@ -1,13 +1,13 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.10",
-    "pybind11",
+    "scikit-build-core>=0.11",
+    "pybind11>=3",
 ]
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "46"
+version = "50"
 dependencies = [
     "numpy>=1.18.0"
 ]
@@ -24,7 +24,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
@@ -37,6 +36,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Scientific/Engineering :: Mathematics",
@@ -44,7 +44,8 @@ classifiers = [
     "Topic :: Software Development",
     "Topic :: Utilities",
 ]
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause AND MIT"
+license-files = ["LICENSE", "rapidjson/license.txt"]
 requires-python = ">=3.9"
 
 [project.urls]
@@ -70,6 +71,9 @@ sdist.include = [
     "tests-cpu-kernels",
     "tests-cpu-kernels-explicit"
 ]
+sdist.exclude = [
+  "rapidjson/bin",
+]
 
 [[tool.scikit-build.overrides]]
 if.platform-system = "darwin"
@@ -78,7 +82,7 @@ cmake.version = ">=3.29"
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
-free-threaded-support = true
+enable = ["pypy", "cpython-freethreading"]
 test-requires = ["pytest>=6", "."]
 test-command = ["echo {project}:", "ls {project}", "echo {package}:", "ls {package}",
 """
@@ -91,10 +95,8 @@ pytest -p no:cacheprovider \
 """]
 skip = [
     "pp*win*",
-    "pp*-manylinux_i686",
 ]
 test-skip = [
-    "*universal2:arm64",
     "pp*",
     "*musllinux*",
 ]
@@ -102,11 +104,13 @@ build-verbosity = 1
 
 [tool.cibuildwheel.environment]
 PIP_ONLY_BINARY = "cmake,numpy"
-
-[[tool.cibuildwheel.overrides]]
-select = "cp313*"
-environment.PYO3_USE_ABI3_FORWARD_COMPATIBILITY = "1"
+UV_ONLY_BINARY = "cmake,numpy"
 
 [[tool.cibuildwheel.overrides]]
 select = "*pyodide*"
 build-frontend = {name = "build", args = ["--exports", "whole_archive"]}
+
+# Use older manylinux for Python 3.9 and 3.10
+[[tool.cibuildwheel.overrides]]
+select = "cp3{9,10}-manylinux*"
+manylinux-x86_64-image = "manylinux2014"

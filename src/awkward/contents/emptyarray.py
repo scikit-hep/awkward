@@ -452,7 +452,7 @@ class EmptyArray(EmptyMeta, Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         return self
 
     def _to_list(self, behavior, json_conversions):
@@ -463,8 +463,8 @@ class EmptyArray(EmptyMeta, Content):
     def _to_backend(self, backend: Backend) -> Self:
         return EmptyArray(backend=backend)
 
-    def _materialize(self) -> Self:
-        return EmptyArray(backend=self._backend)
+    def _materialize(self, type_) -> Self:
+        return self
 
     @property
     def _is_all_materialized(self) -> bool:

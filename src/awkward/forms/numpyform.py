@@ -175,7 +175,7 @@ class NumpyForm(NumpyMeta, Form):
             # read data pickled in Awkward 1.x
 
             # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L530-L537
-            has_identities, parameters, form_key, inner_shape, itemsize, format = state
+            _has_identities, parameters, form_key, inner_shape, itemsize, format = state
 
             # https://github.com/scikit-hep/awkward/blob/main-v1/src/libawkward/util.cpp#L131-L145
             format = format.lstrip("<").lstrip(">").lstrip("=")

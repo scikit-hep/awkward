@@ -39,6 +39,7 @@ jobs:
           - ubuntu-latest
           - macos-13
         python-version:
+          - '3.14'
           - '3.13'
           - '3.12'
           - '3.11'
@@ -84,12 +85,12 @@ jobs:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
@@ -176,13 +177,19 @@ jobs:
       run:
         shell: bash -l {0}
 
+    strategy:
+      fail-fast: false
+      matrix:
+        cuda-version:
+          - 12
+
     steps:
       - name: Clean the workspace and mamba
         run: |
           rm -rf * .[!.]* || echo "Nothing to clean"
           rm -rf ~/micromamba* || echo "Nothing to clean"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
@@ -192,7 +199,12 @@ jobs:
           environment-name: test-env
           init-shell: bash
           create-args: >-
+            -c rapidsai
+            -c nvidia
             python=3.13
+            cudf
+            cupy
+            cuda-version=${{ matrix.cuda-version }}
 
       - name: Generate build files
         run: |
@@ -231,7 +243,13 @@ jobs:
       - name: Print versions
         run: python -m pip list
 
-      - name: Run GPU tests
+      - name: Test CUDA kernels
+        run: python -m pytest -vv -rs tests-cuda-kernels
+
+      - name: Test CUDA kernels with explicitly defined values
+        run: python -m pytest -vv -rs tests-cuda-kernels-explicit
+
+      - name: Test CUDA non-kernel (Python)
         run: >-
           python -m pytest -vv -rs tests-cuda
 
@@ -249,7 +267,7 @@ jobs:
         shell: "bash -l {0}"
 
     steps:
-      - uses: "actions/checkout@v4"
+      - uses: "actions/checkout@v5"
         with:
           submodules: true
 
@@ -303,12 +321,12 @@ jobs:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 

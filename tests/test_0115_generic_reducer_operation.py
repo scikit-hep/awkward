@@ -175,7 +175,7 @@ def test_reproduce_numpy():
 
 def test_gaps():
     content1 = ak.contents.NumpyArray(
-        np.array([123] + primes[: 2 * 3 * 5], dtype=np.int64)
+        np.array([123, *primes[: 2 * 3 * 5]], dtype=np.int64)
     )
     offsets1 = ak.index.Index64(np.array([0, 1, 6, 11, 16, 21, 26, 31], dtype=np.int64))
     offsets2 = ak.index.Index64(np.array([1, 4, 7], dtype=np.int64))

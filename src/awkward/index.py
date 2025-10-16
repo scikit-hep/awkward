@@ -6,7 +6,7 @@ import copy
 
 import awkward as ak
 from awkward._nplikes import to_nplike
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
@@ -14,7 +14,7 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._slicing import normalize_slice
 from awkward._typing import Any, DType, Final, Self, cast
 
@@ -137,18 +137,7 @@ class Index:
 
     @property
     def ptr(self):
-        if isinstance(self._nplike, Numpy):
-            return self._data.ctypes.data
-        elif isinstance(self._nplike, Cupy):
-            return self._data.data.ptr
-        elif isinstance(self._nplike, Jax):
-            return self._data.unsafe_buffer_pointer()
-        elif isinstance(self._nplike, TypeTracer):
-            return 0
-        else:
-            raise NotImplementedError(
-                f"this function hasn't been implemented for the {type(self._nplike).__name__} backend"
-            )
+        return self._nplike.memory_ptr(self._data)
 
     @property
     def length(self) -> ShapeItem:
@@ -167,21 +156,21 @@ class Index:
     def raw(self, nplike: NumpyLike) -> ArrayLike:
         return to_nplike(self.data, nplike, from_nplike=self._nplike)
 
-    def materialize(self) -> Index:
-        (out,) = materialize_if_virtual(self._data)
+    def materialize(self, type_) -> Index:
+        (out,) = maybe_materialize(self._data, type_=type_)
         return Index(out, metadata=self.metadata, nplike=self._nplike)
 
     @property
     def is_all_materialized(self) -> bool:
         buffer = self._data
-        if isinstance(buffer, VirtualArray):
+        if isinstance(buffer, VirtualNDArray):
             return buffer.is_materialized
         return True
 
     @property
     def is_any_materialized(self) -> bool:
         buffer = self._data
-        if isinstance(buffer, VirtualArray):
+        if isinstance(buffer, VirtualNDArray):
             return buffer.is_materialized
         return True
 
@@ -223,7 +212,7 @@ class Index:
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
+                arraystr_lines = [*arraystr_lines[:2], " ...", *arraystr_lines[-2:]]
             out.append(">\n" + indent + "    ")
             if self._metadata is not None:
                 for k, v in self._metadata.items():
@@ -234,7 +223,7 @@ class Index:
             out.append("\n" + indent + "</Index>")
         else:
             if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
+                arraystr_lines = [*arraystr_lines[:2], " ...", *arraystr_lines[-2:]]
             out.append(">")
             out.append(arraystr_lines[0])
             out.append("</Index>")
@@ -250,6 +239,13 @@ class Index:
         if isinstance(where, slice):
             where = normalize_slice(where, nplike=self.nplike)
 
+            # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+            # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+            if self._nplike.known_data and (
+                where.step == 1 and where.start == 0 and where.stop == self.length
+            ):
+                return self
+
         out = self._data[where]
 
         if hasattr(out, "shape") and len(out.shape) != 0:
@@ -260,10 +256,10 @@ class Index:
             return out
 
     def __setitem__(self, where, what):
-        (data, where, what) = materialize_if_virtual(self._data, where, what)
+        (data, where, what) = maybe_materialize(self._data, where, what)
         if isinstance(self._nplike, Jax):
             new_data = data.at[where].set(what)
-            if isinstance(self._data, VirtualArray):
+            if isinstance(self._data, VirtualNDArray):
                 self._data._array = new_data
             else:
                 self._data = new_data

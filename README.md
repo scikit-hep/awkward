@@ -9,10 +9,14 @@
 [![Build Test](https://github.com/scikit-hep/awkward/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/test.yml)
 
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
-[![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)](https://doi.org/10.5281/zenodo.4341376)
 [![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.org/)
 [![Gitter](https://img.shields.io/badge/chat-online-success)](https://gitter.im/Scikit-HEP/awkward-array)
+
+[![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
+[![NSF-2103945](https://img.shields.io/badge/NSF-2103945-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=2103945)
+[![NSF-2121686](https://img.shields.io/badge/NSF-2121686-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=2121686)
+[![NSF-2323298](https://img.shields.io/badge/NSF-2323298-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=2323298)
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
@@ -69,7 +73,7 @@ The expression using Awkward Arrays is more concise, using idioms familiar from 
 
 Awkward Array is even faster when used in [Numba](https://numba.pydata.org/)'s JIT-compiled functions.
 
-See the [Getting started](https://awkward-array.org/doc/main/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.org/doc/main/getting-started/try-awkward-array.html) you can try in your web browser.
+See the [Getting started](https://awkward-array.org/doc/main/getting-started/index.html) documentation on [awkward-array.org](https://awkward-array.org) for an introduction, including a [no-install demo](https://awkward-array.org/doc/main/_static/try-it.html) you can try in your web browser.
 
 # Getting help
 
@@ -142,7 +146,7 @@ To cite Awkward Array in a paper, see the "Cite this repository" drop-down menu 
 
 ```bibtex
 @software{Pivarski_Awkward_Array_2018,
-author = {Pivarski, Jim and Osborne, Ianna and Ifrim, Ioana and Schreiner, Henry and Hollands, Angus and Biswas, Anish and Das, Pratyush and Roy Choudhury, Santam and Smith, Nicholas and Goyal, Manasvi},
+author = {Pivarski, Jim and Osborne, Ianna and Ifrim, Ioana and Schreiner, Henry and Hollands, Angus and Biswas, Anish and Das, Pratyush and Roy Choudhury, Santam and Smith, Nicholas and Goyal, Manasvi and Fackeldey, Peter and Krommydas, Iason},
 doi = {10.5281/zenodo.4341376},
 month = {10},
 title = {{Awkward Array}},
@@ -221,7 +225,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://www.mloning.com/"><img src="https://avatars.githubusercontent.com/u/21020482?v=4?s=100" width="100px;" alt="Markus Löning"/><br /><sub><b>Markus Löning</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=mloning" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/kkothari2001"><img src="https://avatars.githubusercontent.com/u/53650538?v=4?s=100" width="100px;" alt="Kush Kothari"/><br /><sub><b>Kush Kothari</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=kkothari2001" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward/commits?author=kkothari2001" title="Tests">⚠️</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jrueb"><img src="https://avatars.githubusercontent.com/u/30041073?v=4?s=100" width="100px;" alt="Jonas Rübenach"/><br /><sub><b>Jonas Rübenach</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=jrueb" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://blog.jling.dev"><img src="https://avatars.githubusercontent.com/u/5306213?v=4?s=100" width="100px;" alt="Jerry Ling"/><br /><sub><b>Jerry Ling</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Moelf" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://blog.jling.dev"><img src="https://avatars.githubusercontent.com/u/5306213?v=4?s=100" width="100px;" alt="Jerry Ling"/><br /><sub><b>Jerry Ling</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Moelf" title="Documentation">📖</a> <a href="https://github.com/scikit-hep/awkward/commits?author=Moelf" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/lobis"><img src="https://avatars.githubusercontent.com/u/35803280?v=4?s=100" width="100px;" alt="Luis Antonio Obis Aparicio"/><br /><sub><b>Luis Antonio Obis Aparicio</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=lobis" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/tcawlfield"><img src="https://avatars.githubusercontent.com/u/4094385?v=4?s=100" width="100px;" alt="Topher Cawlfield"/><br /><sub><b>Topher Cawlfield</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=tcawlfield" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/maxgalli"><img src="https://avatars.githubusercontent.com/u/26309531?v=4?s=100" width="100px;" alt="Massimiliano Galli"/><br /><sub><b>Massimiliano Galli</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=maxgalli" title="Code">💻</a></td>
@@ -238,6 +242,8 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ikrommyd"><img src="https://avatars.githubusercontent.com/u/82155404?v=4?s=100" width="100px;" alt="Iason Krommydas"/><br /><sub><b>Iason Krommydas</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=ikrommyd" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward/commits?author=ikrommyd" title="Tests">⚠️</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/NJManganelli"><img src="https://avatars.githubusercontent.com/u/38217274?v=4?s=100" width="100px;" alt="Nick"/><br /><sub><b>Nick</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=NJManganelli" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://apn-pucky.github.io/"><img src="https://avatars.githubusercontent.com/u/4533248?v=4?s=100" width="100px;" alt="Alexander Puck Neuwirth"/><br /><sub><b>Alexander Puck Neuwirth</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=APN-Pucky" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/nileshpatra"><img src="https://avatars.githubusercontent.com/u/37436956?v=4?s=100" width="100px;" alt="Nilesh Patra"/><br /><sub><b>Nilesh Patra</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=nileshpatra" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

@@ -1,6 +1,7 @@
 fsspec>=2022.11.0;sys_platform != "win32"
 numpy==1.19.3
-pyarrow==7.0.0
+pandas==1.1.3
+pyarrow==14.0.0
 pytest>=6
 pytest-cov
 pytest-xdist

@@ -291,7 +291,7 @@ def from_arraylib(
 
     def recurse(array, mask=None):
         if regulararray and len(array.shape) > 1:
-            new_shape = (-1,) + array.shape[2:]
+            new_shape = (-1, *array.shape[2:])
             return RegularArray(
                 recurse(nplike.reshape(array, new_shape), mask),
                 array.shape[1],

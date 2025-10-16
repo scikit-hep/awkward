@@ -319,6 +319,12 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         return self._shape
 
     @property
+    def strides(self):
+        raise AssertionError(
+            "Bug in Awkward Array: cannot get the strides of a TypeTracerArray because its not a concrete array"
+        )
+
+    @property
     def inner_shape(self) -> tuple[ShapeItem, ...]:
         if len(self._shape) > 1:
             self.touch_shape()
@@ -375,7 +381,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                     "new size of array with larger dtype must be a "
                     "divisor of the total size in bytes (of the last axis of the array)"
                 )
-            shape = self._shape[:-1] + (last,)
+            shape = (*self._shape[:-1], last)
         else:
             shape = self._shape
         return self._new(
@@ -385,19 +391,19 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def forget_length(self) -> Self:
         return self._new(
             self._dtype,
-            (unknown_length,) + self._shape[1:],
+            (unknown_length, *self._shape[1:]),
             self._form_key,
             self._report,
         )
 
     def __iter__(self):
         raise AssertionError(
-            "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
+            "Bug in Awkward Array: cannot iterate over TypeTracerArray because its not a concrete array"
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         raise AssertionError(
-            "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
+            "Bug in Awkward Array: cannot convert TypeTracerArray into a concrete array"
         )
 
     class _CTypes:
@@ -409,7 +415,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __len__(self):
         raise AssertionError(
-            "bug in Awkward Array: attempt to get length of a TypeTracerArray"
+            "Bug in Awkward Array: cannot get length of a TypeTracerArray because its not a concrete array"
         )
 
     def __getitem__(
@@ -511,9 +517,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 # Slice
                 elif isinstance(item, slice):
                     (
-                        start,
-                        stop,
-                        step,
+                        _start,
+                        _stop,
+                        _step,
                         slice_length,
                     ) = self.nplike.derive_slice_for_length(item, dimension_length)
                     result_shape_parts.append((slice_length,))
@@ -705,7 +711,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         ]
         # Build proxy (empty) arrays
         proxy_args = [
-            (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+            cast(
+                ArrayLike, (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+            )
             for x in non_generic_value_promoted_args
         ]
         # Determine result dtype from proxy call
@@ -821,7 +829,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                         shape.append(len(node))
 
                     if isinstance(node, TypeTracerArray):
-                        raise AssertionError(
+                        raise TypeError(
                             "typetracer arrays inside sequences not currently supported"
                         )
                     # Found leaf!
@@ -1638,6 +1646,16 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     ) -> TypeTracerArray:
         return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
 
+    def sum(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: TypeTracerArray | None = None,
+    ) -> TypeTracerArray:
+        return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
+
     def array_str(
         self,
         x: TypeTracerArray,
@@ -1673,6 +1691,10 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     def is_c_contiguous(self, x: TypeTracerArray | PlaceholderArray) -> bool:
         assert isinstance(x, TypeTracerArray)
         return True
+
+    def memory_ptr(self, x: TypeTracerArray | PlaceholderArray) -> int:
+        assert isinstance(x, TypeTracerArray)
+        return 0
 
     def __dlpack_device__(self) -> tuple[int, int]:
         raise NotImplementedError

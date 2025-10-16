@@ -8,7 +8,6 @@ import functools
 import html
 import inspect
 import io
-import itertools
 import keyword
 import pickle
 import re
@@ -1490,15 +1489,22 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         header_lines = rows.pop(0).removesuffix("\n").splitlines()
 
         # it's always the second row (after the array)
-        type_lines = [rows.pop(0).removesuffix("\n")]
+        type_lines = rows.pop(0).removesuffix("\n").splitlines()
+        # some reasonable number (2 for beginning and end + 10 fields -> 12)
+        if len(type_lines) > 12:
+            n_white_spaces = len(type_lines[1]) - len(type_lines[1].lstrip())
+            type_lines = [
+                type_lines[0],
+                *type_lines[1:11],
+                n_white_spaces * " " + "...",
+                type_lines[-1],
+            ]
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from longest to shortest for _repr_mimebundle_
         sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
 
-        n_cols = max(
-            len(line) for line in itertools.chain(header_lines, sorted_rows, type_lines)
-        )
+        n_cols = max(map(len, header_lines), default=0)
         body_lines = header_lines
         body_lines.append("-" * n_cols)
         body_lines.extend(sorted_rows)
@@ -1510,10 +1516,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             "text/plain": repr(self),
         }
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         """
         Intercepts attempts to convert this Array into a NumPy array and
-        either performs a zero-copy conversion or raises an error.
+        either performs a conversion if possible or raises an error.
+        The array may be copied depending on the values of `dtype` and `copy`.
+        The rules for copying are specified in the
+        [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
+        documentation.
 
         This function is also called by the
         [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
@@ -1536,11 +1546,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         cannot be sliced as dimensions.
         """
         with ak._errors.OperationErrorContext(
-            "numpy.asarray", (self,), {"dtype": dtype}
+            "numpy.asarray", (self,), {"dtype": dtype, "copy": copy}
         ):
             from awkward._connect.numpy import convert_to_array
 
-            return convert_to_array(self._layout, dtype=dtype)
+            return convert_to_array(self._layout, dtype=dtype, copy=copy)
 
     def __arrow_array__(self, type=None):
         with ak._errors.OperationErrorContext(
@@ -2425,15 +2435,22 @@ class Record(NDArrayOperatorsMixin):
         header_lines = rows.pop(0).removesuffix("\n").splitlines()
 
         # it's always the second row (after the array)
-        type_lines = [rows.pop(0).removesuffix("\n")]
+        type_lines = rows.pop(0).removesuffix("\n").splitlines()
+        # some reasonable number (2 for beginning and end + 10 fields -> 12)
+        if len(type_lines) > 12:
+            n_white_spaces = len(type_lines[1]) - len(type_lines[1].lstrip())
+            type_lines = [
+                type_lines[0],
+                *type_lines[1:11],
+                n_white_spaces * " " + "...",
+                type_lines[-1],
+            ]
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from longest to shortest for _repr_mimebundle_
         sorted_rows = sorted(rows, key=lambda x: -len(x.split(":")[0]))
 
-        n_cols = max(
-            len(line) for line in itertools.chain(header_lines, sorted_rows, type_lines)
-        )
+        n_cols = max(map(len, header_lines), default=0)
         body_lines = header_lines
         body_lines.append("-" * n_cols)
         body_lines.extend(sorted_rows)
@@ -2866,20 +2883,19 @@ class ArrayBuilder(Sized):
             formatter=formatter_impl,
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         """
         Intercepts attempts to convert a #snapshot of this array into a
-        NumPy array and either performs a zero-copy conversion or raises
-        an error.
+        NumPy array and either performs a conversion if possible or raises an error.
 
         See #ak.Array.__array__ for a more complete description.
         """
         with ak._errors.OperationErrorContext(
-            "numpy.asarray", (self,), {"dtype": dtype}
+            "numpy.asarray", (self,), {"dtype": dtype, "copy": copy}
         ):
             from awkward._connect.numpy import convert_to_array
 
-            return convert_to_array(self.snapshot(), dtype=dtype)
+            return convert_to_array(self.snapshot(), dtype=dtype, copy=copy)
 
     def __arrow_array__(self, type=None):
         with ak._errors.OperationErrorContext(

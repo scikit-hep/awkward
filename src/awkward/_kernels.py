@@ -6,13 +6,15 @@ import ctypes
 from abc import abstractmethod
 from typing import Any, Callable
 
+from packaging.version import parse as parse_version
+
 import awkward as ak
+from awkward._nplikes.array_like import maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import try_touch_data
-from awkward._nplikes.virtual import materialize_if_virtual
 from awkward._typing import Protocol, TypeAlias
 
 KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
@@ -73,7 +75,7 @@ class NumpyKernel(BaseKernel):
             if numpy.is_own_array(x):
                 assert numpy.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
-                    return ctypes.cast(x.ctypes.data, t)
+                    return ctypes.cast(numpy.memory_ptr(x), t)
                 else:
                     return x
             # Or, do we have a ctypes type
@@ -89,7 +91,7 @@ class NumpyKernel(BaseKernel):
     def __call__(self, *args) -> None:
         assert len(args) == len(self._impl.argtypes)
 
-        args = materialize_if_virtual(*args)
+        args = maybe_materialize(*args)
 
         return self._impl(
             *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
@@ -102,21 +104,25 @@ class JaxKernel(BaseKernel):
 
         self._jax = Jax.instance()
 
+        jax_module = ak.jax.import_jax()
+        self._ad_tracer_types = (jax_module._src.interpreters.ad.JVPTracer,)
+        if parse_version(jax_module.__version__) >= parse_version("0.7.0"):
+            self._ad_tracer_types += (jax_module._src.interpreters.ad.LinearizeTracer,)
+
     def _cast(self, x, t):
         if issubclass(t, ctypes._Pointer):
             # Do we have a JAX-owned array?
             if self._jax.is_own_array(x):
                 if self._jax.is_tracer_type(type(x)):
-                    jax_module = ak.jax.import_jax()
                     # general message for any invalid JAX input type
                     msg = f"Encountered {x} as an (invalid) input to the '{self._key[0]}' Awkward C++ kernel."
                     # message specification for autodiff (i.e. when encountering a JVPTracer)
-                    if isinstance(x, jax_module._src.interpreters.ad.JVPTracer):
+                    if isinstance(x, self._ad_tracer_types):
                         msg += " This kernel is not differentiable by the JAX backend."
                     raise ValueError(msg)
                 assert self._jax.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
-                    return ctypes.cast(x.unsafe_buffer_pointer(), t)
+                    return ctypes.cast(self._jax.memory_ptr(x), t)
                 else:
                     return x
             # Or, do we have a ctypes type
@@ -132,7 +138,7 @@ class JaxKernel(BaseKernel):
     def __call__(self, *args) -> None:
         assert len(args) == len(self._impl.argtypes)
 
-        args = materialize_if_virtual(*args)
+        args = maybe_materialize(*args)
 
         return self._impl(
             *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
@@ -176,7 +182,7 @@ class CupyKernel(BaseKernel):
     def __call__(self, *args) -> None:
         import awkward._connect.cuda as ak_cuda
 
-        args = materialize_if_virtual(*args)
+        args = maybe_materialize(*args)
 
         cupy = ak_cuda.import_cupy("Awkward Arrays with CUDA")
         maxlength = self.max_length(args)

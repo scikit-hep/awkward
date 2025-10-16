@@ -4,7 +4,7 @@ import pytest
 
 import awkward as ak
 
-cudf = pytest.importorskip("cudf")
+cudf = pytest.importorskip("cudf", exc_type=ImportError)
 cupy = pytest.importorskip("cupy")
 
 
@@ -47,7 +47,6 @@ def test_null():
     assert out.to_arrow().tolist() == [12, None, 21, 12]
 
 
-@pytest.mark.xfail(reason="The StringColumn constructor in cudf was changed. See #3480")
 def test_strings():
     arr = ak.Array(["hey", "hi", "hum"])
     out = ak.to_cudf(arr)

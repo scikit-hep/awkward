@@ -9,13 +9,13 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.indexedmeta import IndexedMeta
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -296,7 +296,7 @@ class IndexedArray(IndexedMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
-            isinstance(self._index.data, VirtualArray)
+            isinstance(self._index.data, VirtualNDArray)
             and not self._index.data.is_materialized
         )
         if is_virtual:
@@ -317,6 +317,11 @@ class IndexedArray(IndexedMeta[Content], Content):
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
+            return self
+
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
             return self
 
         return IndexedArray(
@@ -402,7 +407,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         elif is_integer_like(head) or isinstance(
             head, (slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            nexthead, nexttail = ak._slicing.head_tail(tail)
+            _nexthead, _nexttail = ak._slicing.head_tail(tail)
 
             nextcarry = ak.index.Index64.empty(self._index.length, self._backend.nplike)
             assert (
@@ -1018,7 +1023,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             next = IndexedArray(self._index, self._content, parameters=next_parameters)
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-        (index,) = materialize_if_virtual(self._index.raw(numpy))
+        (index,) = maybe_materialize(self._index.raw(numpy))
 
         if self.parameter("__array__") == "categorical":
             dictionary = self._content._to_arrow(
@@ -1145,7 +1150,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         if self.parameter("__array__") == "categorical":
             content = self._content.to_packed(True) if recursive else self._content
             return IndexedArray(self._index, content, parameters=self._parameters)
@@ -1161,7 +1166,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         if out is not None:
             return out
 
-        (index,) = materialize_if_virtual(self._index.raw(numpy))
+        (index,) = maybe_materialize(self._index.raw(numpy))
         nextcontent = self._content._carry(ak.index.Index(index), False)
         return nextcontent._to_list(behavior, json_conversions)
 
@@ -1170,9 +1175,9 @@ class IndexedArray(IndexedMeta[Content], Content):
         index = self._index.to_nplike(backend.nplike)
         return IndexedArray(index, content, parameters=self._parameters)
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        index = self._index.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        index = self._index.materialize(type_)
         return IndexedArray(index, content, parameters=self._parameters)
 
     @property

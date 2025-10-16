@@ -341,16 +341,8 @@ class RecordArray(RecordMeta[Content], Content):
         byteorder: str,
     ):
         assert isinstance(form, self.form_cls)
-        if self._fields is None:
-            for i, content in enumerate(self._contents):
-                content._to_buffers(
-                    form.content(i), getkey, container, backend, byteorder
-                )
-        else:
-            for field, content in zip(self._fields, self._contents):
-                content._to_buffers(
-                    form.content(field), getkey, container, backend, byteorder
-                )
+        for i, content in enumerate(self._contents):
+            content._to_buffers(form.content(i), getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         backend = TypeTracerBackend.instance()
@@ -459,6 +451,13 @@ class RecordArray(RecordMeta[Content], Content):
         start, stop, _, length = self._backend.nplike.derive_slice_for_length(
             slice(start, stop), self.length
         )
+
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (
+            start == 0 and stop == length == self.length
+        ):
+            return self
 
         if len(self._contents) == 0:
             return RecordArray(
@@ -1277,7 +1276,7 @@ class RecordArray(RecordMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         return RecordArray(
             [
                 x[: self.length].to_packed(True) if recursive else x[: self.length]
@@ -1324,8 +1323,8 @@ class RecordArray(RecordMeta[Content], Content):
             backend=backend,
         )
 
-    def _materialize(self) -> Self:
-        contents = [content.materialize() for content in self._contents]
+    def _materialize(self, type_) -> Self:
+        contents = [content.materialize(type_) for content in self._contents]
         return RecordArray(
             contents,
             self._fields,

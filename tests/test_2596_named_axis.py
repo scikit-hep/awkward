@@ -469,7 +469,7 @@ def test_named_axis_binary_ufuncs():
     b = ak.with_named_axis(array, named_axis=("y", None))
     with pytest.raises(
         ValueError,
-        match="The named axes are incompatible. Got: x and y for positional axis 0",
+        match=r"The named axes are incompatible. Got: x and y for positional axis 0",
     ):
         _ = a + b
 
@@ -477,7 +477,7 @@ def test_named_axis_binary_ufuncs():
     b = ak.with_named_axis(array, named_axis=(None, "y"))
     with pytest.raises(
         ValueError,
-        match="The named axes are incompatible. Got: x and y for positional axis 1",
+        match=r"The named axes are incompatible. Got: x and y for positional axis 1",
     ):
         _ = a + b
 
@@ -1142,7 +1142,7 @@ def test_named_axis_ak_concatenate():
 
     with pytest.raises(
         ValueError,
-        match="The named axes are incompatible. Got: x and y for positional axis 0",
+        match=r"The named axes are incompatible. Got: x and y for positional axis 0",
     ):
         ak.concatenate(
             [
@@ -1154,7 +1154,7 @@ def test_named_axis_ak_concatenate():
 
     with pytest.raises(
         ValueError,
-        match="The named axes are incompatible. Got: x and y for positional axis 1",
+        match=r"The named axes are incompatible. Got: x and y for positional axis 1",
     ):
         ak.concatenate(
             [
