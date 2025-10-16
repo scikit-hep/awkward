@@ -466,7 +466,6 @@ def test_numpyarray_nanmax(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_numpyarray_argmin(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.argmin(virtual_numpyarray, axis=0) == ak.argmin(numpyarray, axis=0)
@@ -474,7 +473,6 @@ def test_numpyarray_argmin(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_numpyarray_nanargmin(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.nanargmin(virtual_numpyarray, axis=0) == ak.nanargmin(numpyarray, axis=0)
@@ -482,7 +480,6 @@ def test_numpyarray_nanargmin(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_numpyarray_argmax(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.argmax(virtual_numpyarray, axis=0) == ak.argmax(numpyarray, axis=0)
@@ -490,7 +487,6 @@ def test_numpyarray_argmax(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_numpyarray_nanargmax(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.nanargmax(virtual_numpyarray, axis=0) == ak.nanargmax(numpyarray, axis=0)
@@ -1128,7 +1124,6 @@ def test_listoffsetarray_nanmax(listoffsetarray, virtual_listoffsetarray):
     assert virtual_listoffsetarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_listoffsetarray_argmin(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     assert ak.array_equal(
@@ -1138,7 +1133,6 @@ def test_listoffsetarray_argmin(listoffsetarray, virtual_listoffsetarray):
     assert virtual_listoffsetarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_listoffsetarray_nanargmin(numpy_like):
     # Create arrays with NaN values to test nanargmin
     offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
@@ -1180,7 +1174,6 @@ def test_listoffsetarray_nanargmin(numpy_like):
     assert virtual_array.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_listoffsetarray_argmax(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     assert ak.array_equal(
@@ -1190,7 +1183,6 @@ def test_listoffsetarray_argmax(listoffsetarray, virtual_listoffsetarray):
     assert virtual_listoffsetarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_listoffsetarray_nanargmax(numpy_like):
     # Create arrays with NaN values to test nanargmax
     offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
@@ -1891,7 +1883,7 @@ def test_listarray_to_json(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_to_numpy(listarray, virtual_listarray):
     # ListArray can't be directly converted to numpy for non-rectangular data
@@ -1989,7 +1981,7 @@ def test_listarray_where(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_flatten(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
@@ -2001,7 +1993,7 @@ def test_listarray_flatten(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_unflatten(listarray, virtual_listarray):
     # First flatten the arrays
@@ -2030,7 +2022,7 @@ def test_listarray_num(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_count(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
@@ -2040,7 +2032,7 @@ def test_listarray_count(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_count_nonzero(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
@@ -2053,7 +2045,7 @@ def test_listarray_count_nonzero(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_sum(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
@@ -2070,7 +2062,7 @@ def test_listarray_nansum(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_prod(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
@@ -2089,7 +2081,7 @@ def test_listarray_nanprod(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_any(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
@@ -2099,7 +2091,7 @@ def test_listarray_any(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_all(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
@@ -2109,7 +2101,7 @@ def test_listarray_all(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_min(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
@@ -2126,7 +2118,7 @@ def test_listarray_nanmin(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_max(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
@@ -2142,7 +2134,9 @@ def test_listarray_nanmax(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
+@pytest.mark.xfail(
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
+)
 def test_listarray_argmin(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(ak.argmin(virtual_listarray), ak.argmin(listarray))
@@ -2150,7 +2144,6 @@ def test_listarray_argmin(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_listarray_nanargmin(numpy_like):
     # Create arrays with NaN values to test nanargmin
     starts = cp.array([0, 2, 4, 7], dtype=cp.int64)
@@ -2202,7 +2195,9 @@ def test_listarray_nanargmin(numpy_like):
     assert virtual_array.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
+@pytest.mark.xfail(
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
+)
 def test_listarray_argmax(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(ak.argmax(virtual_listarray), ak.argmax(listarray))
@@ -2210,7 +2205,6 @@ def test_listarray_argmax(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_listarray_nanargmax(numpy_like):
     # Create arrays with NaN values to test nanargmax
     starts = cp.array([0, 2, 4, 7], dtype=cp.int64)
@@ -2691,7 +2685,7 @@ def test_listarray_local_index(listarray, virtual_listarray):
 
 
 @pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_run_lengths(numpy_like):
     # Create a ListArray with repeated values for run_lengths test
@@ -3310,7 +3304,6 @@ def test_recordarray_max_y_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_recordarray_argmin_x_field(recordarray, virtual_recordarray):
     # Test argmin on the x field (ListOffsetArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3324,7 +3317,6 @@ def test_recordarray_argmin_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_recordarray_argmin_y_field(recordarray, virtual_recordarray):
     # Test argmin on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3338,7 +3330,6 @@ def test_recordarray_argmin_y_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_recordarray_argmax_x_field(recordarray, virtual_recordarray):
     # Test argmax on the x field (ListOffsetArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3352,7 +3343,6 @@ def test_recordarray_argmax_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_recordarray_argmax_y_field(recordarray, virtual_recordarray):
     # Test argmax on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
