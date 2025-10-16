@@ -10,6 +10,13 @@ from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.virtual import VirtualNDArray
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    np._default_memory_pool.free_all_blocks()
+    np.cuda.Device().synchronize()
+
+
 # Create fixtures for common test setup
 @pytest.fixture
 def numpy_like():
