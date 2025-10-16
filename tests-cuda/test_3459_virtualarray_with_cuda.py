@@ -7,7 +7,7 @@ import pytest
 
 import awkward as ak
 from awkward._nplikes.cupy import Cupy
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualNDArray
 
 
 # Create fixtures for common test setup
@@ -23,7 +23,7 @@ def simple_array_generator():
 
 @pytest.fixture
 def virtual_array(numpy_like, simple_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
@@ -38,7 +38,7 @@ def two_dim_array_generator():
 
 @pytest.fixture
 def two_dim_virtual_array(numpy_like, two_dim_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like,
         shape=(2, 3),
         dtype=np.dtype(np.int64),
@@ -53,7 +53,7 @@ def scalar_array_generator():
 
 @pytest.fixture
 def scalar_virtual_array(numpy_like, scalar_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like, shape=(), dtype=np.dtype(np.int64), generator=scalar_array_generator
     )
 
@@ -65,7 +65,7 @@ def float_array_generator():
 
 @pytest.fixture
 def float_virtual_array(numpy_like, float_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.float64),
@@ -90,7 +90,7 @@ def offset_array_generator():
 
 @pytest.fixture
 def virtual_offset_array(numpy_like, offset_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
@@ -124,7 +124,7 @@ def starts_array_generator():
 
 @pytest.fixture
 def virtual_starts_array(numpy_like, starts_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
@@ -139,7 +139,7 @@ def stops_array_generator():
 
 @pytest.fixture
 def virtual_stops_array(numpy_like, stops_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
@@ -156,7 +156,7 @@ def content_array_generator():
 
 @pytest.fixture
 def virtual_content_array(numpy_like, content_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -194,7 +194,7 @@ def offsets_array_generator():
 
 @pytest.fixture
 def virtual_offsets_array(numpy_like, offsets_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.int64),
@@ -211,7 +211,7 @@ def x_content_array_generator():
 
 @pytest.fixture
 def virtual_x_content_array(numpy_like, x_content_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -226,7 +226,7 @@ def y_array_generator():
 
 @pytest.fixture
 def virtual_y_array(numpy_like, y_array_generator):
-    return VirtualArray(
+    return VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.float64),
@@ -303,7 +303,7 @@ def test_numpyarray_to_buffers(numpyarray, virtual_numpyarray):
     assert out1[2].keys() == out2[2].keys()
     for key in out1[2]:
         assert isinstance(out1[2][key], np.ndarray)
-        assert isinstance(out2[2][key], VirtualArray)
+        assert isinstance(out2[2][key], VirtualNDArray)
         assert ak.all(out1[2][key] == out2[2][key])
 
 
@@ -525,7 +525,7 @@ def test_numpyarray_drop_none(numpy_like):
         ak.Array([1, None, 2, 3, None, 4, 5]), "cuda", highlevel=False
     )
     virtual_index = ak.index.Index(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(7,),
             dtype=np.dtype(np.int64),
@@ -533,7 +533,7 @@ def test_numpyarray_drop_none(numpy_like):
         )
     )
     virtual_content = ak.contents.NumpyArray(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(5,),
             dtype=np.dtype(np.int64),
@@ -552,7 +552,7 @@ def test_numpy_array_pad_none(numpy_like):
         ak.Array([1, None, 2, 3, None, 4, 5]), "cuda", highlevel=False
     )
     virtual_index = ak.index.Index(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(7,),
             dtype=np.dtype(np.int64),
@@ -560,7 +560,7 @@ def test_numpy_array_pad_none(numpy_like):
         )
     )
     virtual_content = ak.contents.NumpyArray(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(5,),
             dtype=np.dtype(np.int64),
@@ -581,7 +581,7 @@ def test_numpyarray_fill_none(numpy_like):
         ak.Array([1, None, 2, 3, None, 4, 5]), "cuda", highlevel=False
     )
     virtual_index = ak.index.Index(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(7,),
             dtype=np.dtype(np.int64),
@@ -589,7 +589,7 @@ def test_numpyarray_fill_none(numpy_like):
         )
     )
     virtual_content = ak.contents.NumpyArray(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(5,),
             dtype=np.dtype(np.int64),
@@ -616,7 +616,7 @@ def test_numpyarray_firsts(numpyarray, virtual_numpyarray):
 def test_numpyarray_singletons(numpy_like):
     array = ak.to_backend(ak.Array([1, 2, 3, 4, 5]), "cuda", highlevel=False)
     virtual_index = ak.index.Index(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(5,),
             dtype=np.dtype(np.int64),
@@ -624,7 +624,7 @@ def test_numpyarray_singletons(numpy_like):
         )
     )
     virtual_content = ak.contents.NumpyArray(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(5,),
             dtype=np.dtype(np.int64),
@@ -701,7 +701,7 @@ def test_numpyarray_nan_to_none(numpy_like):
         ak.Array([1, np.nan, 2, 3, np.nan, 4, 5]), "cuda", highlevel=False
     )
     virtual_array = ak.contents.NumpyArray(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(7,),
             dtype=np.dtype(np.float64),
@@ -721,7 +721,7 @@ def test_numpyarray_nan_to_num(numpy_like):
         ak.Array([1, np.nan, 2, 3, np.nan, 4, 5]), "cuda", highlevel=False
     )
     virtual_array = ak.contents.NumpyArray(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(7,),
             dtype=np.dtype(np.float64),
@@ -748,7 +748,7 @@ def test_numpyarray_local_index(numpyarray, virtual_numpyarray):
 def test_numpyarray_run_lengths(numpy_like):
     array = ak.to_backend(ak.Array([1, 1, 2, 3, 3, 3, 4, 5]), "cuda", highlevel=False)
     virtual_array = ak.contents.NumpyArray(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(8,),
             dtype=np.dtype(np.int64),
@@ -766,7 +766,7 @@ def test_numpyarray_round(numpy_like):
         ak.Array([1.234, 2.567, 3.499, 4.501]), "cuda", highlevel=False
     )
     virtual_array = ak.contents.NumpyArray(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(4,),
             dtype=np.dtype(np.float64),
@@ -802,7 +802,7 @@ def test_numpyarray_almost_equal(numpyarray, virtual_numpyarray):
 def test_numpyarray_real(numpy_like):
     array = ak.to_backend(ak.Array([1 + 2j, 3 + 4j, 5 + 6j]), "cuda", highlevel=False)
     virtual_array = ak.contents.NumpyArray(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(3,),
             dtype=np.dtype(np.complex128),
@@ -818,7 +818,7 @@ def test_numpyarray_real(numpy_like):
 def test_numpyarray_imag(numpy_like):
     array = ak.to_backend(ak.Array([1 + 2j, 3 + 4j, 5 + 6j]), "cuda", highlevel=False)
     virtual_array = ak.contents.NumpyArray(
-        VirtualArray(
+        VirtualNDArray(
             numpy_like,
             shape=(3,),
             dtype=np.dtype(np.complex128),
@@ -903,7 +903,7 @@ def test_listoffsetarray_to_buffers(listoffsetarray, virtual_listoffsetarray):
     # container
     assert set(out1[2].keys()) == set(out2[2].keys())
     for key in out1[2]:
-        if isinstance(out2[2][key], VirtualArray):
+        if isinstance(out2[2][key], VirtualNDArray):
             assert not out2[2][key].is_materialized
             assert ak.all(out1[2][key] == out2[2][key])
             assert out2[2][key].is_materialized
@@ -1143,14 +1143,14 @@ def test_listoffsetarray_nanargmin(numpy_like):
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
     )
 
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -1195,14 +1195,14 @@ def test_listoffsetarray_nanargmax(numpy_like):
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
     )
 
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -1269,21 +1269,21 @@ def test_listoffsetarray_drop_none(numpy_like):
     array = ak.contents.ListOffsetArray(ak.index.Index(offsets), indexed_content)
 
     # Create virtual versions
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_index = VirtualArray(
+    virtual_index = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.float64),
@@ -1315,14 +1315,14 @@ def test_listoffsetarray_pad_none(numpy_like):
     )
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -1359,21 +1359,21 @@ def test_listoffsetarray_fill_none(numpy_like):
     array = ak.contents.ListOffsetArray(ak.index.Index(offsets), indexed_content)
 
     # Create virtual versions
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_index = VirtualArray(
+    virtual_index = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.float64),
@@ -1416,14 +1416,14 @@ def test_listoffsetarray_singletons(numpy_like):
     )
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 1, 2, 3, 4], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.float64),
@@ -1513,14 +1513,14 @@ def test_listoffsetarray_nan_to_none(numpy_like):
     )
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -1551,14 +1551,14 @@ def test_listoffsetarray_nan_to_num(numpy_like):
     )
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -1598,14 +1598,14 @@ def test_listoffsetarray_run_lengths(numpy_like):
     )
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 3, 6], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.int64),
@@ -1632,14 +1632,14 @@ def test_listoffsetarray_round(numpy_like):
     )
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.float64),
@@ -1685,14 +1685,14 @@ def test_listoffsetarray_real(numpy_like):
     )
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 3], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.complex128),
@@ -1718,14 +1718,14 @@ def test_listoffsetarray_imag(numpy_like):
     )
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 3], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.complex128),
@@ -1751,14 +1751,14 @@ def test_listoffsetarray_angle(numpy_like):
     )
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.complex128),
@@ -1908,7 +1908,7 @@ def test_listarray_to_buffers(listarray, virtual_listarray):
     # container
     assert set(out1[2].keys()) == set(out2[2].keys())
     for key in out1[2]:
-        if isinstance(out2[2][key], VirtualArray):
+        if isinstance(out2[2][key], VirtualNDArray):
             assert not out2[2][key].is_materialized
             assert ak.all(out1[2][key] == out2[2][key])
             assert out2[2][key].is_materialized
@@ -2123,21 +2123,21 @@ def test_listarray_nanargmin(numpy_like):
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
     )
 
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -2183,21 +2183,21 @@ def test_listarray_nanargmax(numpy_like):
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
     )
 
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -2269,28 +2269,28 @@ def test_listarray_drop_none(numpy_like):
     )
 
     # Create virtual versions
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_index = VirtualArray(
+    virtual_index = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.float64),
@@ -2325,21 +2325,21 @@ def test_listarray_pad_none(numpy_like):
     )
 
     # Create virtual version
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -2381,28 +2381,28 @@ def test_listarray_fill_none(numpy_like):
     )
 
     # Create virtual versions
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_index = VirtualArray(
+    virtual_index = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.float64),
@@ -2448,21 +2448,21 @@ def test_listarray_singletons(numpy_like):
     )
 
     # Create virtual version
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 1, 2, 3], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([1, 2, 3, 4], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.float64),
@@ -2555,21 +2555,21 @@ def test_listarray_nan_to_none(numpy_like):
     )
 
     # Create virtual version
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -2603,21 +2603,21 @@ def test_listarray_nan_to_num(numpy_like):
     )
 
     # Create virtual version
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -2660,21 +2660,21 @@ def test_listarray_run_lengths(numpy_like):
     )
 
     # Create virtual version
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(2,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 3], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(2,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([3, 6], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.int64),
@@ -2704,21 +2704,21 @@ def test_listarray_round(numpy_like):
     )
 
     # Create virtual version
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(2,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(2,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 4], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.float64),
@@ -2767,21 +2767,21 @@ def test_listarray_real(numpy_like):
     )
 
     # Create virtual version
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(2,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(2,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 3], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.complex128),
@@ -2810,21 +2810,21 @@ def test_listarray_imag(numpy_like):
     )
 
     # Create virtual version
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(2,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(2,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 3], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.complex128),
@@ -2853,21 +2853,21 @@ def test_listarray_angle(numpy_like):
     )
 
     # Create virtual version
-    virtual_starts = VirtualArray(
+    virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(2,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2], dtype=np.int64),
     )
 
-    virtual_stops = VirtualArray(
+    virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(2,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([2, 4], dtype=np.int64),
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.complex128),
@@ -2989,7 +2989,7 @@ def test_recordarray_to_buffers(recordarray, virtual_recordarray):
     # container
     assert set(out1[2].keys()) == set(out2[2].keys())
     for key in out1[2]:
-        if isinstance(out2[2][key], VirtualArray):
+        if isinstance(out2[2][key], VirtualNDArray):
             assert not out2[2][key].is_materialized
             assert ak.all(out1[2][key] == out2[2][key])
             assert out2[2][key].is_materialized
@@ -3452,14 +3452,14 @@ def test_recordarray_nan_to_none_x_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7, 10, 10], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -3469,7 +3469,7 @@ def test_recordarray_nan_to_none_x_field(numpy_like):
         ),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.float64),
@@ -3512,14 +3512,14 @@ def test_recordarray_nan_to_none_y_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7, 10, 10], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
@@ -3528,7 +3528,7 @@ def test_recordarray_nan_to_none_y_field(numpy_like):
         ),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.float64),
@@ -3732,21 +3732,21 @@ def test_recordarray_run_lengths_x_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 3, 6, 6], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([1, 1, 2, 3, 3, 3], dtype=np.int64),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.float64),
@@ -3787,21 +3787,21 @@ def test_recordarray_run_lengths_y_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 3, 6, 6], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.float64),
         generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.float64),
@@ -3842,21 +3842,21 @@ def test_recordarray_round_x_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 4], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.float64),
         generator=lambda: np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.float64),
@@ -3897,21 +3897,21 @@ def test_recordarray_round_y_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 4], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.float64),
         generator=lambda: np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.float64),
@@ -3972,21 +3972,21 @@ def test_recordarray_real_x_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.complex128),
         generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.float64),
@@ -4027,20 +4027,20 @@ def test_recordarray_real_y_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.float64),
         generator=lambda: np.array([1.1, 2.2, 3.3], dtype=np.float64),
     )
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.complex128),
@@ -4081,21 +4081,21 @@ def test_recordarray_imag_x_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.complex128),
         generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.float64),
@@ -4136,21 +4136,21 @@ def test_recordarray_imag_y_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.float64),
         generator=lambda: np.array([1.1, 2.2, 3.3], dtype=np.float64),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.complex128),
@@ -4191,14 +4191,14 @@ def test_recordarray_angle_x_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 4], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.complex128),
@@ -4207,7 +4207,7 @@ def test_recordarray_angle_x_field(numpy_like):
         ),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.float64),
@@ -4248,21 +4248,21 @@ def test_recordarray_angle_y_field(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual version
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.float64),
         generator=lambda: np.array([1.1, 2.2, 3.3], dtype=np.float64),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.complex128),
@@ -4301,7 +4301,7 @@ def test_recordarray_with_field(recordarray, virtual_recordarray, numpy_like):
     assert not virtual_recordarray.is_any_materialized
 
     # Create a new field to add
-    new_field = VirtualArray(
+    new_field = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.float64),
@@ -4360,21 +4360,21 @@ def test_recordarray_with_custom_generator(numpy_like):
         return np.array([np.sin(i) for i in range(5)], dtype=np.float64)
 
     # Create virtual arrays with these generators
-    virtual_offsets = VirtualArray(
+    virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=compute_offsets,
     )
 
-    virtual_content = VirtualArray(
+    virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.float64),
         generator=compute_content,
     )
 
-    virtual_y = VirtualArray(
+    virtual_y = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.float64),
@@ -4456,35 +4456,35 @@ def test_recordarray_with_none_values(numpy_like):
     array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create virtual versions
-    virtual_x_offsets = VirtualArray(
+    virtual_x_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
     )
 
-    virtual_x_index = VirtualArray(
+    virtual_x_index = VirtualNDArray(
         numpy_like,
         shape=(10,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
     )
 
-    virtual_x_content = VirtualArray(
+    virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
         dtype=np.dtype(np.float64),
         generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
     )
 
-    virtual_y_index = VirtualArray(
+    virtual_y_index = VirtualNDArray(
         numpy_like,
         shape=(5,),
         dtype=np.dtype(np.int64),
         generator=lambda: np.array([0, -1, 1, -1, 2], dtype=np.int64),
     )
 
-    virtual_y_content = VirtualArray(
+    virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
         dtype=np.dtype(np.float64),
