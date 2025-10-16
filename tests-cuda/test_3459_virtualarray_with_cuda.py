@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import cupy as np
+import cupy as cp
 import pytest
 
 import awkward as ak
@@ -13,8 +13,8 @@ from awkward._nplikes.virtual import VirtualNDArray
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
     yield
-    np._default_memory_pool.free_all_blocks()
-    np.cuda.Device().synchronize()
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
 
 
 # Create fixtures for common test setup
@@ -25,7 +25,7 @@ def numpy_like():
 
 @pytest.fixture
 def simple_array_generator():
-    return lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64)
+    return lambda: cp.array([1, 2, 3, 4, 5], dtype=cp.int64)
 
 
 @pytest.fixture
@@ -33,14 +33,14 @@ def virtual_array(numpy_like, simple_array_generator):
     return VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
+        dtype=cp.dtype(cp.int64),
         generator=simple_array_generator,
     )
 
 
 @pytest.fixture
 def two_dim_array_generator():
-    return lambda: np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int64)
+    return lambda: cp.array([[1, 2, 3], [4, 5, 6]], dtype=cp.int64)
 
 
 @pytest.fixture
@@ -48,26 +48,26 @@ def two_dim_virtual_array(numpy_like, two_dim_array_generator):
     return VirtualNDArray(
         numpy_like,
         shape=(2, 3),
-        dtype=np.dtype(np.int64),
+        dtype=cp.dtype(cp.int64),
         generator=two_dim_array_generator,
     )
 
 
 @pytest.fixture
 def scalar_array_generator():
-    return lambda: np.array(42, dtype=np.int64)
+    return lambda: cp.array(42, dtype=cp.int64)
 
 
 @pytest.fixture
 def scalar_virtual_array(numpy_like, scalar_array_generator):
     return VirtualNDArray(
-        numpy_like, shape=(), dtype=np.dtype(np.int64), generator=scalar_array_generator
+        numpy_like, shape=(), dtype=cp.dtype(cp.int64), generator=scalar_array_generator
     )
 
 
 @pytest.fixture
 def float_array_generator():
-    return lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64)
+    return lambda: cp.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=cp.float64)
 
 
 @pytest.fixture
@@ -75,14 +75,14 @@ def float_virtual_array(numpy_like, float_array_generator):
     return VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.float64),
+        dtype=cp.dtype(cp.float64),
         generator=float_array_generator,
     )
 
 
 @pytest.fixture
 def numpyarray():
-    return ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64))
+    return ak.contents.NumpyArray(cp.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=cp.float64))
 
 
 @pytest.fixture
@@ -92,7 +92,7 @@ def virtual_numpyarray(float_virtual_array):
 
 @pytest.fixture
 def offset_array_generator():
-    return lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64)
+    return lambda: cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
 
 
 @pytest.fixture
@@ -100,16 +100,16 @@ def virtual_offset_array(numpy_like, offset_array_generator):
     return VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
+        dtype=cp.dtype(cp.int64),
         generator=offset_array_generator,
     )
 
 
 @pytest.fixture
 def listoffsetarray():
-    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
     )
     return ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
@@ -126,7 +126,7 @@ def virtual_listoffsetarray(numpy_like, virtual_offset_array, virtual_content_ar
 
 @pytest.fixture
 def starts_array_generator():
-    return lambda: np.array([0, 2, 4, 7], dtype=np.int64)
+    return lambda: cp.array([0, 2, 4, 7], dtype=cp.int64)
 
 
 @pytest.fixture
@@ -134,14 +134,14 @@ def virtual_starts_array(numpy_like, starts_array_generator):
     return VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
+        dtype=cp.dtype(cp.int64),
         generator=starts_array_generator,
     )
 
 
 @pytest.fixture
 def stops_array_generator():
-    return lambda: np.array([2, 4, 7, 10], dtype=np.int64)
+    return lambda: cp.array([2, 4, 7, 10], dtype=cp.int64)
 
 
 @pytest.fixture
@@ -149,15 +149,15 @@ def virtual_stops_array(numpy_like, stops_array_generator):
     return VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
+        dtype=cp.dtype(cp.int64),
         generator=stops_array_generator,
     )
 
 
 @pytest.fixture
 def content_array_generator():
-    return lambda: np.array(
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    return lambda: cp.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
     )
 
 
@@ -166,17 +166,17 @@ def virtual_content_array(numpy_like, content_array_generator):
     return VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
+        dtype=cp.dtype(cp.float64),
         generator=content_array_generator,
     )
 
 
 @pytest.fixture
 def listarray():
-    starts = np.array([0, 2, 4, 7], dtype=np.int64)
-    stops = np.array([2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    starts = cp.array([0, 2, 4, 7], dtype=cp.int64)
+    stops = cp.array([2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
     )
     return ak.contents.ListArray(
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
@@ -196,7 +196,7 @@ def virtual_listarray(
 
 @pytest.fixture
 def offsets_array_generator():
-    return lambda: np.array([0, 2, 4, 7, 10, 10], dtype=np.int64)
+    return lambda: cp.array([0, 2, 4, 7, 10, 10], dtype=cp.int64)
 
 
 @pytest.fixture
@@ -204,15 +204,15 @@ def virtual_offsets_array(numpy_like, offsets_array_generator):
     return VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.int64),
+        dtype=cp.dtype(cp.int64),
         generator=offsets_array_generator,
     )
 
 
 @pytest.fixture
 def x_content_array_generator():
-    return lambda: np.array(
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    return lambda: cp.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
     )
 
 
@@ -221,14 +221,14 @@ def virtual_x_content_array(numpy_like, x_content_array_generator):
     return VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
+        dtype=cp.dtype(cp.float64),
         generator=x_content_array_generator,
     )
 
 
 @pytest.fixture
 def y_array_generator():
-    return lambda: np.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=np.float64)
+    return lambda: cp.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=cp.float64)
 
 
 @pytest.fixture
@@ -236,7 +236,7 @@ def virtual_y_array(numpy_like, y_array_generator):
     return VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.float64),
+        dtype=cp.dtype(cp.float64),
         generator=y_array_generator,
     )
 
@@ -244,11 +244,11 @@ def virtual_y_array(numpy_like, y_array_generator):
 @pytest.fixture
 def recordarray():
     # Create a regular RecordArray with ListOffsetArray and NumpyArray fields
-    offsets = np.array([0, 2, 4, 7, 10, 10], dtype=np.int64)
-    x_content = np.array(
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    offsets = cp.array([0, 2, 4, 7, 10, 10], dtype=cp.int64)
+    x_content = cp.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
     )
-    y_content = np.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=np.float64)
+    y_content = cp.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=cp.float64)
 
     x_field = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(x_content)
@@ -309,7 +309,7 @@ def test_numpyarray_to_buffers(numpyarray, virtual_numpyarray):
     # container
     assert out1[2].keys() == out2[2].keys()
     for key in out1[2]:
-        assert isinstance(out1[2][key], np.ndarray)
+        assert isinstance(out1[2][key], cp.ndarray)
         assert isinstance(out2[2][key], VirtualNDArray)
         assert ak.all(out1[2][key] == out2[2][key])
 
@@ -535,16 +535,16 @@ def test_numpyarray_drop_none(numpy_like):
         VirtualNDArray(
             numpy_like,
             shape=(7,),
-            dtype=np.dtype(np.int64),
-            generator=lambda: np.array([0, -1, 1, 2, -1, 3, 4], dtype=np.int64),
+            dtype=cp.dtype(cp.int64),
+            generator=lambda: cp.array([0, -1, 1, 2, -1, 3, 4], dtype=cp.int64),
         )
     )
     virtual_content = ak.contents.NumpyArray(
         VirtualNDArray(
             numpy_like,
             shape=(5,),
-            dtype=np.dtype(np.int64),
-            generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
+            dtype=cp.dtype(cp.int64),
+            generator=lambda: cp.array([1, 2, 3, 4, 5], dtype=cp.int64),
         )
     )
     virtual_array = ak.contents.IndexedOptionArray(virtual_index, virtual_content)
@@ -562,16 +562,16 @@ def test_numpy_array_pad_none(numpy_like):
         VirtualNDArray(
             numpy_like,
             shape=(7,),
-            dtype=np.dtype(np.int64),
-            generator=lambda: np.array([0, -1, 1, 2, -1, 3, 4], dtype=np.int64),
+            dtype=cp.dtype(cp.int64),
+            generator=lambda: cp.array([0, -1, 1, 2, -1, 3, 4], dtype=cp.int64),
         )
     )
     virtual_content = ak.contents.NumpyArray(
         VirtualNDArray(
             numpy_like,
             shape=(5,),
-            dtype=np.dtype(np.int64),
-            generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
+            dtype=cp.dtype(cp.int64),
+            generator=lambda: cp.array([1, 2, 3, 4, 5], dtype=cp.int64),
         )
     )
     virtual_array = ak.contents.IndexedOptionArray(virtual_index, virtual_content)
@@ -591,16 +591,16 @@ def test_numpyarray_fill_none(numpy_like):
         VirtualNDArray(
             numpy_like,
             shape=(7,),
-            dtype=np.dtype(np.int64),
-            generator=lambda: np.array([0, -1, 1, 2, -1, 3, 4], dtype=np.int64),
+            dtype=cp.dtype(cp.int64),
+            generator=lambda: cp.array([0, -1, 1, 2, -1, 3, 4], dtype=cp.int64),
         )
     )
     virtual_content = ak.contents.NumpyArray(
         VirtualNDArray(
             numpy_like,
             shape=(5,),
-            dtype=np.dtype(np.int64),
-            generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
+            dtype=cp.dtype(cp.int64),
+            generator=lambda: cp.array([1, 2, 3, 4, 5], dtype=cp.int64),
         )
     )
     virtual_array = ak.contents.IndexedOptionArray(virtual_index, virtual_content)
@@ -626,16 +626,16 @@ def test_numpyarray_singletons(numpy_like):
         VirtualNDArray(
             numpy_like,
             shape=(5,),
-            dtype=np.dtype(np.int64),
-            generator=lambda: np.array([0, 1, 2, 3, 4], dtype=np.int64),
+            dtype=cp.dtype(cp.int64),
+            generator=lambda: cp.array([0, 1, 2, 3, 4], dtype=cp.int64),
         )
     )
     virtual_content = ak.contents.NumpyArray(
         VirtualNDArray(
             numpy_like,
             shape=(5,),
-            dtype=np.dtype(np.int64),
-            generator=lambda: np.array([1, 2, 3, 4, 5], dtype=np.int64),
+            dtype=cp.dtype(cp.int64),
+            generator=lambda: cp.array([1, 2, 3, 4, 5], dtype=cp.int64),
         )
     )
     virtual_array = ak.contents.IndexedArray(virtual_index, virtual_content)
@@ -705,15 +705,15 @@ def test_numpyarray_argcombinations(numpyarray, virtual_numpyarray):
 
 def test_numpyarray_nan_to_none(numpy_like):
     array = ak.to_backend(
-        ak.Array([1, np.nan, 2, 3, np.nan, 4, 5]), "cuda", highlevel=False
+        ak.Array([1, cp.nan, 2, 3, cp.nan, 4, 5]), "cuda", highlevel=False
     )
     virtual_array = ak.contents.NumpyArray(
         VirtualNDArray(
             numpy_like,
             shape=(7,),
-            dtype=np.dtype(np.float64),
-            generator=lambda: np.array(
-                [1, np.nan, 2, 3, np.nan, 4, 5], dtype=np.float64
+            dtype=cp.dtype(cp.float64),
+            generator=lambda: cp.array(
+                [1, cp.nan, 2, 3, cp.nan, 4, 5], dtype=cp.float64
             ),
         )
     )
@@ -725,15 +725,15 @@ def test_numpyarray_nan_to_none(numpy_like):
 
 def test_numpyarray_nan_to_num(numpy_like):
     array = ak.to_backend(
-        ak.Array([1, np.nan, 2, 3, np.nan, 4, 5]), "cuda", highlevel=False
+        ak.Array([1, cp.nan, 2, 3, cp.nan, 4, 5]), "cuda", highlevel=False
     )
     virtual_array = ak.contents.NumpyArray(
         VirtualNDArray(
             numpy_like,
             shape=(7,),
-            dtype=np.dtype(np.float64),
-            generator=lambda: np.array(
-                [1, np.nan, 2, 3, np.nan, 4, 5], dtype=np.float64
+            dtype=cp.dtype(cp.float64),
+            generator=lambda: cp.array(
+                [1, cp.nan, 2, 3, cp.nan, 4, 5], dtype=cp.float64
             ),
         )
     )
@@ -758,8 +758,8 @@ def test_numpyarray_run_lengths(numpy_like):
         VirtualNDArray(
             numpy_like,
             shape=(8,),
-            dtype=np.dtype(np.int64),
-            generator=lambda: np.array([1, 1, 2, 3, 3, 3, 4, 5], dtype=np.int64),
+            dtype=cp.dtype(cp.int64),
+            generator=lambda: cp.array([1, 1, 2, 3, 3, 3, 4, 5], dtype=cp.int64),
         )
     )
     assert not virtual_array.is_any_materialized
@@ -776,8 +776,8 @@ def test_numpyarray_round(numpy_like):
         VirtualNDArray(
             numpy_like,
             shape=(4,),
-            dtype=np.dtype(np.float64),
-            generator=lambda: np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64),
+            dtype=cp.dtype(cp.float64),
+            generator=lambda: cp.array([1.234, 2.567, 3.499, 4.501], dtype=cp.float64),
         )
     )
     assert not virtual_array.is_any_materialized
@@ -812,8 +812,8 @@ def test_numpyarray_real(numpy_like):
         VirtualNDArray(
             numpy_like,
             shape=(3,),
-            dtype=np.dtype(np.complex128),
-            generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+            dtype=cp.dtype(cp.complex128),
+            generator=lambda: cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128),
         )
     )
     assert not virtual_array.is_any_materialized
@@ -828,8 +828,8 @@ def test_numpyarray_imag(numpy_like):
         VirtualNDArray(
             numpy_like,
             shape=(3,),
-            dtype=np.dtype(np.complex128),
-            generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+            dtype=cp.dtype(cp.complex128),
+            generator=lambda: cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128),
         )
     )
     assert not virtual_array.is_any_materialized
@@ -998,7 +998,7 @@ def test_listoffsetarray_unflatten(listoffsetarray, virtual_listoffsetarray):
     flat_virtual = ak.flatten(virtual_listoffsetarray)
 
     # Define counts for unflattening
-    counts = np.array([2, 2, 3, 3])
+    counts = cp.array([2, 2, 3, 3])
 
     assert virtual_listoffsetarray.is_any_materialized
 
@@ -1141,9 +1141,9 @@ def test_listoffsetarray_argmin(listoffsetarray, virtual_listoffsetarray):
 @pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_listoffsetarray_nanargmin(numpy_like):
     # Create arrays with NaN values to test nanargmin
-    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan], dtype=cp.float64
     )
 
     array = ak.contents.ListOffsetArray(
@@ -1153,17 +1153,17 @@ def test_listoffsetarray_nanargmin(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
-            dtype=np.float64,
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan],
+            dtype=cp.float64,
         ),
     )
 
@@ -1193,9 +1193,9 @@ def test_listoffsetarray_argmax(listoffsetarray, virtual_listoffsetarray):
 @pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_listoffsetarray_nanargmax(numpy_like):
     # Create arrays with NaN values to test nanargmax
-    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan], dtype=cp.float64
     )
 
     array = ak.contents.ListOffsetArray(
@@ -1205,17 +1205,17 @@ def test_listoffsetarray_nanargmax(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
-            dtype=np.float64,
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan],
+            dtype=cp.float64,
         ),
     )
 
@@ -1263,11 +1263,11 @@ def test_listoffsetarray_is_none(listoffsetarray, virtual_listoffsetarray):
 
 def test_listoffsetarray_drop_none(numpy_like):
     # Create a ListOffsetArray with some None values
-    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+    offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
 
     # Create an IndexedOptionArray for the content that has None values
-    index_data = np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64)
-    content_data = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64)
+    index_data = cp.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=cp.int64)
+    content_data = cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64)
 
     index = ak.index.Index(index_data)
     content = ak.contents.NumpyArray(content_data)
@@ -1279,22 +1279,22 @@ def test_listoffsetarray_drop_none(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_index = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64),
     )
 
     virtual_indexed_content = ak.contents.IndexedOptionArray(
@@ -1313,9 +1313,9 @@ def test_listoffsetarray_drop_none(numpy_like):
 
 def test_listoffsetarray_pad_none(numpy_like):
     # Create a regular ListOffsetArray
-    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
     )
     array = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
@@ -1325,16 +1325,16 @@ def test_listoffsetarray_pad_none(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
         ),
     )
 
@@ -1353,11 +1353,11 @@ def test_listoffsetarray_pad_none(numpy_like):
 
 def test_listoffsetarray_fill_none(numpy_like):
     # Create a ListOffsetArray with some None values
-    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
+    offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
 
     # Create an IndexedOptionArray for the content that has None values
-    index_data = np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64)
-    content_data = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64)
+    index_data = cp.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=cp.int64)
+    content_data = cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64)
 
     index = ak.index.Index(index_data)
     content = ak.contents.NumpyArray(content_data)
@@ -1369,22 +1369,22 @@ def test_listoffsetarray_fill_none(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_index = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64),
     )
 
     virtual_indexed_content = ak.contents.IndexedOptionArray(
@@ -1416,8 +1416,8 @@ def test_listoffsetarray_firsts(listoffsetarray, virtual_listoffsetarray):
 
 def test_listoffsetarray_singletons(numpy_like):
     # Create a regular array to test
-    offsets = np.array([0, 1, 2, 3, 4], dtype=np.int64)
-    content = np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64)
+    offsets = cp.array([0, 1, 2, 3, 4], dtype=cp.int64)
+    content = cp.array([1.1, 2.2, 3.3, 4.4], dtype=cp.float64)
     array = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
     )
@@ -1426,15 +1426,15 @@ def test_listoffsetarray_singletons(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 1, 2, 3, 4], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 1, 2, 3, 4], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3, 4.4], dtype=cp.float64),
     )
 
     virtual_array = ak.contents.ListOffsetArray(
@@ -1511,9 +1511,9 @@ def test_listoffsetarray_argcombinations(listoffsetarray, virtual_listoffsetarra
 
 def test_listoffsetarray_nan_to_none(numpy_like):
     # Create a ListOffsetArray with NaN values
-    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan], dtype=cp.float64
     )
     array = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
@@ -1523,17 +1523,17 @@ def test_listoffsetarray_nan_to_none(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
-            dtype=np.float64,
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan],
+            dtype=cp.float64,
         ),
     )
 
@@ -1549,9 +1549,9 @@ def test_listoffsetarray_nan_to_none(numpy_like):
 
 def test_listoffsetarray_nan_to_num(numpy_like):
     # Create a ListOffsetArray with NaN values
-    offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan], dtype=cp.float64
     )
     array = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
@@ -1561,17 +1561,17 @@ def test_listoffsetarray_nan_to_num(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
-            dtype=np.float64,
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan],
+            dtype=cp.float64,
         ),
     )
 
@@ -1598,8 +1598,8 @@ def test_listoffsetarray_local_index(listoffsetarray, virtual_listoffsetarray):
 
 def test_listoffsetarray_run_lengths(numpy_like):
     # Create a ListOffsetArray with repeated values for run_lengths test
-    offsets = np.array([0, 3, 6], dtype=np.int64)
-    content = np.array([1, 1, 2, 3, 3, 3], dtype=np.int64)
+    offsets = cp.array([0, 3, 6], dtype=cp.int64)
+    content = cp.array([1, 1, 2, 3, 3, 3], dtype=cp.int64)
     array = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
     )
@@ -1608,15 +1608,15 @@ def test_listoffsetarray_run_lengths(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 3, 6], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 3, 6], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([1, 1, 2, 3, 3, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([1, 1, 2, 3, 3, 3], dtype=cp.int64),
     )
 
     virtual_array = ak.contents.ListOffsetArray(
@@ -1632,8 +1632,8 @@ def test_listoffsetarray_run_lengths(numpy_like):
 
 def test_listoffsetarray_round(numpy_like):
     # Create a ListOffsetArray with float values for rounding
-    offsets = np.array([0, 2, 4], dtype=np.int64)
-    content = np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64)
+    offsets = cp.array([0, 2, 4], dtype=cp.int64)
+    content = cp.array([1.234, 2.567, 3.499, 4.501], dtype=cp.float64)
     array = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
     )
@@ -1642,15 +1642,15 @@ def test_listoffsetarray_round(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.234, 2.567, 3.499, 4.501], dtype=cp.float64),
     )
 
     virtual_array = ak.contents.ListOffsetArray(
@@ -1685,8 +1685,8 @@ def test_listoffsetarray_almost_equal(listoffsetarray, virtual_listoffsetarray):
 
 def test_listoffsetarray_real(numpy_like):
     # Create a ListOffsetArray with complex values for real test
-    offsets = np.array([0, 2, 3], dtype=np.int64)
-    content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+    offsets = cp.array([0, 2, 3], dtype=cp.int64)
+    content = cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128)
     array = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
     )
@@ -1695,15 +1695,15 @@ def test_listoffsetarray_real(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 3], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128),
     )
 
     virtual_array = ak.contents.ListOffsetArray(
@@ -1718,8 +1718,8 @@ def test_listoffsetarray_real(numpy_like):
 
 def test_listoffsetarray_imag(numpy_like):
     # Create a ListOffsetArray with complex values for imag test
-    offsets = np.array([0, 2, 3], dtype=np.int64)
-    content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+    offsets = cp.array([0, 2, 3], dtype=cp.int64)
+    content = cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128)
     array = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
     )
@@ -1728,15 +1728,15 @@ def test_listoffsetarray_imag(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 3], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128),
     )
 
     virtual_array = ak.contents.ListOffsetArray(
@@ -1751,8 +1751,8 @@ def test_listoffsetarray_imag(numpy_like):
 
 def test_listoffsetarray_angle(numpy_like):
     # Create a ListOffsetArray with complex values for angle test
-    offsets = np.array([0, 2, 4], dtype=np.int64)
-    content = np.array([1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=np.complex128)
+    offsets = cp.array([0, 2, 4], dtype=cp.int64)
+    content = cp.array([1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=cp.complex128)
     array = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
     )
@@ -1761,16 +1761,16 @@ def test_listoffsetarray_angle(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array(
-            [1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=np.complex128
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array(
+            [1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=cp.complex128
         ),
     )
 
@@ -2000,7 +2000,7 @@ def test_listarray_unflatten(listarray, virtual_listarray):
     flat_virtual = ak.flatten(virtual_listarray)
 
     # Define counts for unflattening
-    counts = np.array([2, 2, 3, 3])
+    counts = cp.array([2, 2, 3, 3])
 
     assert virtual_listarray.is_any_materialized
 
@@ -2120,10 +2120,10 @@ def test_listarray_argmin(listarray, virtual_listarray):
 @pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_listarray_nanargmin(numpy_like):
     # Create arrays with NaN values to test nanargmin
-    starts = np.array([0, 2, 4, 7], dtype=np.int64)
-    stops = np.array([2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    starts = cp.array([0, 2, 4, 7], dtype=cp.int64)
+    stops = cp.array([2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan], dtype=cp.float64
     )
 
     array = ak.contents.ListArray(
@@ -2133,24 +2133,24 @@ def test_listarray_nanargmin(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
-            dtype=np.float64,
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan],
+            dtype=cp.float64,
         ),
     )
 
@@ -2180,10 +2180,10 @@ def test_listarray_argmax(listarray, virtual_listarray):
 @pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_listarray_nanargmax(numpy_like):
     # Create arrays with NaN values to test nanargmax
-    starts = np.array([0, 2, 4, 7], dtype=np.int64)
-    stops = np.array([2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    starts = cp.array([0, 2, 4, 7], dtype=cp.int64)
+    stops = cp.array([2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan], dtype=cp.float64
     )
 
     array = ak.contents.ListArray(
@@ -2193,24 +2193,24 @@ def test_listarray_nanargmax(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
-            dtype=np.float64,
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan],
+            dtype=cp.float64,
         ),
     )
 
@@ -2260,12 +2260,12 @@ def test_listarray_is_none(listarray, virtual_listarray):
 
 def test_listarray_drop_none(numpy_like):
     # Create a ListArray with some None values
-    starts = np.array([0, 2, 4, 7], dtype=np.int64)
-    stops = np.array([2, 4, 7, 10], dtype=np.int64)
+    starts = cp.array([0, 2, 4, 7], dtype=cp.int64)
+    stops = cp.array([2, 4, 7, 10], dtype=cp.int64)
 
     # Create an IndexedOptionArray for the content that has None values
-    index_data = np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64)
-    content_data = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64)
+    index_data = cp.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=cp.int64)
+    content_data = cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64)
 
     index = ak.index.Index(index_data)
     content = ak.contents.NumpyArray(content_data)
@@ -2279,29 +2279,29 @@ def test_listarray_drop_none(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_index = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64),
     )
 
     virtual_indexed_content = ak.contents.IndexedOptionArray(
@@ -2322,10 +2322,10 @@ def test_listarray_drop_none(numpy_like):
 
 def test_listarray_pad_none(numpy_like):
     # Create a regular ListArray
-    starts = np.array([0, 2, 4, 7], dtype=np.int64)
-    stops = np.array([2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    starts = cp.array([0, 2, 4, 7], dtype=cp.int64)
+    stops = cp.array([2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
     )
     array = ak.contents.ListArray(
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
@@ -2335,23 +2335,23 @@ def test_listarray_pad_none(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
         ),
     )
 
@@ -2372,12 +2372,12 @@ def test_listarray_pad_none(numpy_like):
 
 def test_listarray_fill_none(numpy_like):
     # Create a ListArray with some None values
-    starts = np.array([0, 2, 4, 7], dtype=np.int64)
-    stops = np.array([2, 4, 7, 10], dtype=np.int64)
+    starts = cp.array([0, 2, 4, 7], dtype=cp.int64)
+    stops = cp.array([2, 4, 7, 10], dtype=cp.int64)
 
     # Create an IndexedOptionArray for the content that has None values
-    index_data = np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64)
-    content_data = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64)
+    index_data = cp.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=cp.int64)
+    content_data = cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64)
 
     index = ak.index.Index(index_data)
     content = ak.contents.NumpyArray(content_data)
@@ -2391,29 +2391,29 @@ def test_listarray_fill_none(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_index = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64),
     )
 
     virtual_indexed_content = ak.contents.IndexedOptionArray(
@@ -2447,9 +2447,9 @@ def test_listarray_firsts(listarray, virtual_listarray):
 
 def test_listarray_singletons(numpy_like):
     # Create a regular array to test
-    starts = np.array([0, 1, 2, 3], dtype=np.int64)
-    stops = np.array([1, 2, 3, 4], dtype=np.int64)
-    content = np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64)
+    starts = cp.array([0, 1, 2, 3], dtype=cp.int64)
+    stops = cp.array([1, 2, 3, 4], dtype=cp.int64)
+    content = cp.array([1.1, 2.2, 3.3, 4.4], dtype=cp.float64)
     array = ak.contents.ListArray(
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
     )
@@ -2458,22 +2458,22 @@ def test_listarray_singletons(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 1, 2, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 1, 2, 3], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([1, 2, 3, 4], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([1, 2, 3, 4], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3, 4.4], dtype=cp.float64),
     )
 
     virtual_array = ak.contents.ListArray(
@@ -2552,10 +2552,10 @@ def test_listarray_argcombinations(listarray, virtual_listarray):
 
 def test_listarray_nan_to_none(numpy_like):
     # Create a ListArray with NaN values
-    starts = np.array([0, 2, 4, 7], dtype=np.int64)
-    stops = np.array([2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    starts = cp.array([0, 2, 4, 7], dtype=cp.int64)
+    stops = cp.array([2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan], dtype=cp.float64
     )
     array = ak.contents.ListArray(
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
@@ -2565,24 +2565,24 @@ def test_listarray_nan_to_none(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
-            dtype=np.float64,
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan],
+            dtype=cp.float64,
         ),
     )
 
@@ -2600,10 +2600,10 @@ def test_listarray_nan_to_none(numpy_like):
 
 def test_listarray_nan_to_num(numpy_like):
     # Create a ListArray with NaN values
-    starts = np.array([0, 2, 4, 7], dtype=np.int64)
-    stops = np.array([2, 4, 7, 10], dtype=np.int64)
-    content = np.array(
-        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    starts = cp.array([0, 2, 4, 7], dtype=cp.int64)
+    stops = cp.array([2, 4, 7, 10], dtype=cp.int64)
+    content = cp.array(
+        [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan], dtype=cp.float64
     )
     array = ak.contents.ListArray(
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
@@ -2613,24 +2613,24 @@ def test_listarray_nan_to_num(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
-            dtype=np.float64,
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan],
+            dtype=cp.float64,
         ),
     )
 
@@ -2659,9 +2659,9 @@ def test_listarray_local_index(listarray, virtual_listarray):
 
 def test_listarray_run_lengths(numpy_like):
     # Create a ListArray with repeated values for run_lengths test
-    starts = np.array([0, 3], dtype=np.int64)
-    stops = np.array([3, 6], dtype=np.int64)
-    content = np.array([1, 1, 2, 3, 3, 3], dtype=np.int64)
+    starts = cp.array([0, 3], dtype=cp.int64)
+    stops = cp.array([3, 6], dtype=cp.int64)
+    content = cp.array([1, 1, 2, 3, 3, 3], dtype=cp.int64)
     array = ak.contents.ListArray(
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
     )
@@ -2670,22 +2670,22 @@ def test_listarray_run_lengths(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(2,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 3], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(2,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([3, 6], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([3, 6], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([1, 1, 2, 3, 3, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([1, 1, 2, 3, 3, 3], dtype=cp.int64),
     )
 
     virtual_array = ak.contents.ListArray(
@@ -2703,9 +2703,9 @@ def test_listarray_run_lengths(numpy_like):
 
 def test_listarray_round(numpy_like):
     # Create a ListArray with float values for rounding
-    starts = np.array([0, 2], dtype=np.int64)
-    stops = np.array([2, 4], dtype=np.int64)
-    content = np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64)
+    starts = cp.array([0, 2], dtype=cp.int64)
+    stops = cp.array([2, 4], dtype=cp.int64)
+    content = cp.array([1.234, 2.567, 3.499, 4.501], dtype=cp.float64)
     array = ak.contents.ListArray(
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
     )
@@ -2714,22 +2714,22 @@ def test_listarray_round(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(2,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(2,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 4], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 4], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.234, 2.567, 3.499, 4.501], dtype=cp.float64),
     )
 
     virtual_array = ak.contents.ListArray(
@@ -2766,9 +2766,9 @@ def test_listarray_almost_equal(listarray, virtual_listarray):
 
 def test_listarray_real(numpy_like):
     # Create a ListArray with complex values for real test
-    starts = np.array([0, 2], dtype=np.int64)
-    stops = np.array([2, 3], dtype=np.int64)
-    content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+    starts = cp.array([0, 2], dtype=cp.int64)
+    stops = cp.array([2, 3], dtype=cp.int64)
+    content = cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128)
     array = ak.contents.ListArray(
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
     )
@@ -2777,22 +2777,22 @@ def test_listarray_real(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(2,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(2,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 3], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128),
     )
 
     virtual_array = ak.contents.ListArray(
@@ -2809,9 +2809,9 @@ def test_listarray_real(numpy_like):
 
 def test_listarray_imag(numpy_like):
     # Create a ListArray with complex values for imag test
-    starts = np.array([0, 2], dtype=np.int64)
-    stops = np.array([2, 3], dtype=np.int64)
-    content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+    starts = cp.array([0, 2], dtype=cp.int64)
+    stops = cp.array([2, 3], dtype=cp.int64)
+    content = cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128)
     array = ak.contents.ListArray(
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
     )
@@ -2820,22 +2820,22 @@ def test_listarray_imag(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(2,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(2,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 3], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128),
     )
 
     virtual_array = ak.contents.ListArray(
@@ -2852,9 +2852,9 @@ def test_listarray_imag(numpy_like):
 
 def test_listarray_angle(numpy_like):
     # Create a ListArray with complex values for angle test
-    starts = np.array([0, 2], dtype=np.int64)
-    stops = np.array([2, 4], dtype=np.int64)
-    content = np.array([1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=np.complex128)
+    starts = cp.array([0, 2], dtype=cp.int64)
+    stops = cp.array([2, 4], dtype=cp.int64)
+    content = cp.array([1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=cp.complex128)
     array = ak.contents.ListArray(
         ak.index.Index(starts), ak.index.Index(stops), ak.contents.NumpyArray(content)
     )
@@ -2863,23 +2863,23 @@ def test_listarray_angle(numpy_like):
     virtual_starts = VirtualNDArray(
         numpy_like,
         shape=(2,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2], dtype=cp.int64),
     )
 
     virtual_stops = VirtualNDArray(
         numpy_like,
         shape=(2,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([2, 4], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([2, 4], dtype=cp.int64),
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array(
-            [1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=np.complex128
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array(
+            [1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=cp.complex128
         ),
     )
 
@@ -3445,11 +3445,11 @@ def test_recordarray_combinations_y_field(recordarray, virtual_recordarray):
 
 def test_recordarray_nan_to_none_x_field(numpy_like):
     # Create a RecordArray with NaN values in the x field
-    offsets = np.array([0, 2, 4, 7, 10, 10], dtype=np.int64)
-    x_content = np.array(
-        [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan], dtype=np.float64
+    offsets = cp.array([0, 2, 4, 7, 10, 10], dtype=cp.int64)
+    x_content = cp.array(
+        [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan], dtype=cp.float64
     )
-    y_content = np.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=np.float64)
+    y_content = cp.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=cp.float64)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -3462,25 +3462,25 @@ def test_recordarray_nan_to_none_x_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7, 10, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7, 10, 10], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, np.nan, 3.3, np.nan, 5.5, 6.6, np.nan, 8.8, 9.9, np.nan],
-            dtype=np.float64,
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, cp.nan, 3.3, cp.nan, 5.5, 6.6, cp.nan, 8.8, 9.9, cp.nan],
+            dtype=cp.float64,
         ),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=cp.float64),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -3505,11 +3505,11 @@ def test_recordarray_nan_to_none_x_field(numpy_like):
 
 def test_recordarray_nan_to_none_y_field(numpy_like):
     # Create a RecordArray with NaN values in the y field
-    offsets = np.array([0, 2, 4, 7, 10, 10], dtype=np.int64)
-    x_content = np.array(
-        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+    offsets = cp.array([0, 2, 4, 7, 10, 10], dtype=cp.int64)
+    x_content = cp.array(
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
     )
-    y_content = np.array([0.1, np.nan, 0.3, np.nan, 0.5], dtype=np.float64)
+    y_content = cp.array([0.1, cp.nan, 0.3, cp.nan, 0.5], dtype=cp.float64)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -3522,24 +3522,24 @@ def test_recordarray_nan_to_none_y_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7, 10, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7, 10, 10], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array(
-            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=np.float64
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array(
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10], dtype=cp.float64
         ),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([0.1, np.nan, 0.3, np.nan, 0.5], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([0.1, cp.nan, 0.3, cp.nan, 0.5], dtype=cp.float64),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -3727,9 +3727,9 @@ def test_recordarray_to_regular_y_field(recordarray, virtual_recordarray):
 
 def test_recordarray_run_lengths_x_field(numpy_like):
     # Create a RecordArray with repeated values in the x field for run_lengths test
-    offsets = np.array([0, 3, 6, 6], dtype=np.int64)
-    x_content = np.array([1, 1, 2, 3, 3, 3], dtype=np.int64)
-    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+    offsets = cp.array([0, 3, 6, 6], dtype=cp.int64)
+    x_content = cp.array([1, 1, 2, 3, 3, 3], dtype=cp.int64)
+    y_content = cp.array([0.1, 0.2, 0.3], dtype=cp.float64)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -3742,22 +3742,22 @@ def test_recordarray_run_lengths_x_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 3, 6, 6], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 3, 6, 6], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([1, 1, 2, 3, 3, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([1, 1, 2, 3, 3, 3], dtype=cp.int64),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([0.1, 0.2, 0.3], dtype=cp.float64),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -3782,9 +3782,9 @@ def test_recordarray_run_lengths_x_field(numpy_like):
 
 def test_recordarray_run_lengths_y_field(numpy_like):
     # Create a RecordArray with repeated values in the y field for run_lengths test
-    offsets = np.array([0, 3, 6, 6], dtype=np.int64)
-    x_content = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64)
-    y_content = np.array([0.1, 0.1, 0.2, 0.3, 0.3, 0.3], dtype=np.float64)
+    offsets = cp.array([0, 3, 6, 6], dtype=cp.int64)
+    x_content = cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64)
+    y_content = cp.array([0.1, 0.1, 0.2, 0.3, 0.3, 0.3], dtype=cp.float64)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -3797,22 +3797,22 @@ def test_recordarray_run_lengths_y_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 3, 6, 6], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 3, 6, 6], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([0.1, 0.1, 0.2, 0.3, 0.3, 0.3], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([0.1, 0.1, 0.2, 0.3, 0.3, 0.3], dtype=cp.float64),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -3837,9 +3837,9 @@ def test_recordarray_run_lengths_y_field(numpy_like):
 
 def test_recordarray_round_x_field(numpy_like):
     # Create a RecordArray with float values in the x field for rounding
-    offsets = np.array([0, 2, 4, 4], dtype=np.int64)
-    x_content = np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64)
-    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+    offsets = cp.array([0, 2, 4, 4], dtype=cp.int64)
+    x_content = cp.array([1.234, 2.567, 3.499, 4.501], dtype=cp.float64)
+    y_content = cp.array([0.1, 0.2, 0.3], dtype=cp.float64)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -3852,22 +3852,22 @@ def test_recordarray_round_x_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 4], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 4], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.234, 2.567, 3.499, 4.501], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.234, 2.567, 3.499, 4.501], dtype=cp.float64),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([0.1, 0.2, 0.3], dtype=cp.float64),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -3892,9 +3892,9 @@ def test_recordarray_round_x_field(numpy_like):
 
 def test_recordarray_round_y_field(numpy_like):
     # Create a RecordArray with float values in the y field for rounding
-    offsets = np.array([0, 2, 4, 4], dtype=np.int64)
-    x_content = np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64)
-    y_content = np.array([1.234, 2.567, 3.499], dtype=np.float64)
+    offsets = cp.array([0, 2, 4, 4], dtype=cp.int64)
+    x_content = cp.array([1.1, 2.2, 3.3, 4.4], dtype=cp.float64)
+    y_content = cp.array([1.234, 2.567, 3.499], dtype=cp.float64)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -3907,22 +3907,22 @@ def test_recordarray_round_y_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 4], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 4], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3, 4.4], dtype=cp.float64),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.234, 2.567, 3.499], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.234, 2.567, 3.499], dtype=cp.float64),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -3967,9 +3967,9 @@ def test_recordarray_almost_equal(recordarray, virtual_recordarray):
 
 def test_recordarray_real_x_field(numpy_like):
     # Create a RecordArray with complex values in the x field
-    offsets = np.array([0, 2, 3, 3], dtype=np.int64)
-    x_content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
-    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+    offsets = cp.array([0, 2, 3, 3], dtype=cp.int64)
+    x_content = cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128)
+    y_content = cp.array([0.1, 0.2, 0.3], dtype=cp.float64)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -3982,22 +3982,22 @@ def test_recordarray_real_x_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 3, 3], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([0.1, 0.2, 0.3], dtype=cp.float64),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -4022,9 +4022,9 @@ def test_recordarray_real_x_field(numpy_like):
 
 def test_recordarray_real_y_field(numpy_like):
     # Create a RecordArray with complex values in the y field
-    offsets = np.array([0, 2, 3, 3], dtype=np.int64)
-    x_content = np.array([1.1, 2.2, 3.3], dtype=np.float64)
-    y_content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+    offsets = cp.array([0, 2, 3, 3], dtype=cp.int64)
+    x_content = cp.array([1.1, 2.2, 3.3], dtype=cp.float64)
+    y_content = cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -4037,21 +4037,21 @@ def test_recordarray_real_y_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 3, 3], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3], dtype=cp.float64),
     )
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -4076,9 +4076,9 @@ def test_recordarray_real_y_field(numpy_like):
 
 def test_recordarray_imag_x_field(numpy_like):
     # Create a RecordArray with complex values in the x field
-    offsets = np.array([0, 2, 3, 3], dtype=np.int64)
-    x_content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
-    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+    offsets = cp.array([0, 2, 3, 3], dtype=cp.int64)
+    x_content = cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128)
+    y_content = cp.array([0.1, 0.2, 0.3], dtype=cp.float64)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -4091,22 +4091,22 @@ def test_recordarray_imag_x_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 3, 3], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([0.1, 0.2, 0.3], dtype=cp.float64),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -4131,9 +4131,9 @@ def test_recordarray_imag_x_field(numpy_like):
 
 def test_recordarray_imag_y_field(numpy_like):
     # Create a RecordArray with complex values in the y field
-    offsets = np.array([0, 2, 3, 3], dtype=np.int64)
-    x_content = np.array([1.1, 2.2, 3.3], dtype=np.float64)
-    y_content = np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128)
+    offsets = cp.array([0, 2, 3, 3], dtype=cp.int64)
+    x_content = cp.array([1.1, 2.2, 3.3], dtype=cp.float64)
+    y_content = cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -4146,22 +4146,22 @@ def test_recordarray_imag_y_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 3, 3], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3], dtype=cp.float64),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=np.complex128),
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array([1 + 2j, 3 + 4j, 5 + 6j], dtype=cp.complex128),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -4186,9 +4186,9 @@ def test_recordarray_imag_y_field(numpy_like):
 
 def test_recordarray_angle_x_field(numpy_like):
     # Create a RecordArray with complex values in the x field
-    offsets = np.array([0, 2, 4, 4], dtype=np.int64)
-    x_content = np.array([1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=np.complex128)
-    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+    offsets = cp.array([0, 2, 4, 4], dtype=cp.int64)
+    x_content = cp.array([1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=cp.complex128)
+    y_content = cp.array([0.1, 0.2, 0.3], dtype=cp.float64)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -4201,24 +4201,24 @@ def test_recordarray_angle_x_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 4], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 4], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array(
-            [1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=np.complex128
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array(
+            [1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j], dtype=cp.complex128
         ),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([0.1, 0.2, 0.3], dtype=cp.float64),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -4243,9 +4243,9 @@ def test_recordarray_angle_x_field(numpy_like):
 
 def test_recordarray_angle_y_field(numpy_like):
     # Create a RecordArray with complex values in the y field
-    offsets = np.array([0, 2, 3, 3], dtype=np.int64)
-    x_content = np.array([1.1, 2.2, 3.3], dtype=np.float64)
-    y_content = np.array([1 + 0j, 0 + 1j, -1 + 0j], dtype=np.complex128)
+    offsets = cp.array([0, 2, 3, 3], dtype=cp.int64)
+    x_content = cp.array([1.1, 2.2, 3.3], dtype=cp.float64)
+    y_content = cp.array([1 + 0j, 0 + 1j, -1 + 0j], dtype=cp.complex128)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -4258,22 +4258,22 @@ def test_recordarray_angle_y_field(numpy_like):
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(4,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 3, 3], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 3, 3], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3], dtype=cp.float64),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.complex128),
-        generator=lambda: np.array([1 + 0j, 0 + 1j, -1 + 0j], dtype=np.complex128),
+        dtype=cp.dtype(cp.complex128),
+        generator=lambda: cp.array([1 + 0j, 0 + 1j, -1 + 0j], dtype=cp.complex128),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -4311,14 +4311,14 @@ def test_recordarray_with_field(recordarray, virtual_recordarray, numpy_like):
     new_field = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=cp.float64),
     )
 
     # Test with_field method which adds a new field
     result = ak.with_field(virtual_recordarray, ak.contents.NumpyArray(new_field), "z")
     expected = ak.with_field(
-        recordarray, ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])), "z"
+        recordarray, ak.contents.NumpyArray(cp.array([1.1, 2.2, 3.3, 4.4, 5.5])), "z"
     )
 
     assert ak.array_equal(result, expected)
@@ -4356,35 +4356,35 @@ def test_recordarray_with_custom_generator(numpy_like):
     # Define generator functions that compute values
     def compute_offsets():
         # Compute offsets dynamically
-        return np.array([0, 2, 5, 9, 10], dtype=np.int64)
+        return cp.array([0, 2, 5, 9, 10], dtype=cp.int64)
 
     def compute_content():
         # Compute content with a formula
-        return np.array([i**2 for i in range(10)], dtype=np.float64)
+        return cp.array([i**2 for i in range(10)], dtype=cp.float64)
 
     def compute_y_values():
         # Compute y values with a formula
-        return np.array([np.sin(i) for i in range(5)], dtype=np.float64)
+        return cp.array([cp.sin(i) for i in range(5)], dtype=cp.float64)
 
     # Create virtual arrays with these generators
     virtual_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
+        dtype=cp.dtype(cp.int64),
         generator=compute_offsets,
     )
 
     virtual_content = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.float64),
+        dtype=cp.dtype(cp.float64),
         generator=compute_content,
     )
 
     virtual_y = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.float64),
+        dtype=cp.dtype(cp.float64),
         generator=compute_y_values,
     )
 
@@ -4398,9 +4398,9 @@ def test_recordarray_with_custom_generator(numpy_like):
     virtual_array = ak.contents.RecordArray([x_field, y_field], ["x", "y"])
 
     # Create the expected array for comparison
-    offsets = np.array([0, 2, 5, 9, 10], dtype=np.int64)
-    content = np.array([0, 1, 4, 9, 16, 25, 36, 49, 64, 81], dtype=np.float64)
-    y_values = np.array(
+    offsets = cp.array([0, 2, 5, 9, 10], dtype=cp.int64)
+    content = cp.array([0, 1, 4, 9, 16, 25, 36, 49, 64, 81], dtype=cp.float64)
+    y_values = cp.array(
         [
             0.0,
             0.8414709848078965,
@@ -4408,7 +4408,7 @@ def test_recordarray_with_custom_generator(numpy_like):
             0.1411200080598672,
             -0.7568024953079282,
         ],
-        dtype=np.float64,
+        dtype=cp.float64,
     )
 
     x_field_regular = ak.contents.ListOffsetArray(
@@ -4440,13 +4440,13 @@ def test_recordarray_with_none_values(numpy_like):
     # Create a RecordArray with None values in both fields
 
     # Create x field with None values
-    x_offsets = np.array([0, 2, 4, 7, 10], dtype=np.int64)
-    x_index = np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64)
-    x_content = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64)
+    x_offsets = cp.array([0, 2, 4, 7, 10], dtype=cp.int64)
+    x_index = cp.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=cp.int64)
+    x_content = cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64)
 
     # Create y field with None values
-    y_index = np.array([0, -1, 1, -1, 2], dtype=np.int64)
-    y_content = np.array([0.1, 0.2, 0.3], dtype=np.float64)
+    y_index = cp.array([0, -1, 1, -1, 2], dtype=cp.int64)
+    y_content = cp.array([0.1, 0.2, 0.3], dtype=cp.float64)
 
     # Create regular array
     x_field = ak.contents.ListOffsetArray(
@@ -4466,36 +4466,36 @@ def test_recordarray_with_none_values(numpy_like):
     virtual_x_offsets = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, 2, 4, 7, 10], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, 2, 4, 7, 10], dtype=cp.int64),
     )
 
     virtual_x_index = VirtualNDArray(
         numpy_like,
         shape=(10,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, -1, 1, -1, 2, 3, -1, 4, 5, -1], dtype=cp.int64),
     )
 
     virtual_x_content = VirtualNDArray(
         numpy_like,
         shape=(6,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6], dtype=cp.float64),
     )
 
     virtual_y_index = VirtualNDArray(
         numpy_like,
         shape=(5,),
-        dtype=np.dtype(np.int64),
-        generator=lambda: np.array([0, -1, 1, -1, 2], dtype=np.int64),
+        dtype=cp.dtype(cp.int64),
+        generator=lambda: cp.array([0, -1, 1, -1, 2], dtype=cp.int64),
     )
 
     virtual_y_content = VirtualNDArray(
         numpy_like,
         shape=(3,),
-        dtype=np.dtype(np.float64),
-        generator=lambda: np.array([0.1, 0.2, 0.3], dtype=np.float64),
+        dtype=cp.dtype(cp.float64),
+        generator=lambda: cp.array([0.1, 0.2, 0.3], dtype=cp.float64),
     )
 
     virtual_x_field = ak.contents.ListOffsetArray(
@@ -4543,13 +4543,13 @@ def test_recordarray_advanced_indexing(recordarray, virtual_recordarray):
     assert ak.array_equal(slice_result, expected_slice)
 
     # Test fancy indexing with array of indices
-    indices = np.array([3, 1, 2])
+    indices = cp.array([3, 1, 2])
     fancy_result = virtual_record_array[indices]
     expected_fancy = record_array[indices]
     assert ak.array_equal(fancy_result, expected_fancy)
 
     # Test boolean masking
-    mask = np.array([True, False, True, False, True])
+    mask = cp.array([True, False, True, False, True])
     mask_result = virtual_record_array[mask]
     expected_mask = record_array[mask]
     assert ak.array_equal(mask_result, expected_mask)
