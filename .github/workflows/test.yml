@@ -49,7 +49,12 @@ jobs:
           - x64
         dependencies-kind:
           - full
+        exclude:
+          - runs-on: macos-14
+            python-architecture: x64
         include:
+          - runs-on: macos-14
+            python-architecture: arm64
           - python-version: '3.9'
             python-architecture: x86
             runs-on: windows-latest
