@@ -494,7 +494,7 @@ def test_numpyarray_nanargmax(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_sort is not implemented")
+@pytest.mark.xfail(reason="awkward_sort is not implemented")
 def test_numpyarray_sort(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.array_equal(
@@ -505,7 +505,7 @@ def test_numpyarray_sort(numpyarray, virtual_numpyarray):
     assert virtual_numpyarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_argsort is not implemented")
+@pytest.mark.xfail(reason="awkward_argsort is not implemented")
 def test_numpyarray_argsort(numpyarray, virtual_numpyarray):
     assert not virtual_numpyarray.is_any_materialized
     assert ak.array_equal(
@@ -1224,7 +1224,7 @@ def test_listoffsetarray_nanargmax(numpy_like):
     assert virtual_array.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_sort is not implemented")
+@pytest.mark.xfail(reason="awkward_sort is not implemented")
 def test_listoffsetarray_sort(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     assert ak.array_equal(
@@ -1235,7 +1235,7 @@ def test_listoffsetarray_sort(listoffsetarray, virtual_listoffsetarray):
     assert virtual_listoffsetarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_argsort is not implemented")
+@pytest.mark.xfail(reason="awkward_argsort is not implemented")
 def test_listoffsetarray_argsort(listoffsetarray, virtual_listoffsetarray):
     assert not virtual_listoffsetarray.is_any_materialized
     assert ak.array_equal(
@@ -2256,7 +2256,7 @@ def test_listarray_nanargmax(numpy_like):
     assert virtual_array.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_sort is not implemented")
+@pytest.mark.xfail(reason="awkward_sort is not implemented")
 def test_listarray_sort(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(
@@ -2267,7 +2267,7 @@ def test_listarray_sort(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.skip(reason="awkward_argsort is not implemented")
+@pytest.mark.xfail(reason="awkward_argsort is not implemented")
 def test_listarray_argsort(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(
@@ -3356,7 +3356,7 @@ def test_recordarray_argmax_y_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip(reason="awkward_sort is not implemented")
+@pytest.mark.xfail(reason="awkward_sort is not implemented")
 def test_recordarray_sort_x_field(recordarray, virtual_recordarray):
     # Test sort on the x field (ListOffsetArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3370,7 +3370,7 @@ def test_recordarray_sort_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip(reason="awkward_sort is not implemented")
+@pytest.mark.xfail(reason="awkward_sort is not implemented")
 def test_recordarray_sort_y_field(recordarray, virtual_recordarray):
     # Test sort on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3384,7 +3384,7 @@ def test_recordarray_sort_y_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip(reason="awkward_argsort is not implemented")
+@pytest.mark.xfail(reason="awkward_argsort is not implemented")
 def test_recordarray_argsort_x_field(recordarray, virtual_recordarray):
     # Test argsort on the x field (ListOffsetArray)
     assert not virtual_recordarray.is_any_materialized
@@ -3398,7 +3398,7 @@ def test_recordarray_argsort_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip(reason="awkward_argsort is not implemented")
+@pytest.mark.xfail(reason="awkward_argsort is not implemented")
 def test_recordarray_argsort_y_field(recordarray, virtual_recordarray):
     # Test argsort on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
