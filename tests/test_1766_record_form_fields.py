@@ -179,7 +179,7 @@ def test_old_style_contents_new_style_list():
     }
 
     with pytest.raises(
-        TypeError, match=".*new-style RecordForm contents must not be mappings.*"
+        TypeError, match=r".*new-style RecordForm contents must not be mappings.*"
     ):
         ak.from_buffers(
             form,
