@@ -183,6 +183,12 @@ jobs:
       run:
         shell: bash -l {0}
 
+    strategy:
+      fail-fast: false
+      matrix:
+        cuda-version:
+          - 12
+
     steps:
       - name: Clean the workspace and mamba
         run: |
@@ -199,7 +205,12 @@ jobs:
           environment-name: test-env
           init-shell: bash
           create-args: >-
+            -c rapidsai
+            -c nvidia
             python=3.13
+            cudf
+            cupy
+            cuda-version=${{ matrix.cuda-version }}
 
       - name: Generate build files
         run: |
