@@ -137,34 +137,34 @@ def _impl(base, what, where, highlevel, behavior, attrs):
                         )
                     )
 
+                base_fields = base.fields
                 # Check if we're replacing an existing field
-                field_exists = where is not None and where in base.fields
-
+                field_exists = where is not None and where in base_fields
                 if base.is_tuple:
                     # Preserve tuple-ness
                     if where is None:
                         fields = None
-                        contents = [base[k] for k in base.fields] + [what]
+                        contents = [base[k] for k in base_fields] + [what]
                     # Otherwise the tuple becomes a record
                     else:
                         if field_exists:
-                            fields = list(base.fields)
+                            fields = list(base_fields)
                             contents = [what if k == where else base[k] for k in fields]
                         else:
                             # Add new field at the end
-                            fields = [*base.fields, where]
+                            fields = [*base_fields, where]
                             contents = [base[k] for k in base.fields] + [what]
                 # Records with `where=None` will create a tuple-like key
                 elif where is None:
-                    fields = [*base.fields, str(len(base.fields))]
-                    contents = [base[k] for k in base.fields] + [what]
+                    fields = [*base_fields, str(len(base_fields))]
+                    contents = [base[k] for k in base_fields] + [what]
                 else:
                     if field_exists:
-                        fields = list(base.fields)
+                        fields = list(base_fields)
                         contents = [what if k == where else base[k] for k in fields]
                     else:
-                        fields = [*base.fields, where]
-                        contents = [base[k] for k in base.fields] + [what]
+                        fields = [*base_fields, where]
+                        contents = [base[k] for k in base_fields] + [what]
 
                 out = ak.contents.RecordArray(
                     contents,
