@@ -182,7 +182,6 @@ jobs:
       matrix:
         cuda-version:
           - 12
-          - 13
 
     steps:
       - name: Clean the workspace and mamba
