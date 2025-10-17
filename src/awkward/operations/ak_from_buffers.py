@@ -189,7 +189,11 @@ def _from_buffer(
             raise ValueError(
                 f"Mismatch of dtypes. Got {dtype}, but VirtualNDArray has {buffer.dtype}."
             )
-        if count != buffer._shape[0]:
+        if (
+            count is not unknown_length
+            and buffer._shape[0] is not unknown_length
+            and count != buffer._shape[0]
+        ):
             raise ValueError(
                 f"Mismatch of lengths. Got {count}, but VirtualNDArray has {buffer._shape[0]}."
             )
