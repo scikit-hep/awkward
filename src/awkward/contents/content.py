@@ -730,7 +730,10 @@ class Content(Meta):
             return self._getitem_fields(ak.operations.to_list(where))
 
         elif isinstance(where, ak.contents.EmptyArray):
-            return where.to_NumpyArray(np.int64)
+            return self._carry(
+                Index64.empty(0, self._backend.nplike),
+                allow_lazy=True,
+            )
 
         elif isinstance(where, Content):
             return self._getitem((where,), named_axis)
