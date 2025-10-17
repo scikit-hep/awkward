@@ -123,7 +123,7 @@ or
         ) from err
 
     buffers = {}
-    wrap = lambda x: (lambda: x) if virtual else x  # noqa: E731
+    wrap = lambda x: (lambda: x) if virtual else x  # noqa: E731 # pylint: disable=C3001
     with safetensors.safe_open(source, framework="np") as f:
         metadata = f.metadata()
         for k in f.offset_keys():
