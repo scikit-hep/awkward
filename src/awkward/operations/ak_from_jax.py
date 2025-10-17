@@ -49,4 +49,5 @@ def from_jax(
         from_arraylib(array, regulararray, False, primitive_policy=primitive_policy),
         highlevel=highlevel,
         behavior=behavior,
+        attrs=attrs,
     )
