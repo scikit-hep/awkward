@@ -38,6 +38,8 @@
     generated/ak.from_feather
     generated/ak.to_feather
     generated/ak.from_avro_file
+    generated/ak.to_safetensors
+    generated/ak.from_safetensors
 
 .. toctree::
     :caption: Conversions for machine learning
