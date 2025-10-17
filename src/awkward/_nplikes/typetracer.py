@@ -280,7 +280,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 raise TypeError("typetracer shape must be integers or unknown-length")
             if not isinstance(dtype, np.dtype):
                 raise TypeError("typetracer dtype must be an instance of np.dtype")
-        self._shape = shape
+        self._shape = tuple(dim if dim is unknown_length else int(dim) for dim in shape)
         self._dtype = dtype
 
         return self
