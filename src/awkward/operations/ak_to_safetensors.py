@@ -11,7 +11,7 @@ __all__ = ("to_safetensors",)
 
 
 @high_level_function()
-def to_safetensors( 
+def to_safetensors(
     array,
     destination,
     *,
@@ -71,7 +71,7 @@ def to_safetensors(
         >>> arr = ak.Array([[1, 2, 3], [], [4]])
         >>> ak.to_safetensors(arr, "out.safetensors")
 
-    
+
     See also #ak.from_safetensors.
     """
     # Implementation
@@ -87,7 +87,6 @@ def to_safetensors(
     )
 
 
-
 def _impl(
     array,
     destination,
@@ -96,7 +95,7 @@ def _impl(
     form_key,
     id_start,
     backend,
-    byteorder,  
+    byteorder,
 ):
     try:
         from safetensors.numpy import save_file
@@ -108,7 +107,7 @@ def _impl(
 or
         conda install -c huggingface safetensors"""
         ) from err
-    
+
     form, length, buffers = ak.ak_to_buffers._impl(
         array,
         container=container,

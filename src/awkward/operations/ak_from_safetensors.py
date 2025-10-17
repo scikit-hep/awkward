@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 import awkward as ak
 from awkward._dispatch import high_level_function
 
@@ -10,7 +9,7 @@ __all__ = ("from_safetensors",)
 
 
 @high_level_function()
-def from_safetensors( 
+def from_safetensors(
     source,
     *,
     virtual=False,
@@ -29,9 +28,9 @@ def from_safetensors(
 
     This function reads data serialized in the safetensors format and constructs an
     Awkward Array (or low-level layout) from it. Buffers in the safetensors
-    file are mapped to Awkward buffers using the `buffer_key` template, and optional 
-    behavior/attributes can be attached to the returned array. 
-    
+    file are mapped to Awkward buffers using the `buffer_key` template, and optional
+    behavior/attributes can be attached to the returned array.
+
     Optionally the result can be "virtual" (lazily referencing buffers rather than materializing them immediately).
 
     Args:
@@ -101,7 +100,6 @@ def from_safetensors(
     )
 
 
-
 def _impl(
     source,
     virtual,
@@ -123,7 +121,7 @@ def _impl(
 or
         conda install -c huggingface safetensors"""
         ) from err
-    
+
     buffers = {}
     wrap = lambda x: (lambda: x) if virtual else x
     with safetensors.safe_open(source, framework="np") as f:
