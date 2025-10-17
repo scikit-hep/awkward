@@ -245,6 +245,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://apn-pucky.github.io/"><img src="https://avatars.githubusercontent.com/u/4533248?v=4?s=100" width="100px;" alt="Alexander Puck Neuwirth"/><br /><sub><b>Alexander Puck Neuwirth</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=APN-Pucky" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/nileshpatra"><img src="https://avatars.githubusercontent.com/u/37436956?v=4?s=100" width="100px;" alt="Nilesh Patra"/><br /><sub><b>Nilesh Patra</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=nileshpatra" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/TaiSakuma"><img src="https://avatars.githubusercontent.com/u/1388081?v=4?s=100" width="100px;" alt="Tai Sakuma"/><br /><sub><b>Tai Sakuma</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=TaiSakuma" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://dylanmodesitt.com/"><img src="https://avatars.githubusercontent.com/u/8339189?v=4?s=100" width="100px;" alt="Dylan Modesitt"/><br /><sub><b>Dylan Modesitt</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=DylanModesitt" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
