@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 from functools import reduce
 
 import awkward as ak
@@ -96,10 +95,6 @@ def _impl(base, what, where, highlevel, behavior, attrs):
                 ),
             )
 
-        keys = copy.copy(base.fields)
-        if where in base.fields:
-            keys.remove(where)
-
         def purelist_is_record(layout):
             result = False
 
@@ -141,20 +136,38 @@ def _impl(base, what, where, highlevel, behavior, attrs):
                             backend.nplike.shape_item_as_index(base.length),
                         )
                     )
+
+                base_fields = base.fields
+                # Check if we're replacing an existing field
+                field_exists = where is not None and where in base_fields
                 if base.is_tuple:
                     # Preserve tuple-ness
                     if where is None:
                         fields = None
+                        contents = [base[k] for k in base_fields] + [what]
                     # Otherwise the tuple becomes a record
                     else:
-                        fields = [*keys, where]
+                        if field_exists:
+                            fields = list(base_fields)
+                            contents = [what if k == where else base[k] for k in fields]
+                        else:
+                            # Add new field at the end
+                            fields = [*base_fields, where]
+                            contents = [base[k] for k in base.fields] + [what]
                 # Records with `where=None` will create a tuple-like key
                 elif where is None:
-                    fields = [*keys, str(len(keys))]
+                    fields = [*base_fields, str(len(base_fields))]
+                    contents = [base[k] for k in base_fields] + [what]
                 else:
-                    fields = [*keys, where]
+                    if field_exists:
+                        fields = list(base_fields)
+                        contents = [what if k == where else base[k] for k in fields]
+                    else:
+                        fields = [*base_fields, where]
+                        contents = [base[k] for k in base_fields] + [what]
+
                 out = ak.contents.RecordArray(
-                    [base[k] for k in keys] + [what],
+                    contents,
                     fields,
                     parameters=base.parameters,
                 )
