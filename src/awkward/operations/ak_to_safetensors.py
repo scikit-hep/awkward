@@ -120,4 +120,9 @@ or
         "length": json.dumps(length),
     }
     # save
-    save_file(buffers, destination, metadata)
+    try:
+      save_file(buffers, destination, metadata)
+    except Exception as err:
+      raise RuntimeError(
+          f"Failed to write safetensors file to '{destination}': {err}"
+      ) from err
