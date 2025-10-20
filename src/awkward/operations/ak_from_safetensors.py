@@ -31,7 +31,8 @@ def from_safetensors(
     are mapped to Awkward buffers according to the `buffer_key` template, and
     optional behavior or attributes can be attached to the returned array.
 
-    Optionally the result can be "virtual" (lazily referencing buffers rather than materializing them immediately).
+   The safetensors file **must contain** `form` and `length` entries in its
+   metadata, which define the structure and length of the reconstructed array.
 
     Args:
         source (str | os.PathLike | bytes | file-like): Path to a .safetensors file,
