@@ -60,9 +60,8 @@ def from_safetensors(
             to the returned array; useful for preserving safetensors file metadata.
 
     Returns:
-        ak.Array or ak.layout.Content: A high-level Awkward Array if `highlevel` is True,
-        otherwise the corresponding low-level Awkward layout object. The array contains
-        data reconstructed from the safetensors tensors; buffer names follow `buffer_key`.
+        ak.Array or ak.layout.Content: An Awkward Array (or layout) reconstructed
+        from the safetensors buffers.
 
     Raises:
         ValueError: If `byteorder` is not one of "<" or ">".
