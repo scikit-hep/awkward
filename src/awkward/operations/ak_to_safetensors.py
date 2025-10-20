@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-
 import awkward as ak
 from awkward._dispatch import high_level_function
 
@@ -23,16 +21,7 @@ def to_safetensors(
     backend=None,
     byteorder=ak._util.native_byteorder,
 ):
-    """Serialize an Awkward Array to the safetensors format and write it to `destination`.
-
-    Ref: https://huggingface.co/docs/safetensors/.
-
-    This function converts the provided Awkward Array (or array-like object) into raw
-    buffers via `ak.to_buffers` and stores them in the safetensors format. Buffer names
-    are generated from `buffer_key` and `form_key` templates, allowing downstream
-    compatibility or layout reuse.
-     The resulting safetensors file includes metadata containing the Awkward `form` and
-     array `length`, which are required for `ak.from_safetensors` to reconstruct the array.
+    """
     Args:
         array: An Awkward Array or array-like object to serialize.
         destination (str | pathlib.Path | file-like): Path or writable binary stream
@@ -49,17 +38,23 @@ def to_safetensors(
         backend (str | object, optional): Backend used to convert array data into
             buffers. If None, the default backend is used.
         byteorder (str, optional): Byte order for numeric buffers. Defaults to the
-            system’s native byte order.
+            system's native byte order.
 
     Returns:
         None
             This function writes the safetensors file to `destination`. If
         `container` is provided, it will be populated with the raw buffer bytes.
 
-    Raises:
-        ValueError: If `destination` is not writable or otherwise invalid.
-        TypeError: If `array` is not an Awkward Array or an object convertible to one.
-        RuntimeError: If an error occurs while serializing buffers or writing the file.
+    Serialize an Awkward Array to the safetensors format and write it to `destination`.
+
+    Ref: https://huggingface.co/docs/safetensors/.
+
+    This function converts the provided Awkward Array (or array-like object) into raw
+    buffers via `ak.to_buffers` and stores them in the safetensors format. Buffer names
+    are generated from `buffer_key` and `form_key` templates, allowing downstream
+    compatibility or layout reuse.
+    The resulting safetensors file includes metadata containing the Awkward `form` and
+    array `length`, which are required for `ak.from_safetensors` to reconstruct the array.
 
     Example:
 
@@ -68,8 +63,7 @@ def to_safetensors(
         >>> ak.to_safetensors(arr, "out.safetensors")
 
 
-    See also:
-        ak.from_safetensors
+    See also #ak.from_safetensors.
     """
     # Implementation
     return _impl(
@@ -105,6 +99,12 @@ or
         conda install -c huggingface safetensors"""
         ) from err
 
+    import os
+    from pathlib import Path
+
+    if isinstance(destination, Path):
+        destination = os.fspath(destination)
+
     form, length, buffers = ak.ak_to_buffers._impl(
         array,
         container=container,
@@ -121,8 +121,8 @@ or
     }
     # save
     try:
-      save_file(buffers, destination, metadata)
+        save_file(buffers, destination, metadata)
     except Exception as err:
-      raise RuntimeError(
-          f"Failed to write safetensors file to '{destination}': {err}"
-      ) from err
+        raise RuntimeError(
+            f"Failed to write safetensors file to '{destination}': {err}"
+        ) from err

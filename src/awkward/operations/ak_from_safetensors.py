@@ -22,18 +22,7 @@ def from_safetensors(
     behavior=None,
     attrs=None,
 ):
-    """Load a safetensors file as an Awkward Array.
-
-    Ref: https://huggingface.co/docs/safetensors/.
-
-    This function reads data serialized in the safetensors format and reconstructs
-    an Awkward Array (or low-level layout) from it. Buffers in the safetensors file
-    are mapped to Awkward buffers according to the `buffer_key` template, and
-    optional behavior or attributes can be attached to the returned array.
-
-   The safetensors file **must contain** `form` and `length` entries in its
-   metadata, which define the structure and length of the reconstructed array.
-
+    """
     Args:
         source (str | os.PathLike | bytes | file-like): Path to a .safetensors file,
             raw bytes containing safetensors data, or a file-like object supporting
@@ -55,12 +44,17 @@ def from_safetensors(
         ak.Array or ak.layout.Content: An Awkward Array (or layout) reconstructed
         from the safetensors buffers.
 
-    Raises:
-        ValueError: If `byteorder` is not one of "<" or ">".
-        FileNotFoundError: If `source` is a path that does not exist.
-        TypeError: If `source` is not a supported type (neither path/bytes nor file-like).
-        RuntimeError: If the safetensors data is malformed or tensors cannot be mapped to
-            Awkward forms and `allow_noncanonical_form` is False.
+    Load a safetensors file as an Awkward Array.
+
+    Ref: https://huggingface.co/docs/safetensors/.
+
+    This function reads data serialized in the safetensors format and reconstructs
+    an Awkward Array (or low-level layout) from it. Buffers in the safetensors file
+    are mapped to Awkward buffers according to the `buffer_key` template, and
+    optional behavior or attributes can be attached to the returned array.
+
+    The safetensors file **must contain** `form` and `length` entries in its
+    metadata, which define the structure and length of the reconstructed array.
 
     Example:
 
@@ -114,12 +108,21 @@ or
         conda install -c huggingface safetensors"""
         ) from err
 
+    import os
+    from pathlib import Path
+
+    if isinstance(source, Path):
+        source = os.fspath(source)
+
     buffers = {}
-    wrap = lambda x: (lambda: x) if virtual else x  # noqa: E731 # pylint: disable=C3001
+
+    def maybe_virtualize(x):
+        return (lambda: x) if virtual else x
+
     with safetensors.safe_open(source, framework="np") as f:
         metadata = f.metadata()
         for k in f.offset_keys():
-            buffers[k] = wrap(f.get_tensor(k))
+            buffers[k] = maybe_virtualize(f.get_tensor(k))
     if "form" not in metadata or "length" not in metadata:
         raise RuntimeError(
             "Missing required metadata in safetensors file: 'form' and 'length' are required."
