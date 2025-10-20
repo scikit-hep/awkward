@@ -38,8 +38,8 @@ def from_safetensors(
         source (str | os.PathLike | bytes | file-like): Path to a .safetensors file,
             raw bytes containing safetensors data, or a file-like object supporting
             read/seek.
-        virtual (bool): If True, create a virtual (lazy) Awkward Array that references
-            buffers without immediately materializing them. Defaults to False.
+        virtual (bool, optional): If True, create a virtual (lazy) Awkward Array
+           that references buffers without materializing them. Defaults to False.
         buffer_key (str): Template used to construct buffer names for ak.from_buffers.
             The template may include the placeholders "{form_key}" (the safetensors form
             key) and "{attribute}" (the tensor attribute, e.g. "data" or a named field).
