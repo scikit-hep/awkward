@@ -40,10 +40,8 @@ def from_safetensors(
             read/seek.
         virtual (bool, optional): If True, create a virtual (lazy) Awkward Array
            that references buffers without materializing them. Defaults to False.
-        buffer_key (str): Template used to construct buffer names for ak.from_buffers.
-            The template may include the placeholders "{form_key}" (the safetensors form
-            key) and "{attribute}" (the tensor attribute, e.g. "data" or a named field).
-            Defaults to "{form_key}-{attribute}".
+        buffer_key (str, optional): Template for buffer names, with placeholders
+           `{form_key}` and `{attribute}`. Defaults to "{form_key}-{attribute}".
         backend (str): Backend identifier used to interpret raw buffers (for example
             "cpu" or a GPU backend string). Defaults to "cpu".
         byteorder (str): Byte order to assume when interpreting raw tensor bytes.
