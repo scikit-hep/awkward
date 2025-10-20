@@ -43,8 +43,7 @@ def from_safetensors(
         buffer_key (str, optional): Template for buffer names, with placeholders
            `{form_key}` and `{attribute}`. Defaults to "{form_key}-{attribute}".
         backend (str, optional): Backend identifier (e.g., "cpu"). Defaults to "cpu".
-        byteorder (str): Byte order to assume when interpreting raw tensor bytes.
-            Use "<" for little-endian (default) or ">" for big-endian.
+        byteorder (str, optional): Byte order, "<" (little-endian, default) or ">".
         allow_noncanonical_form (bool): If True, attempt to convert non-canonical
             safetensors forms into a canonical Awkward form. If False, raise when
             a direct mapping is not possible. Defaults to False.
