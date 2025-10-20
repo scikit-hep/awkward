@@ -52,9 +52,9 @@ def to_safetensors(
             system’s native byte order.
 
     Returns:
-        None: The function writes the safetensors file to `destination`. If a
-        `container` was provided, it will be populated with the generated buffer
-        bytes and can be inspected or reused by the caller.
+        None
+            This function writes the safetensors file to `destination`. If
+        `container` is provided, it will be populated with the raw buffer bytes.
 
     Raises:
         ValueError: If `destination` is not writable or otherwise invalid.
