@@ -66,7 +66,7 @@ def to_safetensors(
         TypeError: If `array` is not an Awkward Array or an object convertible to one.
         RuntimeError: If an error occurs while serializing buffers or writing the file.
 
-    Here is a simple example:
+    Example:
 
         >>> import awkward as ak
         >>> arr = ak.Array([[1, 2, 3], [], [4]])
