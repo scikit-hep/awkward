@@ -128,7 +128,10 @@ or
         metadata = f.metadata()
         for k in f.offset_keys():
             buffers[k] = wrap(f.get_tensor(k))
-
+    if "form" not in metadata or "length" not in metadata:
+        raise RuntimeError(
+            "Missing required metadata in safetensors file: 'form' and 'length' are required."
+        )
     form = ak.forms.from_json(metadata["form"])
     length = int(metadata["length"])
 
