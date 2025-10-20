@@ -31,7 +31,8 @@ def to_safetensors(
     buffers (via ak.to_buffers) and stores them in the safetensors layout. Buffer
     names are generated from `buffer_key` and `form_key` and can be controlled to
     match downstream consumers or to allow reuse of existing serialization layouts.
-
+     The resulting safetensors file includes metadata containing the Awkward `form` and
+     array `length`, which are required for `ak.from_safetensors` to reconstruct the array.
     Args:
         array: An Awkward Array or array-like object to serialize.
         destination (str or pathlib.Path or file-like): Path to write the resulting
