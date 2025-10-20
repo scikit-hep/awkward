@@ -44,16 +44,12 @@ def from_safetensors(
            `{form_key}` and `{attribute}`. Defaults to "{form_key}-{attribute}".
         backend (str, optional): Backend identifier (e.g., "cpu"). Defaults to "cpu".
         byteorder (str, optional): Byte order, "<" (little-endian, default) or ">".
-        allow_noncanonical_form (bool): If True, attempt to convert non-canonical
-            safetensors forms into a canonical Awkward form. If False, raise when
-            a direct mapping is not possible. Defaults to False.
-        highlevel (bool): If True, return a high-level ak.Array. If False, return the
-            low-level Awkward layout object. Defaults to True.
-        behavior (Mapping | None): Optional behavior mapping applied to the returned
-            high-level array (see Awkward's behavior mechanism). If None, the default
-            behavior is used.
-        attrs (Mapping | None): Optional dictionary of attributes (metadata) to attach
-            to the returned array; useful for preserving safetensors file metadata.
+        allow_noncanonical_form (bool, optional): If True, normalize
+            safetensors forms that do not directly match Awkward. Defaults to False.
+         highlevel (bool, optional): If True, return a high-level ak.Array. If False,
+             return the low-level layout. Defaults to True.
+         behavior (Mapping | None, optional): Optional Awkward behavior mapping.
+         attrs (Mapping | None, optional): Optional metadata to attach to the array.
 
     Returns:
         ak.Array or ak.layout.Content: An Awkward Array (or layout) reconstructed
