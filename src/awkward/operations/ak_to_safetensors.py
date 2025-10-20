@@ -117,7 +117,7 @@ or
 
     metadata = {
         "form": form.to_json(),
-        "length": json.dumps(length),
+        "length": str(length),
     }
     # save
     try:
