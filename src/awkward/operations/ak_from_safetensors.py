@@ -70,7 +70,7 @@ def from_safetensors(
         RuntimeError: If the safetensors data is malformed or tensors cannot be mapped to
             Awkward forms and `allow_noncanonical_form` is False.
 
-    Here is a simple example:
+    Example:
 
         >>> import awkward as ak
         >>> arr = ak.from_safetensors("out.safetensors")
