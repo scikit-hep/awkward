@@ -26,10 +26,10 @@ def from_safetensors(
 
     Ref: https://huggingface.co/docs/safetensors/.
 
-    This function reads data serialized in the safetensors format and constructs an
-    Awkward Array (or low-level layout) from it. Buffers in the safetensors
-    file are mapped to Awkward buffers using the `buffer_key` template, and optional
-    behavior/attributes can be attached to the returned array.
+    This function reads data serialized in the safetensors format and reconstructs
+    an Awkward Array (or low-level layout) from it. Buffers in the safetensors file
+    are mapped to Awkward buffers according to the `buffer_key` template, and
+    optional behavior or attributes can be attached to the returned array.
 
     Optionally the result can be "virtual" (lazily referencing buffers rather than materializing them immediately).
 
