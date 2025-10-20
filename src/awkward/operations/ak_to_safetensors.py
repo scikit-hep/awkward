@@ -35,26 +35,21 @@ def to_safetensors(
      array `length`, which are required for `ak.from_safetensors` to reconstruct the array.
     Args:
         array: An Awkward Array or array-like object to serialize.
-        destination (str or pathlib.Path or file-like): Path to write the resulting
-            safetensors file, or a writable binary file-like object.
-        container (dict, optional): A mapping to receive the raw buffers produced by
-            ak.to_buffers. If provided, the function will populate this dict with
-            {buffer_key: bytes} entries. If None (the default), a temporary container
-            is used for writing and discarded after the file is created.
-        buffer_key (str, optional): A format string used to name each buffer in the
-            safetensors container. May include placeholders such as
-            "{form_key}" and "{attribute}" (default: "{form_key}-{attribute}").
-        form_key (str, optional): A format string used to name node forms when
-            generating buffer keys; typically contains an "{id}" placeholder
-            (default: "node{id}").
-        id_start (int, optional): Starting index for node numbering used by `form_key`
-            (default: 0).
-        backend (str or object, optional): Backend selection passed through to
-            ak.to_buffers for converting array data to raw buffers (e.g., numpy
-            backend or an Awkward array backend object). If None, the library's
-            default backend is used.
-        byteorder (str, optional): Byte order to use when encoding numeric buffers.
-            Defaults to the system native byteorder.
+        destination (str | pathlib.Path | file-like): Path or writable binary stream
+            where the safetensors file will be written.
+        container (dict, optional): Optional mapping to receive the generated buffer
+            bytes. If None (default), a temporary container is used and discarded
+            after writing.
+        buffer_key (str, optional): Format string for naming buffers. May include
+            `{form_key}` and `{attribute}` placeholders. Defaults to
+            `"{form_key}-{attribute}"`.
+        form_key (str, optional): Format string for node forms when generating buffer
+            keys. Typically includes `"{id}"`. Defaults to `"node{id}"`.
+        id_start (int, optional): Starting index for node numbering. Defaults to `0`.
+        backend (str | object, optional): Backend used to convert array data into
+            buffers. If None, the default backend is used.
+        byteorder (str, optional): Byte order for numeric buffers. Defaults to the
+            system’s native byte order.
 
     Returns:
         None: The function writes the safetensors file to `destination`. If a
