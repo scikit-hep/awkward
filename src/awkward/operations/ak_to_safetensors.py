@@ -28,9 +28,9 @@ def to_safetensors(
     Ref: https://huggingface.co/docs/safetensors/.
 
     This function converts the provided Awkward Array (or array-like object) into raw
-    buffers (via ak.to_buffers) and stores them in the safetensors layout. Buffer
-    names are generated from `buffer_key` and `form_key` and can be controlled to
-    match downstream consumers or to allow reuse of existing serialization layouts.
+    buffers via `ak.to_buffers` and stores them in the safetensors format. Buffer names
+    are generated from `buffer_key` and `form_key` templates, allowing downstream
+    compatibility or layout reuse.
      The resulting safetensors file includes metadata containing the Awkward `form` and
      array `length`, which are required for `ak.from_safetensors` to reconstruct the array.
     Args:
