@@ -73,7 +73,8 @@ def to_safetensors(
         >>> ak.to_safetensors(arr, "out.safetensors")
 
 
-    See also #ak.from_safetensors.
+    See also:
+        ak.from_safetensors
     """
     # Implementation
     return _impl(
