@@ -42,8 +42,7 @@ def from_safetensors(
            that references buffers without materializing them. Defaults to False.
         buffer_key (str, optional): Template for buffer names, with placeholders
            `{form_key}` and `{attribute}`. Defaults to "{form_key}-{attribute}".
-        backend (str): Backend identifier used to interpret raw buffers (for example
-            "cpu" or a GPU backend string). Defaults to "cpu".
+        backend (str, optional): Backend identifier (e.g., "cpu"). Defaults to "cpu".
         byteorder (str): Byte order to assume when interpreting raw tensor bytes.
             Use "<" for little-endian (default) or ">" for big-endian.
         allow_noncanonical_form (bool): If True, attempt to convert non-canonical
