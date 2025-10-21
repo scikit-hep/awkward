@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._layout import HighLevelContext
 
 __all__ = ("to_safetensors",)
 
@@ -99,14 +103,21 @@ or
         conda install -c huggingface safetensors"""
         ) from err
 
-    import os
-    from pathlib import Path
-
     if isinstance(destination, Path):
         destination = os.fspath(destination)
 
+    with HighLevelContext(behavior=None, attrs=None) as ctx:
+        layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
+
+    layout = ak.ak_to_packed._impl(
+        layout,
+        highlevel=False,  # doesn't matter, but we can avoid extra wrapping/unwrapping
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )
+
     form, length, buffers = ak.ak_to_buffers._impl(
-        array,
+        layout,
         container=container,
         buffer_key=buffer_key,
         form_key=form_key,

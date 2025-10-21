@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 
@@ -107,9 +110,6 @@ def _impl(
 or
         conda install -c huggingface safetensors"""
         ) from err
-
-    import os
-    from pathlib import Path
 
     if isinstance(source, Path):
         source = os.fspath(source)
