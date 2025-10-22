@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import awkward as ak
 import pytest
 
-import awkward as ak
+pandas = pytest.importorskip("pandas")
 
 
 def test_masked_string_array_with_option():
@@ -45,11 +46,9 @@ def test_masked_bytestring_array_with_option():
 def test_union_with_narrow_strings():
     """Test union arrays with narrow strings and None values."""
     # Test case from the existing test_union_to_record
-    unionarray = ak.Array([
-        {"x": "a", "y": 1.1},
-        {"y": 2.2, "z": "b"},
-        {"x": "c", "y": 3.3}
-    ])
+    unionarray = ak.Array(
+        [{"x": "a", "y": 1.1}, {"y": 2.2, "z": "b"}, {"x": "c", "y": 3.3}]
+    )
 
     df = ak.operations.to_dataframe(unionarray)
 
