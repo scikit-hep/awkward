@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import awkward as ak
 import pytest
+
+import awkward as ak
 
 pandas = pytest.importorskip("pandas")
 
