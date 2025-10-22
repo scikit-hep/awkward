@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
+import fsspec
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -17,6 +16,7 @@ def to_safetensors(
     array,
     destination,
     *,
+    storage_options=None,
     # ak.to_buffers kwargs
     container=None,
     buffer_key="{form_key}-{attribute}",
@@ -28,8 +28,12 @@ def to_safetensors(
     """
     Args:
         array: An Awkward Array or array-like object to serialize.
-        destination (str | pathlib.Path | file-like): Path or writable binary stream
-            where the safetensors file will be written.
+        destination (path-like): Name of the output file, file path, or
+            remote URL passed to [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
+            for remote writing.
+        storage_options (None or dict): Any additional options to pass to
+            [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
+            to open a remote file for writing.
         container (dict, optional): Optional mapping to receive the generated buffer
             bytes. If None (default), a temporary container is used and discarded
             after writing.
@@ -73,6 +77,7 @@ def to_safetensors(
     return _impl(
         array,
         destination,
+        storage_options,
         container,
         buffer_key,
         form_key,
@@ -85,6 +90,7 @@ def to_safetensors(
 def _impl(
     array,
     destination,
+    storage_options,
     container,
     buffer_key,
     form_key,
@@ -93,7 +99,7 @@ def _impl(
     byteorder,
 ):
     try:
-        from safetensors.numpy import save_file
+        from safetensors.numpy import save
     except ImportError as err:
         raise ImportError(
             """to use ak.to_safetensors, you must install the 'safetensors' package with:
@@ -103,8 +109,7 @@ or
         conda install -c huggingface safetensors"""
         ) from err
 
-    if isinstance(destination, Path):
-        destination = os.fspath(destination)
+    fs, destination = fsspec.core.url_to_fs(destination, **(storage_options or {}))
 
     with HighLevelContext(behavior=None, attrs=None) as ctx:
         layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
@@ -130,9 +135,12 @@ or
         "form": form.to_json(),
         "length": str(length),
     }
+
+    byts = save(buffers, metadata)
     # save
     try:
-        save_file(buffers, destination, metadata)
+        with fs.open(destination, "wb") as f:
+            f.write(byts)
     except Exception as err:
         raise RuntimeError(
             f"Failed to write safetensors file to '{destination}': {err}"

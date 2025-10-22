@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
+import fsspec
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -15,6 +14,7 @@ __all__ = ("from_safetensors",)
 def from_safetensors(
     source,
     *,
+    storage_options=None,
     virtual=False,
     # ak.from_buffers kwargs
     buffer_key="{form_key}-{attribute}",
@@ -27,9 +27,12 @@ def from_safetensors(
 ):
     """
     Args:
-        source (str | os.PathLike | bytes | file-like): Path to a .safetensors file,
-            raw bytes containing safetensors data, or a file-like object supporting
-            read/seek.
+        source (path-like): Name of the input file, file path, or
+            remote URL passed to [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
+            for remote reading.
+        storage_options (None or dict): Any additional options to pass to
+            [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
+            to open a remote file for reading.
         virtual (bool, optional): If True, create a virtual (lazy) Awkward Array
            that references buffers without materializing them. Defaults to False.
         buffer_key (str, optional): Template for buffer names, with placeholders
@@ -78,6 +81,7 @@ def from_safetensors(
     # Implementation
     return _impl(
         source,
+        storage_options,
         virtual,
         buffer_key,
         backend,
@@ -91,6 +95,7 @@ def from_safetensors(
 
 def _impl(
     source,
+    storage_options,
     virtual,
     buffer_key,
     backend,
@@ -101,7 +106,7 @@ def _impl(
     attrs,
 ):
     try:
-        import safetensors
+        from safetensors import _safe_open_handle
     except ImportError as err:
         raise ImportError(
             """to use ak.from_tensorflow, you must install the 'safetensors' package with:
@@ -111,18 +116,19 @@ or
         conda install -c huggingface safetensors"""
         ) from err
 
-    if isinstance(source, Path):
-        source = os.fspath(source)
+    fs, source = fsspec.core.url_to_fs(source, **(storage_options or {}))
 
     buffers = {}
 
     def maybe_virtualize(x):
         return (lambda: x) if virtual else x
 
-    with safetensors.safe_open(source, framework="np") as f:
-        metadata = f.metadata()
-        for k in f.offset_keys():
-            buffers[k] = maybe_virtualize(f.get_tensor(k))
+    with fs.open(source, "rb") as f:
+        with _safe_open_handle(f, framework="np") as g:
+            metadata = g.metadata()
+            for k in g.offset_keys():
+                buffers[k] = maybe_virtualize(g.get_tensor(k))
+
     if "form" not in metadata or "length" not in metadata:
         raise RuntimeError(
             "Missing required metadata in safetensors file: 'form' and 'length' are required."
