@@ -47,6 +47,7 @@ from awkward.operations.ak_from_parquet import *
 from awkward.operations.ak_from_raggedtensor import *
 from awkward.operations.ak_from_rdataframe import *
 from awkward.operations.ak_from_regular import *
+from awkward.operations.ak_from_safetensors import *
 from awkward.operations.ak_from_tensorflow import *
 from awkward.operations.ak_from_torch import *
 from awkward.operations.ak_full_like import *
@@ -105,6 +106,7 @@ from awkward.operations.ak_to_parquet_row_groups import *
 from awkward.operations.ak_to_raggedtensor import *
 from awkward.operations.ak_to_rdataframe import *
 from awkward.operations.ak_to_regular import *
+from awkward.operations.ak_to_safetensors import *
 from awkward.operations.ak_to_tensorflow import *
 from awkward.operations.ak_to_torch import *
 from awkward.operations.ak_transform import *
