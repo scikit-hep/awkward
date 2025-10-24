@@ -2716,16 +2716,16 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: outmaxcodepoints, type: "List[int64_t]", dir: out}
-      - name: awkward_NumpyArray_prepare_utf8_to_utf32_padded_uint32
-        args:
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
-          - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: outmaxcodepoints, type: "List[int64_t]", dir: out}
       - name: awkward_NumpyArray_prepare_utf8_to_utf32_padded_int64
         args:
           - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outmaxcodepoints, type: "List[int64_t]", dir: out}
+      - name: awkward_NumpyArray_prepare_utf8_to_utf32_padded_uint32
+        args:
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
+          - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: outmaxcodepoints, type: "List[int64_t]", dir: out}
     description: null
@@ -2742,17 +2742,17 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: maxcodepoints, type: "int64_t", dir: in,  role: default}
           - {name: toptr, type: "List[uint32_t]", dir: out}
-      - name: awkward_NumpyArray_utf8_to_utf32_padded_uint32
-        args:
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
-          - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: maxcodepoints, type: "int64_t", dir: in,  role: default}
-          - {name: toptr, type: "List[uint32_t]", dir: out}
       - name: awkward_NumpyArray_utf8_to_utf32_padded_int64
         args:
           - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: maxcodepoints, type: "int64_t", dir: in,  role: default}
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+      - name: awkward_NumpyArray_utf8_to_utf32_padded_uint32
+        args:
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
+          - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: maxcodepoints, type: "int64_t", dir: in,  role: default}
           - {name: toptr, type: "List[uint32_t]", dir: out}
@@ -2770,17 +2770,17 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: target, type: "int64_t", dir: in,  role: default}
           - {name: toptr, type: "List[uint8_t]", dir: out}
-      - name: awkward_NumpyArray_pad_zero_to_length_uint8_uint32
-        args:
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
-          - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: target, type: "int64_t", dir: in,  role: default}
-          - {name: toptr, type: "List[uint8_t]", dir: out}
       - name: awkward_NumpyArray_pad_zero_to_length_uint8_int64
         args:
           - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: target, type: "int64_t", dir: in,  role: default}
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+      - name: awkward_NumpyArray_pad_zero_to_length_uint8_uint32
+        args:
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: default}
+          - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: target, type: "int64_t", dir: in,  role: default}
           - {name: toptr, type: "List[uint8_t]", dir: out}
