@@ -14,7 +14,7 @@ awkward_IndexedArray_fill(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < length) {
       C fromval = fromindex[thread_id];
-      toindex[toindexoffset + thread_id] = fromval < 0 ? -1 : (C)(fromval + base);
+      toindex[toindexoffset + thread_id] = fromval < 0 ? (C)-1 : (C)(fromval + base);
     }
   }
 }

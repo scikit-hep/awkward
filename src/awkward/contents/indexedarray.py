@@ -9,12 +9,13 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.indexedmeta import IndexedMeta
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
-from awkward._nplikes.shape import ShapeItem
+from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -39,7 +40,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.indexedform import IndexedForm
 from awkward.index import Index
 
@@ -57,7 +58,7 @@ class IndexedArray(IndexedMeta[Content], Content):
     IndexedArray is a general-purpose tool for *lazily* changing the order of
     and/or duplicating some `content` with a
     [np.take](https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html)
-    over the integer buffer `index.
+    over the integer buffer `index`.
 
     It has many uses:
 
@@ -129,7 +130,7 @@ class IndexedArray(IndexedMeta[Content], Content):
                 )
             )
 
-        assert index.nplike is content.backend.index_nplike
+        assert index.nplike is content.backend.nplike
 
         self._index = index
         self._content = content
@@ -173,7 +174,7 @@ class IndexedArray(IndexedMeta[Content], Content):
                 inner = content.index
             else:
                 inner = content.to_IndexedOptionArray64().index
-            result = ak.index.Index64.empty(index.length, nplike=backend.index_nplike)
+            result = ak.index.Index64.empty(index.length, nplike=backend.nplike)
 
             backend.maybe_kernel_error(
                 backend[
@@ -214,6 +215,14 @@ class IndexedArray(IndexedMeta[Content], Content):
             form_key=form_key,
         )
 
+    def _form_with_key_path(self, path: FormKeyPathT) -> IndexedForm:
+        return self.form_cls(
+            self._index.form,
+            self._content._form_with_key_path((*path, None)),
+            parameters=self._parameters,
+            form_key=repr(path),
+        )
+
     def _to_buffers(
         self,
         form: Form,
@@ -225,7 +234,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         assert isinstance(form, self.form_cls)
         key = getkey(self, form, "index")
         container[key] = ak._util.native_to_byteorder(
-            self._index.raw(backend.index_nplike), byteorder
+            self._index.raw(backend.nplike), byteorder
         )
         self._content._to_buffers(form.content, getkey, container, backend, byteorder)
 
@@ -256,7 +265,7 @@ class IndexedArray(IndexedMeta[Content], Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<IndexedArray len="]
-        out.append(repr(str(self.length)))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")
@@ -281,9 +290,18 @@ class IndexedArray(IndexedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._index, PlaceholderArray):
+        if isinstance(self._index.data, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
+
+    def _is_getitem_at_virtual(self) -> bool:
+        is_virtual = (
+            isinstance(self._index.data, VirtualNDArray)
+            and not self._index.data.is_materialized
+        )
+        if is_virtual:
+            return True
+        return self._content._is_getitem_at_virtual()
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data:
@@ -299,6 +317,11 @@ class IndexedArray(IndexedMeta[Content], Content):
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
+            return self
+
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
             return self
 
         return IndexedArray(
@@ -343,10 +366,10 @@ class IndexedArray(IndexedMeta[Content], Content):
                 f"cannot fit jagged slice with length {slicestarts.length} into {type(self).__name__} of size {self.length}",
             )
 
-        nextcarry = ak.index.Index64.empty(self.length, self._backend.index_nplike)
+        nextcarry = ak.index.Index64.empty(self.length, self._backend.nplike)
         assert (
-            nextcarry.nplike is self._backend.index_nplike
-            and self._index.nplike is self._backend.index_nplike
+            nextcarry.nplike is self._backend.nplike
+            and self._index.nplike is self._backend.nplike
         )
         self._maybe_index_error(
             self._backend[
@@ -384,14 +407,12 @@ class IndexedArray(IndexedMeta[Content], Content):
         elif is_integer_like(head) or isinstance(
             head, (slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            nexthead, nexttail = ak._slicing.head_tail(tail)
+            _nexthead, _nexttail = ak._slicing.head_tail(tail)
 
-            nextcarry = ak.index.Index64.empty(
-                self._index.length, self._backend.index_nplike
-            )
+            nextcarry = ak.index.Index64.empty(self._index.length, self._backend.nplike)
             assert (
-                nextcarry.nplike is self._backend.index_nplike
-                and self._index.nplike is self._backend.index_nplike
+                nextcarry.nplike is self._backend.nplike
+                and self._index.nplike is self._backend.nplike
             )
             self._maybe_index_error(
                 self._backend[
@@ -434,13 +455,11 @@ class IndexedArray(IndexedMeta[Content], Content):
                 raise ValueError(
                     f"mask length ({mask.length()}) is not equal to {type(self).__name__} length ({self._index.length})"
                 )
-            nextindex = ak.index.Index64.empty(
-                self._index.length, self._backend.index_nplike
-            )
+            nextindex = ak.index.Index64.empty(self._index.length, self._backend.nplike)
             assert (
-                nextindex.nplike is self._backend.index_nplike
-                and mask.nplike is self._backend.index_nplike
-                and self._index.nplike is self._backend.index_nplike
+                nextindex.nplike is self._backend.nplike
+                and mask.nplike is self._backend.nplike
+                and self._index.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -461,10 +480,10 @@ class IndexedArray(IndexedMeta[Content], Content):
             return next.project()
 
         else:
-            nextcarry = ak.index.Index64.empty(self.length, self._backend.index_nplike)
+            nextcarry = ak.index.Index64.empty(self.length, self._backend.nplike)
             assert (
-                nextcarry.nplike is self._backend.index_nplike
-                and self._index.nplike is self._backend.index_nplike
+                nextcarry.nplike is self._backend.nplike
+                and self._index.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -548,14 +567,12 @@ class IndexedArray(IndexedMeta[Content], Content):
 
         theirlength = other.length
         mylength = self.length
-        index = ak.index.Index64.empty(
-            (theirlength + mylength), self._backend.index_nplike
-        )
+        index = ak.index.Index64.empty((theirlength + mylength), self._backend.nplike)
 
         content = other._mergemany([self._content])
 
         # Fill `index` with a range starting at zero, up to `theirlength`
-        assert index.nplike is self._backend.index_nplike
+        assert index.nplike is self._backend.nplike
         self._backend.maybe_kernel_error(
             self._backend["awkward_IndexedArray_fill_count", index.dtype.type](
                 index.data,
@@ -566,7 +583,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         )
 
         # Fill remaining indices
-        assert index.nplike is self._backend.index_nplike
+        assert index.nplike is self._backend.nplike
         self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_IndexedArray_fill",
@@ -604,9 +621,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         contents = []
         contentlength_so_far = 0
         length_so_far = 0
-        nextindex = ak.index.Index64.empty(
-            total_length, nplike=self._backend.index_nplike
-        )
+        nextindex = ak.index.Index64.empty(total_length, nplike=self._backend.nplike)
 
         parameters = self._parameters
         for array in head:
@@ -626,13 +641,14 @@ class IndexedArray(IndexedMeta[Content], Content):
             if isinstance(
                 array, (ak.contents.IndexedOptionArray, ak.contents.IndexedArray)
             ):
+                array = array._trim()  # see: #3185 and #3119
                 parameters = parameters_intersect(parameters, array._parameters)
 
                 contents.append(array.content)
                 array_index = array.index
                 assert (
-                    nextindex.nplike is self._backend.index_nplike
-                    and array_index.nplike is self._backend.index_nplike
+                    nextindex.nplike is self._backend.nplike
+                    and array_index.nplike is self._backend.nplike
                 )
                 self._backend.maybe_kernel_error(
                     self._backend[
@@ -651,7 +667,7 @@ class IndexedArray(IndexedMeta[Content], Content):
                 length_so_far += array.length
             else:
                 contents.append(array)
-                assert nextindex.nplike is self._backend.index_nplike
+                assert nextindex.nplike is self._backend.nplike
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_IndexedArray_fill_count",
@@ -720,17 +736,17 @@ class IndexedArray(IndexedMeta[Content], Content):
             return self.project()._local_index(axis, depth)
 
     def _unique_index(self, index, sorted=True):
-        next = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
-        length = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
+        next = ak.index.Index64.zeros(self.length, nplike=self._backend.nplike)
+        length = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
 
         if not sorted:
             next = self._index
-            offsets = ak.index.Index64.empty(2, self._backend.index_nplike)
+            offsets = ak.index.Index64.empty(2, self._backend.nplike)
             offsets[0] = 0
             offsets[1] = next.length
             assert (
-                next.nplike is self._backend.index_nplike
-                and offsets.nplike is self._backend.index_nplike
+                next.nplike is self._backend.nplike
+                and offsets.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -751,14 +767,14 @@ class IndexedArray(IndexedMeta[Content], Content):
             )
 
         assert (
-            self._index.nplike is self._backend.index_nplike
-            and next.nplike is self._backend.index_nplike
-            and length.nplike is self._backend.index_nplike
+            self._index.nplike is self._backend.nplike
+            and next.nplike is self._backend.nplike
+            and length.nplike is self._backend.nplike
         )
 
         next = ak.index.Index64(
-            self._backend.index_nplike.unique_values(self._index),
-            nplike=self._backend.index_nplike,
+            self._backend.nplike.unique_values(self._index),
+            nplike=self._backend.nplike,
         )
         length[0] = next.data.size
 
@@ -772,7 +788,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._index.length == 0:
+        if self._index.length is not unknown_length and self._index.length == 0:
             return True
 
         nextindex = self._unique_index(self._index)
@@ -784,7 +800,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         return next._is_unique(negaxis, starts, parents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self._index.length == 0:
+        if self._index.length is not unknown_length and self._index.length == 0:
             return self
 
         branch, depth = self.branch_depth
@@ -793,15 +809,15 @@ class IndexedArray(IndexedMeta[Content], Content):
         parents_length = parents.length
         next_length = index_length
 
-        nextcarry = ak.index.Index64.empty(index_length, self._backend.index_nplike)
-        nextparents = ak.index.Index64.empty(index_length, self._backend.index_nplike)
-        outindex = ak.index.Index64.empty(index_length, self._backend.index_nplike)
+        nextcarry = ak.index.Index64.empty(index_length, self._backend.nplike)
+        nextparents = ak.index.Index64.empty(index_length, self._backend.nplike)
+        outindex = ak.index.Index64.empty(index_length, self._backend.nplike)
         assert (
-            nextcarry.nplike is self._backend.index_nplike
-            and nextparents.nplike is self._backend.index_nplike
-            and outindex.nplike is self._backend.index_nplike
-            and self._index.nplike is self._backend.index_nplike
-            and parents.nplike is self._backend.index_nplike
+            nextcarry.nplike is self._backend.nplike
+            and nextparents.nplike is self._backend.nplike
+            and outindex.nplike is self._backend.nplike
+            and self._index.nplike is self._backend.nplike
+            and parents.nplike is self._backend.nplike
         )
         self._backend.maybe_kernel_error(
             self._backend[
@@ -829,18 +845,17 @@ class IndexedArray(IndexedMeta[Content], Content):
         )
 
         if branch or (negaxis is not None and negaxis != depth):
-            nextoutindex = ak.index.Index64.empty(
-                parents_length, self._backend.index_nplike
-            )
+            nextoutindex = ak.index.Index64.empty(parents_length, self._backend.nplike)
             assert (
-                nextoutindex.nplike is self._backend.index_nplike
-                and starts.nplike is self._backend.index_nplike
-                and parents.nplike is self._backend.index_nplike
-                and nextparents.nplike is self._backend.index_nplike
+                nextoutindex.nplike is self._backend.nplike
+                and starts.nplike is self._backend.nplike
+                and parents.nplike is self._backend.nplike
+                and nextparents.nplike is self._backend.nplike
             )
+
             self._backend.maybe_kernel_error(
                 self._backend[
-                    "awkward_IndexedArray_local_preparenext",
+                    "awkward_IndexedArray_local_preparenext_64",
                     nextoutindex.dtype.type,
                     starts.dtype.type,
                     parents.dtype.type,
@@ -873,11 +888,11 @@ class IndexedArray(IndexedMeta[Content], Content):
                     )
 
                 outoffsets = ak.index.Index64.empty(
-                    starts.length + 1, self._backend.index_nplike
+                    starts.length + 1, self._backend.nplike
                 )
                 assert (
-                    outoffsets.nplike is self._backend.index_nplike
-                    and starts.nplike is self._backend.index_nplike
+                    outoffsets.nplike is self._backend.nplike
+                    and starts.nplike is self._backend.nplike
                 )
                 self._backend.maybe_kernel_error(
                     self._backend[
@@ -900,8 +915,8 @@ class IndexedArray(IndexedMeta[Content], Content):
 
             elif isinstance(unique, ak.contents.NumpyArray):
                 nextoutindex = ak.index.Index64(
-                    self._backend.index_nplike.arange(unique.length, dtype=np.int64),
-                    nplike=self._backend.index_nplike,
+                    self._backend.nplike.arange(unique.length, dtype=np.int64),
+                    nplike=self._backend.nplike,
                 )
                 return ak.contents.IndexedOptionArray.simplified(
                     nextoutindex, unique, parameters=self._parameters
@@ -962,7 +977,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         error = self._backend["awkward_IndexedArray_validity", self.index.dtype.type](
             self.index.data, self.index.length, self._content.length, False
         )
-        if error.str is not None:
+        if error is not None and error.str is not None:
             if error.filename is None:
                 filename = ""
             else:
@@ -1008,7 +1023,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             next = IndexedArray(self._index, self._content, parameters=next_parameters)
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-        index = self._index.raw(numpy)
+        (index,) = maybe_materialize(self._index.raw(numpy))
 
         if self.parameter("__array__") == "categorical":
             dictionary = self._content._to_arrow(
@@ -1034,7 +1049,7 @@ class IndexedArray(IndexedMeta[Content], Content):
                 return out
 
         else:
-            if self._content.length == 0:
+            if self._content.length is not unknown_length and self._content.length == 0:
                 # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
                 # every masked value is self._content[0], unless self._content.length == 0.
                 # In that case, don't call self._content[index]; it's empty anyway.
@@ -1046,6 +1061,16 @@ class IndexedArray(IndexedMeta[Content], Content):
                 parameters=parameters_union(next._parameters, self._parameters)
             )
             return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        if self._content.length is not unknown_length and self._content.length == 0:
+            # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
+            # every masked value is self._content[0], unless self._content.length == 0.
+            # In that case, don't call self._content[index]; it's empty anyway.
+            next = self._content
+        else:
+            next = self._content._carry(self._index, False)
+        return next._to_cudf(cudf, None, len(next))
 
     def _to_backend_array(self, allow_missing, backend):
         return self.project()._to_backend_array(allow_missing, backend)
@@ -1069,11 +1094,10 @@ class IndexedArray(IndexedMeta[Content], Content):
             and self._index.length != 0
         ):
             npindex = self._index.data
-            indexmin = self._backend.index_nplike.min(npindex)
-            index = ak.index.Index(
-                npindex - indexmin, nplike=self._backend.index_nplike
-            )
-            content = self._content[indexmin : npindex.max() + 1]
+            indexmin = self._backend.nplike.min(npindex)
+            indexmax = self._backend.nplike.max(npindex)
+            index = ak.index.Index(npindex - indexmin, nplike=self._backend.nplike)
+            content = self._content[indexmin : indexmax + 1]
         else:
             if not self._backend.nplike.known_data:
                 self._touch_data(recursive=False)
@@ -1126,7 +1150,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         if self.parameter("__array__") == "categorical":
             content = self._content.to_packed(True) if recursive else self._content
             return IndexedArray(self._index, content, parameters=self._parameters)
@@ -1142,14 +1166,27 @@ class IndexedArray(IndexedMeta[Content], Content):
         if out is not None:
             return out
 
-        index = self._index.raw(numpy)
+        (index,) = maybe_materialize(self._index.raw(numpy))
         nextcontent = self._content._carry(ak.index.Index(index), False)
         return nextcontent._to_list(behavior, json_conversions)
 
     def _to_backend(self, backend: Backend) -> Self:
         content = self._content.to_backend(backend)
-        index = self._index.to_nplike(backend.index_nplike)
+        index = self._index.to_nplike(backend.nplike)
         return IndexedArray(index, content, parameters=self._parameters)
+
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        index = self._index.materialize(type_)
+        return IndexedArray(index, content, parameters=self._parameters)
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return self._content.is_all_materialized and self._index.is_all_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return self._content.is_any_materialized or self._index.is_any_materialized
 
     def _push_inside_record_or_project(self) -> Self | ak.contents.RecordArray:
         if self.content.is_record:
@@ -1176,3 +1213,19 @@ class IndexedArray(IndexedMeta[Content], Content):
                 other.content, index_dtype, numpyarray, all_parameters
             )
         )
+
+    def _trim(self) -> Self:
+        nplike = self._backend.nplike
+
+        if not nplike.known_data or self._index.length == 0:
+            return self
+
+        idx_buf = nplike.asarray(self._index.data, copy=True)
+        min_idx = nplike.min(idx_buf)
+        max_idx = nplike.max(idx_buf)
+        idx_buf -= min_idx
+        index = Index(idx_buf)
+
+        # left and right trim
+        content = self._content._getitem_range(min_idx, max_idx + 1)
+        return IndexedArray(index, content, parameters=self._parameters)

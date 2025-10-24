@@ -1,5 +1,5 @@
 fsspec>=2022.11.0;sys_platform != "win32"
-numpy>=2.0.0b1
+pandas>=0.24.0;sys_platform != "win32"
 pytest>=6
 pytest-cov
 pytest-xdist

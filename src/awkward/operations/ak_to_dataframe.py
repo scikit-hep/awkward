@@ -178,7 +178,7 @@ or
             starts, stops = offsets.data[:-1], offsets.data[1:]
             counts = stops - starts
             if ak._util.win or ak._util.bits32:
-                counts = layout.backend.index_nplike.astype(counts, np.int32)
+                counts = layout.backend.nplike.astype(counts, np.int32)
             if len(row_arrays) == 0:
                 newrows = [
                     numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)
@@ -234,6 +234,17 @@ or
         else:
             columns = pandas.MultiIndex.from_tuples([col_names])
 
+        # Before filling, ensure dtype is wide enough for "nan" fill value. Need
+        # at least three characters / bytes for 'nan' or b'nan', respectively.
+        if numpy.ma.is_masked(column):
+            if np.issubdtype(column.dtype, np.str_):
+                char_width = column.dtype.itemsize // 4
+                if char_width < 3:
+                    column = column.astype(np.dtype(("U", 3)))
+            elif np.issubdtype(column.dtype, np.bytes_):
+                byte_width = column.dtype.itemsize
+                if byte_width < 3:
+                    column = column.astype(np.dtype(("S", 3)))
         # Pandas can't handle masked strings
         if np.issubdtype(column.dtype, np.str_):
             column = numpy.ma.filled(column, "nan")
@@ -325,9 +336,7 @@ def _union_to_record(unionarray, anonymous):
 
         missingarray = ak.contents.IndexedOptionArray(
             ak.index.Index64(
-                unionarray.backend.index_nplike.full(
-                    unionarray.length, -1, dtype=np.int64
-                )
+                unionarray.backend.nplike.full(unionarray.length, -1, dtype=np.int64)
             ),
             ak.contents.EmptyArray(),
         )

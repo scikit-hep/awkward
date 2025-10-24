@@ -27,13 +27,17 @@ from awkward._typing import (
     Iterator,
     JSONMapping,
     Self,
+    Tuple,
+    TypeAlias,
+    Union,
 )
 
-__all__ = ("from_dict", "from_type", "from_json", "reserved_nominal_parameters", "Form")
+__all__ = ("Form", "from_dict", "from_json", "from_type", "reserved_nominal_parameters")
 
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
 
+FormKeyPathT: TypeAlias = Tuple[Union[str, int, None], ...]
 
 reserved_nominal_parameters: Final = frozenset(
     {
@@ -189,8 +193,8 @@ def from_dict(input: Mapping) -> Form:
             form_key=form_key,
         )
 
-    elif input["class"] == "VirtualArray":
-        raise ValueError("Awkward 1.x VirtualArrays are not supported")
+    elif input["class"] == "VirtualNDArray":
+        raise ValueError("Awkward 1.x VirtualNDArrays are not supported")
 
     else:
         raise ValueError(
@@ -333,7 +337,7 @@ class _SpecifierMatcher:
             has_matched = True
             next_specifiers.extend(self._match_to_next_specifiers[field])
 
-        # Fixed-strings are an O(n) lookup
+        # Patterns are an O(n) lookup
         for pattern in self._patterns:
             if fnmatchcase(field, pattern):
                 has_matched = True
@@ -369,11 +373,11 @@ def regularize_buffer_key(buffer_key: str | Callable) -> Callable[[Form, str], s
 
 
 index_to_dtype: Final[dict[str, DType]] = {
-    "i8": np.dtype("<i1"),
-    "u8": np.dtype("<u1"),
-    "i32": np.dtype("<i4"),
-    "u32": np.dtype("<u4"),
-    "i64": np.dtype("<i8"),
+    "i8": np.dtype("i1"),
+    "u8": np.dtype("u1"),
+    "i32": np.dtype("i4"),
+    "u32": np.dtype("u4"),
+    "i64": np.dtype("i8"),
 }
 
 
@@ -437,29 +441,59 @@ class Form(Meta):
     def select_columns(
         self, specifier, expand_braces=True, *, prune_unions_and_records: bool = True
     ):
+        """
+        select_columns returns a new Form with only columns and sub-columns selected.
+        Returns an empty Form if no columns matched the specifier(s).
+
+        `specifier` can be a `str | Iterable[str | Iterable[str]]`.
+        Strings may include shell-globbing-style wildcards "*" and "?".
+        If `expand_braces` is `True` (the default), strings may include alternatives in braces.
+        For example, `["a.{b,c}.d"]` is equivalent to `["a.b.d", "a.c.d"]`.
+        Glob-style matching would also suit this single-character instance: `"a.[bc].d"`.
+        If specifier is a list which contains a list/tuple, that inner list will be interpreted as
+        column and subcolumn specifiers. They *may* contain wildcards, but "." will not be
+        interpreted as a `<field>.<subfield>` pattern.
+        """
         if isinstance(specifier, str):
             specifier = {specifier}
 
         # Only take unique specifiers
         for item in specifier:
-            if not isinstance(item, str):
+            if isinstance(item, str):
+                if item == "":
+                    raise ValueError(
+                        "a column-selection specifier cannot be an empty string"
+                    )
+            elif isinstance(item, Iterable):
+                for field in item:
+                    if not isinstance(field, str):
+                        raise ValueError("a sub-column specifier must be a string")
+            else:
                 raise TypeError(
-                    "a column-selection specifier must be a list of non-empty strings"
-                )
-            if not item:
-                raise ValueError(
-                    "a column-selection specifier must be a list of non-empty strings"
+                    "a column specifier must be a string or an iterable of strings"
                 )
 
         if expand_braces:
             next_specifier = []
             for item in specifier:
-                for result in _expand_braces(item):
-                    next_specifier.append(result)
+                if isinstance(item, str):
+                    for result in _expand_braces(item):
+                        next_specifier.append(result)
+                else:
+                    next_specifier.append(item)
             specifier = next_specifier
 
-        specifier = [[] if item == "" else item.split(".") for item in set(specifier)]
-        match_specifier = _SpecifierMatcher(specifier, match_if_empty=False)
+        # specifier = set(specifier)
+        specifier_lists: list[list[str]] = []
+        for item in specifier:
+            if isinstance(item, str):
+                if item == "":
+                    specifier_lists.append([])
+                else:
+                    specifier_lists.append(item.split("."))
+            else:
+                specifier_lists.append(item)
+        match_specifier = _SpecifierMatcher(specifier_lists, match_if_empty=False)
         selection = self._select_columns(match_specifier)
         assert selection is not None, "top-level selections always return a Form"
 
@@ -528,6 +562,52 @@ class Form(Meta):
 
         container = {}
 
+        def prepare_empty(form):
+            form_key = f"node-{len(container)}"
+
+            if isinstance(form, (ak.forms.BitMaskedForm, ak.forms.ByteMaskedForm)):
+                container[form_key] = b""
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
+
+            elif isinstance(form, ak.forms.IndexedOptionForm):
+                container[form_key] = b""
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
+
+            elif isinstance(form, ak.forms.EmptyForm):
+                return form
+
+            elif isinstance(form, ak.forms.UnmaskedForm):
+                return form.copy(content=prepare_empty(form.content))
+
+            elif isinstance(form, (ak.forms.IndexedForm, ak.forms.ListForm)):
+                container[form_key] = b""
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
+
+            elif isinstance(form, ak.forms.ListOffsetForm):
+                container[form_key] = b""
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
+
+            elif isinstance(form, ak.forms.RegularForm):
+                return form.copy(content=prepare_empty(form.content))
+
+            elif isinstance(form, ak.forms.NumpyForm):
+                container[form_key] = b""
+                return form.copy(form_key=form_key)
+
+            elif isinstance(form, ak.forms.RecordForm):
+                return form.copy(contents=[prepare_empty(x) for x in form.contents])
+
+            elif isinstance(form, ak.forms.UnionForm):
+                # both tags and index will get this buffer
+                container[form_key] = b""
+                return form.copy(
+                    contents=[prepare_empty(x) for x in form.contents],
+                    form_key=form_key,
+                )
+
+            else:
+                raise AssertionError(f"not a Form: {form!r}")
+
         def prepare(form, multiplier):
             form_key = f"node-{len(container)}"
 
@@ -536,11 +616,13 @@ class Form(Meta):
                     container[form_key] = b"\x00" * multiplier
                 else:
                     container[form_key] = b"\xff" * multiplier
-                return form.copy(form_key=form_key)  # DO NOT RECURSE
+                # switch from recursing down `prepare` to `prepare_empty`
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
 
             elif isinstance(form, ak.forms.IndexedOptionForm):
                 container[form_key] = b"\xff\xff\xff\xff\xff\xff\xff\xff"  # -1
-                return form.copy(form_key=form_key)  # DO NOT RECURSE
+                # switch from recursing down `prepare` to `prepare_empty`
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
 
             elif isinstance(form, ak.forms.EmptyForm):
                 # no error if protected by non-recursing node type
@@ -594,13 +676,11 @@ class Form(Meta):
             elif isinstance(form, ak.forms.UnionForm):
                 # both tags and index will get this buffer, but index is 8 bytes
                 container[form_key] = b"\x00" * (8 * multiplier)
-                return form.copy(
-                    # only recurse down contents[0] because all index == 0
-                    contents=(
-                        [prepare(form.contents[0], multiplier)] + form.contents[1:]
-                    ),
-                    form_key=form_key,
-                )
+                # recurse down contents[0] with `prepare`, but others with `prepare_empty`
+                contents = [prepare(form.contents[0], multiplier)]
+                for x in form.contents[1:]:
+                    contents.append(prepare_empty(x))
+                return form.copy(contents=contents, form_key=form_key)
 
             else:
                 raise AssertionError(f"not a Form: {form!r}")
@@ -664,3 +744,35 @@ class Form(Meta):
             and not (form_key and self._form_key != other._form_key)
             and compare_parameters(self._parameters, other._parameters)
         )
+
+
+def form_with_unique_keys(form: Form, key: tuple) -> Form:
+    def impl(form: Form, key: tuple) -> None:
+        # Set form key as str
+        # Can be interpreted as tuple again with `ast.literal_eval(form_key)`
+        form.form_key = repr(key)
+
+        # If the form is a record we need to loop over all fields in the
+        # record and set form that include the field name; this will keep
+        # recursing as well.
+        if form.is_record:
+            for field in form.fields:
+                impl(form.content(field), (*key, field))  # type: ignore[attr-defined]
+
+        elif form.is_union:
+            for i, entry in enumerate(form.contents):  # type: ignore[attr-defined]
+                impl(entry, (*key, i))
+
+        # NumPy like array is easy
+        elif form.is_numpy or form.is_unknown:
+            pass
+
+        # Anything else grab the content and keep recursing
+        else:
+            # use `None` for anything else, could be more informative at some point, but there's no need for it right now
+            impl(form.content, (*key, None))  # type: ignore[attr-defined]
+
+    # Perform a "deep" copy without preserving references
+    form = ak.forms.from_dict(form.to_dict())
+    impl(form, key)
+    return form

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import warnings
+
 import awkward_cpp
 
 import awkward as ak
@@ -22,19 +24,19 @@ class JaxBackend(Backend):
     name: Final[str] = "jax"
 
     _jax: Jax
-    _numpy: Numpy
 
     @property
     def nplike(self) -> Jax:
         return self._jax
 
-    @property
-    def index_nplike(self) -> Numpy:
-        return self._numpy
-
     def __init__(self):
+        warnings.warn(
+            "The JAX backend is deprecated and will be removed in a future release of Awkward Array. "
+            "Please plan to migrate your code accordingly.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._jax = Jax.instance()
-        self._numpy = Numpy.instance()
 
     def __getitem__(self, index: KernelKeyType) -> JaxKernel:
         # JAX uses Awkward's C++ kernels for index-only operations

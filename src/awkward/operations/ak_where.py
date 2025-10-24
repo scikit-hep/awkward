@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from functools import reduce
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("where",)
@@ -71,7 +74,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs
 def _impl1(condition, mergebool, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(condition, allow_record=False, primitive_policy="error")
-    out = layout.backend.nplike.nonzero(layout.to_backend_array(allow_missing=False))
+    out = layout.backend.nplike.nonzero(layout.to_backend_array(allow_missing=True))
 
     return tuple(
         ctx.wrap(ak.contents.NumpyArray(x, backend=layout.backend), highlevel=highlevel)
@@ -90,11 +93,11 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
     def action(inputs, backend, **kwargs):
         x, y, condition = inputs
         if isinstance(condition, ak.contents.NumpyArray):
-            npcondition = backend.index_nplike.asarray(condition.data)
+            npcondition = backend.nplike.asarray(condition.data)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
-                backend.index_nplike.arange(tags.length, dtype=np.int64),
-                nplike=backend.index_nplike,
+                backend.nplike.arange(tags.length, dtype=np.int64),
+                nplike=backend.nplike,
             )
             if not isinstance(x, ak.contents.Content):
                 x = ak.contents.NumpyArray(
@@ -121,6 +124,26 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
         else:
             return None
 
-    out = ak._broadcasting.broadcast_and_apply(layouts, action, numpy_to_regular=True)
-
-    return ctx.wrap(out[0], highlevel=highlevel)
+    depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+        [x, y, condition]
+    )
+    out = ak._broadcasting.broadcast_and_apply(
+        layouts,
+        action,
+        depth_context=depth_context,
+        lateral_context=lateral_context,
+        numpy_to_regular=True,
+        function_name="ak.where",
+    )
+    # Unify named axes propagated through the broadcast
+    out_named_axis = reduce(
+        _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+    )
+    wrapped_out = ctx.wrap(out[0], highlevel=highlevel)
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

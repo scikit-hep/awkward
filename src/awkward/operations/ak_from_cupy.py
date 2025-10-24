@@ -9,7 +9,15 @@ __all__ = ("from_cupy",)
 
 
 @high_level_function()
-def from_cupy(array, *, regulararray=False, highlevel=True, behavior=None, attrs=None):
+def from_cupy(
+    array,
+    *,
+    regulararray=False,
+    highlevel=True,
+    behavior=None,
+    primitive_policy="error",
+    attrs=None,
+):
     """
     Args:
         array (cp.ndarray): The CuPy array to convert into an Awkward Array.
@@ -36,7 +44,8 @@ def from_cupy(array, *, regulararray=False, highlevel=True, behavior=None, attrs
     See also #ak.to_cupy, #ak.from_numpy and #ak.from_jax.
     """
     return wrap_layout(
-        from_arraylib(array, regulararray, False),
+        from_arraylib(array, regulararray, False, primitive_policy=primitive_policy),
         highlevel=highlevel,
         behavior=behavior,
+        attrs=attrs,
     )

@@ -5,6 +5,7 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
+from awkward._namedaxis import _get_named_axis, _named_axis_to_positional_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -93,7 +94,6 @@ def _impl(
     behavior,
     attrs,
 ):
-    axis = regularize_axis(axis)
     if parameters is None:
         parameters = {}
     else:
@@ -101,20 +101,24 @@ def _impl(
     if with_name is not None:
         parameters["__record__"] = with_name
 
-    if axis < 0:
-        raise ValueError("the 'axis' for argcombinations must be non-negative")
-    else:
-        with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-            layout = ak._do.local_index(
-                ctx.unwrap(array, allow_record=False, primitive_policy="error"),
-                axis,
-            )
-        out = ak._do.combinations(
-            layout,
-            n,
-            replacement=replacement,
-            axis=axis,
-            fields=fields,
-            parameters=parameters,
+    # Handle named axis
+    named_axis = _get_named_axis(array)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
+
+    axis = regularize_axis(axis, none_allowed=False)
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ak._do.local_index(
+            ctx.unwrap(array, allow_record=False, primitive_policy="error"),
+            axis,
         )
-        return ctx.wrap(out, highlevel=highlevel)
+    out = ak._do.combinations(
+        layout,
+        n,
+        replacement=replacement,
+        axis=axis,
+        fields=fields,
+        parameters=parameters,
+    )
+    return ctx.wrap(out, highlevel=highlevel)

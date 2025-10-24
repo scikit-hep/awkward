@@ -18,12 +18,14 @@ jobs:
     if: inputs.publish-pypi
     permissions:
       id-token: write
+      attestations: write
+      contents: read
     environment:
       name: "pypi"
       url: "https://pypi.org/project/awkward-cpp/"
     steps:
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         pattern: "awkward-cpp*"
         path: dist
@@ -32,4 +34,9 @@ jobs:
     - name: List distributions to be deployed
       run: ls -l dist/
 
-    - uses: pypa/gh-action-pypi-publish@v1.8.14
+    - name: Generate artifact attestation for sdist and wheel
+      uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
+      with:
+        subject-path: "dist/awkward*cpp-*"
+
+    - uses: pypa/gh-action-pypi-publish@v1.13.0

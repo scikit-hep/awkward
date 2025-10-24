@@ -9,10 +9,11 @@ import shutil
 
 import nox
 
-ALL_PYTHONS = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+ALL_PYTHONS = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
+nox.needs_version = ">=2024.3.2"
+nox.options.default_venv_backend = "uv|virtualenv"
 nox.options.sessions = ["lint", "tests"]
-
 
 requirements_dev = [
     "build",
@@ -56,7 +57,7 @@ def pylint(session):
     Run the pylint process.
     """
 
-    session.install("pylint==3.0.2")
+    session.install("pylint~=3.3.0")
     session.run("pylint", "src", *session.posargs)
 
 
@@ -134,6 +135,7 @@ def clean(session):
             pathlib.Path("awkward-cpp", "tests-cpu-kernels"),
             pathlib.Path("awkward-cpp", "tests-cpu-kernels-explicit"),
             pathlib.Path("tests-cuda-kernels"),
+            pathlib.Path("tests-cuda-kernels-explicit"),
         )
     if args.docs or clean_all:
         remove_if_found(pathlib.Path("docs", "reference", "generated", "kernels.rst"))

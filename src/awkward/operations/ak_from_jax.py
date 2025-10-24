@@ -10,7 +10,15 @@ __all__ = ("from_jax",)
 
 
 @high_level_function()
-def from_jax(array, *, regulararray=False, highlevel=True, behavior=None, attrs=None):
+def from_jax(
+    array,
+    *,
+    regulararray=False,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
+    primitive_policy="error",
+):
     """
     Args:
         array (jax.numpy.DeviceArray): The JAX DeviceArray to convert into an Awkward Array.
@@ -38,7 +46,8 @@ def from_jax(array, *, regulararray=False, highlevel=True, behavior=None, attrs=
     """
     jax.assert_registered()
     return wrap_layout(
-        from_arraylib(array, regulararray, False),
+        from_arraylib(array, regulararray, False, primitive_policy=primitive_policy),
         highlevel=highlevel,
         behavior=behavior,
+        attrs=attrs,
     )

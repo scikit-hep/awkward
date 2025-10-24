@@ -42,3 +42,32 @@ def attrs_of(*arrays, attrs: Mapping | None = None) -> Mapping:
 
 def without_transient_attrs(attrs: dict[str, Any]) -> JSONMapping:
     return {k: v for k, v in attrs.items() if not k.startswith("@")}
+
+
+class Attrs(Mapping):
+    def __init__(self, data: Mapping[str, Any]):
+        self._data = {_enforce_str_key(k): v for k, v in data.items()}
+
+    def __getitem__(self, key: str):
+        return self._data[key]
+
+    def __setitem__(self, key: str, value: Any):
+        self._data[_enforce_str_key(key)] = value
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __len__(self):
+        return len(self._data)
+
+    def __repr__(self):
+        return f"Attrs({self._data!r})"
+
+    def to_dict(self):
+        return dict(self._data)
+
+
+def _enforce_str_key(key: Any) -> str:
+    if not isinstance(key, str):
+        raise TypeError(f"'attrs' keys must be strings, got: {key!r}")
+    return key

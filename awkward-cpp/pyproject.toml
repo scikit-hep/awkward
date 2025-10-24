@@ -1,21 +1,20 @@
 [build-system]
 requires = [
-    "scikit-build-core[pyproject]>=0.2.0",
-    "pybind11",
+    "scikit-build-core>=0.11",
+    "pybind11>=3",
 ]
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "32"
+version = "50"
 dependencies = [
-    "numpy>=1.18.0",
-    "importlib_resources;python_version < \"3.9\""
+    "numpy>=1.18.0"
 ]
 readme = "README.md"
 description = "CPU kernels and compiled extensions for Awkward Array"
 authors = [
-    {name = "Jim Pivarski", email = "pivarski@princeton.edu"},
+    {name = "Jim Pivarski", email = "jpivarski@gmail.com"},
 ]
 maintainers = [
     {name = "Scikit-HEP", email = "scikit-hep-admins@googlegroups.com"},
@@ -25,7 +24,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
@@ -33,11 +31,12 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Scientific/Engineering :: Mathematics",
@@ -45,8 +44,9 @@ classifiers = [
     "Topic :: Software Development",
     "Topic :: Utilities",
 ]
-license = {text = "BSD-3-Clause"}
-requires-python = ">=3.8"
+license = "BSD-3-Clause AND MIT"
+license-files = ["LICENSE", "rapidjson/license.txt"]
+requires-python = ">=3.9"
 
 [project.urls]
 Homepage = "https://github.com/scikit-hep/awkward-1.0"
@@ -59,7 +59,7 @@ Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 
 
 [tool.scikit-build]
-minimum-version = "0.2"
+minimum-version = "build-system.requires"
 build-dir = "build/{cache_tag}"
 sdist.reproducible = true
 sdist.include = [
@@ -71,3 +71,46 @@ sdist.include = [
     "tests-cpu-kernels",
     "tests-cpu-kernels-explicit"
 ]
+sdist.exclude = [
+  "rapidjson/bin",
+]
+
+[[tool.scikit-build.overrides]]
+if.platform-system = "darwin"
+cmake.version = ">=3.29"
+
+
+[tool.cibuildwheel]
+build-frontend = "build[uv]"
+enable = ["pypy", "cpython-freethreading"]
+test-requires = ["pytest>=6", "."]
+test-command = ["echo {project}:", "ls {project}", "echo {package}:", "ls {package}",
+"""
+pytest -p no:cacheprovider \
+       {project}/tests \
+       {package}/tests-cpu-kernels \
+       {package}/tests-cpu-kernels-explicit \
+       {package}/tests-spec \
+       {package}/tests-spec-explicit
+"""]
+skip = [
+    "pp*win*",
+]
+test-skip = [
+    "pp*",
+    "*musllinux*",
+]
+build-verbosity = 1
+
+[tool.cibuildwheel.environment]
+PIP_ONLY_BINARY = "cmake,numpy"
+UV_ONLY_BINARY = "cmake,numpy"
+
+[[tool.cibuildwheel.overrides]]
+select = "*pyodide*"
+build-frontend = {name = "build", args = ["--exports", "whole_archive"]}
+
+# Use older manylinux for Python 3.9 and 3.10
+[[tool.cibuildwheel.overrides]]
+select = "cp3{9,10}-manylinux*"
+manylinux-x86_64-image = "manylinux2014"

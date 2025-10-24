@@ -38,6 +38,18 @@
     generated/ak.from_feather
     generated/ak.to_feather
     generated/ak.from_avro_file
+    generated/ak.to_safetensors
+    generated/ak.from_safetensors
+
+.. toctree::
+    :caption: Conversions for machine learning
+
+    generated/ak.from_raggedtensor
+    generated/ak.to_raggedtensor
+    generated/ak.from_tensorflow
+    generated/ak.to_tensorflow
+    generated/ak.from_torch
+    generated/ak.to_torch
 
 .. toctree::
     :caption: Converting to Pandas DataFrames
@@ -64,6 +76,11 @@
     generated/ak.copy
 
 .. toctree::
+    :caption: Materializing virtual arrays
+
+    generated/ak.materialize
+
+.. toctree::
     :caption: Validity checking
 
     generated/ak.is_valid
@@ -73,6 +90,7 @@
     :caption: Restructuring records (columns)
 
     generated/ak.zip
+    generated/ak.zip_no_broadcast
     generated/ak.unzip
     generated/ak.merge_union_of_records
     generated/ak.merge_option_of_records
@@ -284,6 +302,8 @@
     generated/ak.without_field
     generated/ak.with_parameter
     generated/ak.without_parameters
+    generated/ak.with_named_axis
+    generated/ak.without_named_axis
 
 .. toctree::
     :caption: Overriding behavior
@@ -299,11 +319,12 @@
     generated/ak.backend
 
 .. toctree::
-    :caption: Approximation
+    :caption: Approximation and comparison
 
     generated/ak.round
     generated/ak.isclose
     generated/ak.almost_equal
+    generated/ak.array_equal
 
 .. toctree::
     :caption: NumPy compatibility
@@ -314,7 +335,7 @@
     generated/ak.zeros_like
     generated/ak.ones_like
     generated/ak.full_like
-    
+
 .. toctree::
     :caption: Third-party integration
 
@@ -374,7 +395,7 @@
 
 .. toctree::
     :caption: Low-level types: "forms"
-    
+
     generated/ak.forms.Form
     generated/ak.forms.BitMaskedForm
     generated/ak.forms.ByteMaskedForm

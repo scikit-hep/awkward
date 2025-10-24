@@ -16,6 +16,7 @@ def from_numpy(
     recordarray=True,
     highlevel=True,
     behavior=None,
+    primitive_policy="error",
     attrs=None,
 ):
     """
@@ -52,7 +53,10 @@ def from_numpy(
     See also #ak.to_numpy and #ak.from_cupy.
     """
     return wrap_layout(
-        from_arraylib(array, regulararray, recordarray),
+        from_arraylib(
+            array, regulararray, recordarray, primitive_policy=primitive_policy
+        ),
         highlevel=highlevel,
         behavior=behavior,
+        attrs=attrs,
     )

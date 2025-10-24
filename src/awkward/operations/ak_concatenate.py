@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import reduce
 from itertools import permutations
 
 import awkward as ak
@@ -9,6 +10,13 @@ from awkward._backends.dispatch import backend_of_obj
 from awkward._dispatch import high_level_function
 from awkward._do import mergeable
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
+from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
+    NamedAxesWithDims,
+    _get_named_axis,
+    _named_axis_to_positional_axis,
+    _unify_named_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
@@ -69,8 +77,8 @@ def _merge_as_union(
 ) -> ak.contents.UnionArray:
     length = sum(c.length for c in contents)
     first = contents[0]
-    tags = ak.index.Index8.empty(length, first.backend.index_nplike)
-    index = ak.index.Index64.empty(length, first.backend.index_nplike)
+    tags = ak.index.Index8.empty(length, first.backend.nplike)
+    index = ak.index.Index64.empty(length, first.backend.nplike)
 
     offset = 0
     for i, content in enumerate(contents):
@@ -92,7 +100,6 @@ def _merge_as_union(
 
 
 def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
     # Simple single-array, axis=0 fast-path
     if (
         # Is an array with a known backend
@@ -120,6 +127,15 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                 for x in arrays
             )
         )
+
+    # Handle named axis
+    merged_named_axis = reduce(_unify_named_axis, map(_get_named_axis, arrays))
+    # Step 1: normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(merged_named_axis, axis)
+    axis = regularize_axis(axis, none_allowed=False)
+    # Step 2: propagate named axis from input to output,
+    #   use strategy "unify" (see: awkward._namedaxis)
+    out_named_axis = merged_named_axis
 
     contents = [x for x in content_or_others if isinstance(x, ak.contents.Content)]
     if len(contents) == 0:
@@ -240,15 +256,21 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                         )
                     sizes.append(regulararrays[-1].size)
 
-                prototype = backend.index_nplike.empty(sum(sizes), dtype=np.int8)
+                if len(regulararrays) < 2**7:
+                    prototype = backend.nplike.empty(sum(sizes), dtype=np.int8)
+                    tags_cls = ak.index.Index8
+                else:
+                    prototype = backend.nplike.empty(sum(sizes), dtype=np.int64)
+                    tags_cls = ak.index.Index64
+
                 start = 0
                 for tag, size in enumerate(sizes):
                     prototype[start : start + size] = tag
                     start += size
 
-                tags = ak.index.Index8(
-                    backend.index_nplike.reshape(
-                        backend.index_nplike.broadcast_to(
+                tags = tags_cls(
+                    backend.nplike.reshape(
+                        backend.nplike.broadcast_to(
                             prototype, (length, prototype.size)
                         ),
                         (-1,),
@@ -265,10 +287,9 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                 return (ak.contents.RegularArray(inner, prototype.size),)
 
             elif all(
-                isinstance(x, ak.contents.Content)
-                and x.is_list
-                or (isinstance(x, ak.contents.NumpyArray) and x.data.ndim > 1)
-                or not isinstance(x, ak.contents.Content)
+                (isinstance(x, ak.contents.Content) and x.is_list)  # Case 1
+                or (isinstance(x, ak.contents.NumpyArray) and x.data.ndim > 1)  # Case 2
+                or not isinstance(x, ak.contents.Content)  # Case 3: scalar value
                 for x in inputs
             ):
                 nextinputs = []
@@ -276,16 +297,16 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                     if isinstance(x, ak.contents.Content):
                         nextinputs.append(x)
                     else:
+                        # Treat non-content inputs as scalars.
+                        # These become arrays of matching length.
                         nextinputs.append(
                             ak.contents.ListOffsetArray(
                                 ak.index.Index64(
-                                    backend.index_nplike.arange(
-                                        backend.index_nplike.shape_item_as_index(
-                                            length + 1
-                                        ),
+                                    backend.nplike.arange(
+                                        backend.nplike.shape_item_as_index(length + 1),
                                         dtype=np.int64,
                                     ),
-                                    nplike=backend.index_nplike,
+                                    nplike=backend.nplike,
                                 ),
                                 ak.contents.NumpyArray(
                                     backend.nplike.broadcast_to(
@@ -295,31 +316,32 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                             )
                         )
 
-                counts = backend.index_nplike.zeros(
-                    nextinputs[0].length, dtype=np.int64
-                )
+                counts = backend.nplike.zeros(nextinputs[0].length, dtype=np.int64)
                 all_counts = []
                 all_flatten = []
 
                 for x in nextinputs:
-                    o, f = x._offsets_and_flattened(1, 1)
+                    o, f = x._offsets_and_flattened(axis=1, depth=1)
                     c = o.data[1:] - o.data[:-1]
-                    backend.index_nplike.add(counts, c, maybe_out=counts)
+                    backend.nplike.add(counts, c, maybe_out=counts)
                     all_counts.append(c)
                     all_flatten.append(f)
 
-                offsets = backend.index_nplike.empty(
-                    nextinputs[0].length + 1, dtype=np.int64
-                )
+                offsets = backend.nplike.empty(nextinputs[0].length + 1, dtype=np.int64)
                 offsets[0] = 0
-                backend.index_nplike.cumsum(counts, maybe_out=offsets[1:])
+                backend.nplike.cumsum(counts, maybe_out=offsets[1:])
 
-                offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
+                offsets = ak.index.Index64(offsets, nplike=backend.nplike)
 
+                if len(nextinputs) < 2**7:
+                    tags_cls = ak.index.Index8
+                else:
+                    tags_cls = ak.index.Index64
                 tags, index = ak.contents.UnionArray.nested_tags_index(
                     offsets,
                     [ak.index.Index64(x) for x in all_counts],
                     backend=backend,
+                    tags_cls=tags_cls,
                 )
 
                 inner = ak.contents.UnionArray.simplified(
@@ -331,11 +353,35 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
             else:
                 return None
 
+        depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+            list(arrays)
+        )
         out = ak._broadcasting.broadcast_and_apply(
-            content_or_others, action, allow_records=True, right_broadcast=False
+            content_or_others,
+            action,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            allow_records=True,
+            right_broadcast=False,
         )[0]
+        # Unify named axes
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+        )
 
-    return ctx.wrap(out, highlevel=highlevel)
+    wrapped_out = ctx.wrap(
+        out,
+        highlevel=highlevel,
+    )
+
+    # propagate named axis to output
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )
 
 
 def _form_has_type(form, type_):
@@ -446,7 +492,7 @@ def enforce_concatenated_form(layout, form):
         # Otherwise, we move into the contents
         else:
             index = ak.index.Index64(
-                layout.backend.index_nplike.arange(layout.length, dtype=np.int64)
+                layout.backend.nplike.arange(layout.length, dtype=np.int64)
             )
             layout_to_merge = layout
 
@@ -488,9 +534,7 @@ def enforce_concatenated_form(layout, form):
                     )
 
         return ak.contents.UnionArray(
-            ak.index.Index8(
-                layout.backend.index_nplike.zeros(layout.length, dtype=np.int8)
-            ),
+            ak.index.Index8(layout.backend.nplike.zeros(layout.length, dtype=np.int8)),
             index,
             contents,
             parameters=form._parameters,
@@ -532,9 +576,7 @@ def enforce_concatenated_form(layout, form):
             ]
         )
         return ak.contents.UnionArray(
-            ak.index.Index8(
-                layout.backend.index_nplike.astype(layout.tags.data, np.int8)
-            ),
+            ak.index.Index8(layout.backend.nplike.astype(layout.tags.data, np.int8)),
             layout.index.to64(),
             next_contents,
             parameters=form._parameters,
@@ -579,7 +621,7 @@ def enforce_concatenated_form(layout, form):
     # Add index
     elif not layout.is_indexed and form.is_indexed:
         return ak.contents.IndexedArray(
-            ak.index.Index64(layout.backend.index_nplike.arange(layout.length)),
+            ak.index.Index64(layout.backend.nplike.arange(layout.length)),
             enforce_concatenated_form(layout, form.content),
             parameters=form._parameters,
         )

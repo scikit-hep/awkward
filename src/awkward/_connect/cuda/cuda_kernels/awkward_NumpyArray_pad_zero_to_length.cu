@@ -32,12 +32,12 @@ awkward_NumpyArray_pad_zero_to_length(
         l_to_char = scan_in_array[thread_id - 1];
       }
       // Copy from src to dst
-      for (int64_t j_from_char = fromoffsets[thread_id]; j_from_char < fromoffsets[thread_id + 1]; j_from_char++) {
+      for (int64_t j_from_char = fromoffsets[thread_id] + threadIdx.y; j_from_char < fromoffsets[thread_id + 1]; j_from_char += blockDim.y) {
         toptr[l_to_char++] = fromptr[j_from_char];
       }
       // Pad to remaining width
       auto n_to_pad = target - (fromoffsets[thread_id + 1] - fromoffsets[thread_id]);
-      for (int64_t j_from_char = 0; j_from_char < n_to_pad; j_from_char++){
+      for (int64_t j_from_char = threadIdx.y; j_from_char < n_to_pad; j_from_char += blockDim.y){
         toptr[l_to_char++] = 0;
       }
     }

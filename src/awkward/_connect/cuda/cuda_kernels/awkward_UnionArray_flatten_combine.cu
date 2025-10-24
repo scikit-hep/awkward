@@ -57,7 +57,7 @@ awkward_UnionArray_flatten_combine_b(
       X start = offsetsraws[tag][idx];
       X stop = offsetsraws[tag][idx + 1];
       int64_t k = scan_in_array_tooffsets[thread_id];
-      for (int64_t j = start;  j < stop;  j++) {
+      for (int64_t j = start + threadIdx.y; j < stop; j += blockDim.y) {
         totags[k] = tag;
         toindex[k] = j;
         k++;

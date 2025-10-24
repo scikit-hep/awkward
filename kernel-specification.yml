@@ -543,7 +543,7 @@ kernels:
                       k = k + 1
     automatic-tests: true
 
-  - name: awkward_IndexedArray_local_preparenext
+  - name: awkward_IndexedArray_local_preparenext_64
     specializations:
       - name: awkward_IndexedArray_local_preparenext_64
         args:
@@ -555,7 +555,7 @@ kernels:
           - {name: nextlen, type: "Const[int64_t]", dir: in, role: default}
     description: null
     definition: |
-      def awkward_IndexedArray_local_preparenext(
+      def awkward_IndexedArray_local_preparenext_64(
         tocarry, starts, parents, parentslength, nextparents, nextlen
       ):
           j = 0
@@ -1156,7 +1156,20 @@ kernels:
           - {name: length, type: "int64_t", dir: in}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_ListArray_combinations(
+          tocarry, toindex, fromindex, n, replacement, starts, stops, length
+      ):
+          for j in range(n):
+              toindex[j] = 0
+
+          for i in range(length):
+              start = int(starts[i])
+              stop = int(stops[i])
+              fromindex[0] = start
+              awkward_ListArray_combinations_step(
+                  tocarry, toindex, fromindex, 0, stop, n, replacement
+              )
+
     automatic-tests: false
 
   - name: awkward_ListArray_combinations_length
@@ -1453,7 +1466,7 @@ kernels:
           - {name: tocarry, type: "List[int64_t]", dir: out}
           - {name: fromstarts, type: "Const[List[int32_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int32_t]]", dir: in, role: ListArray-stops}
-          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-at}
+          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-length}
           - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_ListArray64_getitem_jagged_expand_64
         args:
@@ -1463,7 +1476,7 @@ kernels:
           - {name: tocarry, type: "List[int64_t]", dir: out}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
-          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-at}
+          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-length}
           - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_ListArrayU32_getitem_jagged_expand_64
         args:
@@ -1473,7 +1486,7 @@ kernels:
           - {name: tocarry, type: "List[int64_t]", dir: out}
           - {name: fromstarts, type: "Const[List[uint32_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[uint32_t]]", dir: in, role: ListArray-stops}
-          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-at}
+          - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-length}
           - {name: length, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
@@ -1762,44 +1775,30 @@ kernels:
       ):
           k = 0
           tooffsets[0] = 0
-          if step > 0:
-              for i in range(lenstarts):
-                  length = fromstops[i] - fromstarts[i]
-                  regular_start = start
-                  regular_stop = stop
-                  regular_start, regular_stop = awkward_regularize_rangeslice(
-                      regular_start,
-                      regular_stop,
-                      step > 0,
-                      start != kSliceNone,
-                      stop != kSliceNone,
-                      length,
-                  )
-                  j = regular_start
+          for i in range(lenstarts):
+              length = fromstops[i] - fromstarts[i]
+              regular_start = start
+              regular_stop = stop
+              regular_start, regular_stop = awkward_regularize_rangeslice(
+                  regular_start,
+                  regular_stop,
+                  step > 0,
+                  start != kSliceNone,
+                  stop != kSliceNone,
+                  length,
+              )
+              j = regular_start
+              if step > 0:
                   while j < regular_stop:
                       tocarry[k] = fromstarts[i] + j
                       k = k + 1
                       j += step
-                  tooffsets[i + 1] = k
-          else:
-              for i in range(lenstarts):
-                  length = fromstops[i] - fromstarts[i]
-                  regular_start = start
-                  regular_stop = stop
-                  regular_start, regular_stop = awkward_regularize_rangeslice(
-                      regular_start,
-                      regular_stop,
-                      step > 0,
-                      start != kSliceNone,
-                      stop != kSliceNone,
-                      length,
-                  )
-                  j = regular_start
+              else:
                   while j > regular_stop:
                       tocarry[k] = fromstarts[i] + j
                       k = k + 1
                       j += step
-                  tooffsets[i + 1] = k
+              tooffsets[i + 1] = k
     automatic-tests: false
 
   - name: awkward_ListArray_getitem_next_range_carrylength
@@ -2916,7 +2915,7 @@ kernels:
 
           # Close open sublist
           if lenparents > 0:
-              outoffsets[k_sublist + 1] = j
+              outoffsets[k_sublist + 1] = j + 1
               outcarry[parents[i]] = k_sublist
               k_sublist += 1
 
@@ -2945,7 +2944,19 @@ kernels:
           - {name: length, type: "int64_t", dir: in}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_RegularArray_combinations_64(
+          tocarry, toindex, fromindex, n, replacement, size, length
+      ):
+          for j in range(n):
+              toindex[j] = 0
+
+          for i in range(length):
+              start = size * i
+              stop = start + size
+              fromindex[0] = start
+              awkward_ListArray_combinations_step(
+                  tocarry, toindex, fromindex, 0, stop, n, replacement
+              )
     automatic-tests: false
 
   - name: awkward_RegularArray_getitem_carry
@@ -3361,6 +3372,14 @@ kernels:
 
   - name: awkward_UnionArray_nestedfill_tags_index
     specializations:
+      - name: awkward_UnionArray64_64_nestedfill_tags_index_64
+        args:
+          - {name: totags, type: "List[int64_t]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: tmpstarts, type: "List[int64_t]", dir: out}
+          - {name: tag, type: "int64_t", dir: in, role: default}
+          - {name: fromcounts, type: "Const[List[int64_t]]", dir: in, role: default}
+          - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_32_nestedfill_tags_index_64
         args:
           - {name: totags, type: "List[int8_t]", dir: out}
@@ -3439,6 +3458,27 @@ kernels:
 
   - name: awkward_UnionArray_regular_index
     specializations:
+      - name: awkward_UnionArray64_32_regular_index
+        args:
+          - {name: toindex, type: "List[int32_t]", dir: out}
+          - {name: current, type: "List[int32_t]", dir: out}
+          - {name: size, type: "int64_t", dir: in, role: default}
+          - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_UnionArray64_64_regular_index
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: current, type: "List[int64_t]", dir: out}
+          - {name: size, type: "int64_t", dir: in, role: default}
+          - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_UnionArray64_U32_regular_index
+        args:
+          - {name: toindex, type: "List[uint32_t]", dir: out}
+          - {name: current, type: "List[uint32_t]", dir: out}
+          - {name: size, type: "int64_t", dir: in, role: default}
+          - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_32_regular_index
         args:
           - {name: toindex, type: "List[int32_t]", dir: out}
@@ -3474,6 +3514,11 @@ kernels:
 
   - name: awkward_UnionArray_regular_index_getsize
     specializations:
+      - name: awkward_UnionArray64_regular_index_getsize
+        args:
+          - {name: size, type: "List[int64_t]", dir: out}
+          - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_regular_index_getsize
         args:
           - {name: size, type: "List[int64_t]", dir: out}
@@ -3492,6 +3537,19 @@ kernels:
 
   - name: awkward_UnionArray_simplify
     specializations:
+      - name: awkward_UnionArray64_64_simplify8_64_to8_64
+        args:
+          - {name: totags, type: "List[int8_t]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: outertags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: outerindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: innertags, type: "Const[List[int8_t]]", dir: in, role: UnionArray2-tags}
+          - {name: innerindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray2-index}
+          - {name: towhich, type: "int64_t", dir: in, role: default}
+          - {name: innerwhich, type: "int64_t", dir: in, role: UnionArray1-which}
+          - {name: outerwhich, type: "int64_t", dir: in, role: UnionArray2-which}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: base, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_32_simplify8_32_to8_64
         args:
           - {name: totags, type: "List[int8_t]", dir: out}
@@ -3634,6 +3692,16 @@ kernels:
 
   - name: awkward_UnionArray_simplify_one
     specializations:
+      - name: awkward_UnionArray64_64_simplify_one_to8_64
+        args:
+          - {name: totags, type: "List[int8_t]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromtags, type: "Const[List[int64_t]]", dir: in, role: UnionArray-tags}
+          - {name: fromindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: towhich, type: "int64_t", dir: in, role: default}
+          - {name: fromwhich, type: "int64_t", dir: in, role: UnionArray-which}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: base, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_32_simplify_one_to8_64
         args:
           - {name: totags, type: "List[int8_t]", dir: out}
@@ -3818,7 +3886,22 @@ kernels:
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
     description: null
     definition: |
-      Insert Python definition here
+      def awkward_argsort(
+        toptr, fromptr, length, offsets, offsetslength, ascending, stable
+      ):
+          result = []
+          indices = list(range(length))
+          for i in range(offsetslength - 1):
+              sub_indices = indices[offsets[i]:offsets[i+1]]
+              sorted_indices = sorted(
+                  sub_indices,
+                  key=lambda x: fromptr[x],
+                  reverse=not ascending
+              )
+              local_sorted_indices = [idx - offsets[i] for idx in sorted_indices]
+              result.extend(local_sorted_indices)
+          for i in range(length):
+              toptr[i] = result[i]
     automatic-tests: false
 
   - name: awkward_index_rpad_and_clip_axis0
@@ -4007,6 +4090,15 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_argmax_complex(toptr, fromptr, parents, lenparents, outlength):
+          for k in range(outlength):
+              toptr[k] = -1
+          for i in range(lenparents):
+              parent = parents[i]
+              if (toptr[parent] == -1  or (fromptr[i * 2] > fromptr[toptr[parent] * 2] or
+                 (fromptr[i * 2] == fromptr[toptr[parent] * 2]  and
+                  fromptr[i * 2 + 1] > fromptr[toptr[parent] * 2 + 1]))):
+                  toptr[parent] = i
     automatic-tests: false
 
   - name: awkward_reduce_argmin
@@ -4110,6 +4202,15 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_argmin_complex(toptr, fromptr, parents, lenparents, outlength):
+          for k in range(outlength):
+              toptr[k] = -1
+          for i in range(lenparents):
+              parent = parents[i]
+              if (toptr[parent] == -1  or (fromptr[i * 2] < fromptr[toptr[parent] * 2] or
+                 (fromptr[i * 2] == fromptr[toptr[parent] * 2]  and
+                  fromptr[i * 2 + 1] < fromptr[toptr[parent] * 2 + 1]))):
+                  toptr[parent] = i
     automatic-tests: false
 
   - name: awkward_reduce_count_64
@@ -4235,6 +4336,11 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_countnonzero_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i] = 0
+          for i in range(lenparents):
+              toptr[parents[i]] += fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0
     automatic-tests: false
 
   - name: awkward_reduce_max
@@ -4349,6 +4455,17 @@ kernels:
           - {name: identity, type: "double", dir: in, role: reducer-identity}
     description: null
     definition: |
+      def awkward_reduce_max_complex(toptr, fromptr, parents, lenparents, outlength, identity):
+          for i in range(outlength):
+              toptr[i * 2] = identity
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              x = fromptr[i * 2]
+              y = fromptr[i * 2 + 1]
+              parent = parents[i]
+              if x > toptr[parent * 2] or (x == toptr[parent * 2]  and  y > toptr[parent * 2 + 1]):
+                  toptr[parent * 2] = x
+                  toptr[parent * 2 + 1] = y
     automatic-tests: false
 
   - name: awkward_reduce_min
@@ -4463,6 +4580,17 @@ kernels:
           - {name: identity, type: "double", dir: in, role: reducer-identity}
     description: null
     definition: |
+      def awkward_reduce_min_complex(toptr, fromptr, parents, lenparents, outlength, identity):
+          for i in range(outlength):
+              toptr[i * 2] = identity
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              x = fromptr[i * 2]
+              y = fromptr[i * 2 + 1]
+              parent = parents[i]
+              if x < toptr[parent * 2] or (x == toptr[parent * 2]  and  y < toptr[parent * 2 + 1]):
+                  toptr[parent * 2] = x
+                  toptr[parent * 2 + 1] = y
     automatic-tests: false
 
   - name: awkward_reduce_prod
@@ -4606,6 +4734,16 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_prod_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i * 2] = 1
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              parent = parents[i]
+              real = toptr[parent * 2] * fromptr[i * 2] - toptr[parent * 2 + 1] * fromptr[i * 2 + 1]
+              imag = toptr[parent * 2] * fromptr[i * 2 + 1] + toptr[parent * 2 + 1] * fromptr[i * 2]
+              toptr[parents[i] * 2] = real
+              toptr[parents[i] * 2 + 1] = imag
     automatic-tests: false
 
   - name: awkward_reduce_prod_bool
@@ -4714,6 +4852,11 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_prod_bool_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i] = 1
+          for i in range(lenparents):
+              toptr[parents[i]] = fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0
     automatic-tests: false
 
   - name: awkward_reduce_sum
@@ -4857,6 +5000,13 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_sum_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i * 2] = 0
+              toptr[i * 2 + 1] = 0
+          for i in range(lenparents):
+              toptr[parents[i] * 2] += fromptr[i * 2]
+              toptr[parents[i] * 2 + 1] += fromptr[i * 2 + 1]
     automatic-tests: false
 
   - name: awkward_reduce_sum_bool
@@ -4965,6 +5115,11 @@ kernels:
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
+      def awkward_reduce_sum_bool_complex(toptr, fromptr, parents, lenparents, outlength):
+          for i in range(outlength):
+              toptr[i] = 0
+          for i in range(lenparents):
+              toptr[parents[i]] |= fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0
     automatic-tests: false
 
   - name: awkward_reduce_sum_int32_bool_64

@@ -33,7 +33,10 @@ def register_and_check():
     Register Awkward Array node types with JAX's tree mechanism.
     """
     try:
-        import jax  # noqa: TID251, F401
+        import jax  # noqa: TID251
+
+        # ak.from_buffers needs this
+        jax.config.update("jax_enable_x64", True)
 
     except ModuleNotFoundError:
         raise ModuleNotFoundError(

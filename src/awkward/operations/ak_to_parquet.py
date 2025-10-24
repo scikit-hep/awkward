@@ -8,6 +8,8 @@ from os import fsdecode
 import fsspec
 
 import awkward as ak
+import awkward._connect.pyarrow
+from awkward._connect.pyarrow import convert_awkward_arrow_table_to_native
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -237,7 +239,6 @@ def _impl(
     write_iteratively,
 ):
     # Implementation
-    import awkward._connect.pyarrow
 
     data = array
 
@@ -313,7 +314,7 @@ def _impl(
     else:
         column_prefix = ()
 
-    if isinstance(data, ak.Record):
+    if isinstance(layout, ak.record.Record):
         form = layout.array.form
     else:
         form = layout.form
@@ -353,13 +354,13 @@ def _impl(
     elif isinstance(compression, Mapping):
         replacement = {}
         for specifier, value in compression.items():
-            replacement.update({x: value for x in parquet_columns(specifier)})
+            replacement.update(dict.fromkeys(parquet_columns(specifier), value))
         compression = replacement
 
     if isinstance(compression_level, Mapping):
         replacement = {}
         for specifier, value in compression_level.items():
-            replacement.update({x: value for x in parquet_columns(specifier)})
+            replacement.update(dict.fromkeys(parquet_columns(specifier), value))
         compression_level = replacement
 
     if parquet_metadata_statistics is True:
@@ -369,7 +370,7 @@ def _impl(
     elif isinstance(parquet_metadata_statistics, Mapping):
         replacement = {}
         for specifier, value in parquet_metadata_statistics.items():
-            replacement.update({x: value for x in parquet_columns(specifier)})
+            replacement.update(dict.fromkeys(parquet_columns(specifier), value))
         parquet_metadata_statistics = [x for x, value in replacement.items() if value]
     elif isinstance(parquet_metadata_statistics, Sequence):
         replacement = []
@@ -385,7 +386,7 @@ def _impl(
         replacement = {}
         for specifier, value in parquet_dictionary_encoding.items():
             replacement.update(
-                {x: value for x in parquet_columns(specifier, only="string")}
+                dict.fromkeys(parquet_columns(specifier, only="string"), value)
             )
         parquet_dictionary_encoding = [x for x, value in replacement.items() if value]
 
@@ -397,9 +398,12 @@ def _impl(
         replacement = {}
         for specifier, value in parquet_byte_stream_split.items():
             replacement.update(
-                {x: value for x in parquet_columns(specifier, only="floating")}
+                dict.fromkeys(parquet_columns(specifier, only="floating"), value)
             )
         parquet_byte_stream_split = [x for x, value in replacement.items() if value]
+
+    if extensionarray:
+        table = convert_awkward_arrow_table_to_native(table)
 
     if parquet_extra_options is None:
         parquet_extra_options = {}
@@ -444,6 +448,8 @@ def _impl(
                 # a `for` loop implicitly calls `next` and stops at `StopIteration`
                 for item in data:
                     layout, table = get_layout_and_table(item)
+                    if extensionarray:
+                        table = convert_awkward_arrow_table_to_native(table)
                     writer.write_table(table, row_group_size=row_group_size)
 
         finally:

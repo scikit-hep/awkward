@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from awkward._nplikes.typetracer import MaybeNone, OneOf  # noqa: F401
 
-__all__ = ["UnknownScalar", "UnknownLength"]
+__all__ = ["UnknownLength", "UnknownScalar"]
 
 
 UnknownLength = None

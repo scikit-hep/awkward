@@ -5,8 +5,15 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
+from awkward._namedaxis import (
+    _get_named_axis,
+    _named_axis_to_positional_axis,
+    _remove_named_axis,
+)
+from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._nplikes.shape import unknown_length
+from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
 
 __all__ = ("firsts",)
@@ -58,10 +65,20 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
 def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False)
-    axis = regularize_axis(axis)
 
-    if not is_integer(axis):
-        raise TypeError(f"'axis' must be an integer, not {axis!r}")
+    # Handle named axis
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
+    # Step 2: propagate named axis from input to output,
+    #   use strategy "remove one" (see: awkward._namedaxis)
+    out_named_axis = _remove_named_axis(
+        named_axis=named_axis,
+        axis=axis,
+        total=layout.minmax_depth[1],
+    )
+
+    axis = regularize_axis(axis, none_allowed=False)
 
     if maybe_posaxis(layout, axis, 1) == 0:
         # specialized logic; it's tested in test_0582-propagate-context-in-broadcast_and_apply.py
@@ -70,7 +87,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
         # and length > 0 cases.
         backend = ak.backend(array)
         slicer = ak.to_backend(ak.from_iter([None, 0]), backend)
-        if layout.length == 0:
+        if layout.length is not unknown_length and layout.length == 0:
             out = layout[slicer[[0]]][0]
         else:
             out = layout[slicer[[1]]][0]
@@ -82,7 +99,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
             if posaxis == depth and layout.is_list:
                 # this is a copy of the raw array
-                index = starts = backend.index_nplike.asarray(
+                index = starts = backend.nplike.asarray(
                     layout.starts.data, dtype=np.int64, copy=True
                 )
 
@@ -90,7 +107,10 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 stops = layout.stops.data
 
                 empties = starts == stops
-                index[empties] = -1
+                if isinstance(layout.backend.nplike, Jax):
+                    index = index.at[empties].set(-1)
+                else:
+                    index[empties] = -1
 
                 return ak.contents.IndexedOptionArray.simplified(
                     ak.index.Index64(index), layout._content
@@ -103,4 +123,17 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
         out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return ctx.wrap(out, highlevel=highlevel, allow_other=True)
+    wrapped_out = ctx.wrap(
+        out,
+        highlevel=highlevel,
+        allow_other=True,
+    )
+
+    # propagate named axis to output
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

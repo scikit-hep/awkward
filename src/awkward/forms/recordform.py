@@ -127,7 +127,9 @@ class RecordForm(RecordMeta[Form], Form):
         if not fields and is_inside_record_or_union:
             return None
         else:
-            return self.copy(contents=contents, fields=fields)
+            return self.copy(
+                contents=contents, fields=None if self.is_tuple else fields
+            )
 
     def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         contents = []
@@ -145,7 +147,7 @@ class RecordForm(RecordMeta[Form], Form):
             contents.append(next_content)
             fields.append(field)
 
-        return self.copy(contents=contents, fields=fields)
+        return self.copy(contents=contents, fields=None if self.is_tuple else fields)
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
@@ -158,7 +160,7 @@ class RecordForm(RecordMeta[Form], Form):
             # read data pickled in Awkward 1.x
 
             # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L624-L643
-            has_identities, parameters, form_key, recordlookup, contents = state
+            _has_identities, parameters, form_key, recordlookup, contents = state
 
             if form_key is not None:
                 form_key = "part0-" + form_key  # only the first partition

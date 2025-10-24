@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import copy
+from functools import reduce
 
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import is_non_string_like_sequence
 
@@ -76,6 +77,11 @@ def _impl(base, what, where, highlevel, behavior, attrs):
         if is_non_string_like_sequence(where):
             where = where[0]
 
+        depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
+            [base, what],
+            unwrap_kwargs={"none_policy": "promote"},
+        )
+
         with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
             base, what = ensure_same_backend(
                 ctx.unwrap(base, allow_record=True, primitive_policy="error"),
@@ -88,10 +94,6 @@ def _impl(base, what, where, highlevel, behavior, attrs):
                     string_policy="promote",
                 ),
             )
-
-        keys = copy.copy(base.fields)
-        if where in base.fields:
-            keys.remove(where)
 
         def purelist_is_record(layout):
             result = False
@@ -122,8 +124,8 @@ def _impl(base, what, where, highlevel, behavior, attrs):
                 if what is None:
                     what = ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            backend.index_nplike.full(base.length, -1, dtype=np.int64),
-                            nplike=backend.index_nplike,
+                            backend.nplike.full(base.length, -1, dtype=np.int64),
+                            nplike=backend.nplike,
                         ),
                         ak.contents.EmptyArray(),
                     )
@@ -134,20 +136,38 @@ def _impl(base, what, where, highlevel, behavior, attrs):
                             backend.nplike.shape_item_as_index(base.length),
                         )
                     )
+
+                base_fields = base.fields
+                # Check if we're replacing an existing field
+                field_exists = where is not None and where in base_fields
                 if base.is_tuple:
                     # Preserve tuple-ness
                     if where is None:
                         fields = None
+                        contents = [base[k] for k in base_fields] + [what]
                     # Otherwise the tuple becomes a record
                     else:
-                        fields = [*keys, where]
+                        if field_exists:
+                            fields = list(base_fields)
+                            contents = [what if k == where else base[k] for k in fields]
+                        else:
+                            # Add new field at the end
+                            fields = [*base_fields, where]
+                            contents = [base[k] for k in base.fields] + [what]
                 # Records with `where=None` will create a tuple-like key
                 elif where is None:
-                    fields = [*keys, str(len(keys))]
+                    fields = [*base_fields, str(len(base_fields))]
+                    contents = [base[k] for k in base_fields] + [what]
                 else:
-                    fields = [*keys, where]
+                    if field_exists:
+                        fields = list(base_fields)
+                        contents = [what if k == where else base[k] for k in fields]
+                    else:
+                        fields = [*base_fields, where]
+                        contents = [base[k] for k in base_fields] + [what]
+
                 out = ak.contents.RecordArray(
-                    [base[k] for k in keys] + [what],
+                    contents,
                     fields,
                     parameters=base.parameters,
                 )
@@ -156,9 +176,24 @@ def _impl(base, what, where, highlevel, behavior, attrs):
                 return None
 
         out = ak._broadcasting.broadcast_and_apply(
-            [base, what], action, right_broadcast=False
+            [base, what],
+            action,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            right_broadcast=False,
         )
 
         assert isinstance(out, tuple) and len(out) == 1
 
-        return ctx.wrap(out[0], highlevel=highlevel)
+        # Unify named axes propagated through the broadcast
+        out_named_axis = reduce(
+            _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+        )
+        wrapped_out = ctx.wrap(out[0], highlevel=highlevel)
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped_out,
+            named_axis=out_named_axis,
+            highlevel=highlevel,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )

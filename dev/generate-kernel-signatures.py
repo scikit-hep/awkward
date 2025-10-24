@@ -53,16 +53,23 @@ cuda_kernels_impl = [
     "awkward_missing_repeat",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_combinations_length",
+    "awkward_ListArray_combinations",
+    "awkward_RegularArray_combinations_64",
+    "awkward_ListArray_getitem_jagged_apply",
     "awkward_ListArray_getitem_jagged_carrylen",
     "awkward_ListArray_getitem_jagged_descend",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_numvalid",
+    "awkward_ListArray_getitem_jagged_shrink",
     "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_next_array",
     "awkward_ListArray_getitem_next_at",
+    "awkward_ListArray_getitem_next_range",
+    "awkward_ListArray_getitem_next_range_carrylength",
     "awkward_ListArray_getitem_next_range_counts",
     "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListArray_rpad_axis1",
+    "awkward_UnionArray_regular_index",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     "awkward_ListArray_getitem_next_range_spreadadvanced",
     "awkward_ListArray_localindex",
@@ -80,11 +87,14 @@ cuda_kernels_impl = [
     "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
     "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
+    "awkward_NumpyArray_subrange_equal",
+    "awkward_NumpyArray_subrange_equal_bool",
     "awkward_IndexedArray_flatten_nextcarry",
     "awkward_IndexedArray_flatten_none2empty",
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
     "awkward_IndexedArray_index_of_nulls",
+    "awkward_IndexedArray_local_preparenext_64",
     "awkward_IndexedArray_ranges_next_64",
     "awkward_IndexedArray_ranges_carry_next_64",
     "awkward_IndexedArray_reduce_next_64",
@@ -101,32 +111,52 @@ cuda_kernels_impl = [
     "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+    "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
+    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",
     "awkward_UnionArray_regular_index_getsize",
     "awkward_UnionArray_simplify",
     "awkward_UnionArray_simplify_one",
-    "awkward_reduce_argmax",
-    "awkward_reduce_argmin",
+    "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
     "awkward_reduce_count_64",
     "awkward_reduce_max",
+    "awkward_reduce_max_complex",
     "awkward_reduce_min",
+    "awkward_reduce_min_complex",
+    "awkward_reduce_argmin",
+    "awkward_reduce_argmin_complex",
+    "awkward_reduce_argmax",
+    "awkward_reduce_argmax_complex",
     "awkward_reduce_sum",
+    "awkward_reduce_sum_bool",
+    "awkward_reduce_sum_bool_complex",
+    "awkward_reduce_sum_complex",
     "awkward_reduce_sum_int32_bool_64",
     "awkward_reduce_sum_int64_bool_64",
-    "awkward_reduce_sum_bool",
+    "awkward_reduce_prod",
     "awkward_reduce_prod_bool",
+    "awkward_reduce_prod_bool_complex",
+    "awkward_reduce_prod_complex",
     "awkward_reduce_countnonzero",
+    "awkward_reduce_countnonzero_complex",
     "awkward_sorting_ranges",
     "awkward_sorting_ranges_length",
 ]
 
 
 def reproducible_datetime():
-    build_date = datetime.datetime.utcfromtimestamp(
-        int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-    )
+    import sys
+
+    timestamp = int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
+
+    if sys.version_info >= (3, 11):
+        build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
+    else:
+        build_date = datetime.datetime.utcfromtimestamp(
+            int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
+        )
     return build_date.isoformat().replace("T", " AT ")[:22]
 
 
@@ -374,6 +404,8 @@ from numpy import (
 from awkward._connect.cuda import fetch_specialization
 from awkward._connect.cuda import import_cupy
 
+import math
+
 cupy = import_cupy("Awkward Arrays with CUDA")
 """
         )
@@ -408,7 +440,10 @@ def by_signature(cuda_kernel_templates):
                 special = [repr(spec["name"])]
                 [type_to_pytype(x["type"], special) for x in childfunc["args"]]
                 dirlist = [repr(x["dir"]) for x in childfunc["args"]]
-                ispointerlist = [repr("List" in x["type"]) for x in childfunc["args"]]
+                ispointerlist = [
+                    repr("List" in x["type"] or "ListArray-at" == x.get("role", None))
+                    for x in childfunc["args"]
+                ]
                 if spec["name"] in cuda_kernels_impl:
                     with open(
                         os.path.join(

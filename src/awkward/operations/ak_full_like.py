@@ -8,7 +8,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import is_unknown_scalar
-from awkward._regularize import is_integer_like
+from awkward._regularize import is_array_like, is_integer_like
 from awkward.operations.ak_zeros_like import _ZEROS
 
 __all__ = ("full_like",)
@@ -121,7 +121,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
 
     def action(layout, backend, **kwargs):
         nplike = backend.nplike
-        index_nplike = backend.index_nplike
+        nplike = backend.nplike
 
         if layout.is_numpy:
             original = nplike.asarray(layout.data)
@@ -166,12 +166,12 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
                 asbytes = nplike.frombuffer(b"", dtype=np.uint8)
                 result = ak.contents.ListArray(
                     ak.index.Index64(
-                        index_nplike.zeros(layout.length, dtype=np.int64),
-                        nplike=index_nplike,
+                        nplike.zeros(layout.length, dtype=np.int64),
+                        nplike=nplike,
                     ),
                     ak.index.Index64(
-                        index_nplike.zeros(layout.length, dtype=np.int64),
-                        nplike=index_nplike,
+                        nplike.zeros(layout.length, dtype=np.int64),
+                        nplike=nplike,
                     ),
                     ak.contents.NumpyArray(
                         asbytes,
@@ -197,11 +197,11 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
                 asbytes = nplike.frombuffer(asbytes, dtype=np.uint8)
                 result = ak.contents.ListArray(
                     ak.index.Index64(
-                        index_nplike.zeros(layout.length, dtype=np.int64),
-                        nplike=index_nplike,
+                        nplike.zeros(layout.length, dtype=np.int64),
+                        nplike=nplike,
                     ),
                     ak.index.Index64(
-                        index_nplike.full(layout.length, len(asbytes), dtype=np.int64)
+                        nplike.full(layout.length, len(asbytes), dtype=np.int64)
                     ),
                     ak.contents.NumpyArray(
                         asbytes, parameters={"__array__": charlike_type}
@@ -222,7 +222,9 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
         else:
             return None
 
-    out = ak._do.recursively_apply(layout, action)
+    out = ak._do.recursively_apply(
+        layout, action, numpy_to_regular=not is_array_like(fill_value)
+    )
     return ctx.wrap(out, highlevel=highlevel)
 
 

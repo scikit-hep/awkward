@@ -6,6 +6,11 @@ import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
+from awkward._namedaxis import (
+    _get_named_axis,
+    _named_axis_to_positional_axis,
+)
+from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._nplikes.typetracer import is_unknown_scalar
@@ -91,8 +96,6 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=Non
 
 
 def _impl(array, counts, axis, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout, maybe_counts_layout = ensure_same_backend(
             ctx.unwrap(array, allow_record=False, primitive_policy="error"),
@@ -104,6 +107,13 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
                 string_policy="error",
             ),
         )
+
+    # Handle named axis
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
+
+    axis = regularize_axis(axis, none_allowed=False)
 
     if is_integer_like(maybe_counts_layout):
         # Regularize unknown values to unknown lengths
@@ -141,18 +151,24 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
         if not np.issubdtype(counts.dtype, np.integer):
             raise ValueError("counts must be integers")
 
-        current_offsets = maybe_counts_layout.backend.index_nplike.empty(
+        current_offsets = maybe_counts_layout.backend.nplike.empty(
             counts.size + 1, dtype=np.int64
         )
-        current_offsets[0] = 0
-        maybe_counts_layout.backend.index_nplike.cumsum(
-            counts, maybe_out=current_offsets[1:]
-        )
+        if isinstance(maybe_counts_layout.backend.nplike, Jax):
+            current_offsets = current_offsets.at[0].set(0)
+            current_offsets = current_offsets.at[1:].set(
+                maybe_counts_layout.backend.nplike.cumsum(counts)
+            )
+        else:
+            current_offsets[0] = 0
+            maybe_counts_layout.backend.nplike.cumsum(
+                counts, maybe_out=current_offsets[1:]
+            )
 
     def unflatten_this_layout(layout):
         nonlocal current_offsets
 
-        index_nplike = layout.backend.index_nplike
+        nplike = layout.backend.nplike
 
         if isinstance(counts, int) or counts is unknown_length:
             if (
@@ -165,11 +181,9 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
 
         else:
             position = (
-                index_nplike.searchsorted(
+                nplike.searchsorted(
                     current_offsets,
-                    index_nplike.asarray(
-                        [index_nplike.shape_item_as_index(layout.length)]
-                    ),
+                    nplike.asarray([nplike.shape_item_as_index(layout.length)]),
                     side="right",
                 )[0]
                 - 1
@@ -189,15 +203,15 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
                 )
 
             offsets = current_offsets[: position + 1]
-            current_offsets = current_offsets[
-                position:
-            ] - index_nplike.shape_item_as_index(layout.length)
+            current_offsets = current_offsets[position:] - nplike.shape_item_as_index(
+                layout.length
+            )
 
             out = ak.contents.ListOffsetArray(ak.index.Index64(offsets), layout)
             if not isinstance(mask, (bool, np.bool_)):
                 index = ak.index.Index8(
-                    index_nplike.asarray(mask, dtype=np.int8),
-                    nplike=index_nplike,
+                    nplike.asarray(mask, dtype=np.int8),
+                    nplike=nplike,
                 )
                 out = ak.contents.ByteMaskedArray(index, out, valid_when=False)
 
@@ -259,16 +273,13 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
                     inneroffsets = content.offsets
 
                 positions = (
-                    backend.index_nplike.searchsorted(
+                    backend.nplike.searchsorted(
                         inneroffsets.data, outeroffsets.data, side="right"
                     )
                     - 1
                 )
-                if (
-                    backend.index_nplike.known_data
-                    and not backend.index_nplike.array_equal(
-                        inneroffsets.data[positions], outeroffsets
-                    )
+                if backend.nplike.known_data and not backend.nplike.array_equal(
+                    inneroffsets.data[positions], outeroffsets
                 ):
                     raise ValueError(
                         "structure imposed by 'counts' does not fit in the array or partition "
@@ -292,4 +303,16 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
             f"at axis={axis}"
         )
 
-    return ctx.wrap(out, highlevel=highlevel)
+    wrapped_out = ctx.wrap(
+        out,
+        highlevel=highlevel,
+    )
+
+    # Step 2: propagate named axis from input to output,
+    #   use strategy "remove all" (see: awkward._namedaxis)
+    return ak.operations.ak_without_named_axis._impl(
+        wrapped_out,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

@@ -16,18 +16,31 @@ from awkward._backends.dispatch import (
 )
 from awkward._behavior import get_array_class, get_record_class
 from awkward._kernels import KernelError
-from awkward._layout import wrap_layout
+from awkward._layout import maybe_posaxis, wrap_layout
 from awkward._meta.meta import Meta
+from awkward._namedaxis import (
+    NamedAxis,
+    _add_named_axis,
+    _keep_named_axis,
+    _remove_named_axis,
+)
 from awkward._nplikes import to_nplike
+from awkward._nplikes.array_like import MaterializableArray
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_are_equal,
     type_parameters_equal,
 )
-from awkward._regularize import is_integer_like, is_sized_iterable
+from awkward._regularize import (
+    is_array_like,
+    is_integer,
+    is_integer_like,
+    is_sized_iterable,
+)
 from awkward._slicing import normalize_slice
 from awkward._typing import (
     TYPE_CHECKING,
@@ -38,11 +51,12 @@ from awkward._typing import (
     Protocol,
     Self,
     SupportsIndex,
+    Type,
     TypeAlias,
     TypedDict,
 )
 from awkward._util import UNSET
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.index import Index, Index64
 
 if TYPE_CHECKING:
@@ -226,6 +240,12 @@ class Content(Meta):
     ) -> Form:
         raise NotImplementedError
 
+    def form_with_key_path(self, root: FormKeyPathT = ()) -> Form:
+        return self._form_with_key_path(root)
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> Form:
+        raise NotImplementedError
+
     @property
     def form_cls(self) -> type[Form]:
         raise NotImplementedError
@@ -286,7 +306,7 @@ class Content(Meta):
             "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak.highlevel.Array"
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         raise TypeError(
             "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak.highlevel.Array"
         )
@@ -365,15 +385,15 @@ class Content(Meta):
         length = 1 if length is not unknown_length and length == 0 else length
         index = head.index
         indexlength = index.length
-        index = index.to_nplike(self._backend.index_nplike)
+        index = index.to_nplike(self._backend.nplike)
         outindex = Index64.empty(
             index.length * length,
-            self._backend.index_nplike,
+            self._backend.nplike,
         )
 
         assert (
-            outindex.nplike is self._backend.index_nplike
-            and index.nplike is self._backend.index_nplike
+            outindex.nplike is self._backend.nplike
+            and index.nplike is self._backend.nplike
         )
         self._maybe_index_error(
             self._backend[
@@ -383,7 +403,7 @@ class Content(Meta):
                 index.data,
                 index.length,
                 length,
-                raw._size,
+                raw.size,
             ),
             slicer=head,
         )
@@ -409,16 +429,16 @@ class Content(Meta):
                 f"cannot fit masked jagged slice with length {index.length} into {type(that).__name__} of size {content.length}",
             )
 
-        outputmask = Index64.empty(index.length, self._backend.index_nplike)
-        starts = Index64.empty(index.length, self._backend.index_nplike)
-        stops = Index64.empty(index.length, self._backend.index_nplike)
+        outputmask = Index64.empty(index.length, self._backend.nplike)
+        starts = Index64.empty(index.length, self._backend.nplike)
+        stops = Index64.empty(index.length, self._backend.nplike)
 
         assert (
-            index.nplike is self._backend.index_nplike
-            and jagged._offsets.nplike is self._backend.index_nplike
-            and outputmask.nplike is self._backend.index_nplike
-            and starts.nplike is self._backend.index_nplike
-            and stops.nplike is self._backend.index_nplike
+            index.nplike is self._backend.nplike
+            and jagged._offsets.nplike is self._backend.nplike
+            and outputmask.nplike is self._backend.nplike
+            and starts.nplike is self._backend.nplike
+            and stops.nplike is self._backend.nplike
         )
         self._maybe_index_error(
             self._backend[
@@ -509,34 +529,52 @@ class Content(Meta):
             )
 
     def __getitem__(self, where):
-        return self._getitem(where)
+        return self._getitem(where, NamedAxis)
 
-    def _getitem(self, where):
+    def _getitem(self, where, named_axis: Type[NamedAxis] = NamedAxis):
         if is_integer_like(where):
+            # propagate named_axis to output
+            named_axis.mapping = _remove_named_axis(
+                named_axis.mapping, 0, self.purelist_depth
+            )
             return self._getitem_at(ak._slicing.normalize_integer_like(where))
 
         elif isinstance(where, slice) and where.step is None:
             # Ensure that start, stop are non-negative!
-            start, stop, _, _ = self._backend.index_nplike.derive_slice_for_length(
-                normalize_slice(where, nplike=self._backend.index_nplike), self.length
+            start, stop, _, _ = self._backend.nplike.derive_slice_for_length(
+                normalize_slice(where, nplike=self._backend.nplike), self.length
             )
             return self._getitem_range(start, stop)
 
         elif isinstance(where, slice):
-            return self._getitem((where,))
+            return self._getitem((where,), named_axis)
 
         elif isinstance(where, str):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
-            return self._getitem((where,))
+            return self._getitem((where,), named_axis)
 
         elif where is Ellipsis:
-            return self._getitem((where,))
+            return self._getitem((where,), named_axis)
 
         elif isinstance(where, tuple):
             if len(where) == 0:
                 return self
+
+            # count number of ellipsis
+            # Need to use a little trick here:
+            #   where.count(Ellipsis) does not work, because it will do a == comparison against Ellipsis,
+            #   and this will fail in the case of typetracers where == is dispatched to np.equal ufunc.
+            #   In this dispatch we encounter an assertion that the type of the Ellipsis is not allowed.
+            #   ...but luckily we can use the fact that Ellipsis is a singleton and use the 'is' operator
+            n_ellipsis = 0
+            for w in where:
+                if w is ...:
+                    n_ellipsis += 1
+
+            if n_ellipsis > 1:
+                raise IndexError("an index can only have a single ellipsis ('...')")
 
             # Backend may change if index contains typetracers
             backend = backend_of(self, *where, coerce_to_common=True)
@@ -546,6 +584,62 @@ class Content(Meta):
             items = ak._slicing.normalise_items(where, backend)
             # Prepare items for advanced indexing (e.g. via broadcasting)
             nextwhere = ak._slicing.prepare_advanced_indexing(items, backend)
+
+            # Handle named axis
+            # first expand the ellipsis to colons in nextwhere,
+            # copy nextwhere to not pollute the original
+            _nextwhere = tuple(nextwhere)
+            if n_ellipsis == 1:
+                # collect the ellipsis index
+                # same little trick as above for `nextwhere.index(...)`
+                (ellipsis_at,) = tuple(i for i, x in enumerate(nextwhere) if x is ...)
+                # calculate how many slice(None) we need to add
+                # same little trick as above for `nextwhere.count(None)`
+                n_newaxis = 0
+                for x in nextwhere:
+                    if x is np.newaxis or x is None:
+                        n_newaxis += 1
+                n_total = self.minmax_depth[1]
+                n_slice_none = n_total - (len(_nextwhere) - n_newaxis - 1)
+                # expand `[...]` to `[:]*n_slice_none`
+                _nextwhere = (
+                    _nextwhere[:ellipsis_at]
+                    + (slice(None),) * n_slice_none
+                    + _nextwhere[ellipsis_at + 1 :]
+                )
+
+            # now propagate named axis
+            _named_axis = _keep_named_axis(named_axis.mapping, None)
+            _adjust_dim = 0
+            # this loop does the following:
+            # - remove a named axis for integer indices, e.g. `a[1, 2]`
+            # - add a named axis for None (or np.newaxis) indices, e.g. `a[..., None]`
+            # - keep named axis for any other index, e.g. `a[:]`, `a[0:1]`, or `a[a>0]`
+            #   (these may only remove elements, but not dimensions)
+            for dim, nw in enumerate(_nextwhere):
+                dim_adjusted = dim + _adjust_dim
+                total_adjusted = self.minmax_depth[1] + _adjust_dim
+                for _, pos in _named_axis.items():
+                    if maybe_posaxis(self, pos, 0) == dim_adjusted:
+                        break
+
+                if is_integer(nw) or (is_array_like(nw) and nw.ndim == 0):
+                    _named_axis = _remove_named_axis(
+                        named_axis=_named_axis,
+                        axis=dim_adjusted,
+                        total=total_adjusted,
+                    )
+                    _adjust_dim -= 1
+                elif nw is None:
+                    _named_axis = _add_named_axis(
+                        named_axis=_named_axis,
+                        axis=dim_adjusted,
+                        total=total_adjusted,
+                    )
+                    _adjust_dim += 1
+
+            # set propagated named axis
+            named_axis.mapping = _named_axis
 
             next = ak.contents.RegularArray(
                 this,
@@ -562,7 +656,7 @@ class Content(Meta):
                 return out._getitem_at(0)
 
         elif isinstance(where, ak.highlevel.Array):
-            return self._getitem(where.layout)
+            return self._getitem(where.layout, named_axis)
 
         # Convert between nplikes of different backends
         elif (
@@ -570,39 +664,41 @@ class Content(Meta):
             and where.backend is not self._backend
         ):
             backend = backend_of(self, where, coerce_to_common=True)
-            return self.to_backend(backend)._getitem(where.to_backend(backend))
+            return self.to_backend(backend)._getitem(
+                where.to_backend(backend), named_axis
+            )
 
         elif isinstance(where, ak.contents.NumpyArray):
             data_as_index = to_nplike(
                 where.data,
-                self._backend.index_nplike,
+                self._backend.nplike,
                 from_nplike=self._backend.nplike,
             )
             if np.issubdtype(where.dtype, np.int64):
                 allow_lazy = True
                 carry = Index64(
-                    self._backend.index_nplike.reshape(data_as_index, (-1,)),
-                    nplike=self._backend.index_nplike,
+                    self._backend.nplike.reshape(data_as_index, (-1,)),
+                    nplike=self._backend.nplike,
                 )
             elif np.issubdtype(where.dtype, np.integer):
                 allow_lazy = "copied"  # True, but also can be modified in-place
                 carry = Index64(
-                    self._backend.index_nplike.reshape(
-                        self._backend.index_nplike.astype(
+                    self._backend.nplike.reshape(
+                        self._backend.nplike.astype(
                             data_as_index, dtype=np.int64, copy=True
                         ),
                         (-1,),
                     ),
-                    nplike=self._backend.index_nplike,
+                    nplike=self._backend.nplike,
                 )
             elif np.issubdtype(where.dtype, np.bool_):
                 if len(where.data.shape) == 1:
-                    where = self._backend.index_nplike.nonzero(data_as_index)[0]
-                    carry = Index64(where, nplike=self._backend.index_nplike)
+                    where = self._backend.nplike.nonzero(data_as_index)[0]
+                    carry = Index64(where, nplike=self._backend.nplike)
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
-                    wheres = self._backend.index_nplike.nonzero(data_as_index)
-                    return self._getitem(wheres)
+                    wheres = self._backend.nplike.nonzero(data_as_index)
+                    return self._getitem(wheres, named_axis)
             else:
                 raise TypeError(
                     "array slice must be an array of integers or booleans, not\n\n    {}".format(
@@ -621,9 +717,9 @@ class Content(Meta):
         elif isinstance(where, ak.contents.RegularArray):
             maybe_numpy = where.maybe_to_NumpyArray()
             if maybe_numpy is None:
-                return self._getitem((where,))
+                return self._getitem((where,), named_axis)
             else:
-                return self._getitem(maybe_numpy)
+                return self._getitem(maybe_numpy, named_axis)
 
         # Awkward Array of strings
         elif (
@@ -634,10 +730,13 @@ class Content(Meta):
             return self._getitem_fields(ak.operations.to_list(where))
 
         elif isinstance(where, ak.contents.EmptyArray):
-            return where.to_NumpyArray(np.int64)
+            return self._carry(
+                Index64.empty(0, self._backend.nplike),
+                allow_lazy=True,
+            )
 
         elif isinstance(where, Content):
-            return self._getitem((where,))
+            return self._getitem((where,), named_axis)
 
         elif is_sized_iterable(where):
             # Do we have an array
@@ -654,11 +753,11 @@ class Content(Meta):
                     primitive_policy="error",
                     string_policy="as-characters",
                 )
-                return self._getitem(layout)
+                return self._getitem(layout, named_axis)
 
             elif len(where) == 0:
                 return self._carry(
-                    Index64.empty(0, self._backend.index_nplike),
+                    Index64.empty(0, self._backend.nplike),
                     allow_lazy=True,
                 )
             # Normally we would be worried about np.array et al. being treated
@@ -682,7 +781,7 @@ class Content(Meta):
                     ),
                     self._backend,
                 )
-                return self._getitem(layout)
+                return self._getitem(layout, named_axis)
 
         else:
             raise TypeError(
@@ -695,6 +794,9 @@ class Content(Meta):
 
     def _is_getitem_at_placeholder(self) -> bool:
         raise NotImplementedError
+
+    def _is_getitem_at_virtual(self) -> bool:
+        return NotImplementedError
 
     def _getitem_at(self, where: IndexType):
         raise NotImplementedError
@@ -733,7 +835,7 @@ class Content(Meta):
         raise NotImplementedError
 
     def _local_index_axis0(self) -> NumpyArray:
-        localindex = Index64.empty(self.length, self._backend.index_nplike)
+        localindex = Index64.empty(self.length, self._backend.nplike)
         self._backend.maybe_kernel_error(
             self._backend["awkward_localindex", np.int64](
                 localindex.data,
@@ -843,24 +945,24 @@ class Content(Meta):
                     combinationslen = combinationslen * (size - j + 1)
                     combinationslen = combinationslen // j
 
-        tocarryraw = self._backend.index_nplike.empty(n, dtype=np.intp)
+        tocarryraw = ak.index.Index.empty(n, dtype=np.intp, nplike=self._backend.nplike)
         tocarry = []
         for i in range(n):
             ptr = Index64.empty(
                 combinationslen,
-                nplike=self._backend.index_nplike,
+                nplike=self._backend.nplike,
                 dtype=np.int64,
             )
             tocarry.append(ptr)
             if self._backend.nplike.known_data:
                 tocarryraw[i] = ptr.ptr
 
-        toindex = Index64.empty(n, self._backend.index_nplike, dtype=np.int64)
-        fromindex = Index64.empty(n, self._backend.index_nplike, dtype=np.int64)
+        toindex = Index64.empty(n, self._backend.nplike, dtype=np.int64)
+        fromindex = Index64.empty(n, self._backend.nplike, dtype=np.int64)
 
         assert (
-            toindex.nplike is self._backend.index_nplike
-            and fromindex.nplike is self._backend.index_nplike
+            toindex.nplike is self._backend.nplike
+            and fromindex.nplike is self._backend.nplike
         )
         self._backend.maybe_kernel_error(
             self._backend[
@@ -869,7 +971,7 @@ class Content(Meta):
                 toindex.data.dtype.type,
                 fromindex.data.dtype.type,
             ](
-                tocarryraw,
+                tocarryraw.data,
                 toindex.data,
                 fromindex.data,
                 n,
@@ -949,14 +1051,14 @@ class Content(Meta):
     def _pad_none_axis0(self, target: int, clip: bool) -> Content:
         if not clip and (self.length is unknown_length or (target < self.length)):
             index = Index64(
-                self._backend.index_nplike.arange(self.length, dtype=np.int64),
-                nplike=self._backend.index_nplike,
+                self._backend.nplike.arange(self.length, dtype=np.int64),
+                nplike=self._backend.nplike,
             )
 
         else:
-            index = Index64.empty(target, self._backend.index_nplike)
+            index = Index64.empty(target, self._backend.nplike)
 
-            assert index.nplike is self._backend.index_nplike
+            assert index.nplike is self._backend.nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_index_rpad_and_clip_axis0",
@@ -1008,6 +1110,10 @@ class Content(Meta):
         length: int,
         options: ToArrowOptions,
     ):
+        raise NotImplementedError
+
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        # prototype abstract signature
         raise NotImplementedError
 
     def to_backend_array(
@@ -1079,6 +1185,11 @@ class Content(Meta):
         )
 
     def to_packed(self, recursive: bool = True) -> Content:
+        if recursive:
+            return self.materialize(VirtualNDArray)._to_packed(True)
+        return self._to_packed(False)
+
+    def _to_packed(self, recursive: bool = True) -> Content:
         raise NotImplementedError
 
     def to_list(self, behavior: dict | None = None) -> list:
@@ -1203,6 +1314,28 @@ class Content(Meta):
             return self._to_backend(backend)
 
     def _to_backend(self, backend: Backend) -> Self:
+        raise NotImplementedError
+
+    def materialize(self, type_: type = MaterializableArray) -> Self:
+        return self._materialize(type_)
+
+    def _materialize(self, type_) -> Self:
+        raise NotImplementedError
+
+    @property
+    def is_all_materialized(self) -> bool:
+        return self._is_all_materialized
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        raise NotImplementedError
+
+    @property
+    def is_any_materialized(self) -> bool:
+        return self._is_any_materialized
+
+    @property
+    def _is_any_materialized(self) -> bool:
         raise NotImplementedError
 
     def with_parameter(self, key: str, value: Any) -> Self:

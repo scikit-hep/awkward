@@ -179,20 +179,27 @@ def _impl(
             regulararray=regulararray,
             recordarray=True,
             highlevel=False,
+            primitive_policy=primitive_policy,
         )
         return _handle_array_like(
             obj, promoted_layout, primitive_policy=primitive_policy
         )
     elif Cupy.is_own_array(obj):
         promoted_layout = ak.operations.from_cupy(
-            obj, regulararray=regulararray, highlevel=False
+            obj,
+            regulararray=regulararray,
+            highlevel=False,
+            primitive_policy=primitive_policy,
         )
         return _handle_array_like(
             obj, promoted_layout, primitive_policy=primitive_policy
         )
     elif Jax.is_own_array(obj):
         promoted_layout = ak.operations.from_jax(
-            obj, regulararray=regulararray, highlevel=False
+            obj,
+            regulararray=regulararray,
+            highlevel=False,
+            primitive_policy=primitive_policy,
         )
         return _handle_array_like(
             obj, promoted_layout, primitive_policy=primitive_policy
@@ -201,7 +208,14 @@ def _impl(
         backend = TypeTracerBackend.instance()
 
         if obj.ndim == 0:
-            obj = backend.nplike.reshape(obj, (1,))
+            if primitive_policy == "pass-through":
+                return obj
+            elif primitive_policy == "error":
+                raise TypeError(
+                    f"Encountered a scalar ({type(obj).__name__}), but scalar conversion/promotion is disabled"
+                )
+            else:
+                obj = backend.nplike.reshape(obj, (1,))
 
         if obj.dtype.kind in {"S", "U"}:
             raise NotImplementedError(
@@ -215,7 +229,9 @@ def _impl(
     elif ak._util.in_module(obj, "pyarrow"):
         return ak.operations.from_arrow(obj, highlevel=False)
     elif hasattr(obj, "__dlpack__") and hasattr(obj, "__dlpack_device__"):
-        return ak.operations.from_dlpack(obj, highlevel=False)
+        return ak.operations.from_dlpack(
+            obj, highlevel=False, primitive_policy=primitive_policy
+        )
     # Typed scalars
     elif isinstance(obj, np.generic):
         promoted_layout = ak.operations.from_numpy(
@@ -223,6 +239,7 @@ def _impl(
             regulararray=regulararray,
             recordarray=True,
             highlevel=False,
+            primitive_policy=primitive_policy,
         )
         return _handle_array_like(
             obj, promoted_layout, primitive_policy=primitive_policy

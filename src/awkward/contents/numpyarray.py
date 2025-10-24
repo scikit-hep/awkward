@@ -13,13 +13,15 @@ from awkward._backends.typetracer import TypeTracerBackend
 from awkward._layout import maybe_posaxis
 from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes import to_nplike
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
+from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
@@ -44,7 +46,7 @@ from awkward.contents.content import (
     ToArrowOptions,
 )
 from awkward.errors import AxisError
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
 from awkward.index import Index
 from awkward.types.numpytype import primitive_to_dtype
@@ -121,13 +123,16 @@ class NumpyArray(NumpyMeta, Content):
         if not isinstance(backend.nplike, Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)
 
-        if len(self._data.shape) == 0:
+        if len(ak._util.maybe_shape_of(self._data)) == 0:
             raise TypeError(
                 f"{type(self).__name__} 'data' must be an array, not a scalar: {data!r}"
             )
 
         if parameters is not None and parameters.get("__array__") in ("char", "byte"):
-            if data.dtype != np.dtype(np.uint8) or len(data.shape) != 1:
+            if (
+                data.dtype != np.dtype(np.uint8)
+                or len(ak._util.maybe_shape_of(data)) != 1
+            ):
                 raise ValueError(
                     "{} is a {}, so its 'data' must be 1-dimensional and uint8, not {}".format(
                         type(self).__name__, parameters["__array__"], repr(data)
@@ -174,7 +179,11 @@ class NumpyArray(NumpyMeta, Content):
 
     @property
     def inner_shape(self) -> tuple[ShapeItem, ...]:
-        return self._data.shape[1:]
+        if hasattr(self._data, "inner_shape"):
+            inner_shape = self._data.inner_shape
+        else:
+            inner_shape = self._data.shape[1:]
+        return inner_shape
 
     @property
     def strides(self) -> tuple[ShapeItem, ...]:
@@ -190,9 +199,17 @@ class NumpyArray(NumpyMeta, Content):
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> NumpyForm:
         return self.form_cls(
             ak.types.numpytype.dtype_to_primitive(self._data.dtype),
-            self._data.shape[1:],
+            self.inner_shape,
             parameters=self._parameters,
             form_key=getkey(self),
+        )
+
+    def _form_with_key_path(self, path: FormKeyPathT) -> NumpyForm:
+        return self.form_cls(
+            ak.types.numpytype.dtype_to_primitive(self._data.dtype),
+            self.inner_shape,
+            parameters=self._parameters,
+            form_key=repr(path),
         )
 
     def _to_buffers(
@@ -236,28 +253,24 @@ class NumpyArray(NumpyMeta, Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<NumpyArray dtype="]
         out.append(repr(str(self.dtype)))
-        if len(self._data.shape) == 1:
-            out.append(" len=" + repr(str(self._data.shape[0])))
+        shape = ak._util.maybe_shape_of(self._data)
+        if len(shape) == 1:
+            out.append(" len=" + repr(str(shape[0])))
         else:
-            out.append(
-                " shape='({})'".format(", ".join(str(x) for x in self._data.shape))
-            )
+            out.append(" shape='({})'".format(", ".join(str(x) for x in shape)))
 
         extra = self._repr_extra(indent + "    ")
 
-        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)):
-            arraystr_lines = ["[## ... ##]"]
-        else:
-            arraystr_lines = self._backend.nplike.array_str(
-                self._data, max_line_width=30
-            ).split("\n")
+        arraystr_lines = self._backend.nplike.array_str(
+            self._data, max_line_width=30
+        ).split("\n")
 
         if len(extra) != 0 or len(arraystr_lines) > 1:
             arraystr_lines = self._backend.nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
+                arraystr_lines = [*arraystr_lines[:2], " ...", *arraystr_lines[-2:]]
             out.append(">")
             out.extend(extra)
             out.append("\n" + indent + "    ")
@@ -296,13 +309,19 @@ class NumpyArray(NumpyMeta, Content):
     def _getitem_nothing(self):
         tmp = self._data[0:0]
         return NumpyArray(
-            self._backend.nplike.reshape(tmp, ((0,) + tmp.shape[2:])),
+            self._backend.nplike.reshape(tmp, (0, *tmp.shape[2:])),
             parameters=None,
             backend=self._backend,
         )
 
     def _is_getitem_at_placeholder(self) -> bool:
         return isinstance(self._data, PlaceholderArray)
+
+    def _is_getitem_at_virtual(self) -> bool:
+        is_virtual = (
+            isinstance(self._data, VirtualNDArray) and not self._data.is_materialized
+        )
+        return is_virtual
 
     def _getitem_at(self, where: IndexType):
         if not self._backend.nplike.known_data and len(self._data.shape) == 1:
@@ -320,6 +339,11 @@ class NumpyArray(NumpyMeta, Content):
             return out
 
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
+            return self
+
         try:
             out = self._data[start:stop]
         except IndexError as err:
@@ -406,7 +430,7 @@ class NumpyArray(NumpyMeta, Content):
                 where = (slice(None), head.data, *tail)
             else:
                 where = (
-                    self._backend.index_nplike.asarray(advanced.data),
+                    self._backend.nplike.asarray(advanced.data),
                     head.data,
                     *tail,
                 )
@@ -471,7 +495,8 @@ class NumpyArray(NumpyMeta, Content):
             elif (
                 np.issubdtype(self.dtype, np.bool_)
                 and np.issubdtype(other.dtype, np.number)
-                or np.issubdtype(self.dtype, np.number)
+            ) or (
+                np.issubdtype(self.dtype, np.number)
                 and np.issubdtype(other.dtype, np.bool_)
             ):
                 return mergebool
@@ -566,8 +591,8 @@ class NumpyArray(NumpyMeta, Content):
         is_equal = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
 
         assert (
-            starts.nplike is self._backend.index_nplike
-            and stops.nplike is self._backend.index_nplike
+            starts.nplike is self._backend.nplike
+            and stops.nplike is self._backend.nplike
         )
         if self.dtype == np.bool_:
             self._backend.maybe_kernel_error(
@@ -610,14 +635,12 @@ class NumpyArray(NumpyMeta, Content):
 
     def _as_unique_strings(self, offsets):
         offsets = ak.index.Index64(offsets.data, nplike=offsets.nplike)
-        outoffsets = ak.index.Index64.empty(
-            offsets.length, nplike=self._backend.index_nplike
-        )
+        outoffsets = ak.index.Index64.empty(offsets.length, nplike=self._backend.nplike)
         out = self._backend.nplike.empty(self.shape[0], dtype=self.dtype)
 
         assert (
-            offsets.nplike is self._backend.index_nplike
-            and outoffsets.nplike is self._backend.index_nplike
+            offsets.nplike is self._backend.nplike
+            and outoffsets.nplike is self._backend.nplike
         )
         self._backend.maybe_kernel_error(
             self._backend[
@@ -637,12 +660,12 @@ class NumpyArray(NumpyMeta, Content):
             )
         )
 
-        outlength = ak.index.Index64.empty(1, self._backend.index_nplike)
-        nextoffsets = ak.index.Index64.empty(offsets.length, self._backend.index_nplike)
+        outlength = ak.index.Index64.empty(1, self._backend.nplike)
+        nextoffsets = ak.index.Index64.empty(offsets.length, self._backend.nplike)
         assert (
-            outoffsets.nplike is self._backend.index_nplike
-            and nextoffsets.nplike is self._backend.index_nplike
-            and outlength.nplike is self._backend.index_nplike
+            outoffsets.nplike is self._backend.nplike
+            and nextoffsets.nplike is self._backend.nplike
+            and outlength.nplike is self._backend.nplike
         )
         self._backend.maybe_kernel_error(
             self._backend[
@@ -678,7 +701,7 @@ class NumpyArray(NumpyMeta, Content):
             )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self.length == 0:
+        if self.length is not unknown_length and self.length == 0:
             return True
         elif len(self.shape) != 1:
             return self.to_RegularArray()._is_unique(
@@ -697,9 +720,12 @@ class NumpyArray(NumpyMeta, Content):
         else:
             out = self._unique(negaxis, starts, parents, outlength)
             if isinstance(out, ak.contents.ListOffsetArray):
-                return out.content.length == self.length
+                return (
+                    out.content.length is not unknown_length
+                    and out.content.length == self.length
+                )
             else:
-                return out.length == self.length
+                return out.length is not unknown_length and out.length == self.length
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self.shape[0] == 0:
@@ -711,7 +737,7 @@ class NumpyArray(NumpyMeta, Content):
         elif negaxis is None:
             contiguous_self = self.to_contiguous()
 
-            offsets = ak.index.Index64.zeros(2, self._backend.index_nplike)
+            offsets = ak.index.Index64.zeros(2, self._backend.nplike)
             offsets[1] = self._data.size
             dtype = (
                 np.dtype(np.int64)
@@ -719,7 +745,7 @@ class NumpyArray(NumpyMeta, Content):
                 else self._data.dtype
             )
             out = self._backend.nplike.empty(self._data.size, dtype=dtype)
-            assert offsets.nplike is self._backend.index_nplike
+            assert offsets.nplike is self._backend.nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_sort",
@@ -737,9 +763,9 @@ class NumpyArray(NumpyMeta, Content):
                     False,
                 )
             )
-            nextlength = ak.index.Index64.empty(1, self._backend.index_nplike)
-            assert nextlength.nplike is self._backend.index_nplike
-            out = self._backend.index_nplike.unique_values(out)
+            nextlength = ak.index.Index64.empty(1, self._backend.nplike)
+            assert nextlength.nplike is self._backend.nplike
+            out = self._backend.nplike.unique_values(out)
             nextlength[0] = out.size
 
             return ak.contents.NumpyArray(
@@ -758,10 +784,10 @@ class NumpyArray(NumpyMeta, Content):
             )
         else:
             parents_length = parents.length
-            offsets_length = ak.index.Index64.empty(1, self._backend.index_nplike)
+            offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
-                offsets_length.nplike is self._backend.index_nplike
-                and parents.nplike is self._backend.index_nplike
+                offsets_length.nplike is self._backend.nplike
+                and parents.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -775,12 +801,10 @@ class NumpyArray(NumpyMeta, Content):
                 )
             )
 
-            offsets = ak.index.Index64.empty(
-                offsets_length[0], self._backend.index_nplike
-            )
+            offsets = ak.index.Index64.empty(offsets_length[0], self._backend.nplike)
             assert (
-                offsets.nplike is self._backend.index_nplike
-                and parents.nplike is self._backend.index_nplike
+                offsets.nplike is self._backend.nplike
+                and parents.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -796,7 +820,7 @@ class NumpyArray(NumpyMeta, Content):
             )
 
             out = self._backend.nplike.empty(self.length, dtype=self.dtype)
-            assert offsets.nplike is self._backend.index_nplike
+            assert offsets.nplike is self._backend.nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_sort",
@@ -815,12 +839,10 @@ class NumpyArray(NumpyMeta, Content):
                 )
             )
 
-            nextoffsets = ak.index.Index64.empty(
-                offsets.length, self._backend.index_nplike
-            )
+            nextoffsets = ak.index.Index64.empty(offsets.length, self._backend.nplike)
             assert (
-                offsets.nplike is self._backend.index_nplike
-                and nextoffsets.nplike is self._backend.index_nplike
+                offsets.nplike is self._backend.nplike
+                and nextoffsets.nplike is self._backend.nplike
             )
             if out.dtype == np.bool_:
                 self._backend.maybe_kernel_error(
@@ -851,14 +873,12 @@ class NumpyArray(NumpyMeta, Content):
                     )
                 )
 
-            outoffsets = ak.index.Index64.empty(
-                starts.length + 1, self._backend.index_nplike
-            )
+            outoffsets = ak.index.Index64.empty(starts.length + 1, self._backend.nplike)
 
             assert (
-                outoffsets.nplike is self._backend.index_nplike
-                and nextoffsets.nplike is self._backend.index_nplike
-                and starts.nplike is self._backend.index_nplike
+                outoffsets.nplike is self._backend.nplike
+                and nextoffsets.nplike is self._backend.nplike
+                and starts.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -892,10 +912,10 @@ class NumpyArray(NumpyMeta, Content):
             )
         else:
             parents_length = parents.length
-            _offsets_length = ak.index.Index64.empty(1, self._backend.index_nplike)
+            _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
-                _offsets_length.nplike is self._backend.index_nplike
-                and parents.nplike is self._backend.index_nplike
+                _offsets_length.nplike is self._backend.nplike
+                and parents.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -908,14 +928,14 @@ class NumpyArray(NumpyMeta, Content):
                     parents_length,
                 )
             )
-            offsets_length = self._backend.index_nplike.index_as_shape_item(
+            offsets_length = self._backend.nplike.index_as_shape_item(
                 _offsets_length[0]
             )
 
-            offsets = ak.index.Index64.empty(offsets_length, self._backend.index_nplike)
+            offsets = ak.index.Index64.empty(offsets_length, self._backend.nplike)
             assert (
-                offsets.nplike is self._backend.index_nplike
-                and parents.nplike is self._backend.index_nplike
+                offsets.nplike is self._backend.nplike
+                and parents.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -935,10 +955,10 @@ class NumpyArray(NumpyMeta, Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            nextcarry = ak.index.Index64.empty(self.length, self._backend.index_nplike)
+            nextcarry = ak.index.Index64.empty(self.length, self._backend.nplike)
             assert (
-                nextcarry.nplike is self._backend.index_nplike
-                and offsets.nplike is self._backend.index_nplike
+                nextcarry.nplike is self._backend.nplike
+                and offsets.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -959,11 +979,11 @@ class NumpyArray(NumpyMeta, Content):
 
             if shifts is not None:
                 assert (
-                    nextcarry.nplike is self._backend.index_nplike
-                    and shifts.nplike is self._backend.index_nplike
-                    and offsets.nplike is self._backend.index_nplike
-                    and parents.nplike is self._backend.index_nplike
-                    and starts.nplike is self._backend.index_nplike
+                    nextcarry.nplike is self._backend.nplike
+                    and shifts.nplike is self._backend.nplike
+                    and offsets.nplike is self._backend.nplike
+                    and parents.nplike is self._backend.nplike
+                    and starts.nplike is self._backend.nplike
                 )
                 self._backend.maybe_kernel_error(
                     self._backend[
@@ -998,10 +1018,10 @@ class NumpyArray(NumpyMeta, Content):
 
         else:
             parents_length = parents.length
-            _offsets_length = ak.index.Index64.empty(1, self._backend.index_nplike)
+            _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
-                _offsets_length.nplike is self._backend.index_nplike
-                and parents.nplike is self._backend.index_nplike
+                _offsets_length.nplike is self._backend.nplike
+                and parents.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -1014,15 +1034,15 @@ class NumpyArray(NumpyMeta, Content):
                     parents_length,
                 )
             )
-            offsets_length = self._backend.index_nplike.index_as_shape_item(
+            offsets_length = self._backend.nplike.index_as_shape_item(
                 _offsets_length[0]
             )
 
-            offsets = ak.index.Index64.empty(offsets_length, self._backend.index_nplike)
+            offsets = ak.index.Index64.empty(offsets_length, self._backend.nplike)
 
             assert (
-                offsets.nplike is self._backend.index_nplike
-                and parents.nplike is self._backend.index_nplike
+                offsets.nplike is self._backend.nplike
+                and parents.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -1043,7 +1063,7 @@ class NumpyArray(NumpyMeta, Content):
                 else self._data.dtype
             )
             out = self._backend.nplike.empty(self.length, dtype=dtype)
-            assert offsets.nplike is self._backend.index_nplike
+            assert offsets.nplike is self._backend.nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_sort",
@@ -1122,10 +1142,10 @@ class NumpyArray(NumpyMeta, Content):
         out = reducer.apply(self, parents, starts, shifts, outlength)
 
         if mask:
-            outmask = ak.index.Index8.empty(outlength, self._backend.index_nplike)
+            outmask = ak.index.Index8.empty(outlength, self._backend.nplike)
             assert (
-                outmask.nplike is self._backend.index_nplike
-                and parents.nplike is self._backend.index_nplike
+                outmask.nplike is self._backend.nplike
+                and parents.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -1191,7 +1211,7 @@ class NumpyArray(NumpyMeta, Content):
                 pyarrow, mask_node, validbytes, length, options
             )
 
-        nparray = self._raw(numpy)
+        (nparray,) = maybe_materialize(self._raw(numpy))
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
@@ -1215,8 +1235,26 @@ class NumpyArray(NumpyMeta, Content):
             ),
         )
 
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        cupy = Cupy.instance()
+        from cudf.core.column.column import as_column
+
+        assert self._backend.nplike.known_data
+        data = as_column(*maybe_materialize(self._data))
+        if mask is not None:
+            m = cupy.packbits(cupy.asarray(mask), bitorder="little")
+            if m.nbytes % 64:
+                m = cupy.resize(m, ((m.nbytes // 64) + 1) * 64)
+            m = cudf.core.buffer.as_buffer(m)
+            data.set_base_data(m)
+        return data
+
     def _to_backend_array(self, allow_missing, backend):
-        return to_nplike(self.data, backend.nplike, from_nplike=self._backend.nplike)
+        return to_nplike(
+            *maybe_materialize(self.data),
+            backend.nplike,
+            from_nplike=self._backend.nplike,
+        )
 
     def _remove_structure(
         self, backend: Backend, options: RemoveStructureOptions
@@ -1277,7 +1315,7 @@ class NumpyArray(NumpyMeta, Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         return self.to_contiguous().to_RegularArray()
 
     def _to_list(self, behavior, json_conversions):
@@ -1349,22 +1387,42 @@ class NumpyArray(NumpyMeta, Content):
             backend=backend,
         )
 
+    def _materialize(self, type_) -> Self:
+        (out,) = maybe_materialize(self._data, type_=type_)
+        return NumpyArray(out, parameters=self._parameters, backend=self._backend)
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        buffer = self._data
+        if isinstance(buffer, VirtualNDArray):
+            return buffer.is_materialized
+        return True
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        buffer = self._data
+        if isinstance(buffer, VirtualNDArray):
+            return buffer.is_materialized
+        return True
+
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:
         return self._is_equal_to_generic(other, all_parameters) and (
             not numpyarray
             # dtypes agree
-            or self.dtype == other.dtype
-            # Contents agree
-            and (
-                not self._backend.nplike.known_data
-                or self._backend.nplike.array_equal(self.data, other.data)
-            )
-            # Shapes agree
-            and all(
-                x is unknown_length or y is unknown_length or x == y
-                for x, y in zip(self.shape, other.shape)
+            or (
+                self.dtype == other.dtype
+                # Contents agree
+                and (
+                    not self._backend.nplike.known_data
+                    or self._backend.nplike.array_equal(self.data, other.data)
+                )
+                # Shapes agree
+                and all(
+                    x is unknown_length or y is unknown_length or x == y
+                    for x, y in zip(self.shape, other.shape)
+                )
             )
         )
 

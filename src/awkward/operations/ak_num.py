@@ -5,8 +5,14 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, maybe_posaxis
+from awkward._namedaxis import (
+    _get_named_axis,
+    _keep_named_axis,
+    _named_axis_to_positional_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._regularize import is_integer, regularize_axis
+from awkward._regularize import regularize_axis
+from awkward._typing import Mapping
 from awkward.errors import AxisError
 
 __all__ = ("num",)
@@ -15,7 +21,14 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def num(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
+def num(
+    array,
+    axis=1,
+    *,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -83,20 +96,32 @@ def num(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
     return _impl(array, axis, highlevel, behavior, attrs)
 
 
-def _impl(array, axis, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
+def _impl(
+    array,
+    axis,
+    highlevel: bool,
+    behavior: Mapping | None,
+    attrs: Mapping | None,
+):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
-    if not is_integer(axis):
-        raise TypeError(f"'axis' must be an integer, not {axis!r}")
+    # Handle named axis
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
+    # Step 2: propagate named axis from input to output,
+    #   use strategy "keep one" (see: awkward._namedaxis)
+    out_named_axis = _keep_named_axis(named_axis, axis)
+
+    axis = regularize_axis(axis, none_allowed=False)
 
     if maybe_posaxis(layout, axis, 1) == 0:
-        index_nplike = layout.backend.index_nplike
+        nplike = layout.backend.nplike
         if isinstance(layout, ak.record.Record):
-            return index_nplike.asarray(index_nplike.shape_item_as_index(1))
+            return nplike.asarray(nplike.shape_item_as_index(1))
         else:
-            return index_nplike.asarray(index_nplike.shape_item_as_index(layout.length))
+            return nplike.asarray(nplike.shape_item_as_index(layout.length))
 
     def action(layout, depth, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
@@ -109,4 +134,16 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
     out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 
-    return ctx.wrap(out, highlevel=highlevel)
+    wrapped_out = ctx.wrap(
+        out,
+        highlevel=highlevel,
+    )
+
+    # propagate named axis to output
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped_out,
+        named_axis=out_named_axis,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

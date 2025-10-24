@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from awkward._backends.dispatch import backend_of_obj
+from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
 from awkward._dispatch import high_level_function
+from awkward._layout import ensure_same_backend
+from awkward._namedaxis import _get_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_are_equal
 from awkward.operations.ak_to_layout import to_layout
@@ -26,6 +28,7 @@ def almost_equal(
     dtype_exact: bool = True,
     check_parameters: bool = True,
     check_regular: bool = True,
+    check_named_axis: bool = True,
 ):
     """
     Args:
@@ -38,6 +41,7 @@ def almost_equal(
         check_parameters: whether to compare parameters.
         check_regular: whether to consider ragged and regular dimensions as
             unequal.
+        check_named_axis: bool (default=True) whether to consider named axes as unequal.
 
     Return True if the two array-like arguments are considered equal for the
     given options. Otherwise, return False.
@@ -52,18 +56,49 @@ def almost_equal(
     # Dispatch
     yield left, right
 
+    return _impl(
+        left,
+        right,
+        rtol=rtol,
+        atol=atol,
+        dtype_exact=dtype_exact,
+        check_parameters=check_parameters,
+        check_regular=check_regular,
+        check_named_axis=check_named_axis,
+        exact_eq=False,
+        same_content_types=False,
+        equal_nan=False,
+    )
+
+
+def _impl(
+    left,
+    right,
+    rtol: float,
+    atol: float,
+    dtype_exact: bool,
+    check_parameters: bool,
+    check_regular: bool,
+    check_named_axis: bool,
+    exact_eq: bool,
+    same_content_types: bool,
+    equal_nan: bool,
+):
     # Implementation
     left_behavior = behavior_of(left)
     right_behavior = behavior_of(right)
 
-    left_backend = backend_of_obj(left, default=cpu)
-    right_backend = backend_of_obj(right, default=cpu)
-    if left_backend is not right_backend:
-        return False
-    backend = left_backend
+    layouts = ensure_same_backend(
+        to_layout(left, allow_record=False),
+        to_layout(right, allow_record=False),
+    )
+    left_layout = layouts[0].to_packed()
+    right_layout = layouts[1].to_packed()
+    backend = backend_of(left_layout)
 
-    left_layout = to_layout(left, allow_record=False).to_packed()
-    right_layout = to_layout(right, allow_record=False).to_packed()
+    if check_named_axis and _get_named_axis(left) and _get_named_axis(right):
+        if left.named_axis != right.named_axis:
+            return False
 
     if not backend.nplike.known_data:
         raise NotImplementedError(
@@ -82,6 +117,10 @@ def almost_equal(
         return layout.content[layout.offsets[0] : layout.offsets[-1]]
 
     def visitor(left, right) -> bool:
+        # Most firstly, check same_content_types before any transformations
+        if same_content_types and left.__class__ is not right.__class__:
+            return False
+
         # First, erase indexed types!
         if left.is_indexed and not left.is_option:
             left = left.project()
@@ -122,6 +161,11 @@ def almost_equal(
             return (left.size == right.size) and visitor(left.content, right.content)
         # List-list
         elif left.is_list and right.is_list:
+            # Check that indexes are equal
+            left_index = left.to_ListOffsetArray64(True).offsets
+            right_index = right.to_ListOffsetArray64(True).offsets
+            if not backend.nplike.array_equal(left_index.data, right_index.data):
+                return False
             # Mixed regular-var
             if left.is_regular and not right.is_regular:
                 return (not check_regular) and visitor(
@@ -152,18 +196,32 @@ def almost_equal(
                     and backend.nplike.all(left.data == right.data)
                     and left.shape == right.shape
                 )
+            elif exact_eq:
+                return (
+                    is_approx_dtype(left.dtype, right.dtype)
+                    and backend.nplike.array_equal(
+                        left.data,
+                        right.data,
+                        equal_nan=equal_nan,
+                    )
+                    and left.shape == right.shape
+                )
             else:
                 return (
                     is_approx_dtype(left.dtype, right.dtype)
                     and backend.nplike.all(
                         backend.nplike.isclose(
-                            left.data, right.data, rtol=rtol, atol=atol, equal_nan=False
+                            left.data,
+                            right.data,
+                            rtol=rtol,
+                            atol=atol,
+                            equal_nan=equal_nan,
                         )
                     )
                     and left.shape == right.shape
                 )
         elif left.is_option and right.is_option:
-            return backend.index_nplike.array_equal(
+            return backend.nplike.array_equal(
                 left.mask_as_bool(True), right.mask_as_bool(True)
             ) and visitor(left.project(), right.project())
         elif left.is_union and right.is_union:
@@ -173,19 +231,19 @@ def almost_equal(
                 # First, find unique values and their appearance (from smallest to largest)
                 # unique_index is in ascending order of `unique` value
                 (
-                    unique,
+                    _unique,
                     unique_index,
                     *_,
-                ) = backend.index_nplike.unique_all(values)
+                ) = backend.nplike.unique_all(values)
                 # Now re-order `unique` by order of appearance (`unique_index`)
-                return values[backend.index_nplike.sort(unique_index)]
+                return values[backend.nplike.sort(unique_index)]
 
             # Find order of appearance for each union tags, and assume these are one-to-one maps
             left_tag_order = ordered_unique_values(left.tags.data)
             right_tag_order = ordered_unique_values(right.tags.data)
 
             # Create map from left tags to right tags
-            left_tag_to_right_tag = backend.index_nplike.empty(
+            left_tag_to_right_tag = backend.nplike.empty(
                 left_tag_order.size, dtype=np.int64
             )
             left_tag_to_right_tag[left_tag_order] = right_tag_order
@@ -193,7 +251,7 @@ def almost_equal(
             # Map left tags onto right, such that the result should equal right.tags
             # if the two tag arrays are equivalent
             new_left_tag = left_tag_to_right_tag[left.tags.data]
-            if not backend.index_nplike.all(new_left_tag == right.tags.data):
+            if not backend.nplike.all(new_left_tag == right.tags.data):
                 return False
 
             # Now project out the contents, and check for equality

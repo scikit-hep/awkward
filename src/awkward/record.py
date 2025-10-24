@@ -194,7 +194,7 @@ class Record:
         return self._array._getitem_fields(where)._getitem_at(self._at)
 
     def to_packed(self, recursive: bool = True) -> Self:
-        if self._array.length == 1:
+        if self._array.length is not unknown_length and self._array.length == 1:
             return Record(self._array.to_packed(recursive), self._at)
         else:
             return Record(self._array[self._at : self._at + 1].to_packed(recursive), 0)
@@ -240,6 +240,17 @@ class Record:
             return self
         else:
             return Record(self._array._to_backend(backend), self._at)
+
+    def materialize(self) -> Self:
+        return Record(self._array.materialize(), self._at)
+
+    @property
+    def is_all_materialized(self) -> bool:
+        return self._array._is_all_materialized
+
+    @property
+    def is_any_materialized(self) -> bool:
+        return self._array._is_any_materialized
 
     def __copy__(self) -> Self:
         return self.copy()

@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+
 import fsspec.parquet
 
 import awkward as ak
+import awkward._connect.pyarrow
 from awkward._dispatch import high_level_function
 from awkward._layout import wrap_layout
 from awkward._regularize import is_integer
@@ -31,10 +35,11 @@ def from_parquet(
     Args:
         path (str): Local filename or remote URL, passed to fsspec for resolution.
             May contain glob patterns.
-        columns (None, str, or list of str): Glob pattern(s) with bash-like curly
+        columns (None, str, or iterable of (str or iterable of str)): Glob pattern(s) including bash-like curly
             brackets for matching column names. Nested records are separated by dots.
             If a list of patterns, the logical-or is matched. If None, all columns
-            are read.
+            are read. A list of lists can be provided to select columns with literal dots
+            in their names -- The inner list provides column names or patterns.
         row_groups (None or set of int): Row groups to read; must be non-negative.
             Order is ignored: the output array is presented in the order specified by
             Parquet metadata. If None, all row groups/all rows are read.
@@ -62,13 +67,9 @@ def from_parquet(
 
     See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
-    import awkward._connect.pyarrow  # noqa: F401
 
-    parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta = metadata(
-        path,
-        storage_options,
-        row_groups,
-        columns,
+    parquet_columns, subform, actual_paths, fs, subrg, _row_counts, _meta, _uuid = (
+        metadata(path, storage_options, row_groups, columns, calculate_uuid=True)
     )
     return _load(
         actual_paths,
@@ -94,9 +95,8 @@ def metadata(
     columns=None,
     ignore_metadata=False,
     scan_files=True,
+    calculate_uuid=False,
 ):
-    import awkward._connect.pyarrow
-
     # early exit if missing deps
     pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.from_parquet")
 
@@ -194,6 +194,43 @@ def metadata(
         list_indicator=list_indicator, column_prefix=column_prefix
     )
 
+    # generate hash from the col_counts, first row_group and last row_group to calculate approximate parquet uuid
+    uuid = None
+    if calculate_uuid:
+        uuids = [repr({"col_counts": col_counts})]
+        for row_group_index in (0, metadata.num_row_groups - 1):
+            row_group_info = metadata.row_group(row_group_index).to_dict()
+            for k, v in row_group_info.items():
+                # sorting columns, and columns::statistics have some version skew in underlying library
+                # with latter's 'distinct_counts' showing None vs 0 for example, so they're not used
+                if k in ["num_rows", "num_columns"]:
+                    uuids.append(repr({k: v}))
+                if k == "columns":
+                    for subitem in v:
+                        for subkey in subitem:
+                            if subkey not in [
+                                "file_offset",
+                                "file_path",
+                                "physical_type",
+                                "path_in_schema",
+                                "compression",
+                                "encodings",
+                                "total_compressed_size",
+                            ]:
+                                continue
+                            uuids.append(repr({subkey: subitem[subkey]}))
+        uuid = hashlib.sha256(json.dumps(",".join(uuids)).encode()).hexdigest()
+        return (
+            parquet_columns,
+            subform,
+            actual_paths,
+            fs,
+            subrg,
+            col_counts,
+            metadata,
+            uuid,
+        )
+
     return parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata
 
 
@@ -277,7 +314,7 @@ def _read_parquet_file(
     generate_bitmasks,
     metadata=None,
 ):
-    import pyarrow.parquet as pyarrow_parquet
+    pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.from_parquet")
 
     with _open_file(
         path,
@@ -296,6 +333,7 @@ def _read_parquet_file(
         else:
             arrow_table = parquetfile.read_row_groups(row_groups, parquet_columns)
 
+    arrow_table = ak._connect.pyarrow.convert_native_arrow_table_to_awkward(arrow_table)
     return ak.operations.ak_from_arrow._impl(
         arrow_table,
         generate_bitmasks,

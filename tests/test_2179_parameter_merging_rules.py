@@ -59,4 +59,4 @@ def test_merge_permutations():
 def test_merge_type_commutativity():
     one = ak.concatenate((ak.with_parameter([1], "k", "v"), [None]))
     two = ak.concatenate(([None], ak.with_parameter([1], "k", "v")))
-    assert type(one) == type(two)
+    assert type(one) is type(two)

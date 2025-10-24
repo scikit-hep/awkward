@@ -49,6 +49,16 @@ def _impl(array, highlevel, behavior, attrs):
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+
     ak._do.recursively_apply(layout, action)
 
-    return ctx.wrap(output, highlevel=highlevel)
+    wrapped_out = ctx.wrap(output, highlevel=highlevel, allow_other=True)
+
+    # propagate named axis from input to output,
+    #   use strategy "drop all" (see: awkward._namedaxis)
+    return ak.operations.ak_without_named_axis._impl(
+        wrapped_out,
+        highlevel=highlevel,
+        behavior=ctx.behavior,
+        attrs=ctx.attrs,
+    )

@@ -427,7 +427,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/5306213?v=4",
       "profile": "http://blog.jling.dev",
       "contributions": [
-        "doc"
+        "doc",
+        "code"
       ]
     },
     {
@@ -444,6 +445,142 @@
       "name": "Topher Cawlfield",
       "avatar_url": "https://avatars.githubusercontent.com/u/4094385?v=4",
       "profile": "https://github.com/tcawlfield",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "maxgalli",
+      "name": "Massimiliano Galli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/26309531?v=4",
+      "profile": "https://github.com/maxgalli",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "pfackeldey",
+      "name": "Peter Fackeldey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18463582?v=4",
+      "profile": "https://github.com/pfackeldey",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "ariostas",
+      "name": "Andres Rios Tascon",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7596837?v=4",
+      "profile": "http://www.ariostas.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "maxymnaumchyk",
+      "name": "maxymnaumchyk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70752300?v=4",
+      "profile": "https://github.com/maxymnaumchyk",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "tacaswell",
+      "name": "Thomas A Caswell",
+      "avatar_url": "https://avatars.githubusercontent.com/u/199813?v=4",
+      "profile": "https://tacaswell.github.io",
+      "contributions": [
+        "maintenance"
+      ]
+    },
+    {
+      "login": "basnijholt",
+      "name": "Bas Nijholt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6897215?v=4",
+      "profile": "http://www.nijho.lt",
+      "contributions": [
+        "maintenance"
+      ]
+    },
+    {
+      "login": "nj-vs-vh",
+      "name": "Igor Vaiman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30616208?v=4",
+      "profile": "https://nj-vs-vh.name/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "HavryliukAY",
+      "name": "Havryliuk Artem ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58536463?v=4",
+      "profile": "https://github.com/HavryliukAY",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "ikrommyd",
+      "name": "Iason Krommydas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/82155404?v=4",
+      "profile": "https://github.com/ikrommyd",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "NJManganelli",
+      "name": "Nick",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38217274?v=4",
+      "profile": "https://github.com/NJManganelli",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "APN-Pucky",
+      "name": "Alexander Puck Neuwirth",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4533248?v=4",
+      "profile": "https://apn-pucky.github.io/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "nileshpatra",
+      "name": "Nilesh Patra",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37436956?v=4",
+      "profile": "https://github.com/nileshpatra",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "TaiSakuma",
+      "name": "Tai Sakuma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1388081?v=4",
+      "profile": "https://github.com/TaiSakuma",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "DylanModesitt",
+      "name": "Dylan Modesitt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8339189?v=4",
+      "profile": "http://dylanmodesitt.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "JamesBrofos",
+      "name": "James Brofos",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3391741?v=4",
+      "profile": "https://www.brofos.org",
       "contributions": [
         "code"
       ]

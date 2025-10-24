@@ -35,7 +35,7 @@ from awkward.contents.content import (
 )
 from awkward.errors import AxisError
 from awkward.forms.emptyform import EmptyForm
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.index import Index
 
 if TYPE_CHECKING:
@@ -118,6 +118,9 @@ class EmptyArray(EmptyMeta, Content):
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> EmptyForm:
         return self.form_cls(form_key=getkey(self))
 
+    def _form_with_key_path(self, path: FormKeyPathT) -> EmptyForm:
+        return self.form_cls(form_key=repr(path))
+
     def _to_buffers(
         self,
         form: Form,
@@ -172,6 +175,9 @@ class EmptyArray(EmptyMeta, Content):
         return self
 
     def _is_getitem_at_placeholder(self) -> bool:
+        return False
+
+    def _is_getitem_at_virtual(self) -> bool:
         return False
 
     def _getitem_at(self, where: IndexType):
@@ -258,7 +264,7 @@ class EmptyArray(EmptyMeta, Content):
         if posaxis is not None and posaxis + 1 == depth:
             raise AxisError(self, "axis=0 not allowed for flatten")
         else:
-            offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
+            offsets = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
             return (
                 offsets,
                 EmptyArray(backend=self._backend),
@@ -268,6 +274,7 @@ class EmptyArray(EmptyMeta, Content):
         return True
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
+        others = [other for other in others if not other.is_unknown]
         if len(others) == 0:
             return self
         elif len(others) == 1:
@@ -387,6 +394,15 @@ class EmptyArray(EmptyMeta, Content):
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
+    def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        dtype = np.dtype("float64")
+        next = ak.contents.NumpyArray(
+            numpy.empty(length, dtype=dtype),
+            parameters=self._parameters,
+            backend=self._backend,
+        )
+        return next._to_cudf(cudf, None, 0)
+
     @classmethod
     def _arrow_needs_option_type(cls):
         return True  # This overrides Content._arrow_needs_option_type
@@ -437,7 +453,7 @@ class EmptyArray(EmptyMeta, Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         return self
 
     def _to_list(self, behavior, json_conversions):
@@ -447,6 +463,17 @@ class EmptyArray(EmptyMeta, Content):
 
     def _to_backend(self, backend: Backend) -> Self:
         return EmptyArray(backend=backend)
+
+    def _materialize(self, type_) -> Self:
+        return self
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return True
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return True
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool

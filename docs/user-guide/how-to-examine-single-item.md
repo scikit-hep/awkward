@@ -27,7 +27,7 @@ First, let's load the dataset using the {func}`ak.from_parquet` function. We wil
 ```{code-cell} ipython3
 import awkward as ak
 
-url = "https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet"
+url = "https://zenodo.org/records/14537442/files/chicago-taxi.parquet"
 taxi = ak.from_parquet(
     url,
     row_groups=[0],

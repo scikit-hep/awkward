@@ -37,23 +37,34 @@ jobs:
         runs-on:
           - windows-latest
           - ubuntu-latest
-          - macos-11
+          - macos-14
         python-version:
+          - '3.14'
+          - '3.13'
           - '3.12'
           - '3.11'
           - '3.10'
           - '3.9'
-          - '3.8'
         python-architecture:
           - x64
         dependencies-kind:
           - full
+        exclude:
+          - runs-on: macos-14
+            python-architecture: x64
         include:
+          - runs-on: macos-14
+            python-architecture: arm64
+            dependencies-kind: full
           - python-version: '3.9'
             python-architecture: x86
             runs-on: windows-latest
             dependencies-kind: full
-          - python-version: '3.8'
+          - python-version: '3.9'
+            python-architecture: x86
+            runs-on: windows-latest
+            dependencies-kind: numpy1
+          - python-version: '3.9'
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: minimal
@@ -64,15 +75,15 @@ jobs:
           - python-version: '3.11'
             python-architecture: x64
             runs-on: ubuntu-latest
-            dependencies-kind: numpy2
-          - python-version: '3.11'
+            dependencies-kind: ml
+          - python-version: '3.13t'
             python-architecture: x64
-            runs-on: macos-11
-            dependencies-kind: numpy2
-          - python-version: '3.11'
+            runs-on: ubuntu-latest
+            dependencies-kind: nogil
+          - python-version: '3.13t'
             python-architecture: x64
             runs-on: windows-latest
-            dependencies-kind: numpy2
+            dependencies-kind: nogil
 
     runs-on: ${{ matrix.runs-on }}
 
@@ -80,12 +91,12 @@ jobs:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
@@ -108,11 +119,16 @@ jobs:
           python -m build -w awkward-cpp
 
       - name: Find built wheel
-        uses: tj-actions/glob@v21
+        uses: tj-actions/glob@v22
         id: find-wheel
         with:
           files: |
             awkward-cpp/dist/*.whl
+
+      - name: Add workaround for 3.13 + cramjam
+        if: matrix.python-version == '3.13'
+        run: echo 'PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1' >> $GITHUB_ENV
+        shell: bash
 
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
@@ -152,10 +168,99 @@ jobs:
 
       - name: Upload Codecov results
         if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
+
+  run-gpu-tests:
+    name: Run GPU Tests
+
+    runs-on: self-hosted
+
+    env:
+      PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
+
+    # Required for miniconda to activate conda
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        cuda-version:
+          - 12
+
+    steps:
+      - name: Clean the workspace and mamba
+        run: |
+          rm -rf * .[!.]* || echo "Nothing to clean"
+          rm -rf ~/micromamba* || echo "Nothing to clean"
+
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Get micromamba
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: test-env
+          init-shell: bash
+          create-args: >-
+            -c rapidsai
+            -c nvidia
+            python=3.13
+            cudf
+            cupy
+            cuda-version=${{ matrix.cuda-version }}
+
+      - name: Generate build files
+        run: |
+          pip install pipx
+          pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v4
+        with:
+          path: awkward-cpp/dist
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w awkward-cpp
+
+      - name: Find built wheel
+        uses: tj-actions/glob@v22
+        id: find-wheel
+        with:
+          files: |
+            awkward-cpp/dist/*.whl
+
+      - name: Add workaround for 3.13 + cramjam
+        run: echo 'PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1' >> $GITHUB_ENV
+        shell: bash
+
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
+          -r "requirements-test-gpu.txt"
+
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Test CUDA kernels
+        run: python -m pytest -vv -rs tests-cuda-kernels
+
+      - name: Test CUDA kernels with explicitly defined values
+        run: python -m pytest -vv -rs tests-cuda-kernels-explicit
+
+      - name: Test CUDA non-kernel (Python)
+        run: >-
+          python -m pytest -vv -rs tests-cuda
 
   Linux-ROOT:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     env:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
@@ -168,19 +273,19 @@ jobs:
         shell: "bash -l {0}"
 
     steps:
-      - uses: "actions/checkout@v4"
+      - uses: "actions/checkout@v5"
         with:
           submodules: true
 
       - name: Setup Python via Conda
-        uses: mamba-org/setup-micromamba@v1
+        uses: mamba-org/setup-micromamba@v2
         with:
           # Cache invalidates daily by default
           cache-environment: true
           environment-name: awkward
-          # Need Python 3.8 for the cached wheels
+          # Need Python 3.9 for the cached wheels
           create-args: >-
-            python=3.8
+            python=3.9
             numpy
             root
 
@@ -222,12 +327,12 @@ jobs:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -264,3 +369,13 @@ jobs:
 
       - name: Test
         run: python -m pytest -vv -rs tests -k cppyy
+
+
+  pass-tests:
+    if: always()
+    needs: [ run-tests, Linux-ROOT, Linux-cppyy ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}

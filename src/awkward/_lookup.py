@@ -16,10 +16,7 @@ class Lookup:
         def arrayptr(x):
             if isinstance(x, int):
                 return x
-            elif isinstance(self.nplike, ak._nplikes.cupy.Cupy):
-                return x.data.ptr
-            else:
-                return x.ctypes.data
+            return self.nplike.memory_ptr(x)
 
         self.nplike = layout.backend.nplike
         self.generator = generator
@@ -30,6 +27,11 @@ class Lookup:
 
 
 def tolookup(layout, positions):
+    if not layout.is_all_materialized:
+        raise TypeError(
+            "Only fully materialized arrays can be passed into lookups. Use ak.materialize to materialize the array before passing it to the kernel."
+        )
+
     if isinstance(layout, ak.contents.EmptyArray):
         return tolookup(layout.to_NumpyArray(np.dtype(np.float64)), positions)
 

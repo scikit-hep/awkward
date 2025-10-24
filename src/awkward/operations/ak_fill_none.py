@@ -5,6 +5,10 @@ from __future__ import annotations
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend, maybe_posaxis
+from awkward._namedaxis import (
+    _get_named_axis,
+    _named_axis_to_positional_axis,
+)
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
@@ -69,8 +73,6 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=Non
 
 
 def _impl(array, value, axis, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         array_layout, value_layout = ensure_same_backend(
             ctx.unwrap(array, allow_record=True, allow_unknown=False),
@@ -83,6 +85,13 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
                 string_policy="pass-through",
             ),
         )
+
+    # Handle named axis
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
+
+    axis = regularize_axis(axis, none_allowed=True)
 
     if isinstance(value_layout, ak.record.Record):
         value_layout = value_layout.array[value_layout.at : value_layout.at + 1]

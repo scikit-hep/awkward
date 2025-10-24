@@ -14,7 +14,7 @@ jobs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
           fetch-depth: 0
@@ -35,7 +35,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
@@ -46,4 +46,4 @@ jobs:
         run: pipx run build --sdist awkward-cpp
 
       - name: Check sdist matches PyPI
-        run: pipx run nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward-cpp*.tar.gz
+        run: pipx run nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward_cpp*.tar.gz

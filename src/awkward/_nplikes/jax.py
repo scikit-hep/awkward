@@ -2,20 +2,30 @@
 
 from __future__ import annotations
 
+import warnings
+
 import awkward as ak
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpy_like import UfuncLike
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._typing import Final, cast
 
 
 @register_nplike
-class Jax(ArrayModuleNumpyLike):  # pylint: disable=too-many-ancestors
+class Jax(ArrayModuleNumpyLike):
     is_eager: Final = True
     supports_structured_dtypes: Final = False
+    supports_virtual_arrays: Final = True
 
     def __init__(self):
+        warnings.warn(
+            "The JAX backend is deprecated and will be removed in a future release of Awkward Array. "
+            "Please plan to migrate your code accordingly.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         jax = ak.jax.import_jax()
         self._module = jax.numpy
 
@@ -34,8 +44,7 @@ class Jax(ArrayModuleNumpyLike):  # pylint: disable=too-many-ancestors
     @property
     def char(self):
         raise ValueError(
-            "JAX arrays cannot do string manipulations until JAX implements "
-            "numpy.char"
+            "JAX arrays cannot do string manipulations until JAX implements numpy.char"
         )
 
     @property
@@ -62,8 +71,12 @@ class Jax(ArrayModuleNumpyLike):  # pylint: disable=too-many-ancestors
         Return `True` if the given object is a jax buffer, otherwise `False`.
 
         """
-        module, _, suffix = type_.__module__.partition(".")
+        module, _, _suffix = type_.__module__.partition(".")
         return module == "jaxlib"
+
+    def is_currently_tracing(self) -> bool:
+        jax = ak.jax.import_jax()
+        return isinstance(self._module.array(1) + 1, jax.core.Tracer)
 
     @classmethod
     def is_tracer_type(cls, type_: type) -> bool:
@@ -74,17 +87,71 @@ class Jax(ArrayModuleNumpyLike):  # pylint: disable=too-many-ancestors
         Return `True` if the given object is a jax tracer, otherwise `False`.
 
         """
-        module, _, suffix = type_.__module__.partition(".")
+        module, _, _suffix = type_.__module__.partition(".")
         return module == "jax"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         return True
 
     def ascontiguousarray(self, x: ArrayLike) -> ArrayLike:
-        return x
+        if isinstance(x, VirtualNDArray) and x.is_materialized:
+            return x.materialize()
+        else:
+            return x
 
     def strides(self, x: ArrayLike) -> tuple[int, ...]:
         out: tuple[int, ...] = (x.dtype.itemsize,)
         for item in cast(tuple[int, ...], x.shape[-1:0:-1]):
             out = (item * out[0], *out)
         return out
+
+    ############################ ufuncs, need to overwrite those because JAX doesn't support `out=` for ufuncs
+
+    def add(
+        self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
+    ) -> ArrayLike:
+        del maybe_out
+        x1, x2 = maybe_materialize(x1, x2)
+        return self._module.add(x1, x2)
+
+    def logical_or(
+        self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
+    ) -> ArrayLike:
+        del maybe_out
+        x1, x2 = maybe_materialize(x1, x2)
+        return self._module.logical_or(x1, x2)
+
+    def logical_and(
+        self, x1: ArrayLike, x2: ArrayLike, *, maybe_out: ArrayLike | None = None
+    ) -> ArrayLike:
+        del maybe_out
+        x1, x2 = maybe_materialize(x1, x2)
+        return self._module.logical_and(x1, x2)
+
+    def logical_not(
+        self, x: ArrayLike, maybe_out: ArrayLike | None = None
+    ) -> ArrayLike:
+        del maybe_out
+        (x,) = maybe_materialize(x)
+        return self._module.logical_not(x)
+
+    def sqrt(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
+        del maybe_out
+        (x,) = maybe_materialize(x)
+        return self._module.sqrt(x)
+
+    def exp(self, x: ArrayLike, maybe_out: ArrayLike | None = None) -> ArrayLike:
+        del maybe_out
+        (x,) = maybe_materialize(x)
+        return self._module.exp(x)
+
+    def divide(
+        self, x1: ArrayLike, x2: ArrayLike, maybe_out: ArrayLike | None = None
+    ) -> ArrayLike:
+        del maybe_out
+        x1, x2 = maybe_materialize(x1, x2)
+        return self._module.divide(x1, x2)
+
+    def memory_ptr(self, x: ArrayLike) -> int:
+        (x,) = maybe_materialize(x)
+        return x.unsafe_buffer_pointer()  # type: ignore[attr-defined]

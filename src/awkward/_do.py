@@ -11,6 +11,7 @@ from awkward._backends.backend import Backend
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Any, AxisMaybeNone, Literal
 from awkward.contents.content import ActionType, Content
+from awkward.contents.remove_structure import remove_structure
 from awkward.errors import AxisError
 from awkward.forms import form
 from awkward.record import Record
@@ -143,8 +144,8 @@ def combinations(
 
 def is_unique(layout, axis: Integral | None = None) -> bool:
     negaxis = axis if axis is None else -axis
-    starts = ak.index.Index64.zeros(1, nplike=layout._backend.index_nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.index_nplike)
+    starts = ak.index.Index64.zeros(1, nplike=layout._backend.nplike)
+    parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.nplike)
     return layout._is_unique(negaxis, starts, parents, 1)
 
 
@@ -173,10 +174,8 @@ def unique(layout: Content, axis=None):
                         f"axis={axis} exceeds the depth of this array ({depth})"
                     )
 
-        starts = ak.index.Index64.zeros(1, nplike=layout._backend.index_nplike)
-        parents = ak.index.Index64.zeros(
-            layout.length, nplike=layout._backend.index_nplike
-        )
+        starts = ak.index.Index64.zeros(1, nplike=layout._backend.nplike)
+        parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.nplike)
 
         return layout._unique(negaxis, starts, parents, 1)
 
@@ -191,46 +190,8 @@ def pad_none(
     return layout._pad_none(length, axis, 1, clip)
 
 
-def remove_structure(
-    layout: Content | Record,
-    backend: Backend | None = None,
-    flatten_records: bool = True,
-    function_name: str | None = None,
-    drop_nones: bool = True,
-    keepdims: bool = False,
-    allow_records: bool = False,
-    list_to_regular: bool = False,
-):
-    if isinstance(layout, Record):
-        return remove_structure(
-            layout._array[layout._at : layout._at + 1],
-            backend,
-            flatten_records,
-            function_name,
-            drop_nones,
-            keepdims,
-            allow_records,
-        )
-
-    else:
-        if backend is None:
-            backend = layout._backend
-        arrays = layout._remove_structure(
-            backend,
-            {
-                "flatten_records": flatten_records,
-                "function_name": function_name,
-                "drop_nones": drop_nones,
-                "keepdims": keepdims,
-                "allow_records": allow_records,
-                "list_to_regular": list_to_regular,
-            },
-        )
-        return tuple(arrays)
-
-
 def flatten(layout: Content, axis: int = 1) -> Content:
-    offsets, flattened = layout._offsets_and_flattened(axis, 1)
+    _offsets, flattened = layout._offsets_and_flattened(axis, 1)
     return flattened
 
 
@@ -263,9 +224,13 @@ def reduce(
     keepdims: bool = False,
     behavior: dict | None = None,
 ):
+    # store the original reducer for potential reuse later
+    original_reducer = reducer
     reducer = layout.backend.prepare_reducer(reducer)
 
     if axis is None:
+        del original_reducer  # not used below this point
+
         parts = remove_structure(
             layout,
             flatten_records=False,
@@ -286,8 +251,18 @@ def reduce(
         else:
             (layout,) = parts
 
-        starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
-        parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)
+        # Check if we're running with concrete data and if the reducer has a axis=None specialization.
+        # If both are true, we use the specialized reducer. This allows us to use optimized implementations
+        # from e.g. NumPy, but also make use of potentially better algorithms, i.e. Kahan summation for sum.
+        if (
+            layout.backend.nplike.known_data
+            and (specialization := reducer.axis_none_reducer()) is not None
+        ):
+            # overwrite reducer if it has an axis=None version
+            reducer = specialization
+
+        starts = ak.index.Index64.zeros(1, layout.backend.nplike)
+        parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)
         shifts = None
         next = layout._reduce_next(
             reducer,
@@ -327,8 +302,21 @@ def reduce(
                     f"(which is {depth})"
                 )
 
-        starts = ak.index.Index64.zeros(1, layout.backend.index_nplike)
-        parents = ak.index.Index64.zeros(layout.length, layout.backend.index_nplike)
+            # a flat array can be fully reduced with axis=None or axis=0 or axis=-1,
+            # so we treat them as equivalent and recurse to the axis=None specialization
+            if depth == negaxis == 1:
+                return reduce(
+                    layout=layout,
+                    reducer=original_reducer,
+                    axis=None,
+                    mask=mask,
+                    keepdims=keepdims,
+                    behavior=behavior,
+                )
+            del original_reducer  # not used below this point
+
+        starts = ak.index.Index64.zeros(1, layout.backend.nplike)
+        parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)
         shifts = None
         next = layout._reduce_next(
             reducer,
@@ -378,8 +366,8 @@ def argsort(
                 f"(which is {depth})"
             )
 
-    starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
+    starts = ak.index.Index64.zeros(1, nplike=layout.backend.nplike)
+    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.nplike)
     return layout._argsort_next(
         negaxis,
         starts,
@@ -417,8 +405,8 @@ def sort(
                 f"(which is {depth})"
             )
 
-    starts = ak.index.Index64.zeros(1, nplike=layout.backend.index_nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.index_nplike)
+    starts = ak.index.Index64.zeros(1, nplike=layout.backend.nplike)
+    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.nplike)
     return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)
 
 

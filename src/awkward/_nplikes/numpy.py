@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy
 
+from awkward._nplikes.array_like import maybe_materialize
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -17,9 +18,10 @@ np = NumpyMetadata.instance()
 
 
 @register_nplike
-class Numpy(ArrayModuleNumpyLike["NDArray"]):  # pylint: disable=too-many-ancestors
+class Numpy(ArrayModuleNumpyLike["NDArray"]):
     is_eager: Final = True
     supports_structured_dtypes: Final = True
+    supports_virtual_arrays: Final = True
 
     def __init__(self):
         self._module = numpy
@@ -51,7 +53,8 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):  # pylint: disable=too-many-ancest
         if isinstance(x, PlaceholderArray):
             return True
         else:
-            return x.flags["C_CONTIGUOUS"]  # type: ignore[attr-defined]
+            (x,) = maybe_materialize(x)
+            return x.flags["C_CONTIGUOUS"]  # type: ignore[union-attr]
 
     def packbits(
         self,
@@ -60,7 +63,7 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):  # pylint: disable=too-many-ancest
         axis: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ):
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         return numpy.packbits(x, axis=axis, bitorder=bitorder)  # type: ignore[arg-type]
 
     def unpackbits(
@@ -71,5 +74,9 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):  # pylint: disable=too-many-ancest
         count: int | None = None,
         bitorder: Literal["big", "little"] = "big",
     ):
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)  # type: ignore[arg-type]
+
+    def memory_ptr(self, x: NDArray) -> int:
+        (x,) = maybe_materialize(x)
+        return x.ctypes.data

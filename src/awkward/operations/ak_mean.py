@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import awkward as ak
+from awkward._attrs import attrs_of_obj
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import (
@@ -10,6 +11,11 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
+)
+from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
+    _get_named_axis,
+    _named_axis_to_positional_axis,
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
@@ -174,8 +180,6 @@ def nanmean(
 
 
 def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
-    axis = regularize_axis(axis)
-
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         x_layout, weight_layout = ensure_same_backend(
             ctx.unwrap(x, allow_record=False, primitive_policy="error"),
@@ -190,6 +194,13 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
 
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
+
+    # Handle named axis
+    named_axis = _get_named_axis(ctx)
+    # Step 1: Normalize named axis to positional axis
+    axis = _named_axis_to_positional_axis(named_axis, axis)
+
+    axis = regularize_axis(axis, none_allowed=True)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
@@ -215,8 +226,8 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
             sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
                 axis,
-                keepdims,
-                mask_identity,
+                keepdims=True,
+                mask_identity=True,
                 highlevel=True,
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
@@ -245,14 +256,25 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
 
         if axis is None:
             if not keepdims:
+                # remove all dimensions
                 out = out[(0,) * out.ndim]
         else:
             if not keepdims:
+                # remove reduced dimension
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        return ctx.wrap(
-            maybe_highlevel_to_lowlevel(out), highlevel=highlevel, allow_other=True
+        wrapped = ctx.without_attr(NAMED_AXIS_KEY).wrap(
+            maybe_highlevel_to_lowlevel(out),
+            highlevel=highlevel,
+            allow_other=True,
+        )
+        return ak.operations.ak_with_named_axis._impl(
+            wrapped,
+            named_axis=_get_named_axis(attrs_of_obj(out), allow_any=True),
+            highlevel=highlevel,
+            behavior=None,
+            attrs=None,
         )
 
 

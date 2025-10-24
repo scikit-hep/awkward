@@ -4,6 +4,7 @@ from __future__ import annotations
 import cupy as cp
 import numpy as np
 import pytest
+from numpy.exceptions import AxisError
 
 import awkward as ak
 from awkward.forms import (
@@ -14,6 +15,13 @@ from awkward.forms import (
 )
 
 to_list = ak.operations.to_list
+
+
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_cuda():
+    yield
+    cp._default_memory_pool.free_all_blocks()
+    cp.cuda.Device().synchronize()
 
 
 def test_0184_concatenate_operation_records():
@@ -262,7 +270,7 @@ def test_1904_drop_none_all_axes():
     assert (
         ak.is_none(array, axis=-2).tolist() == ak.is_none(cuda_array, axis=-2).tolist()
     )
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.drop_none(array, axis=-2).tolist()
         ak.drop_none(cuda_array, axis=-2).tolist()
 
@@ -282,7 +290,7 @@ def test_1904_drop_none_all_axes():
         ak.is_none(array2, axis=-2).tolist()
         == ak.is_none(cuda_array2, axis=-2).tolist()
     )
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.drop_none(array2, axis=-2).tolist()
         ak.drop_none(cuda_array2, axis=-2).tolist()
 
@@ -307,7 +315,7 @@ def test_1914_improved_axis_to_posaxis_is_none():
 
     assert ak.is_none(array, axis=2).tolist() == ak.is_none(cuda_array, axis=2).tolist()
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.is_none(array, axis=3)
         ak.is_none(cuda_array, axis=3)
 
@@ -319,7 +327,7 @@ def test_1914_improved_axis_to_posaxis_is_none():
         ak.is_none(array, axis=-2).tolist() == ak.is_none(cuda_array, axis=-2).tolist()
     )
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.is_none(array, axis=-3)
         ak.is_none(cuda_array, axis=-3)
 
@@ -353,7 +361,7 @@ def test_1914_improved_axis_to_posaxis_singletons():
         == ak.singletons(cuda_array, axis=2).tolist()
     )
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.singletons(array, axis=3)
         ak.singletons(cuda_array, axis=3)
 
@@ -367,7 +375,7 @@ def test_1914_improved_axis_to_posaxis_singletons():
         == ak.singletons(cuda_array, axis=-2).tolist()
     )
 
-    with pytest.raises(np.AxisError):
+    with pytest.raises(AxisError):
         ak.singletons(array, axis=-3)
         ak.singletons(cuda_array, axis=-3)
 
@@ -438,7 +446,7 @@ def test_2660_expected_container_keys_from_form_UnionArray_NumpyArray():
 
     cuda_array = ak.to_backend(array, "cuda")
 
-    form, length, container = ak.to_buffers(cuda_array)
+    form, _length, container = ak.to_buffers(cuda_array)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -466,7 +474,7 @@ def test_2660_expected_container_keys_from_form_UnionArray_RecordArray_NumpyArra
 
     cuda_array = ak.to_backend(array, "cuda")
 
-    form, length, container = ak.to_buffers(cuda_array)
+    form, _length, container = ak.to_buffers(cuda_array)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -651,6 +659,8 @@ def test_2425_forms_from_type_regular():
 
 
 def test_2425_forms_from_type_categorical():
+    pytest.importorskip("pyarrow")
+
     array = ak.str.to_categorical(["do", "re", "mi", "fa", "so"])
 
     cuda_array = ak.to_backend(array, "cuda")
@@ -663,6 +673,8 @@ def test_2425_forms_from_type_categorical():
 
 
 def test_2425_forms_from_type_categorical_option():
+    pytest.importorskip("pyarrow")
+
     array = ak.str.to_categorical(["do", "re", "mi", "fa", "so", None])
 
     cuda_array = ak.to_backend(array, "cuda")
@@ -724,7 +736,7 @@ def test_2410_string_broadcast_deep_string_string():
     cuda_a = ak.to_backend(a, "cuda")
     cuda_b = ak.to_backend(b, "cuda")
 
-    left, right = ak.broadcast_arrays(cuda_a, cuda_b)
+    _left, right = ak.broadcast_arrays(cuda_a, cuda_b)
     assert right.to_list() == [["x", "x"], ["y", "y", "y", "y"]]
 
 
@@ -735,7 +747,7 @@ def test_2410_string_broadcast_deep_numbers_string():
     cuda_a = ak.to_backend(a, "cuda")
     cuda_b = ak.to_backend(b, "cuda")
 
-    left, right = ak.broadcast_arrays(cuda_a, cuda_b)
+    _left, right = ak.broadcast_arrays(cuda_a, cuda_b)
     assert right.to_list() == [["x", "x"], ["y", "y", "y", "y"]]
 
 
@@ -991,7 +1003,8 @@ def test_2064_fill_none_record_axis_last():
 
 
 def test_2064_fill_none_record_option_outside_record():
-    record = ak.zip({"x": [1, 4], "y": [2, 3]}).mask[[True, False]]
+    record = ak.zip({"x": [1, 4], "y": [2, 3]})
+    record = record.mask[[True, False]]
 
     cuda_record = ak.to_backend(record, "cuda")
 
@@ -1180,6 +1193,8 @@ def test_1823_fill_none_axis_none():
 
 
 def test_1671_categorical_type():
+    pytest.importorskip("pyarrow")
+
     array1 = ak.Array(["one", "two", "one", "one"])
     array2 = ak.str.to_categorical(array1)
 
@@ -1197,6 +1212,8 @@ def test_1671_categorical_type():
 
 
 def test_1671_categorical_type_to_categorical():
+    pytest.importorskip("pyarrow")
+
     array1 = ak.Array(["one", "two", "one", "one"])
     array2 = ak.str.to_categorical(array1)
 

@@ -2,20 +2,26 @@
 
 from __future__ import annotations
 
+import importlib
 import sys
 import warnings
+from functools import reduce
 
 from packaging.version import parse as parse_version
 
 import awkward as ak
-from awkward._behavior import behavior_of
+from awkward._attrs import attrs_of_obj
+from awkward._behavior import behavior_of, behavior_of_obj
 from awkward._layout import wrap_layout
+from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 
 _has_checked_version = False
+_numexpr_version_ge_2_11_0 = False
 
 
 def _import_numexpr():
     global _has_checked_version
+    global _numexpr_version_ge_2_11_0
     try:
         import numexpr
     except ModuleNotFoundError as err:
@@ -30,14 +36,17 @@ or
         ) from err
     else:
         if not _has_checked_version:
-            if parse_version(numexpr.__version__) < parse_version("2.7.1"):
+            _numexpr_version = importlib.metadata.version("numexpr")
+            if parse_version(_numexpr_version) < parse_version("2.7.1"):
                 warnings.warn(
                     "Awkward Array is only known to work with numexpr 2.7.1 or later"
-                    f"(you have version {numexpr.__version__})",
+                    f"(you have version {_numexpr_version})",
                     RuntimeWarning,
                     stacklevel=1,
                 )
             _has_checked_version = True
+            if parse_version(_numexpr_version) >= parse_version("2.11.0"):
+                _numexpr_version_ge_2_11_0 = True
         return numexpr
 
 
@@ -63,7 +72,7 @@ def getArguments(names, local_dict=None, global_dict=None):
                 a = global_dict[name]
             arguments.append(a)  # <--- different from NumExpr
     finally:
-        if clear_local_dict:
+        if clear_local_dict and hasattr(local_dict, "clear"):
             local_dict.clear()
 
     return arguments
@@ -74,13 +83,26 @@ def evaluate(
 ):
     numexpr = _import_numexpr()
 
+    if _numexpr_version_ge_2_11_0:
+        if not hasattr(numexpr.necompiler._numexpr_last, "l"):
+            numexpr.necompiler._numexpr_last.l = numexpr.utils.ContextDict()
+        if not hasattr(numexpr.necompiler._names_cache, "c"):
+            numexpr.necompiler._names_cache.c = numexpr.utils.CacheDict(256)
+        if not hasattr(numexpr.necompiler._numexpr_cache, "c"):
+            numexpr.necompiler._numexpr_cache.c = numexpr.utils.CacheDict(256)
+        _numexpr_last = numexpr.necompiler._numexpr_last.l
+        _names_cache = numexpr.necompiler._names_cache.c
+        _numexpr_cache = numexpr.necompiler._numexpr_cache.c
+    else:
+        _numexpr_last = numexpr.necompiler._numexpr_last
+        _names_cache = numexpr.necompiler._names_cache
+        _numexpr_cache = numexpr.necompiler._numexpr_cache
+
     context = numexpr.necompiler.getContext(kwargs)
     expr_key = (expression, tuple(sorted(context.items())))
-    if expr_key not in numexpr.necompiler._names_cache:
-        numexpr.necompiler._names_cache[expr_key] = numexpr.necompiler.getExprNames(
-            expression, context
-        )
-    names, ex_uses_vml = numexpr.necompiler._names_cache[expr_key]
+    if expr_key not in _names_cache:
+        _names_cache[expr_key] = numexpr.necompiler.getExprNames(expression, context)
+    names, _ex_uses_vml = _names_cache[expr_key]
     arguments = getArguments(names, local_dict, global_dict)
 
     arrays = [ak.operations.to_layout(x, allow_unknown=True) for x in arguments]
@@ -110,9 +132,26 @@ def evaluate(
             return None
 
     behavior = behavior_of(*arrays)
-    out = ak._broadcasting.broadcast_and_apply(arrays, action, allow_records=False)
+    depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(arguments)
+    out = ak._broadcasting.broadcast_and_apply(
+        arrays,
+        action,
+        depth_context=depth_context,
+        lateral_context=lateral_context,
+        allow_records=False,
+    )
     assert isinstance(out, tuple) and len(out) == 1
-    return wrap_layout(out[0], behavior)
+    wrapped = wrap_layout(out[0], behavior)
+    out_named_axis = reduce(
+        _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+    )
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped,
+        named_axis=out_named_axis,
+        highlevel=True,
+        behavior=behavior_of_obj(wrapped),
+        attrs=attrs_of_obj(wrapped),
+    )
 
 
 evaluate.evaluate = evaluate
@@ -121,11 +160,18 @@ evaluate.evaluate = evaluate
 def re_evaluate(local_dict=None):
     numexpr = _import_numexpr()
 
+    if _numexpr_version_ge_2_11_0:
+        if not hasattr(numexpr.necompiler._numexpr_last, "l"):
+            numexpr.necompiler._numexpr_last.l = numexpr.utils.ContextDict()
+        _numexpr_last = numexpr.necompiler._numexpr_last.l
+    else:
+        _numexpr_last = numexpr.necompiler._numexpr_last
+
     try:
-        compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
+        compiled_ex = _numexpr_last["ex"]  # noqa: F841
     except KeyError as err:
         raise RuntimeError("not a previous evaluate() execution found") from err
-    names = numexpr.necompiler._numexpr_last["argnames"]
+    names = _numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
 
     arrays = [ak.operations.to_layout(x, allow_unknown=True) for x in arguments]
@@ -148,6 +194,24 @@ def re_evaluate(local_dict=None):
             return None
 
     behavior = behavior_of(*arrays)
-    out = ak._broadcasting.broadcast_and_apply(arrays, action, allow_records=False)
+
+    depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(arguments)
+    out = ak._broadcasting.broadcast_and_apply(
+        arrays,
+        action,
+        depth_context=depth_context,
+        lateral_context=lateral_context,
+        allow_records=False,
+    )
     assert isinstance(out, tuple) and len(out) == 1
-    return wrap_layout(out[0], behavior)
+    wrapped = wrap_layout(out[0], behavior)
+    out_named_axis = reduce(
+        _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
+    )
+    return ak.operations.ak_with_named_axis._impl(
+        wrapped,
+        named_axis=out_named_axis,
+        highlevel=True,
+        behavior=behavior_of_obj(wrapped),
+        attrs=attrs_of_obj(wrapped),
+    )

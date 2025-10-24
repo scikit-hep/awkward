@@ -4,16 +4,17 @@ from __future__ import annotations
 
 import copy
 
+import awkward as ak
 from awkward._nplikes import to_nplike
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
-from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem
-from awkward._nplikes.typetracer import TypeTracer, TypeTracerArray
+from awkward._nplikes.typetracer import TypeTracer
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._slicing import normalize_slice
 from awkward._typing import Any, DType, Final, Self, cast
 
@@ -67,13 +68,13 @@ class Index:
             self._nplike.asarray(data, dtype=self._expected_dtype)
         )
 
-        if len(self._data.shape) != 1:
+        if len(ak._util.maybe_shape_of(self._data)) != 1:
             raise TypeError("Index data must be one-dimensional")
 
         if np.issubdtype(self._data.dtype, np.longlong):
-            assert (
-                np.dtype(np.longlong).itemsize == 8
-            ), "longlong is always 64-bit, right?"
+            assert np.dtype(np.longlong).itemsize == 8, (
+                "longlong is always 64-bit, right?"
+            )
 
             self._data = self._data.view(np.int64)
 
@@ -136,10 +137,7 @@ class Index:
 
     @property
     def ptr(self):
-        if self._nplike == Numpy.instance():
-            return self._data.ctypes.data
-        elif self._nplike == Cupy.instance():
-            return self._data.data.ptr
+        return self._nplike.memory_ptr(self._data)
 
     @property
     def length(self) -> ShapeItem:
@@ -157,6 +155,24 @@ class Index:
 
     def raw(self, nplike: NumpyLike) -> ArrayLike:
         return to_nplike(self.data, nplike, from_nplike=self._nplike)
+
+    def materialize(self, type_) -> Index:
+        (out,) = maybe_materialize(self._data, type_=type_)
+        return Index(out, metadata=self.metadata, nplike=self._nplike)
+
+    @property
+    def is_all_materialized(self) -> bool:
+        buffer = self._data
+        if isinstance(buffer, VirtualNDArray):
+            return buffer.is_materialized
+        return True
+
+    @property
+    def is_any_materialized(self) -> bool:
+        buffer = self._data
+        if isinstance(buffer, VirtualNDArray):
+            return buffer.is_materialized
+        return True
 
     def __len__(self) -> int:
         return int(self.length)
@@ -185,21 +201,18 @@ class Index:
         out = [indent, pre, "<Index dtype="]
         out.append(repr(str(self.dtype)))
         out.append(" len=")
-        out.append(repr(str(self._data.shape[0])))
+        out.append(repr(str(ak._util.maybe_length_of(self))))
 
-        if isinstance(self._data, (TypeTracerArray, PlaceholderArray)):
-            arraystr_lines = ["[## ... ##]"]
-        else:
-            arraystr_lines = self._nplike.array_str(
-                self._data, max_line_width=30
-            ).split("\n")
+        arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
+            "\n"
+        )
 
         if len(arraystr_lines) > 1 or self._metadata is not None:
             arraystr_lines = self._nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
+                arraystr_lines = [*arraystr_lines[:2], " ...", *arraystr_lines[-2:]]
             out.append(">\n" + indent + "    ")
             if self._metadata is not None:
                 for k, v in self._metadata.items():
@@ -210,7 +223,7 @@ class Index:
             out.append("\n" + indent + "</Index>")
         else:
             if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
+                arraystr_lines = [*arraystr_lines[:2], " ...", *arraystr_lines[-2:]]
             out.append(">")
             out.append(arraystr_lines[0])
             out.append("</Index>")
@@ -226,6 +239,13 @@ class Index:
         if isinstance(where, slice):
             where = normalize_slice(where, nplike=self.nplike)
 
+            # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+            # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+            if self._nplike.known_data and (
+                where.step == 1 and where.start == 0 and where.stop == self.length
+            ):
+                return self
+
         out = self._data[where]
 
         if hasattr(out, "shape") and len(out.shape) != 0:
@@ -236,7 +256,15 @@ class Index:
             return out
 
     def __setitem__(self, where, what):
-        self._data[where] = what
+        (data, where, what) = maybe_materialize(self._data, where, what)
+        if isinstance(self._nplike, Jax):
+            new_data = data.at[where].set(what)
+            if isinstance(self._data, VirtualNDArray):
+                self._data._array = new_data
+            else:
+                self._data = new_data
+        else:
+            self._data[where] = what
 
     def to64(self) -> Index:
         return Index(self._nplike.astype(self._data, dtype=np.int64))

@@ -12,9 +12,7 @@ from awkward._backends.typetracer import TypeTracerBackend
 def test():
     backend = TypeTracerBackend.instance()
     layout = ak.contents.ListOffsetArray(
-        ak.index.Index64(
-            backend.index_nplike.asarray([0, 1, 3, 7], dtype=np.dtype("int64"))
-        ),
+        ak.index.Index64(backend.nplike.asarray([0, 1, 3, 7], dtype=np.dtype("int64"))),
         ak.contents.NumpyArray(backend.nplike.asarray([1, 2, 3, 4, 5, 6, 7])),
     )
     assert layout.to_packed().length == 3

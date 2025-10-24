@@ -13,7 +13,7 @@ awkward_ListArray_localindex(
     if (thread_id < length) {
       int64_t start = (int64_t)offsets[thread_id];
       int64_t stop = (int64_t)offsets[thread_id + 1];
-      for (int64_t j = start;  j < stop;  j++) {
+      for (int64_t j = start + threadIdx.y;  j < stop;  j += blockDim.y) {
         toindex[j] = j - start;
       }
     }

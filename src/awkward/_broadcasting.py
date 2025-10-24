@@ -11,6 +11,12 @@ from collections.abc import Sequence
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
+from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
+    _add_named_axis,
+    _unify_named_axis,
+)
+from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -34,6 +40,7 @@ from awkward.contents.recordarray import RecordArray
 from awkward.contents.regulararray import RegularArray
 from awkward.contents.unionarray import UnionArray
 from awkward.contents.unmaskedarray import UnmaskedArray
+from awkward.forms import ByteMaskedForm
 from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
     Index8,
     Index64,
@@ -87,7 +94,7 @@ def broadcast_pack(inputs: Sequence, isscalar: list[bool]) -> list:
 
     for x in inputs:
         if isinstance(x, Record):
-            index = x.backend.index_nplike.full(maxlen, x.at, dtype=np.int64)
+            index = x.backend.nplike.full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
@@ -245,7 +252,7 @@ def intersection_parameters_factory(
             parameters_to_intersect.append(params)
     # Otherwise, build the intersected parameter dict
     else:
-        if len(parameters_to_intersect):
+        if parameters_to_intersect:
             intersected_parameters = functools.reduce(
                 parameters_intersect, parameters_to_intersect
             )
@@ -318,10 +325,18 @@ BROADCAST_RULE_TO_FACTORY_IMPL = {
 }
 
 
-def left_broadcast_to(content: Content, depth: int) -> Content:
-    for _ in range(content.purelist_depth, depth):
-        content = RegularArray(content, 1, content.length)
-    return content
+def _export_named_axis_from_depth_to_lateral(
+    idx: int,
+    depth_context: dict[str, Any],
+    lateral_context: dict[str, Any],
+) -> None:
+    # set adjusted named axes to lateral (inplace)
+    named_axis, ndim = depth_context[NAMED_AXIS_KEY][idx]
+    seen_named_axis, _ = lateral_context[NAMED_AXIS_KEY][idx]
+    lateral_context[NAMED_AXIS_KEY][idx] = (
+        _unify_named_axis(named_axis, seen_named_axis),
+        ndim,
+    )
 
 
 def broadcast_regular_dim_size(contents: Sequence[ak.contents.Content]) -> ShapeItem:
@@ -357,31 +372,29 @@ def broadcast_to_offsets_avoiding_carry(
     list_content: ak.contents.Content,
     offsets: ak.index.Index,
 ) -> ak.contents.Content:
-    index_nplike = list_content.backend.index_nplike
+    nplike = list_content.backend.nplike
 
     # Without known data, we can't perform these optimisations
-    if not index_nplike.known_data:
+    if not nplike.known_data:
         return list_content._broadcast_tooffsets64(offsets).content
 
     elif isinstance(list_content, ListOffsetArray):
-        if index_nplike.array_equal(offsets.data, list_content.offsets.data):
-            next_length = index_nplike.index_as_shape_item(offsets[-1])
+        if nplike.array_equal(offsets.data, list_content.offsets.data):
+            next_length = nplike.index_as_shape_item(offsets[-1])
             return list_content.content[:next_length]
         else:
             return list_content._broadcast_tooffsets64(offsets).content
     elif isinstance(list_content, ListArray):
         # Is this list contiguous?
-        if index_nplike.array_equal(
+        if nplike.array_equal(
             list_content.starts.data[1:], list_content.stops.data[:-1]
         ):
             # Does this list match the offsets?
-            if index_nplike.array_equal(
-                offsets.data[:-1], list_content.starts.data
-            ) and not (
+            if nplike.array_equal(offsets.data[:-1], list_content.starts.data) and not (
                 list_content.stops.data.shape[0] != 0
                 and offsets[-1] != list_content.stops[-1]
             ):
-                next_length = index_nplike.index_as_shape_item(offsets[-1])
+                next_length = nplike.index_as_shape_item(offsets[-1])
                 return list_content.content[:next_length]
             else:
                 return list_content._broadcast_tooffsets64(offsets).content
@@ -390,7 +403,7 @@ def broadcast_to_offsets_avoiding_carry(
 
     elif isinstance(list_content, RegularArray):
         my_offsets = list_content._compact_offsets64(True)
-        if index_nplike.array_equal(offsets.data, my_offsets.data):
+        if nplike.array_equal(offsets.data, my_offsets.data):
             return list_content.content[: list_content.size * list_content.length]
         else:
             return list_content._broadcast_tooffsets64(offsets).content
@@ -432,10 +445,32 @@ def apply_step(
         max_depth = max(x.purelist_depth for x in contents)
 
         if max_depth > 0 and all(x.purelist_isregular for x in contents):
-            nextinputs = [
-                left_broadcast_to(o, max_depth) if isinstance(o, Content) else o
-                for o in inputs
-            ]
+            nextinputs = []
+
+            named_axes_with_ndims = depth_context[NAMED_AXIS_KEY]
+            seen_named_axes = lateral_context[NAMED_AXIS_KEY]
+            for i, ((named_axis, ndim), o) in enumerate(
+                zip(named_axes_with_ndims, inputs)
+            ):
+                if isinstance(o, Content):
+                    # rightbroadcast
+                    for _ in range(o.purelist_depth, max_depth):
+                        o = RegularArray(o, 1, o.length)
+                        # track new dimensions for named axis
+                        # rightbroadcasting adds a new first(!) dimension at depth
+                        seen_named_axis, _seen_ndim = seen_named_axes[i]
+                        named_axis = _add_named_axis(named_axis, depth, ndim)
+                        depth_context[NAMED_AXIS_KEY][i] = (
+                            _unify_named_axis(named_axis, seen_named_axis),
+                            ndim + 1 if ndim is not None else ndim,
+                        )
+                        if o.is_leaf:
+                            _export_named_axis_from_depth_to_lateral(
+                                i, depth_context, lateral_context
+                            )
+                    nextinputs.append(o)
+                else:
+                    nextinputs.append(o)
             # Did a broadcast take place?
             if any(x is not y for x, y in zip(inputs, nextinputs)):
                 return apply_step(
@@ -533,10 +568,11 @@ def apply_step(
         )
 
     def broadcast_any_list():
-        index_nplike = backend.index_nplike
+        nplike = backend.nplike
         # Under the category of "is_list", we have both strings and non-strings
         # The strings should behave like non-lists within these routines.
 
+        named_axes_with_ndims = depth_context[NAMED_AXIS_KEY]
         # Are the non-string list types exclusively regular?
         if all(x.is_regular or (is_string_like(x) or not x.is_list) for x in contents):
             # Compute the expected dim size
@@ -564,14 +600,14 @@ def apply_step(
                     ):
                         # For any (N, 1) array, we know we'll broadcast to (N, M) where M is maxsize
                         size_one_carry_index = Index64(
-                            index_nplike.repeat(
-                                index_nplike.arange(
-                                    index_nplike.shape_item_as_index(length),
+                            nplike.repeat(
+                                nplike.arange(
+                                    nplike.shape_item_as_index(length),
                                     dtype=np.int64,
                                 ),
-                                index_nplike.shape_item_as_index(dim_size),
+                                nplike.shape_item_as_index(dim_size),
                             ),
-                            nplike=index_nplike,
+                            nplike=nplike,
                         )
                 else:
                     inputs_are_strings.append(False)
@@ -585,7 +621,9 @@ def apply_step(
             # we don't left-broadcast
             nextinputs = []
             nextparameters = []
-            for x, x_is_string in zip(inputs, inputs_are_strings):
+            for i, ((named_axis, ndim), x, x_is_string) in enumerate(
+                zip(named_axes_with_ndims, inputs, inputs_are_strings)
+            ):
                 if isinstance(x, RegularArray) and not x_is_string:
                     content_size_maybe_one = (
                         x.size is not unknown_length and x.size == 1
@@ -602,6 +640,16 @@ def apply_step(
                             )
                         )
                         nextparameters.append(x._parameters)
+                        # track new dimensions for named axis
+                        # rightbroadcasting adds a new first(!) dimension as depth
+                        depth_context[NAMED_AXIS_KEY][i] = (
+                            _add_named_axis(named_axis, depth, ndim),
+                            ndim + 1 if ndim is not None else ndim,
+                        )
+                        if x.is_leaf:
+                            _export_named_axis_from_depth_to_lateral(
+                                i, depth_context, lateral_context
+                            )
                     # Any unknown values or sizes are assumed to be correct as-is
                     elif (
                         dim_size is unknown_length
@@ -666,7 +714,9 @@ def apply_step(
 
             nextinputs = []
             nextparameters = []
-            for x, x_is_string in zip(inputs, input_is_string):
+            for i, ((named_axis, ndim), x, x_is_string) in enumerate(
+                zip(named_axes_with_ndims, inputs, input_is_string)
+            ):
                 if isinstance(x, listtypes) and not x_is_string:
                     next_content = broadcast_to_offsets_avoiding_carry(x, offsets)
                     nextinputs.append(next_content)
@@ -679,6 +729,16 @@ def apply_step(
                         .content
                     )
                     nextparameters.append(NO_PARAMETERS)
+                    # track new dimensions for named axis
+                    # leftbroadcasting adds a new last dimension at depth + 1
+                    depth_context[NAMED_AXIS_KEY][i] = (
+                        _add_named_axis(named_axis, depth + 1, ndim),
+                        ndim + 1 if ndim is not None else ndim,
+                    )
+                    if x.is_leaf:
+                        _export_named_axis_from_depth_to_lateral(
+                            i, depth_context, lateral_context
+                        )
                 else:
                     nextinputs.append(x)
                     nextparameters.append(NO_PARAMETERS)
@@ -700,6 +760,36 @@ def apply_step(
                 for x, p in zip(outcontent, parameters)
             )
 
+    def broadcast_any_option_all_UnmaskedArray():
+        nextinputs = []
+        nextparameters = []
+        for x in inputs:
+            if isinstance(x, UnmaskedArray):
+                nextinputs.append(x.content)
+                nextparameters.append(x._parameters)
+            elif isinstance(x, Content):
+                nextinputs.append(x)
+                nextparameters.append(x._parameters)
+            else:
+                nextinputs.append(x)
+                nextparameters.append(NO_PARAMETERS)
+
+        outcontent = apply_step(
+            backend,
+            nextinputs,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            options,
+        )
+        assert isinstance(outcontent, tuple)
+        parameters = parameters_factory(nextparameters, len(outcontent))
+
+        return tuple(
+            UnmaskedArray(x, parameters=p) for x, p in zip(outcontent, parameters)
+        )
+
     def broadcast_any_option():
         mask = None
         for x in contents:
@@ -708,22 +798,34 @@ def apply_step(
                 if mask is None:
                     mask = m
                 else:
-                    mask = backend.index_nplike.logical_or(mask, m, maybe_out=mask)
+                    mask = backend.nplike.logical_or(mask, m, maybe_out=mask)
 
         nextmask = Index8(mask.view(np.int8))
-        index = backend.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
-        index[~mask] = backend.index_nplike.arange(
-            backend.index_nplike.shape_item_as_index(mask.shape[0])
-            - backend.index_nplike.count_nonzero(mask),
-            dtype=np.int64,
-        )
-        index = Index64(index)
-        if any(not x.is_option for x in contents):
-            nextindex = backend.index_nplike.arange(
-                backend.index_nplike.shape_item_as_index(mask.shape[0]),
+        index = backend.nplike.full(mask.shape[0], np.int64(-1), dtype=np.int64)
+        if isinstance(backend.nplike, Jax):
+            index = index.at[~mask].set(
+                backend.nplike.arange(
+                    backend.nplike.shape_item_as_index(mask.shape[0])
+                    - backend.nplike.count_nonzero(mask),
+                    dtype=np.int64,
+                )
+            )
+        else:
+            index[~mask] = backend.nplike.arange(
+                backend.nplike.shape_item_as_index(mask.shape[0])
+                - backend.nplike.count_nonzero(mask),
                 dtype=np.int64,
             )
-            nextindex[mask] = -1
+        index = Index64(index)
+        if any(not x.is_option for x in contents):
+            nextindex = backend.nplike.arange(
+                backend.nplike.shape_item_as_index(mask.shape[0]),
+                dtype=np.int64,
+            )
+            if isinstance(backend.nplike, Jax):
+                nextindex = nextindex.at[mask].set(-1)
+            else:
+                nextindex[mask] = -1
             nextindex = Index64(nextindex)
 
         nextinputs = []
@@ -756,6 +858,142 @@ def apply_step(
             for x, p in zip(outcontent, parameters)
         )
 
+    def broadcast_any_option_akwhere():
+        """
+        ak_where is a bit like the ternary operator. Due to asymmetries in the three
+        inputs (their roles are distinct), special handling is required for option-types.
+        """
+        unmasked = []  # Contents of inputs-as-ByteMaskedArrays or non-Content-type
+        masks: List[Index8] = []
+        # Here we choose the convention that elements are masked when mask==1
+        # And byte masks (not bits) so we can pass them as (x,y) to ak_where's action()
+        for xyc in inputs:  # from ak_where, inputs are (x, y, condition)
+            if not isinstance(xyc, Content):
+                unmasked.append(xyc)
+                masks.append(
+                    NumpyArray(backend.nplike.zeros(inputs[2].length, dtype=np.int8))
+                )
+            elif not xyc.is_option:
+                unmasked.append(xyc)
+                masks.append(
+                    NumpyArray(backend.nplike.zeros(xyc.length, dtype=np.int8))
+                )
+            elif xyc.is_indexed:
+                # Indexed arrays have no array elements where None, which is a problem for us.
+                # We don't care what the element's value is when masked. Just that there *is* a value.
+                if xyc.content.is_unknown:
+                    # Unknown arrays cannot use to_ByteMaskedArray.
+                    # Create a stand-in array of similar shape and any dtype (we use bool here)
+                    unused_unmasked = NumpyArray(
+                        backend.nplike.zeros(xyc.length, dtype=np.bool_)
+                    )
+                    unmasked.append(unused_unmasked)
+                    all_masked = NumpyArray(
+                        backend.nplike.ones(xyc.length, dtype=np.int8)
+                    )
+                    masks.append(all_masked)
+                else:
+                    xyc_as_masked = xyc.to_ByteMaskedArray(valid_when=False)
+                    unmasked.append(xyc_as_masked.content)
+                    masks.append(NumpyArray(xyc_as_masked.mask.data))
+            elif not isinstance(xyc.form, ByteMaskedForm) or xyc.form.valid_when:
+                # Must make existing mask conform to our convention
+                xyc_as_bytemasked = xyc.to_ByteMaskedArray(valid_when=False)
+                unmasked.append(xyc_as_bytemasked.content)
+                masks.append(NumpyArray(xyc_as_bytemasked.mask.data))
+            else:
+                unmasked.append(xyc.content)
+                masks.append(NumpyArray(xyc.mask.data))
+
+        # (1) Apply ak_where action to unmasked inputs
+        outcontent = apply_step(
+            backend,
+            unmasked,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            options,
+        )
+        assert isinstance(outcontent, tuple) and len(outcontent) == 1
+        xy_unmasked = outcontent[0]
+
+        # (2) Now apply ak_where action to unmasked condition and mask arrays for x and y
+        which_mask = (
+            masks[0],  # Now x is the x-mask
+            masks[1],  # y-mask
+            unmasked[2],  # But same condition as previous
+        )
+        outmasks = apply_step(
+            backend,
+            which_mask,
+            action,
+            depth,
+            copy.copy(depth_context),
+            lateral_context,
+            options,
+        )
+        assert len(outmasks) == 1
+        xy_mask = outmasks[0]
+
+        simple_options = BroadcastOptions(
+            allow_records=True,
+            left_broadcast=True,
+            right_broadcast=True,
+            numpy_to_regular=True,
+            regular_to_jagged=False,
+            function_name=None,
+            broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
+        )
+
+        # (3) Since condition may be tree-like, use apply_step to OR condition and result masks
+        def action_logical_or(inputs, backend, **kwargs):
+            # Return None when condition is None or selected element is None
+            m1, m2 = inputs
+            if all(isinstance(x, NumpyArray) for x in inputs):
+                out = NumpyArray(backend.nplike.logical_or(m1.data, m2.data))
+                return (out,)
+
+        cond_mask = masks[2]
+        mask = apply_step(
+            backend,
+            (xy_mask, cond_mask),
+            action_logical_or,
+            0,
+            depth_context,
+            lateral_context,
+            simple_options,
+        )[0]
+
+        # (4) Apply mask to unmasked selection results, recursively
+        def apply_mask_action(inputs, backend, **kwargs):
+            if all(
+                x.is_leaf or (x.branch_depth == (False, 1) and is_string_like(x))
+                for x in inputs
+            ):
+                content, mask = inputs
+                if hasattr(mask, "content"):
+                    mask_as_idx = Index8(mask.content.data)
+                else:
+                    mask_as_idx = Index8(mask.data)
+                out = ByteMaskedArray(
+                    mask_as_idx,
+                    content,
+                    valid_when=False,
+                )
+                return (out,)
+
+        masked = apply_step(
+            backend,
+            (xy_unmasked, mask),
+            apply_mask_action,
+            0,
+            depth_context,
+            lateral_context,
+            simple_options,
+        )
+        return masked
+
     def broadcast_any_union():
         nextparameters = []
 
@@ -768,7 +1006,7 @@ def apply_step(
         union_tags, union_num_contents, length = [], [], unknown_length
         for x in contents:
             if x.is_union:
-                tags = x.tags.raw(backend.index_nplike)
+                tags = x.tags.raw(backend.nplike)
                 union_tags.append(tags)
                 union_num_contents.append(len(x.contents))
 
@@ -782,11 +1020,11 @@ def apply_step(
                         f"with UnionArray of length {tags.shape[0]}{in_function(options)}"
                     )
 
-        tags = backend.index_nplike.empty(length, dtype=np.int8)
-        index = backend.index_nplike.empty(length, dtype=np.int64)
+        tags = backend.nplike.empty(length, dtype=np.int8)
+        index = backend.nplike.empty(length, dtype=np.int64)
 
         # Stack all union tags
-        combos = backend.index_nplike.stack(union_tags, axis=-1)
+        combos = backend.nplike.stack(union_tags, axis=-1)
 
         # Build array of indices (c1, c2, c3, ..., cn) of contents in
         # (union 1, union 2, union 3, ..., union n)
@@ -796,12 +1034,20 @@ def apply_step(
         outcontents = []
 
         for tag, j_contents in enumerate(all_combos):
-            combo = backend.index_nplike.asarray(j_contents, dtype=np.int64)
-            mask = backend.index_nplike.all(combos == combo, axis=-1)
-            tags[mask] = tag
-            index[mask] = backend.index_nplike.arange(
-                backend.index_nplike.count_nonzero(mask), dtype=np.int64
-            )
+            combo = backend.nplike.asarray(j_contents, dtype=np.int64)
+            mask = backend.nplike.all(combos == combo, axis=-1)
+            if isinstance(backend.nplike, Jax):
+                tags = tags.at[mask].set(tag)
+                index = index.at[mask].set(
+                    backend.nplike.arange(
+                        backend.nplike.count_nonzero(mask), dtype=np.int64
+                    )
+                )
+            else:
+                tags[mask] = tag
+                index[mask] = backend.nplike.arange(
+                    backend.nplike.count_nonzero(mask), dtype=np.int64
+                )
             nextinputs = []
             it_j_contents = iter(j_contents)
             for x in inputs:
@@ -908,7 +1154,12 @@ def apply_step(
 
         # Any option-types?
         elif any(x.is_option for x in contents):
-            return broadcast_any_option()
+            if all(not x.is_option or isinstance(x, UnmaskedArray) for x in contents):
+                return broadcast_any_option_all_UnmaskedArray()
+            elif options["function_name"] == "ak.where":
+                return broadcast_any_option_akwhere()
+            else:
+                return broadcast_any_option()
 
         # Any non-string list-types?
         elif any(x.is_list and not is_string_like(x) for x in contents):

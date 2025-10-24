@@ -75,13 +75,15 @@ def _impl(
     length = None
     for name, array in arrays.items():
         layouts[name] = ak.operations.ak_to_layout._impl(
-            array,
+            ak.operations.materialize(array)
+            if isinstance(array, (ak.highlevel.Array, ak.contents.Content))
+            else array,
             allow_record=False,
             allow_unknown=False,
             none_policy="error",
             regulararray=True,
             use_from_iter=True,
-            primitive_policy="forbid",
+            primitive_policy="error",
             string_policy="as-characters",
         ).to_backend(cpu)
         if length is None:

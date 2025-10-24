@@ -25,10 +25,6 @@ class NumpyBackend(Backend):
     def nplike(self) -> Numpy:
         return self._numpy
 
-    @property
-    def index_nplike(self) -> Numpy:
-        return self._numpy
-
     def __init__(self):
         self._numpy = Numpy.instance()
 

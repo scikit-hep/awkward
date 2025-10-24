@@ -120,6 +120,7 @@ def test_union_simplification():
     projected = ak.from_buffers(
         projected_form, length, container, allow_noncanonical_form=True
     )
+
     assert projected.layout.form.to_dict(verbose=False) == {
         "class": "IndexedArray",
         "index": "i64",

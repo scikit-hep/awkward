@@ -5,9 +5,8 @@ from __future__ import annotations
 import json
 from collections.abc import Iterable, Sized
 from functools import lru_cache
-from types import ModuleType
 
-from packaging.version import parse as parse_version
+import pyarrow
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
@@ -15,187 +14,14 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_union
 
+from .extn_types import (
+    AwkwardArrowType,
+    get_field_option,
+    to_awkwardarrow_storage_types,
+)
+
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
-
-try:
-    import pyarrow
-
-    error_message = None
-
-except ModuleNotFoundError:
-    pyarrow = None
-    error_message = """to use {0}, you must install pyarrow:
-
-    pip install pyarrow
-
-or
-
-    conda install -c conda-forge pyarrow
-"""
-
-else:
-    if parse_version(pyarrow.__version__) < parse_version("7.0.0"):
-        pyarrow = None
-        error_message = "pyarrow 7.0.0 or later required for {0}"
-
-
-def import_pyarrow(name: str) -> ModuleType:
-    if pyarrow is None:
-        raise ImportError(error_message.format(name))
-    return pyarrow
-
-
-def import_pyarrow_parquet(name: str) -> ModuleType:
-    if pyarrow is None:
-        raise ImportError(error_message.format(name))
-
-    import pyarrow.parquet as out
-
-    return out
-
-
-def import_pyarrow_compute(name: str) -> ModuleType:
-    if pyarrow is None:
-        raise ImportError(error_message.format(name))
-
-    import pyarrow.compute as out
-
-    return out
-
-
-if pyarrow is not None:
-
-    class AwkwardArrowArray(pyarrow.ExtensionArray):
-        def to_pylist(self):
-            out = super().to_pylist()
-            if (
-                isinstance(self.type, AwkwardArrowType)
-                and self.type.node_type == "RecordArray"
-                and self.type.record_is_tuple is True
-            ):
-                for i, x in enumerate(out):
-                    if x is not None:
-                        out[i] = tuple(x[str(j)] for j in range(len(x)))
-            return out
-
-    class AwkwardArrowType(pyarrow.ExtensionType):
-        def __init__(
-            self,
-            storage_type,
-            mask_type,
-            node_type,
-            mask_parameters,
-            node_parameters,
-            record_is_tuple,
-            record_is_scalar,
-            is_nonnullable_nulltype=False,
-        ):
-            self._mask_type = mask_type
-            self._node_type = node_type
-            self._mask_parameters = mask_parameters
-            self._node_parameters = node_parameters
-            self._record_is_tuple = record_is_tuple
-            self._record_is_scalar = record_is_scalar
-            self._is_nonnullable_nulltype = is_nonnullable_nulltype
-            super().__init__(storage_type, "awkward")
-
-        def __str__(self):
-            return "ak:" + str(self.storage_type)
-
-        def __repr__(self):
-            return f"awkward<{self.storage_type!r}>"
-
-        @property
-        def mask_type(self):
-            return self._mask_type
-
-        @property
-        def node_type(self):
-            return self._node_type
-
-        @property
-        def mask_parameters(self):
-            return self._mask_parameters
-
-        @property
-        def node_parameters(self):
-            return self._node_parameters
-
-        @property
-        def record_is_tuple(self):
-            return self._record_is_tuple
-
-        @property
-        def record_is_scalar(self):
-            return self._record_is_scalar
-
-        def __arrow_ext_class__(self):
-            return AwkwardArrowArray
-
-        def __arrow_ext_serialize__(self):
-            return json.dumps(
-                {
-                    "mask_type": self._mask_type,
-                    "node_type": self._node_type,
-                    "mask_parameters": self._mask_parameters,
-                    "node_parameters": self._node_parameters,
-                    "record_is_tuple": self._record_is_tuple,
-                    "record_is_scalar": self._record_is_scalar,
-                    "is_nonnullable_nulltype": self._is_nonnullable_nulltype,
-                }
-            ).encode(errors="surrogatescape")
-
-        @classmethod
-        def __arrow_ext_deserialize__(cls, storage_type, serialized):
-            metadata = json.loads(serialized.decode(errors="surrogatescape"))
-            return cls(
-                storage_type,
-                metadata["mask_type"],
-                metadata["node_type"],
-                metadata["mask_parameters"],
-                metadata["node_parameters"],
-                metadata["record_is_tuple"],
-                metadata["record_is_scalar"],
-                is_nonnullable_nulltype=metadata.get("is_nonnullable_nulltype", False),
-            )
-
-        @property
-        def num_buffers(self):
-            return self.storage_type.num_buffers
-
-        @property
-        def num_fields(self):
-            return self.storage_type.num_fields
-
-    pyarrow.register_extension_type(
-        AwkwardArrowType(pyarrow.null(), None, None, None, None, None, None)
-    )
-
-    # order is important; _string_like[:2] vs _string_like[::2]
-    _string_like = (
-        pyarrow.string(),
-        pyarrow.large_string(),
-        pyarrow.binary(),
-        pyarrow.large_binary(),
-    )
-
-    _pyarrow_to_numpy_dtype = {
-        pyarrow.date32(): (True, np.dtype("M8[D]")),
-        pyarrow.date64(): (False, np.dtype("M8[ms]")),
-        pyarrow.time32("s"): (True, np.dtype("M8[s]")),
-        pyarrow.time32("ms"): (True, np.dtype("M8[ms]")),
-        pyarrow.time64("us"): (False, np.dtype("M8[us]")),
-        pyarrow.time64("ns"): (False, np.dtype("M8[ns]")),
-        pyarrow.timestamp("s"): (False, np.dtype("M8[s]")),
-        pyarrow.timestamp("ms"): (False, np.dtype("M8[ms]")),
-        pyarrow.timestamp("us"): (False, np.dtype("M8[us]")),
-        pyarrow.timestamp("ns"): (False, np.dtype("M8[ns]")),
-        pyarrow.duration("s"): (False, np.dtype("m8[s]")),
-        pyarrow.duration("ms"): (False, np.dtype("m8[ms]")),
-        pyarrow.duration("us"): (False, np.dtype("m8[us]")),
-        pyarrow.duration("ns"): (False, np.dtype("m8[ns]")),
-    }
 
 
 def and_validbytes(validbytes1, validbytes2):
@@ -228,13 +54,6 @@ def to_null_count(validbytes, count_nulls):
         return -1
     else:
         return len(validbytes) - numpy.count_nonzero(validbytes)
-
-
-def to_awkwardarrow_storage_types(arrowtype):
-    if isinstance(arrowtype, AwkwardArrowType):
-        return arrowtype, arrowtype.storage_type
-    else:
-        return None, arrowtype
 
 
 def node_parameters(awkwardarrow_type):
@@ -366,15 +185,17 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
     # Start by removing the ExtensionArray wrapper.
     if awkwardarrow_type is not None:
         paarray = paarray.storage
-
     ### Beginning of the big if-elif-elif chain!
+    try:
+        if isinstance(storage_type, pyarrow.lib.PyExtensionType):
+            raise ValueError(
+                "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+            )
+    except AttributeError:
+        # PyExtensionType is deprecated in pyarrow 21.0.0.
+        pass
 
-    if isinstance(storage_type, pyarrow.lib.PyExtensionType):
-        raise ValueError(
-            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
-        )
-
-    elif isinstance(storage_type, pyarrow.lib.ExtensionType):
+    if isinstance(storage_type, pyarrow.lib.ExtensionType):
         # AwkwardArrowType should already be unwrapped; this must be some other ExtensionType.
         assert not isinstance(storage_type, AwkwardArrowType)
         # In that case, just ignore its logical type and use its storage type.
@@ -550,11 +371,12 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             field_name = field.name
             keys.append(field_name)
 
+            # Build the awkward array content from field buffers
             a, b = to_awkwardarrow_storage_types(field.type)
-            akcontent = popbuffers(
-                paarray.field(field_name), a, b, buffers, generate_bitmasks
-            )
-            if not field.nullable:
+            akcontent = popbuffers(paarray.field(i), a, b, buffers, generate_bitmasks)
+
+            option_type = get_field_option(field, b"option_type")
+            if not field.nullable or option_type is False:
                 # strip the dummy option-type node
                 akcontent = remove_optiontype(akcontent)
             contents.append(akcontent)
@@ -656,6 +478,8 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if to64:
             data = numpy.astype(numpy.frombuffer(data, dtype=np.int32), dtype=np.int64)
         if dt is None:
+            if getattr(storage_type, "tz", None) is not None:
+                storage_type = pyarrow.lib.timestamp(storage_type.unit)
             dt = storage_type.to_pandas_dtype()
 
         out = ak.contents.NumpyArray(
@@ -674,12 +498,16 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 def form_popbuffers(awkwardarrow_type, storage_type):
     ### Beginning of the big if-elif-elif chain!
 
-    if isinstance(storage_type, pyarrow.lib.PyExtensionType):
-        raise ValueError(
-            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
-        )
+    try:
+        if isinstance(storage_type, pyarrow.lib.PyExtensionType):
+            raise ValueError(
+                "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+            )
+    except AttributeError:
+        # PyExtensionType is deprecated in pyarrow 21.0.0.
+        pass
 
-    elif isinstance(storage_type, pyarrow.lib.ExtensionType):
+    if isinstance(storage_type, pyarrow.lib.ExtensionType):
         # AwkwardArrowType should already be unwrapped; this must be some other ExtensionType.
         assert not isinstance(storage_type, AwkwardArrowType)
         # In that case, just ignore its logical type and use its storage type.
@@ -812,7 +640,9 @@ def form_popbuffers(awkwardarrow_type, storage_type):
 
             a, b = to_awkwardarrow_storage_types(field.type)
             akcontent = form_popbuffers(a, b)
-            if not field.nullable:
+
+            option_type = get_field_option(field, b"option_type")
+            if not field.nullable or option_type is False:
                 # strip the dummy option-type node
                 akcontent = form_remove_optiontype(akcontent)
             contents.append(akcontent)
@@ -855,6 +685,8 @@ def form_popbuffers(awkwardarrow_type, storage_type):
     elif isinstance(storage_type, pyarrow.lib.DataType):
         _, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
         if dt is None:
+            if getattr(storage_type, "tz", None) is not None:
+                storage_type = pyarrow.lib.timestamp(storage_type.unit)
             dt = np.dtype(storage_type.to_pandas_dtype())
 
         out = ak.forms.NumpyForm(
@@ -1003,6 +835,8 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
             contents = []
             for i in range(obj.num_columns):
                 field = obj.schema.field(i)
+                option_type = get_field_option(field, b"option_type")
+
                 layout = handle_arrow(obj.column(i), generate_bitmasks)
                 if record_is_optiontype:
                     if record_mask is None:
@@ -1010,8 +844,10 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                     else:
                         record_mask &= layout.mask_as_bool(valid_when=False)
                 if (
-                    record_is_optiontype and field.name not in optiontype_fields
-                ) or not field.nullable:
+                    (record_is_optiontype and field.name not in optiontype_fields)
+                    or not field.nullable
+                    or option_type is False
+                ):
                     contents.append(remove_optiontype(layout))
                 else:
                     contents.append(layout)
@@ -1132,12 +968,16 @@ def form_handle_arrow(schema, pass_empty_field=False):
         forms = []
         for i, arrowtype in enumerate(schema.types):
             field = schema.field(i)
+            option_type = get_field_option(field, b"option_type")
+
             awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(arrowtype)
             akform = form_popbuffers(awkwardarrow_type, storage_type)
 
             if (
-                record_is_optiontype and field.name not in optiontype_fields
-            ) or not field.nullable:
+                (record_is_optiontype and field.name not in optiontype_fields)
+                or not field.nullable
+                or option_type is False
+            ):
                 forms.append(form_remove_optiontype(akform))
             else:
                 forms.append(akform)
@@ -1161,3 +1001,29 @@ def convert_to_array(layout, type=None):
         return out
     else:
         return pyarrow.array(out, type=type)
+
+
+# order is important; _string_like[:2] vs _string_like[::2]
+_string_like = (
+    pyarrow.string(),
+    pyarrow.large_string(),
+    pyarrow.binary(),
+    pyarrow.large_binary(),
+)
+
+_pyarrow_to_numpy_dtype = {
+    pyarrow.date32(): (True, np.dtype("M8[D]")),
+    pyarrow.date64(): (False, np.dtype("M8[ms]")),
+    pyarrow.time32("s"): (True, np.dtype("M8[s]")),
+    pyarrow.time32("ms"): (True, np.dtype("M8[ms]")),
+    pyarrow.time64("us"): (False, np.dtype("M8[us]")),
+    pyarrow.time64("ns"): (False, np.dtype("M8[ns]")),
+    pyarrow.timestamp("s"): (False, np.dtype("M8[s]")),
+    pyarrow.timestamp("ms"): (False, np.dtype("M8[ms]")),
+    pyarrow.timestamp("us"): (False, np.dtype("M8[us]")),
+    pyarrow.timestamp("ns"): (False, np.dtype("M8[ns]")),
+    pyarrow.duration("s"): (False, np.dtype("m8[s]")),
+    pyarrow.duration("ms"): (False, np.dtype("m8[ms]")),
+    pyarrow.duration("us"): (False, np.dtype("m8[us]")),
+    pyarrow.duration("ns"): (False, np.dtype("m8[ns]")),
+}

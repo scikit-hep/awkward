@@ -140,7 +140,7 @@ html_css_files = ["css/awkward.css"]
 html_js_files = ["js/awkward.js"]
 
 # MyST settings
-myst_enable_extensions = ["colon_fence"]
+myst_enable_extensions = ["colon_fence", "deflist"]
 
 nb_execution_mode = "cache"
 nb_execution_raise_on_error = True
@@ -158,6 +158,8 @@ nb_ipywidgets_js = {
     },
 }
 nb_execution_show_tb = True
+# Increase cell execution timeout (seconds)
+nb_execution_timeout = 120  # two minutes per cell
 
 if not run_cuda_notebooks:
     nb_execution_excludepatterns = [

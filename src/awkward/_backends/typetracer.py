@@ -24,10 +24,6 @@ class TypeTracerBackend(Backend):
     def nplike(self) -> TypeTracer:
         return self._typetracer
 
-    @property
-    def index_nplike(self) -> TypeTracer:
-        return self._typetracer
-
     def __init__(self):
         self._typetracer = TypeTracer.instance()
 
@@ -39,7 +35,7 @@ class TypeTracerBackend(Backend):
             if x.ndim == 0:
                 return numpy.empty((0,), dtype=x.dtype)
             else:
-                return numpy.empty((0,) + x.shape[1:], dtype=x.dtype)
+                return numpy.empty((0, *x.shape[1:]), dtype=x.dtype)
         elif isinstance(x, MaybeNone):
             return self._coerce_ufunc_argument(x.content)
         else:

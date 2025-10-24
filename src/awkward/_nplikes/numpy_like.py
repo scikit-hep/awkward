@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from numpy.typing import DTypeLike
 
     from awkward._nplikes.placeholder import PlaceholderArray
+    from awkward._nplikes.virtual import VirtualNDArray
 
 
 IndexType: TypeAlias = "int | ArrayLikeT"
@@ -130,11 +131,21 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
 
     @property
     @abstractmethod
+    def supports_virtual_arrays(self) -> bool: ...
+
+    @property
+    @abstractmethod
     def known_data(self) -> bool: ...
 
     @property
     @abstractmethod
     def is_eager(self) -> bool: ...
+
+    ############################ ndarray property that all the nplikes have
+
+    @property
+    @abstractmethod
+    def ndarray(self) -> ArrayLikeT: ...
 
     ############################ array creation
 
@@ -145,14 +156,14 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         *,
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
-    ) -> ArrayLikeT | PlaceholderArray: ...
+    ) -> ArrayLikeT | PlaceholderArray | VirtualNDArray: ...
 
     # FIXME: find a way to express TypeVar(..., OtherTypeVar(...), FOO) such that
     #        this function preserves the type identity of the input
     @abstractmethod
     def ascontiguousarray(
         self, x: ArrayLikeT | PlaceholderArray
-    ) -> ArrayLikeT | PlaceholderArray: ...
+    ) -> ArrayLikeT | PlaceholderArray | VirtualNDArray: ...
 
     @abstractmethod
     def frombuffer(
@@ -281,7 +292,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         shape: tuple[ShapeItem, ...],
         *,
         copy: bool | None = None,
-    ) -> ArrayLikeT | PlaceholderArray: ...
+    ) -> ArrayLikeT | PlaceholderArray | VirtualNDArray: ...
 
     @abstractmethod
     def nonzero(self, x: ArrayLikeT) -> tuple[ArrayLikeT, ...]: ...
@@ -457,6 +468,16 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     ) -> ArrayLikeT: ...
 
     @abstractmethod
+    def sum(
+        self,
+        x: ArrayLikeT,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLikeT | None = None,
+    ) -> ArrayLikeT: ...
+
+    @abstractmethod
     def count_nonzero(
         self, x: ArrayLikeT, *, axis: int | tuple[int, ...] | None = None
     ) -> ArrayLikeT: ...
@@ -510,3 +531,6 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     @classmethod
     @abstractmethod
     def is_own_array_type(cls, type_: type) -> bool: ...
+
+    @abstractmethod
+    def memory_ptr(self, x: ArrayLikeT) -> int: ...

@@ -1251,17 +1251,17 @@ namespace awkward {
         instruction_stack_max_depth++;
         instructions_.push_back(KeyTableHeader);
         instructions_.push_back(num_items);
-        instructions_.push_back(record_current_field_.size());  // record identifier
+        instructions_.push_back(static_cast<int64_t>(record_current_field_.size()));  // record identifier
         instructions_.push_back(-1);
 
         record_current_field_.push_back(-1);  // the first find_key will increase this to zero
 
         // checklist consists of a 1 bit for each field that has not been seen yet
-        std::vector<uint64_t> checklist_init(num_checklist_chunks, 0);
+        std::vector<uint64_t> checklist_init(static_cast<size_t>(num_checklist_chunks), 0);
         for (int64_t j = 0;  j < num_items;  j++) {
           int64_t  chunki    = j >> 6;                      // j / 64
           uint64_t chunkmask = (uint64_t)1 << (j & 0x3f);   // j % 64
-          checklist_init[chunki] |= chunkmask;
+          checklist_init[static_cast<size_t>(chunki)] |= chunkmask;
         }
         std::vector<uint64_t> checklist_copy = checklist_init;   // copied (not shared)
         record_checklist_init_.push_back(checklist_init);
