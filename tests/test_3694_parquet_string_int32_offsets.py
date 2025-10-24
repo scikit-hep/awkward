@@ -42,6 +42,7 @@ def test_parquet_string_roundtrip_with_string_to32_default():
 
     # Clean up
     import os
+
     os.remove("test_string_to32.parquet")
 
 
@@ -60,6 +61,7 @@ def test_parquet_string_roundtrip_explicit_string_to32_true():
 
     # Clean up
     import os
+
     os.remove("test_explicit_string_to32.parquet")
 
 
@@ -78,6 +80,7 @@ def test_parquet_string_roundtrip_string_to32_false():
 
     # Clean up
     import os
+
     os.remove("test_string_to32_false.parquet")
 
 
@@ -97,6 +100,7 @@ def test_parquet_bytestring_roundtrip_with_bytestring_to32():
 
     # Clean up
     import os
+
     os.remove("test_bytestring_to32.parquet")
 
 
@@ -111,7 +115,11 @@ def test_direct_string_array_with_int32_offsets():
 
     # Check that offsets are int32
     layout = x.layout
-    assert layout.offsets.dtype in (np.dtype("int32"), np.dtype("uint32"), np.dtype("int64"))
+    assert layout.offsets.dtype in (
+        np.dtype("int32"),
+        np.dtype("uint32"),
+        np.dtype("int64"),
+    )
 
     # Convert to numpy
     result = np.asarray(x)
@@ -120,6 +128,7 @@ def test_direct_string_array_with_int32_offsets():
 
     # Clean up
     import os
+
     os.remove("test_direct_strings.parquet")
 
 
@@ -136,6 +145,7 @@ def test_empty_strings_with_int32_offsets():
 
     # Clean up
     import os
+
     os.remove("test_empty_strings.parquet")
 
 
@@ -152,4 +162,5 @@ def test_unicode_strings_with_int32_offsets():
 
     # Clean up
     import os
+
     os.remove("test_unicode_strings.parquet")
