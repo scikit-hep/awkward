@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Iterable
 from datetime import datetime
 
@@ -7,7 +8,7 @@ import numpy as np
 import pytest
 
 import awkward as ak
-from awkward.types.numpytype import _primitive_to_dtype_dict
+from awkward.types.numpytype import _primitive_to_dtype_dict, primitive_to_dtype
 
 
 def test_issue() -> None:
@@ -22,8 +23,20 @@ def test_issue() -> None:
     assert result.layout.is_equal_to(expected_layout, all_parameters=True)
 
 
-# (dtype('bool', dtype='int8', dtype='float16', ...) All supported dtypes
-DTYPES = tuple(_primitive_to_dtype_dict.values())
+def _add_necessary_unit(dtype_name: str) -> str:
+    """Completes datetime or timedelta dtype names with a unit if missing."""
+    UNIT_LESS_DT_RE = re.compile(r"^(?:datetime|timedelta)\d*$")
+    SAMPLE_UNIT = "15us"
+    if UNIT_LESS_DT_RE.fullmatch(dtype_name):
+        return f"{dtype_name}[{SAMPLE_UNIT}]"
+    return dtype_name
+
+
+# (dtype('bool'), dtype('int8'), dtype('<M8[15us]'), ...) Supported dtypes
+DTYPES = tuple(
+    primitive_to_dtype(_add_necessary_unit(k)) for k in _primitive_to_dtype_dict.keys()
+)
+
 
 # (dtype('bool'), dtype('int8'), ...) Only bool and integer types
 INDEXABLE_DTYPES = tuple(d for d in DTYPES if d.kind in ("b", "i", "u"))
