@@ -7,7 +7,6 @@ import math
 import numba
 import numba.core.typing.npydecl
 import numpy as np
-
 from numba.core.errors import NumbaTypeError
 
 # from awkward._connect.numba.growablebuffer import GrowableBufferType
