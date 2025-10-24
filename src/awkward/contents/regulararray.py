@@ -9,11 +9,10 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.regularmeta import RegularMeta
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
-from awkward._nplikes.virtual import materialize_if_virtual
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -520,7 +519,7 @@ class RegularArray(RegularMeta[Content], Content):
 
         elif isinstance(head, slice):
             nexthead, nexttail = ak._slicing.head_tail(tail)
-            start, stop, step, nextsize = nplike.derive_slice_for_length(
+            start, _stop, step, nextsize = nplike.derive_slice_for_length(
                 head, length=self._size
             )
 
@@ -1338,7 +1337,7 @@ class RegularArray(RegularMeta[Content], Content):
                 self.length,
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
-                    pyarrow.py_buffer(akcontent._raw(*materialize_if_virtual(numpy))),
+                    pyarrow.py_buffer(akcontent._raw(*maybe_materialize(numpy))),
                 ],
             )
 
@@ -1457,7 +1456,7 @@ class RegularArray(RegularMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         nplike = self._backend.nplike
         length = self.length * self._size
         content = self._content[: nplike.shape_item_as_index(length)]
@@ -1524,8 +1523,8 @@ class RegularArray(RegularMeta[Content], Content):
             content, self._size, zeros_length=self._length, parameters=self._parameters
         )
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
         return RegularArray(
             content, self._size, zeros_length=self.length, parameters=self._parameters
         )

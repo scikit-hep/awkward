@@ -18,7 +18,7 @@ jobs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
           fetch-depth: 0
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
@@ -50,7 +50,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
@@ -74,7 +74,7 @@ jobs:
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
@@ -88,7 +88,7 @@ jobs:
       run: pipx run twine check dist/*
 
     - name: Generate artifact attestation for sdist and wheel
-      uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+      uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
       with:
         subject-path: "dist/awkward-*"
 
@@ -101,7 +101,7 @@ jobs:
     name: "Bundle header-only libraries"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: actions/upload-artifact@v4
       with:
         name: header-only
@@ -117,7 +117,7 @@ jobs:
       name: "pypi"
       url: "https://pypi.org/project/awkward/"
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         name: distributions
         path: dist
@@ -135,7 +135,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: gh attestation verify dist/awkward-*.whl --repo ${{ github.repository }}
 
-    - uses: pypa/gh-action-pypi-publish@v1.12.4
+    - uses: pypa/gh-action-pypi-publish@v1.13.0
 
   publish-headers:
     name: "Publish header-only libraries alongside release"
@@ -143,7 +143,7 @@ jobs:
     needs: [bundle-headers]
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         name: header-only
         path: header-only

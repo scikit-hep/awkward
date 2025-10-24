@@ -15,7 +15,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer
-from awkward._nplikes.virtual import VirtualArray
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
@@ -329,11 +329,11 @@ class ListArray(ListMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual_starts = (
-            isinstance(self._starts.data, VirtualArray)
+            isinstance(self._starts.data, VirtualNDArray)
             and not self._starts.data.is_materialized
         )
         is_virtual_stops = (
-            isinstance(self._stops.data, VirtualArray)
+            isinstance(self._stops.data, VirtualNDArray)
             and not self._stops.data.is_materialized
         )
         is_virtual = is_virtual_starts or is_virtual_stops
@@ -354,6 +354,11 @@ class ListArray(ListMeta[Content], Content):
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
+            return self
+
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
             return self
 
         return ListArray(
@@ -1616,7 +1621,7 @@ class ListArray(ListMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         return self.to_ListOffsetArray64(True).to_packed(recursive)
 
     def _to_list(self, behavior, json_conversions):
@@ -1631,10 +1636,10 @@ class ListArray(ListMeta[Content], Content):
         stops = self._stops.to_nplike(backend.nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        starts = self._starts.materialize()
-        stops = self._stops.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        starts = self._starts.materialize(type_)
+        stops = self._stops.materialize(type_)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
     @property

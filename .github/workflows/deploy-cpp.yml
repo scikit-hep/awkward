@@ -25,7 +25,7 @@ jobs:
       url: "https://pypi.org/project/awkward-cpp/"
     steps:
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         pattern: "awkward-cpp*"
         path: dist
@@ -35,8 +35,8 @@ jobs:
       run: ls -l dist/
 
     - name: Generate artifact attestation for sdist and wheel
-      uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+      uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
       with:
         subject-path: "dist/awkward*cpp-*"
 
-    - uses: pypa/gh-action-pypi-publish@v1.12.4
+    - uses: pypa/gh-action-pypi-publish@v1.13.0

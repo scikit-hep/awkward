@@ -25,7 +25,7 @@ jobs:
     if: github.repository_owner == 'scikit-hep'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
           fetch-depth: 0
@@ -45,7 +45,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
@@ -71,7 +71,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-13, macos-14]
+        os: [ubuntu-latest, macos-14, macos-15]
         arch: [auto64]
         build: ["cp", "pp"]
 
@@ -89,22 +89,22 @@ jobs:
           build: "cp"
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
     - name: Python 3.12
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@v6
+      uses: astral-sh/setup-uv@v7
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v3.1
+    - uses: pypa/cibuildwheel@v3.2
       env:
         CIBW_BUILD: "${{ matrix.build }}*"
         CIBW_ARCHS: ${{ matrix.arch }}
@@ -127,12 +127,12 @@ jobs:
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@v6
+      uses: astral-sh/setup-uv@v7
 
     - name: Prepare build files
       run: pipx run nox -s prepare

@@ -17,7 +17,7 @@ jobs:
     name: "Build awkward"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
@@ -55,27 +55,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-13, ubuntu-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@v6
+      uses: astral-sh/setup-uv@v7
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v3.1
+    - uses: pypa/cibuildwheel@v3.2
       env:
         CIBW_ARCHS_MACOS: universal2
         CIBW_BUILD: cp39-win_amd64 cp310-manylinux_x86_64 cp39-macosx_universal2
       with:
         package-dir: awkward-cpp
 
-    - uses: pypa/cibuildwheel@v3.1
+    - uses: pypa/cibuildwheel@v3.2
       if: matrix.os == 'ubuntu-latest'
       env:
         CIBW_BUILD: cp312-manylinux_x86_64

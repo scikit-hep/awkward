@@ -175,7 +175,7 @@ class UnionForm(UnionMeta[Form], Form):
             # read data pickled in Awkward 1.x
 
             # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L744-L755
-            has_identities, parameters, form_key, tags, index, contents = state
+            _has_identities, parameters, form_key, tags, index, contents = state
 
             if form_key is not None:
                 form_key = "part0-" + form_key  # only the first partition

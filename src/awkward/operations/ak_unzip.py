@@ -13,10 +13,18 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def unzip(array, *, highlevel=True, behavior=None, attrs=None):
+def unzip(
+    array,
+    *,
+    how=tuple,
+    highlevel=True,
+    behavior=None,
+    attrs=None,
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
+        how (type): The type of the returned output. This can be `tuple` or `dict`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -25,10 +33,10 @@ def unzip(array, *, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     If the `array` contains tuples or records, this operation splits them
-    into a Python tuple of arrays, one for each field.
+    into a Python tuple (or dict) of arrays, one for each field.
 
     If the `array` does not contain tuples or records, the single `array`
-    is placed in a length 1 Python tuple.
+    is placed in a length 1 Python tuple (or dict).
 
     For example,
 
@@ -40,15 +48,32 @@ def unzip(array, *, highlevel=True, behavior=None, attrs=None):
         <Array [1.1, 2.2, 3.3] type='3 * float64'>
         >>> y
         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
+
+    The `how` argument determines the structure of the output. Using `how=dict`
+    returns a dictionary of arrays instead of a tuple, and let's you round-trip
+    through `ak.zip`:
+
+        >>> array = ak.Array([{"x": 1.1, "y": [1]},
+        ...                   {"x": 2.2, "y": [2, 2]},
+        ...                   {"x": 3.3, "y": [3, 3, 3]}])
+        >>> x = ak.unzip(array, how=dict)
+        >>> x
+        {'x': <Array [1.1, 2.2, 3.3] type='3 * float64'>,
+         'y': <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>}
+        >>> assert ak.zip(ak.unzip(array, how=dict), depth_limit=1).to_list() == array.to_list()  # True
+
     """
     # Dispatch
     yield (array,)
 
     # Implementation
-    return _impl(array, highlevel, behavior, attrs)
+    return _impl(array, how, highlevel, behavior, attrs)
 
 
-def _impl(array, highlevel, behavior, attrs):
+def _impl(array, how, highlevel, behavior, attrs):
+    if how not in {tuple, dict}:
+        raise ValueError(f"`how` must be `tuple` or `dict`, not {how!r}")
+
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=True, primitive_policy="error")
 
@@ -68,13 +93,10 @@ def _impl(array, highlevel, behavior, attrs):
     ak._do.recursively_apply(layout, check_for_union, return_array=False)
 
     if len(fields) == 0:
-        return (ctx.wrap(layout, highlevel=highlevel, allow_other=True),)
+        items = (ctx.wrap(layout, highlevel=highlevel, allow_other=True),)
+        fields = ["0"]
     else:
-        return tuple(
-            ctx.wrap(
-                layout[n],
-                highlevel=highlevel,
-                allow_other=True,
-            )
-            for n in fields
+        items = (
+            ctx.wrap(layout[n], highlevel=highlevel, allow_other=True) for n in fields
         )
+    return tuple(items) if how is tuple else dict(zip(fields, items))

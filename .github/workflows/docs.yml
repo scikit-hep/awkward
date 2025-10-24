@@ -19,16 +19,16 @@ env:
 jobs:
   awkward-cpp-wasm:
     name: Build C++ WASM
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures --tests
 
-    - uses: pypa/cibuildwheel@v3.1
+    - uses: pypa/cibuildwheel@v3.2
       with:
         package-dir: awkward-cpp
       env:
@@ -45,14 +45,14 @@ jobs:
 
 
   awkward-cpp-x86-64:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build C++ x86
     defaults:
       run:
         # Ensure conda env is activated
         shell: "bash -l {0}"
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
@@ -100,10 +100,10 @@ jobs:
         path: awkward-cpp/dist/awkward*.whl
 
   awkward:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build Python
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
@@ -121,15 +121,15 @@ jobs:
 
   execute-cppyy:
     needs: [awkward-cpp-x86-64, awkward]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Execute cppyy notebook
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
     - name: Setup Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: "${{ env.X86_64_PYTHON_VERSION }}"
 
@@ -141,13 +141,13 @@ jobs:
         destination: "/tmp/wheels/"
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: awkward
         path: /tmp/wheels/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: awkward-cpp-x86-64
         path: /tmp/wheels/
@@ -167,7 +167,7 @@ jobs:
         path: docs/user-guide/how-to-use-in-cpp-cppyy.ipynb
 
   build-docs:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [awkward-cpp-x86-64, awkward, execute-cppyy]
     name: Build Docs
     defaults:
@@ -177,7 +177,7 @@ jobs:
     env:
         DOCS_CANONICAL_VERSION: main
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
       # TODO: remove this once mamba-org/mamba#1726 is fixed
       #       and replace with `-r requirements.txt` in a
@@ -202,7 +202,7 @@ jobs:
            doxygen
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: awkward
         path: dist
@@ -213,7 +213,7 @@ jobs:
         cp dist/awkward*.whl docs/lite/pypi/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: awkward-cpp-x86-64
         path: dist
@@ -243,7 +243,7 @@ jobs:
         echo "DOCS_VERSION=main" >> $GITHUB_ENV
 
     - name: Download cppyy notebook
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide
@@ -270,39 +270,20 @@ jobs:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
 
-  branch-preview:
-    runs-on: ubuntu-22.04
-    needs: [build-docs]
-    name: Deploy Branch Preview
-    # We can only deploy for PRs on host repo
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      S3_BUCKET: "preview.awkward-array.org"
-      DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
-    environment:
-      name: docs
-      url: "${{ env.DEPLOY_URL }}/${{ github.head_ref }}"
-    steps:
-    - uses: actions/checkout@v4
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: eu-west-2
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
-    - name: Download rendered docs
-      uses: actions/download-artifact@v4
-      with:
-        name: docs
-        path: built-docs
-    - name: Sync artefacts
+    - name: Save PR number
+      env:
+        PR_NUMBER: ${{ github.event.number }}
       run: |
-        aws s3 sync built-docs/ "s3://${S3_BUCKET}/${{ github.head_ref }}"
+        mkdir -p ./pr
+        echo $PR_NUMBER > ./pr/pr_number.txt
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: pr_number
+        path: pr/
 
   deploy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [ build-docs ]
     # We can only deploy for PRs on host repo
     if: github.event_name == 'push' || github.event_name == 'release'
@@ -318,19 +299,19 @@ jobs:
       name: docs
       url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-region: eu-west-2
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
       - name: Download rendered docs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: docs
           path: built-docs
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       # Pushes to main trigger latest
