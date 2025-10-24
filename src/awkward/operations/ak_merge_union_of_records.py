@@ -115,9 +115,12 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 indexedoption_index = nplike.arange(
                     tagged_content.length + 1, dtype=np.int64
                 )
-                indexedoption_index[
-                    nplike.shape_item_as_index(tagged_content.length)
-                ] = -1
+                if isinstance(nplike, Jax):
+                    indexedoption_index = indexedoption_index.at[-1].set(-1)
+                else:
+                    indexedoption_index[
+                        nplike.shape_item_as_index(tagged_content.length)
+                    ] = -1
                 field_contents[tag_for_missing] = (
                     ak.contents.IndexedOptionArray.simplified(
                         ak.index.Index64(indexedoption_index), tagged_content
@@ -137,14 +140,23 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
                 if content.has_field(field):
                     # Rewrite tags to account for missing fields
-                    field_tags[tag_is_j] = k
+                    if isinstance(nplike, Jax):
+                        field_tags = field_tags.at[tag_is_j].set(k)
+                    else:
+                        field_tags[tag_is_j] = k
                     k += 1
 
                 else:
-                    # Rewrite tags to point to option content
-                    field_tags[tag_is_j] = tag_for_missing
-                    # Point each value to missing value
-                    field_index[tag_is_j] = index_missing
+                    if isinstance(nplike, Jax):
+                        # Rewrite tags to point to option content
+                        field_tags = field_tags.at[tag_is_j].set(tag_for_missing)
+                        # Point each value to missing value
+                        field_index = field_index.at[tag_is_j].set(index_missing)
+                    else:
+                        # Rewrite tags to point to option content
+                        field_tags[tag_is_j] = tag_for_missing
+                        # Point each value to missing value
+                        field_index[tag_is_j] = index_missing
 
             outer_field_contents.append(
                 ak.contents.UnionArray.simplified(
