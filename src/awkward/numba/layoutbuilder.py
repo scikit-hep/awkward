@@ -41,7 +41,6 @@ class LayoutBuilder:
 _numba_to_dtype = {
     numba.boolean: np.dtype(np.int8),
     numba.int8: np.dtype(np.int8),
-    numba.int8: np.dtype(np.int8),
     numba.uint8: np.dtype(np.uint8),
     numba.int32: np.dtype(np.int32),
     numba.uint32: np.dtype(np.uint32),
