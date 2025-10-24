@@ -116,7 +116,9 @@ def _impl(array, axis, highlevel, behavior, attrs):
                     tagged_content.length + 1, dtype=np.int64
                 )
                 if isinstance(nplike, Jax):
-                    indexedoption_index = indexedoption_index.at[-1].set(-1)
+                    indexedoption_index = indexedoption_index.at[
+                        nplike.shape_item_as_index(tagged_content.length)
+                    ].set(-1)
                 else:
                     indexedoption_index[
                         nplike.shape_item_as_index(tagged_content.length)
