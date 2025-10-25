@@ -5,10 +5,10 @@
 #include "awkward/kernels.h"
 
 
-template <typename T>
+template <typename T, typename C>
 ERROR awkward_NumpyArray_pad_zero_to_length(
   const T* fromptr,
-  const int64_t* fromoffsets,
+  const C* fromoffsets,
   int64_t offsetslength,
   int64_t target,
   T* toptr) {
@@ -30,13 +30,41 @@ ERROR awkward_NumpyArray_pad_zero_to_length(
   return success();
 }
 
-ERROR awkward_NumpyArray_pad_zero_to_length_uint8(
+ERROR awkward_NumpyArray_pad_zero_to_length_uint8_int32(
+  const uint8_t* fromptr,
+  const int32_t* fromoffsets,
+  int64_t offsetslength,
+  int64_t target,
+  uint8_t* toptr) {
+  return awkward_NumpyArray_pad_zero_to_length<uint8_t, int32_t>(
+    fromptr,
+    fromoffsets,
+    offsetslength,
+    target,
+    toptr);
+}
+
+ERROR awkward_NumpyArray_pad_zero_to_length_uint8_uint32(
+  const uint8_t* fromptr,
+  const uint32_t* fromoffsets,
+  int64_t offsetslength,
+  int64_t target,
+  uint8_t* toptr) {
+  return awkward_NumpyArray_pad_zero_to_length<uint8_t, uint32_t>(
+    fromptr,
+    fromoffsets,
+    offsetslength,
+    target,
+    toptr);
+}
+
+ERROR awkward_NumpyArray_pad_zero_to_length_uint8_int64(
   const uint8_t* fromptr,
   const int64_t* fromoffsets,
   int64_t offsetslength,
   int64_t target,
   uint8_t* toptr) {
-return awkward_NumpyArray_pad_zero_to_length<uint8_t>(
+  return awkward_NumpyArray_pad_zero_to_length<uint8_t, int64_t>(
     fromptr,
     fromoffsets,
     offsetslength,
