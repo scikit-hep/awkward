@@ -58,7 +58,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check awkward-cpp/dist/*
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       with:
         name: awkward-cpp-sdist
         path: awkward-cpp/dist/*.tar.gz
@@ -115,7 +115,7 @@ jobs:
       run: pipx run twine check wheelhouse/*.whl
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: awkward-cpp-wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.build }}
         path: wheelhouse/*.whl
@@ -143,7 +143,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check dist/*
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       with:
         name: awkward-wheel
         path: dist/*
