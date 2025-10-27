@@ -97,7 +97,7 @@ def test_flatten_empty_array() -> None:
     a = ak.Array([])  #  type='0 * unknown'
     assert ak.flatten(a).to_list() == []
 
-    # The empty sub-array is an empty array of an array of int64.
+    # The empty sub-array is an empty array of arrays of integers.
     a = ak.Array([[[1]], []])  # type='2 * var * var * int64'
     assert ak.flatten(a, axis=2).to_list() == [[1], []]
 
