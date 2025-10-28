@@ -38,7 +38,7 @@ jobs:
         CIBW_ENABLE: "pyodide-prerelease"
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: awkward-cpp-wasm
         path: awkward-cpp/dist/awkward*wasm32.whl
@@ -94,7 +94,7 @@ jobs:
       run: python -m build -w ./awkward-cpp
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: awkward-cpp-x86-64
         path: awkward-cpp/dist/awkward*.whl
@@ -114,7 +114,7 @@ jobs:
       run: pipx run build -w
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: awkward
         path: dist/awkward*.whl
@@ -141,13 +141,13 @@ jobs:
         destination: "/tmp/wheels/"
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: awkward
         path: /tmp/wheels/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: awkward-cpp-x86-64
         path: /tmp/wheels/
@@ -161,7 +161,7 @@ jobs:
       run: jupyter nbconvert --to notebook --execute --inplace user-guide/how-to-use-in-cpp-cppyy.ipynb
 
     - name: Save executed notebook
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide/how-to-use-in-cpp-cppyy.ipynb
@@ -202,7 +202,7 @@ jobs:
            doxygen
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: awkward
         path: dist
@@ -213,7 +213,7 @@ jobs:
         cp dist/awkward*.whl docs/lite/pypi/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: awkward-cpp-x86-64
         path: dist
@@ -243,7 +243,7 @@ jobs:
         echo "DOCS_VERSION=main" >> $GITHUB_ENV
 
     - name: Download cppyy notebook
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide
@@ -253,19 +253,19 @@ jobs:
       working-directory: docs
 
     - name: Upload docs artefact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: docs
         path: docs/_build/html
 
     - name: Upload Jupyter Book cache
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: doctrees
         path: docs/_build/doctrees
 
     - name: Upload Jupyter Book cache
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
@@ -277,7 +277,7 @@ jobs:
         mkdir -p ./pr
         echo $PR_NUMBER > ./pr/pr_number.txt
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       with:
         name: pr_number
         path: pr/
@@ -306,7 +306,7 @@ jobs:
           aws-region: eu-west-2
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
       - name: Download rendered docs
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: docs
           path: built-docs
