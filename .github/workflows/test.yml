@@ -187,7 +187,9 @@ jobs:
       fail-fast: false
       matrix:
         cuda-version:
+          - 11
           - 12
+          - 13
 
     steps:
       - name: Clean the workspace and mamba
@@ -211,6 +213,8 @@ jobs:
             cudf
             cupy
             cuda-version=${{ matrix.cuda-version }}
+            cuda-toolkit
+            cxx-compiler
 
       - name: Generate build files
         run: |
