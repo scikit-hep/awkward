@@ -25,10 +25,12 @@ from awkward._namedaxis import (
     _remove_named_axis,
 )
 from awkward._nplikes import to_nplike
+from awkward._nplikes.array_like import MaterializableArray
 from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_are_equal,
     type_parameters_equal,
@@ -304,7 +306,7 @@ class Content(Meta):
             "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak.highlevel.Array"
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         raise TypeError(
             "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak.highlevel.Array"
         )
@@ -728,7 +730,10 @@ class Content(Meta):
             return self._getitem_fields(ak.operations.to_list(where))
 
         elif isinstance(where, ak.contents.EmptyArray):
-            return where.to_NumpyArray(np.int64)
+            return self._carry(
+                Index64.empty(0, self._backend.nplike),
+                allow_lazy=True,
+            )
 
         elif isinstance(where, Content):
             return self._getitem((where,), named_axis)
@@ -1180,6 +1185,11 @@ class Content(Meta):
         )
 
     def to_packed(self, recursive: bool = True) -> Content:
+        if recursive:
+            return self.materialize(VirtualNDArray)._to_packed(True)
+        return self._to_packed(False)
+
+    def _to_packed(self, recursive: bool = True) -> Content:
         raise NotImplementedError
 
     def to_list(self, behavior: dict | None = None) -> list:
@@ -1306,10 +1316,10 @@ class Content(Meta):
     def _to_backend(self, backend: Backend) -> Self:
         raise NotImplementedError
 
-    def materialize(self) -> Self:
-        return self._materialize()
+    def materialize(self, type_: type = MaterializableArray) -> Self:
+        return self._materialize(type_)
 
-    def _materialize(self) -> Self:
+    def _materialize(self, type_) -> Self:
         raise NotImplementedError
 
     @property

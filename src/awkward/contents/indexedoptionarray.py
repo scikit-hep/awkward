@@ -3,21 +3,20 @@
 from __future__ import annotations
 
 import copy
-import operator
 from collections.abc import Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.indexedoptionmeta import IndexedOptionMeta
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import MaybeNone, TypeTracer
-from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
     parameters_union,
@@ -317,7 +316,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
-            isinstance(self._index.data, VirtualArray)
+            isinstance(self._index.data, VirtualNDArray)
             and not self._index.data.is_materialized
         )
         if is_virtual:
@@ -341,6 +340,11 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
+            return self
+
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
             return self
 
         return IndexedOptionArray(
@@ -499,9 +503,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         elif is_integer_like(head) or isinstance(
             head, (slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            nexthead, nexttail = ak._slicing.head_tail(tail)
+            _nexthead, _nexttail = ak._slicing.head_tail(tail)
 
-            numnull, nextcarry, outindex = self._nextcarry_outindex()
+            _numnull, nextcarry, outindex = self._nextcarry_outindex()
 
             next = self._content._carry(nextcarry, True)
             out = next._getitem_next(head, tail, advanced)
@@ -979,7 +983,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
         index_length = self._index.length
 
-        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
+        next, nextparents, _numnull, _outindex = self._rearrange_prepare_next(parents)
 
         out = next._unique(
             negaxis,
@@ -1336,7 +1340,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         )
         branch, depth = self.branch_depth
 
-        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
+        next, nextparents, _numnull, outindex = self._rearrange_prepare_next(parents)
 
         out = next._sort_next(
             negaxis, starts, nextparents, outlength, ascending, stable
@@ -1395,7 +1399,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     ):
         branch, depth = self.branch_depth
 
-        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
+        next, nextparents, _numnull, outindex = self._rearrange_prepare_next(parents)
 
         if reducer.needs_position and (not branch and negaxis == depth):
             nextshifts = self._rearrange_nextshifts(nextparents, shifts)
@@ -1556,7 +1560,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
-        (index,) = materialize_if_virtual(numpy.asarray(self._index.data, copy=True))
+        (index,) = maybe_materialize(numpy.asarray(self._index.data, copy=True))
         this_validbytes = self.mask_as_bool(valid_when=True)
         index[~this_validbytes] = 0
 
@@ -1711,7 +1715,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         if self.parameter("__array__") == "categorical":
             content = self._content.to_packed(True) if recursive else self._content
             return ak.contents.IndexedOptionArray(
@@ -1722,7 +1726,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             nplike = self._backend.nplike
             original_index = self._index.data
             is_none = original_index < 0
-            num_none = operator.index(nplike.count_nonzero(is_none))
+            num_none = nplike.index_as_shape_item(nplike.count_nonzero(is_none))
             new_index = nplike.empty(self._index.length, dtype=self._index.dtype)
             if isinstance(nplike, Jax):
                 new_index = new_index.at[is_none].set(-1)
@@ -1753,7 +1757,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         if out is not None:
             return out
 
-        (index,) = materialize_if_virtual(self._index.raw(numpy))
+        (index,) = maybe_materialize(self._index.raw(numpy))
         not_missing = index >= 0
         content = ak.to_backend(self._content, "cpu", highlevel=False)
         nextcontent = content._carry(ak.index.Index(index[not_missing]), False)
@@ -1770,9 +1774,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         index = self._index.to_nplike(backend.nplike)
         return IndexedOptionArray(index, content, parameters=self._parameters)
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        index = self._index.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        index = self._index.materialize(type_)
         return IndexedOptionArray(index, content, parameters=self._parameters)
 
     @property

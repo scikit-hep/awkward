@@ -242,7 +242,7 @@ class Record:
             return Record(self._array._to_backend(backend), self._at)
 
     def materialize(self) -> Self:
-        return Record(self._array._materialize(), self._at)
+        return Record(self._array.materialize(), self._at)
 
     @property
     def is_all_materialized(self) -> bool:

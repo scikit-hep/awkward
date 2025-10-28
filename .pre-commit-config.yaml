@@ -6,7 +6,7 @@ ci:
 exclude: ^(docs|studies|tests/samples|src/awkward/_typeparser/generated_parser.py)
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
   - id: check-added-large-files
   - id: check-case-conflict
@@ -28,9 +28,9 @@ repos:
     additional_dependencies: [pyyaml]
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.12.2
+  rev: v0.13.3
   hooks:
-  - id: ruff
+  - id: ruff-check
     args: ["--fix", "--show-fixes"]
   - id: ruff-format
 
@@ -49,7 +49,7 @@ repos:
     exclude: .pre-commit-config.yaml
 
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: "v0.10.0.1"
+  rev: "v0.11.0.1"
   hooks:
   - id: shellcheck
 
@@ -63,13 +63,13 @@ repos:
     files: ^tests/
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.33.2
+  rev: 0.34.0
   hooks:
     - id: check-github-workflows
       args: ["--verbose"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.16.1
+  rev: v1.18.2
   hooks:
     - id: mypy
       files: src

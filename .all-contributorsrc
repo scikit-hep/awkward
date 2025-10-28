@@ -548,6 +548,42 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "nileshpatra",
+      "name": "Nilesh Patra",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37436956?v=4",
+      "profile": "https://github.com/nileshpatra",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "TaiSakuma",
+      "name": "Tai Sakuma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1388081?v=4",
+      "profile": "https://github.com/TaiSakuma",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "DylanModesitt",
+      "name": "Dylan Modesitt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8339189?v=4",
+      "profile": "http://dylanmodesitt.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "JamesBrofos",
+      "name": "James Brofos",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3391741?v=4",
+      "profile": "https://www.brofos.org",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

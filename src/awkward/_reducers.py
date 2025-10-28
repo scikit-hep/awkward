@@ -33,6 +33,11 @@ class Reducer(Protocol):
     def highlevel_function(cls):
         return getattr(ak.operations, cls.name)
 
+    @classmethod
+    def axis_none_reducer(cls) -> Reducer | None:
+        """A specialized version for axis=None reductions, or None if there is none."""
+        return None
+
     @abstractmethod
     def apply(
         self,
@@ -336,6 +341,10 @@ class Sum(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
+    @classmethod
+    def axis_none_reducer(cls):
+        return AxisNoneSum()
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -433,6 +442,25 @@ class Sum(KernelReducer):
                 result.view(self._promote_integer_rank(array.dtype)),
                 backend=array.backend,
             )
+
+
+class AxisNoneSum(Sum):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        del parents, starts, shifts, outlength  # Unused
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "M":
+            raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
+        reduce_fn = getattr(array.backend.nplike, self.name)
+        return ak.contents.NumpyArray(
+            [reduce_fn(array.data, axis=None)], backend=array.backend
+        )
 
 
 class Prod(KernelReducer):

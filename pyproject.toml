@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.8.6"
+version = "2.8.10"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
@@ -43,7 +43,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==48",
+    "awkward_cpp==50",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.18.0",
     "packaging",
@@ -138,6 +138,7 @@ filterwarnings = [
     "ignore:Jitify is performing a one-time only warm-up",
 ]
 log_cli_level = "INFO"
+testpaths = ["tests", "tests-cuda", "tests-cuda-kernels", "tests-cuda-kernels-explicit"]
 
 [tool.pylint]
 py-version = "3.9"
@@ -227,12 +228,9 @@ disable = [
 
 [tool.mypy]
 files = ["src/awkward/**/*.py"]
-plugins = [
-    "numpy.typing.mypy_plugin"
-]
 python_version = "3.11"
 ignore_errors = true
-ignore_missing_imports = true
+enable_error_code = ["ignore-without-code", "truthy-bool"]
 
 [[tool.mypy.overrides]]
 module = [

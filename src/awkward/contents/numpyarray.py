@@ -13,7 +13,7 @@ from awkward._backends.typetracer import TypeTracerBackend
 from awkward._layout import maybe_posaxis
 from awkward._meta.numpymeta import NumpyMeta
 from awkward._nplikes import to_nplike
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
@@ -21,7 +21,7 @@ from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
-from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
@@ -319,7 +319,7 @@ class NumpyArray(NumpyMeta, Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
-            isinstance(self._data, VirtualArray) and not self._data.is_materialized
+            isinstance(self._data, VirtualNDArray) and not self._data.is_materialized
         )
         return is_virtual
 
@@ -339,6 +339,11 @@ class NumpyArray(NumpyMeta, Content):
             return out
 
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
+            return self
+
         try:
             out = self._data[start:stop]
         except IndexError as err:
@@ -1206,7 +1211,7 @@ class NumpyArray(NumpyMeta, Content):
                 pyarrow, mask_node, validbytes, length, options
             )
 
-        (nparray,) = materialize_if_virtual(self._raw(numpy))
+        (nparray,) = maybe_materialize(self._raw(numpy))
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
@@ -1235,7 +1240,7 @@ class NumpyArray(NumpyMeta, Content):
         from cudf.core.column.column import as_column
 
         assert self._backend.nplike.known_data
-        data = as_column(*materialize_if_virtual(self._data))
+        data = as_column(*maybe_materialize(self._data))
         if mask is not None:
             m = cupy.packbits(cupy.asarray(mask), bitorder="little")
             if m.nbytes % 64:
@@ -1246,7 +1251,7 @@ class NumpyArray(NumpyMeta, Content):
 
     def _to_backend_array(self, allow_missing, backend):
         return to_nplike(
-            *materialize_if_virtual(self.data),
+            *maybe_materialize(self.data),
             backend.nplike,
             from_nplike=self._backend.nplike,
         )
@@ -1310,7 +1315,7 @@ class NumpyArray(NumpyMeta, Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         return self.to_contiguous().to_RegularArray()
 
     def _to_list(self, behavior, json_conversions):
@@ -1382,21 +1387,21 @@ class NumpyArray(NumpyMeta, Content):
             backend=backend,
         )
 
-    def _materialize(self) -> Self:
-        (out,) = materialize_if_virtual(self._data)
+    def _materialize(self, type_) -> Self:
+        (out,) = maybe_materialize(self._data, type_=type_)
         return NumpyArray(out, parameters=self._parameters, backend=self._backend)
 
     @property
     def _is_all_materialized(self) -> bool:
         buffer = self._data
-        if isinstance(buffer, VirtualArray):
+        if isinstance(buffer, VirtualNDArray):
             return buffer.is_materialized
         return True
 
     @property
     def _is_any_materialized(self) -> bool:
         buffer = self._data
-        if isinstance(buffer, VirtualArray):
+        if isinstance(buffer, VirtualNDArray):
             return buffer.is_materialized
         return True
 

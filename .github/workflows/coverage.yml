@@ -37,12 +37,12 @@ jobs:
       PYTHON_VERSION: "3.9"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
       - name: 'Python ${{ env.PYTHON_VERSION }}'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 

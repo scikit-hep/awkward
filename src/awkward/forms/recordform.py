@@ -160,7 +160,7 @@ class RecordForm(RecordMeta[Form], Form):
             # read data pickled in Awkward 1.x
 
             # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L624-L643
-            has_identities, parameters, form_key, recordlookup, contents = state
+            _has_identities, parameters, form_key, recordlookup, contents = state
 
             if form_key is not None:
                 form_key = "part0-" + form_key  # only the first partition

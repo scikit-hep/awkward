@@ -9,14 +9,14 @@ import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._layout import maybe_posaxis
 from awkward._meta.listoffsetmeta import ListOffsetMeta
-from awkward._nplikes.array_like import ArrayLike
+from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer, is_unknown_scalar
-from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     type_parameters_equal,
 )
@@ -316,7 +316,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
     def _is_getitem_at_virtual(self) -> bool:
         is_virtual = (
-            isinstance(self._offsets.data, VirtualArray)
+            isinstance(self._offsets.data, VirtualNDArray)
             and not self._offsets.data.is_materialized
         )
         return is_virtual or self._content._is_getitem_at_virtual()
@@ -339,6 +339,11 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
     def _getitem_range(self, start: IndexType, stop: IndexType) -> Content:
         if not self._backend.nplike.known_data:
             self._touch_shape(recursive=False)
+            return self
+
+        # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+        # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+        if self._backend.nplike.known_data and (start == 0 and stop == self.length):
             return self
 
         offsets = self._offsets[start : stop + 1]
@@ -964,8 +969,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 assert self._offsets.length - 1 == parents.length
 
             (
-                distincts,
-                maxcount,
+                _distincts,
+                _maxcount,
                 maxnextparents,
                 nextcarry,
                 nextparents,
@@ -1110,9 +1115,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 assert self._offsets.length - 1 == parents.length
 
             (
-                distincts,
+                _distincts,
                 maxcount,
-                maxnextparents,
+                _maxnextparents,
                 nextcarry,
                 nextparents,
                 nextstarts,
@@ -1283,8 +1288,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 assert self._offsets.length - 1 == parents.length
 
             (
-                distincts,
-                maxcount,
+                _distincts,
+                _maxcount,
                 maxnextparents,
                 nextcarry,
                 nextparents,
@@ -1899,7 +1904,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             downsize = options["bytestring_to32"]
         else:
             downsize = options["list_to32"]
-        (npoffsets,) = materialize_if_virtual(self._offsets.raw(numpy))
+        (npoffsets,) = maybe_materialize(self._offsets.raw(numpy))
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
         if len(npoffsets) > length + 1:
             npoffsets = npoffsets[: length + 1]
@@ -1962,7 +1967,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
                     pyarrow.py_buffer(npoffsets),
-                    pyarrow.py_buffer(*materialize_if_virtual(akcontent._raw(numpy))),
+                    pyarrow.py_buffer(*maybe_materialize(akcontent._raw(numpy))),
                 ],
             )
 
@@ -2003,7 +2008,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         from packaging.version import parse as parse_version
 
         cupy = Cupy.instance()
-        index = materialize_if_virtual(self._offsets.raw(cupy))[0].astype("int32")
+        index = maybe_materialize(self._offsets.raw(cupy))[0].astype("int32")
         buf = cudf.core.buffer.as_buffer(index)
 
         if parse_version(cudf.__version__) >= parse_version("24.10.00"):
@@ -2256,7 +2261,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         next = self.to_ListOffsetArray64(True)
         next_content = next._content[: next._offsets[-1]]
         return ListOffsetArray(
@@ -2270,8 +2275,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             raise TypeError("cannot convert typetracer arrays to Python lists")
 
         starts, stops = self.starts, self.stops
-        (starts_data,) = materialize_if_virtual(starts.raw(numpy))
-        (stops_data,) = materialize_if_virtual(stops.raw(numpy)[: len(starts_data)])
+        (starts_data,) = maybe_materialize(starts.raw(numpy))
+        (stops_data,) = maybe_materialize(stops.raw(numpy)[: len(starts_data)])
 
         nonempty = starts_data != stops_data
         if numpy.count_nonzero(nonempty) == 0:
@@ -2327,9 +2332,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         offsets = self._offsets.to_nplike(backend.nplike)
         return ListOffsetArray(offsets, content, parameters=self._parameters)
 
-    def _materialize(self) -> Self:
-        content = self._content.materialize()
-        offsets = self._offsets.materialize()
+    def _materialize(self, type_) -> Self:
+        content = self._content.materialize(type_)
+        offsets = self._offsets.materialize(type_)
         return ListOffsetArray(offsets, content, parameters=self._parameters)
 
     @property

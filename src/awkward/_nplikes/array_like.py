@@ -7,6 +7,7 @@ from abc import abstractmethod
 from awkward._nplikes.shape import ShapeItem
 from awkward._typing import (
     TYPE_CHECKING,
+    Any,
     DType,
     EllipsisType,
     Protocol,
@@ -31,6 +32,10 @@ class ArrayLike(Protocol):
     @property
     @abstractmethod
     def shape(self) -> tuple[ShapeItem, ...]: ...
+
+    @property
+    @abstractmethod
+    def strides(self) -> tuple[ShapeItem, ...]: ...
 
     @property
     @abstractmethod
@@ -133,3 +138,30 @@ class ArrayLike(Protocol):
 
     @abstractmethod
     def __invert__(self) -> Self: ...
+
+
+class MaterializableArray(ArrayLike):
+    @abstractmethod
+    def materialize(self) -> ArrayLike: ...
+
+
+def maybe_materialize(
+    *args: Any,
+    type_: type[MaterializableArray]
+    | tuple[type[MaterializableArray], ...] = MaterializableArray,
+) -> tuple[Any, ...]:
+    """
+    Returns a tuple where all arguments that are instances of `type_` have been replaced
+    by the result of calling their `.materialize()` method.
+
+    Other `ArrayLike` or `Any` arguments are returned unchanged.
+
+    Args:
+        *args: Variable length argument list of MaterializableArray or ArrayLike or Any objects.
+        type_: The class or tuple of classes to check for materialization. The default is `MaterializableArray`.
+
+    Returns:
+        tuple: A tuple where each instance of `type_` is replaced by its materialized form,
+        and other ArrayLike or Any objects are returned unchanged.
+    """
+    return tuple(arg.materialize() if isinstance(arg, type_) else arg for arg in args)

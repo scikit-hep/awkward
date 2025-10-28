@@ -280,7 +280,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 raise TypeError("typetracer shape must be integers or unknown-length")
             if not isinstance(dtype, np.dtype):
                 raise TypeError("typetracer dtype must be an instance of np.dtype")
-        self._shape = shape
+        self._shape = tuple(dim if dim is unknown_length else int(dim) for dim in shape)
         self._dtype = dtype
 
         return self
@@ -317,6 +317,12 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
     def shape(self) -> tuple[ShapeItem, ...]:
         self.touch_shape()
         return self._shape
+
+    @property
+    def strides(self):
+        raise AssertionError(
+            "Bug in Awkward Array: cannot get the strides of a TypeTracerArray because its not a concrete array"
+        )
 
     @property
     def inner_shape(self) -> tuple[ShapeItem, ...]:
@@ -392,12 +398,12 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __iter__(self):
         raise AssertionError(
-            "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
+            "Bug in Awkward Array: cannot iterate over TypeTracerArray because its not a concrete array"
         )
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         raise AssertionError(
-            "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
+            "Bug in Awkward Array: cannot convert TypeTracerArray into a concrete array"
         )
 
     class _CTypes:
@@ -409,7 +415,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
 
     def __len__(self):
         raise AssertionError(
-            "bug in Awkward Array: attempt to get length of a TypeTracerArray"
+            "Bug in Awkward Array: cannot get length of a TypeTracerArray because its not a concrete array"
         )
 
     def __getitem__(
@@ -511,9 +517,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 # Slice
                 elif isinstance(item, slice):
                     (
-                        start,
-                        stop,
-                        step,
+                        _start,
+                        _stop,
+                        _step,
                         slice_length,
                     ) = self.nplike.derive_slice_for_length(item, dimension_length)
                     result_shape_parts.append((slice_length,))
@@ -705,7 +711,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         ]
         # Build proxy (empty) arrays
         proxy_args = [
-            (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+            cast(
+                ArrayLike, (numpy.empty(0, dtype=x.dtype) if hasattr(x, "dtype") else x)
+            )
             for x in non_generic_value_promoted_args
         ]
         # Determine result dtype from proxy call
@@ -821,7 +829,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                         shape.append(len(node))
 
                     if isinstance(node, TypeTracerArray):
-                        raise AssertionError(
+                        raise TypeError(
                             "typetracer arrays inside sequences not currently supported"
                         )
                     # Found leaf!
@@ -1629,6 +1637,16 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             return TypeTracerArray._new(x.dtype, shape=tuple(next_shape))
 
     def max(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: TypeTracerArray | None = None,
+    ) -> TypeTracerArray:
+        return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
+
+    def sum(
         self,
         x: TypeTracerArray,
         *,

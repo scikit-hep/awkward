@@ -5,12 +5,13 @@ from __future__ import annotations
 import numpy
 
 import awkward as ak
+from awkward._nplikes.array_like import maybe_materialize
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpy_like import ArrayLike
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem
-from awkward._nplikes.virtual import VirtualArray, materialize_if_virtual
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._typing import TYPE_CHECKING, Final
 
 if TYPE_CHECKING:
@@ -49,17 +50,15 @@ class Cupy(ArrayModuleNumpyLike):
     def frombuffer(
         self, buffer, *, dtype: DTypeLike | None = None, count: ShapeItem = -1
     ) -> ArrayLike:
-        assert not isinstance(buffer, (PlaceholderArray, VirtualArray))
-        assert not isinstance(count, (PlaceholderArray, VirtualArray))
+        assert not isinstance(buffer, (PlaceholderArray, VirtualNDArray))
+        assert not isinstance(count, (PlaceholderArray, VirtualNDArray))
         np_array = numpy.frombuffer(buffer, dtype=dtype, count=count)
         return self._module.asarray(np_array)
 
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
     ) -> bool:
-        x1, x2 = materialize_if_virtual(x1, x2)
-        assert not isinstance(x1, PlaceholderArray)
-        assert not isinstance(x2, PlaceholderArray)
+        x1, x2 = maybe_materialize(x1, x2)
         if x1.shape != x2.shape:
             return False
         else:
@@ -68,9 +67,7 @@ class Cupy(ArrayModuleNumpyLike):
     def repeat(
         self, x: ArrayLike, repeats: ArrayLike | int, *, axis: int | None = None
     ):
-        x, repeats = materialize_if_virtual(x, repeats)
-        assert not isinstance(x, PlaceholderArray)
-        assert not isinstance(repeats, PlaceholderArray)
+        x, repeats = maybe_materialize(x, repeats)
         if axis is not None:
             raise NotImplementedError(f"repeat for CuPy with axis={axis!r}")
         # https://github.com/cupy/cupy/issues/3849
@@ -94,8 +91,7 @@ class Cupy(ArrayModuleNumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        (x,) = materialize_if_virtual(x)
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         out = self._module.all(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
@@ -110,8 +106,7 @@ class Cupy(ArrayModuleNumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        (x,) = materialize_if_virtual(x)
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         out = self._module.any(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
@@ -121,8 +116,7 @@ class Cupy(ArrayModuleNumpyLike):
     def count_nonzero(
         self, x: ArrayLike, *, axis: ShapeItem | tuple[ShapeItem, ...] | None = None
     ) -> ArrayLike:
-        (x,) = materialize_if_virtual(x)
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         assert isinstance(axis, int) or axis is None
         out = self._module.count_nonzero(x, axis=axis)
         if axis is None and isinstance(out, self._module.ndarray):
@@ -138,9 +132,23 @@ class Cupy(ArrayModuleNumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        (x,) = materialize_if_virtual(x)
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         out = self._module.min(x, axis=axis, out=maybe_out)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
+    def sum(
+        self,
+        x: ArrayLike,
+        *,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        (x,) = maybe_materialize(x)
+        out = self._module.sum(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
@@ -154,8 +162,7 @@ class Cupy(ArrayModuleNumpyLike):
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
-        (x,) = materialize_if_virtual(x)
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         out = self._module.max(x, axis=axis, out=maybe_out)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
@@ -171,17 +178,16 @@ class Cupy(ArrayModuleNumpyLike):
         Return `True` if the given object is a cupy buffer, otherwise `False`.
 
         """
-        module, _, suffix = type_.__module__.partition(".")
+        module, _, _suffix = type_.__module__.partition(".")
         return module == "cupy"
 
     def is_c_contiguous(self, x: ArrayLike) -> bool:
         if isinstance(x, PlaceholderArray):
             return True
         else:
-            (x,) = materialize_if_virtual(x)
+            (x,) = maybe_materialize(x)
             return x.flags["C_CONTIGUOUS"]  # type: ignore[attr-defined]
 
     def memory_ptr(self, x: ArrayLike) -> int:
-        (x,) = materialize_if_virtual(x)
-        assert not isinstance(x, PlaceholderArray)
+        (x,) = maybe_materialize(x)
         return x.data.ptr  # type: ignore[attr-defined]

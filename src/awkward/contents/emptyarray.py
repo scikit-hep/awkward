@@ -274,6 +274,7 @@ class EmptyArray(EmptyMeta, Content):
         return True
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
+        others = [other for other in others if not other.is_unknown]
         if len(others) == 0:
             return self
         elif len(others) == 1:
@@ -452,7 +453,7 @@ class EmptyArray(EmptyMeta, Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         return self
 
     def _to_list(self, behavior, json_conversions):
@@ -463,8 +464,8 @@ class EmptyArray(EmptyMeta, Content):
     def _to_backend(self, backend: Backend) -> Self:
         return EmptyArray(backend=backend)
 
-    def _materialize(self) -> Self:
-        return EmptyArray(backend=self._backend)
+    def _materialize(self, type_) -> Self:
+        return self
 
     @property
     def _is_all_materialized(self) -> bool:
