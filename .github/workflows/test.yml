@@ -213,8 +213,6 @@ jobs:
             cudf
             cupy
             cuda-version=${{ matrix.cuda-version }}
-            cuda-nvcc
-            cuda-runtime
             cuda-toolkit
             cxx-compiler
 
