@@ -211,6 +211,7 @@ jobs:
             cudf
             cupy
             cuda-version=${{ matrix.cuda-version }}
+            cxx-compiler
 
       - name: Generate build files
         run: |
