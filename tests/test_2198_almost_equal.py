@@ -27,13 +27,13 @@ def test_dtype():
         dtype_exact=True,
     )
     assert not ak.almost_equal(
-        np.array([1, 2, 3], dtype=np.dtype("<M8[D]")),
-        np.array([1, 2, 3], dtype=np.dtype("<m8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("M8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("m8[D]")),
         dtype_exact=True,
     )
     assert not ak.almost_equal(
-        np.array([1, 2, 3], dtype=np.dtype("<M8[D]")),
-        np.array([1, 2, 3], dtype=np.dtype("<m8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("M8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("m8[D]")),
         dtype_exact=False,
     )
 

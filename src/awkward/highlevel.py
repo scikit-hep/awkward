@@ -1675,7 +1675,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             packed_layout,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
 
         # For pickle >= 5, we can avoid copying the buffers
@@ -1712,7 +1712,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     container,
                     highlevel=False,
                     buffer_key="{form_key}-{attribute}",
-                    byteorder="<",
+                    byteorder=ak._util.native_byteorder,
                 )
                 for i, part_length in enumerate(length)
             ]
@@ -1727,7 +1727,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 container,
                 highlevel=False,
                 buffer_key="{form_key}-{attribute}",
-                byteorder="<",
+                byteorder=ak._util.native_byteorder,
             )
         self._layout = layout
         self._behavior = behavior
@@ -2509,7 +2509,7 @@ class Record(NDArrayOperatorsMixin):
             packed_layout.array,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
 
         # For pickle >= 5, we can avoid copying the buffers
@@ -2544,7 +2544,7 @@ class Record(NDArrayOperatorsMixin):
             container,
             highlevel=False,
             buffer_key="{form_key}-{attribute}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
         layout = ak.record.Record(layout, at)
         self._layout = layout
