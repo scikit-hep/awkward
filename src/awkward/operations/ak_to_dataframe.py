@@ -234,22 +234,12 @@ or
         else:
             columns = pandas.MultiIndex.from_tuples([col_names])
 
-        # Before filling, ensure dtype is wide enough for "nan" fill value. Need
-        # at least three characters / bytes for 'nan' or b'nan', respectively.
+        # Pandas can handle None in object arrays, so convert masked strings
+        # to object arrays with None for missing values instead of filling with "nan"
         if numpy.ma.is_masked(column):
-            if np.issubdtype(column.dtype, np.str_):
-                char_width = column.dtype.itemsize // 4
-                if char_width < 3:
-                    column = column.astype(np.dtype(("U", 3)))
-            elif np.issubdtype(column.dtype, np.bytes_):
-                byte_width = column.dtype.itemsize
-                if byte_width < 3:
-                    column = column.astype(np.dtype(("S", 3)))
-        # Pandas can't handle masked strings
-        if np.issubdtype(column.dtype, np.str_):
-            column = numpy.ma.filled(column, "nan")
-        elif np.issubdtype(column.dtype, np.bytes_):
-            column = numpy.ma.filled(column, b"nan")
+            if np.issubdtype(column.dtype, np.str_) or np.issubdtype(column.dtype, np.bytes_):
+                # Convert masked string/bytestring arrays to object arrays with None
+                column = numpy.where(column.mask, None, column.data)
 
         if (
             last_row_arrays is not None
