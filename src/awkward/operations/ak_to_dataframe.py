@@ -241,7 +241,7 @@ or
                 column.dtype, np.bytes_
             ):
                 # Convert masked string/bytestring arrays to object arrays with None
-                column = numpy.where(column.mask, None, column.data)
+                column = numpy.where(column.mask, None, column.data).astype(object)
 
         if (
             last_row_arrays is not None
