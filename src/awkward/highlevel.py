@@ -380,6 +380,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def _update_class(self):
         self._numbaview = None
         self.__class__ = get_array_class(self._layout, self._behavior)
+        if hasattr(self, "__awkward_validation__"):
+            self.__awkward_validation__()
 
     @property
     def attrs(self) -> Attrs:
@@ -1201,15 +1203,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             ):
                 raise TypeError("only fields may be assigned in-place (by field name)")
 
-            self._layout = ak.operations.with_field(
-                self._layout,
+            # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
+            self.layout = ak.operations.with_field(
+                self.layout,
                 what,
                 where,
                 highlevel=False,
                 attrs=self._attrs,
                 behavior=self._behavior,
             )
-            self._numbaview = None
 
     def __delitem__(self, where):
         """
@@ -1238,14 +1240,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             ):
                 raise TypeError("only fields may be removed in-place (by field name)")
 
-            self._layout = ak.operations.ak_without_field._impl(
-                self._layout,
+            # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
+            self.layout = ak.operations.ak_without_field._impl(
+                self.layout,
                 where,
                 highlevel=False,
                 behavior=self._behavior,
                 attrs=self._attrs,
             )
-            self._numbaview = None
 
     def __getattr__(self, where):
         """
@@ -1917,6 +1919,8 @@ class Record(NDArrayOperatorsMixin):
     def _update_class(self):
         self._numbaview = None
         self.__class__ = get_record_class(self._layout, self._behavior)
+        if hasattr(self, "__awkward_validation__"):
+            self.__awkward_validation__()
 
     @property
     def attrs(self) -> Attrs:
@@ -2157,15 +2161,17 @@ class Record(NDArrayOperatorsMixin):
             ):
                 raise TypeError("only fields may be assigned in-place (by field name)")
 
-            self._layout._array = ak.operations.ak_with_field._impl(
-                self._layout.array,
+            # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
+            layout = self.layout
+            layout._array = ak.operations.ak_with_field._impl(
+                layout._array,
                 what,
                 where,
                 highlevel=False,
                 behavior=self._behavior,
                 attrs=self._attrs,
             )
-            self._numbaview = None
+            self.layout = layout
 
     def __delitem__(self, where):
         """
@@ -2195,14 +2201,14 @@ class Record(NDArrayOperatorsMixin):
             ):
                 raise TypeError("only fields may be removed in-place (by field name)")
 
-            self._layout = ak.operations.ak_without_field._impl(
-                self._layout,
+            # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
+            self.layout = ak.operations.ak_without_field._impl(
+                self.layout,
                 where,
                 highlevel=False,
                 behavior=self._behavior,
                 attrs=self._attrs,
             )
-            self._numbaview = None
 
     def __getattr__(self, where):
         """
