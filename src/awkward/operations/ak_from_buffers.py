@@ -266,7 +266,7 @@ def _reconstitute(
     shape_generator,
 ):
     if isinstance(form, ak.forms.EmptyForm):
-        if length != 0:
+        if length is not unknown_length and length != 0:
             raise ValueError(f"EmptyForm node, but the expected length is {length}")
         return ak.contents.EmptyArray(backend=backend)
 
