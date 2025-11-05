@@ -487,6 +487,9 @@ def highlevel_array_show_rows(
         array.type.show(stream=typeio)
         type_line = "type: "
         type_line += typeio.getvalue().removesuffix("\n")
+        # crop type line if too long
+        if len(type_line) > limit_cols:
+            type_line = type_line[: limit_cols - 3] + "..."
         rows.append(type_line)
 
     # other info
@@ -495,6 +498,9 @@ def highlevel_array_show_rows(
         named_axis_line += _prettify_named_axes(
             array.named_axis, delimiter=", ", maxlen=None
         )
+        # crop named axis line if too long
+        if len(named_axis_line) > limit_cols:
+            named_axis_line = named_axis_line[: limit_cols - 3] + "..."
         rows.append(named_axis_line)
     if nbytes:
         if array.nbytes is unknown_length:
