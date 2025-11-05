@@ -237,7 +237,9 @@ or
         # Pandas can handle None in object arrays, so convert masked strings
         # to object arrays with None for missing values instead of filling with "nan"
         if numpy.ma.is_masked(column):
-            if np.issubdtype(column.dtype, np.str_) or np.issubdtype(column.dtype, np.bytes_):
+            if np.issubdtype(column.dtype, np.str_) or np.issubdtype(
+                column.dtype, np.bytes_
+            ):
                 # Convert masked string/bytestring arrays to object arrays with None
                 column = numpy.where(column.mask, None, column.data)
 

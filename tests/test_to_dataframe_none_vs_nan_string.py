@@ -54,11 +54,13 @@ def test_nested_list_with_none_and_nan_string():
 
 def test_record_with_none_and_nan_string():
     """Test records containing both None and 'nan' string."""
-    array = ak.Array([
-        {"x": "value", "y": None},
-        {"x": "nan", "y": "another"},
-        {"x": None, "y": "nan"}
-    ])
+    array = ak.Array(
+        [
+            {"x": "value", "y": None},
+            {"x": "nan", "y": "another"},
+            {"x": None, "y": "nan"},
+        ]
+    )
     df = ak.to_dataframe(array)
 
     # Check x column
