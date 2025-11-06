@@ -1458,6 +1458,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             # it's always the second row (after the array)
             type_line = rows.pop(0)
             out_io.write(type_line)
+            out_io.write("\n")
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from shortest to longest contrary to _repr_mimebundle_
@@ -2408,6 +2409,7 @@ class Record(NDArrayOperatorsMixin):
             # it's always the second row (after the array)
             type_line = rows.pop(0)
             out_io.write(type_line)
+            out_io.write("\n")
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from shortest to longest contrary to _repr_mimebundle_
