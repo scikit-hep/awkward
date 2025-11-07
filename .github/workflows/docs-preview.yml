@@ -22,12 +22,12 @@ jobs:
       url: "${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}"
     steps:
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@v5
       with:
         aws-region: eu-west-2
         role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
     - name: Download rendered docs
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
@@ -76,7 +76,7 @@ jobs:
       run: |
         aws s3 sync ${{ runner.temp }}/artifacts/ "s3://${S3_BUCKET}/PR${{ steps.pr_number.outputs.pr_number }}"
     - name: Try to find previous bot comment
-      uses: peter-evans/find-comment@v3
+      uses: peter-evans/find-comment@v4
       id: fc
       with:
         issue-number: ${{ steps.pr_number.outputs.pr_number }}
@@ -84,7 +84,7 @@ jobs:
         body-includes: The documentation preview is ready to be viewed
     - name: Create comment with preview link
       if: steps.fc.outputs.comment-id == ''
-      uses: peter-evans/create-or-update-comment@v4
+      uses: peter-evans/create-or-update-comment@v5
       with:
         issue-number: ${{ steps.pr_number.outputs.pr_number }}
         body: |

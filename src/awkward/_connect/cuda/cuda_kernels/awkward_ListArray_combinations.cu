@@ -2,64 +2,114 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
+//     """
+//     (tocarry, toindex, fromindex, n, replacement, starts, stops, length, invocation_index, err_code)
+//     - tocarry: sequence/array of device arrays (length >= n), each 1D of total output size
+//     - toindex: device array of length >= n (receives total output length per field)
+//     - fromindex: kept for signature parity
+//     """
+//     import math
 //     (tocarry, toindex, fromindex, n, replacement, starts, stops, length, invocation_index, err_code) = args
+//     # Pass A: per-list counts (offsets[0] must be 0)
 //     scan_in_array_offsets = cupy.zeros(length + 1, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_a", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))(grid, block, (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, invocation_index, err_code))
-//     cupy.cumsum(scan_in_array_offsets, out = scan_in_array_offsets)
-//     totallen=int(scan_in_array_offsets[length])
-//     if totallen == 0:
-//         return  # Nothing to do if no combinations, skip the rest
-//     block_size = min(totallen, 1024)
-//     grid_size = max(1, math.ceil(totallen / block_size))
-//     scan_in_array_parents = cupy.zeros(totallen, dtype=cupy.int64)
-//     scan_in_array_local_indices = cupy.zeros(totallen, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_b", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_c", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListArray_combinations_d", tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype]))((grid_size,), (block_size,), (tocarry, toindex, fromindex, n, replacement, starts, stops, length, scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization([
+//         "awkward_ListArray_combinations_a",
+//         tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype
+//     ]))(
+//         grid, block,
+//         (tocarry, toindex, fromindex, n, bool(replacement), starts, stops, length,
+//          scan_in_array_offsets, invocation_index, err_code)
+//     )
+//     # Inclusive scan (device-only)
+//     scan_in_array_offsets = cupy.cumsum(scan_in_array_offsets)
+//     # Allocate parents/local_indices (device-only), sized to total outputs
+//     total = int(scan_in_array_offsets[length])
+//     scan_in_array_parents = cupy.zeros(total, dtype=cupy.int64)
+//     scan_in_array_local_indices = cupy.zeros(total, dtype=cupy.int64)
+//     # Fill parents as a run-length expansion of [0..length-1]
+//     # (pure device write in a trivial loop would be another kernel; your original loop is fine)
+//     for i in range(1, length + 1):
+//         scan_in_array_parents[scan_in_array_offsets[i - 1]:scan_in_array_offsets[i]] = i - 1
+//     # Choose launch for passes B and C
+//     block_size = min(1024, total) if total > 0 else 1
+//     grid_size = (total + block_size - 1)//block_size if block_size > 0 else 1
+//     # Pass B: compute local ranks
+//     cuda_kernel_templates.get_function(fetch_specialization([
+//         "awkward_ListArray_combinations_b",
+//         tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype
+//     ]))(
+//         (grid_size,), (block_size,),
+//         (tocarry, toindex, fromindex, n, bool(replacement), starts, stops, length,
+//          scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices,
+//          invocation_index, err_code)
+//     )
+//     # Pass C: unrank and write carries
+//     cuda_kernel_templates.get_function(fetch_specialization([
+//         "awkward_ListArray_combinations_c",
+//         tocarry[0].dtype, toindex.dtype, fromindex.dtype, starts.dtype, stops.dtype
+//     ]))(
+//         (grid_size,), (block_size,),
+//         (tocarry, toindex, fromindex, n, bool(replacement), starts, stops, length,
+//          scan_in_array_offsets, scan_in_array_parents, scan_in_array_local_indices,
+//          invocation_index, err_code)
+//     )
 // out["awkward_ListArray_combinations_a", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_b", {dtype_specializations}] = None
 // out["awkward_ListArray_combinations_c", {dtype_specializations}] = None
-// out["awkward_ListArray_combinations_d", {dtype_specializations}] = None
 // END PYTHON
 
-enum class LISTARRAY_COMBINATIONS_ERRORS {
-  N_NOT_IMPLEMENTED,  // message: "not implemented for given n"
-};
 
 template <typename T, typename C, typename U, typename V, typename W>
 __global__ void
 awkward_ListArray_combinations_a(
-    T** tocarry,
-    C* toindex,
-    U* fromindex,
+    T** /*tocarry*/,                 // not used in pass A
+    C* /*toindex*/,                  // not used in pass A
+    U* /*fromindex*/,                // not used in pass A
     int64_t n,
     bool replacement,
     const V* starts,
     const W* stops,
     int64_t length,
-    int64_t* scan_in_array_offsets,
+    int64_t* scan_in_array_offsets,  // size length+1; [0] should be 0
     uint64_t invocation_index,
     uint64_t* err_code) {
-  if (err_code[0] != NO_ERROR) {
-    return;
+
+  if (err_code[0] != NO_ERROR) return;
+
+  int64_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (tid >= length) return;
+
+  if (n < 0) {
+    RAISE_ERROR(ARRAY_COMBINATIONS_ERRORS::N_NEGATIVE)
   }
 
-  // For now only n==2 supported
-  if (n != 2) {
-    if (threadIdx.x == 0 && blockIdx.x == 0) {
-      RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::N_NOT_IMPLEMENTED)
+  int64_t m = (int64_t)(stops[tid] - starts[tid]);
+
+  int64_t count = 0;
+  if (n == 0) {
+    // One empty combination for any m >= 0
+    count = 1;
+  } else if (!replacement) {
+    if (n > m) {
+      count = 0;
+    } else {
+      if (!binom_safe<int64_t>(m, n, count, err_code)) {
+        RAISE_ERROR(ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
+      }
     }
-    return;
+  } else { // with replacement
+    // C(m + n - 1, n)
+    if (m == 0) {
+      count = (n == 0) ? 1 : 0;
+    } else {
+      int64_t top = m + n - 1;
+      if (!binom_safe<int64_t>(top, n, count, err_code)) {
+        RAISE_ERROR(ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
+      }
+    }
   }
 
-  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-  if (thread_id < length) {
-    int64_t counts = stops[thread_id] - starts[thread_id];
-    int64_t result = replacement
-                        ? counts * (counts + 1) / 2
-                        : counts * (counts - 1) / 2;
-    scan_in_array_offsets[thread_id + 1] = result;
-  }
+  scan_in_array_offsets[tid + 1] = count;
 }
 
 template <typename T, typename C, typename U, typename V, typename W>
@@ -73,133 +123,83 @@ awkward_ListArray_combinations_b(
     const V* starts,
     const W* stops,
     int64_t length,
-    const int64_t* __restrict__ scan_in_array_offsets,
-    int64_t* __restrict__ scan_in_array_parents,
-    int64_t* scan_in_array_local_indices,
+    int64_t* scan_in_array_offsets,   // inclusive-scanned before pass C
+    int64_t* scan_in_array_parents,   // size = scan_in_array_offsets[length]
+    int64_t* scan_in_array_local_indices, // same size as parents
     uint64_t invocation_index,
     uint64_t* err_code) {
-  long thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-  long offsetslength = scan_in_array_offsets[length];
 
-  if (thread_id >= offsetslength) return;
+  if (err_code[0] != NO_ERROR) return;
 
-  // Binary search for parent index i such that
-  // scan_in_array_offsets[i] <= thread_id < scan_in_array_offsets[i+1]
-  long left = 0;
-  long right = length;
+  int64_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+  int64_t total = scan_in_array_offsets[length];
+  if (tid >= total) return;
 
-  while (left < right) {
-    long mid = (left + right) / 2;
-    if (thread_id >= scan_in_array_offsets[mid + 1]) {
-      left = mid + 1;
-    } else if (thread_id < scan_in_array_offsets[mid]) {
-      right = mid;
-    } else {
-      left = mid;
-      break;
-    }
-  }
-
-  scan_in_array_parents[thread_id] = left;
+  // parent was pre-filled on host pass (Python loop), we just compute local idx
+  int64_t parent = scan_in_array_parents[tid];
+  int64_t local0 = scan_in_array_offsets[parent];
+  scan_in_array_local_indices[tid] = tid - local0;
 }
 
 template <typename T, typename C, typename U, typename V, typename W>
 __global__ void
 awkward_ListArray_combinations_c(
-    T** tocarry,
-    C* toindex,
-    U* fromindex,
+    T** tocarry,   // tocarry[0..n-1] device pointers
+    C* toindex,    // length >= n
+    U* fromindex,  // (kept for signature parity)
     int64_t n,
     bool replacement,
     const V* starts,
     const W* stops,
     int64_t length,
-    const int64_t* __restrict__ scan_in_array_offsets,
-    int64_t* __restrict__ scan_in_array_parents,
-    int64_t* scan_in_array_local_indices,
+    int64_t* scan_in_array_offsets,     // inclusive-scanned
+    int64_t* scan_in_array_parents,     // per-output parent
+    int64_t* scan_in_array_local_indices, // per-output local rank within parent
     uint64_t invocation_index,
     uint64_t* err_code) {
-  if (err_code[0] != NO_ERROR) {
-    return;
-  }
 
-  // For now only n==2 supported
-  if (n != 2) {
-    if (threadIdx.x == 0 && blockIdx.x == 0) {
-      RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::N_NOT_IMPLEMENTED)
-    }
-    return;
-  }
+  if (err_code[0] != NO_ERROR) return;
 
-  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-  int64_t offsetslength = scan_in_array_offsets[length];
+  int64_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+  int64_t total = scan_in_array_offsets[length];
+  if (tid >= total) return;
 
-  if (thread_id < offsetslength) {
-    scan_in_array_local_indices[thread_id] = thread_id - scan_in_array_offsets[scan_in_array_parents[thread_id]];
-  }
-}
+  int64_t parent = scan_in_array_parents[tid];
+  int64_t start  = (int64_t)starts[parent];
+  int64_t stop   = (int64_t)stops[parent];
+  int64_t m      = stop - start;
 
-template <typename T, typename C, typename U, typename V, typename W>
-__global__ void
-awkward_ListArray_combinations_d(
-    T** tocarry,
-    C* toindex,
-    U* fromindex,
-    int64_t n,
-    bool replacement,
-    const V* starts,
-    const W* stops,
-    int64_t length,
-    int64_t* scan_in_array_offsets,
-    int64_t* scan_in_array_parents,
-    int64_t* scan_in_array_local_indices,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
-  if (err_code[0] != NO_ERROR) {
-    return;
-  }
+  int64_t k = scan_in_array_local_indices[tid];
 
-  // For now only n==2 supported
-  if (n != 2) {
-    if (threadIdx.x == 0 && blockIdx.x == 0) {
-      RAISE_ERROR(LISTARRAY_COMBINATIONS_ERRORS::N_NOT_IMPLEMENTED)
-    }
-    return;
-  }
-
-  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-  int64_t offsetslength = scan_in_array_offsets[length];
-  int64_t i = 0;
-  int64_t j = 0;
-
-  if (thread_id < offsetslength) {
-
-    int64_t parent = scan_in_array_parents[thread_id];
-    int64_t count = stops[parent] - starts[parent];
-    int64_t local_index = scan_in_array_local_indices[thread_id];
-
-    if (replacement) {
-      int64_t b = 2 * count + 1;
-      double discriminant = sqrt((double)(b * b - 8 * local_index));
-      i = (int64_t)((b - discriminant) / 2);
-      j = local_index + i * (i - b + 2) / 2;
-    } else {
-      int64_t b = 2 * count - 1;
-      double discriminant = sqrt((double)(b * b - 8 * local_index));
-      i = (int64_t)((b - discriminant) / 2);
-      j = local_index + i * (i - b + 2) / 2 + 1;
+  if (n == 0) {
+    // nothing to write to tocarry; just set toindex[0..n-1] if any (none)
+  } else {
+    // unrank indices in [0, m) then shift by start
+    // temp buffer on stack; n is typically small
+    // NOTE: if you expect large n, consider capped array or dynamic alloc policy.
+    const int MAX_N = 64; // safety cap; adjust as needed
+    int64_t idxbuf_local[MAX_N];
+    int64_t* idxbuf = idxbuf_local;
+    if (n > MAX_N) {
+      // If you need arbitrarily large n, rework with heap or split passes.
+      RAISE_ERROR(ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
+      return;
     }
 
-    i += starts[parent];
-    j += starts[parent];
+    if (!unrank_lex_general(m, n, k, replacement, idxbuf, err_code)) {
+      RAISE_ERROR(ARRAY_COMBINATIONS_ERRORS::OVERFLOW_IN_COMBINATORICS)
+      return;
+    }
 
-    tocarry[0][thread_id] = i;
-    tocarry[1][thread_id] = j;
+    // write each component to the corresponding carry
+    for (int64_t r = 0; r < n; ++r) {
+      tocarry[r][tid] = start + idxbuf[r];
+    }
   }
 
-  // Write toindex once
-  if (thread_id == 0) {
-    toindex[0] = offsetslength;
-    toindex[1] = offsetslength;
+  // advertise the produced length on each output index buffer
+  // (mirrors the original behavior that wrote two entries; generalize to n)
+  for (int64_t r = 0; r < n; ++r) {
+    toindex[r] = total;
   }
 }

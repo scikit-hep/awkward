@@ -468,6 +468,16 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     ) -> ArrayLikeT: ...
 
     @abstractmethod
+    def sum(
+        self,
+        x: ArrayLikeT,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLikeT | None = None,
+    ) -> ArrayLikeT: ...
+
+    @abstractmethod
     def count_nonzero(
         self, x: ArrayLikeT, *, axis: int | tuple[int, ...] | None = None
     ) -> ArrayLikeT: ...

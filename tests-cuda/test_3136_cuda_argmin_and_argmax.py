@@ -15,9 +15,6 @@ def cleanup_cuda():
     cp.cuda.Device().synchronize()
 
 
-@pytest.mark.skip(
-    reason="awkward_reduce_argmin and awkward_reduce_argmax are not implemented"
-)
 def test_0835_argmin_argmax_axis_None():
     array = ak.highlevel.Array(
         [
@@ -37,9 +34,6 @@ def test_0835_argmin_argmax_axis_None():
     assert ak.operations.argmax(cuda_array) == 3
 
 
-@pytest.mark.skip(
-    reason="awkward_reduce_argmin and awkward_reduce_argmax are not implemented"
-)
 def test_1106_argminmax_axis_None_missing_values():
     array = ak.highlevel.Array([1, 2, 3, None, 4])
 
@@ -48,9 +42,6 @@ def test_1106_argminmax_axis_None_missing_values():
     assert ak.operations.argmax(cuda_array) == 4
 
 
-@pytest.mark.skip(
-    reason="awkward_reduce_argmin and awkward_reduce_argmax are not implemented"
-)
 def test_0070_argmin_and_argmax_jagged():
     v2_array = ak.operations.from_iter(
         [[2.2, 1.1, 3.3], [], [4.4, 5.5], [5.5], [-4.4, -5.5, -6.6]], highlevel=False
@@ -112,9 +103,6 @@ def test_0070_argmin_and_argmax_jagged():
     )
 
 
-@pytest.mark.skip(
-    reason="awkward_reduce_argmin and awkward_reduce_argmax are not implemented"
-)
 def test_0070_argmin_and_argmax_missing():
     array = ak.operations.from_iter(
         [[[2.2, 1.1, 3.3]], [[]], [None, None, None], [[-4.4, -5.5, -6.6]]],
@@ -135,9 +123,6 @@ def test_0070_argmin_and_argmax_missing():
     )
 
 
-@pytest.mark.skip(
-    reason="awkward_reduce_argmin and awkward_reduce_argmax are not implemented"
-)
 def test_0115_generic_reducer_operation_ByteMaskedArray():
     content = ak.operations.from_iter(
         [
@@ -174,9 +159,6 @@ def test_0115_generic_reducer_operation_ByteMaskedArray():
     )
 
 
-@pytest.mark.skip(
-    reason="awkward_reduce_argmin and awkward_reduce_argmax are not implemented"
-)
 @pytest.mark.parametrize(
     "func",
     [

@@ -1220,7 +1220,10 @@ def gencudaunittests(specdict):
                         for arg, val in test["inputs"].items():
                             typename = gettype(arg, spec.args)
                             if "List" not in typename:
-                                f.write(" " * 4 + arg + " = " + str(val) + "\n")
+                                if arg == "identity":
+                                    f.write(f"    {arg} = {dtypes[0]}({val})\n")
+                                else:
+                                    f.write(f"    {arg} = {val}\n")
                             if "List" in typename:
                                 count = typename.count("List")
                                 typename = gettypename(typename)

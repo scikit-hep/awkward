@@ -280,7 +280,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 raise TypeError("typetracer shape must be integers or unknown-length")
             if not isinstance(dtype, np.dtype):
                 raise TypeError("typetracer dtype must be an instance of np.dtype")
-        self._shape = shape
+        self._shape = tuple(dim if dim is unknown_length else int(dim) for dim in shape)
         self._dtype = dtype
 
         return self
@@ -517,9 +517,9 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 # Slice
                 elif isinstance(item, slice):
                     (
-                        start,
-                        stop,
-                        step,
+                        _start,
+                        _stop,
+                        _step,
                         slice_length,
                     ) = self.nplike.derive_slice_for_length(item, dimension_length)
                     result_shape_parts.append((slice_length,))
@@ -1637,6 +1637,16 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             return TypeTracerArray._new(x.dtype, shape=tuple(next_shape))
 
     def max(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: TypeTracerArray | None = None,
+    ) -> TypeTracerArray:
+        return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
+
+    def sum(
         self,
         x: TypeTracerArray,
         *,

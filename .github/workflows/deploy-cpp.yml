@@ -25,7 +25,7 @@ jobs:
       url: "https://pypi.org/project/awkward-cpp/"
     steps:
 
-    - uses: actions/download-artifact@v5
+    - uses: actions/download-artifact@v6
       with:
         pattern: "awkward-cpp*"
         path: dist
@@ -39,4 +39,4 @@ jobs:
       with:
         subject-path: "dist/awkward*cpp-*"
 
-    - uses: pypa/gh-action-pypi-publish@v1.12.4
+    - uses: pypa/gh-action-pypi-publish@v1.13.0

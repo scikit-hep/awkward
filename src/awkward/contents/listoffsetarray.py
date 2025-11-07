@@ -969,8 +969,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 assert self._offsets.length - 1 == parents.length
 
             (
-                distincts,
-                maxcount,
+                _distincts,
+                _maxcount,
                 maxnextparents,
                 nextcarry,
                 nextparents,
@@ -1115,9 +1115,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 assert self._offsets.length - 1 == parents.length
 
             (
-                distincts,
+                _distincts,
                 maxcount,
-                maxnextparents,
+                _maxnextparents,
                 nextcarry,
                 nextparents,
                 nextstarts,
@@ -1288,8 +1288,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 assert self._offsets.length - 1 == parents.length
 
             (
-                distincts,
-                maxcount,
+                _distincts,
+                _maxcount,
                 maxnextparents,
                 nextcarry,
                 nextparents,

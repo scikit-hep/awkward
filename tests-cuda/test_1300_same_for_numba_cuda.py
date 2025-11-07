@@ -10,7 +10,7 @@ import awkward as ak
 nb = pytest.importorskip("numba")
 nb_cuda = pytest.importorskip("numba.cuda")
 pytest.importorskip("numba.core.config")
-config = nb.core.config
+config = nb_cuda.config
 
 try:
     ak.numba.register_and_check()

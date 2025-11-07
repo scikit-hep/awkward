@@ -55,7 +55,7 @@ def from_dlpack(
         raise TypeError(
             f"Expected an object that implements the DLPack protocol, received {type(array)}"
         ) from err
-    device_type, device_id = dlpack_info_func()
+    device_type, _device_id = dlpack_info_func()
 
     # Only a subset of known devices are supported.
     nplike: NumpyLike
@@ -81,4 +81,5 @@ def from_dlpack(
         from_arraylib(array, regulararray, False, primitive_policy=primitive_policy),
         highlevel=highlevel,
         behavior=behavior,
+        attrs=attrs,
     )
