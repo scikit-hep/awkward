@@ -56,6 +56,9 @@ jobs:
           - runs-on: macos-14
             python-architecture: arm64
             dependencies-kind: full
+          - runs-on: macos-15-intel
+            python-architecture: x64
+            dependencies-kind: full
           - python-version: '3.9'
             python-architecture: x86
             runs-on: windows-latest
