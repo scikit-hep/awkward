@@ -73,7 +73,7 @@ def moment(
 
     Passing all arguments to the reducers, the moment is calculated as
 
-        ak.sum(weight * x**n) / ak.sum(weight)
+        ak.sum(x**n * weight) / ak.sum(weight)
 
     The `n=2` moment differs from #ak.var in that #ak.var also subtracts the
     mean (the `n=1` moment).
