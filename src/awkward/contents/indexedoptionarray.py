@@ -269,7 +269,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             return self
         else:
             return IndexedOptionArray(
-                self._backend.nplike.astype(self._index, dtype=np.int64),
+                ak.index.Index64(
+                    self._backend.nplike.astype(self._index.data, dtype=np.int64)
+                ),
                 self._content,
                 parameters=self._parameters,
             )
