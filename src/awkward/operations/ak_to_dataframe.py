@@ -154,19 +154,21 @@ or
 
     conda install pandas"""
         ) from err
-    
-    def _merge_multi_indexed_dfs(df1: pandas.DataFrame, df2: pandas.DataFrame, how: str) -> pandas.DataFrame:
-        '''Merge two DataFrames after aligning their MultiIndex levels.'''
+
+    def _merge_multi_indexed_dfs(
+        df1: pandas.DataFrame, df2: pandas.DataFrame, how: str
+    ) -> pandas.DataFrame:
+        """Merge two DataFrames after aligning their MultiIndex levels."""
         # Extra levels. At most one of these will be non-empty.
         df1_extra = tuple(n for n in df1.index.names if n not in df2.index.names)
         df2_extra = tuple(n for n in df2.index.names if n not in df1.index.names)
-        
+
         # Reset extra levels to columns
         if df1_extra:
             df1 = df1.reset_index(level=df1_extra)
         if df2_extra:
             df2 = df2.reset_index(level=df2_extra)
-        
+
         # Merge on aligned indices
         merged = pandas.merge(df1, df2, left_index=True, right_index=True, how=how)
 
