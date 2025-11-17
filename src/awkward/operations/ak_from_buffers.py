@@ -36,6 +36,7 @@ def from_buffers(
     backend="cpu",
     byteorder="<",
     allow_noncanonical_form=False,
+    disable_virtual_array_caching=False,
     highlevel=True,
     behavior=None,
     attrs=None,
@@ -107,6 +108,8 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
+    global __disable_virtual_array_caching__
+    __disable_virtual_array_caching__ = disable_virtual_array_caching
     return _impl(
         form,
         length,
@@ -222,6 +225,7 @@ def _from_buffer(
             generator=generator,
             shape_generator=cached_shape_generator,
             __wrap_generator_asarray__=True,
+            __disable_caching__=__disable_virtual_array_caching__,
         )
     # Unknown-length information implies that we didn't load shape-buffers (offsets, etc)
     # for the parent of this node. Thus, this node and its children *must* only
