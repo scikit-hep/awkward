@@ -43,7 +43,7 @@ jobs:
           - '3.14'
           - '3.9'
         python-architecture:
-          - null # use default arch
+          - '' # use default arch
         dependencies-kind:
           - full
         include:
