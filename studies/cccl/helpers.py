@@ -34,16 +34,39 @@ def empty_like(array, kind="empty"):
                 backend=backend
             )
         elif isinstance(content, ak.contents.ListOffsetArray):
-            # Keep offsets, recurse on content
+            # Copy offsets to avoid sharing buffers between arrays
+            offsets_array = xp.asarray(content.offsets).copy()
+            # Wrap in appropriate Index type
+            if isinstance(content.offsets, ak.index.Index32):
+                new_offsets = ak.index.Index32(offsets_array)
+            elif isinstance(content.offsets, ak.index.IndexU32):
+                new_offsets = ak.index.IndexU32(offsets_array)
+            else:
+                new_offsets = ak.index.Index64(offsets_array)
+
             return ak.contents.ListOffsetArray(
-                content.offsets,
+                new_offsets,
                 copy_with_empty_buffers(content.content),
                 parameters=content._parameters
             )
         elif isinstance(content, ak.contents.ListArray):
+            # Copy starts/stops to avoid sharing buffers
+            starts_array = xp.asarray(content.starts).copy()
+            stops_array = xp.asarray(content.stops).copy()
+            # Wrap in appropriate Index types
+            if isinstance(content.starts, ak.index.Index32):
+                new_starts = ak.index.Index32(starts_array)
+                new_stops = ak.index.Index32(stops_array)
+            elif isinstance(content.starts, ak.index.IndexU32):
+                new_starts = ak.index.IndexU32(starts_array)
+                new_stops = ak.index.IndexU32(stops_array)
+            else:
+                new_starts = ak.index.Index64(starts_array)
+                new_stops = ak.index.Index64(stops_array)
+
             return ak.contents.ListArray(
-                content.starts,
-                content.stops,
+                new_starts,
+                new_stops,
                 copy_with_empty_buffers(content.content),
                 parameters=content._parameters
             )
@@ -56,14 +79,34 @@ def empty_like(array, kind="empty"):
                 backend=backend
             )
         elif isinstance(content, ak.contents.IndexedArray):
+            # Copy index to avoid sharing buffers
+            index_array = xp.asarray(content.index).copy()
+            # Wrap in appropriate Index type
+            if isinstance(content.index, ak.index.Index32):
+                new_index = ak.index.Index32(index_array)
+            elif isinstance(content.index, ak.index.IndexU32):
+                new_index = ak.index.IndexU32(index_array)
+            else:
+                new_index = ak.index.Index64(index_array)
+
             return ak.contents.IndexedArray(
-                content.index,
+                new_index,
                 copy_with_empty_buffers(content.content),
                 parameters=content._parameters
             )
         elif isinstance(content, ak.contents.IndexedOptionArray):
+            # Copy index to avoid sharing buffers
+            index_array = xp.asarray(content.index).copy()
+            # Wrap in appropriate Index type
+            if isinstance(content.index, ak.index.Index32):
+                new_index = ak.index.Index32(index_array)
+            elif isinstance(content.index, ak.index.IndexU32):
+                new_index = ak.index.IndexU32(index_array)
+            else:
+                new_index = ak.index.Index64(index_array)
+
             return ak.contents.IndexedOptionArray(
-                content.index,
+                new_index,
                 copy_with_empty_buffers(content.content),
                 parameters=content._parameters
             )
