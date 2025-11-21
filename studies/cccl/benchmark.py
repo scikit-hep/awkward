@@ -1,3 +1,4 @@
+from playground import physics_analysis, physics_analysis_gpu, physics_analysis_cccl
 import awkward as ak
 import numpy as np
 import time
@@ -6,7 +7,6 @@ from pathlib import Path
 
 # Add current directory to path to import playground
 sys.path.insert(0, str(Path(__file__).parent))
-from playground import physics_analysis, physics_analysis_gpu, physics_analysis_cccl
 
 
 def generate_random_events(num_events=50000, seed=42):
@@ -66,7 +66,8 @@ def generate_random_events(num_events=50000, seed=42):
 
 def benchmark_analysis(events):
     """
-    Benchmark the three analysis approaches without warmup runs.
+    Benchmark the three analysis approaches with warmup runs.
+    Warmup runs are excluded from timing (only measure steady-state performance).
 
     Args:
         events: Awkward Array of events to analyze
@@ -76,7 +77,9 @@ def benchmark_analysis(events):
     print("=" * 60)
     print()
 
-    # Benchmark CPU version
+    # Warmup and benchmark CPU version
+    print("Warming up physics_analysis (CPU)...")
+    _ = physics_analysis(events)
     print("Running physics_analysis (CPU)...")
     start = time.perf_counter()
     result_cpu = physics_analysis(events)
@@ -84,7 +87,9 @@ def benchmark_analysis(events):
     print(f"  Time: {time_cpu:.4f} seconds")
     print()
 
-    # Benchmark GPU native version
+    # Warmup and benchmark GPU native version
+    print("Warming up physics_analysis_gpu (GPU native)...")
+    _ = physics_analysis_gpu(events)
     print("Running physics_analysis_gpu (GPU native)...")
     start = time.perf_counter()
     result_gpu = physics_analysis_gpu(events)
@@ -92,7 +97,9 @@ def benchmark_analysis(events):
     print(f"  Time: {time_gpu:.4f} seconds")
     print()
 
-    # Benchmark CCCL version
+    # Warmup and benchmark CCCL version
+    print("Warming up physics_analysis_cccl (CCCL)...")
+    _ = physics_analysis_cccl(events)
     print("Running physics_analysis_cccl (CCCL)...")
     start = time.perf_counter()
     result_cccl = physics_analysis_cccl(events)
@@ -105,8 +112,10 @@ def benchmark_analysis(events):
     print("RESULTS SUMMARY")
     print("=" * 60)
     print(f"CPU:          {time_cpu:.4f} seconds (baseline)")
-    print(f"GPU native:   {time_gpu:.4f} seconds ({time_cpu/time_gpu:.2f}x speedup)")
-    print(f"CCCL:         {time_cccl:.4f} seconds ({time_cpu/time_cccl:.2f}x speedup)")
+    print(
+        f"GPU native:   {time_gpu:.4f} seconds ({time_cpu/time_gpu:.2f}x speedup)")
+    print(
+        f"CCCL:         {time_cccl:.4f} seconds ({time_cpu/time_cccl:.2f}x speedup)")
     print()
 
     # Print sample results to verify correctness
@@ -123,4 +132,3 @@ if __name__ == "__main__":
 
     # Run benchmarks
     benchmark_analysis(events)
-
