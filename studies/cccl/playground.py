@@ -36,31 +36,6 @@ muons = ak.Array(
 events = ak.zip({"electrons": electrons, "muons": muons}, depth_limit=1)
 
 
-def physics_analysis(events: ak.Array) -> ak.Array:
-    """
-    A oversimplified physics analysis selecting events with exactly 2 leptons (electrons or muons)
-    and computing their invariant mass.
-    """
-    # select only electrons with pt > 40
-    selected_electrons = events.electrons[events.electrons.pt > 40.0]
-    # select only muons with pt > 20 and abs(eta) < 2.4
-    selected_muons = events.muons[
-        (events.muons.pt > 20.0) & (abs(events.muons.eta) < 2.4)
-    ]
-
-    # choose exactly 2 leptons (electrons or muons)
-    two_electrons = selected_electrons[ak.num(
-        selected_electrons.pt, axis=-1) == 2]
-    two_muons = selected_muons[ak.num(selected_muons.pt, axis=-1) == 2]
-
-    return ak.zip(
-        {
-            "electron": invariant_mass(two_electrons),
-            "muon": invariant_mass(two_muons),
-        }
-    )
-
-
 def invariant_mass(two_particles: ak.Array) -> ak.Array:
     """Compute invariant mass of two particles given their pt, eta, phi."""
     pt1, eta1, phi1 = (
@@ -79,6 +54,54 @@ def invariant_mass(two_particles: ak.Array) -> ak.Array:
     return np.sqrt(m2)
 
 
+def physics_analysis(events: ak.Array) -> ak.Array:
+    """
+    A oversimplified physics analysis selecting events with exactly 2 leptons (electrons or muons)
+    and computing their invariant mass.
+    """
+    # select only electrons with pt > 40
+    selected_electrons = events.electrons[events.electrons.pt > 40.0]
+    # select only muons with pt > 20 and abs(eta) < 2.4
+    selected_muons = events.muons[
+        (events.muons.pt > 20.0) & (abs(events.muons.eta) < 2.4)
+    ]
+
+    # choose exactly 2 leptons (electrons or muons)
+    two_electrons = selected_electrons[ak.num(
+        selected_electrons.pt, axis=-1) == 2]
+    two_muons = selected_muons[ak.num(selected_muons.pt, axis=-1) == 2]
+
+    return {
+        "electron": invariant_mass(two_electrons),
+        "muon": invariant_mass(two_muons),
+    }
+
+
+def physics_analysis_gpu(events: ak.Array) -> ak.Array:
+    """
+    A oversimplified physics analysis selecting events with exactly 2 leptons (electrons or muons)
+    and computing their invariant mass.
+    """
+    events_gpu = ak.to_backend(events, "cuda")
+    # select only electrons with pt > 40
+    selected_electrons = events_gpu.electrons[events_gpu.electrons.pt > 40.0]
+    # select only muons with pt > 20 and abs(eta) < 2.4
+    selected_muons = events_gpu.muons[
+        (events_gpu.muons.pt > 20.0) & (abs(events_gpu.muons.eta) < 2.4)
+    ]
+
+    # choose exactly 2 leptons (electrons or muons)
+    two_electrons = selected_electrons[ak.num(
+        selected_electrons.pt, axis=-1) == 2]
+    two_muons = selected_muons[ak.num(
+        selected_muons.pt, axis=-1) == 2]
+
+    return {
+        "electron": invariant_mass(two_electrons),
+        "muon": invariant_mass(two_muons),
+    }
+
+
 def physics_analysis_cccl(events: ak.Array) -> ak.Array:
     """
     CCCL-based physics analysis selecting events with exactly 2 leptons (electrons or muons)
@@ -86,17 +109,19 @@ def physics_analysis_cccl(events: ak.Array) -> ak.Array:
     """
     # Move data to GPU (zero-copy)
     events_gpu = ak.to_backend(events, "cuda")
-    
+
     def cond_muon(x):
         return (x[0] > 20.0) & (abs(x[1]) < 2.4)
-    
+
     def cond_electron(x):
         return x[0] > 40.0
-    
+
     selected_muons = filter_lists(events_gpu.muons, cond_muon)
     selected_electrons = filter_lists(events_gpu.electrons, cond_electron)
-    two_muons = select_lists(selected_muons, (list_sizes(selected_muons) == 2).astype('int8'))
-    two_electrons = select_lists(selected_electrons, (list_sizes(selected_electrons) == 2).astype('int8'))
+    two_muons = select_lists(
+        selected_muons, (list_sizes(selected_muons) == 2).astype('int8'))
+    two_electrons = select_lists(
+        selected_electrons, (list_sizes(selected_electrons) == 2).astype('int8'))
 
     def invariant_mass(two_particles):
         """Compute invariant mass of two particles given their pt, eta, phi."""
@@ -118,13 +143,10 @@ def physics_analysis_cccl(events: ak.Array) -> ak.Array:
     masses_muons = cp.zeros(len(two_muons), dtype=np.float64)
     transform_lists(two_muons, masses_muons, 2, invariant_mass)
     transform_lists(two_electrons, masses_electrons, 2, invariant_mass)
-    return ak.zip(
-        {
-            "electron": masses_electrons,
-            "muon": masses_muons,
-        }
-    )
-
+    return {
+        "electron": masses_electrons,
+        "muon": masses_muons,
+    }
 
 
 if __name__ == "__main__":
@@ -133,11 +155,17 @@ if __name__ == "__main__":
     # Run original function
     inv_mass = physics_analysis(events)
     print("Original physics_analysis() results:")
-    print("  Electron invariant masses (in GeV):", inv_mass.electron)
-    print("  Muon invariant masses (in GeV):", inv_mass.muon)
+    print("  Electron invariant masses (in GeV):", inv_mass["electron"])
+    print("  Muon invariant masses (in GeV):", inv_mass["muon"])
+
+    # Run Awkward Array on GPU function
+    inv_mass_gpu = physics_analysis_gpu(events)
+    print("\nGPU physics_analysis_gpu() results:")
+    print("  Electron invariant masses (in GeV):", inv_mass_gpu["electron"])
+    print("  Muon invariant masses (in GeV):", inv_mass_gpu["muon"])
 
     # Run CCCL-based function
     inv_mass_cccl = physics_analysis_cccl(events)
     print("\nCCCL physics_analysis_cccl() results:")
-    print("  Electron invariant masses (in GeV):", inv_mass_cccl.electron)
-    print("  Muon invariant masses (in GeV):", inv_mass_cccl.muon)
+    print("  Electron invariant masses (in GeV):", inv_mass_cccl["electron"])
+    print("  Muon invariant masses (in GeV):", inv_mass_cccl["muon"])
