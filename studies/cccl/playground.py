@@ -82,12 +82,11 @@ def physics_analysis_gpu(events: ak.Array) -> ak.Array:
     A oversimplified physics analysis selecting events with exactly 2 leptons (electrons or muons)
     and computing their invariant mass.
     """
-    events_gpu = ak.to_backend(events, "cuda")
     # select only electrons with pt > 40
-    selected_electrons = events_gpu.electrons[events_gpu.electrons.pt > 40.0]
+    selected_electrons = events.electrons[events.electrons.pt > 40.0]
     # select only muons with pt > 20 and abs(eta) < 2.4
-    selected_muons = events_gpu.muons[
-        (events_gpu.muons.pt > 20.0) & (abs(events_gpu.muons.eta) < 2.4)
+    selected_muons = events.muons[
+        (events.muons.pt > 20.0) & (abs(events.muons.eta) < 2.4)
     ]
 
     # choose exactly 2 leptons (electrons or muons)
@@ -107,17 +106,14 @@ def physics_analysis_cccl(events: ak.Array) -> ak.Array:
     CCCL-based physics analysis selecting events with exactly 2 leptons (electrons or muons)
     and computing their invariant mass using cuda.compute primitives.
     """
-    # Move data to GPU (zero-copy)
-    events_gpu = ak.to_backend(events, "cuda")
-
     def cond_muon(x):
         return (x[0] > 20.0) & (abs(x[1]) < 2.4)
 
     def cond_electron(x):
         return x[0] > 40.0
 
-    selected_muons = filter_lists(events_gpu.muons, cond_muon)
-    selected_electrons = filter_lists(events_gpu.electrons, cond_electron)
+    selected_muons = filter_lists(events.muons, cond_muon)
+    selected_electrons = filter_lists(events.electrons, cond_electron)
     two_muons = select_lists(
         selected_muons, (list_sizes(selected_muons) == 2).astype('int8'))
     two_electrons = select_lists(
@@ -158,14 +154,16 @@ if __name__ == "__main__":
     print("  Electron invariant masses (in GeV):", inv_mass["electron"])
     print("  Muon invariant masses (in GeV):", inv_mass["muon"])
 
+    events_gpu = ak.to_backend(events, "cuda")
+
     # Run Awkward Array on GPU function
-    inv_mass_gpu = physics_analysis_gpu(events)
+    inv_mass_gpu = physics_analysis_gpu(events_gpu)
     print("\nGPU physics_analysis_gpu() results:")
     print("  Electron invariant masses (in GeV):", inv_mass_gpu["electron"])
     print("  Muon invariant masses (in GeV):", inv_mass_gpu["muon"])
 
     # Run CCCL-based function
-    inv_mass_cccl = physics_analysis_cccl(events)
+    inv_mass_cccl = physics_analysis_cccl(events_gpu)
     print("\nCCCL physics_analysis_cccl() results:")
     print("  Electron invariant masses (in GeV):", inv_mass_cccl["electron"])
     print("  Muon invariant masses (in GeV):", inv_mass_cccl["muon"])

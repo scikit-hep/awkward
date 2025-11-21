@@ -327,15 +327,15 @@ def segmented_select(
 
 def transform_segments(data_in, data_out, segment_size, op, num_segments):
     def column_it_factory(it, i):
-        def col_it(j):
+        def col_it(j: np.int32) -> np.int32:
             return j * segment_size + i
         return PermutationIterator(it, TransformIterator(CountingIterator(np.int32(0)), col_it))
-    
+
     column_iterators = []
     for i in range(segment_size):
         column_iterators.append(column_it_factory(data_in, i))
-        
-    columns= ZipIterator(*column_iterators)
+
+    columns = ZipIterator(*column_iterators)
     unary_transform(
         columns,
         data_out,
