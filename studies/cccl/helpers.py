@@ -5,10 +5,12 @@ import cupy as cp
 from cuda.compute import ConstantIterator, ZipIterator, PermutationIterator, CountingIterator, TransformIterator, OpKind
 from typing import Callable
 import cuda.compute
+import nvtx
 
 from _segment_algorithms import segment_sizes, offsets_to_segment_ids, select_segments, segmented_select, transform_segments
 
 
+@nvtx.annotate("empty_like")
 def empty_like(array, kind="empty"):
     # Use low-level API to avoid dispatch and from_buffers overhead
     if isinstance(array, ak.Array):
@@ -125,6 +127,7 @@ def empty_like(array, kind="empty"):
     return ak.Array(new_layout)
 
 
+@nvtx.annotate("awkward_to_cccl_iterator")
 def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, return_offsets=True):
     """
     Convert an Awkward Array to a CCCL iterator (zero-copy).
@@ -296,6 +299,7 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
         )
 
 
+@nvtx.annotate("reconstruct_with_offsets")
 def reconstruct_with_offsets(list_array, new_offsets):
     # Directly reconstruct the layout without going through from_buffers
     if isinstance(list_array, ak.Array):
@@ -371,6 +375,7 @@ def reconstruct_with_offsets(list_array, new_offsets):
     return ak.Array(new_layout)
 
 
+@nvtx.annotate("filter_lists")
 def filter_lists(array, cond):
     it, meta = awkward_to_cccl_iterator(array)
     in_segments = meta["offsets"]
@@ -389,6 +394,7 @@ def filter_lists(array, cond):
     return reconstruct_with_offsets(out_array, out_segments)
 
 
+@nvtx.annotate("select_lists")
 def select_lists(array, mask):
     data_in, meta = awkward_to_cccl_iterator(array)
     offsets_in = meta["offsets"]
@@ -412,6 +418,7 @@ def select_lists(array, mask):
     return reconstruct_with_offsets(out_array, offsets_out)
 
 
+@nvtx.annotate("list_sizes")
 def list_sizes(array):
     _, meta = awkward_to_cccl_iterator(array)
     offsets, length = meta["offsets"], meta["length"]
@@ -429,6 +436,7 @@ def list_sizes(array):
     return d_out
 
 
+@nvtx.annotate("transform_lists")
 def transform_lists(array, out_array, list_size, op):
     data_in, meta = awkward_to_cccl_iterator(array)
     data_out, _ = awkward_to_cccl_iterator(out_array)

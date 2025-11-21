@@ -5,6 +5,7 @@
 
 import cupy as cp
 import numpy as np
+import nvtx
 
 from cuda.compute import (
     DiscardIterator, PermutationIterator, ZipIterator, TransformIterator, CountingIterator,
@@ -12,6 +13,7 @@ from cuda.compute import (
 )
 
 
+@nvtx.annotate("segment_sizes")
 def segment_sizes(offsets):
     """
     Compute the size of each segment from segment offsets.
@@ -26,6 +28,7 @@ def segment_sizes(offsets):
     return offsets[1:] - offsets[:-1]
 
 
+@nvtx.annotate("offsets_to_segment_ids")
 def offsets_to_segment_ids(offsets, stream=None):
     """
     Convert segment offsets to segment IDs (indicators).
@@ -70,6 +73,7 @@ def offsets_to_segment_ids(offsets, stream=None):
     return segment_ids
 
 
+@nvtx.annotate("select_segments")
 def select_segments(
     data_in,
     offsets_in,
@@ -172,6 +176,7 @@ def select_segments(
     start_offsets = offsets_in[:-1]
     end_offsets = offsets_in[1:]
 
+    cp.cuda.Device().synchronize()
     segmented_reduce(
         expanded_mask_it,
         segment_counts,
@@ -230,6 +235,7 @@ def select_segments(
     d_num_selected_out[1] = num_kept_segments  # number of segments kept
 
 
+@nvtx.annotate("segmented_select")
 def segmented_select(
     d_in_data,
     d_in_segments,
@@ -298,6 +304,7 @@ def segmented_select(
     end_offsets = d_in_segments[1:]
     d_counts = cp.empty(num_segments, dtype=cp.uint64)
 
+    cp.cuda.Device().synchronize()
     segmented_reduce(
         d_mask,
         d_counts,
@@ -321,10 +328,11 @@ def segmented_select(
 
     # Step 5: Set the final offset to the total count
     d_out_segments[-1] = total_selected
-
+    cp.cuda.Device().synchronize()
     return total_selected
 
 
+@nvtx.annotate("transform_segments")
 def transform_segments(data_in, data_out, segment_size, op, num_segments):
     def column_it_factory(it, i):
         def col_it(j: np.int32) -> np.int32:

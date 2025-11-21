@@ -130,7 +130,7 @@ def benchmark_analysis(events):
 
 if __name__ == "__main__":
     # Generate random events at scale
-    events = generate_random_events(num_events=1000000)
+    events = generate_random_events(num_events=10_000_000)
 
     # Run benchmarks
     benchmark_analysis(events)
