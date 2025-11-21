@@ -10,24 +10,76 @@ from _segment_algorithms import segment_sizes, offsets_to_segment_ids, select_se
 
 
 def empty_like(array, kind="empty"):
-    # Use low-level API to avoid dispatch overhead
+    # Use low-level API to avoid dispatch and from_buffers overhead
     if isinstance(array, ak.Array):
         layout = array.layout
+    elif hasattr(array, 'layout'):
+        layout = array.layout
+    elif isinstance(array, ak.contents.Content):
+        layout = array
     else:
         layout = ak.to_layout(array)
 
-    # Low-level to_buffers (no dispatch)
-    form, length, bufs = ak._do.to_buffers(layout)
+    # Recursively copy the layout tree, allocating empty buffers for data
+    def copy_with_empty_buffers(content):
+        backend = content._backend
+        xp = backend.nplike
 
-    # Get backend directly from layout (no dispatch)
-    backend_name = layout._backend.name
-    xp = __import__("cupy" if backend_name == "cuda" else "numpy")
+        if isinstance(content, ak.contents.NumpyArray):
+            # Allocate empty data buffer
+            empty_data = xp.empty(content.data.shape, dtype=content.data.dtype)
+            return ak.contents.NumpyArray(
+                empty_data,
+                parameters=content._parameters,
+                backend=backend
+            )
+        elif isinstance(content, ak.contents.ListOffsetArray):
+            # Keep offsets, recurse on content
+            return ak.contents.ListOffsetArray(
+                content.offsets,
+                copy_with_empty_buffers(content.content),
+                parameters=content._parameters
+            )
+        elif isinstance(content, ak.contents.ListArray):
+            return ak.contents.ListArray(
+                content.starts,
+                content.stops,
+                copy_with_empty_buffers(content.content),
+                parameters=content._parameters
+            )
+        elif isinstance(content, ak.contents.RecordArray):
+            return ak.contents.RecordArray(
+                [copy_with_empty_buffers(c) for c in content.contents],
+                content.fields,
+                length=content.length,
+                parameters=content._parameters,
+                backend=backend
+            )
+        elif isinstance(content, ak.contents.IndexedArray):
+            return ak.contents.IndexedArray(
+                content.index,
+                copy_with_empty_buffers(content.content),
+                parameters=content._parameters
+            )
+        elif isinstance(content, ak.contents.IndexedOptionArray):
+            return ak.contents.IndexedOptionArray(
+                content.index,
+                copy_with_empty_buffers(content.content),
+                parameters=content._parameters
+            )
+        elif isinstance(content, ak.contents.RegularArray):
+            return ak.contents.RegularArray(
+                copy_with_empty_buffers(content.content),
+                content.size,
+                content.length,
+                parameters=content._parameters
+            )
+        else:
+            # For other types, fallback to copy
+            return content
 
-    new_bufs = {
-        key: xp.empty_like(buf) if key.endswith("data") else buf.copy()
-        for key, buf in bufs.items()
-    }
-    return ak.from_buffers(form, length, new_bufs, backend=backend_name)
+    new_layout = copy_with_empty_buffers(layout)
+    return ak.Array(new_layout)
 
 
 def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, return_offsets=True):
@@ -77,14 +129,21 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
         # Access layout directly if it's an ak.Array, otherwise convert
         if isinstance(array, ak.Array):
             layout = array.layout
-            # Check if already on CUDA backend
-            if layout._backend.name != "cuda":
-                # Need to move to GPU
-                layout = ak.to_backend(array, "cuda").layout
+        elif hasattr(array, 'layout'):
+            # It's a Record or similar
+            layout = array.layout
+        elif isinstance(array, ak.contents.Content):
+            # Already a layout
+            layout = array
         else:
-            # Not an ak.Array, use normal conversion
-            array_gpu = ak.to_backend(array, "cuda")
-            layout = array_gpu.layout
+            # Rare fallback: need to convert to layout (will use dispatch, but rare)
+            layout = ak.to_layout(array)
+
+        # Check if already on CUDA backend, if not convert using low-level method
+        if layout._backend.name != "cuda":
+            from awkward._backends.dispatch import regularize_backend
+            cuda_backend = regularize_backend("cuda")
+            layout = layout.to_backend(cuda_backend)
 
         # Use low-level to_buffers to avoid @high_level_function dispatch overhead
         form, length, buffers = ak._do.to_buffers(layout)
@@ -189,23 +248,78 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
 
 
 def reconstruct_with_offsets(list_array, new_offsets):
-    # Use low-level API to avoid dispatch overhead
+    # Directly reconstruct the layout without going through from_buffers
     if isinstance(list_array, ak.Array):
         layout = list_array.layout
+    elif hasattr(list_array, 'layout'):
+        layout = list_array.layout
+    elif isinstance(list_array, ak.contents.Content):
+        layout = list_array
     else:
         layout = ak.to_layout(list_array)
 
-    # Low-level to_buffers (no dispatch)
-    form, length, bufs = ak._do.to_buffers(layout)
+    # Wrap new_offsets in an Index if it's not already
+    if not isinstance(new_offsets, ak.index.Index):
+        # Determine the appropriate Index type based on dtype
+        if hasattr(new_offsets, 'dtype'):
+            dtype = new_offsets.dtype
+        else:
+            dtype = np.int64
 
-    num_data = new_offsets[-1].get()
-    for name, buf in bufs.items():
-        if name.endswith("data"):
-            bufs[name] = bufs[name][:num_data]
-        elif name.endswith("offsets"):
-            bufs[name] = new_offsets
-    length = len(new_offsets) - 1
-    return ak.from_buffers(form, length, bufs, backend="cuda")
+        if dtype == np.int32:
+            new_offsets = ak.index.Index32(new_offsets)
+        elif dtype == np.uint32:
+            new_offsets = ak.index.IndexU32(new_offsets)
+        else:
+            new_offsets = ak.index.Index64(new_offsets)
+
+    # Find the top-level list and reconstruct with new offsets
+    def reconstruct_list(content, new_offsets):
+        if isinstance(content, ak.contents.ListOffsetArray):
+            # Slice content to match new offsets
+            num_data = int(new_offsets.data[-1])
+            sliced_content = content.content[:num_data]
+            return ak.contents.ListOffsetArray(
+                new_offsets,
+                sliced_content,
+                parameters=content._parameters
+            )
+        elif isinstance(content, ak.contents.IndexedArray):
+            # Recurse through indexed wrapper
+            new_content = reconstruct_list(content.content, new_offsets)
+            return ak.contents.IndexedArray(
+                content.index,
+                new_content,
+                parameters=content._parameters
+            )
+        elif isinstance(content, ak.contents.IndexedOptionArray):
+            # Recurse through indexed option wrapper
+            new_content = reconstruct_list(content.content, new_offsets)
+            return ak.contents.IndexedOptionArray(
+                content.index,
+                new_content,
+                parameters=content._parameters
+            )
+        elif isinstance(content, ak.contents.RecordArray):
+            # For records, reconstruct each field
+            new_contents = [reconstruct_list(
+                c, new_offsets) for c in content.contents]
+            # Length should match the number of lists (offsets length - 1)
+            new_length = len(new_offsets.data) - 1 if isinstance(new_offsets,
+                                                                 ak.index.Index) else len(new_offsets) - 1
+            return ak.contents.RecordArray(
+                new_contents,
+                content.fields,
+                length=new_length,
+                parameters=content._parameters,
+                backend=content._backend
+            )
+        else:
+            # Shouldn't reach here for typical list arrays
+            return content
+
+    new_layout = reconstruct_list(layout, new_offsets)
+    return ak.Array(new_layout)
 
 
 def filter_lists(array, cond):
