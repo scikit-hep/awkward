@@ -2,7 +2,11 @@ import awkward as ak
 import awkward as ak
 import numpy as np
 import cupy as cp
-from cuda.compute import ZipIterator, PermutationIterator
+from cuda.compute import ConstantIterator, ZipIterator, PermutationIterator, CountingIterator, TransformIterator, OpKind
+from typing import Callable
+import cuda.compute
+
+from _segment_algorithms import segment_sizes, offsets_to_segment_ids, select_segments, segmented_select, transform_segments
 
 
 def empty_like(array, kind="empty"):
@@ -10,7 +14,7 @@ def empty_like(array, kind="empty"):
     backend = ak.backend(array)
     xp = __import__("cupy" if backend == "cuda" else "numpy")
     new_bufs = {
-        key: xp.empty_like(buf) if key.endswith("data") else buf
+        key: xp.empty_like(buf) if key.endswith("data") else buf.copy()
         for key, buf in bufs.items()
     }
     return ak.from_buffers(form, length, new_bufs, backend=backend)
@@ -159,3 +163,76 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
             f"Please add support or file an issue."
         )
 
+def reconstruct_with_offsets(list_array, new_offsets):
+    form, length, bufs = ak.to_buffers(list_array)
+    num_data = new_offsets[-1].get()
+    for name, buf in bufs.items():
+        if name.endswith("data"):
+            bufs[name] = bufs[name][:num_data]
+        elif name.endswith("offsets"):
+            bufs[name] = new_offsets
+    length = len(new_offsets) - 1
+    return ak.from_buffers(form, length, bufs, backend="cuda")
+
+
+def filter_lists(array, cond):
+    it, meta = awkward_to_cccl_iterator(array)
+    in_segments = meta["offsets"]
+    out_array = empty_like(array)
+    it_out, meta_out = awkward_to_cccl_iterator(out_array)
+    out_segments = meta_out["offsets"]
+    num_items = in_segments[-1].get()
+    segmented_select(
+        it,
+        in_segments,
+        it_out,
+        out_segments,
+        cond,
+        num_items
+    )
+    return reconstruct_with_offsets(out_array, out_segments)
+
+def select_lists(array, mask):    
+    data_in, meta = awkward_to_cccl_iterator(array)
+    offsets_in = meta["offsets"]
+    offsets_out = meta["offsets"]
+    num_lists = meta["length"]
+    num_elements = meta["offsets"].get()[-1]
+    out_array = empty_like(array)
+    data_out, meta = awkward_to_cccl_iterator(out_array)
+    d_num_selected_out = cp.empty(2, np.int32)
+    select_segments(
+        data_in,
+        offsets_in,
+        mask,
+        data_out,
+        offsets_out,
+        d_num_selected_out,
+        num_elements,
+        num_lists)
+    num_elements_kept, num_lists_kept = d_num_selected_out
+    offsets_out = offsets_out[:num_lists_kept+1]
+    return reconstruct_with_offsets(out_array, offsets_out)
+    
+def list_sizes(array):
+    _, meta = awkward_to_cccl_iterator(array)
+    offsets, length = meta["offsets"], meta["length"]
+    d_out = cp.empty(length, dtype=np.int32)
+    h_init = np.array([0], dtype=np.int32)
+    cuda.compute.segmented_reduce(
+        ConstantIterator(np.int32(1)),
+        d_out,
+        offsets[:-1],
+        offsets[1:],
+        OpKind.PLUS,
+        h_init,
+        length
+    )
+    return d_out
+
+def transform_lists(array, out_array, list_size, op):
+    data_in, meta = awkward_to_cccl_iterator(array)
+    data_out, _ = awkward_to_cccl_iterator(out_array)
+    num_segments = meta["length"]
+    transform_segments(data_in, data_out, list_size, op, num_segments)
+    return out_array
