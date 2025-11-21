@@ -164,51 +164,32 @@ def select_segments(
     num_selected = int(d_num_data_selected[0])
 
     # Step 4: Compute new segment offsets
-    # For each original segment, count how many of its elements passed the selection
-    # This is a segmented reduction of the expanded_mask with SUM operation
+    # First, materialize the expanded_mask into an array
+    def identity(x):
+        return x
 
-    # Segmented reduce to count elements per segment that passed the selection
-    segment_counts = cp.zeros(num_segments, dtype=np.int32)
-    h_init = np.array([0], dtype=np.int32)
-
-    # For segmented_reduce, we need start and end offsets
-    # If offsets_in is an iterator, we can still slice it
-    start_offsets = offsets_in[:-1]
-    end_offsets = offsets_in[1:]
-
-    cp.cuda.Device().synchronize()
-    segmented_reduce(
+    expanded_mask = cp.empty(num_elements, dtype=np.int8)
+    unary_transform(
         expanded_mask_it,
-        segment_counts,
-        start_offsets,
-        end_offsets,
-        OpKind.PLUS,
-        h_init,
-        num_segments,
+        expanded_mask,
+        identity,
+        num_elements,
         stream,
     )
 
-    # Select out the segment sizes where mask is zero (those segments are not included)
-    kept_segment_sizes = cp.empty(num_segments, dtype=np.int32)
-    d_num_kept_segments = cp.zeros(1, dtype=np.int32)
+    # Get indices where mask is non-zero using cp.nonzero
+    d_selected_indices = cp.nonzero(expanded_mask)[0].astype(np.int32)
 
-    # Use ZipIterator to combine segment_counts and mask for selection
-    zip_sizes_mask = ZipIterator(segment_counts, mask_in)
+    # Use searchsorted to count elements per segment
+    # Use side='left' to count elements strictly less than each offset boundary
+    positions = cp.searchsorted(d_selected_indices, offsets_in, side='left')
+    segment_counts = (positions[1:] - positions[:-1]).astype(np.int32)
 
-    def mask_nonzero(pair):
-        return pair[1] != 0
-
-    select(
-        zip_sizes_mask,
-        ZipIterator(kept_segment_sizes, cp.empty(num_segments, dtype=np.int8)),
-        d_num_kept_segments,
-        mask_nonzero,
-        num_segments,
-        stream,
-    )
-
-    num_kept_segments = int(d_num_kept_segments[0])
-    kept_segment_sizes = kept_segment_sizes[:num_kept_segments]
+    # Select out the segment sizes where mask is non-zero (those segments are kept)
+    # Convert mask to a regular array if needed and use boolean indexing
+    mask_array = cp.asarray(mask_in)
+    kept_segment_sizes = segment_counts[mask_array != 0]
+    num_kept_segments = len(kept_segment_sizes)
 
     # Exclusive scan to convert sizes to offsets
     temp_offsets = cp.zeros(num_kept_segments + 1, dtype=np.int32)
@@ -291,30 +272,20 @@ def segmented_select(
     d_num_selected = cp.zeros(2, dtype=cp.uint64)
     select(d_in_data, d_out_data, d_num_selected, cond, num_items, stream)
 
-    # Get total number of selected items
     total_selected = int(d_num_selected[0])
 
     # Step 2: Create a boolean mask by applying the condition
-    # We materialize this as an array to avoid closure issues
     d_mask = cp.empty(num_items, dtype=cp.uint8)
     unary_transform(d_in_data, d_mask, cond, num_items, stream)
 
-    # Step 3: Use segmented reduce to count selected items per segment
-    start_offsets = d_in_segments[:-1]
-    end_offsets = d_in_segments[1:]
-    d_counts = cp.empty(num_segments, dtype=cp.uint64)
+    # Get indices where condition is true using cp.nonzero
+    d_selected_indices = cp.nonzero(d_mask)[0].astype(np.int32)
 
-    cp.cuda.Device().synchronize()
-    segmented_reduce(
-        d_mask,
-        d_counts,
-        start_offsets,
-        end_offsets,
-        OpKind.PLUS,
-        np.array(0, dtype=np.uint64),
-        num_segments,
-        stream,
-    )
+    # Step 3: Use searchsorted to count selected items per segment
+    # Use side='left' to count elements strictly less than each offset boundary
+    positions = cp.searchsorted(
+        d_selected_indices, d_in_segments, side='left')
+    d_counts = (positions[1:] - positions[:-1]).astype(cp.uint64)
 
     # Step 4: Use exclusive scan to compute output segment start offsets
     exclusive_scan(
