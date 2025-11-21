@@ -112,9 +112,10 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
 
     Returns:
         CCCL iterator or CuPy array representing the structure
-        Dictionary with metadata: {"form": ..., "buffers": ..., "offsets": ..., "length": ...}
+        Dictionary with metadata: {"form": ..., "buffers": ..., "offsets": ..., "length": ..., "count": ...}
         - offsets: CuPy array of offsets if list structure exists, else None
-        - length: Array length from ak.to_buffers
+        - length: Array length (number of lists)
+        - count: Total number of items across all lists (avoids .get() calls)
     """
     # Initial call: extract form and buffers from array
     initial_call = form is None and buffers is None
@@ -170,8 +171,12 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
 
     # Extract offsets if this is the initial call and offsets are requested
     offsets = None
+    count = None
     if initial_call and return_offsets:
         offsets = extract_offsets_from_form(form)
+        # Pre-compute count (total number of items in the list array)
+        if offsets is not None:
+            count = int(offsets[-1])
 
     # Helper to create metadata dict for return
     def make_metadata():
@@ -179,7 +184,8 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
             "form": form,
             "buffers": buffers,
             "offsets": offsets,
-            "length": length
+            "length": length,
+            "count": count
         }
 
     # Base case: NumpyArray - return the flat data buffer
@@ -328,7 +334,7 @@ def filter_lists(array, cond):
     out_array = empty_like(array)
     it_out, meta_out = awkward_to_cccl_iterator(out_array)
     out_segments = meta_out["offsets"]
-    num_items = in_segments[-1].get()
+    num_items = meta["count"]
     segmented_select(
         it,
         in_segments,
@@ -345,7 +351,7 @@ def select_lists(array, mask):
     offsets_in = meta["offsets"]
     offsets_out = meta["offsets"]
     num_lists = meta["length"]
-    num_elements = meta["offsets"].get()[-1]
+    num_elements = meta["count"]
     out_array = empty_like(array)
     data_out, meta = awkward_to_cccl_iterator(out_array)
     d_num_selected_out = cp.empty(2, np.int32)
