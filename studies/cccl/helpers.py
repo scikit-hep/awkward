@@ -62,8 +62,22 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
         if array is None:
             raise ValueError(
                 "Must provide either 'array' or both 'form' and 'buffers'")
-        array_gpu = ak.to_backend(array, "cuda")
-        form, length, buffers = ak.to_buffers(array_gpu)
+
+        # Fast path: use low-level API to avoid dispatch overhead
+        # Access layout directly if it's an ak.Array, otherwise convert
+        if isinstance(array, ak.Array):
+            layout = array.layout
+            # Check if already on CUDA backend
+            if layout._backend.name != "cuda":
+                # Need to move to GPU
+                layout = ak.to_backend(array, "cuda").layout
+        else:
+            # Not an ak.Array, use normal conversion
+            array_gpu = ak.to_backend(array, "cuda")
+            layout = array_gpu.layout
+
+        # Use low-level to_buffers to avoid @high_level_function dispatch overhead
+        form, length, buffers = ak._do.to_buffers(layout)
 
     # Helper to extract offsets from the form structure
     def extract_offsets_from_form(form_to_search):
@@ -163,6 +177,7 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
             f"Please add support or file an issue."
         )
 
+
 def reconstruct_with_offsets(list_array, new_offsets):
     form, length, bufs = ak.to_buffers(list_array)
     num_data = new_offsets[-1].get()
@@ -192,7 +207,8 @@ def filter_lists(array, cond):
     )
     return reconstruct_with_offsets(out_array, out_segments)
 
-def select_lists(array, mask):    
+
+def select_lists(array, mask):
     data_in, meta = awkward_to_cccl_iterator(array)
     offsets_in = meta["offsets"]
     offsets_out = meta["offsets"]
@@ -213,7 +229,8 @@ def select_lists(array, mask):
     num_elements_kept, num_lists_kept = d_num_selected_out
     offsets_out = offsets_out[:num_lists_kept+1]
     return reconstruct_with_offsets(out_array, offsets_out)
-    
+
+
 def list_sizes(array):
     _, meta = awkward_to_cccl_iterator(array)
     offsets, length = meta["offsets"], meta["length"]
@@ -229,6 +246,7 @@ def list_sizes(array):
         length
     )
     return d_out
+
 
 def transform_lists(array, out_array, list_size, op):
     data_in, meta = awkward_to_cccl_iterator(array)
