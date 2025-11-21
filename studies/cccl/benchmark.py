@@ -87,22 +87,24 @@ def benchmark_analysis(events):
     print(f"  Time: {time_cpu:.4f} seconds")
     print()
 
+    events_gpu = ak.to_backend(events, "cuda")
+
     # Warmup and benchmark GPU native version
     print("Warming up physics_analysis_gpu (GPU native)...")
-    _ = physics_analysis_gpu(events)
+    _ = physics_analysis_gpu(events_gpu)
     print("Running physics_analysis_gpu (GPU native)...")
     start = time.perf_counter()
-    result_gpu = physics_analysis_gpu(events)
+    result_gpu = physics_analysis_gpu(events_gpu)
     time_gpu = time.perf_counter() - start
     print(f"  Time: {time_gpu:.4f} seconds")
     print()
 
     # Warmup and benchmark CCCL version
     print("Warming up physics_analysis_cccl (CCCL)...")
-    _ = physics_analysis_cccl(events)
+    _ = physics_analysis_cccl(events_gpu)
     print("Running physics_analysis_cccl (CCCL)...")
     start = time.perf_counter()
-    result_cccl = physics_analysis_cccl(events)
+    result_cccl = physics_analysis_cccl(events_gpu)
     time_cccl = time.perf_counter() - start
     print(f"  Time: {time_cccl:.4f} seconds")
     print()
