@@ -10,14 +10,24 @@ from _segment_algorithms import segment_sizes, offsets_to_segment_ids, select_se
 
 
 def empty_like(array, kind="empty"):
-    form, length, bufs = ak.to_buffers(array)
-    backend = ak.backend(array)
-    xp = __import__("cupy" if backend == "cuda" else "numpy")
+    # Use low-level API to avoid dispatch overhead
+    if isinstance(array, ak.Array):
+        layout = array.layout
+    else:
+        layout = ak.to_layout(array)
+
+    # Low-level to_buffers (no dispatch)
+    form, length, bufs = ak._do.to_buffers(layout)
+
+    # Get backend directly from layout (no dispatch)
+    backend_name = layout._backend.name
+    xp = __import__("cupy" if backend_name == "cuda" else "numpy")
+
     new_bufs = {
         key: xp.empty_like(buf) if key.endswith("data") else buf.copy()
         for key, buf in bufs.items()
     }
-    return ak.from_buffers(form, length, new_bufs, backend=backend)
+    return ak.from_buffers(form, length, new_bufs, backend=backend_name)
 
 
 def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, return_offsets=True):
@@ -179,7 +189,15 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
 
 
 def reconstruct_with_offsets(list_array, new_offsets):
-    form, length, bufs = ak.to_buffers(list_array)
+    # Use low-level API to avoid dispatch overhead
+    if isinstance(list_array, ak.Array):
+        layout = list_array.layout
+    else:
+        layout = ak.to_layout(list_array)
+
+    # Low-level to_buffers (no dispatch)
+    form, length, bufs = ak._do.to_buffers(layout)
+
     num_data = new_offsets[-1].get()
     for name, buf in bufs.items():
         if name.endswith("data"):
