@@ -266,20 +266,25 @@ def segmented_select(
         >>> print(total)  # 2
         >>> print(d_out_segments.get())  # [0, 1, 2, 2]
     """
+    import numba.cuda
+
     num_segments = len(d_in_segments) - 1
 
-    # Step 1: Apply select to compact the data
-    d_num_selected = cp.zeros(2, dtype=cp.uint64)
-    select(d_in_data, d_out_data, d_num_selected, cond, num_items, stream)
+    cond = numba.cuda.jit(cond)
+    # Apply select to get the data and indices where condition is true
 
+    def select_predicate(pair):
+        return cond(pair[0])
+
+    data_and_indices_in = ZipIterator(d_in_data, CountingIterator(np.int32(0)))
+    d_indices_out = cp.empty(num_items, dtype=np.int32)
+    data_and_indices_out = ZipIterator(d_out_data, d_indices_out)
+    d_num_selected = cp.zeros(1, dtype=cp.uint64)
+    select(data_and_indices_in, data_and_indices_out,
+           d_num_selected, select_predicate, num_items, stream)
     total_selected = int(d_num_selected[0])
-
-    # Step 2: Create a boolean mask by applying the condition
-    d_mask = cp.empty(num_items, dtype=cp.uint8)
-    unary_transform(d_in_data, d_mask, cond, num_items, stream)
-
-    # Get indices where condition is true using cp.nonzero
-    d_selected_indices = cp.nonzero(d_mask)[0].astype(np.int32)
+    d_indices_out = d_indices_out[:total_selected]
+    d_selected_indices = d_indices_out[:total_selected]
 
     # Step 3: Use searchsorted to count selected items per segment
     # Use side='left' to count elements strictly less than each offset boundary
