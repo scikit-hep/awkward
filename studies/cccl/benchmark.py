@@ -1,6 +1,7 @@
 from playground import physics_analysis, physics_analysis_gpu, physics_analysis_cccl
 import awkward as ak
 import numpy as np
+import cupy as cp
 import time
 import sys
 from pathlib import Path
@@ -125,6 +126,13 @@ def benchmark_analysis(events):
     print(f"  CPU electrons:    {result_cpu['electron'][:5]}")
     print(f"  GPU electrons:    {result_gpu['electron'][:5]}")
     print(f"  CCCL electrons:   {result_cccl['electron'][:5]}")
+    print()
+
+    # Check correctness
+    print("Checking correctness...")
+    cp.testing.assert_allclose(
+        result_cpu['electron'], result_cccl['electron'])
+    print("Correctness check passed")
     print()
 
 

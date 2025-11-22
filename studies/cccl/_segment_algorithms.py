@@ -135,25 +135,22 @@ def select_segments(
     # Each element gets the mask value of its corresponding segment
     expanded_mask_it = PermutationIterator(mask_in, segment_indices)
 
-    # Step 3: Filter the data array using the expanded mask
-    # We use a ZipIterator to combine data and mask, then filter based on mask
-    # and extract only the data values
-
-    # Zip data and expanded mask together
-    zip_it = ZipIterator(data_in, expanded_mask_it)
-
-    # Allocate temporary mask output buffer
-    filtered_pairs = ZipIterator(data_out, DiscardIterator())
+    # Step 3: Filter the data array and capture indices in a single select call
+    # Zip together data, expanded mask, and counting iterator
+    data_mask_idx_in = ZipIterator(
+        data_in, expanded_mask_it, CountingIterator(np.int32(0)))
+    d_selected_indices = cp.empty(num_elements, dtype=np.int32)
+    data_idx_out = ZipIterator(data_out, d_selected_indices)
     d_num_data_selected = cp.zeros(1, dtype=np.int32)
 
     # Define predicate that checks if mask value is non-zero
-    def mask_predicate(pair):
-        return pair[1] != 0
+    def mask_predicate(triple):
+        return triple[1] != 0
 
-    # Apply select to the zipped iterator
+    # Apply select to get both data and indices where mask is non-zero
     select(
-        zip_it,
-        filtered_pairs,
+        data_mask_idx_in,
+        data_idx_out,
         d_num_data_selected,
         mask_predicate,
         num_elements,
@@ -162,23 +159,9 @@ def select_segments(
 
     # Get the actual number of selected elements
     num_selected = int(d_num_data_selected[0])
+    d_selected_indices = d_selected_indices[:num_selected]
 
-    # Step 4: Compute new segment offsets
-    # First, materialize the expanded_mask into an array
-    def identity(x):
-        return x
-
-    expanded_mask = cp.empty(num_elements, dtype=np.int8)
-    unary_transform(
-        expanded_mask_it,
-        expanded_mask,
-        identity,
-        num_elements,
-        stream,
-    )
-
-    # Get indices where mask is non-zero using cp.nonzero
-    d_selected_indices = cp.nonzero(expanded_mask)[0].astype(np.int32)
+    # Step 4: Compute new segment offsets using the captured indices
 
     # Use searchsorted to count elements per segment
     # Use side='left' to count elements strictly less than each offset boundary
