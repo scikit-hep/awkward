@@ -86,7 +86,8 @@ if __name__ == "__main__":
     profile_file = "cccl_profile.prof"
     profiler = cProfile.Profile()
     profiler.enable()
-    physics_analysis_cccl(events_gpu)
+    with nvtx.annotate("physics_analysis_cccl"):
+        physics_analysis_cccl(events_gpu)
     profiler.disable()
     profiler.dump_stats(profile_file)
 

@@ -287,7 +287,6 @@ def segmented_select(
 
     # Step 5: Set the final offset to the total count
     d_out_segments[-1] = total_selected
-    cp.cuda.Device().synchronize()
     return total_selected
 
 
