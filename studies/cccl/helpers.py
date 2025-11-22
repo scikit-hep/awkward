@@ -421,19 +421,7 @@ def select_lists(array, mask):
 @nvtx.annotate("list_sizes")
 def list_sizes(array):
     _, meta = awkward_to_cccl_iterator(array)
-    offsets, length = meta["offsets"], meta["length"]
-    d_out = cp.empty(length, dtype=np.int32)
-    h_init = np.array([0], dtype=np.int32)
-    cuda.compute.segmented_reduce(
-        ConstantIterator(np.int32(1)),
-        d_out,
-        offsets[:-1],
-        offsets[1:],
-        OpKind.PLUS,
-        h_init,
-        length
-    )
-    return d_out
+    return segment_sizes(meta["offsets"])
 
 
 @nvtx.annotate("transform_lists")
