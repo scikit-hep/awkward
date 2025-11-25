@@ -9,7 +9,7 @@ import nvtx
 
 from cuda.compute import (
     DiscardIterator, PermutationIterator, ZipIterator, TransformIterator, CountingIterator,
-    OpKind, exclusive_scan, segmented_reduce, select, unary_transform
+    OpKind, exclusive_scan, segmented_reduce, select, unary_transform, StatefulOp
 )
 
 
@@ -59,15 +59,6 @@ def offsets_to_segment_ids(offsets, stream=None):
     element_indices = cp.arange(num_elements, dtype=np.int32)
 
     # Use binary search to find which segment each element belongs to
-    # searchsorted finds the rightmost position where we can insert each element index
-    # such that the array remains sorted. Subtracting 1 gives us the segment ID.
-    #
-    # Example: offsets = [0, 0, 2, 3], element_indices = [0, 1, 2]
-    # searchsorted(offsets[:-1], [0, 1, 2], side='right') = [1, 1, 2]
-    # Subtracting 1: [0, 0, 1] - but wait, element 0 should be in segment 1!
-    #
-    # Actually, we want: offsets[j] <= i < offsets[j+1]
-    # So searchsorted with side='right' on offsets (not offsets[:-1]) and subtract 1
     segment_ids = cp.searchsorted(offsets, element_indices, side="right") - 1
 
     return segment_ids
@@ -253,40 +244,53 @@ def segmented_select(
 
     num_segments = len(d_in_segments) - 1
 
+    # Initialize a counter for tracking removed items per segment
+    d_num_removed_per_segment = cp.zeros(num_segments, dtype=np.int32)
+
+    # JIT compile the user's condition
     cond = numba.cuda.jit(cond)
-    # Apply select to get the data and indices where condition is true
 
-    def select_predicate(pair):
-        return cond(pair[0])
+    # Create stateful predicate that tracks removed items per segment
+    def stateful_predicate(pair, offsets, items_removed_per_segment):
+        data = pair[0]
+        idx = pair[1]
 
-    data_and_indices_in = ZipIterator(d_in_data, CountingIterator(np.int32(0)))
-    d_indices_out = cp.empty(num_items, dtype=np.int32)
-    data_and_indices_out = ZipIterator(d_out_data, d_indices_out)
-    d_num_selected = cp.zeros(1, dtype=cp.uint64)
-    select(data_and_indices_in, data_and_indices_out,
-           d_num_selected, select_predicate, num_items, stream)
+        # Evaluate the condition
+        keep = cond(data)
+
+        if not keep:
+            # Item is being removed, find which segment it belongs to
+            # Use np.searchsorted to find segment (works in device code via numba-cuda)
+            my_segment_id = np.searchsorted(offsets, idx, side='right') - 1
+
+            # Atomically increment the counter for this segment
+            numba.cuda.atomic.add(items_removed_per_segment, my_segment_id, 1)
+
+        return keep
+
+    # Wrap the predicate with StatefulOp to give it access to offsets and counters
+    op = StatefulOp(stateful_predicate, d_in_segments,
+                    d_num_removed_per_segment)
+    op.set_state(d_in_segments, d_num_removed_per_segment)
+
+    # Create input iterator: zip data with counting iterator for indices
+    it_in = ZipIterator(d_in_data, CountingIterator(np.int32(0)))
+
+    # Create output iterator: zip data output with discard iterator (we don't need indices in output)
+    it_out = ZipIterator(d_out_data, DiscardIterator())
+
+    # Perform the select operation
+    d_num_selected = cp.zeros(1, dtype=np.int32)
+    select(it_in, it_out, d_num_selected, op, num_items, stream)
+
+    # Get total number of selected items
     total_selected = int(d_num_selected[0])
-    d_indices_out = d_indices_out[:total_selected]
-    d_selected_indices = d_indices_out[:total_selected]
 
-    # Step 3: Use searchsorted to count selected items per segment
-    # Use side='left' to count elements strictly less than each offset boundary
-    positions = cp.searchsorted(
-        d_selected_indices, d_in_segments, side='left')
-    d_counts = (positions[1:] - positions[:-1]).astype(cp.uint64)
+    # Compute output offsets by subtracting cumsum of removed items from input offsets
+    d_out_segments[0] = d_in_segments[0]  # First offset is always 0
+    d_out_segments[1:] = d_in_segments[1:] - \
+        cp.cumsum(d_num_removed_per_segment)
 
-    # Step 4: Use exclusive scan to compute output segment start offsets
-    exclusive_scan(
-        d_counts,
-        d_out_segments[:-1],
-        OpKind.PLUS,
-        np.array(0, dtype=np.uint64),
-        num_segments,
-        stream,
-    )
-
-    # Step 5: Set the final offset to the total count
-    d_out_segments[-1] = total_selected
     return total_selected
 
 
