@@ -37,7 +37,7 @@ jobs:
       PYTHON_VERSION: "3.9"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
