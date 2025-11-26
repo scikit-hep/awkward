@@ -157,7 +157,7 @@ def _impl(
 
     if isinstance(disable_virtualarray_caching, bool):
 
-        def disable_caching_function(attribute):
+        def disable_caching_function(attribute, form_key):
             return disable_virtualarray_caching
     elif callable(disable_virtualarray_caching):
         disable_caching_function = disable_virtualarray_caching
@@ -297,7 +297,8 @@ def _reconstitute(
 
     elif isinstance(form, ak.forms.NumpyForm):
         dtype = ak.types.numpytype.primitive_to_dtype(form.primitive)
-        raw_array = container[getkey(form, "data")]
+        form_key = getkey(form, "data")
+        raw_array = container[form_key]
 
         def _adjust_length(length):
             return length * math.prod(form.inner_shape)
@@ -316,7 +317,7 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=_shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("data"),
+            disable_virtualarray_caching=disable_virtualarray_caching("data", form_key),
         )
         if form.inner_shape != ():
             data = backend.nplike.reshape(data, (length, *form.inner_shape))
@@ -345,7 +346,8 @@ def _reconstitute(
         return make(content, parameters=form._parameters)
 
     elif isinstance(form, ak.forms.BitMaskedForm):
-        raw_array = container[getkey(form, "mask")]
+        form_key = getkey(form, "mask")
+        raw_array = container[form_key]
 
         def _adjust_length(length):
             return math.ceil(length / 8.0)
@@ -367,7 +369,7 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=_shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("mask"),
+            disable_virtualarray_caching=disable_virtualarray_caching("mask", form_key),
         )
         content = _reconstitute(
             form.content,
@@ -398,7 +400,8 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.ByteMaskedForm):
-        raw_array = container[getkey(form, "mask")]
+        form_key = getkey(form, "mask")
+        raw_array = container[form_key]
         mask = _from_buffer(
             backend.nplike,
             raw_array,
@@ -407,7 +410,7 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("mask"),
+            disable_virtualarray_caching=disable_virtualarray_caching("mask", form_key),
         )
         content = _reconstitute(
             form.content,
@@ -433,7 +436,8 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.IndexedOptionForm):
-        raw_array = container[getkey(form, "index")]
+        form_key = getkey(form, "index")
+        raw_array = container[form_key]
         index = _from_buffer(
             backend.nplike,
             raw_array,
@@ -442,7 +446,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("index"),
+            disable_virtualarray_caching=disable_virtualarray_caching(
+                "index", form_key
+            ),
         )
 
         def _adjust_length(index):
@@ -478,7 +484,8 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.IndexedForm):
-        raw_array = container[getkey(form, "index")]
+        form_key = getkey(form, "index")
+        raw_array = container[form_key]
         index = _from_buffer(
             backend.nplike,
             raw_array,
@@ -487,7 +494,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("index"),
+            disable_virtualarray_caching=disable_virtualarray_caching(
+                "index", form_key
+            ),
         )
 
         def _adjust_length(index):
@@ -527,8 +536,10 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.ListForm):
-        raw_array1 = container[getkey(form, "starts")]
-        raw_array2 = container[getkey(form, "stops")]
+        form_key1 = getkey(form, "starts")
+        form_key2 = getkey(form, "stops")
+        raw_array1 = container[form_key1]
+        raw_array2 = container[form_key2]
         starts = _from_buffer(
             backend.nplike,
             raw_array1,
@@ -537,7 +548,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("starts"),
+            disable_virtualarray_caching=disable_virtualarray_caching(
+                "starts", form_key1
+            ),
         )
         stops = _from_buffer(
             backend.nplike,
@@ -547,7 +560,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("stops"),
+            disable_virtualarray_caching=disable_virtualarray_caching(
+                "stops", form_key2
+            ),
         )
 
         def _adjust_length(starts, stops):
@@ -583,7 +598,8 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.ListOffsetForm):
-        raw_array = container[getkey(form, "offsets")]
+        form_key = getkey(form, "offsets")
+        raw_array = container[form_key]
 
         def _shape_generator():
             (first,) = shape_generator()
@@ -597,7 +613,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=_shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("offsets"),
+            disable_virtualarray_caching=disable_virtualarray_caching(
+                "offsets", form_key
+            ),
         )
 
         # next length
@@ -685,8 +703,10 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.UnionForm):
-        raw_array1 = container[getkey(form, "tags")]
-        raw_array2 = container[getkey(form, "index")]
+        form_key1 = getkey(form, "tags")
+        form_key2 = getkey(form, "index")
+        raw_array1 = container[form_key1]
+        raw_array2 = container[form_key2]
         tags = _from_buffer(
             backend.nplike,
             raw_array1,
@@ -695,7 +715,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("tags"),
+            disable_virtualarray_caching=disable_virtualarray_caching(
+                "tags", form_key1
+            ),
         )
         index = _from_buffer(
             backend.nplike,
@@ -705,7 +727,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("index"),
+            disable_virtualarray_caching=disable_virtualarray_caching(
+                "index", form_key2
+            ),
         )
 
         def _adjust_length(index, tags, tag):
