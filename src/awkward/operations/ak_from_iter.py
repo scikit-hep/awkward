@@ -112,6 +112,6 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize, attrs):
         highlevel=highlevel,
         behavior=behavior,
         simplify=True,
-        disable_virtualarray_caching=False,
+        enable_virtualarray_caching=True,
         attrs=attrs,
     )[0]

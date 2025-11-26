@@ -145,7 +145,7 @@ or
         backend=backend,
         byteorder=byteorder,
         simplify=allow_noncanonical_form,
-        disable_virtualarray_caching=False,
+        enable_virtualarray_caching=True,
         highlevel=highlevel,
         behavior=behavior,
         attrs=attrs,
