@@ -2929,7 +2929,7 @@ class ArrayBuilder(Sized):
 
     def __bool__(self):
         if len(self) == 1:
-            return bool(self[0])
+            return bool(self.snapshot()[0])
         else:
             raise ValueError(
                 "the truth value of an array whose length is not 1 is ambiguous; "
