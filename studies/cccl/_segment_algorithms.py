@@ -8,8 +8,8 @@ import numpy as np
 import nvtx
 
 from cuda.compute import (
-    DiscardIterator, PermutationIterator, ZipIterator, TransformIterator, CountingIterator,
-    OpKind, exclusive_scan, segmented_reduce, select, unary_transform
+    PermutationIterator, ZipIterator, TransformIterator, CountingIterator,
+    OpKind, exclusive_scan, select, unary_transform
 )
 
 
@@ -34,26 +34,13 @@ def offsets_to_segment_ids(offsets, stream=None):
     Convert segment offsets to segment IDs (indicators).
 
     Given offsets [0, 2, 5, 8, 10], produces [0, 0, 1, 1, 1, 2, 2, 2, 3, 3]
-
-    This function correctly handles empty segments (duplicate offsets).
-    For example, offsets [0, 0, 2, 3] with an empty first segment produces [0, 0, 1]
-    where elements at indices 0-1 belong to segment 1 (the empty segment 0 has no elements).
-
-    The implementation uses binary search to find which segment each element belongs to.
-    For each element at index i, we find segment j where offsets[j] <= i < offsets[j+1].
-
-    Args:
-        offsets: Device array of segment offsets (length = num_segments + 1).
-                 The last element is the total number of elements.
-        stream: CUDA stream for the operation (optional).
-
-    Returns:
-        Device array of segment IDs for each element (length = offsets[-1]).
     """
     num_elements = int(offsets[-1])
 
     if num_elements == 0:
         return cp.array([], dtype=np.int32)
+
+    # TODO: when available this can be a fused CountingIterator + lower_bound
 
     # Create array of all element indices [0, 1, 2, ..., num_elements-1]
     element_indices = cp.arange(num_elements, dtype=np.int32)
@@ -91,11 +78,9 @@ def select_segments(
     A segmented array is conceptually composed of a data array and segment offsets.
     For example, with data=[30, 20, 20, 50, 90, 10, 30, 80, 20, 60] and
     offsets=[0, 2, 5, 8, 10], the segmented array represents:
-    [[30, 20], [20, 50, 90], [10, 30, 80], [20, 60]]
-
-    This function selects entire segments based on a mask, keeping only
-    the segments where mask[i] is non-zero. The results are written to the provided
-    output arrays/iterators.
+    [[30, 20], [20, 50, 90], [10, 30, 80], [20, 60]].
+    Given the mask [0, 1, 0, 1], the function will return the segmented array
+    [[20, 50, 90], [20, 60]].
 
     Example:
         >>> data_in = cp.array([30, 20, 20, 50, 90, 10, 30, 80, 20, 60], dtype=np.int32)
@@ -162,6 +147,7 @@ def select_segments(
     d_selected_indices = d_selected_indices[:num_selected]
 
     # Step 4: Compute new segment offsets using the captured indices
+    # TODO: this part should use run_length_encode when available
 
     # Use searchsorted to count elements per segment
     # Use side='left' to count elements strictly less than each offset boundary
@@ -181,18 +167,15 @@ def select_segments(
         h_init_scan = np.array([0], dtype=np.int32)
         exclusive_scan(
             kept_segment_sizes,
-            temp_offsets[:-1],
+            offsets_out,
             OpKind.PLUS,
             h_init_scan,
             num_kept_segments,
             stream,
         )
-        # Set the final offset to the total number of selected elements
-        temp_offsets[-1] = num_selected
 
-    # Copy results to output iterators/arrays
-    # For offsets_out, we need to copy the computed offsets
-    offsets_out[: num_kept_segments + 1] = temp_offsets
+    # Set the final offset to the total number of selected elements
+    offsets_out[num_kept_segments] = num_selected
 
     # Store the counts in d_num_selected_out
     d_num_selected_out[0] = num_selected  # number of data elements
@@ -259,12 +242,13 @@ def segmented_select(
     def select_predicate(pair):
         return cond(pair[0])
 
-    data_and_indices_in = ZipIterator(d_in_data, CountingIterator(np.int32(0)))
+    data_idx_in = ZipIterator(d_in_data, CountingIterator(np.int32(0)))
     d_indices_out = cp.empty(num_items, dtype=np.int32)
-    data_and_indices_out = ZipIterator(d_out_data, d_indices_out)
+    data_idx_out = ZipIterator(d_out_data, d_indices_out)
     d_num_selected = cp.zeros(1, dtype=cp.uint64)
-    select(data_and_indices_in, data_and_indices_out,
+    select(data_idx_in, data_idx_out,
            d_num_selected, select_predicate, num_items, stream)
+
     total_selected = int(d_num_selected[0])
     d_indices_out = d_indices_out[:total_selected]
     d_selected_indices = d_indices_out[:total_selected]
@@ -292,19 +276,22 @@ def segmented_select(
 
 @nvtx.annotate("transform_segments")
 def transform_segments(data_in, data_out, segment_size, op, num_segments):
-    def column_it_factory(it, i):
-        def col_it(j: np.int32) -> np.int32:
+    """
+    Given a segmented array where each segment contains the same number of items,
+    transform each segment independently using the given n-ary operation.
+
+    For example, given the segmented array [[1, 2, 3], [4, 5, 6], [7, 8, 9]] and the
+    operation x + y + z, the function will return the segmented array [[10], [15], [24]].
+    """
+
+    def get_column(it, i):
+        # return an iterator representing the i-th column of the segmented array.
+        def col_major_index(j: np.int32) -> np.int32:
+            # given the row major index j, return the column major index.
             return j * segment_size + i
-        return PermutationIterator(it, TransformIterator(CountingIterator(np.int32(0)), col_it))
+        return PermutationIterator(it, TransformIterator(CountingIterator(np.int32(0)), col_major_index))
 
-    column_iterators = []
-    for i in range(segment_size):
-        column_iterators.append(column_it_factory(data_in, i))
-
-    columns = ZipIterator(*column_iterators)
-    unary_transform(
-        columns,
-        data_out,
-        op,
-        num_segments
+    columns = ZipIterator(
+        *[get_column(data_in, i) for i in range(segment_size)]
     )
+    return unary_transform(columns, data_out, op, num_segments)

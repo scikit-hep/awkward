@@ -2,12 +2,10 @@ import awkward as ak
 import awkward as ak
 import numpy as np
 import cupy as cp
-from cuda.compute import ConstantIterator, ZipIterator, PermutationIterator, CountingIterator, TransformIterator, OpKind
-from typing import Callable
-import cuda.compute
+from cuda.compute import ZipIterator, PermutationIterator
 import nvtx
 
-from _segment_algorithms import segment_sizes, offsets_to_segment_ids, select_segments, segmented_select, transform_segments
+from _segment_algorithms import segment_sizes, select_segments, segmented_select, transform_segments
 
 
 @nvtx.annotate("empty_like")
@@ -127,27 +125,19 @@ def empty_like(array, kind="empty"):
     return ak.Array(new_layout)
 
 
-@nvtx.annotate("awkward_to_cccl_iterator")
+@nvtx.annotate("awkward_to_iterator")
 def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, return_offsets=True):
     """
-    Convert an Awkward Array to a CCCL iterator (zero-copy).
+    Convert an Awkward Array to a cuda.compute iterator (zero-copy).
 
     This function recursively traverses the Awkward form structure and constructs
-    the corresponding CCCL iterator:
-    - NumpyArray -> CuPy buffer
+    the corresponding cuda.compute iterator:
+    - NumpyArray -> CuPy array
     - RecordArray -> ZipIterator over field iterators
     - IndexedArray -> PermutationIterator with index buffer
     - ListOffsetArray -> Iterator for the flattened content
 
-    The result is a CCCL iterator that provides zero-copy access to GPU buffers,
-    with automatic handling of indexing, records, and jagged array flattening.
-
-    Example usage:
-        # Convert an Awkward Array with structure: IndexedArray -> RecordArray -> ...
-        iterator, metadata = awkward_to_cccl_iterator(my_array, dtype=np.float32)
-        # metadata = {"form": ..., "buffers": ..., "offsets": ..., "length": ...}
-        # Now `iterator` can be used directly with CCCL algorithms
-        # For application-specific indexing, wrap with additional PermutationIterators
+    The resulting iterator can be used with the cuda.compute library.
 
     Args:
         array: Awkward Array (if starting fresh)
@@ -157,7 +147,7 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
         return_offsets: If True, extract and return offsets for list structures (default: True)
 
     Returns:
-        CCCL iterator or CuPy array representing the structure
+        Iterator or CuPy array representing the structure
         Dictionary with metadata: {"form": ..., "buffers": ..., "offsets": ..., "length": ..., "count": ...}
         - offsets: CuPy array of offsets if list structure exists, else None
         - length: Array length (number of lists)
@@ -301,7 +291,11 @@ def awkward_to_cccl_iterator(array=None, form=None, buffers=None, dtype=None, re
 
 @nvtx.annotate("reconstruct_with_offsets")
 def reconstruct_with_offsets(list_array, new_offsets):
-    # Directly reconstruct the layout without going through from_buffers
+    """
+    Given a list array and new offsets representing for example
+    a filtered view, reconstruct the list array with the new offsets.
+    """
+
     if isinstance(list_array, ak.Array):
         layout = list_array.layout
     elif hasattr(list_array, 'layout'):

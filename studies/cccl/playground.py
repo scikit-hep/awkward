@@ -1,8 +1,11 @@
+import sys
+from pathlib import Path
 import awkward as ak
 import numpy as np
 import cupy as cp
-import math
-from helpers import *
+
+sys.path.insert(0, str(Path(__file__).parent))
+from helpers import filter_lists, list_sizes, select_lists, transform_lists  # noqa: E402
 
 
 # 3 events with different numbers of electrons and muons in each
@@ -114,6 +117,7 @@ def physics_analysis_cccl(events: ak.Array) -> ak.Array:
 
     selected_muons = filter_lists(events.muons, cond_muon)
     selected_electrons = filter_lists(events.electrons, cond_electron)
+
     two_muons = select_lists(
         selected_muons, (list_sizes(selected_muons) == 2).astype('int8'))
     two_electrons = select_lists(
@@ -137,8 +141,10 @@ def physics_analysis_cccl(events: ak.Array) -> ak.Array:
 
     masses_electrons = cp.zeros(len(two_electrons), dtype=np.float64)
     masses_muons = cp.zeros(len(two_muons), dtype=np.float64)
+
     transform_lists(two_muons, masses_muons, 2, invariant_mass)
     transform_lists(two_electrons, masses_electrons, 2, invariant_mass)
+
     return {
         "electron": masses_electrons,
         "muon": masses_muons,

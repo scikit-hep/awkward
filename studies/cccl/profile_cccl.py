@@ -1,8 +1,12 @@
-from playground import physics_analysis_cccl
+"""
+To run:
+
+nsys profile -t cuda,nvtx python profile_cccl.py
+"""
+
 import awkward as ak
 import numpy as np
 import cProfile
-import pstats
 import sys
 from pathlib import Path
 import cupy as cp
@@ -10,6 +14,7 @@ import nvtx
 
 # Add current directory to path to import playground
 sys.path.insert(0, str(Path(__file__).parent))
+from playground import physics_analysis_cccl  # noqa: E402
 
 
 def generate_random_events(num_events=1000000, seed=42):

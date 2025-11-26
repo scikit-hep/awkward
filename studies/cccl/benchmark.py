@@ -1,13 +1,13 @@
-from playground import physics_analysis, physics_analysis_gpu, physics_analysis_cccl
+import sys
 import awkward as ak
 import numpy as np
 import cupy as cp
 import time
-import sys
 from pathlib import Path
 
 # Add current directory to path to import playground
 sys.path.insert(0, str(Path(__file__).parent))
+from playground import physics_analysis, physics_analysis_gpu, physics_analysis_cccl  # noqa: E402
 
 
 def generate_random_events(num_events=50000, seed=42):
@@ -96,6 +96,7 @@ def benchmark_analysis(events):
     print("Running physics_analysis_gpu (GPU native)...")
     start = time.perf_counter()
     result_gpu = physics_analysis_gpu(events_gpu)
+    cp.cuda.Device().synchronize()
     time_gpu = time.perf_counter() - start
     print(f"  Time: {time_gpu:.4f} seconds")
     print()
@@ -106,6 +107,7 @@ def benchmark_analysis(events):
     print("Running physics_analysis_cccl (CCCL)...")
     start = time.perf_counter()
     result_cccl = physics_analysis_cccl(events_gpu)
+    cp.cuda.Device().synchronize()
     time_cccl = time.perf_counter() - start
     print(f"  Time: {time_cccl:.4f} seconds")
     print()
