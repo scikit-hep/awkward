@@ -64,6 +64,14 @@ def from_buffers(
         allow_noncanonical_form (bool): If True, non-canonical forms will be
             simplified to produce arrays with canonical layouts; otherwise,
             an exception will be thrown for such forms.
+        disavle_virtualarray_caching (bool or callable): If True, all VirtualNDArray
+            buffers that get created will not cache their materialized buffers
+            on themselves when they get materialized. If a callable is given, it
+            must accept two arguments, `form_key` and `attribute`, and return a
+            boolean indicating whether caching should be disabled for the given
+            buffer. The `form_key` and `attribute` are the same as those passed to
+            the `buffer_key` function. If False, all VirtualNDArrays will cache their
+            materialized buffers on themselves (default behavior).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
