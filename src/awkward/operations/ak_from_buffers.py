@@ -305,8 +305,7 @@ def _reconstitute(
 
     elif isinstance(form, ak.forms.NumpyForm):
         dtype = ak.types.numpytype.primitive_to_dtype(form.primitive)
-        form_key = getkey(form, "data")
-        raw_array = container[form_key]
+        raw_array = container[getkey(form, "data")]
 
         def _adjust_length(length):
             return length * math.prod(form.inner_shape)
@@ -325,7 +324,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=_shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching(form_key, "data"),
+            disable_virtualarray_caching=disable_virtualarray_caching(
+                form.form_key, "data"
+            ),
         )
         if form.inner_shape != ():
             data = backend.nplike.reshape(data, (length, *form.inner_shape))
@@ -354,8 +355,7 @@ def _reconstitute(
         return make(content, parameters=form._parameters)
 
     elif isinstance(form, ak.forms.BitMaskedForm):
-        form_key = getkey(form, "mask")
-        raw_array = container[form_key]
+        raw_array = container[getkey(form, "mask")]
 
         def _adjust_length(length):
             return math.ceil(length / 8.0)
@@ -377,7 +377,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=_shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching(form_key, "mask"),
+            disable_virtualarray_caching=disable_virtualarray_caching(
+                form.form_key, "mask"
+            ),
         )
         content = _reconstitute(
             form.content,
@@ -408,8 +410,7 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.ByteMaskedForm):
-        form_key = getkey(form, "mask")
-        raw_array = container[form_key]
+        raw_array = container[getkey(form, "mask")]
         mask = _from_buffer(
             backend.nplike,
             raw_array,
@@ -418,7 +419,9 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching(form_key, "mask"),
+            disable_virtualarray_caching=disable_virtualarray_caching(
+                form.form_key, "mask"
+            ),
         )
         content = _reconstitute(
             form.content,
@@ -444,8 +447,7 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.IndexedOptionForm):
-        form_key = getkey(form, "index")
-        raw_array = container[form_key]
+        raw_array = container[getkey(form, "index")]
         index = _from_buffer(
             backend.nplike,
             raw_array,
@@ -455,7 +457,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                form_key, "index"
+                form.form_key, "index"
             ),
         )
 
@@ -492,8 +494,7 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.IndexedForm):
-        form_key = getkey(form, "index")
-        raw_array = container[form_key]
+        raw_array = container[getkey(form, "index")]
         index = _from_buffer(
             backend.nplike,
             raw_array,
@@ -503,7 +504,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                form_key, "index"
+                form.form_key, "index"
             ),
         )
 
@@ -544,10 +545,8 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.ListForm):
-        form_key1 = getkey(form, "starts")
-        form_key2 = getkey(form, "stops")
-        raw_array1 = container[form_key1]
-        raw_array2 = container[form_key2]
+        raw_array1 = container[getkey(form, "starts")]
+        raw_array2 = container[getkey(form, "stops")]
         starts = _from_buffer(
             backend.nplike,
             raw_array1,
@@ -557,7 +556,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                form_key1, "starts"
+                form.form_key, "starts"
             ),
         )
         stops = _from_buffer(
@@ -569,7 +568,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                form_key2, "stops"
+                form.form_key, "stops"
             ),
         )
 
@@ -606,8 +605,7 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.ListOffsetForm):
-        form_key = getkey(form, "offsets")
-        raw_array = container[form_key]
+        raw_array = container[getkey(form, "offsets")]
 
         def _shape_generator():
             (first,) = shape_generator()
@@ -622,7 +620,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=_shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                form_key, "offsets"
+                form.form_key, "offsets"
             ),
         )
 
@@ -711,10 +709,8 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.UnionForm):
-        form_key1 = getkey(form, "tags")
-        form_key2 = getkey(form, "index")
-        raw_array1 = container[form_key1]
-        raw_array2 = container[form_key2]
+        raw_array1 = container[getkey(form, "tags")]
+        raw_array2 = container[getkey(form, "index")]
         tags = _from_buffer(
             backend.nplike,
             raw_array1,
@@ -724,7 +720,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                form_key1, "tags"
+                form.form_key, "tags"
             ),
         )
         index = _from_buffer(
@@ -736,7 +732,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                form_key2, "index"
+                form.form_key, "index"
             ),
         )
 
