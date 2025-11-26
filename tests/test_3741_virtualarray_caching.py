@@ -22,22 +22,26 @@ def test(offsets_length, content_length):
     array = ak.from_buffers(form, 4, buffers, enable_virtualarray_caching=True)
     assert array.to_list() == [[1, 2], [3, 4], [5], [6]]
     assert array.layout.is_all_materialized
+    assert ak.materialize(array).to_list() == [[1, 2], [3, 4], [5], [6]]
 
     array = ak.from_buffers(form, 4, buffers, enable_virtualarray_caching=False)
     assert array.to_list() == [[1, 2], [3, 4], [5], [6]]
     assert not array.layout.is_any_materialized
+    assert ak.materialize(array).to_list() == [[1, 2], [3, 4], [5], [6]]
 
     array = ak.from_buffers(
         form, 4, buffers, enable_virtualarray_caching=lambda form_key, attribute: True
     )
     assert array.to_list() == [[1, 2], [3, 4], [5], [6]]
     assert array.layout.is_all_materialized
+    assert ak.materialize(array).to_list() == [[1, 2], [3, 4], [5], [6]]
 
     array = ak.from_buffers(
         form, 4, buffers, enable_virtualarray_caching=lambda form_key, attribute: False
     )
     assert array.to_list() == [[1, 2], [3, 4], [5], [6]]
     assert not array.layout.is_any_materialized
+    assert ak.materialize(array).to_list() == [[1, 2], [3, 4], [5], [6]]
 
     array = ak.from_buffers(
         form,
@@ -48,6 +52,7 @@ def test(offsets_length, content_length):
     assert array.to_list() == [[1, 2], [3, 4], [5], [6]]
     assert array.layout.offsets.is_all_materialized
     assert not array.layout.content.is_any_materialized
+    assert ak.materialize(array).to_list() == [[1, 2], [3, 4], [5], [6]]
 
     array = ak.from_buffers(
         form,
@@ -58,6 +63,7 @@ def test(offsets_length, content_length):
     assert array.to_list() == [[1, 2], [3, 4], [5], [6]]
     assert not array.layout.offsets.is_any_materialized
     assert array.layout.content.is_all_materialized
+    assert ak.materialize(array).to_list() == [[1, 2], [3, 4], [5], [6]]
 
     array = ak.from_buffers(
         form,
@@ -68,6 +74,7 @@ def test(offsets_length, content_length):
     assert array.to_list() == [[1, 2], [3, 4], [5], [6]]
     assert not array.layout.offsets.is_any_materialized
     assert array.layout.content.is_all_materialized
+    assert ak.materialize(array).to_list() == [[1, 2], [3, 4], [5], [6]]
 
     array = ak.from_buffers(
         form,
@@ -77,3 +84,4 @@ def test(offsets_length, content_length):
     )
     assert array.to_list() == [[1, 2], [3, 4], [5], [6]]
     assert array.layout.offsets.is_all_materialized
+    assert ak.materialize(array).to_list() == [[1, 2], [3, 4], [5], [6]]
