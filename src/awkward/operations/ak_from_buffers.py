@@ -157,7 +157,7 @@ def _impl(
 
     if isinstance(disable_virtualarray_caching, bool):
 
-        def disable_caching_function(attribute, form_key):
+        def disable_caching_function(form_key, attribute):
             return disable_virtualarray_caching
     elif callable(disable_virtualarray_caching):
         disable_caching_function = disable_virtualarray_caching
@@ -317,7 +317,7 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=_shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("data", form_key),
+            disable_virtualarray_caching=disable_virtualarray_caching(form_key, "data"),
         )
         if form.inner_shape != ():
             data = backend.nplike.reshape(data, (length, *form.inner_shape))
@@ -369,7 +369,7 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=_shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("mask", form_key),
+            disable_virtualarray_caching=disable_virtualarray_caching(form_key, "mask"),
         )
         content = _reconstitute(
             form.content,
@@ -410,7 +410,7 @@ def _reconstitute(
             byteorder=byteorder,
             field_path=field_path,
             shape_generator=shape_generator,
-            disable_virtualarray_caching=disable_virtualarray_caching("mask", form_key),
+            disable_virtualarray_caching=disable_virtualarray_caching(form_key, "mask"),
         )
         content = _reconstitute(
             form.content,
@@ -447,7 +447,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                "index", form_key
+                form_key, "index"
             ),
         )
 
@@ -495,7 +495,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                "index", form_key
+                form_key, "index"
             ),
         )
 
@@ -549,7 +549,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                "starts", form_key1
+                form_key1, "starts"
             ),
         )
         stops = _from_buffer(
@@ -561,7 +561,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                "stops", form_key2
+                form_key2, "stops"
             ),
         )
 
@@ -614,7 +614,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=_shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                "offsets", form_key
+                form_key, "offsets"
             ),
         )
 
@@ -716,7 +716,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                "tags", form_key1
+                form_key1, "tags"
             ),
         )
         index = _from_buffer(
@@ -728,7 +728,7 @@ def _reconstitute(
             field_path=field_path,
             shape_generator=shape_generator,
             disable_virtualarray_caching=disable_virtualarray_caching(
-                "index", form_key2
+                form_key2, "index"
             ),
         )
 
