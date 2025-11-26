@@ -319,19 +319,25 @@ python -m pip install --upgrade --extra-index-url https://pypi.anaconda.org/scie
 
 To ensure stability and reproducibility across the Awkward ecosystem:
 
-1. Collaborative Review Required • Pull requests that affect core dependencies (e.g., Numba, Pandas, PyArrow, NumPy) or Python version support must be discussed with maintainers before merging. • This avoids unilateral decisions that could break critical workflows.
+1. Collaborative Review Required
+   - Pull requests that affect core dependencies (e.g., Numba, Pandas, PyArrow, NumPy) or Python version support must be discussed with maintainers before merging.
+   - This avoids unilateral decisions that could break critical workflows.
 
-2. Compatibility Transparency• If a dependency is not yet available for a new Python release, note this clearly in the PR description and documentation.
-• Example: “Supports Python 3.14, but Numba-dependent features are disabled until upstream support is released.”
+2. Compatibility Transparency
+   - If a dependency is not yet available for a new Python release, note this clearly in the PR description and documentation.
+   - Example: “Supports Python 3.14, but Numba-dependent features are disabled until upstream support is released.”
 
-3. Testing Expectations• CI should run against all supported Python versions.
-• Tests that depend on unsupported features (e.g., Numba on Python 3.14) must be marked with xfail so contributors see the limitation.
+3. Testing Expectations
+   - CI should run against all supported Python versions.
+   - Tests that depend on unsupported features (e.g., Numba on Python 3.14) must be marked with xfail so contributors see the limitation.
 
-4. Version Pinning• Pin or constrain versions of critical dependencies to prevent silent breakages from upstream changes.
-• Floating versions may be allowed for secondary utilities, but core scientific packages should be locked.
+4. Version Pinning
+   - Pin or constrain versions of critical dependencies to prevent silent breakages from upstream changes.
+   - Floating versions may be allowed for secondary utilities, but core scientific packages should be locked.
 
-5. Communication• Use GitHub Discussions or Issues to propose changes before opening a PR that alters compatibility.
-• This ensures consensus and avoids surprises for downstream users.
+5. Communication
+   - Use GitHub Discussions or Issues to propose changes before opening a PR that alters compatibility.
+   - This ensures consensus and avoids surprises for downstream users.
 
 
 
@@ -339,10 +345,10 @@ To ensure stability and reproducibility across the Awkward ecosystem:
 
 #### Example PR Checklist
 
-• Have I discussed this change with maintainers?
+- Have I discussed this change with maintainers?
 
-• Did I document limitations (e.g., missing Numba support)?
+- Did I document limitations (e.g., missing Numba support)?
 
-• Are CI tests updated to reflect compatibility status?
+- Are CI tests updated to reflect compatibility status?
 
-• Did I pin or constrain critical dependencies?
+- Did I pin or constrain critical dependencies?
