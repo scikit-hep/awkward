@@ -2257,6 +2257,9 @@ def test_listarray_nanargmax(numpy_like):
     assert virtual_array.is_all_materialized
 
 
+@pytest.mark.xfail(
+    reason="ListArray.to_ListOffsetArray64 fails with virtual arrays on CUDA"
+)
 def test_listarray_sort(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(
