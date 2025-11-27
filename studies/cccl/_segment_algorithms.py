@@ -237,7 +237,8 @@ def segmented_select(
     num_segments = len(d_in_segments) - 1
 
     cond = numba.cuda.jit(cond)
-    # Apply select to get the data and indices where condition is true
+
+    # Step 1: Apply select to get the data and indices where condition is true
 
     def select_predicate(pair):
         return cond(pair[0])
@@ -253,13 +254,13 @@ def segmented_select(
     d_indices_out = d_indices_out[:total_selected]
     d_selected_indices = d_indices_out[:total_selected]
 
-    # Step 3: Use searchsorted to count selected items per segment
+    # Step 2: Use searchsorted to count selected items per segment
     # Use side='left' to count elements strictly less than each offset boundary
     positions = cp.searchsorted(
         d_selected_indices, d_in_segments, side='left')
     d_counts = (positions[1:] - positions[:-1]).astype(cp.uint64)
 
-    # Step 4: Use exclusive scan to compute output segment start offsets
+    # Step 3: Use exclusive scan to compute output segment start offsets
     exclusive_scan(
         d_counts,
         d_out_segments[:-1],
@@ -269,7 +270,7 @@ def segmented_select(
         stream,
     )
 
-    # Step 5: Set the final offset to the total count
+    # Set the final offset to the total count
     d_out_segments[-1] = total_selected
     return total_selected
 
