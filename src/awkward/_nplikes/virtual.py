@@ -65,6 +65,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
     """
 
     __slots__ = (
+        "__enable_caching__",
         "_array",
         "_dtype",
         "_generator",
