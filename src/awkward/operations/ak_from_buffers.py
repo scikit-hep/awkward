@@ -271,7 +271,7 @@ def _reconstitute(
 
     elif isinstance(form, ak.forms.NumpyForm):
         dtype = ak.types.numpytype.primitive_to_dtype(form.primitive)
-        raw_array = container[key := getkey(form, "data")]
+        raw_array = container[(key := getkey(form, "data"))]
 
         def _adjust_length(length):
             return length * math.prod(form.inner_shape)
@@ -316,7 +316,7 @@ def _reconstitute(
         return make(content, parameters=form._parameters)
 
     elif isinstance(form, ak.forms.BitMaskedForm):
-        raw_array = container[key := getkey(form, "mask")]
+        raw_array = container[(key := getkey(form, "mask"))]
 
         def _adjust_length(length):
             return math.ceil(length / 8.0)
@@ -366,7 +366,7 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.ByteMaskedForm):
-        raw_array = container[key := getkey(form, "mask")]
+        raw_array = container[(key := getkey(form, "mask"))]
         mask = _from_buffer(
             backend.nplike,
             raw_array,
@@ -398,7 +398,7 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.IndexedOptionForm):
-        raw_array = container[key := getkey(form, "index")]
+        raw_array = container[(key := getkey(form, "index"))]
         index = _from_buffer(
             backend.nplike,
             raw_array,
@@ -440,7 +440,7 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.IndexedForm):
-        raw_array = container[key := getkey(form, "index")]
+        raw_array = container[(key := getkey(form, "index"))]
         index = _from_buffer(
             backend.nplike,
             raw_array,
@@ -486,8 +486,8 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.ListForm):
-        raw_array1 = container[key1 := getkey(form, "starts")]
-        raw_array2 = container[key2 := getkey(form, "stops")]
+        raw_array1 = container[(key1 := getkey(form, "starts"))]
+        raw_array2 = container[(key2 := getkey(form, "stops"))]
         starts = _from_buffer(
             backend.nplike,
             raw_array1,
@@ -538,7 +538,7 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.ListOffsetForm):
-        raw_array = container[key := getkey(form, "offsets")]
+        raw_array = container[(key := getkey(form, "offsets"))]
 
         def _shape_generator():
             (first,) = shape_generator()
@@ -633,8 +633,8 @@ def _reconstitute(
         )
 
     elif isinstance(form, ak.forms.UnionForm):
-        raw_array1 = container[key1 := getkey(form, "tags")]
-        raw_array2 = container[key2 := getkey(form, "index")]
+        raw_array1 = container[(key1 := getkey(form, "tags"))]
+        raw_array2 = container[(key2 := getkey(form, "index"))]
         tags = _from_buffer(
             backend.nplike,
             raw_array1,
