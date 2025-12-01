@@ -163,8 +163,9 @@ def _impl(
         for layout in layouts:
             # get the content of the ListOffsetArray
             if not isinstance(layout.content, ak.contents.NumpyArray):
-                raise ValueError(
-                    "can not (unsafe) zip ListOffsetArrays with non-NumpyArray contents"
+                raise NotImplementedError(
+                    "ak.zip_no_broadcast cannot (safely) zip ListOffsetArrays with non-NumpyArray contents. "
+                    "This restriction is intentional. Use ak.zip instead for safe zipping."
                 )
             contents.append(layout.content)
 
