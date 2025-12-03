@@ -1003,7 +1003,7 @@ def test_iterator():
 def test_ArrayBuilder_refcount():
     builder = ak.highlevel.ArrayBuilder()
 
-    if sys.version_info <= (3, 13):
+    if sys.version_info[:2] <= (3, 13):
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
     else:
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 2)
@@ -1013,7 +1013,7 @@ def test_ArrayBuilder_refcount():
         return 3.14
 
     y = f1(builder)
-    if sys.version_info <= (3, 13):
+    if sys.version_info[:2] <= (3, 13):
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
     else:
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 2)
@@ -1023,13 +1023,13 @@ def test_ArrayBuilder_refcount():
         return x
 
     y = f2(builder)
-    if sys.version_info <= (3, 13):
+    if sys.version_info[:2] <= (3, 13):
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 3)
     else:
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 3)
 
     del y
-    if sys.version_info <= (3, 13):
+    if sys.version_info[:2] <= (3, 13):
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
     else:
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 2)
@@ -1039,13 +1039,13 @@ def test_ArrayBuilder_refcount():
         return x, x
 
     y = f3(builder)
-    if sys.version_info <= (3, 13):
+    if sys.version_info[:2] <= (3, 13):
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 4)
     else:
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 4)
 
     del y
-    if sys.version_info <= (3, 13):
+    if sys.version_info[:2] <= (3, 13):
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
     else:
         assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 2)
