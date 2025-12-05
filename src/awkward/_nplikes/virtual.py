@@ -66,6 +66,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
     __slots__ = (
         "_array",
+        "_buffer_key",
         "_dtype",
         "_generator",
         "_nplike",
@@ -80,6 +81,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         dtype: DTypeLike,
         generator: Callable[[], ArrayLike],
         shape_generator: Callable[[], tuple[ShapeItem, ...]] | None = None,
+        buffer_key: str | None = None,
         __wrap_generator_asarray__: bool = False,
     ) -> None:
         if not nplike.supports_virtual_arrays:
@@ -103,6 +105,13 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
         self._generator = generator
         self._shape_generator = shape_generator
+
+        # buffer key
+        self._buffer_key = buffer_key
+
+    @property
+    def buffer_key(self) -> str | None:
+        return self._buffer_key
 
     @property
     def dtype(self) -> DType:
@@ -205,6 +214,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             self._dtype,
             lambda: self.materialize().T,
             lambda: self.shape[::-1],
+            self._buffer_key,
         )
 
     def view(self, dtype: DTypeLike) -> Self:
@@ -237,6 +247,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             dtype,
             lambda: self.materialize().view(dtype),
             None,
+            self._buffer_key,
         )
 
     @property
@@ -263,6 +274,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             self._dtype,
             lambda: self.materialize().byteswap(inplace=inplace),
             lambda: self.shape,
+            self._buffer_key,
         )
 
     def tobytes(self, order="C") -> bytes:
@@ -275,6 +287,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             self._dtype,
             self._generator,
             self._shape_generator,
+            self._buffer_key,
         )
         new_virtual._array = self._array
         return new_virtual
@@ -287,6 +300,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             self._dtype,
             lambda: copy.deepcopy(current_generator(), memo),
             self._shape_generator,
+            self._buffer_key,
         )
         new_virtual._array = (
             copy.deepcopy(self._array, memo)
@@ -340,6 +354,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                 self._dtype,
                 lambda: self.materialize()[index],
                 None,
+                self._buffer_key,
             )
         else:
             return self.materialize().__getitem__(index)
