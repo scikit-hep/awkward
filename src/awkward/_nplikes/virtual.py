@@ -65,6 +65,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
     """
 
     __slots__ = (
+        "__enable_caching__",
         "_array",
         "_dtype",
         "_generator",
@@ -81,6 +82,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         generator: Callable[[], ArrayLike],
         shape_generator: Callable[[], tuple[ShapeItem, ...]] | None = None,
         __wrap_generator_asarray__: bool = False,
+        __enable_caching__: bool = True,
     ) -> None:
         if not nplike.supports_virtual_arrays:
             raise TypeError(
@@ -103,6 +105,8 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
         self._generator = generator
         self._shape_generator = shape_generator
+
+        self.__enable_caching__ = __enable_caching__
 
     @property
     def dtype(self) -> DType:
@@ -180,9 +184,11 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                     f"{type(self).__name__} had dtype {self._dtype} before materialization while the materialized array has dtype {array.dtype}"
                 )
             self._shape = array.shape
-            self._array = array
-            self._shape_generator = assert_never
-            self._generator = assert_never
+            if self.__enable_caching__:
+                self._array = array
+                self._shape_generator = assert_never
+                self._generator = assert_never
+            return array
         return self._array  # type: ignore[return-value]
 
     @property
@@ -205,6 +211,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             self._dtype,
             lambda: self.materialize().T,
             lambda: self.shape[::-1],
+            __enable_caching__=self.__enable_caching__,
         )
 
     def view(self, dtype: DTypeLike) -> Self:
@@ -237,6 +244,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             dtype,
             lambda: self.materialize().view(dtype),
             None,
+            __enable_caching__=self.__enable_caching__,
         )
 
     @property
@@ -263,6 +271,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             self._dtype,
             lambda: self.materialize().byteswap(inplace=inplace),
             lambda: self.shape,
+            __enable_caching__=self.__enable_caching__,
         )
 
     def tobytes(self, order="C") -> bytes:
@@ -275,6 +284,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             self._dtype,
             self._generator,
             self._shape_generator,
+            __enable_caching__=self.__enable_caching__,
         )
         new_virtual._array = self._array
         return new_virtual
@@ -287,6 +297,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             self._dtype,
             lambda: copy.deepcopy(current_generator(), memo),
             self._shape_generator,
+            __enable_caching__=self.__enable_caching__,
         )
         new_virtual._array = (
             copy.deepcopy(self._array, memo)
@@ -340,6 +351,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                 self._dtype,
                 lambda: self.materialize()[index],
                 None,
+                __enable_caching__=self.__enable_caching__,
             )
         else:
             return self.materialize().__getitem__(index)

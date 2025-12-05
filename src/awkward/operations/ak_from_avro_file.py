@@ -73,5 +73,6 @@ def _impl(form, length, container, highlevel, behavior, attrs):
         highlevel=highlevel,
         behavior=behavior,
         simplify=True,
+        enable_virtualarray_caching=True,
         attrs=attrs,
     )
