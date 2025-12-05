@@ -27,7 +27,7 @@ fi
   python3 -m pip install wheel build;
 
   # Install awkward and dependencies
-  python3 -m pip install -v --only-binary "numpy" . ./awkward-cpp cupy-cuda11x pytest>=6;
+  python3 -m pip install -v --only-binary "numpy" . ./awkward-cpp cupy-cuda12x pytest>=6;
 } || gh issue create --title "GPU Tests Setup Failed" --body "The test-runner for the GPU tests failed before hitting pytest." -R scikit-hep/awkward;
 
 # Test

@@ -187,7 +187,6 @@ jobs:
       fail-fast: false
       matrix:
         cuda-version:
-          - 11
           - 12
           - 13
 
