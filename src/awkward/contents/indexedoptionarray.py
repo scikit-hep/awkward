@@ -269,7 +269,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             return self
         else:
             return IndexedOptionArray(
-                self._index.to64()
+                self._index.to64(),
                 self._content,
                 parameters=self._parameters,
             )
