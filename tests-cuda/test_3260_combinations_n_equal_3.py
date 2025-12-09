@@ -12,7 +12,10 @@ to_list = ak.to_list
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
     yield
-    cp.cuda.Device().synchronize()
+    try:
+        cp.cuda.Device().synchronize()  # wait for all kernels
+    except cp.cuda.runtime.CUDARuntimeError as e:
+        print("GPU error during sync:", e)
     cp._default_memory_pool.free_all_blocks()
 
 
