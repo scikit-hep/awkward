@@ -13,8 +13,11 @@ to_list = ak.operations.to_list
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
     yield
+    try:
+        cp.cuda.Device().synchronize()  # wait for all kernels
+    except cp.cuda.runtime.CUDARuntimeError as e:
+        print("GPU error during sync:", e)
     cp._default_memory_pool.free_all_blocks()
-    cp.cuda.Device().synchronize()
 
 
 def test_0449_merge_many_arrays_in_one_pass_concatenate():
