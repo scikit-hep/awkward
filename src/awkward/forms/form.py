@@ -540,6 +540,7 @@ class Form(Meta):
             behavior=behavior,
             attrs=None,
             simplify=False,
+            enable_virtualarray_caching=True,
         )
 
     def length_one_array(
@@ -696,6 +697,7 @@ class Form(Meta):
             behavior=behavior,
             attrs=None,
             simplify=False,
+            enable_virtualarray_caching=True,
         )
 
     def _expected_from_buffers(
