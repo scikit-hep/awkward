@@ -53,10 +53,6 @@ jobs:
             dependencies-kind: full
           - python-version: '3.14'
             python-architecture: x64
-            runs-on: macos-14
-            dependencies-kind: full
-          - python-version: '3.14'
-            python-architecture: x64
             runs-on: macos-15-intel
             dependencies-kind: full
           - python-version: '3.9'
