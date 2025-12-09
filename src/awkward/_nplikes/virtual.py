@@ -111,7 +111,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
         # buffer key
         self._buffer_key = buffer_key
-        
+
         self.__enable_caching__ = __enable_caching__
 
     @property
