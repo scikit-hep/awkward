@@ -81,6 +81,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                     lambda: self.asarray(obj.materialize(), dtype=dtype, copy=copy),
                     lambda: obj.shape,
                     obj._buffer_key,
+                    __enable_caching__=obj.__enable_caching__,
                 )
         if copy:
             return self._module.array(obj, dtype=dtype, copy=True)
@@ -110,6 +111,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                     lambda: self.ascontiguousarray(x.materialize()),  # type: ignore[arg-type]
                     lambda: x.shape,
                     x._buffer_key,
+                    __enable_caching__=x.__enable_caching__,
                 )
         else:
             return self._module.ascontiguousarray(x)
@@ -359,6 +361,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                     lambda: self.reshape(x.materialize(), next_shape, copy=copy),  # type: ignore[arg-type]
                     None,
                     x._buffer_key,
+                    __enable_caching__=x.__enable_caching__,
                 )
 
         if copy is None:
