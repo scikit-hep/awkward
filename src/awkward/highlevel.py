@@ -2953,6 +2953,7 @@ class ArrayBuilder(Sized):
                 backend="cpu",
                 byteorder=ak._util.native_byteorder,
                 simplify=True,
+                enable_virtualarray_caching=True,
                 highlevel=True,
                 behavior=self._behavior,
                 attrs=self._attrs,

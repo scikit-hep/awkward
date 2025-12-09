@@ -115,6 +115,7 @@ def unpickle_array_schema_1(
         buffer_key="{form_key}-{attribute}",
         byteorder="<",
         simplify=False,
+        enable_virtualarray_caching=True,
     )
 
 
@@ -141,6 +142,7 @@ def unpickle_record_schema_1(
         buffer_key="{form_key}-{attribute}",
         byteorder="<",
         simplify=False,
+        enable_virtualarray_caching=True,
     )
     layout = LowLevelRecord(array_layout, at)
     return Record(layout, behavior=behavior, attrs=attrs)
