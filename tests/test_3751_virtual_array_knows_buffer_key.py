@@ -48,13 +48,13 @@ def test_buffer_keys_on_placeholder_arrays():
     buffers = {
         "x.list-offsets": ak._nplikes.placeholder.PlaceholderArray(
             shape=(4,),
-            dtype="int",
+            dtype=np.int64,
             buffer_key="x.list-offsets",
             nplike=ak._nplikes.numpy.Numpy.instance(),
         ),
         "x.list.content-data": ak._nplikes.placeholder.PlaceholderArray(
             shape=(5,),
-            dtype="int",
+            dtype=np.int64,
             buffer_key="x.list.content-data",
             nplike=ak._nplikes.numpy.Numpy.instance(),
         ),
