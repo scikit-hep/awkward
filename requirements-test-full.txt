@@ -1,6 +1,6 @@
 fsspec>=2022.11.0;sys_platform != "win32"
-jax[cpu]>=0.2.15;sys_platform != "win32"
-numba>=0.50.0;sys_platform != "win32"
+jax[cpu]>=0.2.15;sys_platform != "win32" and not (python_version == "3.14" and sys_platform == "darwin" and platform_machine == "x86_64")
+numba>=0.50.0;sys_platform != "win32"  and not (python_version == "3.14" and sys_platform == "darwin" and platform_machine == "x86_64")
 numexpr>=2.7
 pandas>=0.24.0;sys_platform != "win32"
 pyarrow>=12.0.0;sys_platform != "win32"
