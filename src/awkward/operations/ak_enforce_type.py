@@ -680,7 +680,9 @@ def _recurse_option_any(
         # Check that we can build the content
         content_enforceable = _type_is_enforceable(layout.content, type_)
 
-        if layout.backend.nplike.any(layout.mask_as_bool(False)):
+        if layout.backend.nplike.known_data and layout.backend.nplike.any(
+            layout.mask_as_bool(False)
+        ):
             raise ValueError(
                 "option types can only be removed if there are no missing values"
             )
