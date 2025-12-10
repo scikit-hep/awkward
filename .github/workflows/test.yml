@@ -51,10 +51,10 @@ jobs:
             python-architecture: arm64
             runs-on: macos-14
             dependencies-kind: full
-          - python-version: '3.13'
+          - python-version: '3.14'
             python-architecture: x64
             runs-on: macos-15-intel
-            dependencies-kind: full
+            dependencies-kind: minimal
           - python-version: '3.9'
             python-architecture: x86
             runs-on: windows-latest
@@ -75,11 +75,11 @@ jobs:
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: ml
-          - python-version: '3.13t'
+          - python-version: '3.14t'
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: nogil
-          - python-version: '3.13t'
+          - python-version: '3.14t'
             python-architecture: x64
             runs-on: windows-latest
             dependencies-kind: nogil
