@@ -1858,7 +1858,8 @@ class Record(NDArrayOperatorsMixin):
             contents = []
             for k, v in data.items():
                 fields.append(k)
-                if is_non_string_like_iterable(v):
+                # avoid dictionaries here, see issue #3723
+                if (not isinstance(v, dict)) and is_non_string_like_iterable(v):
                     contents.append(Array(v).layout[np.newaxis])
                 else:
                     contents.append(Array([v]).layout)
