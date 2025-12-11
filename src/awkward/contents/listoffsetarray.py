@@ -2011,7 +2011,11 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         index = maybe_materialize(self._offsets.raw(cupy))[0].astype("int32")
         buf = cudf.core.buffer.as_buffer(index)
 
-        if parse_version(cudf.__version__) >= parse_version("24.10.00"):
+        if parse_version(cudf.__version__) >= parse_version("25.12.00"):
+            ind_buf = cudf.core.column.numerical.NumericalColumn(
+                plc_column=buf, dtype=index.dtype, size=len(index)
+            )
+        elif parse_version(cudf.__version__) >= parse_version("24.10.00"):
             ind_buf = cudf.core.column.numerical.NumericalColumn(
                 data=buf, dtype=index.dtype, mask=None, size=len(index)
             )
