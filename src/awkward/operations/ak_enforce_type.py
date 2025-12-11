@@ -608,7 +608,9 @@ def _recurse_unknown_any(
     layout: ak.contents.EmptyArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     type_form = ak.forms.from_type(type_)
-    return type_form.length_zero_array().copy(parameters=type_._parameters)
+    return type_form.length_zero_array(backend=layout.backend).copy(
+        parameters=type_._parameters
+    )
 
 
 def _recurse_any_unknown(layout: ak.contents.Content, type_: ak.types.UnknownType):
