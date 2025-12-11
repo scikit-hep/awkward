@@ -12,6 +12,7 @@ from glob import escape as escape_glob
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._meta.meta import Meta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -528,13 +529,17 @@ class Form(Meta):
                 "The `highlevel=True` variant of `Form.length_zero_array` has been removed. "
                 "Please use `ak.Array(form.length_zero_array(...), behavior=...)` if an `ak.Array` is required.",
             )
+        if backend == "typetracer" or isinstance(backend, TypeTracerBackend):
+            new_backend = numpy_backend
+        else:
+            new_backend = backend
 
-        return ak.operations.ak_from_buffers._impl(
+        out = ak.operations.ak_from_buffers._impl(
             form=self,
             length=0,
             container={"": b"\x00\x00\x00\x00\x00\x00\x00\x00"},
             buffer_key="",
-            backend=backend,
+            backend=new_backend,
             byteorder=ak._util.native_byteorder,
             highlevel=False,
             behavior=behavior,
@@ -542,6 +547,10 @@ class Form(Meta):
             simplify=False,
             enable_virtualarray_caching=True,
         )
+
+        if backend == "typetracer" or isinstance(backend, TypeTracerBackend):
+            return out.to_typetracer()
+        return out
 
     def length_one_array(
         self, *, backend=numpy_backend, highlevel=False, behavior=None
@@ -686,12 +695,16 @@ class Form(Meta):
             else:
                 raise AssertionError(f"not a Form: {form!r}")
 
-        return ak.operations.ak_from_buffers._impl(
+        if backend == "typetracer" or isinstance(backend, TypeTracerBackend):
+            new_backend = numpy_backend
+        else:
+            new_backend = backend
+        out = ak.operations.ak_from_buffers._impl(
             form=prepare(self, 1),
             length=1,
             container=container,
             buffer_key="{form_key}",
-            backend=backend,
+            backend=new_backend,
             byteorder=ak._util.native_byteorder,
             highlevel=False,
             behavior=behavior,
@@ -699,6 +712,10 @@ class Form(Meta):
             simplify=False,
             enable_virtualarray_caching=True,
         )
+
+        if backend == "typetracer" or isinstance(backend, TypeTracerBackend):
+            return out.to_typetracer()
+        return out
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
