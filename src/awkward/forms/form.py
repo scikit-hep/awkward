@@ -532,7 +532,7 @@ class Form(Meta):
             )
         if isinstance(regularize_backend(backend), TypeTracerBackend):
             return self.length_zero_array(
-                backend=numpy_backend, highlevel=False, behavior=behavior
+                backend=numpy_backend, highlevel=highlevel, behavior=behavior
             ).to_typetracer()
 
         return ak.operations.ak_from_buffers._impl(
@@ -559,7 +559,7 @@ class Form(Meta):
             )
         if isinstance(regularize_backend(backend), TypeTracerBackend):
             return self.length_one_array(
-                backend=numpy_backend, highlevel=False, behavior=behavior
+                backend=numpy_backend, highlevel=highlevel, behavior=behavior
             ).to_typetracer()
 
         # The naive implementation of a length-1 array requires that we have a sufficiently
