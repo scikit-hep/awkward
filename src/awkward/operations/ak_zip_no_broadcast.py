@@ -200,4 +200,21 @@ def _impl(
 
 
 def _check_equal_lengths(
-    conten
+    contents: Sequence[ak.contents.Content],
+) -> int | UnknownLength:
+    """
+    Ensure all layouts in ``contents`` have the same length and return that
+    length.
+
+    ``UnknownLength`` is returned when lengths are not statically known
+    (typetracer/placeholder scenarios).
+    """
+    if not contents:
+        raise ValueError("_check_equal_lengths requires at least one content")
+
+    length = contents[0].length
+    for layout in contents:
+        if layout.length != length:
+            raise ValueError("all arrays must have the same length")
+
+    return length
