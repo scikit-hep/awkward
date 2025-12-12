@@ -1559,7 +1559,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         if axis is None:
             return self.all(
                 cast(TypeTracerArray, self.reshape(x, (-1,))),
-                axis=axis,
+                axis=0,
                 keepdims=keepdims,
                 maybe_out=maybe_out,
             )
