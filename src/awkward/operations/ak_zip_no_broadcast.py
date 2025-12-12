@@ -2,87 +2,70 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from functools import reduce
+from typing import Any, Optional
 
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._namedaxis import _get_named_axis, _unify_named_axis
-from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._nplikes.placeholder import PlaceholderArray
+from awkward._nplikes.shape import UnknownLength
 
 __all__ = ("zip_no_broadcast",)
-
-np = NumpyMetadata.instance()
 
 
 @high_level_function()
 def zip_no_broadcast(
-    arrays,
+    arrays: Mapping[str, Any] | Sequence[Any],
     *,
-    parameters=None,
-    with_name=None,
-    highlevel=True,
-    behavior=None,
-    attrs=None,
+    parameters: Optional[dict] = None,
+    with_name: Optional[str] = None,
+    highlevel: bool = True,
+    behavior: Optional[dict] = None,
+    attrs: Optional[dict] = None,
 ):
     """
-    Args:
-        arrays (mapping or sequence of arrays): Each value in this mapping or
-            sequence can be any array-like data that #ak.to_layout recognizes.
-        parameters (None or dict): Parameters for the new
-            #ak.contents.RecordArray node that is created by this operation.
-        with_name (None or str): Assigns a `"__record__"` name to the new
-            #ak.contents.RecordArray node that is created by this operation
-            (overriding `parameters`, if necessary).
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.contents.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
-        attrs (None or dict): Custom attributes for the output array, if
-            high-level.
+    Combine `arrays` into a single structure as the fields of a collection
+    of records or the slots of a collection of tuples **without broadcasting**.
 
-    Combines `arrays` into a single structure as the fields of a collection
-    of records or the slots of a collection of tuples.
+    This function is similar to :func:`ak.zip` but does *not* attempt to
+    broadcast inputs together. It therefore requires that the provided
+    arrays already share compatible layouts and lengths.
 
-    Caution: unlike #ak.zip this function will _not_ broadcast the arrays together.
-    During typetracing, it assumes that the given arrays have already the same layouts and lengths.
+    Parameters
+    ----------
+    arrays
+        Mapping or sequence of array-like objects that ``ak.to_layout``
+        recognizes. If a mapping is provided, its keys are used as field
+        names in the resulting record array. If a sequence is provided,
+        a tuple-like record (no field names) is produced.
+    parameters
+        Optional parameters for the resulting RecordArray node.
+    with_name
+        If given, sets the ``__record__`` parameter on the result.
+    highlevel
+        If True, return an :class:`ak.Array`; otherwise return a low-level
+        :class:`ak.contents.Content` subclass.
+    behavior
+        Optional behavior for the output array when ``highlevel`` is True.
+    attrs
+        Optional attributes for the output array when ``highlevel`` is True.
 
-    This operation may be thought of as the opposite of projection in
-    #ak.Array.__getitem__, which extracts fields one at a time, or
-    #ak.unzip, which extracts them all in one call.
-
-    Consider the following arrays, `one` and `two`.
-
-        >>> one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]])
-        >>> two = ak.Array([["a", "b", "c"], [], ["d", "e"], ["f"]])
-
-    Zipping them together using a dict creates a collection of records with
-    the same nesting structure as `one` and `two`.
-
-        >>> ak.zip_no_broadcast({"x": one, "y": two}).show()
-        [[{x: 1.1, y: 'a'}, {x: 2.2, y: 'b'}, {x: 3.3, y: 'c'}],
-         [],
-         [{x: 4.4, y: 'd'}],
-         []]
-
-    Doing so with a list creates tuples, whose fields are not named.
-
-        >>> ak.zip_no_broadcast([one, two]).show()
-        [[(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
-         [],
-         [(4.4, 'd')],
-         []]
-
-    See also #ak.zip and #ak.unzip.
+    Notes
+    -----
+    Only two kinds of layouts are supported: :class:`ak.contents.NumpyArray`
+    and :class:`ak.contents.ListOffsetArray` (whose contents must be
+    ``NumpyArray``). All inputs must have the same length. When ListOffsetArray
+    inputs are provided, their offsets must be identical.
     """
-    # Dispatch
+    # Dispatch: provide the underlying arrays to the dispatcher
     if isinstance(arrays, Mapping):
         yield arrays.values()
     else:
         yield arrays
 
-    # Implementation
     return _impl(
         arrays,
         parameters,
@@ -94,15 +77,17 @@ def zip_no_broadcast(
 
 
 def _impl(
-    arrays,
-    parameters,
-    with_name,
-    highlevel,
-    behavior,
-    attrs,
+    arrays: Mapping[str, Any] | Sequence[Any],
+    parameters: Optional[dict],
+    with_name: Optional[str],
+    highlevel: bool,
+    behavior: Optional[dict],
+    attrs: Optional[dict],
 ):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        # Unwrap inputs to low-level layouts
         if isinstance(arrays, Mapping):
+            values = list(arrays.values())
             layouts = ensure_same_backend(
                 *(
                     ctx.unwrap(
@@ -112,18 +97,20 @@ def _impl(
                         none_policy="pass-through",
                         primitive_policy="pass-through",
                     )
-                    for x in arrays.values()
+                    for x in values
                 )
             )
             fields = list(arrays.keys())
 
-            # propagate named axis from input to output,
-            #   use strategy "unify" (see: awkward._namedaxis)
-            out_named_axis = reduce(
-                _unify_named_axis, map(_get_named_axis, arrays.values())
+            # propagate named axis from input to output, use strategy "unify"
+            out_named_axis = (
+                reduce(_unify_named_axis, map(_get_named_axis, values))
+                if values
+                else None
             )
 
         else:
+            seq = list(arrays)
             layouts = ensure_same_backend(
                 *(
                     ctx.unwrap(
@@ -133,17 +120,21 @@ def _impl(
                         none_policy="pass-through",
                         primitive_policy="pass-through",
                     )
-                    for x in arrays
+                    for x in seq
                 )
             )
             fields = None
 
-            # propagate named axis from input to output,
-            #   use strategy "unify" (see: awkward._namedaxis)
-            out_named_axis = reduce(_unify_named_axis, map(_get_named_axis, arrays))
+            out_named_axis = (
+                reduce(_unify_named_axis, map(_get_named_axis, seq)) if seq else None
+            )
 
-    # determine backend
-    backend = next((b.backend for b in layouts if hasattr(b, "backend")), "cpu")
+    # Ensure we have at least one layout
+    if not layouts:
+        raise ValueError("zip_no_broadcast requires at least one array")
+
+    # determine backend (ensure_same_backend guarantees consistency)
+    backend = layouts[0].backend
 
     if with_name is not None:
         if parameters is None:
@@ -152,43 +143,43 @@ def _impl(
             parameters = dict(parameters)
         parameters["__record__"] = with_name
 
-    # only allow all NumpyArrays and ListOffsetArrays
+    # only allow all NumpyArrays or all ListOffsetArrays (with NumpyArray contents)
     if all(isinstance(layout, ak.contents.NumpyArray) for layout in layouts):
         length = _check_equal_lengths(layouts)
         out = ak.contents.RecordArray(
             layouts, fields, length=length, parameters=parameters, backend=backend
         )
+
     elif all(isinstance(layout, ak.contents.ListOffsetArray) for layout in layouts):
-        contents = []
+        contents: list[ak.contents.Content] = []
         for layout in layouts:
             # get the content of the ListOffsetArray
             if not isinstance(layout.content, ak.contents.NumpyArray):
                 raise NotImplementedError(
-                    "ak.zip_no_broadcast cannot (safely) zip ListOffsetArrays with non-NumpyArray contents. "
+                    "ak.zip_no_broadcast cannot (safely) zip ListOffsetArrays whose contents are not NumpyArray. "
                     "This restriction is intentional. Use ak.zip instead for safe zipping."
                 )
             contents.append(layout.content)
 
+        # Typetracer path: offsets may be typetracer objects, so take from the first layout
         if backend.name == "typetracer":
-            # just get from the first one
-            # we're in typetracer mode, so we can't check the offsets (see else branch)
             offsets = layouts[0].offsets
         else:
-            # this is at 'runtime' with actual data, that means we can check the offsets,
-            # but only those that have actual data, i.e. no PlaceholderArrays
-            # so first, let's filter out any PlaceholderArrays
-            comparable_offsets = filter(
-                lambda o: not isinstance(o, ak._nplikes.placeholder.PlaceholderArray),
-                (layout.offsets for layout in layouts),
-            )
-            # check that offsets are the same
-            first = next(comparable_offsets)
-            if not all(
-                first.nplike.all(offsets.data == first.data)
-                for offsets in comparable_offsets
-            ):
-                raise ValueError("all ListOffsetArrays must have the same offsets")
-            offsets = first
+            # runtime path: filter out PlaceholderArray offsets before comparing
+            comparable_offsets = [
+                layout.offsets
+                for layout in layouts
+                if not isinstance(layout.offsets, PlaceholderArray)
+            ]
+
+            if comparable_offsets:
+                first = comparable_offsets[0]
+                if not all(first.nplike.all(other.data == first.data) for other in comparable_offsets):
+                    raise ValueError("all ListOffsetArrays must have the same offsets")
+                offsets = first
+            else:
+                # All offsets were placeholders; fall back to the first layout's offsets
+                offsets = layouts[0].offsets
 
         length = _check_equal_lengths(contents)
         out = ak.contents.ListOffsetArray(
@@ -202,7 +193,7 @@ def _impl(
             "all array layouts must be either NumpyArrays or ListOffsetArrays"
         )
 
-    # Unify named axes propagated through the broadcast
+    # Wrap result and propagate named axes
     wrapped_out = ctx.wrap(out, highlevel=highlevel)
     return ak.operations.ak_with_named_axis._impl(
         wrapped_out,
@@ -214,8 +205,16 @@ def _impl(
 
 
 def _check_equal_lengths(
-    contents: ak.contents.Content,
-) -> int | ak._nplikes.shape.UnknownLength:
+    contents: Sequence[ak.contents.Content],
+) -> int | UnknownLength:
+    """
+    Ensure all layouts in ``contents`` have the same length and return that
+    length. ``UnknownLength`` is returned when lengths are not statically known
+    (typetracer/placeholder scenarios).
+    """
+    if not contents:
+        raise ValueError("_check_equal_lengths requires at least one content")
+
     length = contents[0].length
     for layout in contents:
         if layout.length != length:
