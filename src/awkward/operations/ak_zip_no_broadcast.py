@@ -165,9 +165,7 @@ def _impl(
                     first.nplike.all(other.data == first.data)
                     for other in comparable_offsets
                 ):
-                    raise ValueError(
-                        "all ListOffsetArrays must have the same offsets"
-                    )
+                    raise ValueError("all ListOffsetArrays must have the same offsets")
                 offsets = first
             else:
                 offsets = layouts[0].offsets
