@@ -174,7 +174,10 @@ def _impl(
 
             if comparable_offsets:
                 first = comparable_offsets[0]
-                if not all(first.nplike.all(other.data == first.data) for other in comparable_offsets):
+                if not all(
+                    first.nplike.all(other.data == first.data)
+                    for other in comparable_offsets
+                ):
                     raise ValueError("all ListOffsetArrays must have the same offsets")
                 offsets = first
             else:
