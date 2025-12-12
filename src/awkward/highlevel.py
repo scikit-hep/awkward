@@ -1858,7 +1858,8 @@ class Record(NDArrayOperatorsMixin):
             contents = []
             for k, v in data.items():
                 fields.append(k)
-                if is_non_string_like_iterable(v):
+                # avoid dictionaries here, see issue #3723
+                if (not isinstance(v, dict)) and is_non_string_like_iterable(v):
                     contents.append(Array(v).layout[np.newaxis])
                 else:
                     contents.append(Array([v]).layout)
@@ -2929,7 +2930,7 @@ class ArrayBuilder(Sized):
 
     def __bool__(self):
         if len(self) == 1:
-            return bool(self[0])
+            return bool(self.snapshot()[0])
         else:
             raise ValueError(
                 "the truth value of an array whose length is not 1 is ambiguous; "
@@ -2953,6 +2954,7 @@ class ArrayBuilder(Sized):
                 backend="cpu",
                 byteorder=ak._util.native_byteorder,
                 simplify=True,
+                enable_virtualarray_caching=True,
                 highlevel=True,
                 behavior=self._behavior,
                 attrs=self._attrs,
