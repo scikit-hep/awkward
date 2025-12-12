@@ -11,6 +11,7 @@ from fnmatch import fnmatchcase
 from glob import escape as escape_glob
 
 import awkward as ak
+from awkward._backends.dispatch import regularize_backend
 from awkward._backends.numpy import NumpyBackend
 from awkward._backends.typetracer import TypeTracerBackend
 from awkward._meta.meta import Meta
@@ -529,17 +530,17 @@ class Form(Meta):
                 "The `highlevel=True` variant of `Form.length_zero_array` has been removed. "
                 "Please use `ak.Array(form.length_zero_array(...), behavior=...)` if an `ak.Array` is required.",
             )
-        if backend == "typetracer" or isinstance(backend, TypeTracerBackend):
-            new_backend = numpy_backend
-        else:
-            new_backend = backend
+        if isinstance(regularize_backend(backend), TypeTracerBackend):
+            return self.length_zero_array(
+                backend=numpy_backend, highlevel=False, behavior=behavior
+            ).to_typetracer()
 
-        out = ak.operations.ak_from_buffers._impl(
+        return ak.operations.ak_from_buffers._impl(
             form=self,
             length=0,
             container={"": b"\x00\x00\x00\x00\x00\x00\x00\x00"},
             buffer_key="",
-            backend=new_backend,
+            backend=backend,
             byteorder=ak._util.native_byteorder,
             highlevel=False,
             behavior=behavior,
@@ -547,10 +548,6 @@ class Form(Meta):
             simplify=False,
             enable_virtualarray_caching=True,
         )
-
-        if backend == "typetracer" or isinstance(backend, TypeTracerBackend):
-            return out.to_typetracer()
-        return out
 
     def length_one_array(
         self, *, backend=numpy_backend, highlevel=False, behavior=None
@@ -560,6 +557,10 @@ class Form(Meta):
                 "The `highlevel=True` variant of `Form.length_one_array` has been removed. "
                 "Please use `ak.Array(form.length_one_array(...), behavior=...)` if an `ak.Array` is required.",
             )
+        if isinstance(regularize_backend(backend), TypeTracerBackend):
+            return self.length_one_array(
+                backend=numpy_backend, highlevel=False, behavior=behavior
+            ).to_typetracer()
 
         # The naive implementation of a length-1 array requires that we have a sufficiently
         # large buffer to be able to build _any_ subtree.
@@ -695,16 +696,12 @@ class Form(Meta):
             else:
                 raise AssertionError(f"not a Form: {form!r}")
 
-        if backend == "typetracer" or isinstance(backend, TypeTracerBackend):
-            new_backend = numpy_backend
-        else:
-            new_backend = backend
-        out = ak.operations.ak_from_buffers._impl(
+        return ak.operations.ak_from_buffers._impl(
             form=prepare(self, 1),
             length=1,
             container=container,
             buffer_key="{form_key}",
-            backend=new_backend,
+            backend=backend,
             byteorder=ak._util.native_byteorder,
             highlevel=False,
             behavior=behavior,
@@ -712,10 +709,6 @@ class Form(Meta):
             simplify=False,
             enable_virtualarray_caching=True,
         )
-
-        if backend == "typetracer" or isinstance(backend, TypeTracerBackend):
-            return out.to_typetracer()
-        return out
 
     def _expected_from_buffers(
         self, getkey: Callable[[Form, str], str], recursive: bool
