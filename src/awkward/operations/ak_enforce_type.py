@@ -665,7 +665,7 @@ def _recurse_option_any(
                     new_index[~is_none] = nplike.arange(
                         layout.length - num_none
                         if layout.length is not unknown_length
-                        else unknown_length,
+                        else num_none,
                         dtype=new_index.dtype,
                     )
                 return ak.contents.IndexedOptionArray(
