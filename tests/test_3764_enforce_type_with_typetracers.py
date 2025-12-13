@@ -989,3 +989,99 @@ def test_unknown(forget_length):
         ak.index.Index64([]), ak.contents.EmptyArray()
     ).to_typetracer(forget_length)
     assert result.layout.is_equal_to(expected)
+
+
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_misc(forget_length):
+    ## option → option (inside indexed)
+    original = ak.to_layout([{"x": [1, 2, None]}, None, {"x": [3, 4, None]}])[
+        [0, 2], :2
+    ]
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array,
+        """
+    ?{
+        x: var * ?float32
+    }
+        """,
+    )
+    expected = ak.contents.IndexedOptionArray(
+        ak.index.Index64([0, 1]),
+        ak.contents.RecordArray(
+            [
+                ak.contents.ListOffsetArray(
+                    ak.index.Index64([0, 2, 4]),
+                    ak.contents.IndexedOptionArray(
+                        ak.index.Index64([0, 1, 2, 3]),
+                        ak.contents.NumpyArray(
+                            numpy.array([1, 2, 3, 4], dtype=numpy.float32)
+                        ),
+                    ),
+                )
+            ],
+            ["x"],
+        ),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## no option → option (inside indexed)
+    original = ak.to_layout(
+        [
+            {"x": [1, 2, None]},
+            {"x": [9, 9, None]},
+            {"x": [3, 4, None]},
+            {"x": [8, 8, None]},
+        ]
+    )[[0, 2], :2]
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array,
+        """
+    ?{
+        x: var * ?float32
+    }
+        """,
+    )
+    expected = ak.contents.UnmaskedArray(
+        ak.contents.RecordArray(
+            [
+                ak.contents.ListOffsetArray(
+                    ak.index.Index64([0, 2, 4]),
+                    ak.contents.IndexedOptionArray(
+                        ak.index.Index64([0, 1, 2, 3]),
+                        ak.contents.NumpyArray(
+                            numpy.array([1, 2, 3, 4], dtype=numpy.float32)
+                        ),
+                    ),
+                )
+            ],
+            ["x"],
+        ),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## option (indexed) list of union → option list of no union (project)
+    original = ak.to_layout([[1, "hi", "bye"], None])[[0, 1], 1:2]
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array, ak.types.from_datashape("?var * string", highlevel=False)
+    )
+    expected = ak.contents.IndexedOptionArray(
+        ak.index.Index64([0, -1]),
+        ak.contents.ListOffsetArray(
+            ak.index.Index64([0, 1]),
+            ak.contents.IndexedArray(
+                ak.index.Index64([0]),
+                ak.contents.ListOffsetArray(
+                    offsets=ak.index.Index64([0, 2, 5]),
+                    content=ak.contents.NumpyArray(
+                        numpy.array([104, 105, 98, 121, 101], dtype=numpy.uint8),
+                        parameters={"__array__": "char"},
+                    ),
+                    parameters={"__array__": "string"},
+                ),
+            ),
+        ),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
