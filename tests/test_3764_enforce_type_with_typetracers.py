@@ -739,3 +739,126 @@ def test_union(forget_length):
         ],
     ).to_typetracer(forget_length)
     assert result.layout.is_equal_to(expected)
+
+
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_string(forget_length):
+    ## string -> bytestring
+    original = ak.to_layout(["hello world"])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("bytes", highlevel=False))
+    expected = ak.contents.ListOffsetArray(
+        offsets=ak.index.Index64([0, 11]),
+        content=ak.contents.NumpyArray(
+            numpy.array(
+                [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                dtype=numpy.uint8,
+            ),
+            parameters={"__array__": "byte"},
+        ),
+        parameters={"__array__": "bytestring"},
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## bytestring -> string
+    original = ak.to_layout([b"hello world"])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("string", highlevel=False))
+    expected = ak.contents.ListOffsetArray(
+        offsets=ak.index.Index64([0, 11]),
+        content=ak.contents.NumpyArray(
+            numpy.array(
+                [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                dtype=numpy.uint8,
+            ),
+            parameters={"__array__": "char"},
+        ),
+        parameters={"__array__": "string"},
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## string -> string
+    original = ak.to_layout(["hello world"])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("string", highlevel=False))
+    expected = ak.contents.ListOffsetArray(
+        offsets=ak.index.Index64([0, 11]),
+        content=ak.contents.NumpyArray(
+            numpy.array(
+                [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                dtype=numpy.uint8,
+            ),
+            parameters={"__array__": "char"},
+        ),
+        parameters={"__array__": "string"},
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## bytestring -> bytestring
+    original = ak.to_layout([b"hello world"])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("bytes", highlevel=False))
+    expected = ak.contents.ListOffsetArray(
+        offsets=ak.index.Index64([0, 11]),
+        content=ak.contents.NumpyArray(
+            numpy.array(
+                [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                dtype=numpy.uint8,
+            ),
+            parameters={"__array__": "byte"},
+        ),
+        parameters={"__array__": "bytestring"},
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## bytestring -> list of byte
+    original = ak.to_layout([b"hello world"])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array, ak.types.from_datashape("var * byte", highlevel=False)
+    )
+    expected = ak.contents.ListOffsetArray(
+        offsets=ak.index.Index64([0, 11]),
+        content=ak.contents.NumpyArray(
+            numpy.array(
+                [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                dtype=numpy.uint8,
+            ),
+            parameters={"__array__": "byte"},
+        ),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## bytestring -> list of int64
+    original = ak.to_layout([b"hello world"])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array, ak.types.from_datashape("var * int64", highlevel=False)
+    )
+    expected = ak.contents.ListOffsetArray(
+        offsets=ak.index.Index64([0, 11]),
+        content=ak.contents.NumpyArray(
+            numpy.array(
+                [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                dtype=numpy.int64,
+            )
+        ),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## list of int64 -> string
+    original = ak.without_parameters([b"hello world"])
+    array = original.layout.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("string", highlevel=False))
+    expected = ak.contents.ListOffsetArray(
+        offsets=ak.index.Index64([0, 11]),
+        content=ak.contents.NumpyArray(
+            numpy.array(
+                [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+                dtype=numpy.uint8,
+            ),
+            parameters={"__array__": "char"},
+        ),
+        parameters={"__array__": "string"},
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
