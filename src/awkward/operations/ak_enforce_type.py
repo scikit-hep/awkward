@@ -608,7 +608,9 @@ def _recurse_unknown_any(
     layout: ak.contents.EmptyArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     type_form = ak.forms.from_type(type_)
-    return type_form.length_zero_array().copy(parameters=type_._parameters)
+    return type_form.length_zero_array(backend=layout.backend).copy(
+        parameters=type_._parameters
+    )
 
 
 def _recurse_any_unknown(layout: ak.contents.Content, type_: ak.types.UnknownType):
@@ -661,7 +663,9 @@ def _recurse_option_any(
                 else:
                     new_index[is_none] = -1
                     new_index[~is_none] = nplike.arange(
-                        layout.length - num_none,
+                        layout.length - num_none
+                        if layout.length is not unknown_length
+                        else num_none,
                         dtype=new_index.dtype,
                     )
                 return ak.contents.IndexedOptionArray(
@@ -680,7 +684,9 @@ def _recurse_option_any(
         # Check that we can build the content
         content_enforceable = _type_is_enforceable(layout.content, type_)
 
-        if layout.backend.nplike.any(layout.mask_as_bool(False)):
+        if layout.backend.nplike.known_data and layout.backend.nplike.any(
+            layout.mask_as_bool(False)
+        ):
             raise ValueError(
                 "option types can only be removed if there are no missing values"
             )
