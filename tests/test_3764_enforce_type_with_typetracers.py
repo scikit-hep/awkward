@@ -862,3 +862,130 @@ def test_string(forget_length):
         parameters={"__array__": "string"},
     ).to_typetracer(forget_length)
     assert result.layout.is_equal_to(expected)
+
+
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_highlevel(forget_length):
+    original = ak.to_layout(["hello world"])
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError, match=r"High-level type objects are not supported"):
+        ak.enforce_type(array, ak.types.from_datashape("1 * bytes"))
+
+    original = ak.to_layout([{"msg": "hello world"}])
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError, match=r"High-level type objects are not supported"):
+        ak.enforce_type(
+            array,
+            ak.types.ScalarType(
+                ak.types.RecordType(
+                    [
+                        ak.types.ListType(
+                            ak.types.NumpyType(
+                                "uint8", parameters={"__array__": "char"}
+                            ),
+                            parameters={"__array__": "string"},
+                        )
+                    ],
+                    ["msg"],
+                )
+            ),
+        )
+
+
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_single_record(forget_length):
+    original = ak.to_regular([{"x": [1, 2]}])
+    record = original.layout.to_typetracer(forget_length)[0]
+    result = ak.enforce_type(
+        record,
+        ak.types.from_datashape("{x: var * float64}", highlevel=False),
+        highlevel=False,
+    )
+    expected = ak.contents.RecordArray(
+        [
+            ak.contents.ListOffsetArray(
+                ak.index.Index(numpy.array([0, 2], dtype=numpy.int64)),
+                ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.float64)),
+            )
+        ],
+        ["x"],
+    ).to_typetracer(forget_length)
+    assert result.array.is_equal_to(expected)
+
+
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_indexed(forget_length):
+    original = ak.contents.IndexedArray(
+        ak.index.Index64([0, 2]),
+        ak.contents.ListOffsetArray(
+            ak.index.Index64([0, 3, 6, 9]),
+            ak.contents.NumpyArray(numpy.arange(9, dtype=numpy.int64)),
+        ),
+    )
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array,
+        ak.types.from_datashape(
+            'var * int64[parameters={"key": "value"}]', highlevel=False
+        ),
+    )
+    expected = ak.contents.IndexedArray(
+        ak.index.Index64([0, 2]),
+        ak.contents.ListOffsetArray(
+            ak.index.Index(numpy.array([0, 3, 6, 9], dtype=numpy.int64)),
+            ak.contents.NumpyArray(
+                numpy.array([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=numpy.int64),
+                parameters={"key": "value"},
+            ),
+        ),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.contents.IndexedArray(
+        ak.index.Index64([0, 2]),
+        ak.contents.ListOffsetArray(
+            ak.index.Index64([0, 3, 6, 9]),
+            ak.contents.NumpyArray(numpy.arange(9, dtype=numpy.int64)),
+        ),
+    )
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array, ak.types.from_datashape("var * float32", highlevel=False)
+    )
+    expected = ak.contents.ListOffsetArray(
+        ak.index.Index64([0, 3, 6]),
+        ak.contents.NumpyArray(numpy.array([0, 1, 2, 6, 7, 8], dtype=numpy.float32)),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_unknown(forget_length):
+    original = ak.contents.EmptyArray()
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, "unknown")
+    expected = ak.contents.EmptyArray().to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.contents.EmptyArray()
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, "int64")
+    expected = ak.contents.NumpyArray(numpy.empty(0, numpy.int64)).to_typetracer(
+        forget_length
+    )
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.contents.NumpyArray(numpy.empty(0, numpy.int64))
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(
+        TypeError, match=r"cannot convert non-EmptyArray layouts to a bare UnknownType"
+    ):
+        ak.enforce_type(array, "unknown")
+
+    original = ak.contents.NumpyArray(numpy.empty(0, numpy.int64))
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, "?unknown")
+    expected = ak.contents.IndexedOptionArray(
+        ak.index.Index64([]), ak.contents.EmptyArray()
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
