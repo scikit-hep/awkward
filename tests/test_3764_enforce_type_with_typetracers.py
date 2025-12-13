@@ -265,3 +265,477 @@ def test_list(forget_length):
     array = original.to_typetracer(forget_length)
     with pytest.raises(ValueError, match=r"different size"):
         ak.enforce_type(array, ak.types.from_datashape("4 * int64", highlevel=False))
+
+
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_option(forget_length):
+    ## option → option
+    original = ak.to_layout([1, None])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("?int64", highlevel=False))
+    expected = ak.contents.IndexedOptionArray(
+        ak.index.Index(numpy.array([0, -1], dtype=numpy.int64)),
+        ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64)),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## option → option (packing)
+    original = ak.to_layout([1, None, 2, 3])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array, ak.types.from_datashape("?float64", highlevel=False)
+    )
+    expected = ak.contents.IndexedOptionArray(
+        ak.index.Index(numpy.array([0, -1, 1, 2], dtype=numpy.int64)),
+        ak.contents.NumpyArray(numpy.array([1, 2, 3], dtype=numpy.float64)),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## option → no option
+    original = ak.to_layout([1, None])[:1]
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("int64", highlevel=False))
+    expected = ak.contents.IndexedArray(
+        ak.index.Index(numpy.array([0], dtype=numpy.int64)),
+        ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64)),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.to_layout([1, None])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("int64", highlevel=False))
+    expected = ak.contents.IndexedArray(
+        ak.index.Index(numpy.array([0], dtype=numpy.int64)),
+        ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64)),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## Add option
+    original = ak.to_layout([1, 2])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("?int64", highlevel=False))
+    expected = ak.contents.UnmaskedArray(
+        ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.int64))
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## option[X] → option[unknown]
+    original = ak.to_layout([None, 1, 2, 3])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, "?unknown")
+    expected = ak.contents.IndexedOptionArray(
+        ak.index.Index64([-1, -1, -1, -1]), ak.contents.EmptyArray()
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_numpy(forget_length):
+    ## NumPy
+    ## 1D → 1D
+    original = ak.to_layout([1, 2])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("int64", highlevel=False))
+    expected = ak.contents.NumpyArray(
+        numpy.array([1, 2], dtype=numpy.int64)
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.to_layout([1, 2])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("float32", highlevel=False))
+    expected = ak.contents.NumpyArray(
+        numpy.array([1.0, 2.0], dtype=numpy.float32)
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.to_layout([1, 2])
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError):
+        ak.enforce_type(array, ak.types.from_datashape("string", highlevel=False))
+
+    ## 1D → 2D
+    original = ak.to_layout([1, 2])
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError):
+        ak.enforce_type(array, ak.types.from_datashape("var * int64", highlevel=False))
+
+    original = ak.to_layout([1, 2])
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError):
+        ak.enforce_type(array, ak.types.from_datashape("2 * float32", highlevel=False))
+
+    ## 2D → 1D
+    original = ak.to_layout(numpy.zeros((2, 3)), regulararray=False)
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError):
+        ak.enforce_type(array, ak.types.from_datashape("int64", highlevel=False))
+
+    original = ak.to_layout(numpy.zeros((2, 3)), regulararray=False)
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError):
+        ak.enforce_type(array, ak.types.from_datashape("float32", highlevel=False))
+
+    ## 2D → 2D
+    original = ak.to_layout(numpy.zeros((2, 3)), regulararray=False)
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array, ak.types.from_datashape("var * int64", highlevel=False)
+    )
+    expected = ak.contents.ListOffsetArray(
+        ak.index.Index(numpy.array([0, 3, 6], dtype=numpy.int64)),
+        ak.contents.NumpyArray(numpy.array([0, 0, 0, 0, 0, 0], dtype=numpy.int64)),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.to_layout(numpy.zeros((2, 3)), regulararray=False)
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array, ak.types.from_datashape("3 * float32", highlevel=False)
+    )
+    expected = ak.contents.RegularArray(
+        ak.contents.NumpyArray(numpy.array([0, 0, 0, 0, 0, 0], dtype=numpy.float32)),
+        size=3,
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_union(forget_length):
+    ## non union → union
+    original = ak.to_layout([1, 2])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array, ak.types.from_datashape("union[int64, string]", highlevel=False)
+    )
+    expected = ak.contents.UnionArray(
+        tags=ak.index.Index8([0, 0]),
+        index=ak.index.Index64([0, 1]),
+        contents=[
+            ak.contents.NumpyArray(numpy.array([1, 2], dtype=numpy.int64)),
+            ak.contents.ListOffsetArray(
+                offsets=ak.index.Index64([0]),
+                content=ak.contents.NumpyArray(
+                    numpy.array([], dtype=numpy.uint8),
+                    parameters={"__array__": "char"},
+                ),
+                parameters={"__array__": "string"},
+            ),
+        ],
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.to_layout([1, 2])
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError):
+        ak.enforce_type(
+            array,
+            ak.types.from_datashape("union[var * int64, string]", highlevel=False),
+        )
+
+    ## union → no union (project)
+    original = ak.to_layout([1, "hi", "bye"])[1:2]
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("string", highlevel=False))
+    expected = ak.contents.IndexedArray(
+        ak.index.Index64([0]),
+        ak.contents.ListOffsetArray(
+            offsets=ak.index.Index64([0, 2, 5]),
+            content=ak.contents.NumpyArray(
+                numpy.array([104, 105, 98, 121, 101], dtype=numpy.uint8),
+                parameters={"__array__": "char"},
+            ),
+            parameters={"__array__": "string"},
+        ),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.to_layout([1, "hi", "bye"])[:1]
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("int64", highlevel=False))
+    expected = ak.contents.IndexedArray(
+        ak.index.Index64([0]),
+        ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64)),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.to_layout([1, "hi"])
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError):
+        ak.enforce_type(array, ak.types.from_datashape("var * int64", highlevel=False))
+
+    ## union → no union (convert)
+    original = ak.concatenate(
+        [
+            [{"x": 1, "y": 2.0}],
+            [{"y": 3}],
+            [{"x": 4, "y": 5.0}],
+            [{"y": 6}],
+        ],
+    )
+    array = original.layout.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array, ak.types.from_datashape("{y: int64}", highlevel=False)
+    )
+    expected = ak.contents.IndexedArray(
+        index=ak.index.Index64([0, 2, 1, 3]),
+        content=ak.contents.RecordArray(
+            contents=[
+                ak.contents.NumpyArray(
+                    numpy.array([2, 5, 3, 6], dtype=numpy.int64),
+                )
+            ],
+            fields=["y"],
+        ),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    original = ak.to_layout([1, "hi"])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, ak.types.from_datashape("string", highlevel=False))
+    expected = ak.contents.IndexedArray(
+        ak.index.Index64([0]),
+        ak.contents.ListOffsetArray(
+            offsets=ak.index.Index64([0, 2]),
+            content=ak.contents.NumpyArray(
+                numpy.array([104, 105], dtype=numpy.uint8),
+                parameters={"__array__": "char"},
+            ),
+            parameters={"__array__": "string"},
+        ),
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## union → same union
+    original = ak.to_layout([1, "hi"])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array,
+        ak.types.UnionType(
+            [
+                ak.types.NumpyType("int64"),
+                ak.types.ListType(
+                    ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+                    parameters={"__array__": "string", "foo": "bar"},
+                ),
+            ]
+        ),
+    )
+    expected = ak.contents.UnionArray(
+        tags=ak.index.Index8([0, 1]),
+        index=ak.index.Index64([0, 0]),
+        contents=[
+            ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64)),
+            ak.contents.ListOffsetArray(
+                offsets=ak.index.Index64([0, 2]),
+                content=ak.contents.NumpyArray(
+                    numpy.array([104, 105], dtype=numpy.uint8),
+                    parameters={"__array__": "char"},
+                ),
+                parameters={"__array__": "string", "foo": "bar"},
+            ),
+        ],
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## union → bigger union
+    original = ak.to_layout([1, "hi"])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array,
+        ak.types.from_datashape("union[int64, string, datetime64]", highlevel=False),
+    )
+    expected = ak.contents.UnionArray(
+        tags=ak.index.Index8([0, 1]),
+        index=ak.index.Index64([0, 0]),
+        contents=[
+            ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64)),
+            ak.contents.ListOffsetArray(
+                offsets=ak.index.Index64([0, 2]),
+                content=ak.contents.NumpyArray(
+                    numpy.array([104, 105], dtype=numpy.uint8),
+                    parameters={"__array__": "char"},
+                ),
+                parameters={"__array__": "string"},
+            ),
+            ak.contents.NumpyArray(numpy.array([], dtype=numpy.datetime64)),
+        ],
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## union → different union (same N)
+    original = ak.to_layout([1, "hi"])
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array,
+        ak.types.UnionType(
+            [
+                ak.types.NumpyType("float32"),
+                ak.types.ListType(
+                    ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
+                    parameters={"__array__": "string", "foo": "bar"},
+                ),
+            ]
+        ),
+    )
+    expected = ak.contents.UnionArray(
+        tags=ak.index.Index8([0, 1]),
+        index=ak.index.Index64([0, 0]),
+        contents=[
+            ak.contents.NumpyArray(numpy.array([1], dtype=numpy.float32)),
+            ak.contents.ListOffsetArray(
+                offsets=ak.index.Index64([0, 2]),
+                content=ak.contents.NumpyArray(
+                    numpy.array([104, 105], dtype=numpy.uint8),
+                    parameters={"__array__": "char"},
+                ),
+                parameters={"__array__": "string", "foo": "bar"},
+            ),
+        ],
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## union → different union (smaller N)
+    original = ak.to_layout([1, "hi", [1j, 2j]])[:2]
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(array, "union[int64, string]")
+    expected = ak.contents.UnionArray(
+        tags=ak.index.Index8([0, 1]),
+        index=ak.index.Index64([0, 0]),
+        contents=[
+            ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64)),
+            ak.contents.ListOffsetArray(
+                offsets=ak.index.Index64([0, 2]),
+                content=ak.contents.NumpyArray(
+                    numpy.array([104, 105], dtype=numpy.uint8),
+                    parameters={"__array__": "char"},
+                ),
+                parameters={"__array__": "string"},
+            ),
+        ],
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
+
+    ## union → incompatible different union (same N)
+    original = ak.to_layout([1, "hi"])
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError):
+        ak.enforce_type(
+            array, ak.types.from_datashape("union[int64, bool]", highlevel=False)
+        )
+
+    ## union → different union (same N, more than one change)
+    original = ak.to_layout([1, "hi", False])
+    array = original.to_typetracer(forget_length)
+    with pytest.raises(TypeError):
+        ak.enforce_type(
+            array,
+            ak.types.from_datashape(
+                "union[datetime64, string, float32]", highlevel=False
+            ),
+        )
+
+    ## union of union → union of extended union
+    original = ak.contents.UnionArray(
+        ak.index.Index8([0, 1]),
+        ak.index.Index64([0, 0]),
+        [
+            ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64)),
+            ak.contents.ListOffsetArray(
+                ak.index.Index64([0, 2]),
+                ak.contents.UnionArray(
+                    ak.index.Index8([0, 1]),
+                    ak.index.Index64([0, 0]),
+                    [
+                        ak.contents.NumpyArray(numpy.array([2], dtype=numpy.int64)),
+                        ak.contents.ListOffsetArray(
+                            ak.index.Index64([0, 2]),
+                            ak.contents.RecordArray(
+                                [
+                                    ak.contents.IndexedOptionArray(
+                                        ak.index.Index64([0, -1]),
+                                        ak.contents.NumpyArray(
+                                            numpy.array([1], dtype=numpy.int64)
+                                        ),
+                                    ),
+                                    ak.contents.IndexedOptionArray(
+                                        ak.index.Index64([-1, 0]),
+                                        ak.contents.NumpyArray(
+                                            numpy.array([2], dtype=numpy.int64)
+                                        ),
+                                    ),
+                                ],
+                                ["x", "y"],
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+        ],
+    )
+    array = original.to_typetracer(forget_length)
+    result = ak.enforce_type(
+        array,
+        """
+    union[
+        int64,
+        var * union[
+            int64,
+            var * {
+                x: ?int64,
+                y: ?int64,
+                z: ?string
+            }
+        ]
+    ]
+                             """,
+    )
+    expected = ak.contents.UnionArray(
+        ak.index.Index8([0, 1]),
+        ak.index.Index64([0, 0]),
+        [
+            ak.contents.NumpyArray(numpy.array([1], dtype=numpy.int64)),
+            ak.contents.ListOffsetArray(
+                ak.index.Index64([0, 2]),
+                ak.contents.UnionArray(
+                    ak.index.Index8([0, 1]),
+                    ak.index.Index64([0, 0]),
+                    [
+                        ak.contents.NumpyArray(numpy.array([2], dtype=numpy.int64)),
+                        ak.contents.ListOffsetArray(
+                            ak.index.Index64([0, 2]),
+                            ak.contents.RecordArray(
+                                [
+                                    ak.contents.IndexedOptionArray(
+                                        ak.index.Index64([0, -1]),
+                                        ak.contents.NumpyArray(
+                                            numpy.array([1], dtype=numpy.int64)
+                                        ),
+                                    ),
+                                    ak.contents.IndexedOptionArray(
+                                        ak.index.Index64([-1, 0]),
+                                        ak.contents.NumpyArray(
+                                            numpy.array([2], dtype=numpy.int64)
+                                        ),
+                                    ),
+                                    ak.contents.IndexedOptionArray(
+                                        ak.index.Index64([-1, -1]),
+                                        ak.contents.ListOffsetArray(
+                                            ak.index.Index64([0]),
+                                            ak.contents.NumpyArray(
+                                                numpy.empty(0, dtype=numpy.uint8),
+                                                parameters={"__array__": "char"},
+                                            ),
+                                            parameters={"__array__": "string"},
+                                        ),
+                                    ),
+                                ],
+                                ["x", "y", "z"],
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+        ],
+    ).to_typetracer(forget_length)
+    assert result.layout.is_equal_to(expected)
