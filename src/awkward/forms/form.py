@@ -13,7 +13,6 @@ from glob import escape as escape_glob
 import awkward as ak
 from awkward._backends.dispatch import regularize_backend
 from awkward._backends.numpy import NumpyBackend
-from awkward._backends.typetracer import TypeTracerBackend
 from awkward._meta.meta import Meta
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
@@ -530,7 +529,7 @@ class Form(Meta):
                 "The `highlevel=True` variant of `Form.length_zero_array` has been removed. "
                 "Please use `ak.Array(form.length_zero_array(...), behavior=...)` if an `ak.Array` is required.",
             )
-        if isinstance(regularize_backend(backend), TypeTracerBackend):
+        if not regularize_backend(backend).nplike.known_data:
             return self.length_zero_array(
                 backend=numpy_backend, highlevel=highlevel, behavior=behavior
             ).to_typetracer()
@@ -557,7 +556,7 @@ class Form(Meta):
                 "The `highlevel=True` variant of `Form.length_one_array` has been removed. "
                 "Please use `ak.Array(form.length_one_array(...), behavior=...)` if an `ak.Array` is required.",
             )
-        if isinstance(regularize_backend(backend), TypeTracerBackend):
+        if not regularize_backend(backend).nplike.known_data:
             return self.length_one_array(
                 backend=numpy_backend, highlevel=highlevel, behavior=behavior
             ).to_typetracer()
