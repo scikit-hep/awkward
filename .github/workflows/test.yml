@@ -106,7 +106,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: awkward-cpp/dist
           key: ${{ github.job }}-${{ matrix.runs-on }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
@@ -221,7 +221,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
@@ -296,7 +296,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
@@ -343,7 +343,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
