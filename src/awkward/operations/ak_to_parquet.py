@@ -416,7 +416,7 @@ def _impl(
         ) from None
 
     fs, destination = fsspec.core.url_to_fs(destination, **(storage_options or {}))
-    #Create directories in which we write files, if necessary
+    # Create directories in which we write files, if necessary
     fs.mkdirs(destination, exist_ok=True)
     metalist = []
     with pyarrow_parquet.ParquetWriter(
