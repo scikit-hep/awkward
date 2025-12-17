@@ -244,7 +244,7 @@ def _impl(
 
             # Create map from left tags to right tags
             left_tag_to_right_tag = backend.nplike.empty(
-                left_tag_order.size, dtype=np.int64
+                backend.nplike.max(left_tag_order) + 1, dtype=np.int64
             )
             left_tag_to_right_tag[left_tag_order] = right_tag_order
 
