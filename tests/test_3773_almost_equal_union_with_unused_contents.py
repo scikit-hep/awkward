@@ -189,6 +189,65 @@ def test_union_tags_equal():
     assert ak.array_equal(array, array)
     assert ak.almost_equal(array, array)
 
+    # Last content unused - tags [0, 3] with trailing unused contents
+    array = ak.contents.UnionArray(
+        ak.index.Index8([0, 3, 0, 3]),
+        ak.index.Index64([0, 0, 1, 1]),
+        [
+            ak.contents.NumpyArray(np.array([10, 20], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1.5, 2.5], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+        ],
+    )
+    assert ak.array_equal(array, array)
+    assert ak.almost_equal(array, array)
+
+    # Last content unused - tags [1, 2] with trailing unused contents
+    left = ak.contents.UnionArray(
+        ak.index.Index8([1, 2, 1]),
+        ak.index.Index64([0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([5, 10], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([7.5], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0]),
+        ak.index.Index64([0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([5, 10], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([7.5], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+        ],
+    )
+    assert not np.array_equal(left.tags.data, right.tags.data)
+    assert ak.array_equal(left, right)
+    assert ak.almost_equal(left, right)
+
+    # Last multiple contents unused - tags [0, 2] with many trailing unused contents
+    array = ak.contents.UnionArray(
+        ak.index.Index8([0, 2, 0]),
+        ak.index.Index64([0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([100, 200], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([3.14], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+        ],
+    )
+    assert ak.array_equal(array, array)
+    assert ak.almost_equal(array, array)
+
 
 def test_union_tags_not_equal():
     # Different values
@@ -354,6 +413,113 @@ def test_union_tags_not_equal():
         [
             ak.contents.NumpyArray(np.array([2.5], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([10, 99], dtype=np.int64)),
+        ],
+    )
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(left, right)
+
+    # Last content unused - tags [0, 3] with trailing unused, different values
+    array1 = ak.contents.UnionArray(
+        ak.index.Index8([0, 3, 0, 3]),
+        ak.index.Index64([0, 0, 1, 1]),
+        [
+            ak.contents.NumpyArray(np.array([10, 20], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1.5, 2.5], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+        ],
+    )
+    array2 = ak.contents.UnionArray(
+        ak.index.Index8([0, 3, 0, 3]),
+        ak.index.Index64([0, 0, 1, 1]),
+        [
+            ak.contents.NumpyArray(np.array([10, 20], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1.5, 9.9], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+        ],
+    )
+    assert not ak.array_equal(array1, array2)
+    assert not ak.almost_equal(array1, array2)
+
+    # Last content unused - tags [1, 2] with trailing unused, different values
+    array1 = ak.contents.UnionArray(
+        ak.index.Index8([1, 2, 1]),
+        ak.index.Index64([0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([5, 10], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([7.5], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+        ],
+    )
+    array2 = ak.contents.UnionArray(
+        ak.index.Index8([1, 2, 1]),
+        ak.index.Index64([0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([5, 10], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([8.5], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+        ],
+    )
+    assert not ak.array_equal(array1, array2)
+    assert not ak.almost_equal(array1, array2)
+
+    # Last multiple contents unused - tags [0, 2] with trailing unused, different values
+    array1 = ak.contents.UnionArray(
+        ak.index.Index8([0, 2, 0]),
+        ak.index.Index64([0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([100, 200], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([3.14], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+        ],
+    )
+    array2 = ak.contents.UnionArray(
+        ak.index.Index8([0, 2, 0]),
+        ak.index.Index64([0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([100, 999], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([3.14], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+        ],
+    )
+    assert not ak.array_equal(array1, array2)
+    assert not ak.almost_equal(array1, array2)
+
+    # Last content unused, different tag ordering and values
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 2, 0]),
+        ak.index.Index64([0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([50, 60], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([1.1], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1, 0, 1]),
+        ak.index.Index64([0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([1.1], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([50, 99], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.float64)),
         ],
     )
     assert not ak.array_equal(left, right)
