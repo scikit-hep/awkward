@@ -251,7 +251,7 @@ def test_union_tags_equal():
 
 def test_union_tags_not_equal():
     # Different values
-    array1 = ak.contents.UnionArray(
+    left = ak.contents.UnionArray(
         ak.index.Index8([0, 1]),
         ak.index.Index64([0, 0]),
         [
@@ -259,7 +259,7 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([2], dtype=np.int64)),
         ],
     )
-    array2 = ak.contents.UnionArray(
+    right = ak.contents.UnionArray(
         ak.index.Index8([0, 1]),
         ak.index.Index64([0, 0]),
         [
@@ -267,11 +267,11 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([3], dtype=np.int64)),
         ],
     )
-    assert not ak.array_equal(array1, array2)
-    assert not ak.almost_equal(array1, array2)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(left, right)
 
     # Nonzero tags, different values
-    array1 = ak.contents.UnionArray(
+    left = ak.contents.UnionArray(
         ak.index.Index8([1, 1]),
         ak.index.Index64([0, 1]),
         [
@@ -279,7 +279,7 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([3, 4], dtype=np.int64)),
         ],
     )
-    array2 = ak.contents.UnionArray(
+    right = ak.contents.UnionArray(
         ak.index.Index8([1, 1]),
         ak.index.Index64([0, 1]),
         [
@@ -287,11 +287,11 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([3, 5], dtype=np.int64)),
         ],
     )
-    assert not ak.array_equal(array1, array2)
-    assert not ak.almost_equal(array1, array2)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(left, right)
 
     # Sparse tags, different values
-    array1 = ak.contents.UnionArray(
+    left = ak.contents.UnionArray(
         ak.index.Index8([0, 2, 0, 2]),
         ak.index.Index64([0, 0, 1, 1]),
         [
@@ -300,7 +300,7 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([40, 50], dtype=np.int64)),
         ],
     )
-    array2 = ak.contents.UnionArray(
+    right = ak.contents.UnionArray(
         ak.index.Index8([0, 2, 0, 2]),
         ak.index.Index64([0, 0, 1, 1]),
         [
@@ -309,11 +309,11 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([40, 99], dtype=np.int64)),
         ],
     )
-    assert not ak.array_equal(array1, array2)
-    assert not ak.almost_equal(array1, array2)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(left, right)
 
     # Tags 2 and 5, different values
-    array1 = ak.contents.UnionArray(
+    left = ak.contents.UnionArray(
         ak.index.Index8([2, 5, 2, 5]),
         ak.index.Index64([0, 0, 1, 1]),
         [
@@ -325,7 +325,7 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([2.5, 3.7], dtype=np.float64)),
         ],
     )
-    array2 = ak.contents.UnionArray(
+    right = ak.contents.UnionArray(
         ak.index.Index8([2, 5, 2, 5]),
         ak.index.Index64([0, 0, 1, 1]),
         [
@@ -337,11 +337,11 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([2.5, 3.7], dtype=np.float64)),
         ],
     )
-    assert not ak.array_equal(array1, array2)
-    assert not ak.almost_equal(array1, array2)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(left, right)
 
     # Nonzero tags, different lengths
-    array1 = ak.contents.UnionArray(
+    left = ak.contents.UnionArray(
         ak.index.Index8([1, 1]),
         ak.index.Index64([0, 1]),
         [
@@ -349,7 +349,7 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([3, 4], dtype=np.int64)),
         ],
     )
-    array2 = ak.contents.UnionArray(
+    right = ak.contents.UnionArray(
         ak.index.Index8([1, 1, 1]),
         ak.index.Index64([0, 1, 2]),
         [
@@ -357,11 +357,11 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([3, 4, 5], dtype=np.int64)),
         ],
     )
-    assert not ak.array_equal(array1, array2)
-    assert not ak.almost_equal(array1, array2)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(left, right)
 
     # Max tag 10, different values
-    array1 = ak.contents.UnionArray(
+    left = ak.contents.UnionArray(
         ak.index.Index8([0, 10, 0, 10]),
         ak.index.Index64([0, 0, 1, 1]),
         [
@@ -378,7 +378,7 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([3, 4], dtype=np.int64)),
         ],
     )
-    array2 = ak.contents.UnionArray(
+    right = ak.contents.UnionArray(
         ak.index.Index8([0, 10, 0, 10]),
         ak.index.Index64([0, 0, 1, 1]),
         [
@@ -395,8 +395,8 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([3, 9], dtype=np.int64)),
         ],
     )
-    assert not ak.array_equal(array1, array2)
-    assert not ak.almost_equal(array1, array2)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(left, right)
 
     # Different tag ordering, different values
     left = ak.contents.UnionArray(
@@ -419,7 +419,7 @@ def test_union_tags_not_equal():
     assert not ak.almost_equal(left, right)
 
     # Last content unused - tags [0, 3] with trailing unused, different values
-    array1 = ak.contents.UnionArray(
+    left = ak.contents.UnionArray(
         ak.index.Index8([0, 3, 0, 3]),
         ak.index.Index64([0, 0, 1, 1]),
         [
@@ -431,7 +431,7 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([], dtype=np.float64)),
         ],
     )
-    array2 = ak.contents.UnionArray(
+    right = ak.contents.UnionArray(
         ak.index.Index8([0, 3, 0, 3]),
         ak.index.Index64([0, 0, 1, 1]),
         [
@@ -443,11 +443,11 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([], dtype=np.float64)),
         ],
     )
-    assert not ak.array_equal(array1, array2)
-    assert not ak.almost_equal(array1, array2)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(left, right)
 
     # Last content unused - tags [1, 2] with trailing unused, different values
-    array1 = ak.contents.UnionArray(
+    left = ak.contents.UnionArray(
         ak.index.Index8([1, 2, 1]),
         ak.index.Index64([0, 0, 1]),
         [
@@ -458,7 +458,7 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([], dtype=np.int64)),
         ],
     )
-    array2 = ak.contents.UnionArray(
+    right = ak.contents.UnionArray(
         ak.index.Index8([1, 2, 1]),
         ak.index.Index64([0, 0, 1]),
         [
@@ -469,11 +469,11 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([], dtype=np.int64)),
         ],
     )
-    assert not ak.array_equal(array1, array2)
-    assert not ak.almost_equal(array1, array2)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(left, right)
 
     # Last multiple contents unused - tags [0, 2] with trailing unused, different values
-    array1 = ak.contents.UnionArray(
+    left = ak.contents.UnionArray(
         ak.index.Index8([0, 2, 0]),
         ak.index.Index64([0, 0, 1]),
         [
@@ -486,7 +486,7 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([], dtype=np.int64)),
         ],
     )
-    array2 = ak.contents.UnionArray(
+    right = ak.contents.UnionArray(
         ak.index.Index8([0, 2, 0]),
         ak.index.Index64([0, 0, 1]),
         [
@@ -499,8 +499,8 @@ def test_union_tags_not_equal():
             ak.contents.NumpyArray(np.array([], dtype=np.int64)),
         ],
     )
-    assert not ak.array_equal(array1, array2)
-    assert not ak.almost_equal(array1, array2)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(left, right)
 
     # Last content unused, different tag ordering and values
     left = ak.contents.UnionArray(
