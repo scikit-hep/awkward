@@ -133,6 +133,16 @@ def _impl(
         if right.is_option:
             right = right.to_IndexedOptionArray64()
 
+        # Simplify union types
+        if left.is_union:
+            left = left.simplified(
+                left.tags, left.index, left.contents, parameters=left.parameters
+            )
+        if right.is_union:
+            right = right.simplified(
+                right.tags, right.index, right.contents, parameters=right.parameters
+            )
+
         # Simplify regular NumPy types
         if left.is_numpy and left.purelist_depth > 1:
             left = left.to_RegularArray()
@@ -225,30 +235,39 @@ def _impl(
                 left.mask_as_bool(True), right.mask_as_bool(True)
             ) and visitor(left.project(), right.project())
         elif left.is_union and right.is_union:
-            # Group positions by (left_tag, right_tag) pairs
-            # This allows comparing elements in bulk rather than one-by-one
-            tag_pair_to_positions = {}
-            for i in range(left.length):
-                pair = (int(left.tags[i]), int(right.tags[i]))
-                if pair not in tag_pair_to_positions:
-                    tag_pair_to_positions[pair] = []
-                tag_pair_to_positions[pair].append(i)
+            # For two unions with different content orderings to match, the tags should be equal at each index
+            # Therefore, we can order the contents by index appearance
+            def ordered_unique_values(values):
+                # First, find unique values and their appearance (from smallest to largest)
+                # unique_index is in ascending order of `unique` value
+                (
+                    _unique,
+                    unique_index,
+                    *_,
+                ) = backend.nplike.unique_all(values)
+                # Now re-order `unique` by order of appearance (`unique_index`)
+                return values[backend.nplike.sort(unique_index)]
 
-            # For each unique tag pair, extract and compare elements in bulk
-            for (left_tag, right_tag), positions in tag_pair_to_positions.items():
-                positions_array = backend.nplike.asarray(positions, dtype=np.int64)
+            # Find order of appearance for each union tags, and assume these are one-to-one maps
+            left_tag_order = ordered_unique_values(left.tags.data)
+            right_tag_order = ordered_unique_values(right.tags.data)
 
-                # Get the indices into the content arrays
-                left_indices = left.index.data[positions_array]
-                right_indices = right.index.data[positions_array]
+            # Create map from left tags to right tags
+            left_tag_to_right_tag = backend.nplike.empty(
+                left_tag_order.size, dtype=np.int64
+            )
+            left_tag_to_right_tag[left_tag_order] = right_tag_order
 
-                # Extract and compare the elements
-                if not visitor(
-                    left.content(left_tag)[left_indices],
-                    right.content(right_tag)[right_indices],
-                ):
+            # Map left tags onto right, such that the result should equal right.tags
+            # if the two tag arrays are equivalent
+            new_left_tag = left_tag_to_right_tag[left.tags.data]
+            if not backend.nplike.all(new_left_tag == right.tags.data):
+                return False
+
+            # Now project out the contents, and check for equality
+            for i, j in zip(left_tag_order, right_tag_order):
+                if not visitor(left.project(i), right.project(j)):
                     return False
-
             return True
 
         elif left.is_record and right.is_record:
