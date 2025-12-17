@@ -2,5 +2,6 @@ fsspec>=2022.11.0;sys_platform != "win32"
 pytest>=6
 pytest-cov
 pytest-xdist
-tensorflow-cpu >= 2.12
+tensorflow >= 2.12;sys_platform != "linux"
+tensorflow-cpu >= 2.12;sys_platform == "linux"
 torch >= 2.4.0
