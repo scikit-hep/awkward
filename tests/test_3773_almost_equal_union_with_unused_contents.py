@@ -10,6 +10,44 @@ import awkward as ak
 # Equal cases - all using zeros
 
 
+@pytest.mark.xfail(reason="Requires fix for empty UnionArray")
+def test_equal_empty_union():
+    array = ak.contents.UnionArray(
+        ak.index.Index8([]),
+        ak.index.Index64([0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([0, 0], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([0, 0], dtype=np.int64)),
+        ],
+    )
+    assert ak.array_equal(array, array)
+    assert ak.almost_equal(array, array)
+
+
+def test_equal_size_one_tags():
+    array = ak.contents.UnionArray(
+        ak.index.Index8([0]),
+        ak.index.Index64([0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([0, 0], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1, 1], dtype=np.int64)),
+        ],
+    )
+    assert ak.array_equal(array, array)
+    assert ak.almost_equal(array, array)
+
+    array = ak.contents.UnionArray(
+        ak.index.Index8([1]),
+        ak.index.Index64([0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([0, 0], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1, 1], dtype=np.int64)),
+        ],
+    )
+    assert ak.array_equal(array, array)
+    assert ak.almost_equal(array, array)
+
+
 def test_equal_tags_not_starting_at_zero():
     array = ak.contents.UnionArray(
         ak.index.Index8([1, 1]),
