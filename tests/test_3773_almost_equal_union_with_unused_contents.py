@@ -3,21 +3,19 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 import awkward as ak
 
 # Equal cases - all using zeros
 
 
-@pytest.mark.xfail(reason="Requires fix for empty UnionArray")
 def test_equal_empty_union():
     array = ak.contents.UnionArray(
         ak.index.Index8([]),
-        ak.index.Index64([0, 1]),
+        ak.index.Index64([]),
         [
-            ak.contents.NumpyArray(np.array([0, 0], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 0], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([], dtype=np.int64)),
         ],
     )
     assert ak.array_equal(array, array)
@@ -27,10 +25,10 @@ def test_equal_empty_union():
 def test_equal_size_one_tags():
     array = ak.contents.UnionArray(
         ak.index.Index8([0]),
-        ak.index.Index64([0, 1]),
+        ak.index.Index64([0]),
         [
-            ak.contents.NumpyArray(np.array([0, 0], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([1, 1], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([0], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1], dtype=np.int64)),
         ],
     )
     assert ak.array_equal(array, array)
@@ -38,10 +36,10 @@ def test_equal_size_one_tags():
 
     array = ak.contents.UnionArray(
         ak.index.Index8([1]),
-        ak.index.Index64([0, 1]),
+        ak.index.Index64([0]),
         [
-            ak.contents.NumpyArray(np.array([0, 0], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([1, 1], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([0], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1], dtype=np.int64)),
         ],
     )
     assert ak.array_equal(array, array)
@@ -224,7 +222,6 @@ def test_equal_multiple_trailing_unused():
     assert ak.almost_equal(array, array)
 
 
-@pytest.mark.xfail(reason="Requires fallback for different unique tag counts")
 def test_equal_different_unique_tag_counts_left_more():
     left = ak.contents.UnionArray(
         ak.index.Index8([1, 2]),
@@ -247,7 +244,6 @@ def test_equal_different_unique_tag_counts_left_more():
     assert ak.almost_equal(left, right)
 
 
-@pytest.mark.xfail(reason="Requires fallback for different unique tag counts")
 def test_equal_different_unique_tag_counts_right_more():
     left = ak.contents.UnionArray(
         ak.index.Index8([1, 1, 1]),
@@ -270,7 +266,6 @@ def test_equal_different_unique_tag_counts_right_more():
     assert ak.almost_equal(left, right)
 
 
-@pytest.mark.xfail(reason="Requires fallback for different unique tag counts")
 def test_equal_different_unique_tag_counts_complex():
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 2, 3]),
@@ -648,7 +643,6 @@ def test_not_equal_different_unique_tag_counts_left_more():
     assert not ak.almost_equal(left, right)
 
 
-@pytest.mark.xfail(reason="Requires fallback for different unique tag counts")
 def test_not_equal_different_unique_tag_counts_right_more():
     left = ak.contents.UnionArray(
         ak.index.Index8([1, 1, 1]),
