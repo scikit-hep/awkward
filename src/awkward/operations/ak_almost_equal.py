@@ -10,6 +10,7 @@ from awkward._layout import ensure_same_backend
 from awkward._namedaxis import _get_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_are_equal
+from awkward.operations.ak_is_valid import is_valid
 from awkward.operations.ak_to_layout import to_layout
 
 __all__ = ("almost_equal",)
@@ -133,16 +134,6 @@ def _impl(
         if right.is_option:
             right = right.to_IndexedOptionArray64()
 
-        # Simplify union types
-        if left.is_union:
-            left = left.simplified(
-                left.tags, left.index, left.contents, parameters=left.parameters
-            )
-        if right.is_union:
-            right = right.simplified(
-                right.tags, right.index, right.contents, parameters=right.parameters
-            )
-
         # Simplify regular NumPy types
         if left.is_numpy and left.purelist_depth > 1:
             left = left.to_RegularArray()
@@ -236,7 +227,15 @@ def _impl(
             ) and visitor(left.project(), right.project())
         elif left.is_union and right.is_union:
             # For two unions with different content orderings to match, the tags should be equal at each index
-            # Therefore, we can order the contents by index appearance
+            # Therefore, the unions should first be valid
+            if not (is_valid(left) and is_valid(right)):
+                msg = (
+                    "Cannot compare two UnionArrays if they are not both valid."
+                    "Use 'ak.validity_error' and 'ak.is_valid' to check the validity of the arrays."
+                )
+                raise ValueError(msg)
+
+            # Then we can order the contents by index appearance
             def ordered_unique_values(values):
                 # First, find unique values and their appearance (from smallest to largest)
                 # unique_index is in ascending order of `unique` value
@@ -254,7 +253,7 @@ def _impl(
 
             # Create map from left tags to right tags
             left_tag_to_right_tag = backend.nplike.empty(
-                backend.nplike.max(left_tag_order) + 1, dtype=np.int64
+                left_tag_order.size, dtype=np.int64
             )
             left_tag_to_right_tag[left_tag_order] = right_tag_order
 
