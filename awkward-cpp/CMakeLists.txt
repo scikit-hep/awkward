@@ -27,8 +27,8 @@ message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 message(STATUS "AWKWARD_ENABLE_ROCM = ${AWKWARD_ENABLE_ROCM}")
 
-if(CMAKE_CXX_COMPILER_ID MATCHES AppleClang AND
-   CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15)
+if(CMAKE_CXX_COMPILER_ID MATCHES AppleClang AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL
+                                                15)
   if(CMAKE_VERSION VERSION_LESS 3.29)
     message(WARNING "CMake should be 3.29+ to support AppleClang 15+. Trying anyway.")
   endif()
@@ -67,24 +67,15 @@ set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 # Sources
 # -------------------------------------------------------------------------
 
-# Three tiers:
-#   1. cpu-kernels        (extern "C")
-#   2. cuda/rocm-kernels  (extern "C")
-#   3. libawkward         (C++)
-#   4. Python extension
+# Three tiers: 1. cpu-kernels        (extern "C") 2. cuda/rocm-kernels  (extern "C") 3. libawkward
+# (C++) 4. Python extension
 
-file(GLOB CPU_KERNEL_SOURCES
-     CONFIGURE_DEPENDS
-     "src/cpu-kernels/*.cpp")
+file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp")
 
-file(GLOB_RECURSE LIBAWKWARD_SOURCES
-     CONFIGURE_DEPENDS
-     "src/libawkward/*.cpp")
+file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 
 if(AWKWARD_ENABLE_ROCM)
-  file(GLOB ROCM_KERNEL_SOURCES
-       CONFIGURE_DEPENDS
-       "src/rocm-kernels/*.hip"
+  file(GLOB ROCM_KERNEL_SOURCES CONFIGURE_DEPENDS "src/rocm-kernels/*.hip"
        "src/rocm-kernels/*.cpp")
 endif()
 
@@ -93,12 +84,9 @@ endif()
 # -------------------------------------------------------------------------
 
 add_library(awkward-parent INTERFACE)
-target_compile_definitions(awkward-parent
-  INTERFACE VERSION_INFO="${SKBUILD_PROJECT_VERSION}")
-target_include_directories(awkward-parent
-  INTERFACE include)
-target_compile_features(awkward-parent
-  INTERFACE cxx_std_17)
+target_compile_definitions(awkward-parent INTERFACE VERSION_INFO="${SKBUILD_PROJECT_VERSION}")
+target_include_directories(awkward-parent INTERFACE include)
+target_compile_features(awkward-parent INTERFACE cxx_std_17)
 
 # Header-only deps
 target_include_directories(awkward-parent INTERFACE rapidjson/include)
@@ -108,10 +96,14 @@ target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
 
 # WASM needs exceptions enabled
 if(CMAKE_SYSTEM_NAME MATCHES Emscripten)
-  set_property(TARGET awkward-parent
-    APPEND PROPERTY INTERFACE_LINK_OPTIONS -fexceptions)
-  set_property(TARGET awkward-parent
-    APPEND PROPERTY INTERFACE_COMPILE_OPTIONS -fexceptions)
+  set_property(
+    TARGET awkward-parent
+    APPEND
+    PROPERTY INTERFACE_LINK_OPTIONS -fexceptions)
+  set_property(
+    TARGET awkward-parent
+    APPEND
+    PROPERTY INTERFACE_COMPILE_OPTIONS -fexceptions)
 endif()
 
 # -------------------------------------------------------------------------
@@ -123,10 +115,9 @@ target_link_libraries(awkward-cpu-kernels PUBLIC awkward-parent)
 
 set_target_properties(
   awkward-cpu-kernels
-  PROPERTIES
-    CXX_VISIBILITY_PRESET hidden
-    VISIBILITY_INLINES_HIDDEN ON
-    CXX_EXTENSIONS NO)
+  PROPERTIES CXX_VISIBILITY_PRESET hidden
+             VISIBILITY_INLINES_HIDDEN ON
+             CXX_EXTENSIONS NO)
 
 # -------------------------------------------------------------------------
 # Tier 1b: ROCm (HIP) kernels
@@ -135,22 +126,18 @@ set_target_properties(
 if(AWKWARD_ENABLE_ROCM)
   add_library(awkward-rocm-kernels SHARED ${ROCM_KERNEL_SOURCES})
 
-  target_link_libraries(awkward-rocm-kernels
-    PUBLIC awkward-parent)
+  target_link_libraries(awkward-rocm-kernels PUBLIC awkward-parent)
 
-  target_compile_features(awkward-rocm-kernels
-    PUBLIC cxx_std_17)
+  target_compile_features(awkward-rocm-kernels PUBLIC cxx_std_17)
 
-  target_compile_definitions(awkward-rocm-kernels
-    PRIVATE __HIP_PLATFORM_AMD__)
+  target_compile_definitions(awkward-rocm-kernels PRIVATE __HIP_PLATFORM_AMD__)
 
   set_target_properties(
     awkward-rocm-kernels
-    PROPERTIES
-      HIP_VISIBILITY_PRESET hidden
-      CXX_VISIBILITY_PRESET hidden
-      VISIBILITY_INLINES_HIDDEN ON
-      CXX_EXTENSIONS NO)
+    PROPERTIES HIP_VISIBILITY_PRESET hidden
+               CXX_VISIBILITY_PRESET hidden
+               VISIBILITY_INLINES_HIDDEN ON
+               CXX_EXTENSIONS NO)
 endif()
 
 # -------------------------------------------------------------------------
@@ -162,27 +149,25 @@ add_library(awkward SHARED ${LIBAWKWARD_SOURCES})
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
   target_compile_options(
     awkward
-    PRIVATE
-      -Werror=weak-vtables
-      -Wweak-vtables
-      -Wshorten-64-to-32
-      -Wsign-compare
-      -Wsign-conversion
-      -Wshift-sign-overflow
-      -Wreorder
-      -Wrange-loop-analysis
-      -Wconversion
-      -Wunused)
+    PRIVATE -Werror=weak-vtables
+            -Wweak-vtables
+            -Wshorten-64-to-32
+            -Wsign-compare
+            -Wsign-conversion
+            -Wshift-sign-overflow
+            -Wreorder
+            -Wrange-loop-analysis
+            -Wconversion
+            -Wunused)
 endif()
 
 target_link_libraries(awkward PUBLIC awkward-parent)
 
 set_target_properties(
   awkward
-  PROPERTIES
-    CXX_VISIBILITY_PRESET hidden
-    VISIBILITY_INLINES_HIDDEN ON
-    CXX_EXTENSIONS NO)
+  PROPERTIES CXX_VISIBILITY_PRESET hidden
+             VISIBILITY_INLINES_HIDDEN ON
+             CXX_EXTENSIONS NO)
 
 # -------------------------------------------------------------------------
 # Tier 3: Python extension
@@ -198,10 +183,9 @@ target_link_libraries(_ext PRIVATE awkward)
 
 set_target_properties(
   _ext
-  PROPERTIES
-    CXX_VISIBILITY_PRESET hidden
-    VISIBILITY_INLINES_HIDDEN ON
-    CXX_EXTENSIONS NO)
+  PROPERTIES CXX_VISIBILITY_PRESET hidden
+             VISIBILITY_INLINES_HIDDEN ON
+             CXX_EXTENSIONS NO)
 
 if(CMAKE_SYSTEM_NAME MATCHES Emscripten)
   target_link_options(_ext PRIVATE "-Wl,-rpath=\$ORIGIN")
@@ -214,11 +198,7 @@ endif()
 file(GLOB_RECURSE PYTHON_SOURCES "src/${SKBUILD_PROJECT_NAME}/*.py")
 
 install(
-  TARGETS
-    awkward
-    awkward-parent
-    awkward-cpu-kernels
-    _ext
+  TARGETS awkward awkward-parent awkward-cpu-kernels _ext
   LIBRARY DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
   RUNTIME DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
   ARCHIVE DESTINATION "${SKBUILD_PROJECT_NAME}/lib")
@@ -231,7 +211,4 @@ if(AWKWARD_ENABLE_ROCM)
     ARCHIVE DESTINATION "${SKBUILD_PROJECT_NAME}/lib")
 endif()
 
-install(
-  FILES ${PYTHON_SOURCES}
-  DESTINATION ${SKBUILD_PROJECT_NAME})
-
+install(FILES ${PYTHON_SOURCES} DESTINATION ${SKBUILD_PROJECT_NAME})

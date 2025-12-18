@@ -10,7 +10,7 @@ __global__ void hip_reduce_argmax_kernel(
     const IN* fromptr,
     const int64_t* parents,
     int64_t lenparents) {
-    
+
     int64_t i = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (i < lenparents) {
@@ -55,15 +55,14 @@ ERROR awkward_reduce_argmax(
     // 1. Initialize toptr with -1
     int threads_init = 256;
     int blocks_init = (outlength + threads_init - 1) / threads_init;
-    hipLaunchKernelGGL(HIP_KERNEL_NAME(hip_reduce_argmax_init<OUT>), blocks_init, threads_init, 0, 0, 
+    hipLaunchKernelGGL(HIP_KERNEL_NAME(hip_reduce_argmax_init<OUT>), blocks_init, threads_init, 0, 0,
                        toptr, outlength);
 
     // 2. Run the argmax reduction
     int threads_red = 256;
     int blocks_red = (lenparents + threads_red - 1) / threads_red;
-    hipLaunchKernelGGL(HIP_KERNEL_NAME(hip_reduce_argmax_kernel<OUT, IN>), blocks_red, threads_red, 0, 0, 
+    hipLaunchKernelGGL(HIP_KERNEL_NAME(hip_reduce_argmax_kernel<OUT, IN>), blocks_red, threads_red, 0, 0,
                        toptr, fromptr, parents, lenparents);
 
     return success();
 }
-
