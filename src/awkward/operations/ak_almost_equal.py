@@ -230,7 +230,7 @@ def _impl(
             # Therefore, the unions should first be valid
             if not (is_valid(left) and is_valid(right)):
                 msg = (
-                    "Cannot compare two UnionArrays if they are not both valid."
+                    "Cannot compare two UnionArrays if they are not both valid. "
                     "Use 'ak.validity_error' and 'ak.is_valid' to check the validity of the arrays."
                 )
                 raise ValueError(msg)
