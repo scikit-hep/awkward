@@ -107,7 +107,7 @@ def _impl(
 
     def is_approx_dtype(left, right) -> bool:
         if not dtype_exact:
-            for family in np.integer, np.floating:
+            for family in np.integer, np.floating, np.complexfloating:
                 if np.issubdtype(left, family):
                     return np.issubdtype(right, family)
         return left == right

@@ -524,7 +524,7 @@ class NumpyArray(NumpyMeta, Content):
                 ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "equiv")
 
             elif mergecastable == "family":
-                for family in np.integer, np.floating:
+                for family in np.integer, np.floating, np.complexfloating:
                     if np.issubdtype(self.dtype, family):
                         return np.issubdtype(other.dtype, family)
 

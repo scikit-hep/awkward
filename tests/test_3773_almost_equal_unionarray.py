@@ -1036,8 +1036,8 @@ def test_complex_numbers():
     assert ak.array_equal(right, right)
     assert not ak.almost_equal(left, right, dtype_exact=True)
     assert not ak.array_equal(left, right, dtype_exact=True)
-    assert not ak.almost_equal(left, right, dtype_exact=False)
-    assert not ak.array_equal(left, right, dtype_exact=False)
+    assert ak.almost_equal(left, right, dtype_exact=False)
+    assert ak.array_equal(left, right, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
