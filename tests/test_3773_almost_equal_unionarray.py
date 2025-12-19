@@ -6,25 +6,6 @@ import numpy as np
 
 import awkward as ak
 
-# first = ak.contents.UnionArray(
-#     ak.index.Index8([0, 0, 2, 1, 1]),
-#     ak.index.Index64([0, 1, 0, 0, 1]),
-#     [
-#         ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-#         ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
-#         ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-#     ],
-# )
-# second = ak.contents.UnionArray(
-#     ak.index.Index8([1, 1, 0, 2, 2]),
-#     ak.index.Index64([0, 1, 0, 0, 1]),
-#     [
-#         ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-#         ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-#         ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
-#     ],
-# )
-
 
 def test_original_issue():
     form = ak.forms.UnionForm(
@@ -801,3 +782,284 @@ def test_one_has_more_types():
     assert not ak.array_equal(right, left, dtype_exact=True)
     assert not ak.almost_equal(right, left, dtype_exact=False)
     assert not ak.array_equal(right, left, dtype_exact=False)
+
+
+def test_different_integer_sizes():
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int8)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int16)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1, 0, 1, 0]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int16)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int8)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert ak.almost_equal(left, right, dtype_exact=True)
+    assert ak.array_equal(left, right, dtype_exact=True)
+    assert ak.almost_equal(left, right, dtype_exact=False)
+    assert ak.array_equal(left, right, dtype_exact=False)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int8)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int32)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1, 0, 1, 0]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int16)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right, dtype_exact=True)
+    assert not ak.array_equal(left, right, dtype_exact=True)
+    assert ak.almost_equal(left, right, dtype_exact=False)
+    assert ak.array_equal(left, right, dtype_exact=False)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int8)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int32)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int16)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right, dtype_exact=True)
+    assert not ak.array_equal(left, right, dtype_exact=True)
+    assert ak.almost_equal(left, right, dtype_exact=False)
+    assert ak.array_equal(left, right, dtype_exact=False)
+
+
+def test_unsigned_integers():
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint8)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint16)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1, 0, 1, 0]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint16)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint8)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert ak.almost_equal(left, right, dtype_exact=True)
+    assert ak.array_equal(left, right, dtype_exact=True)
+    assert ak.almost_equal(left, right, dtype_exact=False)
+    assert ak.array_equal(left, right, dtype_exact=False)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint32)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint64)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1, 0, 1, 0]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint64)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint32)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert ak.almost_equal(left, right, dtype_exact=True)
+    assert ak.array_equal(left, right, dtype_exact=True)
+    assert ak.almost_equal(left, right, dtype_exact=False)
+    assert ak.array_equal(left, right, dtype_exact=False)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint8)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint32)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint16)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.uint64)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right, dtype_exact=True)
+    assert not ak.array_equal(left, right, dtype_exact=True)
+    assert ak.almost_equal(left, right, dtype_exact=False)
+    assert ak.array_equal(left, right, dtype_exact=False)
+
+
+def test_complex_numbers():
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1 + 2j, 3 + 4j], dtype=np.complex64)),
+            ak.contents.NumpyArray(np.array([5 + 6j, 7 + 8j], dtype=np.complex128)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1, 0, 1, 0]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([5 + 6j, 7 + 8j], dtype=np.complex128)),
+            ak.contents.NumpyArray(np.array([1 + 2j, 3 + 4j], dtype=np.complex64)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert ak.almost_equal(left, right, dtype_exact=True)
+    assert ak.array_equal(left, right, dtype_exact=True)
+    assert ak.almost_equal(left, right, dtype_exact=False)
+    assert ak.array_equal(left, right, dtype_exact=False)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1 + 2j, 3 + 4j], dtype=np.complex64)),
+            ak.contents.NumpyArray(np.array([5 + 6j, 7 + 8j], dtype=np.complex128)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([5 + 6j, 7 + 8j], dtype=np.complex128)),
+            ak.contents.NumpyArray(np.array([1 + 2j, 3 + 4j], dtype=np.complex64)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right, dtype_exact=True)
+    assert not ak.array_equal(left, right, dtype_exact=True)
+    assert not ak.almost_equal(left, right, dtype_exact=False)
+    assert not ak.array_equal(left, right, dtype_exact=False)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float32)),
+            ak.contents.NumpyArray(np.array([3.0, 4.0], dtype=np.float64)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1, 0, 1, 0]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([3 + 0j, 4 + 0j], dtype=np.complex128)),
+            ak.contents.NumpyArray(np.array([1 + 0j, 2 + 0j], dtype=np.complex64)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right, dtype_exact=True)
+    assert not ak.array_equal(left, right, dtype_exact=True)
+    assert not ak.almost_equal(left, right, dtype_exact=False)
+    assert not ak.array_equal(left, right, dtype_exact=False)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([3 + 0j, 4 + 0j], dtype=np.complex64)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1, 0, 1, 0]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([3 + 0j, 4 + 0j], dtype=np.complex128)),
+            ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float32)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right, dtype_exact=True)
+    assert not ak.array_equal(left, right, dtype_exact=True)
+    assert not ak.almost_equal(left, right, dtype_exact=False)
+    assert not ak.array_equal(left, right, dtype_exact=False)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([3 + 0j, 4 + 0j], dtype=np.complex64)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 0, 1]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([3 + 0j, 4 + 0j], dtype=np.complex128)),
+            ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float32)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right, dtype_exact=True)
+    assert not ak.array_equal(left, right, dtype_exact=True)
+    assert not ak.almost_equal(left, right, dtype_exact=False)
+    assert not ak.array_equal(left, right, dtype_exact=False)
