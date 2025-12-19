@@ -72,8 +72,8 @@ jobs:
             runs-on: ubuntu-latest
             dependencies-kind: pypy
           - python-version: '3.11'
-            python-architecture: x64
-            runs-on: ubuntu-latest
+            python-architecture: arm64
+            runs-on: macos-14
             dependencies-kind: ml
           - python-version: '3.14t'
             python-architecture: x64
