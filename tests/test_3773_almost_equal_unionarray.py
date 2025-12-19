@@ -19,9 +19,9 @@ def test_original_issue():
     )
     buffers = {
         "union-tags": np.array([1, 1], dtype=np.int8),
-        "union-index": np.array([0, 1]),
-        "numpy1-data": np.array([1, 2]),
-        "numpy2-data": np.array([3, 4]),
+        "union-index": np.array([0, 1], dtype=np.int64),
+        "numpy1-data": np.array([1, 2], dtype=np.int64),
+        "numpy2-data": np.array([3, 4], dtype=np.int64),
     }
     array = ak.from_buffers(form, 2, buffers)
     assert ak.almost_equal(array, array)
@@ -38,9 +38,9 @@ def test_original_issue():
     )
     virtual_buffers = {
         "union-tags": lambda: np.array([1, 1], dtype=np.int8),
-        "union-index": lambda: np.array([0, 1]),
-        "numpy-data": lambda: np.array([1, 2]),
-        "nones-index": lambda: np.array([-1]),
+        "union-index": lambda: np.array([0, 1], dtype=np.int64),
+        "numpy-data": lambda: np.array([1, 2], dtype=np.int64),
+        "nones-index": lambda: np.array([-1], dtype=np.int64),
     }
     eager_buffers = {k: v() for k, v in virtual_buffers.items()}
     eager_array = ak.from_buffers(form, 2, eager_buffers)
@@ -69,13 +69,22 @@ def test_original_issue():
             generator=lambda: np.array([1, 1], dtype=np.int8),
         ),
         "union-index": VirtualNDArray(
-            nplike, dtype=np.int64, shape=(2,), generator=lambda: np.array([0, 1])
+            nplike,
+            dtype=np.int64,
+            shape=(2,),
+            generator=lambda: np.array([0, 1], dtype=np.int64),
         ),
         "numpy-data": VirtualNDArray(
-            nplike, dtype=np.int64, shape=(2,), generator=lambda: np.array([1, 2])
+            nplike,
+            dtype=np.int64,
+            shape=(2,),
+            generator=lambda: np.array([1, 2], dtype=np.int64),
         ),
         "nones-index": VirtualNDArray(
-            nplike, dtype=np.int64, shape=(1,), generator=lambda: np.array([-1])
+            nplike,
+            dtype=np.int64,
+            shape=(1,),
+            generator=lambda: np.array([-1], dtype=np.int64),
         ),
     }
     eager_buffers = {k: v._generator() for k, v in virtual_buffers.items()}
