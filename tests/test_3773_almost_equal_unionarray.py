@@ -673,14 +673,8 @@ def test_one_has_more_types():
     assert ak.array_equal(right, right)
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
-
-    (left, right) = (right, left)
-    assert ak.almost_equal(left, left)
-    assert ak.array_equal(left, left)
-    assert ak.almost_equal(right, right)
-    assert ak.array_equal(right, right)
-    assert ak.almost_equal(left, right)
-    assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 2, 1]),
@@ -688,6 +682,7 @@ def test_one_has_more_types():
         [
             ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float64)),
         ],
     )
@@ -707,14 +702,8 @@ def test_one_has_more_types():
     assert ak.array_equal(right, right)
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
-
-    (left, right) = (right, left)
-    assert ak.almost_equal(left, left)
-    assert ak.array_equal(left, left)
-    assert ak.almost_equal(right, right)
-    assert ak.array_equal(right, right)
-    assert ak.almost_equal(left, right)
-    assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 2, 1]),
@@ -733,6 +722,7 @@ def test_one_has_more_types():
             ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([True, False], dtype=np.bool_)),
+            ak.contents.NumpyArray(np.array([True, False], dtype=np.bool_)),
         ],
     )
     assert ak.almost_equal(left, left)
@@ -743,8 +733,31 @@ def test_one_has_more_types():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
-    (left, right) = (right, left)
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 2, 3]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int32)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float64)),
+        ],
+    )
+
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1, 1, 1, 0]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([True, False], dtype=np.bool_)),
+        ],
+    )
     assert ak.almost_equal(left, left)
     assert ak.array_equal(left, left)
     assert ak.almost_equal(right, right)
@@ -753,3 +766,38 @@ def test_one_has_more_types():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 1, 2, 3]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int32)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float64)),
+        ],
+    )
+
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1, 1, 1, 2]),
+        ak.index.Index64([0, 1, 1, 0]),
+        [
+            ak.contents.NumpyArray(np.array([1.0, 2.0], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([1, 2], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([True, False], dtype=np.bool_)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right, dtype_exact=True)
+    assert not ak.array_equal(left, right, dtype_exact=True)
+    assert not ak.almost_equal(left, right, dtype_exact=False)
+    assert not ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert not ak.almost_equal(right, left, dtype_exact=False)
+    assert not ak.array_equal(right, left, dtype_exact=False)
