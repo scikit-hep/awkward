@@ -846,7 +846,9 @@ class Content(Meta):
             localindex.data, parameters=None, backend=self._backend
         )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self, other: Content, mergebool: bool, mergecastable: bool
+    ) -> bool:
         raise NotImplementedError
 
     def _mergemany(self, others: Sequence[Content]) -> Content:

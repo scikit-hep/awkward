@@ -648,15 +648,19 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 )
                 return (outoffsets, flattened)
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self, other: Content, mergebool: bool, mergecastable: bool
+    ) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
         # Is the other array indexed or optional?
         elif other.is_option or other.is_indexed:
-            return self._content._mergeable_next(other.content, mergebool)
+            return self._content._mergeable_next(
+                other.content, mergebool, mergecastable
+            )
         else:
-            return self._content._mergeable_next(other, mergebool)
+            return self._content._mergeable_next(other, mergebool, mergecastable)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
@@ -1257,7 +1261,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         nulls_index_content = ak.contents.NumpyArray(
             nulls_index.data, parameters=None, backend=self._backend
         )
-        if out._mergeable_next(nulls_index_content, True):
+        if out._mergeable_next(nulls_index_content, True, True):
             out = out._mergemany([nulls_index_content])
             nulls_merged = True
 

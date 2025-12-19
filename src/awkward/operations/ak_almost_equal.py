@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
@@ -10,7 +11,6 @@ from awkward._layout import ensure_same_backend
 from awkward._namedaxis import _get_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import parameters_are_equal
-from awkward.operations.ak_is_valid import is_valid
 from awkward.operations.ak_to_layout import to_layout
 
 __all__ = ("almost_equal",)
@@ -227,13 +227,30 @@ def _impl(
             ) and visitor(left.project(), right.project())
         elif left.is_union and right.is_union:
             # For two unions with different content orderings to match, the tags should be equal at each index
-            # Therefore, the unions should first be valid
-            if not (is_valid(left) and is_valid(right)):
-                msg = (
-                    "Cannot compare two UnionArrays if they are not both valid. "
-                    "Use 'ak.validity_error' and 'ak.is_valid' to check the validity of the arrays."
+
+            # First we drop unused contents
+            def drop_unused_contents(union_array):
+                # Find which tags are actually used
+                # inverse maps each tag to its position in unique (0, 1, 2, ...)
+                unique_tags, _, inverse, _ = backend.nplike.unique_all(
+                    union_array.tags.data
                 )
-                raise ValueError(msg)
+
+                # Build new contents list with only used contents
+                new_contents = [union_array.content(int(tag)) for tag in unique_tags]
+
+                # Use inverse to remap tags to new consecutive indices
+                new_tags = ak.index.Index8(inverse)
+
+                return ak.contents.UnionArray(
+                    new_tags,
+                    union_array.index,
+                    new_contents,
+                    parameters=union_array.parameters,
+                )
+
+            left = drop_unused_contents(left)
+            right = drop_unused_contents(right)
 
             # Then we can order the contents by index appearance
             def ordered_unique_values(values):

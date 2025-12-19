@@ -232,6 +232,7 @@ class UnionArray(UnionMeta[Content], Content):
         *,
         parameters=None,
         mergebool=False,
+        mergecastable=True,
     ):
         # Note: to help merge more than 128 arrays, tags *can* have type ak.index.Index64.
         # This is only supported when index is also Index64,
@@ -276,7 +277,9 @@ class UnionArray(UnionMeta[Content], Content):
                     # For each "final" outer union content
                     for k in range(len(contents)):
                         # Try and merge inner union content with running outer-union contentca
-                        if contents[k]._mergeable_next(inner_cont, mergebool):
+                        if contents[k]._mergeable_next(
+                            inner_cont, mergebool, mergecastable
+                        ):
                             backend.maybe_kernel_error(
                                 backend[
                                     "awkward_UnionArray_simplify",
@@ -360,7 +363,9 @@ class UnionArray(UnionMeta[Content], Content):
                         unmerged = False
                         break
 
-                    elif contents[k]._mergeable_next(self_cont, mergebool):
+                    elif contents[k]._mergeable_next(
+                        self_cont, mergebool, mergecastable
+                    ):
                         backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
@@ -1066,7 +1071,9 @@ class UnionArray(UnionMeta[Content], Content):
                     ),
                 )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self, other: Content, mergebool: bool, mergecastable: bool
+    ) -> bool:
         return True
 
     def _merging_strategy(self, others):

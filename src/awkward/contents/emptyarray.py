@@ -270,7 +270,9 @@ class EmptyArray(EmptyMeta, Content):
                 EmptyArray(backend=self._backend),
             )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self, other: Content, mergebool: bool, mergecastable: bool
+    ) -> bool:
         return True
 
     def _mergemany(self, others: Sequence[Content]) -> Content:

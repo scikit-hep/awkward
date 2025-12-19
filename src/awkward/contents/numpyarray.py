@@ -469,19 +469,23 @@ class NumpyArray(NumpyMeta, Content):
         else:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self, other: Content, mergebool: bool, mergecastable: bool
+    ) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
         # Is the other array indexed or optional?
         elif other.is_indexed or other.is_option:
-            return self._mergeable_next(other.content, mergebool)
+            return self._mergeable_next(other.content, mergebool, mergecastable)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
             return False
         # Simplify *this* branch to be 1D self
         elif len(self.shape) > 1:
-            return self._to_regular_primitive()._mergeable_next(other, mergebool)
+            return self._to_regular_primitive()._mergeable_next(
+                other, mergebool, mergecastable
+            )
 
         elif isinstance(other, ak.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
@@ -511,10 +515,17 @@ class NumpyArray(NumpyMeta, Content):
                 return False
 
             # Default merging (can we cast one to the other)
+            elif mergecastable:
+                return self.backend.nplike.can_cast(
+                    self.dtype, other.dtype, "same_kind"
+                ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "same_kind")
+
+            # Only byte order changes are allowed
+            # No type promotions
             else:
                 return self.backend.nplike.can_cast(
-                    self.dtype, other.dtype
-                ) or self.backend.nplike.can_cast(other.dtype, self.dtype)
+                    self.dtype, other.dtype, "equiv"
+                ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "equiv")
 
         else:
             return False
