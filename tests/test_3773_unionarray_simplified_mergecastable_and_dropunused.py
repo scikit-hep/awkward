@@ -19,7 +19,7 @@ def test_mergecastable():
         ],
     )
     simplified = array.simplified(
-        array.tags, array.index, array.contents, mergecastable=True
+        array.tags, array.index, array.contents, mergecastable="same_kind"
     )
     expected = ak.contents.UnionArray(
         ak.index.Index8([0, 0, 0, 1]),
@@ -44,7 +44,7 @@ def test_mergecastable():
         ],
     )
     simplified = array.simplified(
-        array.tags, array.index, array.contents, mergecastable=True
+        array.tags, array.index, array.contents, mergecastable="same_kind"
     )
     expected = ak.contents.UnionArray(
         ak.index.Index8([0, 0, 0, 1]),
@@ -69,7 +69,7 @@ def test_mergecastable():
         ],
     )
     simplified = array.simplified(
-        array.tags, array.index, array.contents, mergecastable=False
+        array.tags, array.index, array.contents, mergecastable="equiv"
     )
     expected = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 1, 2]),
@@ -93,7 +93,7 @@ def test_mergecastable():
         ],
     )
     simplified = array.simplified(
-        array.tags, array.index, array.contents, mergecastable=True
+        array.tags, array.index, array.contents, mergecastable="same_kind"
     )
     expected = ak.contents.UnionArray(
         ak.index.Index8([0, 0, 0, 1]),
@@ -120,7 +120,7 @@ def test_mergecastable():
         ],
     )
     simplified = array.simplified(
-        array.tags, array.index, array.contents, mergecastable=False
+        array.tags, array.index, array.contents, mergecastable="equiv"
     )
     assert simplified.is_equal_to(array)
 
@@ -318,7 +318,11 @@ def test_mergecastable_and_dropunused():
         ],
     )
     simplified = array.simplified(
-        array.tags, array.index, array.contents, mergecastable=True, dropunused=True
+        array.tags,
+        array.index,
+        array.contents,
+        mergecastable="same_kind",
+        dropunused=True,
     )
     expected = ak.contents.UnionArray(
         ak.index.Index8([0, 0, 0, 1]),
@@ -341,7 +345,11 @@ def test_mergecastable_and_dropunused():
         ],
     )
     simplified = array.simplified(
-        array.tags, array.index, array.contents, mergecastable=True, dropunused=False
+        array.tags,
+        array.index,
+        array.contents,
+        mergecastable="same_kind",
+        dropunused=False,
     )
     expected = ak.contents.UnionArray(
         ak.index.Index8([0, 0, 0, 1]),
@@ -366,7 +374,7 @@ def test_mergecastable_and_dropunused():
         ],
     )
     simplified = array.simplified(
-        array.tags, array.index, array.contents, mergecastable=False, dropunused=True
+        array.tags, array.index, array.contents, mergecastable="equiv", dropunused=True
     )
     expected = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 2]),
@@ -390,6 +398,6 @@ def test_mergecastable_and_dropunused():
         ],
     )
     simplified = array.simplified(
-        array.tags, array.index, array.contents, mergecastable=False, dropunused=False
+        array.tags, array.index, array.contents, mergecastable="equiv", dropunused=False
     )
     assert simplified.is_equal_to(array)

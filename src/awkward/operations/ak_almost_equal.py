@@ -140,7 +140,8 @@ def _impl(
                 left.index,
                 left.contents,
                 parameters=left.parameters,
-                mergecastable=False,
+                mergebool=False,
+                mergecastable="equiv" if dtype_exact else "family",
                 dropunused=True,
             )
         if right.is_union:
@@ -149,7 +150,8 @@ def _impl(
                 right.index,
                 right.contents,
                 parameters=right.parameters,
-                mergecastable=False,
+                mergebool=False,
+                mergecastable="equiv" if dtype_exact else "family",
                 dropunused=True,
             )
 
@@ -245,6 +247,10 @@ def _impl(
                 left.mask_as_bool(True), right.mask_as_bool(True)
             ) and visitor(left.project(), right.project())
         elif left.is_union and right.is_union:
+            # After simplification, both unions should have the same number of contents
+            if len(left.contents) != len(right.contents):
+                return False
+
             # For two unions with different content orderings to match, the tags should be equal at each index
             # Therefore, we can order the contents by index appearance
             def ordered_unique_values(values):

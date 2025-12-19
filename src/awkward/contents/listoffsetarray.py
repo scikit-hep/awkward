@@ -27,6 +27,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -797,7 +798,10 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 )
 
     def _mergeable_next(
-        self, other: Content, mergebool: bool, mergecastable: bool
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
     ) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:

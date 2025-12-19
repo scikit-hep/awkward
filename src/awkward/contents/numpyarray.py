@@ -33,6 +33,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -470,7 +471,10 @@ class NumpyArray(NumpyMeta, Content):
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
     def _mergeable_next(
-        self, other: Content, mergebool: bool, mergecastable: bool
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
     ) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
@@ -514,18 +518,24 @@ class NumpyArray(NumpyMeta, Content):
             ):
                 return False
 
+            elif mergecastable == "equiv":
+                return self.backend.nplike.can_cast(
+                    self.dtype, other.dtype, "equiv"
+                ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "equiv")
+
+            elif mergecastable == "family":
+                for family in np.integer, np.floating:
+                    if np.issubdtype(self.dtype, family):
+                        return np.issubdtype(other.dtype, family)
+
             # Default merging (can we cast one to the other)
-            elif mergecastable:
+            elif mergecastable == "same_kind":
                 return self.backend.nplike.can_cast(
                     self.dtype, other.dtype, "same_kind"
                 ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "same_kind")
 
-            # Only byte order changes are allowed
-            # No type promotions
             else:
-                return self.backend.nplike.can_cast(
-                    self.dtype, other.dtype, "equiv"
-                ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "equiv")
+                raise TypeError(f"unrecognized mergecastable option: {mergecastable}")
 
         else:
             return False

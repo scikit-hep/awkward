@@ -208,7 +208,10 @@ def num(layout, axis):
 
 
 def mergeable(
-    one: Content, two: Content, mergebool: bool = True, mergecastable: bool = True
+    one: Content,
+    two: Content,
+    mergebool: bool = True,
+    mergecastable: Literal["same_kind", "equiv", "family"] = "same_kind",
 ) -> bool:
     return one._mergeable_next(two, mergebool=mergebool, mergecastable=mergecastable)
 

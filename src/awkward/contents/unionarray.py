@@ -28,6 +28,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -232,7 +233,7 @@ class UnionArray(UnionMeta[Content], Content):
         *,
         parameters=None,
         mergebool=False,
-        mergecastable=True,
+        mergecastable="same_kind",
         dropunused=False,
     ):
         # Note: to help merge more than 128 arrays, tags *can* have type ak.index.Index64.
@@ -1094,7 +1095,10 @@ class UnionArray(UnionMeta[Content], Content):
                 )
 
     def _mergeable_next(
-        self, other: Content, mergebool: bool, mergecastable: bool
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
     ) -> bool:
         return True
 

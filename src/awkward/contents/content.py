@@ -847,7 +847,10 @@ class Content(Meta):
         )
 
     def _mergeable_next(
-        self, other: Content, mergebool: bool, mergecastable: bool
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
     ) -> bool:
         raise NotImplementedError
 
