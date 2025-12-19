@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
@@ -134,6 +133,26 @@ def _impl(
         if right.is_option:
             right = right.to_IndexedOptionArray64()
 
+        # Simplify union types
+        if left.is_union:
+            left = left.simplified(
+                left.tags,
+                left.index,
+                left.contents,
+                parameters=left.parameters,
+                mergecastable=False,
+                dropunused=True,
+            )
+        if right.is_union:
+            right = right.simplified(
+                right.tags,
+                right.index,
+                right.contents,
+                parameters=right.parameters,
+                mergecastable=False,
+                dropunused=True,
+            )
+
         # Simplify regular NumPy types
         if left.is_numpy and left.purelist_depth > 1:
             left = left.to_RegularArray()
@@ -227,32 +246,7 @@ def _impl(
             ) and visitor(left.project(), right.project())
         elif left.is_union and right.is_union:
             # For two unions with different content orderings to match, the tags should be equal at each index
-
-            # First we drop unused contents
-            def drop_unused_contents(union_array):
-                # Find which tags are actually used
-                # inverse maps each tag to its position in unique (0, 1, 2, ...)
-                unique_tags, _, inverse, _ = backend.nplike.unique_all(
-                    union_array.tags.data
-                )
-
-                # Build new contents list with only used contents
-                new_contents = [union_array.content(int(tag)) for tag in unique_tags]
-
-                # Use inverse to remap tags to new consecutive indices
-                new_tags = ak.index.Index8(inverse)
-
-                return ak.contents.UnionArray(
-                    new_tags,
-                    union_array.index,
-                    new_contents,
-                    parameters=union_array.parameters,
-                )
-
-            left = drop_unused_contents(left)
-            right = drop_unused_contents(right)
-
-            # Then we can order the contents by index appearance
+            # Therefore, we can order the contents by index appearance
             def ordered_unique_values(values):
                 # First, find unique values and their appearance (from smallest to largest)
                 # unique_index is in ascending order of `unique` value

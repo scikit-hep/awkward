@@ -233,6 +233,7 @@ class UnionArray(UnionMeta[Content], Content):
         parameters=None,
         mergebool=False,
         mergecastable=True,
+        dropunused=False,
     ):
         # Note: to help merge more than 128 arrays, tags *can* have type ak.index.Index64.
         # This is only supported when index is also Index64,
@@ -253,6 +254,27 @@ class UnionArray(UnionMeta[Content], Content):
 
         if backend.nplike.known_data and self_index.length < self_tags.length:
             raise ValueError("invalid UnionArray: len(index) < len(tags)")
+
+        # Drop unused contents
+        if dropunused and backend.nplike.known_data and self_tags.length > 0:
+            unique_tags, _, inverse, _ = backend.nplike.unique_all(self_tags.data)
+
+            # Remap self_contents to only include used contents
+            remapped_contents = [self_contents[int(tag)] for tag in unique_tags]
+
+            # If only one content is used, return it directly (UnionArray requires at least 2 contents)
+            if len(remapped_contents) == 1:
+                next = remapped_contents[0]._carry(self_index, True)
+                return next.copy(
+                    parameters=parameters_union(next._parameters, parameters)
+                )
+
+            # Remap self_tags to consecutive indices (0, 1, 2, ...)
+            remapped_tags = ak.index.Index8(inverse)
+
+            # Update self_contents and self_tags to use the remapped versions
+            self_contents = remapped_contents
+            self_tags = remapped_tags
 
         length = self_tags.length
         tags = ak.index.Index8.empty(length, backend.nplike)
