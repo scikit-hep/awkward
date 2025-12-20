@@ -145,6 +145,61 @@ def test_empty_union():
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
 
+    left = ak.contents.UnionArray(
+        ak.index.Index8([]),
+        ak.index.Index64([0, 1, 0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([1]),
+        ak.index.Index64([0, 1, 0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
+            ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(right, left)
+    assert not ak.array_equal(right, left)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([]),
+        ak.index.Index64([0, 1, 0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([2, 3, 0, 1, 2]),
+        ak.index.Index64([0, 1, 0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(right, left)
+    assert not ak.array_equal(right, left)
+
 
 def test_size_one_tags():
     left = ak.contents.UnionArray(
@@ -196,6 +251,60 @@ def test_size_one_tags():
     assert ak.array_equal(right, right)
     assert not ak.almost_equal(left, right)
     assert not ak.array_equal(left, right)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0]),
+        ak.index.Index64([0, 1, 0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([0, 1]),
+        ak.index.Index64([0, 0, 0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
+            ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert not ak.almost_equal(left, right)
+    assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(right, left)
+    assert not ak.array_equal(right, left)
+
+    left = ak.contents.UnionArray(
+        ak.index.Index8([0, 0]),
+        ak.index.Index64([0, 1, 0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
+        ],
+    )
+    right = ak.contents.UnionArray(
+        ak.index.Index8([0, 1]),
+        ak.index.Index64([0, 1, 0, 0, 1]),
+        [
+            ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+        ],
+    )
+    assert ak.almost_equal(left, left)
+    assert ak.array_equal(left, left)
+    assert ak.almost_equal(right, right)
+    assert ak.array_equal(right, right)
+    assert ak.almost_equal(left, right)
+    assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
 
 def test_all_tags_used():
