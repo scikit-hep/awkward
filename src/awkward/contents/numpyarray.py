@@ -518,11 +518,13 @@ class NumpyArray(NumpyMeta, Content):
             ):
                 return False
 
+            # Only equivalent dtypes merge (only byte order changes allowed)
             elif mergecastable == "equiv":
                 return self.backend.nplike.can_cast(
                     self.dtype, other.dtype, "equiv"
                 ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "equiv")
 
+            # Only same family of dtypes merge (integers, floats, complex)
             elif mergecastable == "family":
                 for family in np.integer, np.floating, np.complexfloating:
                     if np.issubdtype(self.dtype, family):
