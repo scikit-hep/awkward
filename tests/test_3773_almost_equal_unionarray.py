@@ -119,6 +119,8 @@ def test_empty_union():
     assert ak.array_equal(right, right)
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([]),
@@ -144,6 +146,8 @@ def test_empty_union():
     assert ak.array_equal(right, right)
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([]),
@@ -226,6 +230,8 @@ def test_size_one_tags():
     assert ak.array_equal(right, right)
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0]),
@@ -251,6 +257,8 @@ def test_size_one_tags():
     assert ak.array_equal(right, right)
     assert not ak.almost_equal(left, right)
     assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(right, left)
+    assert not ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0]),
@@ -335,6 +343,8 @@ def test_all_tags_used():
     assert ak.array_equal(right, right)
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 2, 3, 0]),
@@ -363,6 +373,8 @@ def test_all_tags_used():
     assert ak.array_equal(right, right)
     assert not ak.almost_equal(left, right)
     assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(right, left)
+    assert not ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 2, 3, 0]),
@@ -391,6 +403,8 @@ def test_all_tags_used():
     assert ak.array_equal(right, right)
     assert not ak.almost_equal(left, right)
     assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(right, left)
+    assert not ak.array_equal(right, left)
 
 
 def test_unused_tags():
@@ -421,6 +435,8 @@ def test_unused_tags():
     assert ak.array_equal(right, right)
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([1, 2, 3, 1, 2]),
@@ -449,6 +465,8 @@ def test_unused_tags():
     assert ak.array_equal(right, right)
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([1, 2, 3, 1, 2]),
@@ -477,6 +495,8 @@ def test_unused_tags():
     assert ak.array_equal(right, right)
     assert not ak.almost_equal(left, right)
     assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(right, left)
+    assert not ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 0, 0, 0, 0]),
@@ -505,6 +525,8 @@ def test_unused_tags():
     assert ak.array_equal(right, right)
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([1, 1, 1, 1, 1]),
@@ -533,6 +555,8 @@ def test_unused_tags():
     assert ak.array_equal(right, right)
     assert ak.almost_equal(left, right)
     assert ak.array_equal(left, right)
+    assert ak.almost_equal(right, left)
+    assert ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 0, 0, 0, 0]),
@@ -561,6 +585,8 @@ def test_unused_tags():
     assert ak.array_equal(right, right)
     assert not ak.almost_equal(left, right)
     assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(right, left)
+    assert not ak.array_equal(right, left)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([1, 1, 1, 1, 1]),
@@ -589,6 +615,8 @@ def test_unused_tags():
     assert ak.array_equal(right, right)
     assert not ak.almost_equal(left, right)
     assert not ak.array_equal(left, right)
+    assert not ak.almost_equal(right, left)
+    assert not ak.array_equal(right, left)
 
 
 def test_castable_dtypes():
@@ -617,6 +645,10 @@ def test_castable_dtypes():
     assert ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert ak.almost_equal(right, left, dtype_exact=True)
+    assert ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -643,6 +675,10 @@ def test_castable_dtypes():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert not ak.almost_equal(left, right, dtype_exact=False)
     assert not ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert not ak.almost_equal(right, left, dtype_exact=False)
+    assert not ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -669,6 +705,10 @@ def test_castable_dtypes():
     assert ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert ak.almost_equal(right, left, dtype_exact=True)
+    assert ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -695,6 +735,10 @@ def test_castable_dtypes():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -721,6 +765,10 @@ def test_castable_dtypes():
     assert ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert ak.almost_equal(right, left, dtype_exact=True)
+    assert ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -745,6 +793,10 @@ def test_castable_dtypes():
     assert ak.array_equal(right, right)
     assert not ak.almost_equal(left, right, dtype_exact=True)
     assert not ak.array_equal(left, right, dtype_exact=True)
+    assert ak.almost_equal(left, right, dtype_exact=False)
+    assert ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
 
 
 def test_one_has_more_types():
@@ -927,6 +979,10 @@ def test_different_integer_sizes():
     assert ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert ak.almost_equal(right, left, dtype_exact=True)
+    assert ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -952,6 +1008,10 @@ def test_different_integer_sizes():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -977,6 +1037,10 @@ def test_different_integer_sizes():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
 
 def test_unsigned_integers():
@@ -1004,6 +1068,10 @@ def test_unsigned_integers():
     assert ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert ak.almost_equal(right, left, dtype_exact=True)
+    assert ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -1029,6 +1097,10 @@ def test_unsigned_integers():
     assert ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert ak.almost_equal(right, left, dtype_exact=True)
+    assert ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -1054,6 +1126,10 @@ def test_unsigned_integers():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
 
 def test_complex_numbers():
@@ -1081,6 +1157,10 @@ def test_complex_numbers():
     assert ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert ak.almost_equal(right, left, dtype_exact=True)
+    assert ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -1106,6 +1186,10 @@ def test_complex_numbers():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert not ak.almost_equal(left, right, dtype_exact=False)
     assert not ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert not ak.almost_equal(right, left, dtype_exact=False)
+    assert not ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -1131,6 +1215,10 @@ def test_complex_numbers():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert not ak.almost_equal(left, right, dtype_exact=False)
     assert not ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert not ak.almost_equal(right, left, dtype_exact=False)
+    assert not ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -1156,6 +1244,10 @@ def test_complex_numbers():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert ak.almost_equal(left, right, dtype_exact=False)
     assert ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert ak.almost_equal(right, left, dtype_exact=False)
+    assert ak.array_equal(right, left, dtype_exact=False)
 
     left = ak.contents.UnionArray(
         ak.index.Index8([0, 1, 0, 1]),
@@ -1181,3 +1273,7 @@ def test_complex_numbers():
     assert not ak.array_equal(left, right, dtype_exact=True)
     assert not ak.almost_equal(left, right, dtype_exact=False)
     assert not ak.array_equal(left, right, dtype_exact=False)
+    assert not ak.almost_equal(right, left, dtype_exact=True)
+    assert not ak.array_equal(right, left, dtype_exact=True)
+    assert not ak.almost_equal(right, left, dtype_exact=False)
+    assert not ak.array_equal(right, left, dtype_exact=False)

@@ -305,6 +305,21 @@ def test_dropunused():
     expected = ak.contents.NumpyArray(np.array([10, 5, 15], dtype=np.int64))
     assert simplified.is_equal_to(expected)
 
+    array = ak.contents.UnionArray(
+        ak.index.Index8([1, 1, 1]),
+        ak.index.Index64([1, 0, 2]),
+        [
+            ak.contents.NumpyArray(np.array([99], dtype=np.float64)),
+            ak.contents.NumpyArray(np.array([5, 10, 15], dtype=np.int64)),
+            ak.contents.NumpyArray(np.array([99], dtype=np.float64)),
+        ],
+    )
+    simplified = array.simplified(
+        array.tags, array.index, array.contents, dropunused=True
+    )
+    expected = ak.contents.NumpyArray(np.array([10, 5, 15], dtype=np.int64))
+    assert simplified.is_equal_to(expected)
+
 
 def test_mergecastable_and_dropunused():
     array = ak.contents.UnionArray(
