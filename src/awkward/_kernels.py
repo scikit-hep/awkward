@@ -183,6 +183,10 @@ class CupyKernel(BaseKernel):
         import awkward._connect.cuda as ak_cuda
 
         args = maybe_materialize(*args)
+        args = maybe_materialize(*args)
+        print("Calling a cuda kernel...")
+        print("with", len(args), "parameters.")
+        print("Parameters:", args, "\n")
 
         cupy = ak_cuda.import_cupy("Awkward Arrays with CUDA")
         maxlength = self.max_length(args)
@@ -213,6 +217,26 @@ class CupyKernel(BaseKernel):
         )
 
         self._impl(grid, blocks, args)
+
+
+class CudaComputeKernel(BaseKernel):
+    """
+    Kernel implementation using cuda.compute library.
+    When the CUDA backend is used, this kernel is used for operations
+    that have ``cuda.compute`` implementations. For other operations,
+    the ``CupyKernel`` is used.
+    """
+
+    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
+        super().__init__(impl, key)
+        self._cupy = Cupy.instance()
+
+    def __call__(self, *args) -> None:
+        args = maybe_materialize(*args)
+        print("Calling a cccl kernel...")
+        print("with", len(args), "parameters.")
+        print("Parameters:", args, "\n")
+        return self._impl(*args)
 
 
 class TypeTracerKernelError(KernelError):

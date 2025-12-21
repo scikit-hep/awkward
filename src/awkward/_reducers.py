@@ -250,6 +250,7 @@ class ArgMax(KernelReducer):
                 )
             )
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
+        print("We are wrapping up with contents!!", result_array)
         apply_positional_corrections(result_array, parents, starts, shifts)
         return result_array
 
