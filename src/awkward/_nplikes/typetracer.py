@@ -1676,9 +1676,12 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         return TypeTracerArray._new(np.dtype(dtype), x.shape)
 
     def can_cast(
-        self, from_: DTypeLike | TypeTracerArray, to: DTypeLike | TypeTracerArray
+        self,
+        from_: DTypeLike | TypeTracerArray,
+        to: DTypeLike | TypeTracerArray,
+        casting: Literal["no", "equiv", "safe", "same_kind", "unsafe"] = "same_kind",
     ) -> bool:
-        return numpy.can_cast(from_, to, casting="same_kind")
+        return numpy.can_cast(from_, to, casting=casting)
 
     @classmethod
     def is_own_array_type(cls, type_: type) -> bool:
