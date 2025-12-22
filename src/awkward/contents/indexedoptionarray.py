@@ -1265,7 +1265,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         nulls_index_content = ak.contents.NumpyArray(
             nulls_index.data, parameters=None, backend=self._backend
         )
-        if out._mergeable_next(nulls_index_content, True, True):
+        if out._mergeable_next(nulls_index_content, True, "same_kind"):
             out = out._mergemany([nulls_index_content])
             nulls_merged = True
 
