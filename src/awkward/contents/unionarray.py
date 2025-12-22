@@ -1504,7 +1504,9 @@ class UnionArray(UnionMeta[Content], Content):
         for i, content_i in enumerate(self._contents):
             for j in range(i):
                 content_j = self._contents[j]
-                if ak._do.mergeable(content_i, content_j, mergebool=False):
+                if ak._do.mergeable(
+                    content_i, content_j, mergebool=False, mergecastable="family"
+                ):
                     return f"at {path}: content({i}) is mergeable with content({j})"
 
         for i, content in enumerate(self._contents):
