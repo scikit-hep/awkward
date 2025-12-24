@@ -11,6 +11,7 @@ from fnmatch import fnmatchcase
 from glob import escape as escape_glob
 
 import awkward as ak
+from awkward._backends.dispatch import regularize_backend
 from awkward._backends.numpy import NumpyBackend
 from awkward._meta.meta import Meta
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -528,6 +529,10 @@ class Form(Meta):
                 "The `highlevel=True` variant of `Form.length_zero_array` has been removed. "
                 "Please use `ak.Array(form.length_zero_array(...), behavior=...)` if an `ak.Array` is required.",
             )
+        if not regularize_backend(backend).nplike.known_data:
+            return self.length_zero_array(
+                backend=numpy_backend, highlevel=highlevel, behavior=behavior
+            ).to_typetracer()
 
         return ak.operations.ak_from_buffers._impl(
             form=self,
@@ -551,6 +556,10 @@ class Form(Meta):
                 "The `highlevel=True` variant of `Form.length_one_array` has been removed. "
                 "Please use `ak.Array(form.length_one_array(...), behavior=...)` if an `ak.Array` is required.",
             )
+        if not regularize_backend(backend).nplike.known_data:
+            return self.length_one_array(
+                backend=numpy_backend, highlevel=highlevel, behavior=behavior
+            ).to_typetracer()
 
         # The naive implementation of a length-1 array requires that we have a sufficiently
         # large buffer to be able to build _any_ subtree.
