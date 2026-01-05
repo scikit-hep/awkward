@@ -685,3 +685,41 @@ function takes
 % `Vector design prototype <https://vector.readthedocs.io/en/latest/usage/vector_design_prototype.html>`__
 
 % has a complete example, including Numba.
+
+
+## Adding validation to behaviors
+
+Sometimes it is useful to add checks to a behavior to ensure its methods and properties are 'valid' to be used.
+Awkward Array provides a hook to add these checks, called `"__awkward_validation__"`.
+This method is run everytime an array is created or modified to ensure correctness at every point in time.
+
+Here's an example on how to use behaviors to validate the only floating point numbers are present in the contents:
+
+```python
+class OnlyFloatsError(Exception): ...
+
+@ak.mixin_class(ak.behavior)
+class OnlyFloats(ak.Array):
+    def __awkward_validation__(self) -> None:
+        def _content_only_floats(layout, **kwargs) -> None:
+            del kwargs  # unused
+            if layout.is_numpy: # <- a content "leaf" array
+                if not np.issubdtype(layout.dtype, np.floating):
+                    raise OnlyFloatsError(
+                        "OnlyFloats arrays can only contain floating-point numbers."
+                    )
+
+        # recurse through the layout
+        _ = ak.transform(_content_only_floats, self, return_value="none")
+
+# this passes, because `1.0` is of type float
+_ = ak.with_parameter([1.0], "__list__", "OnlyFloats")
+
+# this fails, because `1` is of type int
+_ = ak.with_parameter([1], "__list__", "OnlyFloats")
+>> OnlyFloatsError: OnlyFloats arrays can only contain floating-point numbers.
+```
+
+**Caution:**
+
+The `"__awkward_validation__"` is run _very often_ in application code, therefore it is important to only validate metadata, and to avoid any array operations.

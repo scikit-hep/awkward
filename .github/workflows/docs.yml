@@ -21,14 +21,14 @@ jobs:
     name: Build C++ WASM
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         submodules: true
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures --tests
 
-    - uses: pypa/cibuildwheel@v3.2
+    - uses: pypa/cibuildwheel@v3.3
       with:
         package-dir: awkward-cpp
       env:
@@ -38,7 +38,7 @@ jobs:
         CIBW_ENABLE: "pyodide-prerelease"
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: awkward-cpp-wasm
         path: awkward-cpp/dist/awkward*wasm32.whl
@@ -52,7 +52,7 @@ jobs:
         # Ensure conda env is activated
         shell: "bash -l {0}"
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         submodules: true
 
@@ -84,7 +84,7 @@ jobs:
 
     - name: Cache wheel
       id: cache-awkward-cpp-x86-64-wheel
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-${{ env.X86_64_PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
@@ -94,7 +94,7 @@ jobs:
       run: python -m build -w ./awkward-cpp
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: awkward-cpp-x86-64
         path: awkward-cpp/dist/awkward*.whl
@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Build Python
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         submodules: true
 
@@ -114,7 +114,7 @@ jobs:
       run: pipx run build -w
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: awkward
         path: dist/awkward*.whl
@@ -124,7 +124,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Execute cppyy notebook
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         submodules: true
 
@@ -141,13 +141,13 @@ jobs:
         destination: "/tmp/wheels/"
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v7
       with:
         name: awkward
         path: /tmp/wheels/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v7
       with:
         name: awkward-cpp-x86-64
         path: /tmp/wheels/
@@ -161,7 +161,7 @@ jobs:
       run: jupyter nbconvert --to notebook --execute --inplace user-guide/how-to-use-in-cpp-cppyy.ipynb
 
     - name: Save executed notebook
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide/how-to-use-in-cpp-cppyy.ipynb
@@ -177,7 +177,7 @@ jobs:
     env:
         DOCS_CANONICAL_VERSION: main
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
       # TODO: remove this once mamba-org/mamba#1726 is fixed
       #       and replace with `-r requirements.txt` in a
@@ -202,7 +202,7 @@ jobs:
            doxygen
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v7
       with:
         name: awkward
         path: dist
@@ -213,7 +213,7 @@ jobs:
         cp dist/awkward*.whl docs/lite/pypi/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v7
       with:
         name: awkward-cpp-x86-64
         path: dist
@@ -243,7 +243,7 @@ jobs:
         echo "DOCS_VERSION=main" >> $GITHUB_ENV
 
     - name: Download cppyy notebook
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v7
       with:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide
@@ -253,19 +253,19 @@ jobs:
       working-directory: docs
 
     - name: Upload docs artefact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: docs
         path: docs/_build/html
 
     - name: Upload Jupyter Book cache
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: doctrees
         path: docs/_build/doctrees
 
     - name: Upload Jupyter Book cache
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
@@ -277,7 +277,7 @@ jobs:
         mkdir -p ./pr
         echo $PR_NUMBER > ./pr/pr_number.txt
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: pr_number
         path: pr/
@@ -299,14 +299,14 @@ jobs:
       name: docs
       url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-region: eu-west-2
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
       - name: Download rendered docs
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           name: docs
           path: built-docs

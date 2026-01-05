@@ -21,6 +21,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -270,10 +271,16 @@ class EmptyArray(EmptyMeta, Content):
                 EmptyArray(backend=self._backend),
             )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         return True
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
+        others = [other for other in others if not other.is_unknown]
         if len(others) == 0:
             return self
         elif len(others) == 1:

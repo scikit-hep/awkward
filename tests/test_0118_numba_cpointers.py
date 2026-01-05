@@ -1002,32 +1002,53 @@ def test_iterator():
 
 def test_ArrayBuilder_refcount():
     builder = ak.highlevel.ArrayBuilder()
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
+
+    if sys.version_info[:2] <= (3, 13):
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
+    else:
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 2)
 
     @numba.njit
     def f1(x):
         return 3.14
 
     y = f1(builder)
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
+    if sys.version_info[:2] <= (3, 13):
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
+    else:
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 2)
 
     @numba.njit
     def f2(x):
         return x
 
     y = f2(builder)
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 3)
+    if sys.version_info[:2] <= (3, 13):
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 3)
+    else:
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 3)
+
     del y
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
+    if sys.version_info[:2] <= (3, 13):
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
+    else:
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 2)
 
     @numba.njit
     def f3(x):
         return x, x
 
     y = f3(builder)
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 4)
+    if sys.version_info[:2] <= (3, 13):
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 4)
+    else:
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 4)
+
     del y
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
+    if sys.version_info[:2] <= (3, 13):
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
+    else:
+        assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (1, 2)
 
 
 def test_ArrayBuilder_len():

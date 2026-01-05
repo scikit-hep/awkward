@@ -37,19 +37,24 @@ jobs:
         runs-on:
           - windows-latest
           - ubuntu-latest
-          - macos-13
+          - ubuntu-24.04-arm
+          - macos-latest
         python-version:
           - '3.14'
-          - '3.13'
-          - '3.12'
-          - '3.11'
-          - '3.10'
           - '3.9'
         python-architecture:
-          - x64
+          - '' # use default arch
         dependencies-kind:
           - full
         include:
+          - python-version: '3.14'
+            python-architecture: arm64
+            runs-on: macos-14
+            dependencies-kind: full
+          - python-version: '3.14'
+            python-architecture: x64
+            runs-on: macos-15-intel
+            dependencies-kind: nogil
           - python-version: '3.9'
             python-architecture: x86
             runs-on: windows-latest
@@ -67,14 +72,14 @@ jobs:
             runs-on: ubuntu-latest
             dependencies-kind: pypy
           - python-version: '3.11'
-            python-architecture: x64
-            runs-on: ubuntu-latest
+            python-architecture: arm64
+            runs-on: macos-14
             dependencies-kind: ml
-          - python-version: '3.13t'
+          - python-version: '3.14t'
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: nogil
-          - python-version: '3.13t'
+          - python-version: '3.14t'
             python-architecture: x64
             runs-on: windows-latest
             dependencies-kind: nogil
@@ -85,7 +90,7 @@ jobs:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -101,7 +106,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: awkward-cpp/dist
           key: ${{ github.job }}-${{ matrix.runs-on }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
@@ -163,6 +168,8 @@ jobs:
       - name: Upload Codecov results
         if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')
         uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   run-gpu-tests:
     name: Run GPU Tests
@@ -182,6 +189,7 @@ jobs:
       matrix:
         cuda-version:
           - 12
+          - 13
 
     steps:
       - name: Clean the workspace and mamba
@@ -189,7 +197,7 @@ jobs:
           rm -rf * .[!.]* || echo "Nothing to clean"
           rm -rf ~/micromamba* || echo "Nothing to clean"
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -205,6 +213,8 @@ jobs:
             cudf
             cupy
             cuda-version=${{ matrix.cuda-version }}
+            cuda-toolkit
+            cxx-compiler
 
       - name: Generate build files
         run: |
@@ -213,7 +223,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
@@ -267,7 +277,7 @@ jobs:
         shell: "bash -l {0}"
 
     steps:
-      - uses: "actions/checkout@v5"
+      - uses: "actions/checkout@v6"
         with:
           submodules: true
 
@@ -288,7 +298,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
@@ -321,7 +331,7 @@ jobs:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -335,7 +345,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}

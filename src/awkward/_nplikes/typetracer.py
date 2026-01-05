@@ -280,7 +280,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
                 raise TypeError("typetracer shape must be integers or unknown-length")
             if not isinstance(dtype, np.dtype):
                 raise TypeError("typetracer dtype must be an instance of np.dtype")
-        self._shape = shape
+        self._shape = tuple(dim if dim is unknown_length else int(dim) for dim in shape)
         self._dtype = dtype
 
         return self
@@ -1559,7 +1559,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         if axis is None:
             return self.all(
                 cast(TypeTracerArray, self.reshape(x, (-1,))),
-                axis=axis,
+                axis=0,
                 keepdims=keepdims,
                 maybe_out=maybe_out,
             )
@@ -1676,9 +1676,12 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         return TypeTracerArray._new(np.dtype(dtype), x.shape)
 
     def can_cast(
-        self, from_: DTypeLike | TypeTracerArray, to: DTypeLike | TypeTracerArray
+        self,
+        from_: DTypeLike | TypeTracerArray,
+        to: DTypeLike | TypeTracerArray,
+        casting: Literal["no", "equiv", "safe", "same_kind", "unsafe"] = "same_kind",
     ) -> bool:
-        return numpy.can_cast(from_, to, casting="same_kind")
+        return numpy.can_cast(from_, to, casting=casting)
 
     @classmethod
     def is_own_array_type(cls, type_: type) -> bool:

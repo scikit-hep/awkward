@@ -73,7 +73,7 @@ def moment(
 
     Passing all arguments to the reducers, the moment is calculated as
 
-        ak.sum((x*weight)**n) / ak.sum(weight)
+        ak.sum(x**n * weight) / ak.sum(weight)
 
     The `n=2` moment differs from #ak.var in that #ak.var also subtracts the
     mean (the `n=1` moment).
@@ -148,7 +148,7 @@ def _impl(
                 attrs=ctx.attrs,
             )
             sumwxn = ak.operations.ak_sum._impl(
-                (x * weight) ** n,
+                (x**n) * weight,
                 axis,
                 keepdims,
                 mask_identity,

@@ -730,7 +730,10 @@ class Content(Meta):
             return self._getitem_fields(ak.operations.to_list(where))
 
         elif isinstance(where, ak.contents.EmptyArray):
-            return where.to_NumpyArray(np.int64)
+            return self._carry(
+                Index64.empty(0, self._backend.nplike),
+                allow_lazy=True,
+            )
 
         elif isinstance(where, Content):
             return self._getitem((where,), named_axis)
@@ -843,7 +846,12 @@ class Content(Meta):
             localindex.data, parameters=None, backend=self._backend
         )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         raise NotImplementedError
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
