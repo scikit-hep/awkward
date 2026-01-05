@@ -751,7 +751,7 @@ class NumpyArray(NumpyMeta, Content):
                 return out.length is not unknown_length and out.length == self.length
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self.shape[0] == 0:
+        if self.shape[0] is not unknown_length and self.shape[0] == 0:
             return self
 
         elif len(self.shape) == 0:
@@ -1193,10 +1193,10 @@ class NumpyArray(NumpyMeta, Content):
         if len(self.shape) == 0:
             return f"at {path} ({type(self)!r}): shape is zero-dimensional"
         for i, dim in enumerate(self.shape):
-            if dim < 0:
+            if (dim is not unknown_length) and (dim < 0):
                 return f"at {path} ({type(self)!r}): shape[{i}] < 0"
         for i, stride in enumerate(self.strides):
-            if stride % self.dtype.itemsize != 0:
+            if (stride is not unknown_length) and (stride % self.dtype.itemsize != 0):
                 return f"at {path} ({type(self)!r}): shape[{i}] % itemsize != 0"
         return ""
 

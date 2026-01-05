@@ -1201,7 +1201,7 @@ class RegularArray(RegularMeta[Content], Content):
             return ak.contents.ListOffsetArray(outoffsets, outcontent, parameters=None)
 
     def _validity_error(self, path):
-        if self.size < 0:
+        if (self.size is not unknown_length) and (self.size < 0):
             return f"at {path} ({type(self)!r}): size < 0"
 
         return self._content._validity_error(path + ".content")

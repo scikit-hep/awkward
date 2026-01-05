@@ -1469,7 +1469,11 @@ class UnionArray(UnionMeta[Content], Content):
         raise ValueError(f"cannot call ak.{reducer.name} on an irreducible UnionArray")
 
     def _validity_error(self, path):
-        if self._backend.nplike.known_data and self.index.length < self.tags.length:
+        if (
+            (self.index.length is not unknown_length)
+            and (self.tags.length is not unknown_length)
+            and (self.index.length < self.tags.length)
+        ):
             return f"at {path} ({type(self)!r}): len(index) < len(tags)"
 
         lencontents = self._backend.nplike.empty(len(self.contents), dtype=np.int64)

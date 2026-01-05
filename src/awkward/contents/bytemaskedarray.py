@@ -1006,7 +1006,11 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             return ak.contents.ListOffsetArray(outoffsets, tmp, parameters=None)
 
     def _validity_error(self, path):
-        if self._backend.nplike.known_data and self._content.length < self.mask.length:
+        if (
+            (self._content.length is not unknown_length)
+            and (self.mask.length is not unknown_length)
+            and (self._content.length < self.mask.length)
+        ):
             return f"at {path} ({type(self)!r}): len(content) < len(mask)"
         else:
             return self._content._validity_error(path + ".content")
