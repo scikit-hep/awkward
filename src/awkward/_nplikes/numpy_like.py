@@ -507,7 +507,12 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     ) -> ArrayLikeT: ...
 
     @abstractmethod
-    def can_cast(self, from_: DType | ArrayLikeT, to: DType | ArrayLikeT) -> bool: ...
+    def can_cast(
+        self,
+        from_: DType | ArrayLikeT,
+        to: DType | ArrayLikeT,
+        casting: Literal["no", "equiv", "safe", "same_kind", "unsafe"] = "same_kind",
+    ) -> bool: ...
 
     @abstractmethod
     def is_c_contiguous(self, x: ArrayLikeT | PlaceholderArray) -> bool: ...

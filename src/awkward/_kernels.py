@@ -17,7 +17,8 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import try_touch_data
 from awkward._typing import Protocol, TypeAlias
 
-KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
+# Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
+KernelKeyType: TypeAlias = tuple
 
 
 numpy = Numpy.instance()
@@ -213,6 +214,24 @@ class CupyKernel(BaseKernel):
         )
 
         self._impl(grid, blocks, args)
+
+
+class CudaComputeKernel(BaseKernel):
+    """
+    Kernel implementation using cuda.compute library.
+
+    When the CUDA backend is used, this kernel is used for operations
+    that have ``cuda.compute`` implementations. For other operations,
+    the ``CupyKernel`` is used.
+    """
+
+    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
+        super().__init__(impl, key)
+        self._cupy = Cupy.instance()
+
+    def __call__(self, *args) -> None:
+        args = maybe_materialize(*args)
+        return self._impl(*args)
 
 
 class TypeTracerKernelError(KernelError):

@@ -28,6 +28,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -232,6 +233,8 @@ class UnionArray(UnionMeta[Content], Content):
         *,
         parameters=None,
         mergebool=False,
+        mergecastable="same_kind",
+        dropunused=False,
     ):
         # Note: to help merge more than 128 arrays, tags *can* have type ak.index.Index64.
         # This is only supported when index is also Index64,
@@ -252,6 +255,27 @@ class UnionArray(UnionMeta[Content], Content):
 
         if backend.nplike.known_data and self_index.length < self_tags.length:
             raise ValueError("invalid UnionArray: len(index) < len(tags)")
+
+        # Drop unused contents
+        if dropunused and backend.nplike.known_data and self_tags.length > 0:
+            unique_tags, _, inverse, _ = backend.nplike.unique_all(self_tags.data)
+
+            # Remap self_contents to only include used contents
+            remapped_contents = [self_contents[int(tag)] for tag in unique_tags]
+
+            # If only one content is used, return it directly (UnionArray requires at least 2 contents)
+            if len(remapped_contents) == 1:
+                next = remapped_contents[0]._carry(self_index, True)
+                return next.copy(
+                    parameters=parameters_union(next._parameters, parameters)
+                )
+
+            # Remap self_tags to consecutive indices (0, 1, 2, ...)
+            remapped_tags = ak.index.Index8(inverse)
+
+            # Update self_contents and self_tags to use the remapped versions
+            self_contents = remapped_contents
+            self_tags = remapped_tags
 
         length = self_tags.length
         tags = ak.index.Index8.empty(length, backend.nplike)
@@ -276,7 +300,9 @@ class UnionArray(UnionMeta[Content], Content):
                     # For each "final" outer union content
                     for k in range(len(contents)):
                         # Try and merge inner union content with running outer-union contentca
-                        if contents[k]._mergeable_next(inner_cont, mergebool):
+                        if contents[k]._mergeable_next(
+                            inner_cont, mergebool, mergecastable
+                        ):
                             backend.maybe_kernel_error(
                                 backend[
                                     "awkward_UnionArray_simplify",
@@ -360,7 +386,9 @@ class UnionArray(UnionMeta[Content], Content):
                         unmerged = False
                         break
 
-                    elif contents[k]._mergeable_next(self_cont, mergebool):
+                    elif contents[k]._mergeable_next(
+                        self_cont, mergebool, mergecastable
+                    ):
                         backend.maybe_kernel_error(
                             backend[
                                 "awkward_UnionArray_simplify_one",
@@ -1066,7 +1094,12 @@ class UnionArray(UnionMeta[Content], Content):
                     ),
                 )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         return True
 
     def _merging_strategy(self, others):
