@@ -757,9 +757,12 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         return x.astype(dtype, copy=copy)  # type: ignore[attr-defined]
 
     def can_cast(
-        self, from_: DTypeLike | ArrayLikeT, to: DTypeLike | ArrayLikeT
+        self,
+        from_: DTypeLike | ArrayLikeT,
+        to: DTypeLike | ArrayLikeT,
+        casting: Literal["no", "equiv", "safe", "same_kind", "unsafe"] = "same_kind",
     ) -> bool:
-        return self._module.can_cast(from_, to, casting="same_kind")
+        return self._module.can_cast(from_, to, casting=casting)
 
     @classmethod
     def is_own_array(cls, obj) -> bool:
