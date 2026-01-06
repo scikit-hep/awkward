@@ -19,16 +19,16 @@ class PlaceholderArray(MaterializableArray):
         nplike: NumpyLike,
         shape: tuple[ShapeItem, ...],
         dtype: DType,
-        field_path: tuple[str, ...] = (),
+        buffer_key: str | None = None,
     ):
         self._nplike = nplike
         self._shape = tuple(dim if dim is unknown_length else int(dim) for dim in shape)
         self._dtype = np.dtype(dtype)
-        self._field_path = field_path
+        self._buffer_key = buffer_key
 
     @property
-    def field_path(self) -> str:
-        return ".".join(self._field_path)
+    def buffer_key(self) -> str | None:
+        return self._buffer_key
 
     @property
     def dtype(self) -> DType:
@@ -55,9 +55,9 @@ class PlaceholderArray(MaterializableArray):
 
     def materialize(self):
         msg = f"{self} should never have been encountered."
-        if self.field_path:
+        if self.buffer_key:
             msg += (
-                f" Awkward Array tried to access a field '{self.field_path}', "
+                f" Awkward Array tried to access a buffer at '{self.buffer_key}', "
                 "but it exists only as a placeholder."
             )
         msg += (
@@ -91,7 +91,7 @@ class PlaceholderArray(MaterializableArray):
             shape = (*self._shape[:-1], last)
         else:
             shape = self._shape
-        return type(self)(self._nplike, shape, dtype, self._field_path)
+        return type(self)(self._nplike, shape, dtype, self._buffer_key)
 
     def __repr__(self):
         dtype = repr(self._dtype)
@@ -127,12 +127,12 @@ class PlaceholderArray(MaterializableArray):
                 )
 
             return type(self)(
-                self._nplike, (new_length,), self._dtype, self._field_path
+                self._nplike, (new_length,), self._dtype, self._buffer_key
             )
         else:
             msg = f"{type(self).__name__} supports only trivial slices, not {type(index).__name__}"
-            if self.field_path:
-                msg += f"\n\nAwkward-array attempted to access a field '{self.field_path}', but "
+            if self.buffer_key:
+                msg += f"\n\nAwkward-array attempted to access a buffer at '{self.buffer_key}', but "
                 msg += (
                     "it has been excluded during a pre-run phase (possibly by Dask). "
                 )

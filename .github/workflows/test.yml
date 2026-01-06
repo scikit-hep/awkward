@@ -37,25 +37,24 @@ jobs:
         runs-on:
           - windows-latest
           - ubuntu-latest
-          - macos-14
+          - ubuntu-24.04-arm
+          - macos-latest
         python-version:
           - '3.14'
-          - '3.13'
-          - '3.12'
-          - '3.11'
-          - '3.10'
           - '3.9'
         python-architecture:
-          - x64
+          - '' # use default arch
         dependencies-kind:
           - full
-        exclude:
-          - runs-on: macos-14
-            python-architecture: x64
         include:
-          - runs-on: macos-14
+          - python-version: '3.14'
             python-architecture: arm64
+            runs-on: macos-14
             dependencies-kind: full
+          - python-version: '3.14'
+            python-architecture: x64
+            runs-on: macos-15-intel
+            dependencies-kind: nogil
           - python-version: '3.9'
             python-architecture: x86
             runs-on: windows-latest
@@ -73,14 +72,14 @@ jobs:
             runs-on: ubuntu-latest
             dependencies-kind: pypy
           - python-version: '3.11'
-            python-architecture: x64
-            runs-on: ubuntu-latest
+            python-architecture: arm64
+            runs-on: macos-14
             dependencies-kind: ml
-          - python-version: '3.13t'
+          - python-version: '3.14t'
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: nogil
-          - python-version: '3.13t'
+          - python-version: '3.14t'
             python-architecture: x64
             runs-on: windows-latest
             dependencies-kind: nogil
@@ -107,7 +106,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: awkward-cpp/dist
           key: ${{ github.job }}-${{ matrix.runs-on }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
@@ -169,6 +168,8 @@ jobs:
       - name: Upload Codecov results
         if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')
         uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   run-gpu-tests:
     name: Run GPU Tests
@@ -223,7 +224,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
@@ -298,7 +299,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
@@ -345,7 +346,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
