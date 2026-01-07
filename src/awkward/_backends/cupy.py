@@ -31,38 +31,70 @@ class CupyBackend(Backend):
         self, index: KernelKeyType
     ) -> CudaComputeKernel | CupyKernel | NumpyKernel:
         from awkward._connect import cuda
+        from awkward._connect.cuda import _compute as cuda_compute
 
         kernel_name = index[0] if index else ""
         print("Calling kernel:", kernel_name)
 
+        # Try CuPy kernels first (primary implementation)
         cupy = cuda.import_cupy("Awkward Arrays with CUDA")
         _cuda_kernels = cuda.initialize_cuda_kernels(cupy)
         func = _cuda_kernels[index]
 
-        compute_impl = self._get_cuda_compute_impl(kernel_name)
-        if compute_impl is not None:
-            print("||  ", compute_impl)
-            for idx in index:
-                print("||||", idx)
-            return CudaComputeKernel(compute_impl, index)
-
         if func is not None:
-            # Return CudaComputeKernel for supported operations
+            # CuPy kernel exists, use it
             return CupyKernel(func, index)
-        else:
-            raise AssertionError(f"CuPyKernel not found: {index!r}")
+
+        # CuPy kernel not found, try cuda.compute as fallback
+        if self._supports_cuda_compute(kernel_name):
+            if cuda_compute.is_available():
+                # Return CudaComputeKernel for supported operations
+                compute_impl = self._get_cuda_compute_impl(kernel_name)
+                if compute_impl is not None:
+                    print("||  ", compute_impl)
+                    return CudaComputeKernel(compute_impl, index)
+            else:
+                # cuda.compute is needed but not available
+                raise NotImplementedError(
+                    f"Operation '{kernel_name}' on CUDA backend requires cuda.compute library "
+                    f"(no CuPy kernel available). "
+                    f"Please install cuda.compute or use the CPU backend: "
+                    f"ak.to_backend(array, 'cpu')"
+                )
+
+        # Neither CuPy kernel nor cuda.compute implementation found
+        raise AssertionError(
+            f"Operation '{kernel_name}' is not supported on CUDA backend. "
+            f"CuPy kernel not found: {index!r}"
+        )
+
+    def _supports_cuda_compute(self, kernel_name: str) -> bool:
+        """
+        Check if the given kernel operation is supported by cuda.compute.
+
+        Currently supports:
+        - awkward_sort
+        - awkward_argsort (future)
+        """
+        # For now, we only support sort operations
+        return kernel_name in ("awkward_sort",)
 
     def _get_cuda_compute_impl(self, kernel_name: str):
         """
         Get the cuda.compute implementation for a kernel operation.
+
         Args:
             kernel_name: Name of the kernel operation (e.g., "awkward_sort")
+
         Returns:
             Callable implementing the operation, or None if not supported
         """
-        from awkward._connect.cuda import cccl_kernels
+        from awkward._connect.cuda import _compute as cuda_compute
 
-        if getattr(cccl_kernels, kernel_name, False):
-            return getattr(cccl_kernels, kernel_name)
+        if kernel_name == "awkward_sort":
+            return cuda_compute.segmented_sort
+
+        if kernel_name == "awkward_argmax":
+            return cuda_compute.awkward_reduce_argmax
 
         return None

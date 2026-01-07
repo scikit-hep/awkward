@@ -1,7 +1,28 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import cupy as cp
 from cuda.compute import ZipIterator, gpu_struct, segmented_reduce
+
+# Cache for cuda.compute availability
+_cuda_compute_available: bool | None = None
+
+
+def is_available() -> bool:
+    global _cuda_compute_available
+
+    if _cuda_compute_available is not None:
+        return _cuda_compute_available
+
+    try:
+        import cuda.compute  # noqa: F401
+
+        _cuda_compute_available = True
+    except ImportError:
+        _cuda_compute_available = False
+
+    return _cuda_compute_available
 
 
 def parents_to_offsets(parents, parents_length):
@@ -48,9 +69,10 @@ def awkward_reduce_argmax(
     outlength,
 ):
     print("\nEntering the custom awkward_reduce_argmax kernel...")
-    print(result.dtype)
-    print(type(input_data))
-    print(type(parents_data))
+    print(result)
+    print(input_data)
+    print(parents_data)
+    print(cp.int64)
 
     @gpu_struct
     class ak_array:
