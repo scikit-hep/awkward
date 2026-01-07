@@ -1193,10 +1193,10 @@ class NumpyArray(NumpyMeta, Content):
         if len(self.shape) == 0:
             return f"at {path} ({type(self)!r}): shape is zero-dimensional"
         for i, dim in enumerate(self.shape):
-            if (dim is not unknown_length) and (dim < 0):
+            if dim is not unknown_length and dim < 0:
                 return f"at {path} ({type(self)!r}): shape[{i}] < 0"
         for i, stride in enumerate(self.strides):
-            if (stride is not unknown_length) and (stride % self.dtype.itemsize != 0):
+            if stride is not unknown_length and stride % self.dtype.itemsize != 0:
                 return f"at {path} ({type(self)!r}): shape[{i}] % itemsize != 0"
         return ""
 
