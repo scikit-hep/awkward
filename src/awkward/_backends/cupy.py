@@ -78,7 +78,10 @@ class CupyBackend(Backend):
         - awkward_argmax (future)
         """
         # For now, we only support these operations
-        return kernel_name in ("awkward_sort", "awkward_reduce_argmax", )
+        return kernel_name in (
+            "awkward_sort",
+            "awkward_reduce_argmax",
+        )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
         """
