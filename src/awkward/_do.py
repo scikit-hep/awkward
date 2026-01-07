@@ -207,8 +207,13 @@ def num(layout, axis):
     return layout._num(axis, 0)
 
 
-def mergeable(one: Content, two: Content, mergebool: bool = True) -> bool:
-    return one._mergeable_next(two, mergebool=mergebool)
+def mergeable(
+    one: Content,
+    two: Content,
+    mergebool: bool = True,
+    mergecastable: Literal["same_kind", "equiv", "family"] = "same_kind",
+) -> bool:
+    return one._mergeable_next(two, mergebool=mergebool, mergecastable=mergecastable)
 
 
 def mergemany(contents: list[Content]) -> Content:
