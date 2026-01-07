@@ -1053,7 +1053,7 @@ class RecordArray(RecordMeta[Content], Content):
 
     def _validity_error(self, path):
         for i, cont in enumerate(self.contents):
-            if self.length is not unknown_length:
+            if self._backend.nplike.known_data:
                 if (cont.length is not unknown_length) and (cont.length < self.length):
                     return f"at {path} ({type(self)!r}): len(field({i})) < len(recordarray)"
         for i, cont in enumerate(self.contents):

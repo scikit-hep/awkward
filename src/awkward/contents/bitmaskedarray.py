@@ -683,17 +683,9 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         )
 
     def _validity_error(self, path):
-        if (
-            (self.mask.length is not unknown_length)
-            and (self.length is not unknown_length)
-            and (self.mask.length * 8 < self.length)
-        ):
+        if self._backend.nplike.known_data and self.mask.length * 8 < self.length:
             return f"at {path} ({type(self)!r}): len(mask) * 8 < length"
-        elif (
-            (self._content.length is not unknown_length)
-            and (self.length is not unknown_length)
-            and (self._content.length < self.length)
-        ):
+        elif self._backend.nplike.known_data and self._content.length < self.length:
             return f"at {path} ({type(self)!r}): len(content) < length"
         else:
             return self._content._validity_error(path + ".content")

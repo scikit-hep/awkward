@@ -1380,11 +1380,7 @@ class ListArray(ListMeta[Content], Content):
         )
 
     def _validity_error(self, path):
-        if (
-            (self.starts.length is not unknown_length)
-            and (self.stops.length is not unknown_length)
-            and (self.stops.length < self.starts.length)
-        ):
+        if self._backend.nplike.known_data and self.stops.length < self.starts.length:
             return f"at {path} ({type(self)!r}): len(stops) < len(starts)"
         assert (
             self.starts.nplike is self._backend.nplike

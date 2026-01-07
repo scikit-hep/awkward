@@ -1763,7 +1763,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         )
 
     def _validity_error(self, path):
-        if (self.offsets.length is not unknown_length) and (self.offsets.length < 1):
+        if self._backend.nplike.known_data and (self.offsets.length < 1):
             return f"at {path} ({type(self)!r}): len(offsets) < 1"
         assert (
             self.starts.nplike is self._backend.nplike
