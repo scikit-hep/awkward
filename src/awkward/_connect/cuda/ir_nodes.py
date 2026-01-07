@@ -1,5 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
+"""Internal lazy execution utilities for CUDA-backed Awkward IR nodes.
+
+This module provides:
+- demand-driven execution
+- memoization
+- explicit dependency traversal
+It is intentionally minimal and internal-only.
+"""
+
 from __future__ import annotations
 
 import cupy as cp
@@ -14,15 +23,6 @@ from .helpers import (
     segmented_select,
     transform_segments,
 )
-
-"""
-Internal lazy execution utilities for CUDA-backed Awkward IR nodes.
-This module provides:
-- demand-driven execution
-- memoization
-- explicit dependency traversal
-It is intentionally minimal and internal-only.
-"""
 
 
 class IRNode:
