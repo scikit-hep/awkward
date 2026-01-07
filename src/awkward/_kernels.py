@@ -185,9 +185,6 @@ class CupyKernel(BaseKernel):
 
         args = maybe_materialize(*args)
         args = maybe_materialize(*args)
-        print("Calling a cuda kernel...")
-        print("with", len(args), "parameters.")
-        print("Parameters:", args, "\n")
 
         cupy = ak_cuda.import_cupy("Awkward Arrays with CUDA")
         maxlength = self.max_length(args)
@@ -235,9 +232,6 @@ class CudaComputeKernel(BaseKernel):
 
     def __call__(self, *args) -> None:
         args = maybe_materialize(*args)
-        print("Calling a cccl kernel...")
-        print("with", len(args), "parameters.")
-        print("Parameters:", args, "\n")
         return self._impl(*args)
 
 

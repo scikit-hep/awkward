@@ -34,7 +34,6 @@ class CupyBackend(Backend):
         from awkward._connect.cuda import _compute as cuda_compute
 
         kernel_name = index[0] if index else ""
-        print("Calling kernel:", kernel_name)
 
         # Try CuPy kernels first (primary implementation)
         cupy = cuda.import_cupy("Awkward Arrays with CUDA")
@@ -51,7 +50,6 @@ class CupyBackend(Backend):
                 # Return CudaComputeKernel for supported operations
                 compute_impl = self._get_cuda_compute_impl(kernel_name)
                 if compute_impl is not None:
-                    print("||  ", compute_impl)
                     return CudaComputeKernel(compute_impl, index)
             else:
                 # cuda.compute is needed but not available
@@ -78,7 +76,10 @@ class CupyBackend(Backend):
         - awkward_argmax (future)
         """
         # For now, we only support these operations
-        return kernel_name in ("awkward_sort", "awkward_reduce_argmax", )
+        return kernel_name in (
+            "awkward_sort",
+            "awkward_reduce_argmax",
+        )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
         """

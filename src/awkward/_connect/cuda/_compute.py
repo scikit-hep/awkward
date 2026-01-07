@@ -68,12 +68,6 @@ def awkward_reduce_argmax(
     parents_length,
     outlength,
 ):
-    print("\nEntering the custom awkward_reduce_argmax kernel...")
-    print(result)
-    print(input_data)
-    print(parents_data)
-    print(cp.int64)
-
     @gpu_struct
     class ak_array:
         data: input_data.dtype
@@ -84,8 +78,7 @@ def awkward_reduce_argmax(
         return a if a.data > b.data else b
 
     # use a helper function to get the local indices
-    local_indices = local_idx_from_parents(parents_data, parents_length)
-    print("Local_indices:", local_indices)
+    # local_indices = local_idx_from_parents(parents_data, parents_length)
 
     # use global indices instead?
     global_indices = cp.arange(0, parents_length + 1, dtype=cp.int64)
@@ -107,7 +100,6 @@ def awkward_reduce_argmax(
 
     # alternative way
     # _result = cp.zeros([outlength], dtype= ak_array.dtype)
-    print("View with ak_array dtype:", result)
 
     # Initial value for the reduction
     # TODO: this should be a very low number instead
@@ -116,18 +108,10 @@ def awkward_reduce_argmax(
     # Perform the segmented reduce
     segmented_reduce(input_struct, _result, start_o, end_o, max_op, h_init, outlength)
 
-    print("segmented_reduce_result:", _result)
-
     # TODO: here converts float to int too, fix this?
     _result = _result.view(cp.int64).reshape(-1, 2)
-    print("Raw?", _result)
     _result = _result[:, 1]
-    print("Raw??", _result)
 
     # pass the result outside the function
     result_v = result.view()
     result_v[...] = _result
-
-    print("Result?", result)
-    print("Result_v?", result_v)
-    print("Exiting the custom awkward_reduce_argmax kernel...\n")
