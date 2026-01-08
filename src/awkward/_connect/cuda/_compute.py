@@ -68,10 +68,12 @@ def awkward_reduce_argmax(
     parents_length,
     outlength,
 ):
-    ak_array = gpu_struct({
-        "data": input_data.dtype.type,
-        "local_index": cp.int64,
-    })
+    ak_array = gpu_struct(
+        {
+            "data": input_data.dtype.type,
+            "local_index": cp.int64,
+        }
+    )
 
     # compare the values of the arrays
     def max_op(a: ak_array, b: ak_array):
