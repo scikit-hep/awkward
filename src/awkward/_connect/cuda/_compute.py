@@ -102,8 +102,9 @@ def awkward_reduce_argmax(
     # _result = cp.zeros([outlength], dtype= ak_array.dtype)
 
     # Initial value for the reduction
-    # TODO: this should be a very low number instead
-    h_init = ak_array(-1, -1)
+    # min value gets transformed to input_data.dtype automatically?
+    min = cp.iinfo(cp.int64).min
+    h_init = ak_array(min, min)
 
     # Perform the segmented reduce
     segmented_reduce(input_struct, _result, start_o, end_o, max_op, h_init, outlength)
