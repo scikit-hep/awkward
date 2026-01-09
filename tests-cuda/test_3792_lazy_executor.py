@@ -1,4 +1,5 @@
-import pytest
+from __future__ import annotations
+
 import awkward as ak
 
 
@@ -7,7 +8,7 @@ def test_executor():
     arr = ak.Array([[1, 2, 3], [4, 5], [6, 7, 8, 9]], backend="cuda")
 
     # Create lazy wrapper
-    lazy_arr =ak.cuda.lazy(arr)
+    lazy_arr = ak.cuda.lazy(arr)
 
     # Build computation graph without executing
     transformed = lazy_arr * 2 + 1
@@ -48,10 +49,9 @@ def test_executor():
     arr3 = ak.Array([[1, 2, 3], [4, 5]], backend="cuda")
     lazy_arr3 = ak.cuda.lazy(arr3)
 
-
     pairs = lazy_arr3.combinations(2)
-    first = pairs['0']
-    second = pairs['1']
+    first = pairs["0"]
+    second = pairs["1"]
     pair_sums = first + second
 
     print("IR for sum of pairs:")
@@ -60,4 +60,3 @@ def test_executor():
 
     print("Result:")
     print(pair_sums.compute())
-
