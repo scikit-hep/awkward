@@ -24,8 +24,6 @@ or
     conda install -c conda-forge cupy
 """
 
-__all__ = ("lazy",)
-
 cuda_streamptr_to_contexts = {}
 kernel_errors = {}
 kernel = None
@@ -286,6 +284,9 @@ def lazy(array):
             "ak.cuda.lazy is only available for arrays with the CUDA backend"
         )
 
-    from awkward._connect.cuda.lazy import lazy as _lazy
+    from ._lazy_impl import lazy as _lazy
 
     return _lazy(array)
+
+
+__all__ = ("lazy",)
