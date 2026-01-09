@@ -1,8 +1,23 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 from __future__ import annotations
 
 import cupy as cp
 import numpy as np
-import nvtx
+
+try:
+    import nvtx
+except ImportError:
+
+    class nvtx:
+        @staticmethod
+        def annotate(*args, **kwargs):
+            def deco(fn):
+                return fn
+
+            return deco
+
+
 from cuda.compute import PermutationIterator, ZipIterator
 
 import awkward as ak
