@@ -15,7 +15,6 @@
 //         scan_in_array_parents = cupy.searchsorted(scan_in_array_offsets[1:], cupy.arange(total), side='right').astype(cupy.int64)
 //     else:
 //         scan_in_array_parents = cupy.zeros(0, dtype=cupy.int64)
-// 
 //     if int(scan_in_array_offsets[length]) < 1024:
 //         block_size = int(scan_in_array_offsets[length])
 //     else:
