@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 
 
-def test():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test(forget_length):
     content = ak.contents.ListOffsetArray(
         ak.index.Index64([0, 2, 4, 4]),
         ak.contents.IndexedArray(
@@ -19,5 +20,9 @@ def test():
     )
     assert (
         ak.validity_error(content)
+        == 'at highlevel.content ("<class \'awkward.contents.indexedarray.IndexedArray\'>"): __array__ = "categorical" requires contents to be unique'
+    )
+    assert (
+        ak.validity_error(content.to_typetracer(forget_length))
         == 'at highlevel.content ("<class \'awkward.contents.indexedarray.IndexedArray\'>"): __array__ = "categorical" requires contents to be unique'
     )

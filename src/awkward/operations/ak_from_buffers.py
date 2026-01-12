@@ -145,6 +145,14 @@ def _impl(
     enable_virtualarray_caching,
 ):
     backend = regularize_backend(backend)
+    if not backend.nplike.known_data:
+        msg = (
+            "Typetacer backend is not supported in 'ak.from_buffers'. "
+            "Typetracer-backed arrays can be constructed only from the form as they do not hold any data. "
+            "Use highlevel functions like 'ak.typetracer.typetracer_from_form' or 'ak.typetracer.typetracer_with_report' "
+            "to construct such arrays."
+        )
+        raise TypeError(msg)
 
     if isinstance(form, str):
         if ak.types.numpytype.is_primitive(form):
