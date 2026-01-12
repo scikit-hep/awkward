@@ -73,7 +73,7 @@ class CupyBackend(Backend):
         Currently supports:
         - awkward_sort
         - awkward_argsort (future)
-        - awkward_argmax (future)
+        - awkward_argmax
         """
         # For now, we only support these operations
         return kernel_name in (
