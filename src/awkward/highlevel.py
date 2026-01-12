@@ -2383,7 +2383,7 @@ class Record(NDArrayOperatorsMixin):
             formatter (Mapping or None): Mapping of types/type-classes to string formatters.
                 If None, use the default formatter.
 
-        Display the contents of the array within `limit_rows` and `limit_cols`, using
+        Display the contents of the record within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
 
         The `formatter` argument controls the formatting of individual values, c.f.
@@ -2865,9 +2865,6 @@ class ArrayBuilder(Sized):
         precision=3,
     ):
         """
-        Display the contents of the ArrayBuilder by taking a snapshot and
-        delegating to ak.Array.show.
-
         Args:
             limit_rows (int): Maximum number of rows (lines) to use in the output.
             limit_cols (int): Maximum number of columns (characters wide).
@@ -2879,25 +2876,23 @@ class ArrayBuilder(Sized):
                 of rows/lines limit.)
             backend (bool): If True, print the backend of the array as well. (Doesn't count toward number
                 of rows/lines limit.)
-            all (bool): If True, print the 'type', 'named axis', 'nbytes', and 'backend' of the array.
-                (Doesn't count toward number of rows/lines limit.)
+            all (bool): If True, print the 'type', 'named axis', 'nbytes', and 'backend' of the array. (Doesn't count toward number
+                of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
             formatter (Mapping or None): Mapping of types/type-classes to string formatters.
                 If None, use the default formatter.
-            precision (int): Floating-point precision.
 
-        Display the contents of the array within ``limit_rows`` and ``limit_cols``, using
-        ellipsis (``...``) for hidden nested data.
+        Display the contents of the array builder within `limit_rows` and `limit_cols`, using
+        ellipsis (`...`) for hidden nested data.
 
-        The ``formatter`` argument controls the formatting of individual values, c.f.
+        The `formatter` argument controls the formatting of individual values, c.f.
         https://numpy.org/doc/stable/reference/generated/numpy.set_printoptions.html
+        As Awkward Array does not implement strings as a NumPy dtype, the `numpystr`
+        key is ignored; instead, a `"bytes"` and/or `"str"` key is considered when formatting
+        string values, falling back upon `"str_kind"`.
 
-        As Awkward Array does not implement strings as a NumPy dtype, the ``numpystr``
-        key is ignored; instead, a ``"bytes"`` and/or ``"str"`` key is considered when
-        formatting string values, falling back upon ``"str_kind"``.
-
-        This method takes a snapshot of the data and calls ``show`` on it, and a snapshot
+        This method takes a snapshot of the data and calls show on it, and a snapshot
         copies data.
         """
         return self.snapshot().show(
