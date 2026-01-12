@@ -44,7 +44,7 @@ from awkward._pickle import (
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
 from awkward._util import STDOUT
-from awkward.prettyprint import Formatter, highlevel_array_show_rows
+from awkward.prettyprint import highlevel_array_show_rows
 from awkward.prettyprint import valuestr as prettyprint_valuestr
 
 __all__ = ("Array", "ArrayBuilder", "Record")
@@ -84,7 +84,7 @@ def _awkward_1_rewrite_partition_form(form, partition: int, template: str = "par
     part_prefix = f"{template.format(partition)}-"
 
     def rename_form_key(key: str) -> str:
-        suffix = key[len(default_prefix):]
+        suffix = key[len(default_prefix) :]
 
         return f"{part_prefix}{suffix}"
 
@@ -314,8 +314,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         f"of equal length ({length} vs {_arrays[-1].layout.length}). "
                         "For automatic broadcasting use 'ak.zip' instead. "
                     )
-            layout = ak.contents.RecordArray(
-                [arr.layout for arr in _arrays], fields)
+            layout = ak.contents.RecordArray([arr.layout for arr in _arrays], fields)
             attrs = attrs_of(*_arrays, attrs=attrs)
             behavior = behavior_of(*_arrays, behavior=behavior)
 
@@ -1112,8 +1111,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
             NamedAxis.mapping = named_axis
 
-            indexed_layout = prepare_layout(
-                self._layout._getitem(where, NamedAxis))
+            indexed_layout = prepare_layout(self._layout._getitem(where, NamedAxis))
 
             if NamedAxis.mapping:
                 return ak.operations.ak_with_named_axis._impl(
@@ -1203,8 +1201,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 isinstance(where, str)
                 or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
             ):
-                raise TypeError(
-                    "only fields may be assigned in-place (by field name)")
+                raise TypeError("only fields may be assigned in-place (by field name)")
 
             # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
             self.layout = ak.operations.with_field(
@@ -1241,8 +1238,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 isinstance(where, str)
                 or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
             ):
-                raise TypeError(
-                    "only fields may be removed in-place (by field name)")
+                raise TypeError("only fields may be removed in-place (by field name)")
 
             # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
             self.layout = ak.operations.ak_without_field._impl(
@@ -1377,15 +1373,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         axisstr = ""
         if self.named_axis:
             # we reserve at maximum 20 characters for the named axis string
-            axisstr = _prettify_named_axes(
-                self.named_axis, delimiter=",", maxlen=20)
+            axisstr = _prettify_named_axes(self.named_axis, delimiter=",", maxlen=20)
             axisstr = f" {axisstr}"
         # subtract the reserved space from the limit_cols
         limit_cols -= len(axisstr)
 
         if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
-            strwidth = limit_cols - \
-                (len(typestr) + len(pytype) + len(" type=''") + 3)
+            strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
         else:
             strwidth = max(
                 0,
@@ -1396,8 +1390,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
         valuestr = valuestr + " " + prettyprint_valuestr(self, 1, strwidth)
 
-        length = max(3, limit_cols - len(pytype) -
-                     len("type='...'") - len(valuestr))
+        length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
@@ -1469,8 +1462,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from shortest to longest contrary to _repr_mimebundle_
-        sorted_rows = sorted([r for r in rows if r],
-                             key=lambda x: len(x.split(":")[0]))
+        sorted_rows = sorted([r for r in rows if r], key=lambda x: len(x.split(":")[0]))
 
         if sorted_rows:
             out_io.write("\n".join(sorted_rows))
@@ -1565,8 +1557,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     def __arrow_array__(self, type=None):
         with ak._errors.OperationErrorContext(
-            f"{builtins.type(self).__name__}.__arrow_array__", (self,), {
-                "type": type}
+            f"{builtins.type(self).__name__}.__arrow_array__", (self,), {"type": type}
         ):
             from awkward._connect.pyarrow import convert_to_array
 
@@ -1672,8 +1663,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         ak.numba.register_and_check()
 
         if self._numbaview is None:
-            self._numbaview = ak._connect.numba.arrayview.ArrayView.fromarray(
-                self)
+            self._numbaview = ak._connect.numba.arrayview.ArrayView.fromarray(self)
         import numba
 
         return numba.typeof(self._numbaview)
@@ -1693,8 +1683,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         # For pickle >= 5, we can avoid copying the buffers
         if protocol >= 5:
-            container = {k: pickle.PickleBuffer(
-                v) for k, v in container.items()}
+            container = {k: pickle.PickleBuffer(v) for k, v in container.items()}
 
         if self._behavior is ak.behavior:
             behavior = None
@@ -1875,8 +1864,7 @@ class Record(NDArrayOperatorsMixin):
                 else:
                     contents.append(Array([v]).layout)
 
-            layout = ak.record.Record(
-                ak.contents.RecordArray(contents, fields), at=0)
+            layout = ak.record.Record(ak.contents.RecordArray(contents, fields), at=0)
 
         elif isinstance(data, Iterable):
             raise TypeError(
@@ -1890,8 +1878,7 @@ class Record(NDArrayOperatorsMixin):
             raise TypeError("could not convert data into an ak.Record")
 
         if with_name is not None:
-            layout = ak.operations.with_name(
-                layout, with_name, highlevel=False)
+            layout = ak.operations.with_name(layout, with_name, highlevel=False)
 
         if not (backend is None or backend == layout.backend.name):
             layout = ak.operations.to_backend(layout, backend, highlevel=False)
@@ -2174,8 +2161,7 @@ class Record(NDArrayOperatorsMixin):
                 isinstance(where, str)
                 or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
             ):
-                raise TypeError(
-                    "only fields may be assigned in-place (by field name)")
+                raise TypeError("only fields may be assigned in-place (by field name)")
 
             # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
             layout = self.layout
@@ -2215,8 +2201,7 @@ class Record(NDArrayOperatorsMixin):
                 isinstance(where, str)
                 or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
             ):
-                raise TypeError(
-                    "only fields may be removed in-place (by field name)")
+                raise TypeError("only fields may be removed in-place (by field name)")
 
             # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
             self.layout = ak.operations.ak_without_field._impl(
@@ -2340,15 +2325,13 @@ class Record(NDArrayOperatorsMixin):
         axisstr = ""
         if self.named_axis:
             # we reserve at maximum 20 characters for the named axis string
-            axisstr = _prettify_named_axes(
-                self.named_axis, delimiter=",", maxlen=20)
+            axisstr = _prettify_named_axes(self.named_axis, delimiter=",", maxlen=20)
             axisstr = f" {axisstr}"
         # subtract the reserved space from the limit_cols
         limit_cols -= len(axisstr)
 
         if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
-            strwidth = limit_cols - \
-                (len(typestr) + len(pytype) + len(" type=''") + 3)
+            strwidth = limit_cols - (len(typestr) + len(pytype) + len(" type=''") + 3)
         else:
             strwidth = max(
                 0,
@@ -2359,8 +2342,7 @@ class Record(NDArrayOperatorsMixin):
             )
         valuestr = valuestr + " " + prettyprint_valuestr(self, 1, strwidth)
 
-        length = max(3, limit_cols - len(pytype) -
-                     len("type='...'") - len(valuestr))
+        length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
@@ -2432,8 +2414,7 @@ class Record(NDArrayOperatorsMixin):
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from shortest to longest contrary to _repr_mimebundle_
-        sorted_rows = sorted([r for r in rows if r],
-                             key=lambda x: len(x.split(":")[0]))
+        sorted_rows = sorted([r for r in rows if r], key=lambda x: len(x.split(":")[0]))
 
         if sorted_rows:
             out_io.write("\n".join(sorted_rows))
@@ -2521,8 +2502,7 @@ class Record(NDArrayOperatorsMixin):
         ak.numba.register_and_check()
 
         if self._numbaview is None:
-            self._numbaview = ak._connect.numba.arrayview.RecordView.fromrecord(
-                self)
+            self._numbaview = ak._connect.numba.arrayview.RecordView.fromrecord(self)
         import numba
 
         return numba.typeof(self._numbaview)
@@ -2543,8 +2523,7 @@ class Record(NDArrayOperatorsMixin):
 
         # For pickle >= 5, we can avoid copying the buffers
         if protocol >= 5:
-            container = {k: pickle.PickleBuffer(
-                v) for k, v in container.items()}
+            container = {k: pickle.PickleBuffer(v) for k, v in container.items()}
 
         if self._behavior is ak.behavior:
             behavior = None
@@ -2872,19 +2851,19 @@ class ArrayBuilder(Sized):
         return f"<ArrayBuilder type={typestr}>"
 
     def show(
-    self,
-    limit_rows=20,
-    limit_cols=80,
-    *,
-    type=False,
-    named_axis=False,
-    nbytes=False,
-    backend=False,
-    all=False,
-    stream=STDOUT,
-    formatter=None,
-    precision=3,
-):
+        self,
+        limit_rows=20,
+        limit_cols=80,
+        *,
+        type=False,
+        named_axis=False,
+        nbytes=False,
+        backend=False,
+        all=False,
+        stream=STDOUT,
+        formatter=None,
+        precision=3,
+    ):
         """
         Display the contents of the ArrayBuilder by taking a snapshot and
         delegating to ak.Array.show.
@@ -2950,8 +2929,7 @@ class ArrayBuilder(Sized):
 
     def __arrow_array__(self, type=None):
         with ak._errors.OperationErrorContext(
-            f"{builtins.type(self).__name__}.__arrow_array__", (self,), {
-                "type": type}
+            f"{builtins.type(self).__name__}.__arrow_array__", (self,), {"type": type}
         ):
             from awkward._connect.pyarrow import convert_to_array
 
@@ -3396,6 +3374,3 @@ def find_lowlevel_backend(obj: type):
             return NumpyBackend.instance()
 
         return numpy_lookup
-
-
-

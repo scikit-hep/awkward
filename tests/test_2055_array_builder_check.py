@@ -53,7 +53,6 @@ def test_no_field_name():
         result,
         ak.contents.RecordArray(
             fields=["time"],
-            contents=[ak.contents.NumpyArray(
-                np.array([0, 2], dtype=np.float64))],
+            contents=[ak.contents.NumpyArray(np.array([0, 2], dtype=np.float64))],
         ),
     )
