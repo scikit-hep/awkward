@@ -184,7 +184,6 @@ class CupyKernel(BaseKernel):
         import awkward._connect.cuda as ak_cuda
 
         args = maybe_materialize(*args)
-        args = maybe_materialize(*args)
 
         cupy = ak_cuda.import_cupy("Awkward Arrays with CUDA")
         maxlength = self.max_length(args)

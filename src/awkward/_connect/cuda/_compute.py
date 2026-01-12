@@ -127,7 +127,7 @@ def awkward_reduce_argmax(
     # use a helper function to get the local indices
     # local_indices = local_idx_from_parents(parents_data, parents_length)
 
-    # use global indices instead?
+    # use global indices instead
     global_indices = cp.arange(0, parents_length + 1, dtype=cp.int64)
 
     # Combine data and their indices into a single structure
