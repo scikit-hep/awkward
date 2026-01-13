@@ -37,7 +37,7 @@ jobs:
       PYTHON_VERSION: "3.9"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -51,7 +51,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('awkward-cpp/**') }}
@@ -82,3 +82,5 @@ jobs:
 
       - name: Upload Codecov results
         uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

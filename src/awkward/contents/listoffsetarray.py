@@ -27,6 +27,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -796,13 +797,18 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     ListOffsetArray(tooffsets, flattened, parameters=self._parameters),
                 )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
         # Is the other array indexed or optional?
         elif other.is_indexed or other.is_option:
-            return self._mergeable_next(other.content, mergebool)
+            return self._mergeable_next(other.content, mergebool, mergecastable)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
             return False
@@ -814,9 +820,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 ak.contents.ListOffsetArray,
             ),
         ):
-            return self._content._mergeable_next(other.content, mergebool)
+            return self._content._mergeable_next(
+                other.content, mergebool, mergecastable
+            )
         elif isinstance(other, ak.contents.NumpyArray) and len(other.shape) > 1:
-            return self._mergeable_next(other._to_regular_primitive(), mergebool)
+            return self._mergeable_next(
+                other._to_regular_primitive(), mergebool, mergecastable
+            )
         else:
             return False
 
@@ -884,7 +894,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if self._offsets.length - 1 == 0:
+        if self._offsets.length is not unknown_length and self._offsets.length - 1 == 0:
             return True
 
         branch, depth = self.branch_depth
@@ -1753,7 +1763,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         )
 
     def _validity_error(self, path):
-        if self.offsets.length < 1:
+        if self._backend.nplike.known_data and self.offsets.length < 1:
             return f"at {path} ({type(self)!r}): len(offsets) < 1"
         assert (
             self.starts.nplike is self._backend.nplike

@@ -33,6 +33,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -469,19 +470,26 @@ class NumpyArray(NumpyMeta, Content):
         else:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
         # Is the other array indexed or optional?
         elif other.is_indexed or other.is_option:
-            return self._mergeable_next(other.content, mergebool)
+            return self._mergeable_next(other.content, mergebool, mergecastable)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
             return False
         # Simplify *this* branch to be 1D self
         elif len(self.shape) > 1:
-            return self._to_regular_primitive()._mergeable_next(other, mergebool)
+            return self._to_regular_primitive()._mergeable_next(
+                other, mergebool, mergecastable
+            )
 
         elif isinstance(other, ak.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
@@ -510,11 +518,26 @@ class NumpyArray(NumpyMeta, Content):
             ):
                 return False
 
-            # Default merging (can we cast one to the other)
-            else:
+            # Only equivalent dtypes merge (only byte order changes allowed)
+            elif mergecastable == "equiv":
                 return self.backend.nplike.can_cast(
-                    self.dtype, other.dtype
-                ) or self.backend.nplike.can_cast(other.dtype, self.dtype)
+                    self.dtype, other.dtype, "equiv"
+                ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "equiv")
+
+            # Only same family of dtypes merge (integers, floats, complex)
+            elif mergecastable == "family":
+                for family in np.integer, np.floating, np.complexfloating:
+                    if np.issubdtype(self.dtype, family):
+                        return np.issubdtype(other.dtype, family)
+
+            # Default merging (can we cast one to the other)
+            elif mergecastable == "same_kind":
+                return self.backend.nplike.can_cast(
+                    self.dtype, other.dtype, "same_kind"
+                ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "same_kind")
+
+            else:
+                raise TypeError(f"unrecognized mergecastable option: {mergecastable}")
 
         else:
             return False
@@ -728,7 +751,7 @@ class NumpyArray(NumpyMeta, Content):
                 return out.length is not unknown_length and out.length == self.length
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if self.shape[0] == 0:
+        if self.shape[0] is not unknown_length and self.shape[0] == 0:
             return self
 
         elif len(self.shape) == 0:
@@ -1170,10 +1193,10 @@ class NumpyArray(NumpyMeta, Content):
         if len(self.shape) == 0:
             return f"at {path} ({type(self)!r}): shape is zero-dimensional"
         for i, dim in enumerate(self.shape):
-            if dim < 0:
+            if dim is not unknown_length and dim < 0:
                 return f"at {path} ({type(self)!r}): shape[{i}] < 0"
         for i, stride in enumerate(self.strides):
-            if stride % self.dtype.itemsize != 0:
+            if stride is not unknown_length and stride % self.dtype.itemsize != 0:
                 return f"at {path} ({type(self)!r}): shape[{i}] % itemsize != 0"
         return ""
 
