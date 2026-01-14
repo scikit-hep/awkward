@@ -44,7 +44,7 @@ from awkward._pickle import (
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
 from awkward._util import STDOUT
-from awkward.prettyprint import Formatter, highlevel_array_show_rows
+from awkward.prettyprint import highlevel_array_show_rows
 from awkward.prettyprint import valuestr as prettyprint_valuestr
 
 __all__ = ("Array", "ArrayBuilder", "Record")
@@ -2383,7 +2383,7 @@ class Record(NDArrayOperatorsMixin):
             formatter (Mapping or None): Mapping of types/type-classes to string formatters.
                 If None, use the default formatter.
 
-        Display the contents of the array within `limit_rows` and `limit_cols`, using
+        Display the contents of the record within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
 
         The `formatter` argument controls the formatting of individual values, c.f.
@@ -2854,9 +2854,13 @@ class ArrayBuilder(Sized):
         self,
         limit_rows=20,
         limit_cols=80,
-        type=False,
-        stream=STDOUT,
         *,
+        type=False,
+        named_axis=False,
+        nbytes=False,
+        backend=False,
+        all=False,
+        stream=STDOUT,
         formatter=None,
         precision=3,
     ):
@@ -2866,12 +2870,20 @@ class ArrayBuilder(Sized):
             limit_cols (int): Maximum number of columns (characters wide).
             type (bool): If True, print the type as well. (Doesn't count toward number
                 of rows/lines limit.)
+            named_axis (bool): If True, print the named axis as well. (Doesn't count toward number
+                of rows/lines limit.)
+            nbytes (bool): If True, print the number of bytes as well. (Doesn't count toward number
+                of rows/lines limit.)
+            backend (bool): If True, print the backend of the array as well. (Doesn't count toward number
+                of rows/lines limit.)
+            all (bool): If True, print the 'type', 'named axis', 'nbytes', and 'backend' of the array. (Doesn't count toward number
+                of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
             formatter (Mapping or None): Mapping of types/type-classes to string formatters.
                 If None, use the default formatter.
 
-        Display the contents of the array within `limit_rows` and `limit_cols`, using
+        Display the contents of the array builder within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
 
         The `formatter` argument controls the formatting of individual values, c.f.
@@ -2883,13 +2895,17 @@ class ArrayBuilder(Sized):
         This method takes a snapshot of the data and calls show on it, and a snapshot
         copies data.
         """
-        formatter_impl = Formatter(formatter, precision=precision)
         return self.snapshot().show(
             limit_rows=limit_rows,
             limit_cols=limit_cols,
             type=type,
+            named_axis=named_axis,
+            nbytes=nbytes,
+            backend=backend,
+            all=all,
             stream=stream,
-            formatter=formatter_impl,
+            formatter=formatter,
+            precision=precision,
         )
 
     def __array__(self, dtype=None, copy=None):
