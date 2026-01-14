@@ -240,11 +240,10 @@ def lazy(array: ak.Array) -> LazyAwkwardArray:
 
     Example:
         >>> import awkward as ak
-        >>> from your_module import lazy
         >>>
         >>> # Create lazy array
         >>> arr = ak.Array([[1, 2, 3], [4, 5], [6, 7, 8, 9]])
-        >>> lazy_arr = lazy(arr)
+        >>> lazy_arr = ak.cuda.lazy(arr)
         >>>
         >>> # Build computation graph
         >>> result = lazy_arr * 2 + 1
