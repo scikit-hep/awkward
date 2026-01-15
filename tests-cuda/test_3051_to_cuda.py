@@ -47,18 +47,15 @@ def test_nested():
 )
 def test_null():
     arr = ak.Array([12, None, 21, 12])
-    # calls ByteMaskedArray._to_cudf not NumpyArray
     out = ak.to_cudf(arr)
     assert isinstance(out, cudf.Series)
     assert out.to_arrow().tolist() == [12, None, 21, 12]
 
-    # True is valid, LSB order
     arr2 = ak.Array(arr.layout.to_BitMaskedArray(True, True))
     out = ak.to_cudf(arr2)
     assert isinstance(out, cudf.Series)
     assert out.to_arrow().tolist() == [12, None, 21, 12]
 
-    # reversed LSB (should be rare, involves extra work!)
     arr3 = ak.Array(arr.layout.to_BitMaskedArray(True, False))
     out = ak.to_cudf(arr3)
     assert isinstance(out, cudf.Series)
