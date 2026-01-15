@@ -52,8 +52,6 @@ def physics_analysis_cccl(events: ak.Array) -> ak.Array:
     selected_muons = filter_lists(events.muons, cond_muon)
     selected_electrons = filter_lists(events.electrons, cond_electron)
     
-    print(list_sizes(selected_muons) == 2)
-    print((list_sizes(selected_muons) == 2).astype('int8'))
     two_muons = select_lists(
         selected_muons, (list_sizes(selected_muons) == 2).astype('int8'))
     two_electrons = select_lists(
@@ -89,11 +87,20 @@ def physics_analysis_cccl(events: ak.Array) -> ak.Array:
     
 def physics_analysis_cccl_ir(events: ak.Array) -> ak.Array:
     from awkward._connect.cuda.ir_nodes import (
+    IRNode,
     Filter,
     SelectLists,
     ListSizes,
     TransformLists,
     )       
+    
+    class IsEqual(IRNode):
+        def lower(self, a, b):
+            return a == b
+        
+    class Zeros(IRNode):
+        def lower(self, a):
+            return cp.zeros(len(a), dtype=np.float64)
     
     """
     CCCL-based physics analysis selecting events with exactly 2 leptons (electrons or muons)
@@ -108,18 +115,11 @@ def physics_analysis_cccl_ir(events: ak.Array) -> ak.Array:
     #using nodes
     selected_muons = Filter(events.muons, cond_muon)
     selected_electrons = Filter(events.electrons, cond_electron)
-        
-    # Use lazy wrapper
-    # lazy_events = ak.cuda.lazy(events)
-    # print(dir(lazy_events))
-    # selected_muons_llllllll = lazy_events.filter(cond_muon)
-    # # print("selected_muons_llllllll", selected_muons_llllllll)
     
-    # TODO: .astype('int8') dooesn't work!
     two_muons = SelectLists(
-        selected_muons, (ListSizes(selected_muons) == 2).astype('int8'))
+        selected_muons, (IsEqual(ListSizes(selected_muons),2)))
     two_electrons = SelectLists(
-        selected_electrons, (ListSizes(selected_electrons) == 2).astype('int8'))
+        selected_electrons, (IsEqual(ListSizes(selected_electrons),2)))
 
     def invariant_mass(two_particles):
         """Compute invariant mass of two particles given their pt, eta, phi."""
@@ -137,8 +137,8 @@ def physics_analysis_cccl_ir(events: ak.Array) -> ak.Array:
         m2 = 2 * pt1 * pt2 * (np.cosh(eta1 - eta2) - np.cos(phi1 - phi2))
         return m2 ** 0.5
     
-    masses_electrons = TransformLists(two_muons, 2, invariant_mass)
-    masses_muons = TransformLists(two_electrons, 2, invariant_mass)
+    masses_muons = TransformLists(two_muons, Zeros(two_muons), 2, invariant_mass)
+    masses_electrons = TransformLists(two_electrons, Zeros(two_electrons), 2, invariant_mass)
 
     return {
         "electron": masses_electrons.compute(),
@@ -149,9 +149,15 @@ if __name__ == "__main__":
     # ipython -i studies/cccl/playground.py to play around with `events` and `physics_analysis`
 
     events_gpu = ak.to_backend(events, "cuda")
-
+    
     # Run CCCL-based function
-    inv_mass_cccl = physics_analysis_cccl_ir(events_gpu)
+    inv_mass_cccl = physics_analysis_cccl(events_gpu)
     print("\nCCCL physics_analysis_cccl() results:")
+    print("  Electron invariant masses (in GeV):", inv_mass_cccl["electron"])
+    print("  Muon invariant masses (in GeV):", inv_mass_cccl["muon"])
+    
+    # Run CCCL-IR-based function
+    inv_mass_cccl = physics_analysis_cccl_ir(events_gpu)
+    print("\nCCCL physics_analysis_cccl_ir() results:")
     print("  Electron invariant masses (in GeV):", inv_mass_cccl["electron"])
     print("  Muon invariant masses (in GeV):", inv_mass_cccl["muon"])

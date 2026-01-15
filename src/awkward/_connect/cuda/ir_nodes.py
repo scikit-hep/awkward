@@ -228,7 +228,8 @@ class SelectLists(IRNode):
         select_segments(
             data_in,
             offsets_in,
-            mask,
+            # bring the values to device
+            mask.astype('int8'),
             data_out,
             offsets_out,
             d_counts,
@@ -249,12 +250,11 @@ class ListSizes(IRNode):
 
 
 class TransformLists(IRNode):
-    def __init__(self, array, list_size, op):
-        super().__init__(array, list_size)
+    def __init__(self, array, out, list_size, op):
+        super().__init__(array, out, list_size)
         self.op = op
 
-    def lower(self, array, list_size):
-        out = empty_like(array)
+    def lower(self, array, out, list_size):
         data_in, meta = awkward_to_cccl_iterator(array)
         data_out, _ = awkward_to_cccl_iterator(out)
 
