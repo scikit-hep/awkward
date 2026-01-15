@@ -13,6 +13,7 @@ cupy = pytest.importorskip("cupy")
 @pytest.mark.xfail(
     parse_version(cudf.__version__) >= parse_version("25.12.00"),
     reason="cudf internals changed since v25.12.00",
+    strict=False,
 )
 def test_jagged():
     arr = ak.Array([[[1, 2, 3], [], [3, 4]], []])
@@ -25,6 +26,7 @@ def test_jagged():
 @pytest.mark.xfail(
     parse_version(cudf.__version__) >= parse_version("25.12.00"),
     reason="cudf internals changed since v25.12.00",
+    strict=False,
 )
 def test_nested():
     arr = ak.Array(
