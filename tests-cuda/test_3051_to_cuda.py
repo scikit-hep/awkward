@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+
 import awkward as ak
 
 cudf = pytest.importorskip("cudf", exc_type=ImportError)
