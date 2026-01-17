@@ -6,7 +6,11 @@ import copy
 import json
 from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 
-from cudf.core.column.struct import StructColumn
+try:
+    from cudf.core.column.struct import StructColumn
+except ImportError:
+    StructColumn = None
+
 from packaging.version import parse as parse_version
 
 import awkward as ak
@@ -19,7 +23,6 @@ from awkward._meta.recordmeta import RecordMeta
 from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
-from cudf.core.column.struct import StructColumn
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._parameters import (
     parameters_intersect,
@@ -1166,6 +1169,9 @@ class RecordArray(RecordMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        if StructColumn is None:
+            raise RuntimeError("ak.to_cudf requires cuDF to be installed")
+
         children = tuple(
             c._to_cudf(cudf, mask=None, length=length) for c in self.contents
         )
@@ -1184,7 +1190,7 @@ class RecordArray(RecordMeta[Content], Content):
         else:
             return StructColumn(
                 data=None,
-                chilren=children,
+                children=children,
                 dtype=dt,
                 mask=m,
                 size=length,
