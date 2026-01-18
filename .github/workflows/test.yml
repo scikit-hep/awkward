@@ -83,6 +83,10 @@ jobs:
             python-architecture: x64
             runs-on: windows-latest
             dependencies-kind: nogil
+          - python-version: '3.14t'
+            python-architecture: arm64
+            runs-on: macos-14
+            dependencies-kind: nogil
 
     runs-on: ${{ matrix.runs-on }}
 
@@ -164,6 +168,15 @@ jobs:
         run: >-
           python -m pytest -vv -rs tests
         if: startsWith(matrix.python-version, 'pypy')
+
+      - name: Test non-kernels (Python) in multiple threads
+        if: matrix.python-version == '3.14t'
+        run: |
+          python -m pip install 'pytest-run-parallel>=0.8.2'
+          python -m pytest -vv -rs tests --parallel-threads 4 \
+            --ignore=tests/test_3364_virtualarray.py \
+            --ignore=tests/test_3451_virtualarray_with_jax.py \
+            --ignore=tests/test_3475_virtualarray_unknown_length.py
 
       - name: Upload Codecov results
         if: (matrix.python-version == '3.9') && (matrix.runs-on == 'ubuntu-latest')

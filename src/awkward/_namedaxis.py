@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 from dataclasses import dataclass
 
 import awkward._typing as tp
@@ -24,12 +25,13 @@ NAMED_AXIS_KEY: tp.Literal["__named_axis__"] = (
 )
 
 
-# just a class for inplace mutation
-class NamedAxis:
-    mapping: AxisMapping
+class _NamedAxisLocal(threading.local):
+    def __init__(self):
+        super().__init__()
+        self.mapping = {}
 
 
-NamedAxis.mapping = {}
+NamedAxis = _NamedAxisLocal()
 
 
 def _prettify_named_axes(
