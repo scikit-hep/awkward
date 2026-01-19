@@ -326,9 +326,9 @@ def test_ByteMaskedForm_EmptyForm():
     result = ak.Array(form.length_zero_array())
     assert len(result) == 0
 
-    result = ak.Array(form.length_one_array())
-    assert len(result) == 1
-    assert result.tolist() == [None]
+    # ByteMaskedForm cannot hide EmptyForm - content length must equal mask length
+    with pytest.raises(TypeError, match="cannot generate a length_one_array"):
+        form.length_one_array()
 
 
 def test_BitMaskedForm_EmptyForm():
@@ -339,9 +339,9 @@ def test_BitMaskedForm_EmptyForm():
     result = ak.Array(form.length_zero_array())
     assert len(result) == 0
 
-    result = ak.Array(form.length_one_array())
-    assert len(result) == 1
-    assert result.tolist() == [None]
+    # BitMaskedForm cannot hide EmptyForm - content length must equal mask length
+    with pytest.raises(TypeError, match="cannot generate a length_one_array"):
+        form.length_one_array()
 
 
 def test_RegularForm_ListForm():
@@ -497,7 +497,7 @@ def test_ByteMaskedForm_ListForm():
     assert result.tolist() == [None]
 
 
-def test_IndexedOtionForm_ListOffsetForm():
+def test_IndexedOptionForm_ListOffsetForm():
     form = ak.forms.IndexedOptionForm(
         "i64", ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64"))
     )
