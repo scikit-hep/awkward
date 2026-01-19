@@ -427,3 +427,194 @@ def test_BitMaskedForm_valid_when_false():
     result = ak.Array(form.length_one_array())
     assert str(result.type) == "1 * ?float64"
     assert result.tolist() == [None]
+
+
+def test_BitMaskedForm_ListOffsetForm():
+    form = ak.forms.BitMaskedForm(
+        "u8",
+        ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64")),
+        valid_when=True,
+        lsb_order=True,
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * option[var * float64]"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * option[var * float64]"
+    assert result.tolist() == [None]
+
+
+def test_ByteMaskedForm_ListOffsetForm():
+    form = ak.forms.ByteMaskedForm(
+        "i8",
+        ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64")),
+        valid_when=True,
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * option[var * float64]"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * option[var * float64]"
+    assert result.tolist() == [None]
+
+
+def test_BitMaskedForm_ListForm():
+    form = ak.forms.BitMaskedForm(
+        "u8",
+        ak.forms.ListForm("i64", "i64", ak.forms.NumpyForm("float64")),
+        valid_when=True,
+        lsb_order=True,
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * option[var * float64]"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * option[var * float64]"
+    assert result.tolist() == [None]
+
+
+def test_ByteMaskedForm_ListForm():
+    form = ak.forms.ByteMaskedForm(
+        "i8",
+        ak.forms.ListForm("i64", "i64", ak.forms.NumpyForm("float64")),
+        valid_when=True,
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * option[var * float64]"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * option[var * float64]"
+    assert result.tolist() == [None]
+
+
+def test_IndexedOtionForm_ListOffsetForm():
+    form = ak.forms.IndexedOptionForm(
+        "i64", ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64"))
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * option[var * float64]"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * option[var * float64]"
+    assert result.tolist() == [None]
+
+
+def test_IndexedOptionForm_ListForm():
+    form = ak.forms.IndexedOptionForm(
+        "i64", ak.forms.ListForm("i64", "i64", ak.forms.NumpyForm("float64"))
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * option[var * float64]"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * option[var * float64]"
+    assert result.tolist() == [None]
+
+
+def test_ListOffsetForm_BitMaskedForm():
+    form = ak.forms.ListOffsetForm(
+        "i64",
+        ak.forms.BitMaskedForm(
+            "u8", ak.forms.NumpyForm("float64"), valid_when=True, lsb_order=True
+        ),
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * var * ?float64"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * var * ?float64"
+    assert result.tolist() == [[]]
+
+
+def test_ListOffsetForm_ByteMaskedForm():
+    form = ak.forms.ListOffsetForm(
+        "i64",
+        ak.forms.ByteMaskedForm("i8", ak.forms.NumpyForm("float64"), valid_when=True),
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * var * ?float64"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * var * ?float64"
+    assert result.tolist() == [[]]
+
+
+def test_ListOffsetForm_IndexedOptionForm():
+    form = ak.forms.ListOffsetForm(
+        "i64",
+        ak.forms.IndexedOptionForm("i64", ak.forms.NumpyForm("float64")),
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * var * ?float64"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * var * ?float64"
+    assert result.tolist() == [[]]
+
+
+def test_ListForm_BitMaskedForm():
+    form = ak.forms.ListForm(
+        "i64",
+        "i64",
+        ak.forms.BitMaskedForm(
+            "u8", ak.forms.NumpyForm("float64"), valid_when=True, lsb_order=True
+        ),
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * var * ?float64"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * var * ?float64"
+    assert result.tolist() == [[]]
+
+
+def test_ListForm_ByteMaskedForm():
+    form = ak.forms.ListForm(
+        "i64",
+        "i64",
+        ak.forms.ByteMaskedForm("i8", ak.forms.NumpyForm("float64"), valid_when=True),
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * var * ?float64"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * var * ?float64"
+    assert result.tolist() == [[]]
+
+
+def test_ListForm_IndexedOptionForm():
+    form = ak.forms.ListForm(
+        "i64",
+        "i64",
+        ak.forms.IndexedOptionForm("i64", ak.forms.NumpyForm("float64")),
+    )
+
+    result = ak.Array(form.length_zero_array())
+    assert str(result.type) == "0 * var * ?float64"
+    assert result.tolist() == []
+
+    result = ak.Array(form.length_one_array())
+    assert str(result.type) == "1 * var * ?float64"
+    assert result.tolist() == [[]]
