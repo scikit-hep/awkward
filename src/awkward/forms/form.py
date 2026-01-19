@@ -15,7 +15,7 @@ from awkward._backends.dispatch import regularize_backend
 from awkward._backends.numpy import NumpyBackend
 from awkward._meta.meta import Meta
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.shape import unknown_length
 from awkward._parameters import (
     parameters_are_equal,
     parameters_union,
@@ -560,15 +560,6 @@ class Form(Meta):
             return self.length_one_array(
                 backend=numpy_backend, highlevel=highlevel, behavior=behavior
             ).to_typetracer()
-
-        # The naive implementation of a length-1 array requires that we have a sufficiently
-        # large buffer to be able to build _any_ subtree.
-        def max_prefer_unknown(this: ShapeItem, that: ShapeItem) -> ShapeItem:
-            if this is unknown_length:
-                return this
-            if that is unknown_length:
-                return that
-            return max(this, that)
 
         container = {}
 
