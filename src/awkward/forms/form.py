@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import itertools
 import json
+import math
 import re
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Mapping
@@ -583,19 +584,54 @@ class Form(Meta):
                 container[form_key] = b"\x00" * size
                 return form.copy(form_key=form_key)
 
-            elif isinstance(form, ak.forms.RegularForm):
-                size = form.size
-                if size is unknown_length:
-                    size = 1
-                next_length = length * size
-                return form.copy(content=prepare(form.content, next_length))
+            elif isinstance(form, ak.forms.UnmaskedForm):
+                # no buffer, content length = length
+                return form.copy(content=prepare(form.content, length))
 
-            elif isinstance(form, ak.forms.ListOffsetForm):
-                # offsets buffer has length+1 elements, all zeros
-                dtype = index_to_dtype[form.offsets]
-                container[form_key] = b"\x00" * ((length + 1) * dtype.itemsize)
-                # with all-zero offsets, next_length = offsets[-1] = 0
+            elif isinstance(form, ak.forms.BitMaskedForm):
+                # mask buffer with values that indicate None
+                dtype = index_to_dtype[form.mask]
+                mask_length = math.ceil(length / 8.0)
+                if form.valid_when:
+                    container[form_key] = b"\x00" * (mask_length * dtype.itemsize)
+                else:
+                    container[form_key] = b"\xff" * (mask_length * dtype.itemsize)
+                # content length must equal length
+                next_length = length
+                return form.copy(
+                    content=prepare(form.content, next_length), form_key=form_key
+                )
+
+            elif isinstance(form, ak.forms.ByteMaskedForm):
+                # mask buffer with values that indicate None
+                dtype = index_to_dtype[form.mask]
+                if form.valid_when:
+                    container[form_key] = b"\x00" * (length * dtype.itemsize)
+                else:
+                    container[form_key] = b"\x01" * (length * dtype.itemsize)
+                # content length must equal mask length
+                next_length = length
+                return form.copy(
+                    content=prepare(form.content, next_length), form_key=form_key
+                )
+
+            elif isinstance(form, ak.forms.IndexedOptionForm):
+                # index buffer with all -1
+                dtype = index_to_dtype[form.index]
+                minus_one = b"\xff" * dtype.itemsize
+                container[form_key] = minus_one * length
+                # with all -1 indices, next_length = max(0, max(index) + 1) = 0
                 next_length = 0
+                return form.copy(
+                    content=prepare(form.content, next_length), form_key=form_key
+                )
+
+            elif isinstance(form, ak.forms.IndexedForm):
+                # index buffer with all zeros
+                dtype = index_to_dtype[form.index]
+                container[form_key] = b"\x00" * (length * dtype.itemsize)
+                # with all-zero indices, next_length = max(index) + 1 = 1 (if length > 0)
+                next_length = 1 if length > 0 else 0
                 return form.copy(
                     content=prepare(form.content, next_length), form_key=form_key
                 )
@@ -614,57 +650,23 @@ class Form(Meta):
                     content=prepare(form.content, next_length), form_key=form_key
                 )
 
-            elif isinstance(form, ak.forms.IndexedForm):
-                # index buffer with all zeros
-                dtype = index_to_dtype[form.index]
-                container[form_key] = b"\x00" * (length * dtype.itemsize)
-                # with all-zero indices, next_length = max(index) + 1 = 1 (if length > 0)
-                next_length = 1 if length > 0 else 0
-                return form.copy(
-                    content=prepare(form.content, next_length), form_key=form_key
-                )
-
-            elif isinstance(form, ak.forms.IndexedOptionForm):
-                # index buffer with all -1
-                dtype = index_to_dtype[form.index]
-                minus_one = b"\xff" * dtype.itemsize
-                container[form_key] = minus_one * length
-                # with all -1 indices, next_length = max(0, max(index) + 1) = 0
+            elif isinstance(form, ak.forms.ListOffsetForm):
+                # offsets buffer has length+1 elements, all zeros
+                dtype = index_to_dtype[form.offsets]
+                container[form_key] = b"\x00" * ((length + 1) * dtype.itemsize)
+                # with all-zero offsets, next_length = offsets[-1] = 0
                 next_length = 0
                 return form.copy(
                     content=prepare(form.content, next_length), form_key=form_key
                 )
 
-            elif isinstance(form, ak.forms.ByteMaskedForm):
-                # mask buffer with values that indicate None
-                dtype = index_to_dtype[form.mask]
-                if form.valid_when:
-                    container[form_key] = b"\x00" * (length * dtype.itemsize)
-                else:
-                    container[form_key] = b"\x01" * (length * dtype.itemsize)
-                # content length must equal mask length
-                next_length = length
-                return form.copy(
-                    content=prepare(form.content, next_length), form_key=form_key
-                )
-
-            elif isinstance(form, ak.forms.BitMaskedForm):
-                # mask buffer with values that indicate None
-                dtype = index_to_dtype[form.mask]
-                mask_length = (length + 7) // 8  # ceil(length / 8)
-                if form.valid_when:
-                    container[form_key] = b"\x00" * (mask_length * dtype.itemsize)
-                else:
-                    container[form_key] = b"\xff" * (mask_length * dtype.itemsize)
-                # content length must equal length
-                next_length = length
-                return form.copy(
-                    content=prepare(form.content, next_length), form_key=form_key
-                )
-
-            elif isinstance(form, ak.forms.UnmaskedForm):
-                # no buffer, content length = length
-                return form.copy(content=prepare(form.content, length))
+            elif isinstance(form, ak.forms.RegularForm):
+                size = form.size
+                # https://github.com/scikit-hep/awkward/pull/2499#discussion_r1220503454
+                if size is unknown_length:
+                    size = 1
+                next_length = length * size
+                return form.copy(content=prepare(form.content, next_length))
 
             elif isinstance(form, ak.forms.RecordForm):
                 # no buffer, all contents have same length
