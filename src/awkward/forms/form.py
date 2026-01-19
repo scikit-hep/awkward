@@ -621,16 +621,27 @@ class Form(Meta):
         def prepare(form, multiplier):
             form_key = f"node-{len(container)}"
 
-            if isinstance(form, (ak.forms.BitMaskedForm, ak.forms.ByteMaskedForm)):
+            if isinstance(form, ak.forms.BitMaskedForm):
                 if form.valid_when:
                     container[form_key] = b"\x00" * multiplier
                 else:
                     container[form_key] = b"\xff" * multiplier
-                # switch from recursing down `prepare` to `prepare_empty`
-                return form.copy(content=prepare_empty(form.content), form_key=form_key)
+                return form.copy(
+                    content=prepare(form.content, multiplier), form_key=form_key
+                )
+            elif isinstance(form, ak.forms.ByteMaskedForm):
+                if form.valid_when:
+                    container[form_key] = b"\x00" * multiplier
+                else:
+                    container[form_key] = b"\x01" * multiplier
+                return form.copy(
+                    content=prepare(form.content, multiplier), form_key=form_key
+                )
 
             elif isinstance(form, ak.forms.IndexedOptionForm):
-                container[form_key] = b"\xff\xff\xff\xff\xff\xff\xff\xff"  # -1
+                container[form_key] = (
+                    b"\xff\xff\xff\xff\xff\xff\xff\xff" * multiplier
+                )  # -1
                 # switch from recursing down `prepare` to `prepare_empty`
                 return form.copy(content=prepare_empty(form.content), form_key=form_key)
 

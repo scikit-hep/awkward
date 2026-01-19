@@ -576,7 +576,7 @@ def _reconstitute(
 
         def _adjust_length(starts, stops):
             reduced_stops = stops[starts != stops]
-            return 0 if len(starts) == 0 else backend.nplike.max(reduced_stops)
+            return 0 if len(reduced_stops) == 0 else backend.nplike.max(reduced_stops)
 
         def _shape_generator():
             return (_adjust_length(starts, stops),)
