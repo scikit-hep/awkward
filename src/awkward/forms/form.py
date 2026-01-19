@@ -626,17 +626,13 @@ class Form(Meta):
                     container[form_key] = b"\x00" * multiplier
                 else:
                     container[form_key] = b"\xff" * multiplier
-                return form.copy(
-                    content=prepare(form.content, multiplier), form_key=form_key
-                )
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
             elif isinstance(form, ak.forms.ByteMaskedForm):
                 if form.valid_when:
                     container[form_key] = b"\x00" * multiplier
                 else:
                     container[form_key] = b"\x01" * multiplier
-                return form.copy(
-                    content=prepare(form.content, multiplier), form_key=form_key
-                )
+                return form.copy(content=prepare_empty(form.content), form_key=form_key)
 
             elif isinstance(form, ak.forms.IndexedOptionForm):
                 container[form_key] = (

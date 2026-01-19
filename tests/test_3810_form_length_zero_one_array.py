@@ -326,8 +326,9 @@ def test_ByteMaskedForm_EmptyForm():
     result = ak.Array(form.length_zero_array())
     assert len(result) == 0
 
-    with pytest.raises(TypeError, match="cannot generate a length_one_array"):
-        form.length_one_array()
+    result = ak.Array(form.length_one_array())
+    assert len(result) == 1
+    assert result.tolist() == [None]
 
 
 def test_BitMaskedForm_EmptyForm():
@@ -338,8 +339,9 @@ def test_BitMaskedForm_EmptyForm():
     result = ak.Array(form.length_zero_array())
     assert len(result) == 0
 
-    with pytest.raises(TypeError, match="cannot generate a length_one_array"):
-        form.length_one_array()
+    result = ak.Array(form.length_one_array())
+    assert len(result) == 1
+    assert result.tolist() == [None]
 
 
 def test_RegularForm_ListForm():
