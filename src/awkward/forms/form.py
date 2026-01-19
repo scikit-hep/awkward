@@ -573,10 +573,6 @@ class Form(Meta):
         container = {}
 
         def prepare(form, length):
-            """
-            Recursively prepare buffers for a form with given length.
-            Mirrors from_buffers._reconstitute logic for computing next_length.
-            """
             form_key = f"node-{len(container)}"
 
             if isinstance(form, ak.forms.EmptyForm):
