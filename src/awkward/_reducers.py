@@ -779,6 +779,9 @@ class Max(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
+    def axis_none_reducer(self):
+        return AxisNoneMax(self.initial)
+
     def __init__(self, initial):
         self._initial = initial
 
@@ -880,3 +883,26 @@ class Max(KernelReducer):
             return ak.contents.NumpyArray(
                 result.view(array.dtype), backend=array.backend
             )
+
+
+class AxisNoneMax(Max):
+    def __init__(self, initial):
+        super().__init__(initial)
+
+    def apply(self, array, _parents, _starts, _shifts, _outlength):
+        nplike = array.backend.nplike
+        data = array.data
+
+        if data.size == 0:
+            result_scalar = nplike.asarray(self.identity)
+        else:
+            reduce_fn = getattr(array.backend.nplike, self.name)
+
+            if self.initial is None:
+                result_scalar = reduce_fn(data, axis=None)
+            else:
+                result_scalar = reduce_fn(data, axis=None, initial=self.initial)
+
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
