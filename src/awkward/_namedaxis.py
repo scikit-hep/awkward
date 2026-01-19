@@ -27,7 +27,6 @@ NAMED_AXIS_KEY: tp.Literal["__named_axis__"] = (
 
 class _NamedAxisLocal(threading.local):
     def __init__(self):
-        super().__init__()
         self.mapping = {}
 
 
