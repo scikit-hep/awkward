@@ -229,7 +229,7 @@ class SelectLists(IRNode):
             data_in,
             offsets_in,
             # bring the values to device
-            mask.astype('int8'),
+            mask.astype("int8"),
             data_out,
             offsets_out,
             d_counts,
