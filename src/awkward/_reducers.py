@@ -939,7 +939,7 @@ class AxisNoneMax(Max):
 
         if data.size == 0:
             result_scalar = nplike.asarray(
-                self.identity_allowed(data.dtype), dtype=data.dtype
+                self._identity_for(data.dtype), dtype=data.dtype
             )
         else:
             reduce_fn = getattr(array.backend.nplike, self.name)
