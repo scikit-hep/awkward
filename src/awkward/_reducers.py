@@ -785,7 +785,7 @@ class AxisNoneMin(Min):
         data = array.data
 
         if data.size == 0:
-            result_scalar = nplike.asarray(self.identity)
+            result_scalar = nplike.asarray(self._identity_for(data.dtype))
         else:
             reduce_fn = getattr(nplike, self.name)
 
@@ -919,7 +919,7 @@ class AxisNoneMax(Max):
         data = array.data
 
         if data.size == 0:
-            result_scalar = nplike.asarray(self.identity)
+            result_scalar = nplike.asarray(self._identity_for(data.dtype))
         else:
             reduce_fn = getattr(array.backend.nplike, self.name)
 
@@ -931,4 +931,3 @@ class AxisNoneMax(Max):
         result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
 
         return ak.contents.NumpyArray(result_array, backend=array.backend)
-

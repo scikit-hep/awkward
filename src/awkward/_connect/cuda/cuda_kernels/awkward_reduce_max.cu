@@ -2,19 +2,20 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromptr, parents, lenparents, outlength, identity, invocation_index, err_code) = args
-//     # 1. Check for int64 and promote to float64
-//     if fromptr.dtype == cupy.int64:
-//         data_to_reduce = fromptr[:lenparents].astype(cupy.float64)
-//         # We must also ensure the identity is promoted
-//         working_identity = cupy.array(identity, dtype=cupy.float64)
-//         # Create a temporary float64 buffer for the atomic reduction
-//         temp_out = cupy.full((outlength,), working_identity, dtype=cupy.float64)
-//         cupy.maximum.at(temp_out, parents[:lenparents], data_to_reduce)
-//         # 2. Cast back to the original int64 toptr
-//         toptr[:outlength] = temp_out.astype(cupy.int64)
-//     else:
-//         # Standard logic for supported types (int32, float32, etc.)
-//         toptr[:outlength] = identity
-//         cupy.maximum.at(toptr[:outlength], parents[:lenparents], fromptr[:lenparents])
+//     """
+//     Max reduction for sorted, present parents on device using
+//     dtype promotion for atomic performance.
+//     """
+//     from awkward._connect.cuda._reducers import reduce_with_cupy_at
+//     (toptr, fromptr, parents, lenparents,
+//      outlength, identity, _invocation_index, _err_code) = args
+//     # We use cupy.maximum for the reduction.
+//     # The identity provided in args should be -inf (or the min value for the dtype).
+//     reduce_with_cupy_at(
+//         cupy.maximum,
+//         toptr[:outlength],
+//         fromptr[:lenparents],
+//         parents[:lenparents],
+//         identity
+//    )
 // END PYTHON

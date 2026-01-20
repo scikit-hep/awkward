@@ -131,10 +131,22 @@ class Cupy(ArrayModuleNumpyLike):
         axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
+        initial: float | int | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.min(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        cp = self._module
+
+        out = cp.min(x, axis=axis, keepdims=keepdims, out=maybe_out)
+
+        if initial is not None:
+            initial_val = cp.array(initial, dtype=x.dtype)
+            out = cp.minimum(out, initial_val)
+
+        if maybe_out is not None:
+            maybe_out[...] = out
+            out = maybe_out
+
+        if axis is None and isinstance(out, cp.ndarray):
             return out.item()
         else:
             return out
@@ -161,10 +173,29 @@ class Cupy(ArrayModuleNumpyLike):
         axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
+        initial: float | int | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.max(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        cp = self._module
+
+        if initial is None:
+            # Direct path: CuPy handles the reduction and the output buffer
+            out = cp.max(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        else:
+            # Step 1: Perform the reduction on the GPU
+            out = cp.max(x, axis=axis, keepdims=keepdims)
+
+            # Step 2: Compare against initial_val (Device-to-Device)
+            initial_val = cp.array(initial, dtype=x.dtype)
+            out = cp.maximum(out, initial_val)
+
+            # Step 3: Copy result into the output buffer if it exists
+            if maybe_out is not None:
+                maybe_out[...] = out
+                out = maybe_out
+
+        # Return a Python scalar for axis=None to match nplike expectations
+        if axis is None and isinstance(out, cp.ndarray):
             return out.item()
         else:
             return out
