@@ -567,12 +567,18 @@ class AxisNoneProd(Prod):
     def apply(self, array, _parents, _starts, _shifts, _outlength):
         nplike = array.backend.nplike
         data = array.data
-        m = nplike._module
+
+        if data.dtype.kind in ("M", "m"):  # 'M' is datetime64, 'm' is timedelta64
+            raise ValueError(f"cannot compute the product of {data.dtype!r} values")
+
+        res_dtype = data.dtype
 
         if data.size == 0:
-            result_scalar = nplike.asarray(1, dtype=data.dtype)
+            result_scalar = nplike.asarray(1, res_dtype)
         else:
-            result_scalar = m.prod(data, axis=None)
+            reduce_fn = getattr(nplike, self.name)
+            result_scalar = reduce_fn(data, axis=None)
+            result_scalar = nplike.asarray(result_scalar, res_dtype)
 
         result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
         return ak.contents.NumpyArray(result_array, backend=array.backend)

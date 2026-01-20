@@ -548,6 +548,8 @@ def test_block_boundary_prod_complex12():
 
 
 def test_block_boundary_prod_complex13():
+    import warnings
+
     rng = np.random.default_rng(seed=42)
     array = rng.integers(50, size=1000)
     complex_array = np.vectorize(complex)(
@@ -555,10 +557,12 @@ def test_block_boundary_prod_complex13():
     )
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
-    cpt.assert_allclose(
-        ak.prod(cuda_content, -1, highlevel=False),
-        ak.prod(content, -1, highlevel=False),
-    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        cpt.assert_allclose(
+            ak.prod(cuda_content, -1, highlevel=False),
+            ak.prod(content, -1, highlevel=False),
+        )
 
     offsets = ak.index.Index64(np.array([0, 5, 996, 1000], dtype=np.int64))
     depth1 = ak.contents.ListOffsetArray(offsets, content)

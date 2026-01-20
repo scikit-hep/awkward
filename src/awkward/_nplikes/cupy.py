@@ -200,6 +200,24 @@ class Cupy(ArrayModuleNumpyLike):
         else:
             return out
 
+    def prod(
+        self,
+        x: ArrayLike,
+        *,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLike | None = None,
+    ) -> ArrayLike:
+        (x,) = maybe_materialize(x)
+        # Call the product function from the underlying module (numpy or cupy)
+        out = self._module.prod(x, axis=axis, out=maybe_out, keepdims=keepdims)
+
+        # If axis is None, the result is a 0-d array; convert to a scalar
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
     @classmethod
     def is_own_array_type(cls, type_: type) -> bool:
         """
