@@ -777,9 +777,6 @@ class Min(KernelReducer):
 
 
 class AxisNoneMin(Min):
-    def __init__(self, initial):
-        super().__init__(initial)
-
     def apply(self, array, _parents, _starts, _shifts, _outlength):
         nplike = array.backend.nplike
         data = array.data
@@ -911,9 +908,6 @@ class Max(KernelReducer):
 
 
 class AxisNoneMax(Max):
-    def __init__(self, initial):
-        super().__init__(initial)
-
     def apply(self, array, _parents, _starts, _shifts, _outlength):
         nplike = array.backend.nplike
         data = array.data
