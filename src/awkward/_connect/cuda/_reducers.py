@@ -31,14 +31,17 @@ def reduce_with_cupy_at(op, toptr, fromptr, parents, identity):
     promoted_dtype = getattr(cupy, info["promoted"])
     reinterpret = info["reinterpret"]
 
+    if reinterpret:
+        identity_prom = orig_dtype.type(identity).view(promoted_dtype)
+    else:
+        identity_prom = promoted_dtype(identity)
+
     if orig_dtype == promoted_dtype:
         toptr_prom = toptr
         fromptr_prom = fromptr
-        identity_prom = promoted_dtype(identity)
     else:
         toptr_prom = toptr.astype(promoted_dtype, copy=True)
         fromptr_prom = fromptr.astype(promoted_dtype, copy=False)
-        identity_prom = promoted_dtype(identity)
 
     toptr_prom.fill(identity_prom)
     op.at(toptr_prom, parents, fromptr_prom)
