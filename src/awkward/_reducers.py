@@ -340,8 +340,7 @@ class Sum(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
-    @classmethod
-    def axis_none_reducer(cls):
+    def axis_none_reducer(self):
         return AxisNoneSum()
 
     def apply(
@@ -473,8 +472,7 @@ class Prod(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
-    @classmethod
-    def axis_none_reducer(cls):
+    def axis_none_reducer(self):
         return AxisNoneProd()
 
     def apply(
@@ -574,11 +572,11 @@ class AxisNoneProd(Prod):
         res_dtype = data.dtype
 
         if data.size == 0:
-            result_scalar = nplike.asarray(1, res_dtype)
+            result_scalar = nplike.asarray(1, dtype=res_dtype)
         else:
             reduce_fn = getattr(nplike, self.name)
             result_scalar = reduce_fn(data, axis=None)
-            result_scalar = nplike.asarray(result_scalar, res_dtype)
+            result_scalar = nplike.asarray(result_scalar, dtype=res_dtype)
 
         result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
         return ak.contents.NumpyArray(result_array, backend=array.backend)
@@ -807,7 +805,9 @@ class AxisNoneMin(Min):
         data = array.data
 
         if data.size == 0:
-            result_scalar = nplike.asarray(self._identity_for(data.dtype))
+            result_scalar = nplike.asarray(
+                self._identity_for(data.dtype), dtype=data.dtype
+            )
         else:
             reduce_fn = getattr(nplike, self.name)
             result_scalar = reduce_fn(data, axis=None)
@@ -938,7 +938,9 @@ class AxisNoneMax(Max):
         data = array.data
 
         if data.size == 0:
-            result_scalar = nplike.asarray(self._identity_for(data.dtype))
+            result_scalar = nplike.asarray(
+                self.identity_allowed(data.dtype), dtype=data.dtype
+            )
         else:
             reduce_fn = getattr(array.backend.nplike, self.name)
             result_scalar = reduce_fn(data, axis=None)

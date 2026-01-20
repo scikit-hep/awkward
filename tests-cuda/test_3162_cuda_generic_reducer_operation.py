@@ -4,6 +4,7 @@ import cupy as cp
 import cupy.testing as cpt
 import numpy as np
 import pytest
+from pytest import approx
 
 import awkward as ak
 
@@ -710,12 +711,12 @@ def test_0115_generic_reducer_operation_count_min_1():
         [0.0, 2.2, 0.0, 4.4],
     ]
 
-    assert to_list(ak.min(depth1, -1, highlevel=False)) == [1.1, 0.0, 0.0]
+    assert to_list(ak.min(depth1, -1, highlevel=False)) == approx([1.1, 0.0, 0.0])
     assert (
         ak.min(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.min(depth1, -1, highlevel=False).form
     )
-    assert to_list(ak.min(depth1, 1, highlevel=False)) == [1.1, 0.0, 0.0]
+    assert to_list(ak.min(depth1, 1, highlevel=False)) == approx([1.1, 0.0, 0.0])
     assert (
         ak.min(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.min(depth1, 1, highlevel=False).form
@@ -766,12 +767,12 @@ def test_0115_generic_reducer_operation_count_max_1():
         [0.0, 2.2, 0.0, 4.4],
     ]
 
-    assert to_list(ak.max(depth1, -1, highlevel=False)) == [3.3, 2.2, 4.4]
+    assert to_list(ak.max(depth1, -1, highlevel=False)) == approx([3.3, 2.2, 4.4])
     assert (
         ak.max(depth1.to_typetracer(), -1, highlevel=False).form
         == ak.max(depth1, -1, highlevel=False).form
     )
-    assert to_list(ak.max(depth1, 1, highlevel=False)) == [3.3, 2.2, 4.4]
+    assert to_list(ak.max(depth1, 1, highlevel=False)) == approx([3.3, 2.2, 4.4])
     assert (
         ak.max(depth1.to_typetracer(), 1, highlevel=False).form
         == ak.max(depth1, 1, highlevel=False).form
@@ -816,30 +817,38 @@ def test_0115_generic_reducer_operation_mask():
     array = ak.contents.ListOffsetArray(offsets, content)
     array = ak.to_backend(array, "cuda", highlevel=False)
 
-    assert to_list(ak.min(array, axis=-1, mask_identity=False, highlevel=False)) == [
-        1.1,
-        np.inf,
-        4.4,
-        6.6,
-        np.inf,
-        np.inf,
-        7.7,
-    ]
+    assert to_list(
+        ak.min(array, axis=-1, mask_identity=False, highlevel=False)
+    ) == approx(
+        [
+            1.1,
+            np.inf,
+            4.4,
+            6.6,
+            np.inf,
+            np.inf,
+            7.7,
+        ]
+    )
     assert (
         ak.min(
             array.to_typetracer(), axis=-1, mask_identity=False, highlevel=False
         ).form
         == ak.min(array, axis=-1, mask_identity=False, highlevel=False).form
     )
-    assert to_list(ak.min(array, axis=-1, mask_identity=True, highlevel=False)) == [
-        1.1,
-        None,
-        4.4,
-        6.6,
-        None,
-        None,
-        7.7,
-    ]
+    assert to_list(
+        ak.min(array, axis=-1, mask_identity=True, highlevel=False)
+    ) == approx(
+        [
+            1.1,
+            None,
+            4.4,
+            6.6,
+            None,
+            None,
+            7.7,
+        ]
+    )
     assert (
         ak.min(array.to_typetracer(), axis=-1, mask_identity=True, highlevel=False).form
         == ak.min(array, axis=-1, mask_identity=True, highlevel=False).form

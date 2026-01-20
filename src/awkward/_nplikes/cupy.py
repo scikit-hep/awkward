@@ -209,10 +209,8 @@ class Cupy(ArrayModuleNumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        # Call the product function from the underlying module (numpy or cupy)
         out = self._module.prod(x, axis=axis, out=maybe_out, keepdims=keepdims)
 
-        # If axis is None, the result is a 0-d array; convert to a scalar
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:

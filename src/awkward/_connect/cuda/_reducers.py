@@ -69,6 +69,7 @@ def reduce_with_cupy_at(op, toptr, fromptr, parents, identity):
         fromptr_prom = fromptr.astype(promoted_dtype, copy=False)
 
     toptr_prom.fill(identity_prom)
+
     if op == cupy.multiply:
         _multiply_at_cuda(toptr_prom, parents, fromptr_prom)
     else:
