@@ -473,6 +473,10 @@ class Prod(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
+    @classmethod
+    def axis_none_reducer(cls):
+        return AxisNoneProd()
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -557,6 +561,21 @@ class Prod(KernelReducer):
                 result.view(self._promote_integer_rank(array.dtype)),
                 backend=array.backend,
             )
+
+
+class AxisNoneProd(Prod):
+    def apply(self, array, _parents, _starts, _shifts, _outlength):
+        nplike = array.backend.nplike
+        data = array.data
+        m = nplike._module
+
+        if data.size == 0:
+            result_scalar = nplike.asarray(1, dtype=data.dtype)
+        else:
+            result_scalar = m.prod(data, axis=None)
+
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
 
 
 class Any(KernelReducer):
@@ -785,11 +804,11 @@ class AxisNoneMin(Min):
             result_scalar = nplike.asarray(self._identity_for(data.dtype))
         else:
             reduce_fn = getattr(nplike, self.name)
+            result_scalar = reduce_fn(data, axis=None)
 
-            if self.initial is None:
-                result_scalar = reduce_fn(data, axis=None)
-            else:
-                result_scalar = reduce_fn(data, axis=None, initial=self.initial)
+        if self.initial is not None:
+            initial_val = nplike.asarray(self.initial, dtype=data.dtype)
+            result_scalar = nplike._module.minimum(result_scalar, initial_val)
 
         result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
 
@@ -916,11 +935,11 @@ class AxisNoneMax(Max):
             result_scalar = nplike.asarray(self._identity_for(data.dtype))
         else:
             reduce_fn = getattr(array.backend.nplike, self.name)
+            result_scalar = reduce_fn(data, axis=None)
 
-            if self.initial is None:
-                result_scalar = reduce_fn(data, axis=None)
-            else:
-                result_scalar = reduce_fn(data, axis=None, initial=self.initial)
+        if self.initial is not None:
+            initial_val = nplike.asarray(self.initial, dtype=data.dtype)
+            result_scalar = nplike._module.maximum(result_scalar, initial_val)
 
         result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
 

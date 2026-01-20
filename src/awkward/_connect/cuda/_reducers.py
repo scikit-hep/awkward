@@ -22,6 +22,31 @@ CUPY_UFUNC_AT_PROMOTION = {
     "float64": {"promoted": "float64", "reinterpret": False},
 }
 
+_multiply_at_kernel = cp.ElementwiseKernel(
+    "S val, raw I parents, raw S fromptr",  # S is input type, T is output type
+    "raw T toptr",
+    """
+    // We must cast the address to 64-bit for atomicCAS
+    unsigned long long* address = (unsigned long long*)&toptr[parents[i]];
+    unsigned long long old_val = *address;
+    unsigned long long assumed;
+
+    do {
+        assumed = old_val;
+        // Perform math in the promoted type T
+        T result = (T)assumed * (T)fromptr[i];
+        old_val = atomicCAS(address, assumed, (unsigned long long)result);
+    } while (assumed != old_val);
+    """,
+    "awkward_multiply_at",
+)
+
+
+# FIXME: CuPy: cupy.multiply.at is NotImplementedError
+def _multiply_at_cuda(toptr, parents, fromptr):
+    # This invokes the element-wise kernel which handles the loop per element
+    _multiply_at_kernel(fromptr, parents, fromptr, toptr)
+
 
 def reduce_with_cupy_at(op, toptr, fromptr, parents, identity):
     import cupy
@@ -44,7 +69,10 @@ def reduce_with_cupy_at(op, toptr, fromptr, parents, identity):
         fromptr_prom = fromptr.astype(promoted_dtype, copy=False)
 
     toptr_prom.fill(identity_prom)
-    op.at(toptr_prom, parents, fromptr_prom)
+    if op == cupy.multiply:
+        _multiply_at_cuda(toptr_prom, parents, fromptr_prom)
+    else:
+        op.at(toptr_prom, parents, fromptr_prom)
 
     if orig_dtype != promoted_dtype:
         if reinterpret:
