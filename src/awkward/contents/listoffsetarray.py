@@ -2063,7 +2063,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
         ListCol = cudf.core.column.lists.ListColumn
 
-       
         col = ListCol(
             length,
             children=(ind_buf, cont),
@@ -2073,7 +2072,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             out = col.set_mask(m)
             if out is not None:
                 col = out
-
 
         return col
 
