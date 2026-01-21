@@ -136,7 +136,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_max_complex",
         "awkward_reduce_min",
         "awkward_reduce_min_complex",
-        "awkward_reduce_argmin",
+        # "awkward_reduce_argmin",
         "awkward_reduce_argmin_complex",
         # "awkward_reduce_argmax",
         "awkward_reduce_argmax_complex",
