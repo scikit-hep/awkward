@@ -173,10 +173,11 @@ def awkward_reduce_argmin(
     parents_length,
     outlength,
 ):
+    index_dtype = parents_data.dtype
     ak_array = gpu_struct(
         {
             "data": input_data.dtype.type,
-            "local_index": cp.int64,
+            "local_index": index_dtype,
         }
     )
 
@@ -210,14 +211,14 @@ def awkward_reduce_argmin(
 
     # Initial value for the reduction
     # max value gets transformed to input_data.dtype automatically?
-    max = cp.iinfo(cp.int64).max
+    max = cp.iinfo(index_dtype).max
     h_init = ak_array(max, max)
 
     # Perform the segmented reduce
     segmented_reduce(input_struct, _result, start_o, end_o, min_op, h_init, outlength)
 
     # TODO: here converts float to int too, fix this?
-    _result = _result.view(cp.int64).reshape(-1, 2)
+    _result = _result.view(index_dtype).reshape(-1, 2)
     _result = _result[:, 1]
 
     # pass the result outside the function
