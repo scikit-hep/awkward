@@ -1168,16 +1168,17 @@ class RecordArray(RecordMeta[Content], Content):
             {field: c.dtype for field, c in zip(self.fields, children, strict=True)}
         )
         m = mask._to_cudf(cudf, None, length) if mask else None
+        StructCol = cudf.core.column.StructColumn
 
-        if parse_version(cudf.__version__) >= parse_version("24.10.00"):
-            return cudf.core.column.StructColumn.from_children(
+        if hasattr(StructCol, "from_children"):
+            return StructCol.from_children(
                 children=children,
                 dtype=dt,
                 size=length,
                 mask=m,
             )
         else:
-            return StructColumn(
+            return StructCol(
                 data=None,
                 children=children,
                 dtype=dt,
