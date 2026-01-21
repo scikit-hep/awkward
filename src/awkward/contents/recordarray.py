@@ -11,7 +11,6 @@ try:
 except ImportError:
     StructColumn = None
 
-from packaging.version import parse as parse_version
 
 import awkward as ak
 from awkward._backends.backend import Backend
