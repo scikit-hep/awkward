@@ -2042,14 +2042,15 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             from cudf.utils.dtypes import CUDF_STRING_DTYPE
 
             data = cudf.core.buffer.as_buffer(cupy.asarray(self._content.data))
-            if parse_version(cudf.__version__) >= parse_version("24.10.00"):
-                return StringColumn.from_offsets_and_chars(
+            StrCol = StringColumn
+            if hasattr(StrCol, "from_offsets_and_chars"):
+                return StrCol.from_offsets_and_chars(
                     offsets=ind_buf,
                     chars=data,
                     mask=m,
                 )
             else:
-                return StringColumn(
+                return StrCol(
                     data=data,
                     size=len(ind_buf) - 1,
                     dtype=CUDF_STRING_DTYPE,
@@ -2057,20 +2058,25 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     children=(ind_buf,),
                 )
 
+        ListCol = cudf.core.column.lists.ListColumn
+
         try:
-            return cudf.core.column.lists.ListColumn(
+            return ListCol(
                 size=length,
                 mask=m,
                 children=(ind_buf, cont),
                 dtype=cudf.core.dtypes.ListDtype(cont.dtype),
             )
         except TypeError:
-            return cudf.core.column.lists.ListColumn(
+            col = ListCol(
                 length,
                 mask=m,
                 children=(ind_buf, cont),
                 dtype=cudf.core.dtypes.ListDtype(cont.dtype),
             )
+            if m is not None:
+                col = col.set_mask(m)
+            return col
 
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
