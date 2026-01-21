@@ -2050,33 +2050,32 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     mask=m,
                 )
             else:
-                return StrCol(
-                    data=data,
+                col = StrCol(
+                    children=(ind_buf, data),
                     size=len(ind_buf) - 1,
                     dtype=CUDF_STRING_DTYPE,
-                    mask=m,
-                    children=(ind_buf,),
                 )
+                if m is not None and hasattr(col, "set_mask"):
+                    out = col.set_mask(m)
+                    if out is not None:
+                        col = out
+                return col
 
         ListCol = cudf.core.column.lists.ListColumn
 
-        try:
-            return ListCol(
-                size=length,
-                mask=m,
-                children=(ind_buf, cont),
-                dtype=cudf.core.dtypes.ListDtype(cont.dtype),
-            )
-        except TypeError:
-            col = ListCol(
-                length,
-                mask=m,
-                children=(ind_buf, cont),
-                dtype=cudf.core.dtypes.ListDtype(cont.dtype),
-            )
-            if m is not None:
-                col = col.set_mask(m)
-            return col
+       
+        col = ListCol(
+            length,
+            children=(ind_buf, cont),
+            dtype=cudf.core.dtypes.ListDtype(cont.dtype),
+        )
+        if m is not None and hasattr(col, "set_mask"):
+            out = col.set_mask(m)
+            if out is not None:
+                col = out
+
+
+        return col
 
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
