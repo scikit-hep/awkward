@@ -1,7 +1,7 @@
 #!/usr/bin/env -S uv run --script
 
 # /// script
-# dependencies = ["nox>=2024.4.15"]
+# dependencies = ["nox>=2025.2.09"]
 # ///
 
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
