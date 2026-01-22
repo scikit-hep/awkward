@@ -114,6 +114,7 @@ def awkward_reduce_argmax(
     outlength,
 ):
     index_dtype = parents_data.dtype
+
     def segment_reduce_op(segment_id: index_dtype) -> index_dtype:
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
