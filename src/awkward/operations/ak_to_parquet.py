@@ -334,13 +334,13 @@ def _impl(
             if only == "string":
                 return [
                     x
-                    for x, y in zip(parquet_column_names, column_types)
+                    for x, y in zip(parquet_column_names, column_types, strict=False)
                     if y == "string"
                 ]
             elif only == "floating":
                 return [
                     x
-                    for x, y in zip(parquet_column_names, column_types)
+                    for x, y in zip(parquet_column_names, column_types, strict=False)
                     if isinstance(y, metadata.dtype)
                     and issubclass(y.type, metadata.floating)
                 ]

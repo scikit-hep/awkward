@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Collection, Iterator, Sequence, Set
+from collections.abc import Callable, Collection, Iterator, Sequence, Set
 from functools import lru_cache
 from numbers import Number
-from typing import Callable
 
 import numpy
 
@@ -670,7 +669,8 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
         # Interpret the arguments under these dtypes
         resolved_args = [
-            self.asarray(arg, dtype=dtype) for arg, dtype in zip(args, resolved_dtypes)
+            self.asarray(arg, dtype=dtype)
+            for arg, dtype in zip(args, resolved_dtypes, strict=False)
         ]
         # Broadcast to ensure all-scalar or all-nd-array
         broadcasted_args = self.broadcast_arrays(*resolved_args)
@@ -707,7 +707,8 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         broadcasted_shape = broadcasted_args[0].shape
         # Choose the broadcasted argument if it wasn't a Python scalar
         non_generic_value_promoted_args = [
-            y if hasattr(x, "ndim") else x for x, y in zip(args, broadcasted_args)
+            y if hasattr(x, "ndim") else x
+            for x, y in zip(args, broadcasted_args, strict=False)
         ]
         # Build proxy (empty) arrays
         proxy_args = [
@@ -1195,7 +1196,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         if len(new_shape) != len(shape):
             raise ValueError
 
-        for result, intended in zip(new_shape, shape):
+        for result, intended in zip(new_shape, shape, strict=False):
             if intended is unknown_length:
                 continue
             if result is unknown_length:
@@ -1784,7 +1785,7 @@ def _attach_report(
 
     elif isinstance(layout, ak.contents.RecordArray):
         assert isinstance(form, ak.forms.RecordForm)
-        for x, y in zip(layout.contents, form.contents):
+        for x, y in zip(layout.contents, form.contents, strict=False):
             _attach_report(x, y, report, getkey)
 
     elif isinstance(layout, (ak.contents.RegularArray, ak.contents.UnmaskedArray)):
@@ -1797,7 +1798,7 @@ def _attach_report(
         layout.tags.data.report = report  # type: ignore[attr-defined]
         layout.index.data.form_key = getkey(form, "index")  # type: ignore[attr-defined]
         layout.index.data.report = report  # type: ignore[attr-defined]
-        for x, y in zip(layout.contents, form.contents):
+        for x, y in zip(layout.contents, form.contents, strict=False):
             _attach_report(x, y, report, getkey)
 
     else:

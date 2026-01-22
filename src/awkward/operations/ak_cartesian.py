@@ -232,7 +232,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
                 )
             )
             fields = list(arrays.keys())
-            array_layouts = dict(zip(fields, layouts))
+            array_layouts = dict(zip(fields, layouts, strict=False))
 
             # propagate named axis from input to output,
             #   use strategy "unify" (see: awkward._namedaxis)
@@ -329,7 +329,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
             )
         ]
         outs = [
-            ak.contents.IndexedArray.simplified(x, y) for x, y in zip(indexes, layouts)
+            ak.contents.IndexedArray.simplified(x, y)
+            for x, y in zip(indexes, layouts, strict=False)
         ]
 
         result = ak.contents.RecordArray(outs, fields, parameters=parameters)

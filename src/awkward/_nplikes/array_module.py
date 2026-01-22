@@ -279,7 +279,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         # Interpret the arguments under these dtypes, converting scalars to length-1 arrays
         resolved_args = [
             cast("ArrayLikeT", self.asarray(arg, dtype=dtype))
-            for arg, dtype in zip(args, resolved_dtypes)
+            for arg, dtype in zip(args, resolved_dtypes, strict=False)
         ]
         # Broadcast to ensure all-scalar or all-nd-array
         broadcasted_args = self.broadcast_arrays(*resolved_args)
@@ -307,7 +307,8 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         broadcasted_args = self.broadcast_arrays(*resolved_args)
         # Choose the broadcasted argument if it wasn't a Python scalar
         non_generic_value_promoted_args = [
-            y if hasattr(x, "ndim") else x for x, y in zip(args, broadcasted_args)
+            y if hasattr(x, "ndim") else x
+            for x, y in zip(args, broadcasted_args, strict=False)
         ]
         # Allow other nplikes to replace implementation
         impl = self.prepare_ufunc(ufunc)

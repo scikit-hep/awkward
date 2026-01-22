@@ -1300,7 +1300,7 @@ class Content(Meta):
                             outimag[i] = f2(f1(f0(x)))
 
                 if outimag is not None:
-                    for i, (real, imag) in enumerate(zip(out, outimag)):
+                    for i, (real, imag) in enumerate(zip(out, outimag, strict=False)):
                         out[i] = {complex_real_string: real, complex_imag_string: imag}
 
             return out

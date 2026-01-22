@@ -696,7 +696,7 @@ def _reconstitute(
                 shape_generator,
                 enable_virtualarray_caching,
             )
-            for content, field in zip(form.contents, form.fields)
+            for content, field in zip(form.contents, form.fields, strict=False)
         ]
         return ak.contents.RecordArray(
             contents,
