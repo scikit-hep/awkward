@@ -487,9 +487,7 @@ def test_bool_missing():
     x1, x2, x3, x4, x5 = True, True, True, False, None
     mask = [x1, x2, x3, x4, x5]
     expected = [
-        m if m is None else x
-        for x, m in zip(data, mask, strict=True)
-        if m is not False
+        m if m is None else x for x, m in zip(data, mask, strict=True) if m is not False
     ]
     array2 = ak.highlevel.Array(mask, check_valid=True).layout
 

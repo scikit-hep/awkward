@@ -670,7 +670,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         # Interpret the arguments under these dtypes
         resolved_args = [
             self.asarray(arg, dtype=dtype)
-            for arg, dtype in zip(args, resolved_dtypes[:len(args)], strict=True)
+            for arg, dtype in zip(args, resolved_dtypes[: len(args)], strict=True)
         ]
         # Broadcast to ensure all-scalar or all-nd-array
         broadcasted_args = self.broadcast_arrays(*resolved_args)

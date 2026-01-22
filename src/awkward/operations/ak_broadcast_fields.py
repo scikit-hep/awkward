@@ -165,9 +165,7 @@ def _recurse(inputs):
     ]
 
     # Rebuild the outermost layouts using pull-back functions
-    return [
-        pull(layout) for pull, layout in zip(pullbacks, inner_layouts, strict=True)
-    ]
+    return [pull(layout) for pull, layout in zip(pullbacks, inner_layouts, strict=True)]
 
 
 def _impl(arrays, highlevel, behavior, attrs):

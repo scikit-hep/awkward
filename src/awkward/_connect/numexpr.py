@@ -187,9 +187,7 @@ def re_evaluate(local_dict=None):
             ]
             return (
                 ak.contents.NumpyArray(
-                    numexpr.re_evaluate(
-                        dict(zip(names, input_primitives, strict=True))
-                    )
+                    numexpr.re_evaluate(dict(zip(names, input_primitives, strict=True)))
                 ),
             )
         else:

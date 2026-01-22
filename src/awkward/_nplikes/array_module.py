@@ -279,7 +279,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         # Interpret the arguments under these dtypes, converting scalars to length-1 arrays
         resolved_args = [
             cast("ArrayLikeT", self.asarray(arg, dtype=dtype))
-            for arg, dtype in zip(args, resolved_dtypes[:len(args)], strict=True)
+            for arg, dtype in zip(args, resolved_dtypes[: len(args)], strict=True)
         ]
         # Broadcast to ensure all-scalar or all-nd-array
         broadcasted_args = self.broadcast_arrays(*resolved_args)
