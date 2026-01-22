@@ -123,21 +123,6 @@ def awkward_reduce_argmax(
         # return a global index
         return np.argmax(segment) + start_idx
 
-    # compare the values of the arrays
-    # def max_op(a: ak_array, b: ak_array):
-    #     return a if a.data > b.data else b
-
-    # use a helper function to get the local indices
-    # local_indices = local_idx_from_parents(parents_data, parents_length)
-
-    # use global indices instead
-    # global_indices = cp.arange(0, parents_length + 1, dtype=index_dtype)
-
-    # Combine data and their indices into a single structure
-    # input_struct = ZipIterator(input_data, global_indices)
-    # alternative way
-    # input_struct = cp.stack((input_data, global_indices), axis=1).view(ak_array.dtype)
-
     # Prepare the start and end offsets
     offsets = parents_to_offsets(parents_data, parents_length)
     start_o = offsets[:-1]
@@ -146,18 +131,11 @@ def awkward_reduce_argmax(
     # Prepare the output array
     _result = result
     _result = cp.concatenate((result, result))
-    # _result = _result.view(ak_array.dtype)
 
     # alternative way
-    # _result = cp.zeros([outlength], dtype= ak_array.dtype)
-
-    # Initial value for the reduction
-    # min value gets transformed to input_data.dtype automatically?
-    # min = cp.iinfo(index_dtype).min
-    # h_init = ak_array(min, min)
+    # _result = cp.zeros([outlength])
 
     # Perform the segmented reduce
-    # segmented_reduce(input_struct, _result, start_o, end_o, max_op, h_init, outlength)
     segment_ids = CountingIterator(cp.int64(0))
     unary_transform(segment_ids, _result, segment_reduce_op, outlength)
 
