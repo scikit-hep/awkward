@@ -1367,7 +1367,7 @@ class RecordGenerator(Generator, ak._lookup.RecordLookup):
                 fieldnames = self.fields
             getfields = []
             for i, (fieldname, content) in enumerate(
-                zip(fieldnames, self.contents, strict=False)
+                zip(fieldnames, self.contents, strict=True)
             ):
                 if re.match("^[A-Za-z_][A-Za-z_0-9]*$", fieldname) is not None:
                     getfields.append(

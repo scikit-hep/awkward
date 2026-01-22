@@ -667,7 +667,7 @@ class NamedAxesWithDims:
             )
 
     def __iter__(self) -> tp.Iterator[tuple[AxisMapping, int | None]]:
-        yield from zip(self.named_axis, self.ndims, strict=False)
+        yield from zip(self.named_axis, self.ndims, strict=True)
 
     @classmethod
     def prepare_contexts(

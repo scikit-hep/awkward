@@ -435,7 +435,7 @@ def _form_has_type(form, type_):
         if form.is_tuple:
             return all(
                 _form_has_type(c, t)
-                for c, t in zip(form.contents, type_.contents, strict=False)
+                for c, t in zip(form.contents, type_.contents, strict=True)
             )
         else:
             return (frozenset(form.fields) == frozenset(type_.fields)) and all(
@@ -448,7 +448,7 @@ def _form_has_type(form, type_):
         for contents in permutations(form.contents):
             if all(
                 _form_has_type(form, type_)
-                for form, type_ in zip(contents, type_.contents, strict=False)
+                for form, type_ in zip(contents, type_.contents, strict=True)
             ):
                 return True
         return False
@@ -558,7 +558,7 @@ def enforce_concatenated_form(layout, form):
         for form_projection_indices in permutations(form_indices, len(layout.contents)):
             if all(
                 mergeable(c, form_contents[i])
-                for c, i in zip(layout.contents, form_projection_indices, strict=False)
+                for c, i in zip(layout.contents, form_projection_indices, strict=True)
             ):
                 break
         else:
@@ -568,7 +568,7 @@ def enforce_concatenated_form(layout, form):
 
         next_contents = [
             enforce_concatenated_form(c, form.contents[i])
-            for c, i in zip(layout.contents, form_projection_indices, strict=False)
+            for c, i in zip(layout.contents, form_projection_indices, strict=True)
         ]
         next_contents.extend(
             [

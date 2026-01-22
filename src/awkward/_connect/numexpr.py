@@ -120,7 +120,7 @@ def evaluate(
                 ak.contents.NumpyArray(
                     numexpr.evaluate(
                         expression,
-                        dict(zip(names, input_primitives, strict=False)),
+                        dict(zip(names, input_primitives, strict=True)),
                         {},
                         order=order,
                         casting=casting,
@@ -188,7 +188,7 @@ def re_evaluate(local_dict=None):
             return (
                 ak.contents.NumpyArray(
                     numexpr.re_evaluate(
-                        dict(zip(names, input_primitives, strict=False))
+                        dict(zip(names, input_primitives, strict=True))
                     )
                 ),
             )

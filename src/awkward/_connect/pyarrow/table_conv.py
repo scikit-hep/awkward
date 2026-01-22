@@ -143,7 +143,7 @@ def native_arrow_field_to_akarraytype(
             awkwardized_fields = [
                 native_arrow_field_to_akarraytype(field, meta)  # Recurse
                 for field, meta in zip(
-                    fields, metadata["subfield_metadata"], strict=False
+                    fields, metadata["subfield_metadata"], strict=True
                 )
             ]
         elif len(fields) < len(sub_meta):
@@ -235,7 +235,7 @@ def replace_schema(table: pyarrow.Table, new_schema: pyarrow.Schema) -> pyarrow.
     new_batches = []
     for batch in table.to_batches():
         columns = []
-        for col, new_field in zip(batch.columns, new_schema, strict=False):
+        for col, new_field in zip(batch.columns, new_schema, strict=True):
             columns.append(array_with_replacement_type(col, new_field.type))
         new_batches.append(
             pyarrow.RecordBatch.from_arrays(arrays=columns, schema=new_schema)
@@ -259,7 +259,7 @@ def array_with_replacement_type(
         )
     children_new = [
         array_with_replacement_type(child, new_child_type.type)
-        for child, new_child_type in zip(children_orig, new_fields, strict=False)
+        for child, new_child_type in zip(children_orig, new_fields, strict=True)
     ]
     own_buffers = orig_array.buffers()[: orig_array.type.num_buffers]
     if isinstance(native_type, pyarrow.lib.DictionaryType):

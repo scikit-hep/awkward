@@ -670,7 +670,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         # Interpret the arguments under these dtypes
         resolved_args = [
             self.asarray(arg, dtype=dtype)
-            for arg, dtype in zip(args, resolved_dtypes, strict=False)
+            for arg, dtype in zip(args, resolved_dtypes[:len(args)], strict=True)
         ]
         # Broadcast to ensure all-scalar or all-nd-array
         broadcasted_args = self.broadcast_arrays(*resolved_args)
@@ -708,7 +708,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         # Choose the broadcasted argument if it wasn't a Python scalar
         non_generic_value_promoted_args = [
             y if hasattr(x, "ndim") else x
-            for x, y in zip(args, broadcasted_args, strict=False)
+            for x, y in zip(args, broadcasted_args, strict=True)
         ]
         # Build proxy (empty) arrays
         proxy_args = [
@@ -1196,7 +1196,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         if len(new_shape) != len(shape):
             raise ValueError
 
-        for result, intended in zip(new_shape, shape, strict=False):
+        for result, intended in zip(new_shape, shape, strict=True):
             if intended is unknown_length:
                 continue
             if result is unknown_length:
@@ -1785,7 +1785,7 @@ def _attach_report(
 
     elif isinstance(layout, ak.contents.RecordArray):
         assert isinstance(form, ak.forms.RecordForm)
-        for x, y in zip(layout.contents, form.contents, strict=False):
+        for x, y in zip(layout.contents, form.contents, strict=True):
             _attach_report(x, y, report, getkey)
 
     elif isinstance(layout, (ak.contents.RegularArray, ak.contents.UnmaskedArray)):
@@ -1798,7 +1798,7 @@ def _attach_report(
         layout.tags.data.report = report  # type: ignore[attr-defined]
         layout.index.data.form_key = getkey(form, "index")  # type: ignore[attr-defined]
         layout.index.data.report = report  # type: ignore[attr-defined]
-        for x, y in zip(layout.contents, form.contents, strict=False):
+        for x, y in zip(layout.contents, form.contents, strict=True):
             _attach_report(x, y, report, getkey)
 
     else:

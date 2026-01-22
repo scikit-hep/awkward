@@ -323,7 +323,7 @@ class RecordArray(RecordMeta[Content], Content):
         # also for tuple records
         contents = [
             x._form_with_key_path((*path, k))
-            for k, x in zip(self.fields, self._contents, strict=False)
+            for k, x in zip(self.fields, self._contents, strict=True)
         ]
 
         return self.form_cls(
@@ -672,7 +672,7 @@ class RecordArray(RecordMeta[Content], Content):
             if self.is_tuple and other.is_tuple:
                 if len(self._contents) == len(other._contents):
                     for self_cont, other_cont in zip(
-                        self._contents, other._contents, strict=False
+                        self._contents, other._contents, strict=True
                     ):
                         if not self_cont._mergeable_next(
                             other_cont, mergebool, mergecastable
@@ -1155,7 +1155,7 @@ class RecordArray(RecordMeta[Content], Content):
             c._to_cudf(cudf, mask=None, length=length) for c in self.contents
         )
         dt = cudf.core.dtypes.StructDtype(
-            {field: c.dtype for field, c in zip(self.fields, children, strict=False)}
+            {field: c.dtype for field, c in zip(self.fields, children, strict=True)}
         )
         m = mask._to_cudf(cudf, None, length) if mask else None
         return cudf.core.column.struct.StructColumn(
@@ -1183,11 +1183,11 @@ class RecordArray(RecordMeta[Content], Content):
         out = backend.nplike.empty(
             self.length,
             dtype=[
-                (str(n), x.dtype) for n, x in zip(self.fields, contents, strict=False)
+                (str(n), x.dtype) for n, x in zip(self.fields, contents, strict=True)
             ],
         )
         mask = None
-        for n, x in zip(self.fields, contents, strict=False):
+        for n, x in zip(self.fields, contents, strict=True):
             if allow_missing and isinstance(x, self._backend.nplike.ma.MaskedArray):
                 if mask is None:
                     mask = backend.nplike.ma.zeros(
@@ -1323,7 +1323,7 @@ class RecordArray(RecordMeta[Content], Content):
             contents = [x._to_list(behavior, json_conversions) for x in self._contents]
             out = [None] * self.length
             for i in range(self.length):
-                out[i] = dict(zip(fields, [x[i] for x in contents], strict=False))
+                out[i] = dict(zip(fields, [x[i] for x in contents], strict=True))
             return out
 
     def _to_backend(self, backend: Backend) -> Self:
@@ -1365,6 +1365,6 @@ class RecordArray(RecordMeta[Content], Content):
                 content._is_equal_to(
                     other.content(field), index_dtype, numpyarray, all_parameters
                 )
-                for field, content in zip(self.fields, self._contents, strict=False)
+                for field, content in zip(self.fields, self._contents, strict=True)
             )
         )

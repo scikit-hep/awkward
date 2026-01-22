@@ -78,7 +78,7 @@ def compare_results(cpu_list, jax_list):
         )
 
         # Compare each element
-        for cpu_item, jax_item in zip(cpu_list, jax_list, strict=False):
+        for cpu_item, jax_item in zip(cpu_list, jax_list, strict=True):
             compare_results(cpu_item, jax_item)
     else:
         # For non-numeric types, use exact equality

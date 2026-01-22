@@ -289,7 +289,7 @@ def _expand_braces(text, seen=None):
     else:
         for combo in itertools.product(*alts):
             replaced = list(text)
-            for (start, stop), replacement in zip(spans, combo, strict=False):
+            for (start, stop), replacement in zip(spans, combo, strict=True):
                 replaced[start:stop] = replacement
             yield from _expand_braces("".join(replaced), seen)
 

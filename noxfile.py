@@ -47,7 +47,7 @@ def tests(session):
     Run the unit and regular tests.
     """
     session.install("-r", "requirements-test-full.txt", "--only-binary=:all:")
-    session.install("./awkward-cpp", ".")
+    session.install("./awkward-cpp", "-e.")
     session.run("pytest", *session.posargs if session.posargs else ["tests"])
 
 

@@ -72,7 +72,7 @@ class AuxData(Generic[T]):
         data_buffers, other_buffers = split_buffers(buffers)
 
         # now we need to flatten the data buffers
-        data_buffer_keys, data_flat_buffers = zip(*data_buffers.items(), strict=False)
+        data_buffer_keys, data_flat_buffers = zip(*data_buffers.items(), strict=True)
         return data_flat_buffers, AuxData(
             data_buffer_keys=data_buffer_keys,
             other_buffers=other_buffers,
@@ -95,7 +95,7 @@ class AuxData(Generic[T]):
                 )
 
         # reconstitute data buffers
-        data_buffers = dict(zip(self._data_buffer_keys, data_buffers, strict=False))
+        data_buffers = dict(zip(self._data_buffer_keys, data_buffers, strict=True))
 
         # combine data buffers with other buffers
         buffers = {**self._other_buffers, **data_buffers}

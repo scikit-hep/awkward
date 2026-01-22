@@ -1444,7 +1444,7 @@ class NumpyArray(NumpyMeta, Content):
                 # Shapes agree
                 and all(
                     x is unknown_length or y is unknown_length or x == y
-                    for x, y in zip(self.shape, other.shape, strict=False)
+                    for x, y in zip(self.shape, other.shape, strict=True)
                 )
             )
         )

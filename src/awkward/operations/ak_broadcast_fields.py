@@ -97,12 +97,12 @@ def _descend_to_record_or_leaf(layout, pullback=_identity):
 def _recurse(inputs):
     # Descend to records, identities, or leaves
     pullbacks, next_inputs = zip(
-        *[_descend_to_record_or_leaf(x) for x in inputs], strict=False
+        *[_descend_to_record_or_leaf(x) for x in inputs], strict=True
     )
     # With no records, we can exit here
     if not any(c.is_record for c in next_inputs):
         return [
-            pull(layout) for pull, layout in zip(pullbacks, next_inputs, strict=False)
+            pull(layout) for pull, layout in zip(pullbacks, next_inputs, strict=True)
         ]
     # Otherwise, we can only work with all non-record, or all record/identity
     elif not all(c.is_record or c.is_identity_like for c in next_inputs):
@@ -146,7 +146,7 @@ def _recurse(inputs):
         )
 
     # Now we transpose the list-of-lists to group layouts by original record, instead of by the field
-    layouts_by_record = zip(*layouts_by_field, strict=False)
+    layouts_by_record = zip(*layouts_by_field, strict=True)
     # Rebuild the original records with the new fields
     next_records = iter(
         [
@@ -154,7 +154,7 @@ def _recurse(inputs):
                 fields=all_fields,
                 contents=contents,
             )
-            for record, contents in zip(next_records, layouts_by_record, strict=False)
+            for record, contents in zip(next_records, layouts_by_record, strict=True)
         ]
     )
 
@@ -166,7 +166,7 @@ def _recurse(inputs):
 
     # Rebuild the outermost layouts using pull-back functions
     return [
-        pull(layout) for pull, layout in zip(pullbacks, inner_layouts, strict=False)
+        pull(layout) for pull, layout in zip(pullbacks, inner_layouts, strict=True)
     ]
 
 
@@ -194,5 +194,5 @@ def _impl(arrays, highlevel, behavior, attrs):
             highlevel=highlevel,
             attrs=attrs_of_obj(array_in, attrs=attrs),
         )
-        for layout_out, array_in in zip(result_layouts, arrays, strict=False)
+        for layout_out, array_in in zip(result_layouts, arrays, strict=True)
     ]
