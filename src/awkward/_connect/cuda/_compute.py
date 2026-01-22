@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
-from cuda.compute import CountingIterator, unary_transform
+# TODO: delete these after modifying argmin
+from cuda.compute import (
+    CountingIterator,
+    ZipIterator,
+    gpu_struct,
+    segmented_reduce,
+    unary_transform,
+)
 
 from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.numpy_like import NumpyMetadata
 
 cupy_nplike = Cupy.instance()
 cp = cupy_nplike._module
+np = NumpyMetadata.instance()
 
 # Cache for cuda.compute availability
 _cuda_compute_available: bool | None = None
