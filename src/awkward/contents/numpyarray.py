@@ -654,7 +654,7 @@ class NumpyArray(NumpyMeta, Content):
                 )
             )
 
-        return bool(is_equal[0])
+        return True if is_equal[0] == 1 else False
 
     def _as_unique_strings(self, offsets):
         offsets = ak.index.Index64(offsets.data, nplike=offsets.nplike)
