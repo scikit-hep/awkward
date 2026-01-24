@@ -611,7 +611,7 @@ class NumpyArray(NumpyMeta, Content):
         return self._backend.nplike.is_c_contiguous(self._data)
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
-        is_equal = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
+        is_equal = self._backend.nplike.zeros(1, dtype=np.bool_)
 
         assert (
             starts.nplike is self._backend.nplike
@@ -632,7 +632,7 @@ class NumpyArray(NumpyMeta, Content):
                     starts.data,
                     stops.data,
                     starts.length,
-                    is_equal.data,
+                    is_equal,
                 )
             )
         else:
@@ -650,11 +650,11 @@ class NumpyArray(NumpyMeta, Content):
                     starts.data,
                     stops.data,
                     starts.length,
-                    is_equal.data,
+                    is_equal,
                 )
             )
 
-        return True if is_equal[0] == 1 else False
+        return bool(is_equal[0])
 
     def _as_unique_strings(self, offsets):
         offsets = ak.index.Index64(offsets.data, nplike=offsets.nplike)
