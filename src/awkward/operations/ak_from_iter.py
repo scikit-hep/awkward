@@ -96,6 +96,14 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize, attrs):
     if isinstance(iterable, tuple):
         iterable = list(iterable)
 
+    for element in iterable : 
+        if isinstance(element, dict ) : 
+            for key in element : 
+                if "\x00" in str(key) : 
+                    raise ValueError ( 
+                        "record field names shall not contain null bytes (\\x00)"
+                    )
+
     builder = _ext.ArrayBuilder(initial=initial, resize=resize)
     builder.fromiter(iterable)
 

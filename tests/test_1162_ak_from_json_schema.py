@@ -1081,3 +1081,17 @@ def test_complex_nested():
         "2015-01-01T10:01:23Z",
         "2015-01-01T10:01:25Z",
     ]
+
+def test_from_iter_null_byte_as_key() : 
+    import awkward as ak 
+    
+    data = {"\x00any_key" : 0}
+
+    try: 
+        ak.from_iter([data])
+
+    except ValueError : 
+        return  #error was correctly raised 
+    
+    raise AssertionError("ValueError was not raised")
+    # If the given is printed then bug still exists for null byte passing as key 
