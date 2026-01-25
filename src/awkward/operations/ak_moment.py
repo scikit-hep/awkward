@@ -49,6 +49,9 @@ def moment(
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
+            See the :doc:`Axis documentation </user-guide/axis>` for an explanation
+            of positional and named axes.
+
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be

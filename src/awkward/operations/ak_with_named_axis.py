@@ -29,8 +29,12 @@ def with_named_axis(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        named_axis: AxisTuple | AxisMapping: Names to give to the array axis; this assigns
-            the `"__named_axis__"` attr. If None, any existing name is unset.
+        named_axis: AxisTuple | AxisMapping
+            Names to give to the array axis; this assigns the `"__named_axis__"` attr.
+            If None, any existing name is unset.
+            See the :doc:`Axis documentation </user-guide/axis>` for an explanation
+            of positional and named axes.
+
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
