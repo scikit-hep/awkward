@@ -41,7 +41,7 @@ class Reducer(Protocol):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -145,12 +145,17 @@ class ArgMin(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
+
+        from awkward import _do
+
+        parents = _do.resolve_parents(parents, array.backend)
+
         # View array data in kernel-supported dtype
         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -207,12 +212,17 @@ class ArgMax(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
+
+        from awkward import _do
+
+        parents = _do.resolve_parents(parents, array.backend)
+
         # View array data in kernel-supported dtype
         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -261,7 +271,7 @@ class Count(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -290,7 +300,7 @@ class CountNonzero(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -346,7 +356,7 @@ class Sum(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -446,7 +456,7 @@ class AxisNoneSum(Sum):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        _parents: ak.index.Index,
+        _parents: ak.index.Index | tuple[None, int],
         _starts: ak.index.Index,
         _shifts: ak.index.Index | None,
         _outlength: ShapeItem,
@@ -478,7 +488,7 @@ class Prod(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -590,7 +600,7 @@ class Any(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -643,7 +653,7 @@ class All(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -729,7 +739,7 @@ class Min(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -862,7 +872,7 @@ class Max(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,

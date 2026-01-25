@@ -221,6 +221,23 @@ def mergemany(contents: list[Content]) -> Content:
     return contents[0]._mergemany(contents[1:])
 
 
+def resolve_parents(parents, backend):
+    """
+    Handles both Index64 arrays and (None, length) tuples.
+    """
+    # Unwrap if nested in a tuple
+    if isinstance(parents, tuple) and len(parents) == 1:
+        parents = parents[0]
+
+    if isinstance(parents, tuple) and len(parents) == 2 and parents[0] is None:
+        length = parents[1]
+        # Create an Index64 array of zeros
+        return ak.index.Index64.zeros(length, backend.nplike)
+
+    # If it's already an array, return it as-is
+    return parents
+
+
 def reduce(
     layout: Content,
     reducer: ak._reducers.Reducer,
@@ -267,7 +284,7 @@ def reduce(
             reducer = specialization
 
         starts = ak.index.Index64.zeros(1, layout.backend.nplike)
-        parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)
+        parents = ((None, layout.length),)
         shifts = None
         next = layout._reduce_next(
             reducer,
@@ -321,7 +338,7 @@ def reduce(
             del original_reducer  # not used below this point
 
         starts = ak.index.Index64.zeros(1, layout.backend.nplike)
-        parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)
+        parents = ((None, layout.length),)
         shifts = None
         next = layout._reduce_next(
             reducer,
@@ -372,7 +389,7 @@ def argsort(
             )
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.nplike)
+    parents = ((None, layout.length),)
     return layout._argsort_next(
         negaxis,
         starts,
@@ -411,7 +428,7 @@ def sort(
             )
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.nplike)
+    parents = ((None, layout.length),)
     return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)
 
 

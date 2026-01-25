@@ -934,6 +934,10 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis, starts, shifts, parents, outlength, ascending, stable
             )
         else:
+            from awkward import _do
+
+            parents = _do.resolve_parents(parents, self._backend)
+
             parents_length = parents.length
             _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
@@ -1040,6 +1044,10 @@ class NumpyArray(NumpyMeta, Content):
             )
 
         else:
+            from awkward import _do
+
+            parents = _do.resolve_parents(parents, self._backend)
+
             parents_length = parents.length
             _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
@@ -1161,6 +1169,10 @@ class NumpyArray(NumpyMeta, Content):
         # Yes, we've just tested these, but we need to be explicit that they are invariants
         assert self.is_contiguous
         assert self._data.ndim == 1
+
+        from awkward import _do
+
+        parents = _do.resolve_parents(parents, self._backend)
 
         out = reducer.apply(self, parents, starts, shifts, outlength)
 
