@@ -31,7 +31,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -46,7 +45,7 @@ classifiers = [
 ]
 license = "BSD-3-Clause AND MIT"
 license-files = ["LICENSE", "rapidjson/license.txt"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.urls]
 Homepage = "https://github.com/scikit-hep/awkward-1.0"
@@ -110,7 +109,7 @@ UV_ONLY_BINARY = "cmake,numpy"
 select = "*pyodide*"
 build-frontend = {name = "build", args = ["--exports", "whole_archive"]}
 
-# Use older manylinux for Python 3.9 and 3.10
+# Use older manylinux for Python 3.10
 [[tool.cibuildwheel.overrides]]
-select = "cp3{9,10}-manylinux*"
+select = "cp310-manylinux*"
 manylinux-x86_64-image = "manylinux2014"
