@@ -1,0 +1,81 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+from __future__ import annotations
+
+import numpy as np
+
+import awkward as ak
+
+
+def test_flat():
+    array = ak.Array(ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8")))
+    form, length, container = ak.to_buffers(array, byteorder="<")
+    assert form.is_equal_to(ak.forms.NumpyForm("float64"))
+    assert length == 3
+    assert container.keys() == {"node0-data"}
+    np.testing.assert_array_equal(
+        container["node0-data"],
+        ak._util.native_to_byteorder(np.array([1.0, 2.0, 3.0], dtype="f8"), "<"),
+    )
+    reconstructed = ak.from_buffers(form, length, container, byteorder="<")
+    assert ak.array_equal(array, reconstructed)
+
+    array = ak.Array(ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8")))
+    form, length, container = ak.to_buffers(array, byteorder=">")
+    assert form.is_equal_to(ak.forms.NumpyForm("float64"))
+    assert length == 3
+    assert container.keys() == {"node0-data"}
+    np.testing.assert_array_equal(
+        container["node0-data"],
+        ak._util.native_to_byteorder(np.array([1.0, 2.0, 3.0], dtype="f8"), ">"),
+    )
+    reconstructed = ak.from_buffers(form, length, container, byteorder=">")
+    assert ak.array_equal(array, reconstructed)
+
+
+def test_jagged():
+    array = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.array([0, 2, 2, 3], dtype="i8")),
+            ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8")),
+        )
+    )
+    form, length, container = ak.to_buffers(array, byteorder="<")
+    assert form.is_equal_to(
+        ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64"))
+    )
+    assert length == 3
+    assert container.keys() == {"node0-offsets", "node1-data"}
+    np.testing.assert_array_equal(
+        container["node0-offsets"],
+        ak._util.native_to_byteorder(np.array([0, 2, 2, 3], dtype="i8"), "<"),
+    )
+    np.testing.assert_array_equal(
+        container["node1-data"],
+        ak._util.native_to_byteorder(np.array([1.0, 2.0, 3.0], dtype="f8"), "<"),
+    )
+    reconstructed = ak.from_buffers(form, length, container, byteorder="<")
+    assert ak.array_equal(array, reconstructed)
+
+    array = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.array([0, 2, 2, 3], dtype="i8")),
+            ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8")),
+        )
+    )
+    form, length, container = ak.to_buffers(array, byteorder=">")
+    assert form.is_equal_to(
+        ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64"))
+    )
+    assert length == 3
+    assert container.keys() == {"node0-offsets", "node1-data"}
+    np.testing.assert_array_equal(
+        container["node0-offsets"],
+        ak._util.native_to_byteorder(np.array([0, 2, 2, 3], dtype="i8"), ">"),
+    )
+    np.testing.assert_array_equal(
+        container["node1-data"],
+        ak._util.native_to_byteorder(np.array([1.0, 2.0, 3.0], dtype="f8"), ">"),
+    )
+    reconstructed = ak.from_buffers(form, length, container, byteorder=">")
+    assert ak.array_equal(array, reconstructed)
