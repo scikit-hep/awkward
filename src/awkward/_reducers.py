@@ -268,6 +268,9 @@ class Count(KernelReducer):
     preferred_dtype: Final = np.int64
     needs_position: Final = False
 
+    def axis_none_reducer(self):
+        return AxisNoneCount()
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -292,10 +295,31 @@ class Count(KernelReducer):
         return ak.contents.NumpyArray(result, backend=array.backend)
 
 
+class AxisNoneCount(Count):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _parents: ak.index.Index,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+
+        nplike = array.backend.nplike
+        count = nplike.asarray(array.length, dtype=self.preferred_dtype)
+        result_array = nplike.reshape(count, (1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
 class CountNonzero(KernelReducer):
     name: Final = "count_nonzero"
     preferred_dtype: Final = np.int64
     needs_position: Final = False
+
+    def axis_none_reducer(self):
+        return AxisNoneCountNonzero()
 
     def apply(
         self,
@@ -343,6 +367,24 @@ class CountNonzero(KernelReducer):
                 )
             )
         return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+class AxisNoneCountNonzero(CountNonzero):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _parents: ak.index.Index,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        nplike = array.backend.nplike
+
+        count_nonzero = nplike.count_nonzero(array.data)
+        result_scalar = nplike.asarray(count_nonzero, dtype=self.preferred_dtype)
+        result_array = nplike.reshape(result_scalar, (1,))
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
 
 
 class Sum(KernelReducer):
