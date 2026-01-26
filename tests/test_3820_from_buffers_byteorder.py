@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 import awkward as ak
 
@@ -140,6 +141,28 @@ def test_jagged_bytes():
             )
         ),
     )
+
+    form = ak.forms.ListOffsetForm(
+        "i64", ak.forms.NumpyForm("float64", form_key="node1"), form_key="node0"
+    )
+    length = 3
+    container = {
+        "node0-offsets": np.array([0, 2, 2, 3], dtype="<i8").tobytes(),
+        "node1-data": np.array([1.0, 2.0, 3.0], dtype="<f8").tobytes(),
+    }
+    with pytest.raises(ValueError, match="buffer is smaller than requested size"):
+        array = ak.from_buffers(form, length, container, byteorder=">")
+
+    form = ak.forms.ListOffsetForm(
+        "i64", ak.forms.NumpyForm("float64", form_key="node1"), form_key="node0"
+    )
+    length = 3
+    container = {
+        "node0-offsets": np.array([0, 2, 2, 3], dtype=">i8").tobytes(),
+        "node1-data": np.array([1.0, 2.0, 3.0], dtype=">f8").tobytes(),
+    }
+    with pytest.raises(ValueError, match="buffer is smaller than requested size"):
+        array = ak.from_buffers(form, length, container, byteorder="<")
 
     form = ak.forms.ListOffsetForm(
         "i64", ak.forms.NumpyForm("float64", form_key="node1"), form_key="node0"
