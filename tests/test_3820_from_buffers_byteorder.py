@@ -7,7 +7,7 @@ import numpy as np
 import awkward as ak
 
 
-def test_flat():
+def test_flat_arrays():
     array = ak.Array(ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8")))
     form, length, container = ak.to_buffers(array, byteorder="<")
     assert form.is_equal_to(ak.forms.NumpyForm("float64"))
@@ -33,7 +33,7 @@ def test_flat():
     assert ak.array_equal(array, reconstructed)
 
 
-def test_jagged():
+def test_jagged_arrays():
     array = ak.Array(
         ak.contents.ListOffsetArray(
             ak.index.Index(np.array([0, 2, 2, 3], dtype="i8")),
@@ -79,3 +79,83 @@ def test_jagged():
     )
     reconstructed = ak.from_buffers(form, length, container, byteorder=">")
     assert ak.array_equal(array, reconstructed)
+
+
+def test_flat_bytes():
+    form = ak.forms.NumpyForm("float64", form_key="node0")
+    length = 3
+    container = {"node0-data": np.array([1.0, 2.0, 3.0], dtype="<f8").tobytes()}
+    array = ak.from_buffers(form, length, container, byteorder="<")
+    assert ak.array_equal(
+        array, ak.Array(ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8")))
+    )
+
+    form = ak.forms.NumpyForm("float64", form_key="node0")
+    length = 3
+    container = {"node0-data": np.array([1.0, 2.0, 3.0], dtype="<f8").tobytes()}
+    array = ak.from_buffers(form, length, container, byteorder=">")
+    assert ak.array_equal(
+        array,
+        ak.Array(
+            ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8").byteswap())
+        ),
+    )
+
+    form = ak.forms.NumpyForm("float64", form_key="node0")
+    length = 3
+    container = {"node0-data": np.array([1.0, 2.0, 3.0], dtype=">f8").tobytes()}
+    array = ak.from_buffers(form, length, container, byteorder="<")
+    assert ak.array_equal(
+        array,
+        ak.Array(
+            ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8").byteswap())
+        ),
+    )
+
+    form = ak.forms.NumpyForm("float64", form_key="node0")
+    length = 3
+    container = {"node0-data": np.array([1.0, 2.0, 3.0], dtype=">f8").tobytes()}
+    array = ak.from_buffers(form, length, container, byteorder=">")
+    assert ak.array_equal(
+        array, ak.Array(ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8")))
+    )
+
+
+def test_jagged_bytes():
+    form = ak.forms.ListOffsetForm(
+        "i64", ak.forms.NumpyForm("float64", form_key="node1"), form_key="node0"
+    )
+    length = 3
+    container = {
+        "node0-offsets": np.array([0, 2, 2, 3], dtype="<i8").tobytes(),
+        "node1-data": np.array([1.0, 2.0, 3.0], dtype="<f8").tobytes(),
+    }
+    array = ak.from_buffers(form, length, container, byteorder="<")
+    assert ak.array_equal(
+        array,
+        ak.Array(
+            ak.contents.ListOffsetArray(
+                ak.index.Index(np.array([0, 2, 2, 3], dtype="i8")),
+                ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8")),
+            )
+        ),
+    )
+
+    form = ak.forms.ListOffsetForm(
+        "i64", ak.forms.NumpyForm("float64", form_key="node1"), form_key="node0"
+    )
+    length = 3
+    container = {
+        "node0-offsets": np.array([0, 2, 2, 3], dtype=">i8").tobytes(),
+        "node1-data": np.array([1.0, 2.0, 3.0], dtype=">f8").tobytes(),
+    }
+    array = ak.from_buffers(form, length, container, byteorder=">")
+    assert ak.array_equal(
+        array,
+        ak.Array(
+            ak.contents.ListOffsetArray(
+                ak.index.Index(np.array([0, 2, 2, 3], dtype="i8")),
+                ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype="f8")),
+            )
+        ),
+    )
