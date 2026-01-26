@@ -12,11 +12,13 @@ from cuda.compute import (
 )
 
 from awkward._nplikes.cupy import Cupy
-from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._nplikes.numpy import Numpy
 
 cupy_nplike = Cupy.instance()
 cp = cupy_nplike._module
-np = NumpyMetadata.instance()
+
+numpy_nplike = Numpy.instance()
+np = numpy_nplike._module
 
 # Cache for cuda.compute availability
 _cuda_compute_available: bool | None = None
@@ -124,7 +126,7 @@ def awkward_reduce_argmax(
 ):
     index_dtype = parents_data.dtype
 
-    def segment_reduce_op(segment_id: index_dtype) -> index_dtype:
+    def segment_reduce_op(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
@@ -138,24 +140,12 @@ def awkward_reduce_argmax(
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
-    # Prepare the output array
-    _result = result
-    _result = cp.concatenate((result, result))
-
-    # alternative way
-    # _result = cp.zeros([outlength])
-
     # Perform the segmented reduce
-    segment_ids = CountingIterator(cp.int64(0))
-    unary_transform(segment_ids, _result, segment_reduce_op, outlength)
-
-    # TODO: here converts float to int too, fix this?
-    _result = _result.view(index_dtype).reshape(-1, 2)
-    _result = _result[:, 1]
-
-    # pass the result outside the function
-    result_v = result.view()
-    result_v[...] = _result
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_op, outlength)
 
 
 # this function is called from ~/awkward/src/awkward/_reducers.py:161 (ArgMin.apply())
@@ -167,53 +157,24 @@ def awkward_reduce_argmin(
     outlength,
 ):
     index_dtype = parents_data.dtype
-    ak_array = gpu_struct(
-        {
-            "data": input_data.dtype.type,
-            "local_index": index_dtype,
-        }
-    )
 
-    # compare the values of the arrays
-    def min_op(a: ak_array, b: ak_array):
-        return a if a.data < b.data else b
-
-    # use a helper function to get the local indices
-    # local_indices = local_idx_from_parents(parents_data, parents_length)
-
-    # use global indices instead
-    global_indices = cp.arange(0, parents_length + 1, dtype=index_dtype)
-
-    # Combine data and their indices into a single structure
-    input_struct = ZipIterator(input_data, global_indices)
-    # alternative way
-    # input_struct = cp.stack((input_data, global_indices), axis=1).view(ak_array.dtype)
+    def segment_reduce_op(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_data[start_idx:end_idx]
+        if len(segment) == 0:
+            return -1
+        # return a global index
+        return np.argmin(segment) + start_idx
 
     # Prepare the start and end offsets
     offsets = parents_to_offsets(parents_data, parents_length)
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
-    # Prepare the output array
-    _result = result
-    _result = cp.concatenate((result, result))
-    _result = _result.view(ak_array.dtype)
-
-    # alternative way
-    # _result = cp.zeros([outlength], dtype= ak_array.dtype)
-
-    # Initial value for the reduction
-    # max value gets transformed to input_data.dtype automatically?
-    max = cp.iinfo(index_dtype).max
-    h_init = ak_array(max, max)
-
     # Perform the segmented reduce
-    segmented_reduce(input_struct, _result, start_o, end_o, min_op, h_init, outlength)
-
-    # TODO: here converts float to int too, fix this?
-    _result = _result.view(index_dtype).reshape(-1, 2)
-    _result = _result[:, 1]
-
-    # pass the result outside the function
-    result_v = result.view()
-    result_v[...] = _result
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_op, outlength)
