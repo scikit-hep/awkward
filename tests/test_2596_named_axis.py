@@ -1084,6 +1084,7 @@ def test_negative_named_axis_ak_cartesian():
     ).named_axis == {"x": -2, "y": -1}
 
 
+@pytest.mark.filterwarnings("ignore:The global interpreter lock")
 def test_named_axis_ak_categories():
     pyarrow = pytest.importorskip("pyarrow")  # noqa: F841
 
