@@ -100,7 +100,7 @@ def test_empty_union():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
         ],
     )
@@ -110,7 +110,7 @@ def test_empty_union():
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert ak.almost_equal(left, left)
@@ -127,7 +127,7 @@ def test_empty_union():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
         ],
     )
@@ -137,7 +137,7 @@ def test_empty_union():
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert ak.almost_equal(left, left)
@@ -154,7 +154,7 @@ def test_empty_union():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
         ],
     )
@@ -164,7 +164,7 @@ def test_empty_union():
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert ak.almost_equal(left, left)
@@ -181,7 +181,7 @@ def test_empty_union():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
         ],
     )
@@ -190,7 +190,7 @@ def test_empty_union():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
@@ -211,7 +211,7 @@ def test_size_one_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
         ],
     )
@@ -221,7 +221,7 @@ def test_size_one_tags():
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert ak.almost_equal(left, left)
@@ -238,7 +238,7 @@ def test_size_one_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
         ],
     )
@@ -248,7 +248,7 @@ def test_size_one_tags():
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert ak.almost_equal(left, left)
@@ -265,7 +265,7 @@ def test_size_one_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
         ],
     )
@@ -275,7 +275,7 @@ def test_size_one_tags():
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert ak.almost_equal(left, left)
@@ -292,7 +292,7 @@ def test_size_one_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
         ],
     )
@@ -302,7 +302,7 @@ def test_size_one_tags():
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert ak.almost_equal(left, left)
@@ -323,7 +323,7 @@ def test_all_tags_used():
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
 
@@ -332,7 +332,7 @@ def test_all_tags_used():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
@@ -353,7 +353,7 @@ def test_all_tags_used():
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
 
@@ -362,7 +362,7 @@ def test_all_tags_used():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
@@ -383,7 +383,7 @@ def test_all_tags_used():
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
 
@@ -392,7 +392,7 @@ def test_all_tags_used():
         ak.index.Index64([0, 0, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
@@ -415,7 +415,7 @@ def test_unused_tags():
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
 
@@ -424,7 +424,7 @@ def test_unused_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
@@ -445,7 +445,7 @@ def test_unused_tags():
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
 
@@ -454,7 +454,7 @@ def test_unused_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
@@ -475,7 +475,7 @@ def test_unused_tags():
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
 
@@ -484,7 +484,7 @@ def test_unused_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
@@ -505,7 +505,7 @@ def test_unused_tags():
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
 
@@ -514,7 +514,7 @@ def test_unused_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
@@ -535,7 +535,7 @@ def test_unused_tags():
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
 
@@ -544,7 +544,7 @@ def test_unused_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
@@ -565,7 +565,7 @@ def test_unused_tags():
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
 
@@ -574,7 +574,7 @@ def test_unused_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
@@ -595,7 +595,7 @@ def test_unused_tags():
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
 
@@ -604,7 +604,7 @@ def test_unused_tags():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
             ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0], dtype=np.float64)),
         ],
