@@ -5,9 +5,6 @@ from __future__ import annotations
 # TODO: delete these after modifying argmin
 from cuda.compute import (
     CountingIterator,
-    ZipIterator,
-    gpu_struct,
-    segmented_reduce,
     unary_transform,
 )
 
