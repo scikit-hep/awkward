@@ -34,7 +34,7 @@ def sum(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        aaxis (None or int or str): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
              a single scalar result; if an int, group by that positional axis:
              `0` is the outermost, `1` is the first level of nested lists, etc.
              If a string, the axis is interpreted as a named axis.
