@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import ctypes
 from abc import abstractmethod
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from packaging.version import parse as parse_version
 
@@ -95,7 +96,7 @@ class NumpyKernel(BaseKernel):
         args = maybe_materialize(*args)
 
         return self._impl(
-            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
+            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes, strict=True))
         )
 
 
@@ -142,7 +143,7 @@ class JaxKernel(BaseKernel):
         args = maybe_materialize(*args)
 
         return self._impl(
-            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
+            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes, strict=True))
         )
 
 
@@ -197,7 +198,7 @@ class CupyKernel(BaseKernel):
             )
         assert len(args) == len(self._impl.is_ptr)
 
-        args = [self._cast(x, t) for x, t in zip(args, self._impl.is_ptr)]
+        args = [self._cast(x, t) for x, t in zip(args, self._impl.is_ptr, strict=True)]
 
         # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
         # The second arg is the error_code.
