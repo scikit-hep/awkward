@@ -30,7 +30,7 @@ def var(
     x,
     weight=None,
     ddof=0,
-    axis=None,
+    axis: int | str | None = None,
     *,
     keepdims=False,
     mask_identity=False,
@@ -48,11 +48,11 @@ def var(
         ddof (int): "delta degrees of freedom": the divisor used in the
             calculation is `sum(weights) - ddof`. Use this for "reduced
             variance."
-        axis (None or int): If None, combine all values from the array into
-            a single scalar result; if an int, group by that axis: `0` is the
-            outermost, `1` is the first level of nested lists, etc., and
-            negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+        axis (None or int or str): If None, combine all values from the array into
+            a single scalar result; if an int, group by that positional axis:
+            `0` is the outermost, `1` is the first level of nested lists, etc.
+            If a string, the axis is interpreted as a named axis.
+            Negative axis values count from the innermost level.
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -160,7 +160,8 @@ def nanvar(
 
     # Implementation
     if weight is not None:
-        weight = ak.operations.ak_nan_to_none._impl(weight, True, behavior, attrs)
+        weight = ak.operations.ak_nan_to_none._impl(
+            weight, True, behavior, attrs)
 
     return _impl(
         ak.operations.ak_nan_to_none._impl(x, highlevel, behavior, attrs),
