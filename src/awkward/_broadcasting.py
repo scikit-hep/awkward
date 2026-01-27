@@ -450,7 +450,7 @@ def apply_step(
             named_axes_with_ndims = depth_context[NAMED_AXIS_KEY]
             seen_named_axes = lateral_context[NAMED_AXIS_KEY]
             for i, ((named_axis, ndim), o) in enumerate(
-                zip(named_axes_with_ndims, inputs)
+                zip(named_axes_with_ndims, inputs, strict=True)
             ):
                 if isinstance(o, Content):
                     # rightbroadcast
@@ -472,7 +472,7 @@ def apply_step(
                 else:
                     nextinputs.append(o)
             # Did a broadcast take place?
-            if any(x is not y for x, y in zip(inputs, nextinputs)):
+            if any(x is not y for x, y in zip(inputs, nextinputs, strict=True)):
                 return apply_step(
                     backend,
                     nextinputs,
@@ -622,7 +622,7 @@ def apply_step(
             nextinputs = []
             nextparameters = []
             for i, ((named_axis, ndim), x, x_is_string) in enumerate(
-                zip(named_axes_with_ndims, inputs, inputs_are_strings)
+                zip(named_axes_with_ndims, inputs, inputs_are_strings, strict=True)
             ):
                 if isinstance(x, RegularArray) and not x_is_string:
                     content_size_maybe_one = (
@@ -681,7 +681,7 @@ def apply_step(
 
             return tuple(
                 RegularArray(x, dim_size, length, parameters=p)
-                for x, p in zip(outcontent, parameters)
+                for x, p in zip(outcontent, parameters, strict=True)
             )
         # General list-handling case: the offsets of each list may be different.
         else:
@@ -715,7 +715,7 @@ def apply_step(
             nextinputs = []
             nextparameters = []
             for i, ((named_axis, ndim), x, x_is_string) in enumerate(
-                zip(named_axes_with_ndims, inputs, input_is_string)
+                zip(named_axes_with_ndims, inputs, input_is_string, strict=False)
             ):
                 if isinstance(x, listtypes) and not x_is_string:
                     next_content = broadcast_to_offsets_avoiding_carry(x, offsets)
@@ -757,7 +757,7 @@ def apply_step(
 
             return tuple(
                 ListOffsetArray(offsets, x, parameters=p)
-                for x, p in zip(outcontent, parameters)
+                for x, p in zip(outcontent, parameters, strict=True)
             )
 
     def broadcast_any_option_all_UnmaskedArray():
@@ -787,7 +787,8 @@ def apply_step(
         parameters = parameters_factory(nextparameters, len(outcontent))
 
         return tuple(
-            UnmaskedArray(x, parameters=p) for x, p in zip(outcontent, parameters)
+            UnmaskedArray(x, parameters=p)
+            for x, p in zip(outcontent, parameters, strict=True)
         )
 
     def broadcast_any_option():
@@ -855,7 +856,7 @@ def apply_step(
 
         return tuple(
             IndexedOptionArray.simplified(index, x, parameters=p)
-            for x, p in zip(outcontent, parameters)
+            for x, p in zip(outcontent, parameters, strict=True)
         )
 
     def broadcast_any_option_akwhere():

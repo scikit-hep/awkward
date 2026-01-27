@@ -165,7 +165,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                 raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
                 )
-            for expected_dim, actual_dim in zip(self._shape, shape):
+            for expected_dim, actual_dim in zip(self._shape, shape, strict=True):
                 if expected_dim is not unknown_length and expected_dim != actual_dim:
                     raise ValueError(
                         f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
@@ -184,7 +184,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                 raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
                 )
-            for expected_dim, actual_dim in zip(self._shape, array.shape):
+            for expected_dim, actual_dim in zip(self._shape, array.shape, strict=True):
                 if expected_dim is not unknown_length and expected_dim != actual_dim:
                     raise ValueError(
                         f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
