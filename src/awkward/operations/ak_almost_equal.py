@@ -281,7 +281,7 @@ def _impl(
                 return False
 
             # Now project out the contents, and check for equality
-            for i, j in zip(left_tag_order, right_tag_order):
+            for i, j in zip(left_tag_order, right_tag_order, strict=True):
                 if not visitor(left.project(i), right.project(j)):
                     return False
             return True

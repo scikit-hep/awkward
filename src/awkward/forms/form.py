@@ -31,7 +31,6 @@ from awkward._typing import (
     Self,
     Tuple,
     TypeAlias,
-    Union,
 )
 
 __all__ = ("Form", "from_dict", "from_json", "from_type", "reserved_nominal_parameters")
@@ -39,7 +38,7 @@ __all__ = ("Form", "from_dict", "from_json", "from_type", "reserved_nominal_para
 np = NumpyMetadata.instance()
 numpy_backend = NumpyBackend.instance()
 
-FormKeyPathT: TypeAlias = Tuple[Union[str, int, None], ...]
+FormKeyPathT: TypeAlias = Tuple[str | int | None, ...]
 
 reserved_nominal_parameters: Final = frozenset(
     {
@@ -290,7 +289,7 @@ def _expand_braces(text, seen=None):
     else:
         for combo in itertools.product(*alts):
             replaced = list(text)
-            for (start, stop), replacement in zip(spans, combo):
+            for (start, stop), replacement in zip(spans, combo, strict=True):
                 replaced[start:stop] = replacement
             yield from _expand_braces("".join(replaced), seen)
 
