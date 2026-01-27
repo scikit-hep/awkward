@@ -133,7 +133,7 @@ def test_dropunused():
             ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     simplified = array.simplified(
@@ -145,7 +145,7 @@ def test_dropunused():
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert simplified.is_equal_to(expected)
@@ -157,7 +157,7 @@ def test_dropunused():
             ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     simplified = array.simplified(
@@ -182,7 +182,7 @@ def test_dropunused():
             ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     simplified = array.simplified(
@@ -200,7 +200,7 @@ def test_dropunused():
             ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     simplified = array.simplified(
@@ -216,7 +216,7 @@ def test_dropunused():
             ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     simplified = array.simplified(
@@ -239,7 +239,7 @@ def test_dropunused():
             ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     simplified = array.simplified(
@@ -250,7 +250,7 @@ def test_dropunused():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert simplified.is_equal_to(expected)
@@ -262,7 +262,7 @@ def test_dropunused():
             ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype=np.float64)),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     simplified = array.simplified(
@@ -273,7 +273,7 @@ def test_dropunused():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype=np.float64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert simplified.is_equal_to(expected)

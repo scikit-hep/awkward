@@ -34,7 +34,7 @@ jobs:
 
     env:
       PIP_ONLY_BINARY: cmake
-      PYTHON_VERSION: "3.9"
+      PYTHON_VERSION: "3.10"
 
     steps:
       - uses: actions/checkout@v6

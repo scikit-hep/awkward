@@ -264,8 +264,6 @@ else:
         __metclass__ = ABCMeta
 
 
-Py36 = (sys.version_info[:2] >= (3, 6))
-
 NO_VALUE = object()
 
 
@@ -1038,19 +1036,10 @@ class Pattern(Serialize):
     def max_width(self):
         raise NotImplementedError()
 
-    if Py36:
-        ##
-
-        def _get_flags(self, value):
-            for f in self.flags:
-                value = (f'(?{f}:{value})')
-            return value
-
-    else:
-        def _get_flags(self, value):
-            for f in self.flags:
-                value = ('(?%s)' % f) + value
-            return value
+    def _get_flags(self, value):
+        for f in self.flags:
+            value = (f'(?{f}:{value})')
+        return value
 
 
 
