@@ -155,8 +155,7 @@ def nanstd(
 
     # Implementation
     if weight is not None:
-        weight = ak.operations.ak_nan_to_none._impl(
-            weight, True, behavior, attrs)
+        weight = ak.operations.ak_nan_to_none._impl(weight, True, behavior, attrs)
 
     return _impl(
         ak.operations.ak_nan_to_none._impl(x, True, behavior, attrs),
