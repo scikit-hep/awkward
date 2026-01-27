@@ -9,8 +9,6 @@ import awkward as ak
 
 ROOT = pytest.importorskip("ROOT")
 
-ROOT.ROOT.EnableImplicitMT(1)
-
 compiler = ROOT.gInterpreter.Declare
 
 
