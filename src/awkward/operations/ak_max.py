@@ -23,7 +23,7 @@ np = NumpyMetadata.instance()
 @high_level_function()
 def max(
     array,
-    axis: int | str | None = None,
+    axis=None,
     *,
     keepdims=False,
     initial=None,
@@ -36,9 +36,9 @@ def max(
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
-            a single scalar result; if an int, group by that positional axis:
-            `0` is the outermost, `1` is the first level of nested lists, etc.
+            a single scalar result; if an int, group by that positional axis.
             If a string, the axis is interpreted as a named axis.
+            See the named-axis user guide for details.
             Negative axis values count from the innermost level.
         keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new

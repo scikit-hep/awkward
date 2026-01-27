@@ -27,7 +27,7 @@ def moment(
     x,
     n,
     weight=None,
-    axis: int | str | None = None,
+    axis=None,
     *,
     keepdims: bool = False,
     mask_identity: bool = False,
@@ -45,11 +45,10 @@ def moment(
             weighting some values higher increases the significance of those
             values. Weights can be zero or negative.
         axis (None or int or str): If None, combine all values from the array into
-            a single scalar result; if an int, group by that positional axis:
-            `0` is the outermost, `1` is the first level of nested lists, etc.
+            a single scalar result; if an int, group by that positional axis.
             If a string, the axis is interpreted as a named axis.
+            See the named-axis user guide for details.
             Negative axis values count from the innermost level.
-
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
