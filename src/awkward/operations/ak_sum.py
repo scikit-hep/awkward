@@ -34,11 +34,11 @@ def sum(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (None or int): If None, combine all values from the array into
-            a single scalar result; if an int, group by that axis: `0` is the
-            outermost, `1` is the first level of nested lists, etc., and
-            negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+        axis (None or int or str): If None, combine all values from the array into
+            a single scalar result; if an int, group by that positional axis.
+            If a string, the axis is interpreted as a named axis.
+            See the named-axis user guide for details.
+            Negative axis values count from the innermost level.
         keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
