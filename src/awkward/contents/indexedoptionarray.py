@@ -1216,6 +1216,10 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     def _argsort_next(
         self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
+        from awkward import _do
+
+        parents = _do.resolve_parents(parents, self._backend)
+
         assert (
             starts.nplike is self._backend.nplike
             and parents.nplike is self._backend.nplike
@@ -1342,6 +1346,10 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             return out
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+        from awkward import _do
+
+        parents = _do.resolve_parents(parents, self._backend)
+
         assert (
             starts.nplike is self._backend.nplike
             and parents.nplike is self._backend.nplike
@@ -1406,6 +1414,10 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         behavior,
     ):
         branch, depth = self.branch_depth
+
+        from awkward import _do
+
+        parents = _do.resolve_parents(parents, self._backend)
 
         next, nextparents, _numnull, outindex = self._rearrange_prepare_next(parents)
 

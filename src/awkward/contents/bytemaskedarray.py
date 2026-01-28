@@ -882,6 +882,11 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         nextcarry = ak.index.Index64.empty(next_length, nplike=self._backend.nplike)
         nextparents = ak.index.Index64.empty(next_length, nplike=self._backend.nplike)
         outindex = ak.index.Index64.empty(mask_length, nplike=self._backend.nplike)
+
+        from awkward import _do
+
+        parents = _do.resolve_parents(parents, self._backend)
+
         assert (
             nextcarry.nplike is self._backend.nplike
             and nextparents.nplike is self._backend.nplike

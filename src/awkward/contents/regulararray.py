@@ -1020,6 +1020,11 @@ class RegularArray(RegularMeta[Content], Content):
         if not branch and negaxis == depth:
             nextcarry = ak.index.Index64.empty(nextlen, nplike=nplike)
             nextparents = ak.index.Index64.empty(nextlen, nplike=nplike)
+
+            from awkward import _do
+
+            parents = _do.resolve_parents(parents, self._backend)
+
             assert (
                 parents.nplike is nplike
                 and nextcarry.nplike is nplike
@@ -1184,6 +1189,11 @@ class RegularArray(RegularMeta[Content], Content):
                     assert outcontent.is_regular
 
             outoffsets = ak.index.Index64.empty(outlength + 1, nplike)
+
+            from awkward import _do
+
+            parents = _do.resolve_parents(parents, self._backend)
+
             assert outoffsets.nplike is nplike and parents.nplike is nplike
             self._backend.maybe_kernel_error(
                 self._backend[
