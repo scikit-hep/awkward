@@ -16,26 +16,25 @@ ak.jax.register_and_check()
 # #### ak.contents.NumpyArray ####
 
 
-test_regulararray = ak.Array(
-    [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
-)
-test_regulararray_tangent = ak.Array(
-    [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
-)
-
-test_regulararray_jax = jax.numpy.array(
-    [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], dtype=np.float64
-)
-test_regulararray_tangent_jax = jax.numpy.array(
-    [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], dtype=np.float64
-)
-
-
 @pytest.mark.parametrize("axis", [0, 1, None])
 @pytest.mark.parametrize(
     "func_ak", [ak.sum, ak.prod, ak.min, ak.max, ak.mean, ak.prod, ak.ptp, ak.std]
 )
 def test_reducer(func_ak, axis):
+    test_regulararray = ak.Array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
+    )
+    test_regulararray_tangent = ak.Array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
+    )
+
+    test_regulararray_jax = jax.numpy.array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], dtype=np.float64
+    )
+    test_regulararray_tangent_jax = jax.numpy.array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], dtype=np.float64
+    )
+
     func_jax = getattr(jax.numpy, func_ak.__name__)
 
     def func_ak_with_axis(x):
@@ -74,6 +73,13 @@ def test_reducer(func_ak, axis):
 @pytest.mark.parametrize("axis", [0, 1])
 @pytest.mark.parametrize("func_ak", [ak.sort])
 def test_sort(func_ak, axis):
+    test_regulararray = ak.Array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
+    )
+    test_regulararray_tangent = ak.Array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
+    )
+
     def func_ak_with_axis(x):
         return func_ak(x, axis=axis)
 
@@ -88,6 +94,20 @@ def test_sort(func_ak, axis):
 
 @pytest.mark.parametrize("func_ak", [ak.ravel])
 def test_ravel(func_ak):
+    test_regulararray = ak.Array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
+    )
+    test_regulararray_tangent = ak.Array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
+    )
+
+    test_regulararray_jax = jax.numpy.array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], dtype=np.float64
+    )
+    test_regulararray_tangent_jax = jax.numpy.array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], dtype=np.float64
+    )
+
     func_jax = getattr(jax.numpy, func_ak.__name__)
 
     def func_ak_no_axis(x):
@@ -126,6 +146,20 @@ def test_ravel(func_ak):
 @pytest.mark.parametrize("axis", [None])
 @pytest.mark.parametrize("func_ak", [ak.any, ak.all])
 def test_bool_returns(func_ak, axis):
+    test_regulararray = ak.Array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
+    )
+    test_regulararray_tangent = ak.Array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
+    )
+
+    test_regulararray_jax = jax.numpy.array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], dtype=np.float64
+    )
+    test_regulararray_tangent_jax = jax.numpy.array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], dtype=np.float64
+    )
+
     func_jax = getattr(jax.numpy, func_ak.__name__)
 
     def func_ak_with_axis(x):
@@ -160,6 +194,13 @@ def test_bool_returns(func_ak, axis):
 @pytest.mark.parametrize("axis", [0, 1, -1])
 @pytest.mark.parametrize("func_ak", [ak.any, ak.all])
 def test_bool_raises(func_ak, axis):
+    test_regulararray = ak.Array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
+    )
+    test_regulararray_tangent = ak.Array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
+    )
+
     def func_with_axis(x):
         return func_ak(x, axis=axis)
 
