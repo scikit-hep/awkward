@@ -22,7 +22,7 @@ Please [make the pull request a draft](https://github.blog/2019-02-14-introducin
 
 ### AI-assisted contributions
 
-We welcome the use of AI tools as part of the development process. They can be valuable aids for drafting, refactoring, documentation, and exploration. However, contributions to **awkward** require human judgment, contextual understanding, and familiarity with the project’s structure, goals, and standards.
+We welcome the use of AI tools as part of the development process. They can be valuable aids for drafting, refactoring, documentation, and exploration. However, contributions to Awkward Array require human judgment, contextual understanding, and familiarity with the project’s structure, goals, and standards.
 
 When using AI tools:
 
