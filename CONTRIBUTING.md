@@ -32,7 +32,7 @@ Please do not paste AI generated text in the description of issues, PRs or in co
 
 If you used AI tools, please state so in your PR description.
 
-PRs that appear to violate this policy will be closed without review.
+PRs that appear to violate this policy may be closed without review.
 
 ### Getting your pull request reviewed
 
