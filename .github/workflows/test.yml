@@ -221,7 +221,7 @@ jobs:
             -c nvidia
             python=3.13
             cccl-python
-            cudf
+          # cudf # TODO: run the tests with cudf again when it supports numba-cuda>=0.23.0
             cupy
             cuda-version=${{ matrix.cuda-version }}
             cuda-toolkit
