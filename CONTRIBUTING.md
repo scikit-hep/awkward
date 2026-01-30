@@ -29,7 +29,7 @@ When using AI tools:
 * **You remain the author of the contribution.** Review, understand, and test all AI-assisted code or documentation before submitting it under your name. You should be able to explain and defend the changes on request.
 * **Avoid fully automated submissions.** Issues or pull requests generated end-to-end by automated tools, without meaningful human review or intent, are not appropriate.
 * **Be respectful of reviewers’ time.** Ensure that both the content of the PR and its description reflect your own understanding. Reviewers should not be expected to infer authorship or unknowingly interact with an AI during review.
-* **Disclose significant AI assistance.** If AI tools were used for a substantial portion of the contribution, please note this in the PR description. (ChatGPT was used to help with this section of our guide)
+* **Disclose significant AI assistance.** If AI tools were used for a substantial portion of the contribution, please note this in the PR description. (This guide is an example of that: we used ChatGPT to help with the writing, and in this comment, we acknowledge that fact.)
 
 Contributors are fully responsible for the correctness, maintainability, and long-term impact of all submitted changes, regardless of whether AI tools were used.
 
