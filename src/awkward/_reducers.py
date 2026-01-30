@@ -166,7 +166,7 @@ class ArgMin(KernelReducer):
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )
@@ -244,7 +244,7 @@ class ArgMax(KernelReducer):
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
+                    starts.data,
                     parents.length,
                     outlength,
                 )

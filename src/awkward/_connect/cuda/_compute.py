@@ -109,7 +109,7 @@ def local_idx_from_parents(parents, parents_length):
 def awkward_reduce_argmax(
     result,
     input_data,
-    parents_data,
+    starts,
     parents_length,
     outlength,
 ):
@@ -136,7 +136,7 @@ def awkward_reduce_argmax(
     # input_struct = cp.stack((input_data, global_indices), axis=1).view(ak_array.dtype)
 
     # Prepare the start and end offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
+    offsets = cp.concatenate((starts, cp.array([parents_length])))
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
@@ -151,7 +151,7 @@ def awkward_reduce_argmax(
     # Initial value for the reduction
     # min value gets transformed to input_data.dtype automatically?
     min = cp.iinfo(cp.int64).min
-    h_init = ak_array(min, min)
+    h_init = ak_array(min, -1)
 
     # Perform the segmented reduce
     segmented_reduce(input_struct, _result, start_o, end_o, max_op, h_init, outlength)
@@ -169,7 +169,7 @@ def awkward_reduce_argmax(
 def awkward_reduce_argmin(
     result,
     input_data,
-    parents_data,
+    starts,
     parents_length,
     outlength,
 ):
@@ -197,7 +197,7 @@ def awkward_reduce_argmin(
     # input_struct = cp.stack((input_data, global_indices), axis=1).view(ak_array.dtype)
 
     # Prepare the start and end offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
+    offsets = cp.concatenate((starts, cp.array([parents_length])))
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
@@ -212,7 +212,7 @@ def awkward_reduce_argmin(
     # Initial value for the reduction
     # max value gets transformed to input_data.dtype automatically?
     max = cp.iinfo(index_dtype).max
-    h_init = ak_array(max, max)
+    h_init = ak_array(max, -1)
 
     # Perform the segmented reduce
     segmented_reduce(input_struct, _result, start_o, end_o, min_op, h_init, outlength)
