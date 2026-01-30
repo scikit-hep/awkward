@@ -113,10 +113,11 @@ def awkward_reduce_argmax(
     parents_length,
     outlength,
 ):
+    index_dtype = starts.dtype
     ak_array = gpu_struct(
         {
             "data": input_data.dtype.type,
-            "local_index": cp.int64,
+            "local_index": index_dtype,
         }
     )
 
@@ -128,7 +129,7 @@ def awkward_reduce_argmax(
     # local_indices = local_idx_from_parents(parents_data, parents_length)
 
     # use global indices instead
-    global_indices = cp.arange(0, parents_length + 1, dtype=cp.int64)
+    global_indices = cp.arange(0, parents_length + 1, dtype=index_dtype)
 
     # Combine data and their indices into a single structure
     input_struct = ZipIterator(input_data, global_indices)
@@ -150,14 +151,14 @@ def awkward_reduce_argmax(
 
     # Initial value for the reduction
     # min value gets transformed to input_data.dtype automatically?
-    min = cp.iinfo(cp.int64).min
+    min = cp.iinfo(index_dtype).min
     h_init = ak_array(min, -1)
 
     # Perform the segmented reduce
     segmented_reduce(input_struct, _result, start_o, end_o, max_op, h_init, outlength)
 
     # TODO: here converts float to int too, fix this?
-    _result = _result.view(cp.int64).reshape(-1, 2)
+    _result = _result.view(index_dtype).reshape(-1, 2)
     _result = _result[:, 1]
 
     # pass the result outside the function
@@ -173,7 +174,7 @@ def awkward_reduce_argmin(
     parents_length,
     outlength,
 ):
-    index_dtype = parents_data.dtype
+    index_dtype = starts.dtype
     ak_array = gpu_struct(
         {
             "data": input_data.dtype.type,
@@ -189,7 +190,7 @@ def awkward_reduce_argmin(
     # local_indices = local_idx_from_parents(parents_data, parents_length)
 
     # use global indices instead
-    global_indices = cp.arange(0, parents_length + 1, dtype=cp.int64)
+    global_indices = cp.arange(0, parents_length + 1, dtype=index_dtype)
 
     # Combine data and their indices into a single structure
     input_struct = ZipIterator(input_data, global_indices)
@@ -198,6 +199,7 @@ def awkward_reduce_argmin(
 
     # Prepare the start and end offsets
     offsets = cp.concatenate((starts, cp.array([parents_length])))
+    print(offsets)
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
@@ -224,3 +226,4 @@ def awkward_reduce_argmin(
     # pass the result outside the function
     result_v = result.view()
     result_v[...] = _result
+    print(result_v)
