@@ -199,7 +199,6 @@ def awkward_reduce_argmin(
 
     # Prepare the start and end offsets
     offsets = cp.concatenate((starts, cp.array([parents_length])))
-    print(offsets)
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
@@ -226,4 +225,3 @@ def awkward_reduce_argmin(
     # pass the result outside the function
     result_v = result.view()
     result_v[...] = _result
-    print(result_v)
