@@ -144,8 +144,7 @@ def nanargmin(
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False,
-                            primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     # Handle named axis
     named_axis = _get_named_axis(ctx)

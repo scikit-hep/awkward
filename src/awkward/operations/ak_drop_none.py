@@ -75,8 +75,7 @@ def _drop_none_if_list(layout):
 
 def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False,
-                            primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     # Handle named axis
     named_axis = _get_named_axis(ctx)
@@ -96,8 +95,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
     else:
         max_axis = layout.branch_depth[1] - 1
         if axis > max_axis:
-            raise AxisError(
-                f"axis={axis} exceeds the depth ({max_axis}) of this array")
+            raise AxisError(f"axis={axis} exceeds the depth ({max_axis}) of this array")
 
         def recompute_offsets(layout, depth, **kwargs):
             posaxis = maybe_posaxis(layout, axis, depth)
@@ -105,14 +103,12 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 posaxis == depth and layout.is_list
             ):
                 none_indexes = options["none_indexes"].pop(0)
-                out = layout._rebuild_without_nones(
-                    none_indexes, layout.content)
+                out = layout._rebuild_without_nones(none_indexes, layout.content)
                 return out
 
         def action(layout, depth, **kwargs):
             if layout.is_record:
-                posaxises = {maybe_posaxis(x, axis, depth)
-                             for x in layout.contents}
+                posaxises = {maybe_posaxis(x, axis, depth) for x in layout.contents}
                 if len(posaxises) > 1 and any(x < depth for x in posaxises):
                     raise AxisError(
                         f"axis={axis} implies different levels in records that might require part of a record to be dropped, which is impossible"
@@ -134,8 +130,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
     out = ak._do.recursively_apply(layout, action, depth_context=options)
 
     if len(options["none_indexes"]) > 0:
-        out = ak._do.recursively_apply(
-            out, recompute_offsets, depth_context=options)
+        out = ak._do.recursively_apply(out, recompute_offsets, depth_context=options)
 
     return ctx.wrap(
         out,

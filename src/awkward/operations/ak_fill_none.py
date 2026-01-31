@@ -98,7 +98,7 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis, none_allowed=True)
 
     if isinstance(value_layout, ak.record.Record):
-        value_layout = value_layout.array[value_layout.at: value_layout.at + 1]
+        value_layout = value_layout.array[value_layout.at : value_layout.at + 1]
     elif isinstance(value_layout, ak.contents.Content):
         value_layout = value_layout[np.newaxis, ...]
     else:

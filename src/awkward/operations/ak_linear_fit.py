@@ -215,8 +215,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
         slope_error = ufuncs.sqrt(sumw / delta)
 
         is_scalar = not isinstance(
-            ak.operations.to_layout(
-                intercept, primitive_policy="pass-through"),
+            ak.operations.to_layout(intercept, primitive_policy="pass-through"),
             ak.contents.Content,
         )
 
