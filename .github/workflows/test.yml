@@ -221,6 +221,7 @@ jobs:
             -c rapidsai
             -c nvidia
             python=3.13
+            pandas>=0.24.0
             cccl-python
             cupy
             cuda-version=${{ matrix.cuda-version }}
