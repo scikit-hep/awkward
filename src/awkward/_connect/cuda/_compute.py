@@ -109,8 +109,9 @@ def local_idx_from_parents(parents, parents_length):
 def awkward_reduce_argmax(
     result,
     input_data,
-    starts,
+    _,
     parents_length,
+    starts,
     outlength,
 ):
     index_dtype = starts.dtype
