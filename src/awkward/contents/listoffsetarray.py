@@ -2022,13 +2022,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         buf = cudf.core.buffer.as_buffer(index)
 
         if parse_version(cudf.__version__) >= parse_version("24.10.00"):
-            ind_buf = cudf.core.column.numerical.NumericalColumn(
-                data=buf, dtype=index.dtype, mask=None, size=len(index)
-            )
+            ind_buf = cudf.core.column.as_column(buf, dtype=index.dtype)
+
         else:
             ind_buf = cudf.core.column.numerical.NumericalColumn(
                 buf, index.dtype, None, size=len(index)
             )
+
         cont = self._content._to_cudf(cudf, None, len(self._content))
         if mask is not None:
             m = np._module.packbits(mask, bitorder="little")
@@ -2039,32 +2039,28 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             m = None
         if self.parameters.get("__array__") == "string":
             from cudf.core.column.string import StringColumn
-            from cudf.utils.dtypes import CUDF_STRING_DTYPE
 
             data = cudf.core.buffer.as_buffer(cupy.asarray(self._content.data))
-            return StringColumn(
-                data=data,
-                size=len(ind_buf) - 1,
-                dtype=CUDF_STRING_DTYPE,
-                mask=m,
-                children=(ind_buf,),
+            StrCol = StringColumn
+            if hasattr(StrCol, "from_offsets_and_chars"):
+                return StrCol.from_offsets_and_chars(
+                    offsets=ind_buf,
+                    chars=data,
+                    mask=m,
+                )
+            return StrCol(
+                ind_buf,
+                data,
+                len(ind_buf) - 1,
             )
 
-        if parse_version(cudf.__version__) >= parse_version("24.10.00"):
-            return cudf.core.column.lists.ListColumn(
-                size=length,
-                data=None,
-                mask=m,
-                children=(ind_buf, cont),
-                dtype=cudf.core.dtypes.ListDtype(cont.dtype),
-            )
-        else:
-            return cudf.core.column.lists.ListColumn(
-                length,
-                mask=m,
-                children=(ind_buf, cont),
-                dtype=cudf.core.dtypes.ListDtype(cont.dtype),
-            )
+        ListCol = cudf.core.column.lists.ListColumn
+
+        return ListCol(
+            ind_buf,
+            cont,
+            length,
+        )
 
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
