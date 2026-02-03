@@ -52,7 +52,7 @@ def var(
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc. If a str, it is interpreted as the
+            `-2` is the next level up, etc; if a str, it is interpreted as the
             name of the axis which maps to an int if named axes are present.
             Named axes are attached to an array using #ak.with_named_axis and
             removed with #ak.without_named_axis; also see the
@@ -133,7 +133,7 @@ def nanvar(
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc. If a str, it is interpreted as the
+            `-2` is the next level up, etc; if a str, it is interpreted as the
             name of the axis which maps to an int if named axes are present.
             Named axes are attached to an array using #ak.with_named_axis and
             removed with #ak.without_named_axis; also see the
