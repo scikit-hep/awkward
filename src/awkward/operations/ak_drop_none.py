@@ -25,7 +25,7 @@ def drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None):
         array: Data in which to remove Nones.
         axis (None or int or str): If None, the operation drops Nones at all levels
             of nesting, returning an array of the same dimension, but without Nones.
-            if an int, the depth at which to drop Nones.
+            If an int, the depth at which to drop Nones.
             The outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.

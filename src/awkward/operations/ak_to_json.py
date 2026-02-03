@@ -50,7 +50,7 @@ def to_json(
         line_delimited (bool or str): If False, a single JSON document is written,
             representing the entire array or record. If True, each element of the
             array (or just the one record) is written on a separate line of text,
-            separated by `"\\n"`; if a string, such as `"\\r\\n"`, it is taken as a
+            separated by `"\\n"`. If a string, such as `"\\r\\n"`, it is taken as a
             custom line delimiter. (Use `os.linesep` for a platform-dependent
             line delimiter.)
         num_indent_spaces (None or nonnegative int): Number of spaces to indent nested
