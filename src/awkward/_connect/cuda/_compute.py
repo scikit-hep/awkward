@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-from cuda.compute import ZipIterator, gpu_struct, segmented_reduce
+from cuda.compute import ZipIterator, gpu_struct, segmented_reduce, CountingIterator, unary_transform
 
 from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.numpy import Numpy
 
 cupy_nplike = Cupy.instance()
 cp = cupy_nplike._module
+
+numpy_nplike = Numpy.instance()
+np = numpy_nplike._module
 
 # Cache for cuda.compute availability
 _cuda_compute_available: bool | None = None
@@ -224,3 +228,32 @@ def awkward_reduce_argmin(
     # pass the result outside the function
     result_v = result.view()
     result_v[...] = _result
+
+def awkward_reduce_sum(
+    result,
+    input_data,
+    parents_data,
+    parents_length,
+    outlength,
+):
+    index_dtype = parents_data.dtype
+
+    def segment_reduce_op(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_data[start_idx:end_idx]
+        if len(segment) == 0:
+            return 0
+        return np.sum(segment)
+
+    # Prepare the start and end offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_op, outlength)
