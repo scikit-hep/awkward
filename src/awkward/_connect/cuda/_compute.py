@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
-from cuda.compute import ZipIterator, gpu_struct, segmented_reduce, CountingIterator, unary_transform
+from cuda.compute import (
+    CountingIterator,
+    ZipIterator,
+    gpu_struct,
+    segmented_reduce,
+    unary_transform,
+)
 
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
@@ -228,6 +234,7 @@ def awkward_reduce_argmin(
     # pass the result outside the function
     result_v = result.view()
     result_v[...] = _result
+
 
 def awkward_reduce_sum(
     result,
