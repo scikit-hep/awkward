@@ -32,15 +32,15 @@ def num(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (int or str): The dimension at which the operation is applied.
-           If an int, `0` is the outermost dimension, `1` is the first level of
-           nested lists, etc., and negative values count from the innermost:
-           `-1` is the innermost, `-2` is the next level up, etc.
-           If a str, it is interpreted as the name of the axis which maps to
-           an int if named axes are present.
-           Named axes are attached to an array using #ak.with_named_axis and
-           removed with #ak.without_named_axis; also see the
-           [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
+        axis (int or str): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
