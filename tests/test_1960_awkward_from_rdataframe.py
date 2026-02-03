@@ -11,9 +11,14 @@ import awkward._lookup
 
 ROOT = pytest.importorskip("ROOT")
 
-ROOT.ROOT.EnableImplicitMT(1)
-
 compiler = ROOT.gInterpreter.Declare
+
+
+@pytest.fixture(scope="module", autouse=True)
+def manage_imt():
+    ROOT.ROOT.EnableImplicitMT(1)
+    yield
+    ROOT.ROOT.DisableImplicitMT()
 
 
 def test_unknown_column_type():
