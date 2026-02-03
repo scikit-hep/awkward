@@ -37,7 +37,8 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=Non
             If a str, it is interpreted as the name of the axis which maps
             to an int if named axes are present. Named axes are attached
             to an array using #ak.with_named_axis and removed with
-            #ak.without_named_axis; also see the Named axes user guide.
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if

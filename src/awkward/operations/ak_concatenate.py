@@ -46,7 +46,8 @@ def concatenate(
             If a str, it is interpreted as the name of the axis which maps
             to an int if named axes are present. Named axes are attached
             to an array using #ak.with_named_axis and removed with
-            #ak.without_named_axis; also see the Named axes user guide.
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         mergebool (bool): If True, boolean and numeric data can be combined
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with

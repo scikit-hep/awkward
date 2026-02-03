@@ -36,7 +36,8 @@ def argcartesian(
             If a str, it is interpreted as the name of the axis which maps
             to an int if named axes are present. Named axes are attached
             to an array using #ak.with_named_axis and removed with
-            #ak.without_named_axis; also see the Named axes user guide.
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         nested (None, True, False, or iterable of str or int): If None or
             False, all combinations of elements from the `arrays` are
             produced at the same level of nesting; if True, they are grouped
