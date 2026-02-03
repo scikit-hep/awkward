@@ -242,7 +242,6 @@ def nansum(
             Named axes are attached to an array using #ak.with_named_axis and
             removed with #ak.without_named_axis; also see the
             [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
-
         keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -284,7 +283,8 @@ def nansum(
 
 def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False,
+                            primitive_policy="error")
 
     # Handle named axis
     named_axis = _get_named_axis(ctx)

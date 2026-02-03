@@ -26,10 +26,14 @@ def merge_union_of_records(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (int): The dimension at which this operation is applied.
+        axis (int or str): The dimension at which this operation is applied.
             The outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the  innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached 
+            to an array using #ak.with_named_axis and removed with 
+            #ak.without_named_axis; also see the Named axes user guide.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -65,7 +69,8 @@ def merge_union_of_records(
 
 def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False,
+                            primitive_policy="error")
 
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis
@@ -94,7 +99,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
             field_index = nplike.asarray(index, copy=True)
 
             # Build contents for union representing current field
-            field_contents = [c.content(field) for c in contents if c.has_field(field)]
+            field_contents = [c.content(field)
+                              for c in contents if c.has_field(field)]
 
             # Find the best location for option type.
             # We will potentially have fewer contents in this per-field union
@@ -151,9 +157,11 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 else:
                     if isinstance(nplike, Jax):
                         # Rewrite tags to point to option content
-                        field_tags = field_tags.at[tag_is_j].set(tag_for_missing)
+                        field_tags = field_tags.at[tag_is_j].set(
+                            tag_for_missing)
                         # Point each value to missing value
-                        field_index = field_index.at[tag_is_j].set(index_missing)
+                        field_index = field_index.at[tag_is_j].set(
+                            index_missing)
                     else:
                         # Rewrite tags to point to option content
                         field_tags[tag_is_j] = tag_for_missing
@@ -176,7 +184,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
         # This is in trivial order: the re-arranging is done by the union (below)
         is_none = index < 0
         num_none = layout.backend.nplike.count_nonzero(is_none)
-        dense_index = layout.backend.nplike.empty(index.size, dtype=index.dtype)
+        dense_index = layout.backend.nplike.empty(
+            index.size, dtype=index.dtype)
 
         if isinstance(layout.backend.nplike, Jax):
             dense_index = dense_index.at[is_none].set(-1)
@@ -203,7 +212,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
             )
 
         if depth < posaxis + 1 and layout.is_leaf:
-            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(
+                f"axis={axis} exceeds the depth of this array ({depth})")
         elif depth == posaxis + 1 and layout.is_union:
             if not all(
                 x.is_record or x.is_indexed or x.is_option for x in layout.contents
@@ -237,7 +247,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
                         # First, find the inner index that actually re-arranges the (non-null) items
                         merged_index = content.index.data[tag_index_data]
                         is_non_null = merged_index >= 0
-                        inner_union_index_parts.append(merged_index[is_non_null])
+                        inner_union_index_parts.append(
+                            merged_index[is_non_null])
                         # Mask out tags of items that are missing
                         next_tags_data_sparse[is_this_tag] = backend.nplike.where(
                             is_non_null, tag, -1
@@ -254,7 +265,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 # This should have the same length as the original union, and its index should be "dense"
                 # (contiguous, monotonic integers; or -1). Therefore, we can directly compute it from the "sparse"
                 # tags index, which has the same length as the original union, and has only missing items set to -1.
-                outer_option_dense_index = compact_option_index(next_tags_data_sparse)
+                outer_option_dense_index = compact_option_index(
+                    next_tags_data_sparse)
 
                 # Ignore missing items for inner union, creating a dense array of tags
                 next_tags_data = next_tags_data_sparse[next_tags_data_sparse >= 0]
@@ -268,7 +280,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 # Return option around record of unions
                 return ak.contents.IndexedOptionArray(
                     ak.index.Index64(outer_option_dense_index),
-                    invert_record_union(next_tags_data, next_index_data, next_contents),
+                    invert_record_union(
+                        next_tags_data, next_index_data, next_contents),
                 )
 
             # Any index types need to be re-written

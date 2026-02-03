@@ -24,7 +24,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=Non
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         value: Data with which to replace None.
-       axis (None or int or str): If None, replace all None values in the
+        axis (None or int or str): If None, replace all None values in the
            array with the given value; if an int, the dimension at which
            this operation is applied. The outermost dimension is `0`,
            followed by `1`, etc., and negative values count backward from
@@ -98,7 +98,7 @@ def _impl(array, value, axis, highlevel, behavior, attrs):
     axis = regularize_axis(axis, none_allowed=True)
 
     if isinstance(value_layout, ak.record.Record):
-        value_layout = value_layout.array[value_layout.at : value_layout.at + 1]
+        value_layout = value_layout.array[value_layout.at: value_layout.at + 1]
     elif isinstance(value_layout, ak.contents.Content):
         value_layout = value_layout[np.newaxis, ...]
     else:

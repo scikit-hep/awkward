@@ -43,10 +43,14 @@ def cartesian(
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached 
+            to an array using #ak.with_named_axis and removed with 
+            #ak.without_named_axis; also see the Named axes user guide.
         nested (None, True, False, or iterable of str or int): If None or
             False, all combinations of elements from the `arrays` are
             produced at the same level of nesting; if True, they are grouped
@@ -249,7 +253,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
             fields = None
             # propagate named axis from input to output,
             #   use strategy "unify" (see: awkward._namedaxis)
-            out_named_axis = reduce(_unify_named_axis, map(_get_named_axis, arrays))
+            out_named_axis = reduce(
+                _unify_named_axis, map(_get_named_axis, arrays))
 
     # Handle named axis
     # Step 1: Normalize named axis to positional axis
@@ -317,14 +322,16 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
     if posaxis == 0:
         # Translate nested field names to nested field indices
         if fields is not None:
-            nested_as_index = [i for i, name in enumerate(fields) if name in nested]
+            nested_as_index = [i for i, name in enumerate(
+                fields) if name in nested]
         else:
             nested_as_index = nested
 
         indexes = [
             ak.index.Index64(backend.nplike.reshape(x, (-1,)))
             for x in backend.nplike.meshgrid(
-                *[backend.nplike.arange(x.length, dtype=np.int64) for x in layouts],
+                *[backend.nplike.arange(x.length, dtype=np.int64)
+                  for x in layouts],
                 indexing="ij",
             )
         ]
@@ -336,12 +343,14 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
         result = ak.contents.RecordArray(outs, fields, parameters=parameters)
         for i in range(len(array_layouts))[::-1]:
             if i in nested_as_index:
-                result = ak.contents.RegularArray(result, layouts[i + 1].length, 0)
+                result = ak.contents.RegularArray(
+                    result, layouts[i + 1].length, 0)
 
     else:
         # Translate nested field names to nested field indices
         if fields is not None:
-            nested_as_index = [i for i, name in enumerate(fields) if name in nested]
+            nested_as_index = [i for i, name in enumerate(
+                fields) if name in nested]
         else:
             nested_as_index = nested
 
@@ -422,7 +431,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
                 return None
 
         depth_context, lateral_context = NamedAxesWithDims.prepare_contexts(
-            list(arrays.values()) if isinstance(arrays, Mapping) else list(arrays)
+            list(arrays.values()) if isinstance(
+                arrays, Mapping) else list(arrays)
         )
         out = ak._broadcasting.broadcast_and_apply(
             new_layouts,

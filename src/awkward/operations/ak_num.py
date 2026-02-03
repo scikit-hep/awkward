@@ -32,7 +32,7 @@ def num(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-       axis (int or str): The dimension at which the operation is applied.
+        axis (int or str): The dimension at which the operation is applied.
            If an int, `0` is the outermost dimension, `1` is the first level of
            nested lists, etc., and negative values count from the innermost:
            `-1` is the innermost, `-2` is the next level up, etc.
@@ -47,6 +47,7 @@ def num(
             high-level.
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
+
     Returns an array of integers specifying the number of elements at a
     particular level.
 
@@ -108,7 +109,8 @@ def _impl(
     attrs: Mapping | None,
 ):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False,
+                            primitive_policy="error")
 
     # Handle named axis
     named_axis = _get_named_axis(ctx)
@@ -134,7 +136,8 @@ def _impl(
             return ak.contents.NumpyArray(layout.stops.data - layout.starts.data)
 
         elif layout.is_leaf:
-            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(
+                f"axis={axis} exceeds the depth of this array ({depth})")
 
     out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 

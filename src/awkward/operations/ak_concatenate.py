@@ -39,10 +39,14 @@ def concatenate(
     """
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached 
+            to an array using #ak.with_named_axis and removed with 
+            #ak.without_named_axis; also see the Named axes user guide.
         mergebool (bool): If True, boolean and numeric data can be combined
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with
@@ -137,7 +141,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
     #   use strategy "unify" (see: awkward._namedaxis)
     out_named_axis = merged_named_axis
 
-    contents = [x for x in content_or_others if isinstance(x, ak.contents.Content)]
+    contents = [x for x in content_or_others if isinstance(
+        x, ak.contents.Content)]
     if len(contents) == 0:
         raise ValueError("need at least one array to concatenate")
 
@@ -162,7 +167,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
 
     if posaxis == 0:
         content_or_others = [
-            x if isinstance(x, ak.contents.Content) else ak.operations.to_layout([x])
+            x if isinstance(
+                x, ak.contents.Content) else ak.operations.to_layout([x])
             for x in content_or_others
         ]
         batches = [[content_or_others[0]]]
@@ -209,7 +215,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                 for x in inputs:
                     if x.is_option and x.content.is_list:
                         empty = ak.to_backend([], backend)
-                        nextinputs.append(fill_none(x, empty, axis=0, highlevel=False))
+                        nextinputs.append(
+                            fill_none(x, empty, axis=0, highlevel=False))
                     else:
                         nextinputs.append(x)
                 inputs = nextinputs
@@ -260,12 +267,13 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                     prototype = backend.nplike.empty(sum(sizes), dtype=np.int8)
                     tags_cls = ak.index.Index8
                 else:
-                    prototype = backend.nplike.empty(sum(sizes), dtype=np.int64)
+                    prototype = backend.nplike.empty(
+                        sum(sizes), dtype=np.int64)
                     tags_cls = ak.index.Index64
 
                 start = 0
                 for tag, size in enumerate(sizes):
-                    prototype[start : start + size] = tag
+                    prototype[start: start + size] = tag
                     start += size
 
                 tags = tags_cls(
@@ -276,7 +284,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                         (-1,),
                     )
                 )
-                index = ak.contents.UnionArray.regular_index(tags, backend=backend)
+                index = ak.contents.UnionArray.regular_index(
+                    tags, backend=backend)
                 inner = ak.contents.UnionArray.simplified(
                     tags,
                     index,
@@ -289,7 +298,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
             elif all(
                 (isinstance(x, ak.contents.Content) and x.is_list)  # Case 1
                 or (isinstance(x, ak.contents.NumpyArray) and x.data.ndim > 1)  # Case 2
-                or not isinstance(x, ak.contents.Content)  # Case 3: scalar value
+                # Case 3: scalar value
+                or not isinstance(x, ak.contents.Content)
                 for x in inputs
             ):
                 nextinputs = []
@@ -303,7 +313,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                             ak.contents.ListOffsetArray(
                                 ak.index.Index64(
                                     backend.nplike.arange(
-                                        backend.nplike.shape_item_as_index(length + 1),
+                                        backend.nplike.shape_item_as_index(
+                                            length + 1),
                                         dtype=np.int64,
                                     ),
                                     nplike=backend.nplike,
@@ -316,7 +327,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                             )
                         )
 
-                counts = backend.nplike.zeros(nextinputs[0].length, dtype=np.int64)
+                counts = backend.nplike.zeros(
+                    nextinputs[0].length, dtype=np.int64)
                 all_counts = []
                 all_flatten = []
 
@@ -327,7 +339,8 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                     all_counts.append(c)
                     all_flatten.append(f)
 
-                offsets = backend.nplike.empty(nextinputs[0].length + 1, dtype=np.int64)
+                offsets = backend.nplike.empty(
+                    nextinputs[0].length + 1, dtype=np.int64)
                 offsets[0] = 0
                 backend.nplike.cumsum(counts, maybe_out=offsets[1:])
 
@@ -423,7 +436,8 @@ def _form_has_type(form, type_):
                 return False
             type_ = type_.content
         return (
-            isinstance(type_, ak.types.NumpyType) and form.primitive == type_.primitive
+            isinstance(
+                type_, ak.types.NumpyType) and form.primitive == type_.primitive
         )
     elif form.is_record:
         if (
@@ -472,7 +486,8 @@ def enforce_concatenated_form(layout, form):
     ############## Unions #####################################################
     # Merge invariant (drop union)
     elif layout.is_union and not form.is_union:
-        raise AssertionError("merge result should be a union if layout is a union")
+        raise AssertionError(
+            "merge result should be a union if layout is a union")
     # Add a union
     elif not layout.is_union and form.is_union:
         # Merge invariant (unions are i8-i64)
@@ -527,7 +542,8 @@ def enforce_concatenated_form(layout, form):
                 )
                 if mergeable(content_layout, layout_to_merge):
                     contents.insert(
-                        0, enforce_concatenated_form(layout_to_merge, content_form)
+                        0, enforce_concatenated_form(
+                            layout_to_merge, content_form)
                     )
                 else:
                     contents.append(
@@ -535,7 +551,8 @@ def enforce_concatenated_form(layout, form):
                     )
 
         return ak.contents.UnionArray(
-            ak.index.Index8(layout.backend.nplike.zeros(layout.length, dtype=np.int8)),
+            ak.index.Index8(layout.backend.nplike.zeros(
+                layout.length, dtype=np.int8)),
             index,
             contents,
             parameters=form._parameters,
@@ -577,7 +594,8 @@ def enforce_concatenated_form(layout, form):
             ]
         )
         return ak.contents.UnionArray(
-            ak.index.Index8(layout.backend.nplike.astype(layout.tags.data, np.int8)),
+            ak.index.Index8(layout.backend.nplike.astype(
+                layout.tags.data, np.int8)),
             layout.index.to64(),
             next_contents,
             parameters=form._parameters,
@@ -586,7 +604,8 @@ def enforce_concatenated_form(layout, form):
     ############## Options ####################################################
     # Merge invariant (drop option)
     elif layout.is_option and not form.is_option:
-        raise AssertionError("merge result should be an option if layout is an option")
+        raise AssertionError(
+            "merge result should be an option if layout is an option")
     # Add option
     elif not layout.is_option and form.is_option:
         return enforce_concatenated_form(
@@ -600,7 +619,8 @@ def enforce_concatenated_form(layout, form):
                     "IndexedOptionForm should have i64 for merge results"
                 )
             return layout.to_IndexedOptionArray64().copy(
-                content=enforce_concatenated_form(layout.content, form.content),
+                content=enforce_concatenated_form(
+                    layout.content, form.content),
                 parameters=form._parameters,
             )
         # Non IndexedOptionArray types require all merge candidates to have same form
@@ -609,7 +629,8 @@ def enforce_concatenated_form(layout, form):
             (ak.forms.ByteMaskedForm, ak.forms.BitMaskedForm, ak.forms.UnmaskedForm),
         ):
             return layout.copy(
-                content=enforce_concatenated_form(layout.content, form.content),
+                content=enforce_concatenated_form(
+                    layout.content, form.content),
                 parameters=form._parameters,
             )
         else:
@@ -618,7 +639,8 @@ def enforce_concatenated_form(layout, form):
     ############## Indexed ####################################################
     # Merge invariant (drop indexed)
     elif layout.is_indexed and not form.is_indexed:
-        raise AssertionError("merge result must be indexed if layout is indexed")
+        raise AssertionError(
+            "merge result must be indexed if layout is indexed")
     # Add index
     elif not layout.is_indexed and form.is_indexed:
         return ak.contents.IndexedArray(
@@ -639,7 +661,8 @@ def enforce_concatenated_form(layout, form):
     ############## NumPy ######################################################
     elif layout.is_numpy and form.is_numpy:
         if layout.inner_shape != form.inner_shape:
-            raise AssertionError("layout must have same inner_shape as merge result")
+            raise AssertionError(
+                "layout must have same inner_shape as merge result")
 
         return ak.values_astype(
             # HACK: drop parameters from type so that character arrays are supported
@@ -651,13 +674,16 @@ def enforce_concatenated_form(layout, form):
     ############## Lists ######################################################
     # Merge invariant (regular to numpy)
     elif layout.is_regular and form.is_numpy:
-        raise AssertionError("layout cannot be regular for NumpyForm merge result")
+        raise AssertionError(
+            "layout cannot be regular for NumpyForm merge result")
     # Merge invariant (ragged to regular)
     elif not (layout.is_regular or layout.is_numpy) and form.is_regular:
-        raise AssertionError("merge result should be ragged if any input is ragged")
+        raise AssertionError(
+            "merge result should be ragged if any input is ragged")
     elif layout.is_numpy and form.is_list:
         if len(layout.inner_shape) == 0:
-            raise AssertionError("layout must be at least 2D if merge result is a list")
+            raise AssertionError(
+                "layout must be at least 2D if merge result is a list")
         return enforce_concatenated_form(layout.to_RegularArray(), form)
     elif layout.is_regular and form.is_regular:
         # regular → regular requires same size!
@@ -678,7 +704,8 @@ def enforce_concatenated_form(layout, form):
         if isinstance(form, ak.forms.ListOffsetForm):
             layout = layout.to_ListOffsetArray64(False)
             return layout.copy(
-                content=enforce_concatenated_form(layout.content, form.content),
+                content=enforce_concatenated_form(
+                    layout.content, form.content),
                 parameters=form._parameters,
             )
         elif isinstance(form, ak.forms.ListForm):
@@ -696,7 +723,8 @@ def enforce_concatenated_form(layout, form):
     ############## Records ####################################################
     # Merge invariant (mix record-tuple)
     elif layout.is_record and not form.is_record:
-        raise AssertionError("merge result should be a record if layout is a record")
+        raise AssertionError(
+            "merge result should be a record if layout is a record")
     # Merge invariant (mix record-tuple)
     elif not layout.is_record and form.is_record:
         raise AssertionError(
@@ -704,7 +732,8 @@ def enforce_concatenated_form(layout, form):
         )
     elif layout.is_record and form.is_record:
         if frozenset(layout.fields) != frozenset(form.fields):
-            raise AssertionError("merge result and form must have matching fields")
+            raise AssertionError(
+                "merge result and form must have matching fields")
         elif layout.is_tuple != form.is_tuple:
             raise AssertionError(
                 "merge result and form must both be tuple or record-like"

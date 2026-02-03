@@ -24,10 +24,14 @@ def singletons(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached 
+            to an array using #ak.with_named_axis and removed with 
+            #ak.without_named_axis; also see the Named axes user guide.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -62,7 +66,8 @@ def singletons(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
 
 def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False,
+                            primitive_policy="error")
 
     # Handle named axis
     named_axis = _get_named_axis(ctx)
@@ -85,7 +90,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 return None
 
             elif layout.is_option:
-                offsets = backend.nplike.empty(layout.length + 1, dtype=np.int64)
+                offsets = backend.nplike.empty(
+                    layout.length + 1, dtype=np.int64)
                 offsets[0] = 0
 
                 backend.nplike.cumsum(
@@ -100,7 +106,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 return ak.contents.RegularArray(layout, 1).to_ListOffsetArray64(True)
 
         elif layout.is_leaf:
-            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(
+                f"axis={axis} exceeds the depth of this array ({depth})")
 
     out = ak._do.recursively_apply(layout, action, numpy_to_regular=True)
 

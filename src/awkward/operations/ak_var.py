@@ -133,7 +133,7 @@ def nanvar(
             a single scalar result; if an int, group by that positional axis.
             If a string, the axis is interpreted as a named axis.
             See the named-axis user guide for details.
-            Negative axis values count from the innermost level.wbrew install node
+            Negative axis values count from the innermost level.
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -164,7 +164,8 @@ def nanvar(
 
     # Implementation
     if weight is not None:
-        weight = ak.operations.ak_nan_to_none._impl(weight, True, behavior, attrs)
+        weight = ak.operations.ak_nan_to_none._impl(
+            weight, True, behavior, attrs)
 
     return _impl(
         ak.operations.ak_nan_to_none._impl(x, highlevel, behavior, attrs),
