@@ -294,8 +294,7 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
             elif all(
                 (isinstance(x, ak.contents.Content) and x.is_list)  # Case 1
                 or (isinstance(x, ak.contents.NumpyArray) and x.data.ndim > 1)  # Case 2
-                # Case 3: scalar value
-                or not isinstance(x, ak.contents.Content)
+                or not isinstance(x, ak.contents.Content)  # Case 3: scalar value
                 for x in inputs
             ):
                 nextinputs = []
