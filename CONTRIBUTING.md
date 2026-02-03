@@ -31,7 +31,7 @@ When using AI tools:
 * **Be respectful of reviewers’ time.** Ensure that both the content of the PR and its description reflect your own understanding. Reviewers should not be expected to infer authorship or unknowingly interact with an AI during review.
 * **Disclose significant AI assistance.** If AI tools were used for a substantial portion of the contribution, please note this in the PR description. (This guide is an example of that: we used ChatGPT to help with the writing, and in this comment, we acknowledge that fact.)
 
-Contributors are fully responsible for the correctness, maintainability, and long-term impact of all submitted changes, regardless of whether AI tools were used.
+Contributors are responsible for the correctness, maintainability, and long-term impact of all submitted changes, regardless of whether AI tools were used.
 
 Pull requests that do not meet these expectations may be closed without review.
 
