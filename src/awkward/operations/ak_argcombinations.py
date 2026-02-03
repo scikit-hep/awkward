@@ -41,8 +41,8 @@ def argcombinations(
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
             If a str, it is interpreted as the name of the axis which maps
-            to an int if named axes are present. Named axes are attached 
-            to an array using #ak.with_named_axis and removed with 
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
             #ak.without_named_axis; also see the Named axes user guide.
         fields (None or list of str): If None, the pairs/triples/etc. are
             tuples with unnamed fields; otherwise, these `fields` name the

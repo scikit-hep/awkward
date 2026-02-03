@@ -28,8 +28,8 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None, attrs=None):
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
             If a str, it is interpreted as the name of the axis which maps
-            to an int if named axes are present. Named axes are attached 
-            to an array using #ak.with_named_axis and removed with 
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
             #ak.without_named_axis; also see the Named axes user guide.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
@@ -98,8 +98,7 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None, attrs=None):
 
 def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False,
-                            primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     # Handle named axis
     named_axis = _get_named_axis(ctx)
@@ -110,8 +109,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
     # Step 2: propagate named axis from input to output,
     #   use strategy "keep up to" (see: awkward._namedaxis)
-    out_named_axis = _keep_named_axis_up_to(
-        named_axis, axis, layout.minmax_depth[1])
+    out_named_axis = _keep_named_axis_up_to(named_axis, axis, layout.minmax_depth[1])
 
     out = ak._do.local_index(layout, axis)
 

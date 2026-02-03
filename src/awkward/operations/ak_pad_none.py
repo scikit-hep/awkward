@@ -32,8 +32,8 @@ def pad_none(
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
             If a str, it is interpreted as the name of the axis which maps
-            to an int if named axes are present. Named axes are attached 
-            to an array using #ak.with_named_axis and removed with 
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
             #ak.without_named_axis; also see the Named axes user guide.
         clip (bool): If True, the output lists will have regular lengths
             (#ak.types.RegularType) of exactly `target`; otherwise the
@@ -122,8 +122,7 @@ def pad_none(
 
 def _impl(array, target, axis, clip, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False,
-                            primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis

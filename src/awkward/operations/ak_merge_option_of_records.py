@@ -30,8 +30,8 @@ def merge_option_of_records(
             values count backward from the  innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
             If a str, it is interpreted as the name of the axis which maps
-            to an int if named axes are present. Named axes are attached 
-            to an array using #ak.with_named_axis and removed with 
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
             #ak.without_named_axis; also see the Named axes user guide.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
@@ -58,8 +58,7 @@ def merge_option_of_records(
 
 def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False,
-                            primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis
@@ -90,8 +89,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
     def apply(layout, depth, backend, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
         if depth < posaxis + 1 and layout.is_leaf:
-            raise AxisError(
-                f"axis={axis} exceeds the depth of this array ({depth})")
+            raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         elif depth == posaxis + 1 and layout.is_option and layout.content.is_record:
             layout = layout.to_IndexedOptionArray64()
 

@@ -183,8 +183,7 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
 
 def _impl(array, axis, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False,
-                            primitive_policy="error")
+        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     # Handle named axis
     named_axis = _get_named_axis(ctx)
@@ -200,8 +199,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
     elif axis == 0 or maybe_posaxis(layout, axis, 1) == 0:
         out_named_axis = _keep_named_axis(named_axis, None)
     else:
-        out_named_axis = _remove_named_axis(
-            named_axis, axis, layout.minmax_depth[1])
+        out_named_axis = _remove_named_axis(named_axis, axis, layout.minmax_depth[1])
 
     if axis is None:
         out = ak._do.remove_structure(layout, function_name="ak.flatten")
@@ -222,15 +220,13 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
             elif layout.is_union:
                 if not any(
-                    x.is_option and not isinstance(
-                        x, ak.contents.UnmaskedArray)
+                    x.is_option and not isinstance(x, ak.contents.UnmaskedArray)
                     for x in layout.contents
                 ):
                     return layout
 
                 tags = layout.tags.data
-                index = layout.backend.nplike.asarray(
-                    layout.index.data, copy=True)
+                index = layout.backend.nplike.asarray(layout.index.data, copy=True)
                 big_mask = layout.backend.nplike.empty(
                     layout.index.length, dtype=np.bool_
                 )

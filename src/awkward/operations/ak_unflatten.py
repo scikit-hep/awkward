@@ -35,8 +35,8 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=Non
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
             If a str, it is interpreted as the name of the axis which maps
-            to an int if named axes are present. Named axes are attached 
-            to an array using #ak.with_named_axis and removed with 
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
             #ak.without_named_axis; also see the Named axes user guide.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
@@ -180,16 +180,14 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
                 and layout.length is not unknown_length
                 and not 0 <= counts <= layout.length
             ):
-                raise ValueError(
-                    "too large counts for array or negative counts")
+                raise ValueError("too large counts for array or negative counts")
             out = ak.contents.RegularArray(layout, counts)
 
         else:
             position = (
                 nplike.searchsorted(
                     current_offsets,
-                    nplike.asarray(
-                        [nplike.shape_item_as_index(layout.length)]),
+                    nplike.asarray([nplike.shape_item_as_index(layout.length)]),
                     side="right",
                 )[0]
                 - 1
@@ -213,8 +211,7 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
                 layout.length
             )
 
-            out = ak.contents.ListOffsetArray(
-                ak.index.Index64(offsets), layout)
+            out = ak.contents.ListOffsetArray(ak.index.Index64(offsets), layout)
             if not isinstance(mask, (bool, np.bool_)):
                 index = ak.index.Index8(
                     nplike.asarray(mask, dtype=np.int8),
