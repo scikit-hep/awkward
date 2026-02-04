@@ -405,6 +405,14 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         array = self.materialize()
         return iter(array)
 
+    @property
+    def __array_interface__(self):
+        return self.materialize().__array_interface__  # type: ignore[attr-defined]
+
+    @property
+    def __cuda_array_interface__(self):
+        return self.materialize().__cuda_array_interface__  # type: ignore[attr-defined]
+
     def __dlpack_device__(self) -> tuple[int, int]:
         return self.materialize().__dlpack_device__()  # type: ignore[attr-defined]
 
