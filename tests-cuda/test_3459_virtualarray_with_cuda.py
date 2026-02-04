@@ -2258,7 +2258,7 @@ def test_listarray_nanargmax(numpy_like):
 
 
 @pytest.mark.xfail(
-    reason="ListArray.to_ListOffsetArray64 fails with virtual arrays on CUDA"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_sort(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
