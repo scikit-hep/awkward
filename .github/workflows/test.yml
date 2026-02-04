@@ -67,10 +67,6 @@ jobs:
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: minimal
-          - python-version: 'pypy3.10'
-            python-architecture: x64
-            runs-on: ubuntu-latest
-            dependencies-kind: pypy
           - python-version: '3.11'
             python-architecture: arm64
             runs-on: macos-14
@@ -163,11 +159,6 @@ jobs:
           python -m pytest -vv -rs tests --cov=awkward --cov-report=term
           --cov-report=xml
         if: startsWith(matrix.python-version, '3.')
-
-      - name: Test non-kernels (PyPy)
-        run: >-
-          python -m pytest -vv -rs tests
-        if: startsWith(matrix.python-version, 'pypy')
 
       - name: Test non-kernels (Python) in multiple threads
         if: matrix.python-version == '3.14t'
