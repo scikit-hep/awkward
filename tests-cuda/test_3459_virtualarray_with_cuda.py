@@ -3348,7 +3348,6 @@ def test_recordarray_argmax_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip(reason="ignore virtual arrays with cccl argmax for the moment")
 def test_recordarray_argmax_y_field(recordarray, virtual_recordarray):
     # Test argmax on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
