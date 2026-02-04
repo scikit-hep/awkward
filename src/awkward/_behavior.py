@@ -122,7 +122,7 @@ def find_ufunc(behavior: Mapping | None, signature: tuple) -> UfuncLike | None:
             and all(
                 k == s
                 or (isinstance(k, type) and isinstance(s, type) and issubclass(s, k))
-                for k, s in zip(key[1:], signature[1:])
+                for k, s in zip(key[1:], signature[1:], strict=True)
             )
         ):
             return custom

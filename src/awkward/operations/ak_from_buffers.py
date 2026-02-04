@@ -279,6 +279,7 @@ def _from_buffer(
         # Require 1D buffers
         copy = None if isinstance(nplike, Jax) else False  # Jax can not avoid this
         array = nplike.reshape(buffer.view(dtype), shape=(-1,), copy=copy)
+        array = ak._util.native_to_byteorder(array, byteorder)
 
         # we can't compare with count or slice when we're working with tracers
         if not (isinstance(nplike, Jax) and nplike.is_currently_tracing()):
@@ -696,7 +697,7 @@ def _reconstitute(
                 shape_generator,
                 enable_virtualarray_caching,
             )
-            for content, field in zip(form.contents, form.fields)
+            for content, field in zip(form.contents, form.fields, strict=True)
         ]
         return ak.contents.RecordArray(
             contents,

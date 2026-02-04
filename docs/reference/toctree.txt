@@ -317,7 +317,6 @@
 
     generated/ak.to_backend
     generated/ak.backend
-    gpu-backend
 
 .. toctree::
     :caption: Approximation and comparison

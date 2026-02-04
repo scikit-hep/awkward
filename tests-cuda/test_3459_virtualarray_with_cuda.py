@@ -2258,7 +2258,7 @@ def test_listarray_nanargmax(numpy_like):
 
 
 @pytest.mark.xfail(
-    reason="ListArray.to_ListOffsetArray64 fails with virtual arrays on CUDA"
+    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
 )
 def test_listarray_sort(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
@@ -3348,7 +3348,6 @@ def test_recordarray_argmax_x_field(recordarray, virtual_recordarray):
     assert virtual_recordarray.is_any_materialized
 
 
-@pytest.mark.skip(reason="ignore virtual arrays with cccl argmax for the moment")
 def test_recordarray_argmax_y_field(recordarray, virtual_recordarray):
     # Test argmax on the y field (NumpyArray)
     assert not virtual_recordarray.is_any_materialized
