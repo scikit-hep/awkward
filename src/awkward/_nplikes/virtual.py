@@ -409,7 +409,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         return self.materialize().__array__(*args, **kwargs)  # type: ignore[attr-defined]
 
     def __cupy_get_ndarray__(self):
-        return self.materialize().__cupy_get_ndarray__()  # type: ignore[attr-defined]
+        return ak._nplikes.cupy.Cupy.instance().asarray(self.materialize())
 
     def __jax_array__(self):
         return ak._nplikes.jax.Jax.instance().asarray(self.materialize())
