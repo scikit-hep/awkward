@@ -182,7 +182,7 @@ class ArgMin(KernelReducer):
                 ](
                     result,
                     kernel_array_data,
-                    starts.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )

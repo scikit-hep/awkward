@@ -171,11 +171,11 @@ def awkward_reduce_argmax(
 def awkward_reduce_argmin(
     result,
     input_data,
-    starts,
+    parents_data,
     parents_length,
     outlength,
 ):
-    index_dtype = starts.dtype
+    index_dtype = parents_data.dtype
     ak_array = gpu_struct(
         {
             "data": input_data.dtype.type,
@@ -199,7 +199,7 @@ def awkward_reduce_argmin(
     # input_struct = cp.stack((input_data, global_indices), axis=1).view(ak_array.dtype)
 
     # Prepare the start and end offsets
-    offsets = cp.concatenate((starts, cp.array([parents_length])))
+    offsets = parents_to_offsets(parents_data, parents_length)
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
