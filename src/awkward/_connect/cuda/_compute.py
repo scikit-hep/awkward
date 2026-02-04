@@ -115,6 +115,7 @@ def awkward_reduce_argmax(
     outlength,
 ):
     index_dtype = starts.dtype
+    data_dtype = input_data.dtype
     ak_array = gpu_struct(
         {
             "data": input_data.dtype.type,
@@ -152,7 +153,7 @@ def awkward_reduce_argmax(
 
     # Initial value for the reduction
     # min value gets transformed to input_data.dtype automatically?
-    min = cp.iinfo(index_dtype).min
+    min = cp.iinfo(data_dtype).min
     h_init = ak_array(min, -1)
 
     # Perform the segmented reduce
@@ -176,6 +177,7 @@ def awkward_reduce_argmin(
     outlength,
 ):
     index_dtype = parents_data.dtype
+    data_dtype = input_data.dtype
     ak_array = gpu_struct(
         {
             "data": input_data.dtype.type,
@@ -213,7 +215,7 @@ def awkward_reduce_argmin(
 
     # Initial value for the reduction
     # max value gets transformed to input_data.dtype automatically?
-    max = cp.iinfo(index_dtype).max
+    max = cp.iinfo(data_dtype).max
     h_init = ak_array(max, -1)
 
     # Perform the segmented reduce
