@@ -405,21 +405,21 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         array = self.materialize()
         return iter(array)
 
-    def __array__(self, *args, **kwargs):
+    def __array__(self, *args, **kwargs) -> ArrayLike:
         return self.materialize().__array__(*args, **kwargs)  # type: ignore[attr-defined]
 
-    def __cupy_get_ndarray__(self):
+    def __cupy_get_ndarray__(self) -> ArrayLike:
         return ak._nplikes.cupy.Cupy.instance().asarray(self.materialize())
 
-    def __jax_array__(self):
+    def __jax_array__(self) -> ArrayLike:
         return ak._nplikes.jax.Jax.instance().asarray(self.materialize())
 
     @property
-    def __array_interface__(self):
+    def __array_interface__(self) -> dict[str, Any]:
         return self.materialize().__array_interface__  # type: ignore[attr-defined]
 
     @property
-    def __cuda_array_interface__(self):
+    def __cuda_array_interface__(self) -> dict[str, Any]:
         return self.materialize().__cuda_array_interface__  # type: ignore[attr-defined]
 
     def __dlpack_device__(self) -> tuple[int, int]:
