@@ -322,7 +322,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         return new_virtual
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
+        return self._nplike.apply_ufunc(ufunc, method, inputs, kwargs)
 
     def __repr__(self):
         dtype = repr(self._dtype)
@@ -404,6 +404,12 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
     def __iter__(self):
         array = self.materialize()
         return iter(array)
+
+    def __array__(self, *args, **kwargs):
+        return self.materialize().__array__(*args, **kwargs)  # type: ignore[attr-defined]
+
+    def __cupy_get_ndarray__(self):
+        return self.materialize().__cupy_get_ndarray__()  # type: ignore[attr-defined]
 
     @property
     def __array_interface__(self):
