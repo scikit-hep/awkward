@@ -25,7 +25,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=Non
         array: Array-like data (anything #ak.to_layout recognizes).
         value: Data with which to replace None.
         axis (None or int or str): If None, replace all None values in the
-            array array with the given value.
+            array with the given value.
             If an int, the dimension at which this operation is applied.
             The outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
