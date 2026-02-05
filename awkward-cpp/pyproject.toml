@@ -81,7 +81,6 @@ cmake.version = ">=3.29"
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
-enable = ["cpython-freethreading"]
 test-requires = ["pytest>=6", "."]
 test-command = ["echo {project}:", "ls {project}", "echo {package}:", "ls {package}",
 """
