@@ -27,10 +27,15 @@ def pad_none(
         target (int): The intended length of the lists. If `clip=True`,
             the output lists will have exactly this length; otherwise,
             they will have *at least* this length.
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         clip (bool): If True, the output lists will have regular lengths
             (#ak.types.RegularType) of exactly `target`; otherwise the
             output lists will have in-principle variable lengths
