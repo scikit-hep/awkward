@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest  # noqa: F401
 
 import awkward as ak
+import numpy as np
 
 
 def test_byteorder():
@@ -14,7 +15,8 @@ def test_byteorder():
     _, _, container_big = ak.to_buffers(array, byteorder=">")
 
     for name, buffer in container_little.items():
-        assert buffer.tobytes() == container_big[name].byteswap().tobytes()
+        assert buffer.tobytes() == np.asarray(
+            container_big[name]).byteswap().tobytes()
 
 
 def test_byteorder_default():
