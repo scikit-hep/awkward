@@ -105,6 +105,17 @@ def local_idx_from_parents(parents, parents_length):
     return cp.arange(parents_length) - start_pos
 
 
+def get_min_value(dtype):
+    dt = cp.dtype(dtype)
+
+    if dt.kind in "iu":  # int / uint
+        return cp.iinfo(dt).min
+    elif dt.kind == "f":  # float
+        return cp.finfo(dt).min
+    else:
+        raise TypeError("Unsupported dtype to get minimal value")
+
+
 # the inputs for this function we get from file ~/awkward/src/awkward/_reducers.py:239, in ArgMax.apply(self, array, parents, starts, shifts, outlength)
 def awkward_reduce_argmax(
     result,
@@ -116,6 +127,15 @@ def awkward_reduce_argmax(
 ):
     index_dtype = starts.dtype
     data_dtype = input_data.dtype
+
+    # initialize the minimum value depending on the dtype
+    if data_dtype.kind in "iu":  # int/uint
+        min = cp.iinfo(data_dtype).min
+    elif data_dtype.kind == "f":  # float
+        min = cp.finfo(data_dtype).min
+    else:
+        raise TypeError("Unsupported dtype to get the minimal value")
+
     ak_array = gpu_struct(
         {
             "data": input_data.dtype.type,
@@ -152,8 +172,6 @@ def awkward_reduce_argmax(
     # _result = cp.zeros([outlength], dtype= ak_array.dtype)
 
     # Initial value for the reduction
-    # min value gets transformed to input_data.dtype automatically?
-    min = cp.iinfo(data_dtype).min
     h_init = ak_array(min, -1)
 
     # Perform the segmented reduce
@@ -178,6 +196,15 @@ def awkward_reduce_argmin(
 ):
     index_dtype = parents_data.dtype
     data_dtype = input_data.dtype
+
+    # initialize the maximum value depending on the dtype
+    if data_dtype.kind in "iu":  # int/uint
+        max = cp.iinfo(data_dtype).max
+    elif data_dtype.kind == "f":  # float
+        max = cp.finfo(data_dtype).max
+    else:
+        raise TypeError("Unsupported dtype to get the maximal value")
+
     ak_array = gpu_struct(
         {
             "data": input_data.dtype.type,
@@ -214,8 +241,6 @@ def awkward_reduce_argmin(
     # _result = cp.zeros([outlength], dtype= ak_array.dtype)
 
     # Initial value for the reduction
-    # max value gets transformed to input_data.dtype automatically?
-    max = cp.iinfo(data_dtype).max
     h_init = ak_array(max, -1)
 
     # Perform the segmented reduce
