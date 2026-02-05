@@ -9,8 +9,6 @@ import awkward as ak
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.virtual import VirtualNDArray
 
-pytest.skip("Skipping ALL tests with virtual arrays for now", allow_module_level=True)
-
 
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
