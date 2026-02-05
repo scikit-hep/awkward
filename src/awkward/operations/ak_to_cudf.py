@@ -46,7 +46,7 @@ or
     from packaging.version import parse as parse_version
 
     if parse_version(cudf.__version__) >= parse_version("25.12.00"):
-        raise ImportError(
+        raise NotImplementedError(
             f"ak.to_cudf is not supported for cudf >= 25.12.00 (you have {cudf.__version__}). "
             "cudf internals changed in ways that are incompatible with the current implementation"
         )
