@@ -413,17 +413,3 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
     def __reduce__(self):
         return self.materialize().__reduce__()
-
-
-# backward compatibility
-class VirtualArray(VirtualNDArray):
-    def __init__(self, *args, **kwargs):
-        import warnings
-
-        warnings.warn(
-            "The `VirtualArray` class is deprecated and will be removed in a future release of Awkward Array. "
-            "Please plan to migrate your code to use the `VirtualNDArray` class instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
