@@ -57,7 +57,7 @@
     generated/ak.to_dataframe
 
 .. toctree::
-    :caption: Converting to GPU DataFrames
+    :caption: Converting to cuDF Series
 
     generated/ak.to_cudf
 
