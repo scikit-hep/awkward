@@ -16,7 +16,8 @@ from awkward._typing import TypeVar
 
 win = os.name == "nt"
 bits32 = struct.calcsize("P") * 8 == 32
-numpy2 = packaging.version.parse(np.__version__) >= packaging.version.Version("2.0.0b1")
+numpy2 = packaging.version.parse(
+    np.__version__) >= packaging.version.Version("2.0.0b1")
 
 
 # matches include/awkward/common.h
@@ -56,7 +57,12 @@ def native_to_byteorder(array, byteorder: str):
     """
     assert byteorder in "<>"
     if byteorder != native_byteorder:
-        return array.byteswap(inplace=False)
+        if isinstance(array, np.ndarray):
+            return array.byteswap(inplace=False)
+        else:
+            raise TypeError(
+                f"native_to_byteorder expects NumPy array, got {type(array)}"
+            )
     else:
         return array
 
@@ -114,7 +120,8 @@ def copy_behaviors(from_name: str, to_name: str, behavior: dict):
                 output[to_name] = value
         else:
             if from_name in key:
-                new_tuple = tuple(to_name if k == from_name else k for k in key)
+                new_tuple = tuple(
+                    to_name if k == from_name else k for k in key)
                 output[new_tuple] = value
 
     return output
