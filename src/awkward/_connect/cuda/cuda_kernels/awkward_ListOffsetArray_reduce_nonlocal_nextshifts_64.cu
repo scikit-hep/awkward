@@ -31,12 +31,12 @@
 // out["awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64_d", {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T_nummissing, 
-	  typename T_missing, 
-	  typename T_nextshifts, 
-	  typename T_offsets, 
-	  typename T_starts, 
-	  typename T_parents, 
+template <typename T_nummissing,
+	  typename T_missing,
+	  typename T_nextshifts,
+	  typename T_offsets,
+	  typename T_starts,
+	  typename T_parents,
 	  typename T_nextcarry>
 __global__ void awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64_a(
   T_nummissing* nummissing,
@@ -74,12 +74,12 @@ __global__ void awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64_a(
   }
 }
 
-template <typename T_nummissing, 
-	  typename T_missing, 
-	  typename T_nextshifts, 
-	  typename T_offsets, 
-	  typename T_starts, 
-	  typename T_parents, 
+template <typename T_nummissing,
+	  typename T_missing,
+	  typename T_nextshifts,
+	  typename T_offsets,
+	  typename T_starts,
+	  typename T_parents,
 	  typename T_nextcarry>
 __global__ void awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64_b(
   T_nummissing* nummissing,
@@ -124,12 +124,12 @@ __global__ void awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64_b(
   }
 }
 
-template <typename T_nummissing, 
-	  typename T_missing, 
-	  typename T_nextshifts, 
-	  typename T_offsets, 
-	  typename T_starts, 
-	  typename T_parents, 
+template <typename T_nummissing,
+	  typename T_missing,
+	  typename T_nextshifts,
+	  typename T_offsets,
+	  typename T_starts,
+	  typename T_parents,
 	  typename T_nextcarry>
 __global__ void awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64_c(
   T_nummissing* nummissing,
@@ -175,12 +175,12 @@ __global__ void awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64_c(
   }
 }
 
-template <typename T_nummissing, 
-	  typename T_missing, 
-	  typename T_nextshifts, 
-	  typename T_offsets, 
-	  typename T_starts, 
-	  typename T_parents, 
+template <typename T_nummissing,
+	  typename T_missing,
+	  typename T_nextshifts,
+	  typename T_offsets,
+	  typename T_starts,
+	  typename T_parents,
 	  typename T_nextcarry>
 __global__ void awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64_d(
   T_nummissing* nummissing,
