@@ -922,6 +922,7 @@ cuda_kernels_tests = [
     "awkward_ListArray_rpad_axis1",
     "awkward_UnionArray_regular_index",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
     "awkward_ListArray_getitem_next_range_spreadadvanced",
     "awkward_ListArray_localindex",
     "awkward_NumpyArray_pad_zero_to_length",

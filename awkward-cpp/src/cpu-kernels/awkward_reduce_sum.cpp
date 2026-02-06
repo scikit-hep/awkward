@@ -11,12 +11,17 @@ ERROR awkward_reduce_sum(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = (OUT)0;
+
+  std::memset(toptr, 0, outlength * sizeof(OUT));
+
+  if (lenparents == 0) {
+    return success();
   }
-  for (int64_t i = 0;  i < lenparents;  i++) {
+
+  for (int64_t i = 0; i < lenparents; i++) {
     toptr[parents[i]] += (OUT)fromptr[i];
   }
+
   return success();
 }
 ERROR awkward_reduce_sum_int64_int8_64(
