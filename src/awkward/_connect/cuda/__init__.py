@@ -120,7 +120,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_NumpyArray_rearrange_shifted",
         "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
         "awkward_reduce_count_64",
-        "awkward_reduce_sum",
+        # "awkward_reduce_sum",
         "awkward_reduce_sum_bool",
         "awkward_reduce_sum_bool_complex",
         "awkward_reduce_sum_complex",
