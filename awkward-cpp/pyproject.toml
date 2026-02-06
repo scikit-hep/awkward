@@ -9,7 +9,7 @@ build-backend = "scikit_build_core.build"
 name = "awkward_cpp"
 version = "51"
 dependencies = [
-    "numpy>=1.18.0"
+    "numpy>=1.21.3"
 ]
 readme = "README.md"
 description = "CPU kernels and compiled extensions for Awkward Array"
@@ -31,7 +31,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -46,7 +45,7 @@ classifiers = [
 ]
 license = "BSD-3-Clause AND MIT"
 license-files = ["LICENSE", "rapidjson/license.txt"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.urls]
 Homepage = "https://github.com/scikit-hep/awkward-1.0"
@@ -82,7 +81,6 @@ cmake.version = ">=3.29"
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
-enable = ["pypy", "cpython-freethreading"]
 test-requires = ["pytest>=6", "."]
 test-command = ["echo {project}:", "ls {project}", "echo {package}:", "ls {package}",
 """
@@ -110,7 +108,7 @@ UV_ONLY_BINARY = "cmake,numpy"
 select = "*pyodide*"
 build-frontend = {name = "build", args = ["--exports", "whole_archive"]}
 
-# Use older manylinux for Python 3.9 and 3.10
+# Use older manylinux for Python 3.10
 [[tool.cibuildwheel.overrides]]
-select = "cp3{9,10}-manylinux*"
+select = "cp310-manylinux*"
 manylinux-x86_64-image = "manylinux2014"

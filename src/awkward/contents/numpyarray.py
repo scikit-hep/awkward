@@ -611,7 +611,7 @@ class NumpyArray(NumpyMeta, Content):
         return self._backend.nplike.is_c_contiguous(self._data)
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
-        is_equal = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
+        is_equal = self._backend.nplike.zeros(1, dtype=np.bool_)
 
         assert (
             starts.nplike is self._backend.nplike
@@ -632,7 +632,7 @@ class NumpyArray(NumpyMeta, Content):
                     starts.data,
                     stops.data,
                     starts.length,
-                    is_equal.data,
+                    is_equal,
                 )
             )
         else:
@@ -650,7 +650,7 @@ class NumpyArray(NumpyMeta, Content):
                     starts.data,
                     stops.data,
                     starts.length,
-                    is_equal.data,
+                    is_equal,
                 )
             )
 
@@ -1444,7 +1444,7 @@ class NumpyArray(NumpyMeta, Content):
                 # Shapes agree
                 and all(
                     x is unknown_length or y is unknown_length or x == y
-                    for x, y in zip(self.shape, other.shape)
+                    for x, y in zip(self.shape, other.shape, strict=True)
                 )
             )
         )

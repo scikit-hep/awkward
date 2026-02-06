@@ -159,12 +159,12 @@ class Specification:
             temp = []
             for arg in instancedict[name]:
                 temp.append(funcpassdict[arg])
-            combinations.append(zip(*temp))
+            combinations.append(zip(*temp, strict=True))
 
         for x in product(*combinations):
             origtemp = OrderedDict()
-            for groupName, t in zip(instancedictlist, x):
-                for key, value in zip(instancedict[groupName], t):
+            for groupName, t in zip(instancedictlist, x, strict=True):
+                for key, value in zip(instancedict[groupName], t, strict=True):
                     origtemp[key] = value
 
             temp = copy.deepcopy(origtemp)

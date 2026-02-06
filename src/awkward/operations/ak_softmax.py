@@ -37,10 +37,16 @@ def softmax(
     """
     Args:
         x: The data on which to compute the softmax (anything #ak.to_layout recognizes).
-        axis (None or int): If None, combine all values from the array into
-            a single scalar result; if an int, group by that axis. Only `axis`
-            arguments equivalent to `-1` (softmax reduction along the innermost
-            dimension) is supported.
+        axis (None or int or str): The dimension over which the softmax is
+            computed. If None, the softmax is computed over the innermost
+            dimension. If an int, `0` is the outermost dimension, `1` is the
+            first level of nested lists, etc., and negative values count from
+            the innermost: `-1` is the innermost, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps to
+            an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be

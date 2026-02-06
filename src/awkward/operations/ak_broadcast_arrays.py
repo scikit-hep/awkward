@@ -268,7 +268,7 @@ def _impl(
         _unify_named_axis, lateral_context[NAMED_AXIS_KEY].named_axis
     )
     wrapped_out = []
-    for layout_out, array_in in zip(out, arrays):
+    for layout_out, array_in in zip(out, arrays, strict=True):
         _behavior = behavior_of_obj(array_in, behavior=behavior)
         _attrs = attrs_of_obj(array_in, attrs=attrs)
         wrapped = wrap_layout(

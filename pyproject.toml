@@ -11,7 +11,7 @@ version = "2.8.12"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     { name = "Jim Pivarski", email = "jpivarski@gmail.com" },
 ]
@@ -27,7 +27,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -45,7 +44,7 @@ classifiers = [
 dependencies = [
     "awkward_cpp==51",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
-    "numpy>=1.18.0",
+    "numpy>=1.21.3",
     "packaging",
     "typing_extensions>=4.1.0; python_version < \"3.11\"",
     "fsspec>=2022.11.0"
@@ -141,7 +140,7 @@ log_level = "INFO"
 testpaths = ["tests", "tests-cuda", "tests-cuda-kernels", "tests-cuda-kernels-explicit"]
 
 [tool.pylint]
-py-version = "3.9"
+py-version = "3.10"
 jobs = "0"
 ignore-paths = [
     "src/awkward/_typeparser/generated_parser.py",
