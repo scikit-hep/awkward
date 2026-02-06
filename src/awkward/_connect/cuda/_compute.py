@@ -123,7 +123,7 @@ def awkward_reduce_argmax(
 ):
     index_dtype = parents_data.dtype
 
-    def segment_reduce_op(segment_id):
+    def segment_reduce_argmax(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
@@ -142,7 +142,7 @@ def awkward_reduce_argmax(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_op, outlength)
+    unary_transform(segment_ids, result, segment_reduce_argmax, outlength)
 
 
 # this function is called from ~/awkward/src/awkward/_reducers.py:161 (ArgMin.apply())
@@ -155,7 +155,7 @@ def awkward_reduce_argmin(
 ):
     index_dtype = parents_data.dtype
 
-    def segment_reduce_op(segment_id):
+    def segment_reduce_argmin(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
@@ -174,4 +174,4 @@ def awkward_reduce_argmin(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_op, outlength)
+    unary_transform(segment_ids, result, segment_reduce_argmin, outlength)
