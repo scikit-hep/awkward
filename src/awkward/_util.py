@@ -56,7 +56,12 @@ def native_to_byteorder(array, byteorder: str):
     """
     assert byteorder in "<>"
     if byteorder != native_byteorder:
-        return array.byteswap(inplace=False)
+        if isinstance(array, np.ndarray):
+            return array.byteswap(inplace=False)
+        else:
+            raise TypeError(
+                f"native_to_byteorder expects NumPy array, got {type(array)}"
+            )
     else:
         return array
 

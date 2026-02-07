@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest  # noqa: F401
 
 import awkward as ak
@@ -14,7 +15,7 @@ def test_byteorder():
     _, _, container_big = ak.to_buffers(array, byteorder=">")
 
     for name, buffer in container_little.items():
-        assert buffer.tobytes() == container_big[name].byteswap().tobytes()
+        assert buffer.tobytes() == np.asarray(container_big[name]).byteswap().tobytes()
 
 
 def test_byteorder_default():
