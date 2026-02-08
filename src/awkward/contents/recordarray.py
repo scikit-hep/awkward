@@ -6,12 +6,6 @@ import copy
 import json
 from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 
-try:
-    from cudf.core.column.struct import StructColumn
-except ImportError:
-    StructColumn = None
-
-
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.numpy import NumpyBackend
@@ -1158,9 +1152,6 @@ class RecordArray(RecordMeta[Content], Content):
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         import inspect
-
-        if StructColumn is None:
-            raise RuntimeError("ak.to_cudf requires cuDF to be installed")
 
         children = tuple(
             c._to_cudf(cudf, mask=None, length=length) for c in self.contents
