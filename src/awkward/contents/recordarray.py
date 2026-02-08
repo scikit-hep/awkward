@@ -349,8 +349,7 @@ class RecordArray(RecordMeta[Content], Content):
     ):
         assert isinstance(form, self.form_cls)
         for i, content in enumerate(self._contents):
-            content._to_buffers(form.content(i), getkey,
-                                container, backend, byteorder)
+            content._to_buffers(form.content(i), getkey, container, backend, byteorder)
 
     def _to_typetracer(self, forget_length: bool) -> Self:
         backend = TypeTracerBackend.instance()
@@ -600,8 +599,7 @@ class RecordArray(RecordMeta[Content], Content):
 
             contents = []
             for i in range(len(self._contents)):
-                contents.append(self.content(
-                    i)._getitem_next(head, (), advanced))
+                contents.append(self.content(i)._getitem_next(head, (), advanced))
 
             parameters = None
             if (
@@ -639,8 +637,7 @@ class RecordArray(RecordMeta[Content], Content):
             contents = []
             for content in self._contents:
                 trimmed = content._getitem_range(0, self.length)
-                offsets, flattened = trimmed._offsets_and_flattened(
-                    axis, depth)
+                offsets, flattened = trimmed._offsets_and_flattened(axis, depth)
                 if self._backend.nplike.known_data and offsets.length != 0:
                     raise AssertionError(
                         "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
@@ -718,7 +715,7 @@ class RecordArray(RecordMeta[Content], Content):
 
         for_each_field = []
         for field in self.contents:
-            trimmed = field[0: self.length]
+            trimmed = field[0 : self.length]
             for_each_field.append([trimmed])
 
         if self.is_tuple:
@@ -726,23 +723,20 @@ class RecordArray(RecordMeta[Content], Content):
                 if isinstance(array, ak.contents.EmptyArray):
                     continue
 
-                parameters = parameters_intersect(
-                    parameters, array._parameters)
+                parameters = parameters_intersect(parameters, array._parameters)
 
                 if isinstance(array, ak.contents.RecordArray):
                     if self.is_tuple:
                         if len(self.contents) == len(array.contents):
                             for i in range(len(self.contents)):
                                 field = array[self.index_to_field(i)]
-                                for_each_field[i].append(
-                                    field[0: array.length])
+                                for_each_field[i].append(field[0 : array.length])
                         else:
                             raise ValueError(
                                 "cannot merge tuples with different numbers of fields"
                             )
                     else:
-                        raise ValueError(
-                            "cannot merge tuple with non-tuple record")
+                        raise ValueError("cannot merge tuple with non-tuple record")
                 else:
                     raise AssertionError(
                         "cannot merge "
@@ -756,8 +750,7 @@ class RecordArray(RecordMeta[Content], Content):
             these_fields.sort()
 
             for array in headless:
-                parameters = parameters_intersect(
-                    parameters, array._parameters)
+                parameters = parameters_intersect(parameters, array._parameters)
 
                 if isinstance(array, ak.contents.RecordArray):
                     if not array.is_tuple:
@@ -768,15 +761,14 @@ class RecordArray(RecordMeta[Content], Content):
                             for i in range(len(self.contents)):
                                 field = array[self.index_to_field(i)]
 
-                                trimmed = field[0: array.length]
+                                trimmed = field[0 : array.length]
                                 for_each_field[i].append(trimmed)
                         else:
                             raise AssertionError(
                                 "cannot merge records with different sets of field names"
                             )
                     else:
-                        raise AssertionError(
-                            "cannot merge non-tuple record with tuple")
+                        raise AssertionError("cannot merge non-tuple record with tuple")
 
                 elif isinstance(array, ak.contents.EmptyArray):
                     pass
@@ -948,8 +940,7 @@ class RecordArray(RecordMeta[Content], Content):
             reducer_should_mask = mask and not reducer.needs_position
 
             # Convert parents into offsets to build a list for axis=1 reduction
-            offsets = ak.index.Index64.empty(
-                outlength + 1, self._backend.nplike)
+            offsets = ak.index.Index64.empty(outlength + 1, self._backend.nplike)
             assert (
                 offsets.nplike is self._backend.nplike
                 and parents.nplike is self._backend.nplike
@@ -1041,8 +1032,7 @@ class RecordArray(RecordMeta[Content], Content):
                     )
 
             if mask:
-                outmask = ak.index.Index8.empty(
-                    outlength, self._backend.nplike)
+                outmask = ak.index.Index8.empty(outlength, self._backend.nplike)
                 assert (
                     outmask.nplike is self._backend.nplike
                     and parents.nplike is self._backend.nplike
@@ -1065,8 +1055,7 @@ class RecordArray(RecordMeta[Content], Content):
                 )
 
             if keepdims:
-                out = ak.contents.RegularArray(
-                    out, 1, self.length, parameters=None)
+                out = ak.contents.RegularArray(out, 1, self.length, parameters=None)
 
             return out
 
@@ -1168,6 +1157,8 @@ class RecordArray(RecordMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        import inspect
+
         if StructColumn is None:
             raise RuntimeError("ak.to_cudf requires cuDF to be installed")
 
@@ -1178,18 +1169,44 @@ class RecordArray(RecordMeta[Content], Content):
             {field: c.dtype for field, c in zip(self.fields, children, strict=True)}
         )
         m = mask._to_cudf(cudf, None, length) if mask else None
-        StructCol = cudf.core.column.StructColumn
+        struct_mod = getattr(cudf.core.column, "struct", None)
+        if struct_mod is not None:
+            StructCol = struct_mod.StructColumn
+        else:
+            StructCol = getattr(cudf.core.column, "StructColumn", None)
+        if StructCol is None:
+            raise RuntimeError("ak.to_cudf could not locate cuDF StructColumn")
 
-        return StructCol(
-            children,
-            length,
-        )
+        if hasattr(StructCol, "from_children"):
+            kwargs = {"children": children, "dtype": dt, "mask": m, "size": length}
+            params = inspect.signature(StructCol.from_children).parameters
+            call_kwargs = {k: v for k, v in kwargs.items() if k in params}
+            return StructCol.from_children(**call_kwargs)
+
+        kwargs = {
+            "data": None,
+            "children": children,
+            "dtype": dt,
+            "mask": m,
+            "size": length,
+            "offset": 0,
+        }
+        init_params = inspect.signature(StructCol.__init__).parameters
+        if "null_count" in init_params:
+            unknown_null = getattr(cudf.core.column.column, "UNKNOWN_NULL_COUNT", None)
+            if unknown_null is None:
+                unknown_null = getattr(
+                    cudf.core.column.column, "_UNKNOWN_NULL_COUNT", -1
+                )
+            kwargs["null_count"] = 0 if m is None else unknown_null
+        if "exposed" in init_params:
+            kwargs["exposed"] = True
+        return StructCol(**kwargs)
 
     def _to_backend_array(self, allow_missing, backend):
         if self.fields is None:
             return backend.nplike.empty(self.length, dtype=[])
-        contents = [x._to_backend_array(allow_missing, backend)
-                    for x in self._contents]
+        contents = [x._to_backend_array(allow_missing, backend) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(f"cannot convert {self} into np.ndarray")
 
@@ -1227,8 +1244,7 @@ class RecordArray(RecordMeta[Content], Content):
         if options["flatten_records"]:
             out = []
             for content in self._contents:
-                out.extend(content[: self.length]._remove_structure(
-                    backend, options))
+                out.extend(content[: self.length]._remove_structure(backend, options))
             return out
         elif options["allow_records"]:
             return [self]
@@ -1312,8 +1328,7 @@ class RecordArray(RecordMeta[Content], Content):
     def _to_packed(self, recursive: bool = True) -> Self:
         return RecordArray(
             [
-                x[: self.length].to_packed(
-                    True) if recursive else x[: self.length]
+                x[: self.length].to_packed(True) if recursive else x[: self.length]
                 for x in self._contents
             ],
             self._fields,
@@ -1331,8 +1346,7 @@ class RecordArray(RecordMeta[Content], Content):
             return out
 
         if self.is_tuple and json_conversions is None:
-            contents = [x._to_list(behavior, json_conversions)
-                        for x in self._contents]
+            contents = [x._to_list(behavior, json_conversions) for x in self._contents]
             out = [None] * self.length
             for i in range(self.length):
                 out[i] = tuple(x[i] for x in contents)
@@ -1342,8 +1356,7 @@ class RecordArray(RecordMeta[Content], Content):
             fields = self._fields
             if fields is None:
                 fields = [str(i) for i in range(len(self._contents))]
-            contents = [x._to_list(behavior, json_conversions)
-                        for x in self._contents]
+            contents = [x._to_list(behavior, json_conversions) for x in self._contents]
             out = [None] * self.length
             for i in range(self.length):
                 out[i] = dict(zip(fields, [x[i] for x in contents], strict=True))
@@ -1386,8 +1399,7 @@ class RecordArray(RecordMeta[Content], Content):
             and set(self.fields) == set(other.fields)
             and all(
                 content._is_equal_to(
-                    other.content(
-                        field), index_dtype, numpyarray, all_parameters
+                    other.content(field), index_dtype, numpyarray, all_parameters
                 )
                 for field, content in zip(self.fields, self._contents, strict=True)
             )
