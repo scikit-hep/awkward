@@ -9,7 +9,6 @@ cudf = pytest.importorskip("cudf", exc_type=ImportError)
 cupy = pytest.importorskip("cupy")
 
 
-@pytest.mark.cuda
 @pytest.mark.xfail(
     parse_version(cudf.__version__) >= parse_version("25.12.00"),
     reason="cudf internals changed since v25.12.00",
@@ -22,7 +21,6 @@ def test_jagged():
     assert out.to_arrow().tolist() == [[[1, 2, 3], [], [3, 4]], []]
 
 
-@pytest.mark.cuda
 @pytest.mark.xfail(
     parse_version(cudf.__version__) >= parse_version("25.12.00"),
     reason="cudf internals changed since v25.12.00",
@@ -40,7 +38,6 @@ def test_nested():
     ]
 
 
-@pytest.mark.cuda
 @pytest.mark.xfail(
     parse_version(cudf.__version__) >= parse_version("25.12.00"),
     reason="cudf internals changed since v25.12.00",
@@ -62,7 +59,6 @@ def test_null():
     assert out.to_arrow().tolist() == [12, None, 21, 12]
 
 
-@pytest.mark.cuda
 @pytest.mark.xfail(
     parse_version(cudf.__version__) >= parse_version("25.12.00"),
     reason="cudf internals changed since v25.12.00",
