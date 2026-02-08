@@ -73,7 +73,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-15, macos-15-intel]
         arch: [auto64]
-        build: ["cp", "pp"]
+        build: ["cp"]
 
         include:
         - os: windows-latest
