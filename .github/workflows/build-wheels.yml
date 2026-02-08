@@ -84,6 +84,9 @@ jobs:
         - os: ubuntu-24.04-arm
           arch: auto64
 
+        - os: windows-11-arm
+          arch: auto64
+
     steps:
     - uses: actions/checkout@v6
       with:

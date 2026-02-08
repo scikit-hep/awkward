@@ -92,10 +92,9 @@ pytest -p no:cacheprovider \
        {package}/tests-spec-explicit
 """]
 skip = [
-    "pp*win*",
+    "cp310-win_arm64",  # No numpy wheels
 ]
 test-skip = [
-    "pp*",
     "*musllinux*",
 ]
 build-verbosity = 1

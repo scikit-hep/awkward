@@ -55,7 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-11-arm, windows-latest, macos-latest, ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v6
@@ -71,7 +71,8 @@ jobs:
     - uses: pypa/cibuildwheel@v3.3
       env:
         CIBW_ARCHS_MACOS: universal2
-        CIBW_BUILD: cp310-win_amd64 cp310-macosx_universal2 cp310-manylinux_x86_64 cp312-manylinux_x86_64
+        CIBW_ARCHS_WINDOWS: auto64
+        CIBW_BUILD: cp311-win_* cp310-macosx_universal2 cp310-manylinux_x86_64 cp312-manylinux_x86_64
       with:
         package-dir: awkward-cpp
 
