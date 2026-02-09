@@ -64,8 +64,10 @@ awkward_reduce_sum_complex_b(
         imag = temp[(thread_id - stride) * 2 + 1];
       }
       __syncthreads();
-      temp[thread_id * 2] += real;
-      temp[thread_id * 2 + 1] += imag;
+      if (thread_id < lenparents) {
+  	temp[thread_id * 2] += real;
+        temp[thread_id * 2 + 1] += imag;
+      }
       __syncthreads();
     }
 
