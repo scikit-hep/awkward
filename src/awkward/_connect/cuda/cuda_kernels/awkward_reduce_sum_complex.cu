@@ -65,7 +65,7 @@ awkward_reduce_sum_complex_b(
       }
       __syncthreads();
       if (thread_id < lenparents) {
-  	temp[thread_id * 2] += real;
+        temp[thread_id * 2] += real;
         temp[thread_id * 2 + 1] += imag;
       }
       __syncthreads();

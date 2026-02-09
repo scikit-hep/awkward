@@ -73,7 +73,7 @@ awkward_reduce_prod_complex_b(
             parents[thread_id] == parents[partner]) {
           right_r = temp[partner * 2];
           right_i = temp[partner * 2 + 1];
-	}
+        }
       }
       __syncthreads();
 
@@ -92,9 +92,9 @@ awkward_reduce_prod_complex_b(
     if (thread_id < lenparents) {
       int64_t parent = parents[thread_id];
       if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-	T cand_r = temp[thread_id * 2];
+        T cand_r = temp[thread_id * 2];
         T cand_i = temp[thread_id * 2 + 1];
-	// atomic multiplication into toptr[parent*2 .. parent*2+1]
+        // atomic multiplication into toptr[parent*2 .. parent*2+1]
         // assume atomicMulComplex(&real, &imag, cand_real, cand_imag) exists and
         // does an atomic read-modify-write multiply in double precision, preserving
         // IEEE semantics (NaN/Inf propagation).
