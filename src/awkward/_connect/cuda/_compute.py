@@ -113,12 +113,25 @@ def local_idx_from_parents(parents, parents_length):
     return cp.arange(parents_length) - start_pos
 
 
+def starts_to_offsets(starts, parents_length):
+    offsets_dtype = starts.dtype
+
+    if parents_length == 0:
+        return cp.array([0], dtype=offsets_dtype)
+
+    offsets = cp.empty(len(starts) + 1, dtype=offsets_dtype)
+    offsets[:-1] = starts
+    offsets[-1] = parents_length
+    return offsets
+
+
 # the inputs for this function we get from file ~/awkward/src/awkward/_reducers.py:239, in ArgMax.apply(self, array, parents, starts, shifts, outlength)
 def awkward_reduce_argmax(
     result,
     input_data,
     parents_data,
     parents_length,
+    starts,
     outlength,
 ):
     index_dtype = parents_data.dtype
@@ -133,7 +146,9 @@ def awkward_reduce_argmax(
         return np.argmax(segment) + start_idx
 
     # Prepare the start and end offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
+    # print("old offsets", parents_to_offsets(parents_data, parents_length))
+    offsets = starts_to_offsets(starts, parents_length)
+    # print("new offsets", offsets)
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
