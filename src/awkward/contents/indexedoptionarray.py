@@ -33,7 +33,7 @@ from awkward._typing import (
     SupportsIndex,
     final,
 )
-from awkward._util import UNSET
+from awkward._util import UNSET, resolve_index
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
@@ -1001,6 +1001,8 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         )
 
         if branch or (negaxis is not None and negaxis != depth):
+            parents = resolve_index(parents, self._backend)
+
             nextoutindex = ak.index.Index64.empty(parents.length, self._backend.nplike)
             assert (
                 nextoutindex.nplike is self._backend.nplike
@@ -1163,6 +1165,8 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         return nextshifts
 
     def _rearrange_prepare_next(self, parents):
+        parents = resolve_index(parents, self._backend)
+
         assert (
             self._index.nplike is self._backend.nplike
             and parents.nplike is self._backend.nplike
@@ -1216,6 +1220,8 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     def _argsort_next(
         self, negaxis, starts, shifts, parents, outlength, ascending, stable
     ):
+        parents = resolve_index(parents, self._backend)
+
         assert (
             starts.nplike is self._backend.nplike
             and parents.nplike is self._backend.nplike
@@ -1342,6 +1348,8 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             return out
 
     def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+        parents = resolve_index(parents, self._backend)
+
         assert (
             starts.nplike is self._backend.nplike
             and parents.nplike is self._backend.nplike
@@ -1406,6 +1414,8 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         behavior,
     ):
         branch, depth = self.branch_depth
+
+        parents = resolve_index(parents, self._backend)
 
         next, nextparents, _numnull, outindex = self._rearrange_prepare_next(parents)
 

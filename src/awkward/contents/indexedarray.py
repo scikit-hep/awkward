@@ -32,7 +32,7 @@ from awkward._typing import (
     SupportsIndex,
     final,
 )
-from awkward._util import UNSET
+from awkward._util import UNSET, resolve_index
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
@@ -812,6 +812,8 @@ class IndexedArray(IndexedMeta[Content], Content):
             return self
 
         branch, depth = self.branch_depth
+
+        parents = resolve_index(parents, self._backend)
 
         index_length = self._index.length
         parents_length = parents.length

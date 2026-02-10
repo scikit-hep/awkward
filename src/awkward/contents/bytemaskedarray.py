@@ -34,7 +34,7 @@ from awkward._typing import (
     SupportsIndex,
     final,
 )
-from awkward._util import UNSET
+from awkward._util import UNSET, resolve_index
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
@@ -882,6 +882,9 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         nextcarry = ak.index.Index64.empty(next_length, nplike=self._backend.nplike)
         nextparents = ak.index.Index64.empty(next_length, nplike=self._backend.nplike)
         outindex = ak.index.Index64.empty(mask_length, nplike=self._backend.nplike)
+
+        parents = resolve_index(parents, self._backend)
+
         assert (
             nextcarry.nplike is self._backend.nplike
             and nextparents.nplike is self._backend.nplike

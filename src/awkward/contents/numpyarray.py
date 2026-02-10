@@ -38,7 +38,7 @@ from awkward._typing import (
     SupportsIndex,
     final,
 )
-from awkward._util import UNSET
+from awkward._util import UNSET, resolve_index
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
@@ -934,6 +934,8 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis, starts, shifts, parents, outlength, ascending, stable
             )
         else:
+            parents = resolve_index(parents, self._backend)
+
             parents_length = parents.length
             _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
@@ -1040,6 +1042,8 @@ class NumpyArray(NumpyMeta, Content):
             )
 
         else:
+            parents = resolve_index(parents, self._backend)
+
             parents_length = parents.length
             _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
@@ -1161,6 +1165,8 @@ class NumpyArray(NumpyMeta, Content):
         # Yes, we've just tested these, but we need to be explicit that they are invariants
         assert self.is_contiguous
         assert self._data.ndim == 1
+
+        parents = resolve_index(parents, self._backend)
 
         out = reducer.apply(self, parents, starts, shifts, outlength)
 

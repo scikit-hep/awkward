@@ -893,7 +893,7 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index,
+        parents: Index | tuple[None, int],
         outlength: int,
         mask: bool,
         keepdims: bool,
@@ -906,7 +906,7 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index,
+        parents: Index | tuple[None, int],
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -917,7 +917,7 @@ class Content(Meta):
         self,
         negaxis: int,
         starts: Index,
-        parents: Index,
+        parents: Index | tuple[None, int],
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -1039,7 +1039,7 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index,
+        parents: Index | tuple[None, int],
         outlength: int,
     ) -> bool:
         raise NotImplementedError
@@ -1048,7 +1048,7 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index,
+        parents: Index | tuple[None, int],
         outlength: int,
     ):
         raise NotImplementedError

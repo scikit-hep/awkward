@@ -168,3 +168,13 @@ def maybe_length_of(
         return 0
     else:
         raise TypeError(f"Invalid type {type(obj)} for length calculation")
+
+
+def resolve_index(index, backend):
+    if isinstance(index, tuple) and len(index) == 1:
+        index = index[0]
+
+    if isinstance(index, tuple) and len(index) == 2 and index[0] is None:
+        return ak.index.Index64.zeros(index[1], backend.nplike)
+
+    return index
