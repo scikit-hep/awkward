@@ -405,8 +405,12 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         array = self.materialize()
         return iter(array)
 
-    def __array__(self, *args, **kwargs) -> ArrayLike:
-        return self.materialize().__array__(*args, **kwargs)  # type: ignore[attr-defined]
+    def __array__(
+        self, dtype: DTypeLike | None = None, copy: bool | None = None
+    ) -> ArrayLike:
+        return ak._nplikes.numpy.Numpy.instance().asarray(
+            self.materialize(), dtype=dtype, copy=copy
+        )
 
     def __cupy_get_ndarray__(self) -> ArrayLike:
         return ak._nplikes.cupy.Cupy.instance().asarray(self.materialize())
