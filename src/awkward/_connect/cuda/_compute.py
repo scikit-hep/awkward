@@ -105,18 +105,41 @@ def local_idx_from_parents(parents, parents_length):
     return cp.arange(parents_length) - start_pos
 
 
+def get_min_value(dtype):
+    dt = cp.dtype(dtype)
+
+    if dt.kind in "iu":  # int / uint
+        return cp.iinfo(dt).min
+    elif dt.kind == "f":  # float
+        return cp.finfo(dt).min
+    else:
+        raise TypeError("Unsupported dtype to get minimal value")
+
+
 # the inputs for this function we get from file ~/awkward/src/awkward/_reducers.py:239, in ArgMax.apply(self, array, parents, starts, shifts, outlength)
 def awkward_reduce_argmax(
     result,
     input_data,
-    parents_data,
+    _,
     parents_length,
+    starts,
     outlength,
 ):
+    index_dtype = starts.dtype
+    data_dtype = input_data.dtype
+
+    # initialize the minimum value depending on the dtype
+    if data_dtype.kind in "iu":  # int/uint
+        min = cp.iinfo(data_dtype).min
+    elif data_dtype.kind == "f":  # float
+        min = cp.finfo(data_dtype).min
+    else:
+        raise TypeError("Unsupported dtype to get the minimal value")
+
     ak_array = gpu_struct(
         {
             "data": input_data.dtype.type,
-            "local_index": cp.int64,
+            "local_index": index_dtype,
         }
     )
 
@@ -128,7 +151,7 @@ def awkward_reduce_argmax(
     # local_indices = local_idx_from_parents(parents_data, parents_length)
 
     # use global indices instead
-    global_indices = cp.arange(0, parents_length + 1, dtype=cp.int64)
+    global_indices = cp.arange(0, parents_length + 1, dtype=index_dtype)
 
     # Combine data and their indices into a single structure
     input_struct = ZipIterator(input_data, global_indices)
@@ -136,7 +159,7 @@ def awkward_reduce_argmax(
     # input_struct = cp.stack((input_data, global_indices), axis=1).view(ak_array.dtype)
 
     # Prepare the start and end offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
+    offsets = cp.concatenate((starts, cp.array([parents_length])))
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
@@ -149,15 +172,13 @@ def awkward_reduce_argmax(
     # _result = cp.zeros([outlength], dtype= ak_array.dtype)
 
     # Initial value for the reduction
-    # min value gets transformed to input_data.dtype automatically?
-    min = cp.iinfo(cp.int64).min
-    h_init = ak_array(min, min)
+    h_init = ak_array(min, -1)
 
     # Perform the segmented reduce
     segmented_reduce(input_struct, _result, start_o, end_o, max_op, h_init, outlength)
 
     # TODO: here converts float to int too, fix this?
-    _result = _result.view(cp.int64).reshape(-1, 2)
+    _result = _result.view(index_dtype).reshape(-1, 2)
     _result = _result[:, 1]
 
     # pass the result outside the function
@@ -174,6 +195,16 @@ def awkward_reduce_argmin(
     outlength,
 ):
     index_dtype = parents_data.dtype
+    data_dtype = input_data.dtype
+
+    # initialize the maximum value depending on the dtype
+    if data_dtype.kind in "iu":  # int/uint
+        max = cp.iinfo(data_dtype).max
+    elif data_dtype.kind == "f":  # float
+        max = cp.finfo(data_dtype).max
+    else:
+        raise TypeError("Unsupported dtype to get the maximal value")
+
     ak_array = gpu_struct(
         {
             "data": input_data.dtype.type,
@@ -189,7 +220,7 @@ def awkward_reduce_argmin(
     # local_indices = local_idx_from_parents(parents_data, parents_length)
 
     # use global indices instead
-    global_indices = cp.arange(0, parents_length + 1, dtype=cp.int64)
+    global_indices = cp.arange(0, parents_length + 1, dtype=index_dtype)
 
     # Combine data and their indices into a single structure
     input_struct = ZipIterator(input_data, global_indices)
@@ -210,9 +241,7 @@ def awkward_reduce_argmin(
     # _result = cp.zeros([outlength], dtype= ak_array.dtype)
 
     # Initial value for the reduction
-    # max value gets transformed to input_data.dtype automatically?
-    max = cp.iinfo(index_dtype).max
-    h_init = ak_array(max, max)
+    h_init = ak_array(max, -1)
 
     # Perform the segmented reduce
     segmented_reduce(input_struct, _result, start_o, end_o, min_op, h_init, outlength)
