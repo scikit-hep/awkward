@@ -941,6 +941,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     nextparents.data,
                     self._offsets.data,
                     self._offsets.length - 1,
+                    nextparents.length,
                 )
             )
             starts = self._offsets[:-1]
@@ -1037,6 +1038,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     nextparents.data,
                     self._offsets.data,
                     self._offsets.length - 1,
+                    nextparents.length,
                 )
             )
 
@@ -1222,6 +1224,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     nextparents.data,
                     self._offsets.data,
                     self._offsets.length - 1,
+                    nextparents.length,
                 )
             )
 
@@ -1337,6 +1340,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
         else:
             nextlen = nplike.index_as_shape_item(self._offsets[-1] - self._offsets[0])
+
+            # Clamp nextlen to actual content length to avoid out-of-bounds access
+            if (
+                nextlen is not unknown_length
+                and self.content.length is not unknown_length
+            ):
+                nextlen = min(nextlen, self.content.length)
             nextparents = Index64.empty(nextlen, nplike)
             lenstarts = self._offsets.length - 1
 
@@ -1350,6 +1360,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     nextparents.data,
                     self._offsets.data,
                     lenstarts,
+                    nextparents.length,
                 )
             )
 
@@ -1610,6 +1621,12 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
         else:
             nextlen = nplike.index_as_shape_item(self._offsets[-1] - self._offsets[0])
+            # Clamp nextlen to actual content length to avoid out-of-bounds access
+            if (
+                nextlen is not unknown_length
+                and self.content.length is not unknown_length
+            ):
+                nextlen = min(nextlen, self.content.length)
             nextparents = Index64.empty(nextlen, nplike)
 
             # n.b. awkward_ListOffsetArray_reduce_local_nextparents_64 always returns parents that are
@@ -1624,6 +1641,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     nextparents.data,
                     self._offsets.data,
                     globalstarts_length,
+                    nextparents.length,
                 )
             )
 
@@ -1676,6 +1694,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
     def _rearrange_prepare_next(self, outlength, parents):
         nplike = self._backend.nplike
         nextlen = nplike.index_as_shape_item(self._offsets[-1] - self._offsets[0])
+        # Clamp nextlen to actual content length to avoid out-of-bounds access
+        if nextlen is not unknown_length and self.content.length is not unknown_length:
+            nextlen = min(nextlen, self.content.length)
         lenstarts = self._offsets.length - 1
         _maxcount = Index64.empty(1, nplike)
         offsetscopy = Index64.empty(self.offsets.length, nplike)
