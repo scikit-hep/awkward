@@ -33,8 +33,7 @@ class Reducer(Protocol):
     def highlevel_function(cls):
         return getattr(ak.operations, cls.name)
 
-    @classmethod
-    def axis_none_reducer(cls) -> Reducer | None:
+    def axis_none_reducer(self) -> Reducer | None:
         """A specialized version for axis=None reductions, or None if there is none."""
         return None
 
@@ -42,7 +41,7 @@ class Reducer(Protocol):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -146,12 +145,17 @@ class ArgMin(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
+
+        from awkward import _do
+
+        parents = _do.resolve_parents(parents, array.backend)
+
         # View array data in kernel-supported dtype
         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -208,12 +212,17 @@ class ArgMax(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
+
+        from awkward import _do
+
+        parents = _do.resolve_parents(parents, array.backend)
+
         # View array data in kernel-supported dtype
         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
@@ -259,10 +268,13 @@ class Count(KernelReducer):
     preferred_dtype: Final = np.int64
     needs_position: Final = False
 
+    def axis_none_reducer(self):
+        return AxisNoneCount()
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -283,15 +295,36 @@ class Count(KernelReducer):
         return ak.contents.NumpyArray(result, backend=array.backend)
 
 
+class AxisNoneCount(Count):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _parents: ak.index.Index,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+
+        nplike = array.backend.nplike
+        count = nplike.asarray(array.length, dtype=self.preferred_dtype)
+        result_array = nplike.reshape(count, (1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
 class CountNonzero(KernelReducer):
     name: Final = "count_nonzero"
     preferred_dtype: Final = np.int64
     needs_position: Final = False
 
+    def axis_none_reducer(self):
+        return AxisNoneCountNonzero()
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -336,19 +369,36 @@ class CountNonzero(KernelReducer):
         return ak.contents.NumpyArray(result, backend=array.backend)
 
 
+class AxisNoneCountNonzero(CountNonzero):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _parents: ak.index.Index,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        nplike = array.backend.nplike
+
+        count_nonzero = nplike.count_nonzero(array.data)
+        result_scalar = nplike.asarray(count_nonzero, dtype=self.preferred_dtype)
+        result_array = nplike.reshape(result_scalar, (1,))
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
 class Sum(KernelReducer):
     name: Final = "sum"
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
-    @classmethod
-    def axis_none_reducer(cls):
+    def axis_none_reducer(self):
         return AxisNoneSum()
 
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -448,19 +498,25 @@ class AxisNoneSum(Sum):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
+        _parents: ak.index.Index | tuple[None, int],
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        del parents, starts, shifts, outlength  # Unused
         assert isinstance(array, ak.contents.NumpyArray)
+
         if array.dtype.kind == "M":
             raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
-        reduce_fn = getattr(array.backend.nplike, self.name)
-        return ak.contents.NumpyArray(
-            [reduce_fn(array.data, axis=None)], backend=array.backend
-        )
+
+        nplike = array.backend.nplike
+        reduce_fn = getattr(nplike, self.name)
+        result_scalar = reduce_fn(array.data, axis=None)
+
+        result_device_scalar = nplike.asarray(result_scalar)
+
+        result_array = nplike.reshape(result_device_scalar, (1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
 
 
 class Prod(KernelReducer):
@@ -468,10 +524,13 @@ class Prod(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
+    def axis_none_reducer(self):
+        return AxisNoneProd()
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -554,6 +613,27 @@ class Prod(KernelReducer):
             )
 
 
+class AxisNoneProd(Prod):
+    def apply(self, array, _parents, _starts, _shifts, _outlength):
+        nplike = array.backend.nplike
+        data = array.data
+
+        if data.dtype.kind in ("M", "m"):  # 'M' is datetime64, 'm' is timedelta64
+            raise ValueError(f"cannot compute the product of {data.dtype!r} values")
+
+        res_dtype = data.dtype
+
+        if data.size == 0:
+            result_scalar = nplike.asarray(1, dtype=res_dtype)
+        else:
+            reduce_fn = getattr(nplike, self.name)
+            result_scalar = reduce_fn(data, axis=None)
+            result_scalar = nplike.asarray(result_scalar, dtype=res_dtype)
+
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
 class Any(KernelReducer):
     name: Final = "any"
     preferred_dtype: Final = np.bool_
@@ -562,7 +642,7 @@ class Any(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -615,7 +695,7 @@ class All(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -665,6 +745,9 @@ class Min(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
+    def axis_none_reducer(self):
+        return AxisNoneMin(self.initial)
+
     def __init__(self, initial: float | None):
         self._initial = initial
 
@@ -698,7 +781,7 @@ class Min(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -768,10 +851,35 @@ class Min(KernelReducer):
             )
 
 
+class AxisNoneMin(Min):
+    def apply(self, array, _parents, _starts, _shifts, _outlength):
+        nplike = array.backend.nplike
+        data = array.data
+
+        if data.size == 0:
+            result_scalar = nplike.asarray(
+                self._identity_for(data.dtype), dtype=data.dtype
+            )
+        else:
+            reduce_fn = getattr(nplike, self.name)
+            result_scalar = reduce_fn(data, axis=None)
+
+        if self.initial is not None:
+            initial_val = nplike.asarray(self.initial, dtype=data.dtype)
+            result_scalar = nplike._module.minimum(result_scalar, initial_val)
+
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
 class Max(KernelReducer):
     name: Final = "max"
     preferred_dtype: Final = np.float64
     needs_position: Final = False
+
+    def axis_none_reducer(self):
+        return AxisNoneMax(self.initial)
 
     def __init__(self, initial):
         self._initial = initial
@@ -806,7 +914,7 @@ class Max(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | tuple[None, int],
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -874,3 +982,25 @@ class Max(KernelReducer):
             return ak.contents.NumpyArray(
                 result.view(array.dtype), backend=array.backend
             )
+
+
+class AxisNoneMax(Max):
+    def apply(self, array, _parents, _starts, _shifts, _outlength):
+        nplike = array.backend.nplike
+        data = array.data
+
+        if data.size == 0:
+            result_scalar = nplike.asarray(
+                self._identity_for(data.dtype), dtype=data.dtype
+            )
+        else:
+            reduce_fn = getattr(array.backend.nplike, self.name)
+            result_scalar = reduce_fn(data, axis=None)
+
+        if self.initial is not None:
+            initial_val = nplike.asarray(self.initial, dtype=data.dtype)
+            result_scalar = nplike._module.maximum(result_scalar, initial_val)
+
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)

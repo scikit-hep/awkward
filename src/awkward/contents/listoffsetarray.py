@@ -1085,6 +1085,11 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 )
 
                 self_starts, self_stops = self._offsets[:-1], self._offsets[1:]
+
+                from awkward import _do
+
+                parents = _do.resolve_parents(parents, self._backend)
+
                 assert (
                     nextcarry.nplike is self._backend.nplike
                     and parents.nplike is self._backend.nplike
@@ -1122,6 +1127,10 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 or self.parameter("__array__") == "bytestring"
             ):
                 raise AxisError("array with strings can only be sorted with axis=-1")
+
+            from awkward import _do
+
+            parents = _do.resolve_parents(parents, self._backend)
 
             if self._backend.nplike.known_data and parents.nplike.known_data:
                 assert self._offsets.length - 1 == parents.length
@@ -1261,6 +1270,11 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 nextcarry = Index64.empty(self._offsets.length - 1, nplike)
 
                 starts, stops = self._offsets[:-1], self._offsets[1:]
+
+                from awkward import _do
+
+                parents = _do.resolve_parents(parents, self._backend)
+
                 assert (
                     nextcarry.nplike is nplike
                     and parents.nplike is nplike
@@ -1296,6 +1310,10 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 or self.parameter("__array__") == "bytestring"
             ):
                 raise AxisError("array with strings can only be sorted with axis=-1")
+
+            from awkward import _do
+
+            parents = _do.resolve_parents(parents, self._backend)
 
             if self._backend.nplike.known_data and parents.nplike.known_data:
                 assert self._offsets.length - 1 == parents.length
@@ -1523,6 +1541,10 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         globalstarts_length = self._offsets.length - 1
 
         if not branch and negaxis == depth:
+            from awkward import _do
+
+            parents = _do.resolve_parents(parents, self._backend)
+
             (
                 distincts,
                 maxcount,
@@ -1661,6 +1683,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
 
             outoffsets = Index64.empty(outlength + 1, nplike)
+            from awkward import _do
+
+            parents = _do.resolve_parents(parents, self._backend)
             assert outoffsets.nplike is nplike and parents.nplike is nplike
             self._backend.maybe_kernel_error(
                 self._backend[

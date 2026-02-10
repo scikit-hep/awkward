@@ -683,6 +683,17 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         (x,) = maybe_materialize(x)
         return self._module.sum(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
+    def prod(
+        self,
+        x: ArrayLikeT,
+        *,
+        axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
+        keepdims: bool = False,
+        maybe_out: ArrayLikeT | None = None,
+    ) -> ArrayLikeT:
+        (x,) = maybe_materialize(x)
+        return self._module.prod(x, axis=axis, keepdims=keepdims, out=maybe_out)
+
     def max(
         self,
         x: ArrayLikeT,
