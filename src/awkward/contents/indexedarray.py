@@ -32,7 +32,7 @@ from awkward._typing import (
     SupportsIndex,
     final,
 )
-from awkward._util import UNSET
+from awkward._util import UNSET, resolve_index
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
