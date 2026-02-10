@@ -20288,7 +20288,8 @@
                     "message": "",
                     "inputs": {
                         "length": 0,
-                        "offsets": [0]
+                        "offsets": [0],
+                        "nextparents_length": 0
                     },
                     "outputs": {
                         "nextparents": []
@@ -20299,7 +20300,8 @@
                     "message": "",
                     "inputs": {
                         "length": 1,
-                        "offsets": [0, 1]
+                        "offsets": [0, 1],
+                        "nextparents_length": 1
                     },
                     "outputs": {
                         "nextparents": [0]
@@ -20310,7 +20312,8 @@
                     "message": "",
                     "inputs": {
                         "length": 18,
-                        "offsets": [0, 0, 1, 3, 3, 6, 8, 9, 9, 9, 10, 10, 12, 15, 15, 17, 18, 18, 18]
+                        "offsets": [0, 0, 1, 3, 3, 6, 8, 9, 9, 9, 10, 10, 12, 15, 15, 17, 18, 18, 18],
+                        "nextparents_length": 18
                     },
                     "outputs": {
                         "nextparents": [1, 2, 2, 4, 4, 4, 5, 5, 6, 9, 11, 11, 12, 12, 12, 14, 14, 15]
@@ -20321,7 +20324,8 @@
                     "message": "",
                     "inputs": {
                         "length": 4,
-                        "offsets": [0, 1, 3, 5, 5]
+                        "offsets": [0, 1, 3, 5, 5],
+                        "nextparents_length": 5
                     },
                     "outputs": {
                         "nextparents": [0, 1, 1, 2, 2]
@@ -20332,7 +20336,8 @@
                     "message": "",
                     "inputs": {
                         "length": 5,
-                        "offsets": [0, 1, 1, 3, 5, 7]
+                        "offsets": [0, 1, 1, 3, 5, 7],
+                        "nextparents_length": 7
                     },
                     "outputs": {
                         "nextparents": [0, 2, 2, 3, 3, 4, 4]
@@ -20343,7 +20348,8 @@
                     "message": "",
                     "inputs": {
                         "length": 5,
-                        "offsets": [0, 0, 1, 1, 2, 2]
+                        "offsets": [0, 0, 1, 1, 2, 2],
+                        "nextparents_length": 2
                     },
                     "outputs": {
                         "nextparents": [1, 3]
