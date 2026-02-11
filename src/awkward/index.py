@@ -345,10 +345,6 @@ class LazyIndex:
         return self._index
 
 
-def zero_factory(length, nplike, dtype=None):
-    return ak.index.Index64.zeros(length, nplike)
-
-
 class ZeroIndex(LazyIndex):
     def __init__(self, length, nplike):
         def zeros_factory(length, nplike, dtype=None):
