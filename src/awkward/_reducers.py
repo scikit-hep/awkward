@@ -42,7 +42,7 @@ class Reducer(Protocol):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -85,7 +85,7 @@ class KernelReducer(Reducer):
 
 def apply_positional_corrections(
     reduced: ak.contents.NumpyArray,
-    parents: ak.index.Index | tuple[None, int],
+    parents: ak.index.Index | ak.index.ZeroIndex,
     starts: ak.index.Index,
     shifts: ak.index.Index | None,
 ):
@@ -146,7 +146,7 @@ class ArgMin(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -208,7 +208,7 @@ class ArgMax(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -262,7 +262,7 @@ class Count(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -291,7 +291,7 @@ class CountNonzero(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -348,7 +348,7 @@ class Sum(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -448,7 +448,7 @@ class AxisNoneSum(Sum):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        _parents: ak.index.Index | tuple[None, int],
+        _parents: ak.index.Index | ak.index.ZeroIndex,
         _starts: ak.index.Index,
         _shifts: ak.index.Index | None,
         _outlength: ShapeItem,
@@ -473,7 +473,7 @@ class Prod(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -564,7 +564,7 @@ class Any(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -617,7 +617,7 @@ class All(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -700,7 +700,7 @@ class Min(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -808,7 +808,7 @@ class Max(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | tuple[None, int],
+        parents: ak.index.Index | ak.index.ZeroIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,

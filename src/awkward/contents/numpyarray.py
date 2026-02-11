@@ -38,7 +38,7 @@ from awkward._typing import (
     SupportsIndex,
     final,
 )
-from awkward._util import UNSET, resolve_index
+from awkward._util import UNSET
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
@@ -49,7 +49,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
-from awkward.index import Index
+from awkward.index import Index, resolve_index
 from awkward.types.numpytype import primitive_to_dtype
 
 if TYPE_CHECKING:

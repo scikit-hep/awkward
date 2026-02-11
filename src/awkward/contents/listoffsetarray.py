@@ -32,7 +32,7 @@ from awkward._typing import (
     SupportsIndex,
     final,
 )
-from awkward._util import UNSET, resolve_index
+from awkward._util import UNSET
 from awkward.contents.content import (
     ApplyActionOptions,
     Content,
@@ -43,7 +43,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.listoffsetform import ListOffsetForm
-from awkward.index import Index, Index64
+from awkward.index import Index, Index64, resolve_index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
