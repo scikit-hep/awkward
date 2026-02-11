@@ -1172,7 +1172,15 @@ class RecordArray(RecordMeta[Content], Content):
             kwargs = {"children": children, "dtype": dt, "mask": m, "size": length}
             params = inspect.signature(StructCol.from_children).parameters
             call_kwargs = {k: v for k, v in kwargs.items() if k in params}
-            return StructCol.from_children(**call_kwargs)
+            try:
+                return StructCol.from_children(**call_kwargs)
+            except ValueError as err:
+                if "from_pylibcudf" not in str(err):
+                    raise
+                out = cudf.core.column.as_column(self.to_list())
+                if m is not None:
+                    out = out.set_mask(m)
+                return out
 
         kwargs = {
             "data": None,
@@ -1192,7 +1200,15 @@ class RecordArray(RecordMeta[Content], Content):
             kwargs["null_count"] = 0 if m is None else unknown_null
         if "exposed" in init_params:
             kwargs["exposed"] = True
-        return StructCol(**kwargs)
+        try:
+            return StructCol(**kwargs)
+        except ValueError as err:
+            if "from_pylibcudf" not in str(err):
+                raise
+            out = cudf.core.column.as_column(self.to_list())
+            if m is not None:
+                out = out.set_mask(m)
+            return out
 
     def _to_backend_array(self, allow_missing, backend):
         if self.fields is None:

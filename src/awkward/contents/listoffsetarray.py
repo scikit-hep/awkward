@@ -2048,19 +2048,35 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     chars=data,
                     mask=m,
                 )
-            return StrCol(
-                ind_buf,
-                data,
-                len(ind_buf) - 1,
-            )
+            try:
+                return StrCol(
+                    ind_buf,
+                    data,
+                    len(ind_buf) - 1,
+                )
+            except ValueError as err:
+                if "from_pylibcudf" not in str(err):
+                    raise
+                out = cudf.core.column.as_column(self.to_list())
+                if m is not None:
+                    out = out.set_mask(m)
+                return out
 
         ListCol = cudf.core.column.lists.ListColumn
 
-        return ListCol(
-            ind_buf,
-            cont,
-            length,
-        )
+        try:
+            return ListCol(
+                ind_buf,
+                cont,
+                length,
+            )
+        except ValueError as err:
+            if "from_pylibcudf" not in str(err):
+                raise
+            out = cudf.core.column.as_column(self.to_list())
+            if m is not None:
+                out = out.set_mask(m)
+            return out
 
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
