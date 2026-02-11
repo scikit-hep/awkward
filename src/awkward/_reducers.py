@@ -179,11 +179,13 @@ class ArgMin(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
                     parents.length,
+                    starts.data,
                     outlength,
                 )
             )

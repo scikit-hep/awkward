@@ -146,9 +146,7 @@ def awkward_reduce_argmax(
         return np.argmax(segment) + start_idx
 
     # Prepare the start and end offsets
-    # print("old offsets", parents_to_offsets(parents_data, parents_length))
     offsets = starts_to_offsets(starts, parents_length)
-    # print("new offsets", offsets)
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
@@ -166,6 +164,7 @@ def awkward_reduce_argmin(
     input_data,
     parents_data,
     parents_length,
+    starts,
     outlength,
 ):
     index_dtype = parents_data.dtype
@@ -180,7 +179,7 @@ def awkward_reduce_argmin(
         return np.argmin(segment) + start_idx
 
     # Prepare the start and end offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
+    offsets = starts_to_offsets(starts, parents_length)
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
