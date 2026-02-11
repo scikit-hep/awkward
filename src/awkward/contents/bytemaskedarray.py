@@ -45,7 +45,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.forms.form import Form, FormKeyPathT
-from awkward.index import Index
+from awkward.index import Index, resolve_index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -882,6 +882,9 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         nextcarry = ak.index.Index64.empty(next_length, nplike=self._backend.nplike)
         nextparents = ak.index.Index64.empty(next_length, nplike=self._backend.nplike)
         outindex = ak.index.Index64.empty(mask_length, nplike=self._backend.nplike)
+
+        parents = resolve_index(parents, self._backend)
+
         assert (
             nextcarry.nplike is self._backend.nplike
             and nextparents.nplike is self._backend.nplike

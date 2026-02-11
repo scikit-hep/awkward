@@ -40,7 +40,7 @@ from awkward.contents.content import (
 )
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.regularform import RegularForm
-from awkward.index import Index
+from awkward.index import Index, resolve_index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -1020,6 +1020,8 @@ class RegularArray(RegularMeta[Content], Content):
         if not branch and negaxis == depth:
             nextcarry = ak.index.Index64.empty(nextlen, nplike=nplike)
             nextparents = ak.index.Index64.empty(nextlen, nplike=nplike)
+            parents = resolve_index(parents, self._backend)
+
             assert (
                 parents.nplike is nplike
                 and nextcarry.nplike is nplike
@@ -1184,6 +1186,9 @@ class RegularArray(RegularMeta[Content], Content):
                     assert outcontent.is_regular
 
             outoffsets = ak.index.Index64.empty(outlength + 1, nplike)
+
+            parents = resolve_index(parents, self._backend)
+
             assert outoffsets.nplike is nplike and parents.nplike is nplike
             self._backend.maybe_kernel_error(
                 self._backend[

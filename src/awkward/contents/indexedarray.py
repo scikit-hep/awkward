@@ -43,7 +43,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.indexedform import IndexedForm
-from awkward.index import Index
+from awkward.index import Index, resolve_index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -812,6 +812,8 @@ class IndexedArray(IndexedMeta[Content], Content):
             return self
 
         branch, depth = self.branch_depth
+
+        parents = resolve_index(parents, self._backend)
 
         index_length = self._index.length
         parents_length = parents.length
