@@ -198,7 +198,25 @@ class PlaceholderArray(MaterializableArray):
     def __truediv__(self, other):
         maybe_materialize(self, other)
 
-    __iter__: None = None
+    def __iter__(self):
+        self.materialize()
+
+    def __array__(self, dtype=None, copy=None):
+        self.materialize()
+
+    def __cupy_get_ndarray__(self):
+        self.materialize()
+
+    def __jax_array__(self):
+        self.materialize()
+
+    @property
+    def __array_interface__(self):
+        self.materialize()
+
+    @property
+    def __cuda_array_interface__(self):
+        self.materialize()
 
     def __dlpack_device__(self):
         self.materialize()
