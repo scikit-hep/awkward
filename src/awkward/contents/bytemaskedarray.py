@@ -802,30 +802,32 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, parents, offsets, outlength
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
         return self.to_IndexedOptionArray64()._unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, parents, offsets, outlength
         )
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         return self.to_IndexedOptionArray64()._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         return self.to_IndexedOptionArray64()._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis, starts, parents, offsets, outlength, ascending, stable
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -852,6 +854,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -964,6 +967,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             starts,
             nextshifts,
             nextparents,
+            offsets,
             outlength,
             mask,
             keepdims,

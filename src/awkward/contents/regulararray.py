@@ -841,7 +841,7 @@ class RegularArray(RegularMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         if self.length == 0:
             return True
 
@@ -849,16 +849,18 @@ class RegularArray(RegularMeta[Content], Content):
             negaxis,
             starts,
             parents,
+            offsets,
             outlength,
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         if self.length == 0:
             return self
         out = self.to_ListOffsetArray64(True)._unique(
             negaxis,
             starts,
             parents,
+            offsets,
             outlength,
         )
 
@@ -874,11 +876,11 @@ class RegularArray(RegularMeta[Content], Content):
         return out
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         next = self.to_ListOffsetArray64(True)
         out = next._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
         )
 
         if isinstance(out, ak.contents.RegularArray):
@@ -892,9 +894,11 @@ class RegularArray(RegularMeta[Content], Content):
 
         return out
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         out = self.to_ListOffsetArray64(True)._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis, starts, parents, offsets, outlength, ascending, stable
         )
 
         # FIXME
@@ -1009,6 +1013,7 @@ class RegularArray(RegularMeta[Content], Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -1076,6 +1081,7 @@ class RegularArray(RegularMeta[Content], Content):
                 nextstarts,
                 nextshifts,
                 nextparents,
+                offsets,
                 # We want a result of length
                 nextoutlength,
                 mask,
@@ -1123,6 +1129,7 @@ class RegularArray(RegularMeta[Content], Content):
                 nextstarts,
                 shifts,
                 nextparents,
+                offsets,
                 self.length,
                 mask,
                 keepdims,

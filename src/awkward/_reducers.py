@@ -43,6 +43,7 @@ class Reducer(Protocol):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -86,6 +87,7 @@ class KernelReducer(Reducer):
 def apply_positional_corrections(
     reduced: ak.contents.NumpyArray,
     parents: ak.index.Index | ak.index.ZeroIndex,
+    offsets: ak.index.Index | ak.index.EmptyIndex,
     starts: ak.index.Index,
     shifts: ak.index.Index | None,
 ):
@@ -147,6 +149,7 @@ class ArgMin(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -188,7 +191,7 @@ class ArgMin(KernelReducer):
                 )
             )
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
-        apply_positional_corrections(result_array, parents, starts, shifts)
+        apply_positional_corrections(result_array, parents, offsets, starts, shifts)
         return result_array
 
 
@@ -209,6 +212,7 @@ class ArgMax(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -250,7 +254,7 @@ class ArgMax(KernelReducer):
                 )
             )
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
-        apply_positional_corrections(result_array, parents, starts, shifts)
+        apply_positional_corrections(result_array, parents, offsets, starts, shifts)
         return result_array
 
 
@@ -263,6 +267,7 @@ class Count(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -292,6 +297,7 @@ class CountNonzero(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -349,6 +355,7 @@ class Sum(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -449,6 +456,7 @@ class AxisNoneSum(Sum):
         self,
         array: ak.contents.NumpyArray,
         _parents: ak.index.Index | ak.index.ZeroIndex,
+        _offsets: ak.index.Index | ak.index.EmptyIndex,
         _starts: ak.index.Index,
         _shifts: ak.index.Index | None,
         _outlength: ShapeItem,
@@ -474,6 +482,7 @@ class Prod(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -565,6 +574,7 @@ class Any(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -618,6 +628,7 @@ class All(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -701,6 +712,7 @@ class Min(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -809,6 +821,7 @@ class Max(KernelReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,

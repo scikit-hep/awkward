@@ -146,7 +146,8 @@ def is_unique(layout, axis: Integral | None = None) -> bool:
     negaxis = axis if axis is None else -axis
     starts = ak.index.Index64.zeros(1, nplike=layout._backend.nplike)
     parents = ak.index.ZeroIndex(layout.length, layout.backend.nplike)
-    return layout._is_unique(negaxis, starts, parents, 1)
+    offsets = ak.index.EmptyIndex(2, layout.backend.nplike)
+    return layout._is_unique(negaxis, starts, parents, offsets, 1)
 
 
 def unique(layout: Content, axis=None):
@@ -176,8 +177,9 @@ def unique(layout: Content, axis=None):
 
         starts = ak.index.Index64.zeros(1, nplike=layout._backend.nplike)
         parents = ak.index.ZeroIndex(layout.length, layout.backend.nplike)
+        offsets = ak.index.EmptyIndex(2, layout.backend.nplike)
 
-        return layout._unique(negaxis, starts, parents, 1)
+        return layout._unique(negaxis, starts, parents, offsets, 1)
 
     raise AxisError(
         f"unique expects axis 'None' or '-1', got axis={axis} that is not supported yet"
@@ -268,6 +270,7 @@ def reduce(
 
         starts = ak.index.Index64.zeros(1, layout.backend.nplike)
         parents = ak.index.ZeroIndex(layout.length, layout.backend.nplike)
+        offsets = ak.index.EmptyIndex(2, layout.backend.nplike)
         shifts = None
         next = layout._reduce_next(
             reducer,
@@ -275,6 +278,7 @@ def reduce(
             starts,
             shifts,
             parents,
+            offsets,
             1,
             mask,
             keepdims,
@@ -322,6 +326,7 @@ def reduce(
 
         starts = ak.index.Index64.zeros(1, layout.backend.nplike)
         parents = ak.index.ZeroIndex(layout.length, layout.backend.nplike)
+        offsets = ak.index.EmptyIndex(2, layout.backend.nplike)
         shifts = None
         next = layout._reduce_next(
             reducer,
@@ -329,6 +334,7 @@ def reduce(
             starts,
             shifts,
             parents,
+            offsets,
             1,
             mask,
             keepdims,
@@ -373,11 +379,13 @@ def argsort(
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.nplike)
     parents = ak.index.ZeroIndex(layout.length, layout.backend.nplike)
+    offsets = ak.index.EmptyIndex(2, layout.backend.nplike)
     return layout._argsort_next(
         negaxis,
         starts,
         None,
         parents,
+        offsets,
         1,
         ascending,
         stable,
@@ -412,7 +420,8 @@ def sort(
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.nplike)
     parents = ak.index.ZeroIndex(layout.length, layout.backend.nplike)
-    return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)
+    offsets = ak.index.EmptyIndex(2, layout.backend.nplike)
+    return layout._sort_next(negaxis, starts, parents, offsets, 1, ascending, stable)
 
 
 def touch_data(layout: Content, recursive: bool = True):
