@@ -198,7 +198,7 @@ class PlaceholderArray(MaterializableArray):
     def __truediv__(self, other):
         maybe_materialize(self, other)
 
-    def __iter__(self):
+    def __iter__(self):  # pylint: disable=E0301
         self.materialize()
 
     def __array__(self, dtype=None, copy=None):
