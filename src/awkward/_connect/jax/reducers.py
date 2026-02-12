@@ -71,6 +71,7 @@ def awkward_JAXNumpyArray_reduce_adjust_starts_shifts_64(
 def apply_positional_corrections(
     reduced: ak.contents.NumpyArray,
     parents: ak.index.Index,
+    offsets: ak.index.Index | ak.index.EmptyIndex,
     starts: ak.index.Index,
     shifts: ak.index.Index | None,
 ) -> ak._nplikes.ArrayLike:
@@ -144,6 +145,7 @@ class ArgMin(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -153,7 +155,7 @@ class ArgMin(JAXReducer):
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
         corrected_data = apply_positional_corrections(
-            result_array, parents, starts, shifts
+            result_array, parents, offsets, starts, shifts
         )
         return ak.contents.NumpyArray(corrected_data, backend=array.backend)
 
@@ -204,6 +206,7 @@ class ArgMax(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -213,7 +216,7 @@ class ArgMax(JAXReducer):
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
         corrected_data = apply_positional_corrections(
-            result_array, parents, starts, shifts
+            result_array, parents, offsets, starts, shifts
         )
         return ak.contents.NumpyArray(corrected_data, backend=array.backend)
 
@@ -237,6 +240,7 @@ class Count(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -296,6 +300,7 @@ class CountNonzero(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -324,6 +329,7 @@ class Sum(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -415,6 +421,7 @@ class Prod(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -471,6 +478,7 @@ class Any(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -506,6 +514,7 @@ class All(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -560,6 +569,7 @@ class Min(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -623,6 +633,7 @@ class Max(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
