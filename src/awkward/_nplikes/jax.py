@@ -8,9 +8,11 @@ import awkward as ak
 from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpy_like import UfuncLike
+from awkward._nplikes.numpy_like import NumpyMetadata, UfuncLike
 from awkward._nplikes.virtual import VirtualNDArray
 from awkward._typing import Final, cast
+
+np = NumpyMetadata.instance()
 
 
 @register_nplike
@@ -151,6 +153,40 @@ class Jax(ArrayModuleNumpyLike):
         del maybe_out
         x1, x2 = maybe_materialize(x1, x2)
         return self._module.divide(x1, x2)
+
+    def byteswap(self, x: ArrayLike) -> ArrayLike:
+        (x,) = maybe_materialize(x)
+
+        jax = ak.jax.import_jax()
+        itemsize = x.dtype.itemsize
+        if itemsize == 1:
+            return self._module.array(x, copy=True)
+
+        # Match NumPy semantics for complex numbers by swapping bytes within
+        # each real-valued component (not across real/imag boundaries).
+        if x.dtype.kind == "c":
+            real = self.byteswap(self._module.real(x))
+            imag = self.byteswap(self._module.imag(x))
+            one_j = self._module.array(1j, dtype=x.dtype)
+            return real + imag * one_j
+
+        unsigned_dtype_by_itemsize = {
+            2: np.dtype(np.uint16),
+            4: np.dtype(np.uint32),
+            8: np.dtype(np.uint64),
+        }
+        try:
+            word_dtype = unsigned_dtype_by_itemsize[itemsize]
+        except KeyError:
+            raise NotImplementedError(
+                f"JAX byteswap does not support dtype with itemsize={itemsize}"
+            ) from None
+
+        words = jax.lax.bitcast_convert_type(x, word_dtype)
+        bytes_view = jax.lax.bitcast_convert_type(words, np.dtype(np.uint8))
+        flipped = self._module.flip(bytes_view, axis=-1)
+        swapped_words = jax.lax.bitcast_convert_type(flipped, word_dtype)
+        return jax.lax.bitcast_convert_type(swapped_words, x.dtype)
 
     def memory_ptr(self, x: ArrayLike) -> int:
         (x,) = maybe_materialize(x)
