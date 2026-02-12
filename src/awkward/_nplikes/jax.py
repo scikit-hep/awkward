@@ -157,36 +157,22 @@ class Jax(ArrayModuleNumpyLike):
     def byteswap(self, x: ArrayLike) -> ArrayLike:
         (x,) = maybe_materialize(x)
 
-        jax = ak.jax.import_jax()
         itemsize = x.dtype.itemsize
         if itemsize == 1:
             return self._module.array(x, copy=True)
 
-        # Match NumPy semantics for complex numbers by swapping bytes within
-        # each real-valued component (not across real/imag boundaries).
         if x.dtype.kind == "c":
-            real = self.byteswap(self._module.real(x))
-            imag = self.byteswap(self._module.imag(x))
-            one_j = self._module.array(1j, dtype=x.dtype)
-            return real + imag * one_j
-
-        unsigned_dtype_by_itemsize = {
-            2: np.dtype(np.uint16),
-            4: np.dtype(np.uint32),
-            8: np.dtype(np.uint64),
-        }
-        try:
-            word_dtype = unsigned_dtype_by_itemsize[itemsize]
-        except KeyError:
             raise NotImplementedError(
-                f"JAX byteswap does not support dtype with itemsize={itemsize}"
-            ) from None
+                "JAX byteswap for complex dtypes is not supported"
+            )
 
-        words = jax.lax.bitcast_convert_type(x, word_dtype)
-        bytes_view = jax.lax.bitcast_convert_type(words, np.dtype(np.uint8))
-        flipped = self._module.flip(bytes_view, axis=-1)
-        swapped_words = jax.lax.bitcast_convert_type(flipped, word_dtype)
-        return jax.lax.bitcast_convert_type(swapped_words, x.dtype)
+        shape = x.shape
+        as_uint8 = x.view(np.uint8)  # type: ignore[attr-defined]
+        as_uint8_2d = self._module.reshape(as_uint8, (-1, itemsize))
+        reversed_uint8_2d = self._module.flip(as_uint8_2d, axis=1)
+        reversed_uint8 = self._module.reshape(reversed_uint8_2d, (-1,))
+        swapped = reversed_uint8.view(x.dtype)  # type: ignore[attr-defined]
+        return self._module.reshape(swapped, shape)
 
     def memory_ptr(self, x: ArrayLike) -> int:
         (x,) = maybe_materialize(x)

@@ -48,7 +48,10 @@ def test_jax_nplike_byteswap_matches_numpy(values: np.ndarray):
     except (TypeError, ValueError, NotImplementedError):
         pytest.skip(f"jax does not support dtype {values.dtype}")
 
-    swapped = nplike.byteswap(array)
+    try:
+        swapped = nplike.byteswap(array)
+    except NotImplementedError:
+        pytest.skip(f"jax byteswap does not support dtype {values.dtype}")
     expected = values.byteswap(inplace=False)
     got = np.asarray(swapped)
 
