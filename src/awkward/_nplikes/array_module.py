@@ -555,6 +555,12 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     def byteswap(self, x: ArrayLikeT) -> ArrayLikeT:
         (x,) = maybe_materialize(x)
 
+        if x.dtype.kind == "c":
+            # NumPy-compatible complex byteswap swaps bytes within each real-valued
+            # component, not across real/imag component boundaries.
+            component_dtype = self._module.empty((), dtype=x.dtype).real.dtype
+            return self.byteswap(x.view(component_dtype)).view(x.dtype)  # type: ignore[attr-defined]
+
         itemsize = x.dtype.itemsize
         if itemsize == 1:
             return self.astype(x, x.dtype, copy=True)

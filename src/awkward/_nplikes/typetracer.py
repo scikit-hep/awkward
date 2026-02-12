@@ -1413,7 +1413,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     def byteswap(self, x: TypeTracerArray) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
-        return TypeTracerArray._new(x.dtype, shape=x.shape)
+        raise NotImplementedError(
+            "TypeTracer does not support byteswap; byteswap requires concrete data"
+        )
 
     def strides(self, x: TypeTracerArray | PlaceholderArray) -> tuple[ShapeItem, ...]:
         assert isinstance(x, TypeTracerArray)
