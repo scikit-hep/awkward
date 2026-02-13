@@ -184,7 +184,7 @@ def awkward_reduce_argmin(
     end_o = offsets[1:]
 
     # Perform the segmented reduce
-    # type_wrapper: cp.int64
+    # type_wrapper is always cp.int64
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
