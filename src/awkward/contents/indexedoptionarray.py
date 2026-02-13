@@ -975,14 +975,14 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         if self._index.length is not unknown_length and self._index.length == 0:
             return True
 
         projected = self.project()
-        return projected._is_unique(negaxis, starts, parents, outlength)
+        return projected._is_unique(negaxis, starts, parents, offsets, outlength)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         branch, depth = self.branch_depth
 
         inject_nones = (
@@ -997,6 +997,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             negaxis,
             starts,
             nextparents,
+            offsets,
             outlength,
         )
 
@@ -1218,7 +1219,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         return next, nextparents, numnull, outindex
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         parents = resolve_index(parents, self._backend)
 
@@ -1238,7 +1239,14 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             nextshifts = None
 
         out = next._argsort_next(
-            negaxis, starts, nextshifts, nextparents, outlength, ascending, stable
+            negaxis,
+            starts,
+            nextshifts,
+            nextparents,
+            offsets,
+            outlength,
+            ascending,
+            stable,
         )
 
         # `next._argsort_next` is given the non-None values. We choose to
@@ -1347,7 +1355,9 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         else:
             return out
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         parents = resolve_index(parents, self._backend)
 
         assert (
@@ -1359,7 +1369,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         next, nextparents, _numnull, outindex = self._rearrange_prepare_next(parents)
 
         out = next._sort_next(
-            negaxis, starts, nextparents, outlength, ascending, stable
+            negaxis, starts, nextparents, offsets, outlength, ascending, stable
         )
 
         nextoutindex = ak.index.Index64.empty(parents.length, self._backend.nplike)
@@ -1408,6 +1418,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -1430,6 +1441,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             starts,
             nextshifts,
             nextparents,
+            offsets,
             outlength,
             mask,
             keepdims,
