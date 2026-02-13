@@ -10,6 +10,7 @@ ERROR awkward_reduce_argmin(
   const IN* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   for (int64_t k = 0;  k < outlength;  k++) {
     toptr[k] = -1;
@@ -27,12 +28,14 @@ ERROR awkward_reduce_argmin_int8_64(
   const int8_t* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   return awkward_reduce_argmin<int64_t, int8_t>(
     toptr,
     fromptr,
     parents,
     lenparents,
+    starts,
     outlength);
 }
 ERROR awkward_reduce_argmin_uint8_64(
@@ -40,12 +43,14 @@ ERROR awkward_reduce_argmin_uint8_64(
   const uint8_t* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   return awkward_reduce_argmin<int64_t, uint8_t>(
     toptr,
     fromptr,
     parents,
     lenparents,
+    starts,
     outlength);
 }
 ERROR awkward_reduce_argmin_int16_64(
@@ -53,12 +58,14 @@ ERROR awkward_reduce_argmin_int16_64(
   const int16_t* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   return awkward_reduce_argmin<int64_t, int16_t>(
     toptr,
     fromptr,
     parents,
     lenparents,
+    starts,
     outlength);
 }
 ERROR awkward_reduce_argmin_uint16_64(
@@ -66,12 +73,14 @@ ERROR awkward_reduce_argmin_uint16_64(
   const uint16_t* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   return awkward_reduce_argmin<int64_t, uint16_t>(
     toptr,
     fromptr,
     parents,
     lenparents,
+    starts,
     outlength);
 }
 ERROR awkward_reduce_argmin_int32_64(
@@ -79,12 +88,14 @@ ERROR awkward_reduce_argmin_int32_64(
   const int32_t* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   return awkward_reduce_argmin<int64_t, int32_t>(
     toptr,
     fromptr,
     parents,
     lenparents,
+    starts,
     outlength);
 }
 ERROR awkward_reduce_argmin_uint32_64(
@@ -92,12 +103,14 @@ ERROR awkward_reduce_argmin_uint32_64(
   const uint32_t* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   return awkward_reduce_argmin<int64_t, uint32_t>(
     toptr,
     fromptr,
     parents,
     lenparents,
+    starts,
     outlength);
 }
 ERROR awkward_reduce_argmin_int64_64(
@@ -105,12 +118,14 @@ ERROR awkward_reduce_argmin_int64_64(
   const int64_t* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   return awkward_reduce_argmin<int64_t, int64_t>(
     toptr,
     fromptr,
     parents,
     lenparents,
+    starts,
     outlength);
 }
 ERROR awkward_reduce_argmin_uint64_64(
@@ -118,12 +133,14 @@ ERROR awkward_reduce_argmin_uint64_64(
   const uint64_t* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   return awkward_reduce_argmin<int64_t, uint64_t>(
     toptr,
     fromptr,
     parents,
     lenparents,
+    starts,
     outlength);
 }
 ERROR awkward_reduce_argmin_float32_64(
@@ -131,12 +148,14 @@ ERROR awkward_reduce_argmin_float32_64(
   const float* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   return awkward_reduce_argmin<int64_t, float>(
     toptr,
     fromptr,
     parents,
     lenparents,
+    starts,
     outlength);
 }
 ERROR awkward_reduce_argmin_float64_64(
@@ -144,11 +163,13 @@ ERROR awkward_reduce_argmin_float64_64(
   const double* fromptr,
   const int64_t* parents,
   int64_t lenparents,
+  const int64_t* starts,
   int64_t outlength) {
   return awkward_reduce_argmin<int64_t, double>(
     toptr,
     fromptr,
     parents,
     lenparents,
+    starts,
     outlength);
 }

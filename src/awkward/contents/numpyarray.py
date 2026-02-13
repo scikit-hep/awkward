@@ -49,7 +49,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
-from awkward.index import Index
+from awkward.index import Index, resolve_index
 from awkward.types.numpytype import primitive_to_dtype
 
 if TYPE_CHECKING:
@@ -723,7 +723,7 @@ class NumpyArray(NumpyMeta, Content):
                 backend=self._backend,
             )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         if self.length is not unknown_length and self.length == 0:
             return True
         elif len(self.shape) != 1:
@@ -731,6 +731,7 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis,
                 starts,
                 parents,
+                offsets,
                 outlength,
             )
         elif not self.is_contiguous:
@@ -738,10 +739,11 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis,
                 starts,
                 parents,
+                offsets,
                 outlength,
             )
         else:
-            out = self._unique(negaxis, starts, parents, outlength)
+            out = self._unique(negaxis, starts, parents, offsets, outlength)
             if isinstance(out, ak.contents.ListOffsetArray):
                 return (
                     out.content.length is not unknown_length
@@ -750,7 +752,7 @@ class NumpyArray(NumpyMeta, Content):
             else:
                 return out.length is not unknown_length and out.length == self.length
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         if self.shape[0] is not unknown_length and self.shape[0] == 0:
             return self
 
@@ -803,6 +805,7 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis,
                 starts,
                 parents,
+                offsets,
                 outlength,
             )
         else:
@@ -923,17 +926,19 @@ class NumpyArray(NumpyMeta, Content):
             )
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         if len(self.shape) != 1:
             return self.to_RegularArray()._argsort_next(
-                negaxis, starts, shifts, parents, outlength, ascending, stable
+                negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
             )
         elif not self.is_contiguous:
             return self.to_contiguous()._argsort_next(
-                negaxis, starts, shifts, parents, outlength, ascending, stable
+                negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
             )
         else:
+            parents = resolve_index(parents, self._backend)
+
             parents_length = parents.length
             _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
@@ -1029,17 +1034,21 @@ class NumpyArray(NumpyMeta, Content):
             out = NumpyArray(nextcarry.data, parameters=None, backend=self._backend)
             return out
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         if len(self.shape) != 1:
             return self.to_RegularArray()._sort_next(
-                negaxis, starts, parents, outlength, ascending, stable
+                negaxis, starts, parents, offsets, outlength, ascending, stable
             )
         elif not self.is_contiguous:
             return self.to_contiguous()._sort_next(
-                negaxis, starts, parents, outlength, ascending, stable
+                negaxis, starts, parents, offsets, outlength, ascending, stable
             )
 
         else:
+            parents = resolve_index(parents, self._backend)
+
             parents_length = parents.length
             _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
@@ -1128,6 +1137,7 @@ class NumpyArray(NumpyMeta, Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -1140,6 +1150,7 @@ class NumpyArray(NumpyMeta, Content):
                 starts,
                 shifts,
                 parents,
+                offsets,
                 outlength,
                 mask,
                 keepdims,
@@ -1152,6 +1163,7 @@ class NumpyArray(NumpyMeta, Content):
                 starts,
                 shifts,
                 parents,
+                offsets,
                 outlength,
                 mask,
                 keepdims,
@@ -1162,7 +1174,10 @@ class NumpyArray(NumpyMeta, Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        out = reducer.apply(self, parents, starts, shifts, outlength)
+        parents = resolve_index(parents, self._backend)
+        offsets = resolve_index(offsets, self._backend)
+
+        out = reducer.apply(self, parents, offsets, starts, shifts, outlength)
 
         if mask:
             outmask = ak.index.Index8.empty(outlength, self._backend.nplike)

@@ -43,7 +43,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.listoffsetform import ListOffsetForm
-from awkward.index import Index, Index64
+from awkward.index import Index, Index64, resolve_index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -893,7 +893,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         if self._offsets.length is not unknown_length and self._offsets.length - 1 == 0:
             return True
 
@@ -918,10 +918,14 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 return out2.length == self.length
 
         if negaxis is None:
-            return self._content._is_unique(negaxis, starts, parents, outlength)
+            return self._content._is_unique(
+                negaxis, starts, parents, self._offsets, outlength
+            )
 
         if not branch and (negaxis == depth):
-            return self._content._is_unique(negaxis - 1, starts, parents, outlength)
+            return self._content._is_unique(
+                negaxis - 1, starts, parents, self._offsets, outlength
+            )
         else:
             nextlen = self._backend.nplike.index_as_shape_item(
                 self._offsets[-1] - self._offsets[0]
@@ -946,9 +950,11 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
             starts = self._offsets[:-1]
 
-            return self._content._is_unique(negaxis, starts, nextparents, outlength)
+            return self._content._is_unique(
+                negaxis, starts, nextparents, self._offsets, outlength
+            )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         if self._offsets.length - 1 == 0:
             return self
 
@@ -1047,6 +1053,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 negaxis,
                 self._offsets[:-1],
                 nextparents,
+                offsets,
                 self._offsets.length - 1,
             )
 
@@ -1064,6 +1071,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         ascending,
         stable,
@@ -1085,6 +1093,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 )
 
                 self_starts, self_stops = self._offsets[:-1], self._offsets[1:]
+
+                parents = resolve_index(parents, self._backend)
+
                 assert (
                     nextcarry.nplike is self._backend.nplike
                     and parents.nplike is self._backend.nplike
@@ -1122,6 +1133,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 or self.parameter("__array__") == "bytestring"
             ):
                 raise AxisError("array with strings can only be sorted with axis=-1")
+
+            parents = resolve_index(parents, self._backend)
 
             if self._backend.nplike.known_data and parents.nplike.known_data:
                 assert self._offsets.length - 1 == parents.length
@@ -1178,6 +1191,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 nextstarts,
                 nextshifts,
                 nextparents,
+                offsets,
                 nextstarts.length,
                 ascending,
                 stable,
@@ -1234,6 +1248,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 self._offsets[:-1],
                 shifts,
                 nextparents,
+                offsets,
                 self._offsets.length - 1,
                 ascending,
                 stable,
@@ -1243,7 +1258,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 outoffsets, outcontent, parameters=self._parameters
             )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         branch, depth = self.branch_depth
 
         nplike = self._backend.nplike
@@ -1261,6 +1278,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 nextcarry = Index64.empty(self._offsets.length - 1, nplike)
 
                 starts, stops = self._offsets[:-1], self._offsets[1:]
+
+                parents = resolve_index(parents, self._backend)
+
                 assert (
                     nextcarry.nplike is nplike
                     and parents.nplike is nplike
@@ -1297,6 +1317,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             ):
                 raise AxisError("array with strings can only be sorted with axis=-1")
 
+            parents = resolve_index(parents, self._backend)
+
             if self._backend.nplike.known_data and parents.nplike.known_data:
                 assert self._offsets.length - 1 == parents.length
 
@@ -1314,6 +1336,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 negaxis - 1,
                 nextstarts,
                 nextparents,
+                offsets,
                 maxnextparents + 1,
                 ascending,
                 stable,
@@ -1369,6 +1392,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 negaxis,
                 self._offsets[:-1],
                 nextparents,
+                offsets,
                 lenstarts,
                 ascending,
                 stable,
@@ -1496,6 +1520,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -1513,6 +1538,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 starts,
                 shifts,
                 parents,
+                offsets,
                 outlength,
                 mask,
                 keepdims,
@@ -1523,6 +1549,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         globalstarts_length = self._offsets.length - 1
 
         if not branch and negaxis == depth:
+            parents = resolve_index(parents, self._backend)
+
             (
                 distincts,
                 maxcount,
@@ -1604,6 +1632,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 nextstarts,
                 nextshifts,
                 nextparents,
+                offsets,
                 maxnextparents + 1,
                 mask,
                 False,
@@ -1654,6 +1683,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 nextstarts,
                 shifts,
                 nextparents,
+                offsets,
                 globalstarts_length,
                 mask,
                 keepdims,
@@ -1661,6 +1691,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
 
             outoffsets = Index64.empty(outlength + 1, nplike)
+
+            parents = resolve_index(parents, self._backend)
+
             assert outoffsets.nplike is nplike and parents.nplike is nplike
             self._backend.maybe_kernel_error(
                 self._backend[
