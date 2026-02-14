@@ -42,7 +42,8 @@ class Reducer(Protocol):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -85,7 +86,8 @@ class KernelReducer(Reducer):
 
 def apply_positional_corrections(
     reduced: ak.contents.NumpyArray,
-    parents: ak.index.Index,
+    parents: ak.index.Index | ak.index.ZeroIndex,
+    offsets: ak.index.Index | ak.index.EmptyIndex,
     starts: ak.index.Index,
     shifts: ak.index.Index | None,
 ):
@@ -146,7 +148,8 @@ class ArgMin(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -179,16 +182,18 @@ class ArgMin(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
                     parents.length,
+                    starts.data,
                     outlength,
                 )
             )
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
-        apply_positional_corrections(result_array, parents, starts, shifts)
+        apply_positional_corrections(result_array, parents, offsets, starts, shifts)
         return result_array
 
 
@@ -208,7 +213,8 @@ class ArgMax(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -241,16 +247,18 @@ class ArgMax(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
                     parents.length,
+                    starts.data,
                     outlength,
                 )
             )
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
-        apply_positional_corrections(result_array, parents, starts, shifts)
+        apply_positional_corrections(result_array, parents, offsets, starts, shifts)
         return result_array
 
 
@@ -262,7 +270,8 @@ class Count(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -291,7 +300,8 @@ class CountNonzero(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -348,7 +358,8 @@ class Sum(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -448,19 +459,22 @@ class AxisNoneSum(Sum):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
+        _parents: ak.index.Index | ak.index.ZeroIndex,
+        _offsets: ak.index.Index | ak.index.EmptyIndex,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        del parents, starts, shifts, outlength  # Unused
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
             raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
-        reduce_fn = getattr(array.backend.nplike, self.name)
-        return ak.contents.NumpyArray(
-            [reduce_fn(array.data, axis=None)], backend=array.backend
-        )
+
+        nplike = array.backend.nplike
+        reduce_fn = getattr(nplike, self.name)
+        result_scalar = reduce_fn(array.data, axis=None)
+        result_array = nplike.asarray(result_scalar).reshape((1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
 
 
 class Prod(KernelReducer):
@@ -471,7 +485,8 @@ class Prod(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -562,7 +577,8 @@ class Any(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -615,7 +631,8 @@ class All(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -698,7 +715,8 @@ class Min(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -806,7 +824,8 @@ class Max(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,

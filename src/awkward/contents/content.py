@@ -57,7 +57,7 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.forms.form import Form, FormKeyPathT
-from awkward.index import Index, Index64
+from awkward.index import EmptyIndex, Index, Index64, ZeroIndex
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpy import NumpyLike
@@ -893,7 +893,8 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index,
+        parents: Index | ZeroIndex,
+        offsets: Index | EmptyIndex,
         outlength: int,
         mask: bool,
         keepdims: bool,
@@ -906,7 +907,8 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index,
+        parents: Index | ZeroIndex,
+        offsets: Index | EmptyIndex,
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -917,7 +919,8 @@ class Content(Meta):
         self,
         negaxis: int,
         starts: Index,
-        parents: Index,
+        parents: Index | ZeroIndex,
+        offsets: Index | EmptyIndex,
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -1039,7 +1042,8 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index,
+        parents: Index | ZeroIndex,
+        offsets: Index | EmptyIndex,
         outlength: int,
     ) -> bool:
         raise NotImplementedError
@@ -1048,7 +1052,8 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index,
+        parents: Index | ZeroIndex,
+        offsets: Index | EmptyIndex,
         outlength: int,
     ):
         raise NotImplementedError

@@ -2170,23 +2170,26 @@ kernels:
           - {name: nextparents, type: "List[int64_t]", dir: out}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: reducer-offsets}
           - {name: length, type: "int64_t", dir: in, role: reducer-length}
+          - {name: nextparents_length, type: "int64_t", dir: in, role: default}
       - name: awkward_ListOffsetArray64_reduce_local_nextparents_64
         args:
           - {name: nextparents, type: "List[int64_t]", dir: out}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: length, type: "int64_t", dir: in, role: reducer-length}
+          - {name: nextparents_length, type: "int64_t", dir: in, role: default}
       - name: awkward_ListOffsetArrayU32_reduce_local_nextparents_64
         args:
           - {name: nextparents, type: "List[int64_t]", dir: out}
           - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: reducer-offsets}
           - {name: length, type: "int64_t", dir: in, role: reducer-length}
+          - {name: nextparents_length, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      def awkward_ListOffsetArray_reduce_local_nextparents_64(nextparents, offsets, length):
+      def awkward_ListOffsetArray_reduce_local_nextparents_64(nextparents, offsets, length, nextparents_length):
           initialoffset = offsets[0]
           for i in range(length):
               j = offsets[i] - initialoffset
-              while j < (offsets[i + 1] - initialoffset):
+              while j < (offsets[i + 1] - initialoffset) and j < nextparents_length:
                   nextparents[j] = i
                   j = j + 1
     automatic-tests: false
@@ -4037,6 +4040,7 @@ kernels:
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_int16_64
         args:
@@ -4044,6 +4048,7 @@ kernels:
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_int32_64
         args:
@@ -4051,6 +4056,7 @@ kernels:
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_int64_64
         args:
@@ -4058,6 +4064,7 @@ kernels:
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_uint8_64
         args:
@@ -4065,6 +4072,7 @@ kernels:
           - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_uint16_64
         args:
@@ -4072,6 +4080,7 @@ kernels:
           - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_uint32_64
         args:
@@ -4079,6 +4088,7 @@ kernels:
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_uint64_64
         args:
@@ -4086,6 +4096,7 @@ kernels:
           - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_float32_64
         args:
@@ -4093,6 +4104,7 @@ kernels:
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_float64_64
         args:
@@ -4100,10 +4112,11 @@ kernels:
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
-      def awkward_reduce_argmax(toptr, fromptr, parents, lenparents, outlength):
+      def awkward_reduce_argmax(toptr, fromptr, parents, lenparents, starts, outlength):
           for k in range(outlength):
               toptr[k] = -1
           for i in range(lenparents):
@@ -4149,6 +4162,7 @@ kernels:
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_int16_64
         args:
@@ -4156,6 +4170,7 @@ kernels:
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_int32_64
         args:
@@ -4163,6 +4178,7 @@ kernels:
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_int64_64
         args:
@@ -4170,6 +4186,7 @@ kernels:
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_uint8_64
         args:
@@ -4177,6 +4194,7 @@ kernels:
           - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_uint16_64
         args:
@@ -4184,6 +4202,7 @@ kernels:
           - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_uint32_64
         args:
@@ -4191,6 +4210,7 @@ kernels:
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_uint64_64
         args:
@@ -4198,6 +4218,7 @@ kernels:
           - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_float32_64
         args:
@@ -4205,6 +4226,7 @@ kernels:
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_float64_64
         args:
@@ -4212,10 +4234,11 @@ kernels:
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
-      def awkward_reduce_argmin(toptr, fromptr, parents, lenparents, outlength):
+      def awkward_reduce_argmin(toptr, fromptr, parents, lenparents, starts, outlength):
           for k in range(outlength):
               toptr[k] = -1
           for i in range(lenparents):

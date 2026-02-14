@@ -43,7 +43,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.indexedform import IndexedForm
-from awkward.index import Index
+from awkward.index import Index, resolve_index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -795,7 +795,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         if self._index.length is not unknown_length and self._index.length == 0:
             return True
 
@@ -805,13 +805,15 @@ class IndexedArray(IndexedMeta[Content], Content):
             return False
 
         next = self._content._carry(nextindex, False)
-        return next._is_unique(negaxis, starts, parents, outlength)
+        return next._is_unique(negaxis, starts, parents, offsets, outlength)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         if self._index.length is not unknown_length and self._index.length == 0:
             return self
 
         branch, depth = self.branch_depth
+
+        parents = resolve_index(parents, self._backend)
 
         index_length = self._index.length
         parents_length = parents.length
@@ -849,6 +851,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             negaxis,
             starts,
             nextparents,
+            offsets,
             outlength,
         )
 
@@ -933,16 +936,20 @@ class IndexedArray(IndexedMeta[Content], Content):
         raise NotImplementedError
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         next = self._content._carry(self._index, False)
         return next._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         next = self._content._carry(self._index, False)
-        return next._sort_next(negaxis, starts, parents, outlength, ascending, stable)
+        return next._sort_next(
+            negaxis, starts, parents, offsets, outlength, ascending, stable
+        )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
@@ -960,6 +967,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -972,6 +980,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             starts,
             shifts,
             parents,
+            offsets,
             outlength,
             mask,
             keepdims,
