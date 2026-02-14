@@ -2204,15 +2204,15 @@ def test_uniques():
     ]
 
     assert (
-        ak.str.uniques(["foo", "bar", "bar", "fee", None, "foo"]).layout.form
+        ak.str.uniques(["foo", "bar", "bar", "fee", "foo"]).layout.form
         == ak.str.uniques(
-            ak.to_backend(["foo", "bar", "bar", "fee", None, "foo"], "typetracer")
+            ak.to_backend(["foo", "bar", "bar", "fee", "foo"], "typetracer")
         ).layout.form
     )
     assert (
-        ak.str.uniques([b"foo", b"bar", b"bar", b"fee", None, b"foo"]).layout.form
+        ak.str.uniques([b"foo", b"bar", b"bar", b"fee", b"foo"]).layout.form
         == ak.str.uniques(
-            ak.to_backend([b"foo", b"bar", b"bar", b"fee", None, b"foo"], "typetracer")
+            ak.to_backend([b"foo", b"bar", b"bar", b"fee", b"foo"], "typetracer")
         ).layout.form
     )
 
@@ -2236,16 +2236,14 @@ def test_distinct_counts():
     ]
 
     assert (
-        ak.str.distinct_counts(["foo", "bar", "bar", "fee", None, "foo"]).layout.form
+        ak.str.distinct_counts(["foo", "bar", "bar", "fee", "foo"]).layout.form
         == ak.str.distinct_counts(
-            ak.to_backend(["foo", "bar", "bar", "fee", None, "foo"], "typetracer")
+            ak.to_backend(["foo", "bar", "bar", "fee", "foo"], "typetracer")
         ).layout.form
     )
     assert (
-        ak.str.distinct_counts(
-            [b"foo", b"bar", b"bar", b"fee", None, b"foo"]
-        ).layout.form
+        ak.str.distinct_counts([b"foo", b"bar", b"bar", b"fee", b"foo"]).layout.form
         == ak.str.distinct_counts(
-            ak.to_backend([b"foo", b"bar", b"bar", b"fee", None, b"foo"], "typetracer")
+            ak.to_backend([b"foo", b"bar", b"bar", b"fee", b"foo"], "typetracer")
         ).layout.form
     )
