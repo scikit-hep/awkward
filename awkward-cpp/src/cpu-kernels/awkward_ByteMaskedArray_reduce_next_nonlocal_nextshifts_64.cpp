@@ -11,17 +11,14 @@ ERROR awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
   bool valid_when) {
   int64_t nullsum = 0;
   int64_t k = 0;
-
-  uint8_t v_when = (valid_when != 0);
-
-  for (int64_t i = 0; i < length; i++) {
-    uint8_t is_valid = ((mask[i] != 0) == v_when);
-
-    nextshifts[k] = nullsum;
-
-    k += is_valid;
-    nullsum += (1 - is_valid);
+  for (int64_t i = 0;  i < length;  i++) {
+    if ((mask[i] != 0) == (valid_when != 0)) {
+      nextshifts[k] = nullsum;
+      k++;
+    }
+    else {
+      nullsum++;
+    }
   }
-
   return success();
 }
