@@ -11,7 +11,8 @@ ERROR awkward_ByteMaskedArray_toIndexedOptionArray(
   int64_t length,
   bool validwhen) {
   for (int64_t i = 0;  i < length;  i++) {
-    toindex[i] = ((mask[i] != 0) == validwhen ? i : -1);
+    bool is_valid = ((mask[i] != 0) == validwhen);
+    toindex[i] = is_valid ? i : -1;
   }
   return success();
 }

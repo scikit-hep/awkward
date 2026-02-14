@@ -11,11 +11,11 @@ ERROR awkward_reduce_sum(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = (OUT)0;
-  }
-  for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i]] += (OUT)fromptr[i];
+  std::memset(toptr, 0, outlength * sizeof(OUT));
+
+  for (int64_t i = 0; i < lenparents; i++) {
+    int64_t parent_idx = parents[i];
+    toptr[parent_idx] += static_cast<OUT>(fromptr[i]);
   }
   return success();
 }

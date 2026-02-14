@@ -12,13 +12,15 @@ ERROR awkward_reduce_argmin(
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
-  for (int64_t k = 0;  k < outlength;  k++) {
-    toptr[k] = -1;
-  }
-  for (int64_t i = 0;  i < lenparents;  i++) {
+  std::fill_n(toptr, outlength, -1);
+  for (int64_t i = 0; i < lenparents; i++) {
     int64_t parent = parents[i];
-    if (toptr[parent] == -1  ||  fromptr[i] < fromptr[toptr[parent]]) {
-      toptr[parent] = i;
+    int64_t current_best_idx = toptr[parent];
+
+    auto candidate_val = fromptr[i];
+
+    if (current_best_idx == -1 || candidate_val < fromptr[current_best_idx]) {
+        toptr[parent] = i;
     }
   }
   return success();

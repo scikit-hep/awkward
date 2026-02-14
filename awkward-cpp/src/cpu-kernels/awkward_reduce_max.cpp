@@ -12,9 +12,8 @@ ERROR awkward_reduce_max(
   int64_t lenparents,
   int64_t outlength,
   OUT identity) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = identity;
-  }
+  std::fill_n(toptr, outlength, identity);
+
   for (int64_t i = 0;  i < lenparents;  i++) {
     IN x = fromptr[i];
     toptr[parents[i]] = (x > toptr[parents[i]] ? x : toptr[parents[i]]);

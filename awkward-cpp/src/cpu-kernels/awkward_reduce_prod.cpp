@@ -11,11 +11,11 @@ ERROR awkward_reduce_prod(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = (OUT)1;
-  }
-  for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i]] *= (OUT)fromptr[i];
+  std::fill_n(toptr, outlength, static_cast<OUT>(1));
+
+  for (int64_t i = 0; i < lenparents; i++) {
+    int64_t parent = parents[i];
+    toptr[parent] *= static_cast<OUT>(fromptr[i]);
   }
   return success();
 }

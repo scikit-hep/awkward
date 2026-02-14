@@ -11,11 +11,12 @@ ERROR awkward_reduce_sum_bool(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = false;
-  }
-  for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i]] |= (fromptr[i] != 0);
+  std::memset(toptr, 0, outlength * sizeof(bool));
+
+  for (int64_t i = 0; i < lenparents; i++) {
+    if (fromptr[i] != 0) {
+      toptr[parents[i]] = true;
+    }
   }
   return success();
 }

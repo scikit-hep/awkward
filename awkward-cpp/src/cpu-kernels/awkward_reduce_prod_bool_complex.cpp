@@ -11,12 +11,15 @@ ERROR awkward_reduce_prod_bool_complex(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = true;
-  }
+  std::memset(toptr, 1, outlength * sizeof(bool));
+
   for (int64_t i = 0;  i < lenparents;  i++) {
     toptr[parents[i]] &= (fromptr[i * 2] != 0  ||  fromptr[i * 2 + 1] != 0);
   }
+  for (int64_t i = 0; i < lenparents; ++i) {
+    bool condition = (fromptr[i * 2] != 0) | (fromptr[i * 2 + 1] != 0);
+    toptr[parents[i]] &= condition;
+}
   return success();
 }
 ERROR awkward_reduce_prod_bool_complex64_64(
