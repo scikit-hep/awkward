@@ -1259,6 +1259,8 @@ class NumpyArray(NumpyMeta, Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        import inspect
+
         cupy = Cupy.instance()
         from cudf.core.column.column import as_column
 
@@ -1269,7 +1271,45 @@ class NumpyArray(NumpyMeta, Content):
             if m.nbytes % 64:
                 m = cupy.resize(m, ((m.nbytes // 64) + 1) * 64)
             m = cudf.core.buffer.as_buffer(m)
-            data.set_base_data(m)
+            if hasattr(data, "set_mask"):
+                data = data.set_mask(m)
+            else:
+                column_mod = cudf.core.column.column
+                builder = getattr(column_mod, "build_column", None)
+                if builder is not None:
+                    kwargs = {
+                        "data": getattr(data, "base_data", None),
+                        "dtype": data.dtype,
+                        "mask": m,
+                        "size": len(data),
+                    }
+                    params = inspect.signature(builder).parameters
+                    call_kwargs = {k: v for k, v in kwargs.items() if k in params}
+                    data = builder(**call_kwargs)
+                else:
+                    numerical_mod = getattr(cudf.core.column, "numerical", None)
+                    if numerical_mod is None:
+                        raise RuntimeError(
+                            "ak.to_cudf could not locate cuDF NumericalColumn"
+                        )
+                    NumCol = numerical_mod.NumericalColumn
+                    kwargs = {
+                        "data": getattr(data, "base_data", None),
+                        "dtype": data.dtype,
+                        "mask": m,
+                        "size": len(data),
+                        "offset": getattr(data, "offset", 0),
+                    }
+                    init_params = inspect.signature(NumCol.__init__).parameters
+                    call_kwargs = {k: v for k, v in kwargs.items() if k in init_params}
+                    if "null_count" in init_params:
+                        unknown_null = getattr(column_mod, "UNKNOWN_NULL_COUNT", None)
+                        if unknown_null is None:
+                            unknown_null = getattr(
+                                column_mod, "_UNKNOWN_NULL_COUNT", -1
+                            )
+                        call_kwargs["null_count"] = unknown_null
+                    data = NumCol(**call_kwargs)
         return data
 
     def _to_backend_array(self, allow_missing, backend):

@@ -39,6 +39,7 @@ from awkward.contents.content import (
     ImplementsApplyAction,
     RemoveStructureOptions,
     ToArrowOptions,
+    _is_cudf_column_constructor_error,
 )
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
@@ -2015,15 +2016,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
-        from packaging.version import parse as parse_version
+        import inspect
 
         cupy = Cupy.instance()
         index = maybe_materialize(self._offsets.raw(cupy))[0].astype("int32")
         buf = cudf.core.buffer.as_buffer(index)
-
-        if parse_version(cudf.__version__) >= parse_version("24.10.00"):
+        if hasattr(cudf.core.column, "as_column"):
             ind_buf = cudf.core.column.as_column(buf, dtype=index.dtype)
-
         else:
             ind_buf = cudf.core.column.numerical.NumericalColumn(
                 buf, index.dtype, None, size=len(index)
@@ -2049,13 +2048,17 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     mask=m,
                 )
             try:
+                from cudf.utils.dtypes import CUDF_STRING_DTYPE
+
                 return StrCol(
-                    ind_buf,
-                    data,
-                    len(ind_buf) - 1,
+                    data=data,
+                    size=len(ind_buf) - 1,
+                    dtype=CUDF_STRING_DTYPE,
+                    mask=m,
+                    children=(ind_buf,),
                 )
-            except ValueError as err:
-                if "from_pylibcudf" not in str(err):
+            except Exception as err:
+                if not _is_cudf_column_constructor_error(err):
                     raise
                 out = cudf.core.column.as_column(self.to_list())
                 if m is not None:
@@ -2063,15 +2066,45 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 return out
 
         ListCol = cudf.core.column.lists.ListColumn
+        kwargs = {
+            "children": (ind_buf, cont),
+            "dtype": cudf.core.dtypes.ListDtype(cont.dtype),
+            "mask": m,
+            "size": length,
+            "data": None,
+        }
+        if hasattr(ListCol, "from_children"):
+            params = inspect.signature(ListCol.from_children).parameters
+            call_kwargs = {k: v for k, v in kwargs.items() if k in params}
+            try:
+                return ListCol.from_children(**call_kwargs)
+            except Exception as err:
+                if not _is_cudf_column_constructor_error(err):
+                    raise
+                out = cudf.core.column.as_column(self.to_list())
+                if m is not None:
+                    out = out.set_mask(m)
+                return out
 
         try:
-            return ListCol(
-                ind_buf,
-                cont,
-                length,
-            )
-        except ValueError as err:
-            if "from_pylibcudf" not in str(err):
+            return ListCol(**kwargs)
+        except TypeError:
+            try:
+                return ListCol(
+                    length,
+                    mask=m,
+                    children=(ind_buf, cont),
+                    dtype=cudf.core.dtypes.ListDtype(cont.dtype),
+                )
+            except Exception as err:
+                if not _is_cudf_column_constructor_error(err):
+                    raise
+                out = cudf.core.column.as_column(self.to_list())
+                if m is not None:
+                    out = out.set_mask(m)
+                return out
+        except Exception as err:
+            if not _is_cudf_column_constructor_error(err):
                 raise
             out = cudf.core.column.as_column(self.to_list())
             if m is not None:

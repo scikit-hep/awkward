@@ -40,6 +40,7 @@ from awkward.contents.content import (
     ImplementsApplyAction,
     RemoveStructureOptions,
     ToArrowOptions,
+    _is_cudf_column_constructor_error,
 )
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
@@ -1174,8 +1175,8 @@ class RecordArray(RecordMeta[Content], Content):
             call_kwargs = {k: v for k, v in kwargs.items() if k in params}
             try:
                 return StructCol.from_children(**call_kwargs)
-            except ValueError as err:
-                if "from_pylibcudf" not in str(err):
+            except Exception as err:
+                if not _is_cudf_column_constructor_error(err):
                     raise
                 out = cudf.core.column.as_column(self.to_list())
                 if m is not None:
@@ -1200,10 +1201,11 @@ class RecordArray(RecordMeta[Content], Content):
             kwargs["null_count"] = 0 if m is None else unknown_null
         if "exposed" in init_params:
             kwargs["exposed"] = True
+
         try:
             return StructCol(**kwargs)
-        except ValueError as err:
-            if "from_pylibcudf" not in str(err):
+        except Exception as err:
+            if not _is_cudf_column_constructor_error(err):
                 raise
             out = cudf.core.column.as_column(self.to_list())
             if m is not None:
