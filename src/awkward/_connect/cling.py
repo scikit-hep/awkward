@@ -17,6 +17,18 @@ numpy = Numpy.instance()
 
 
 cache = {}
+_declared_cache = set()
+
+
+def _declare(compiler, key, source, use_cached):
+    if not use_cached:
+        compiler(source)
+        return
+
+    compiler_key = (id(compiler), key)
+    if compiler_key not in _declared_cache:
+        compiler(source)
+        _declared_cache.add(compiler_key)
 
 
 def generate_headers(compiler, use_cached=True):
@@ -41,7 +53,7 @@ def generate_headers(compiler, use_cached=True):
 extern "C" int printf(const char*, ...);
 """.strip()
         cache[key] = out
-        compiler(out)
+    _declare(compiler, key, out, use_cached)
 
     return out
 
@@ -164,7 +176,7 @@ namespace awkward {
 }
 """.strip()
         cache[key] = out
-        compiler(out)
+    _declare(compiler, key, out, use_cached)
 
     return out
 
@@ -206,7 +218,7 @@ namespace awkward {
 }
 """.strip()
         cache[key] = out
-        compiler(out)
+    _declare(compiler, key, out, use_cached)
 
     return out
 
@@ -441,7 +453,7 @@ namespace awkward {{
 }}
 """.strip()
         cache[key] = out
-        compiler(out)
+    _declare(compiler, key, out, use_cached)
 
     return out
 
@@ -615,6 +627,7 @@ class NumpyArrayGenerator(Generator, ak._lookup.NumpyLookup):
         generate_ArrayView(compiler, use_cached=use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -635,7 +648,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
 
 
 class RegularArrayGenerator(Generator, ak._lookup.RegularLookup):
@@ -698,6 +711,7 @@ class RegularArrayGenerator(Generator, ak._lookup.RegularLookup):
             self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             if self.is_string:
                 out = f"""
@@ -769,7 +783,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
 
 
 class ListArrayGenerator(Generator, ak._lookup.ListLookup):
@@ -852,6 +866,7 @@ class ListArrayGenerator(Generator, ak._lookup.ListLookup):
             self.content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             if self.is_string:
                 out = f"""
@@ -923,7 +938,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
 
 
 class IndexedArrayGenerator(Generator, ak._lookup.IndexedLookup):
@@ -979,6 +994,7 @@ class IndexedArrayGenerator(Generator, ak._lookup.IndexedLookup):
         self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -1000,7 +1016,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
 
 
 class IndexedOptionArrayGenerator(Generator, ak._lookup.IndexedOptionLookup):
@@ -1055,6 +1071,7 @@ class IndexedOptionArrayGenerator(Generator, ak._lookup.IndexedOptionLookup):
         self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -1081,7 +1098,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
 
 
 class ByteMaskedArrayGenerator(Generator, ak._lookup.ByteMaskedLookup):
@@ -1133,6 +1150,7 @@ class ByteMaskedArrayGenerator(Generator, ak._lookup.ByteMaskedLookup):
         self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -1159,7 +1177,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
 
 
 class BitMaskedArrayGenerator(Generator, ak._lookup.BitMaskedLookup):
@@ -1219,6 +1237,7 @@ class BitMaskedArrayGenerator(Generator, ak._lookup.BitMaskedLookup):
         self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -1250,7 +1269,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
 
 
 class UnmaskedArrayGenerator(Generator, ak._lookup.UnmaskedLookup):
@@ -1289,6 +1308,7 @@ class UnmaskedArrayGenerator(Generator, ak._lookup.UnmaskedLookup):
         self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -1309,7 +1329,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
 
 
 class RecordGenerator(Generator, ak._lookup.RecordLookup):
@@ -1355,6 +1375,7 @@ class RecordGenerator(Generator, ak._lookup.RecordLookup):
             content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             params = [
                 f"if (parameter == {json.dumps(name)}) return {json.dumps(json.dumps(value))};\n      "
@@ -1396,7 +1417,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
 
 
 class RecordArrayGenerator(Generator, ak._lookup.RecordLookup):
@@ -1471,6 +1492,7 @@ class RecordArrayGenerator(Generator, ak._lookup.RecordLookup):
         self.record.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -1491,7 +1513,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
 
 
 class UnionArrayGenerator(Generator, ak._lookup.UnionLookup):
@@ -1550,6 +1572,7 @@ class UnionArrayGenerator(Generator, ak._lookup.UnionLookup):
             content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
+        out = cache.get(key)
         if not use_cached or key not in cache:
             cases = []
             for i, content in enumerate(self.contenttypes):
@@ -1586,4 +1609,4 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-            compiler(out)
+        _declare(compiler, key, out, use_cached)
