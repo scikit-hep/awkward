@@ -17,18 +17,6 @@ numpy = Numpy.instance()
 
 
 cache = {}
-_declared_cache = set()
-
-
-def _declare(compiler, key, source, use_cached):
-    if not use_cached:
-        compiler(source)
-        return
-
-    compiler_key = (id(compiler), key)
-    if compiler_key not in _declared_cache:
-        compiler(source)
-        _declared_cache.add(compiler_key)
 
 
 def generate_headers(compiler, use_cached=True):
@@ -53,7 +41,7 @@ def generate_headers(compiler, use_cached=True):
 extern "C" int printf(const char*, ...);
 """.strip()
         cache[key] = out
-    _declare(compiler, key, out, use_cached)
+        compiler(out)
 
     return out
 
@@ -176,7 +164,7 @@ namespace awkward {
 }
 """.strip()
         cache[key] = out
-    _declare(compiler, key, out, use_cached)
+        compiler(out)
 
     return out
 
@@ -218,7 +206,7 @@ namespace awkward {
 }
 """.strip()
         cache[key] = out
-    _declare(compiler, key, out, use_cached)
+        compiler(out)
 
     return out
 
@@ -453,7 +441,7 @@ namespace awkward {{
 }}
 """.strip()
         cache[key] = out
-    _declare(compiler, key, out, use_cached)
+        compiler(out)
 
     return out
 
@@ -647,7 +635,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
 
 
 class RegularArrayGenerator(Generator, ak._lookup.RegularLookup):
@@ -781,7 +769,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
 
 
 class ListArrayGenerator(Generator, ak._lookup.ListLookup):
@@ -935,7 +923,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
 
 
 class IndexedArrayGenerator(Generator, ak._lookup.IndexedLookup):
@@ -1012,7 +1000,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
 
 
 class IndexedOptionArrayGenerator(Generator, ak._lookup.IndexedOptionLookup):
@@ -1093,7 +1081,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
 
 
 class ByteMaskedArrayGenerator(Generator, ak._lookup.ByteMaskedLookup):
@@ -1171,7 +1159,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
 
 
 class BitMaskedArrayGenerator(Generator, ak._lookup.BitMaskedLookup):
@@ -1262,7 +1250,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
 
 
 class UnmaskedArrayGenerator(Generator, ak._lookup.UnmaskedLookup):
@@ -1321,7 +1309,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
 
 
 class RecordGenerator(Generator, ak._lookup.RecordLookup):
@@ -1408,7 +1396,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
 
 
 class RecordArrayGenerator(Generator, ak._lookup.RecordLookup):
@@ -1503,7 +1491,7 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
 
 
 class UnionArrayGenerator(Generator, ak._lookup.UnionLookup):
@@ -1598,4 +1586,4 @@ namespace awkward {{
 }}
 """.strip()
             cache[key] = out
-        _declare(compiler, key, out, use_cached)
+            compiler(out)
