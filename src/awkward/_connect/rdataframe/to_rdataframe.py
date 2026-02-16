@@ -6,6 +6,9 @@ import threading
 
 import ROOT
 
+import sysconfig
+ROOT.gInterpreter.AddIncludePath(sysconfig.get_path('include'))
+
 import awkward as ak
 import awkward._connect.cling
 import awkward._lookup
