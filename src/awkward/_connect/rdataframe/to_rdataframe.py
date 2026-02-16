@@ -26,7 +26,7 @@ done = compile(
 """
 )
 assert done is True, (
-    f"Compilation failed: expected True but got {type(done).__name__} object"
+    f"Compilation failed: `#include <Python.h>` expected True but got {done}"
 )
 
 
