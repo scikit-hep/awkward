@@ -5,6 +5,12 @@ from __future__ import annotations
 import sysconfig
 import threading
 
+include_path = sysconfig.get_path("include")
+if "CPLUS_INCLUDE_PATH" in os.environ:
+    os.environ["CPLUS_INCLUDE_PATH"] = f"{include_path}:{os.environ['CPLUS_INCLUDE_PATH']}"
+else:
+    os.environ["CPLUS_INCLUDE_PATH"] = include_path
+
 import ROOT
 
 ROOT.gInterpreter.AddIncludePath(sysconfig.get_path("include"))
@@ -20,7 +26,9 @@ cache = {}
 
 def compile(source_code):
     with compiler_lock:
-        return ROOT.gInterpreter.Declare(source_code)
+        ROOT.gInterpreter.AddIncludePath(sysconfig.get_path("include"))
+        result = ROOT.gInterpreter.Declare(source_code)
+        return result
 
 
 done = compile(
