@@ -47,7 +47,10 @@ def generate_headers(compiler, use_cached=True):
 #include <complex>
 #include <chrono>
 
-#include <Python.h>
+struct _object;
+typedef _object PyObject;
+extern "C" void Py_IncRef(PyObject*);
+#define Py_INCREF(op) Py_IncRef(reinterpret_cast<PyObject*>(op))
 
 extern "C" int printf(const char*, ...);
 """.strip()
