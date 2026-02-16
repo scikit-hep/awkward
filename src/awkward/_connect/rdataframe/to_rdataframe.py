@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import sysconfig
 import threading
 
 import ROOT
 
-import sysconfig
-ROOT.gInterpreter.AddIncludePath(sysconfig.get_path('include'))
+ROOT.gInterpreter.AddIncludePath(sysconfig.get_path("include"))
 
 import awkward as ak
 import awkward._connect.cling
