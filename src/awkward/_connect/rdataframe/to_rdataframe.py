@@ -20,12 +20,12 @@ def compile(source_code):
         return ROOT.gInterpreter.Declare(source_code)
 
 
-result = compile(
+done = compile(
     """
 #include <Python.h>
 """
 )
-print(f"Include result: {result}")
+assert done is True
 
 
 def to_rdataframe(layouts, length, flatlist_as_rvec):
