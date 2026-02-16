@@ -295,6 +295,67 @@ jobs:
             python=3.10
             numpy
             root
+      
+      - name: Verify Python development headers
+        run: |
+          echo "=== Checking Python.h availability ==="
+          
+          # Check python3-config is available
+          if ! command -v python3-config &> /dev/null; then
+            echo "✗ python3-config not found"
+            exit 1
+          fi
+          
+          # Get include path
+          PYTHON_INCLUDE=$(python3-config --includes | grep -o '\-I[^ ]*' | head -1 | sed 's/-I//')
+          echo "Python include path: $PYTHON_INCLUDE"
+          
+          # Check Python.h exists
+          if [ ! -f "$PYTHON_INCLUDE/Python.h" ]; then
+            echo "✗ Python.h not found at $PYTHON_INCLUDE/Python.h"
+            exit 1
+          fi
+          echo "✓ Python.h found at $PYTHON_INCLUDE/Python.h"
+          
+          # Verify with Python
+          python3 << 'EOF'
+          import sys
+          import sysconfig
+          from pathlib import Path
+          
+          include_dir = sysconfig.get_path('include')
+          python_h = Path(include_dir) / 'Python.h'
+          
+          print(f"Python version: {sys.version}")
+          print(f"Include directory: {include_dir}")
+          
+          if python_h.exists():
+              print(f"✓ Python.h verified via Python")
+          else:
+              print(f"✗ Python.h NOT found via Python")
+              sys.exit(1)
+          EOF
+          
+          # Try to compile a test program
+          cat > /tmp/test_python.c << 'EOF'
+          #include <Python.h>
+          int main() {
+              Py_Initialize();
+              Py_Finalize();
+              return 0;
+          }
+          EOF
+          
+          if gcc /tmp/test_python.c $(python3-config --cflags --ldflags) -o /tmp/test_python 2>&1; then
+              echo "✓ Successfully compiled test program with Python.h"
+              rm -f /tmp/test_python.c /tmp/test_python
+          else
+              echo "✗ Failed to compile test program"
+              rm -f /tmp/test_python.c
+              exit 1
+          fi
+          
+          echo "=== All Python.h checks passed ==="
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
