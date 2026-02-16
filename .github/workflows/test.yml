@@ -296,6 +296,11 @@ jobs:
             numpy
             root
 
+      - name: Verify Python.h for ROOT
+        run: |
+          echo "Verifying Python.h is available for ROOT build..."
+          python3 -c "from pathlib import Path; import sysconfig; p = Path(sysconfig.get_path('include')) / 'Python.h'; print(f'✓ Python.h: {p}') if p.exists() else exit(1)"
+
       - name: Verify Python development headers
         run: |
           echo "=== Checking Python.h availability ==="
