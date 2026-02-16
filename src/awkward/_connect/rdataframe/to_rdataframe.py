@@ -7,7 +7,9 @@ import threading
 
 include_path = sysconfig.get_path("include")
 if "CPLUS_INCLUDE_PATH" in os.environ:
-    os.environ["CPLUS_INCLUDE_PATH"] = f"{include_path}:{os.environ['CPLUS_INCLUDE_PATH']}"
+    os.environ["CPLUS_INCLUDE_PATH"] = (
+        f"{include_path}:{os.environ['CPLUS_INCLUDE_PATH']}"
+    )
 else:
     os.environ["CPLUS_INCLUDE_PATH"] = include_path
 
