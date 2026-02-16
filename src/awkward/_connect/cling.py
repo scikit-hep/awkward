@@ -25,10 +25,9 @@ def _declare(compiler, key, source, use_cached):
         compiler(source)
         return
 
-    compiler_key = (id(compiler), key)
-    if compiler_key not in _declared_cache:
+    if key not in _declared_cache:
         compiler(source)
-        _declared_cache.add(compiler_key)
+        _declared_cache.add(key)
 
 
 def generate_headers(compiler, use_cached=True):
