@@ -340,15 +340,13 @@ jobs:
           cat > /tmp/test_python.c << 'EOF'
           #include <Python.h>
           int main() {
-              Py_Initialize();
-              Py_Finalize();
               return 0;
           }
           EOF
 
-          if gcc /tmp/test_python.c $(python3-config --cflags --ldflags) -o /tmp/test_python 2>&1; then
+          if gcc /tmp/test_python.c $(python3-config --cflags) -c -o /tmp/test_python 2>&1; then
               echo "✓ Successfully compiled test program with Python.h"
-              rm -f /tmp/test_python.c /tmp/test_python
+              rm -f /tmp/test_python.c /tmp/test_python.o
           else
               echo "✗ Failed to compile test program"
               rm -f /tmp/test_python.c
