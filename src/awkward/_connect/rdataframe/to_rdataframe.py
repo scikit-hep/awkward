@@ -25,7 +25,9 @@ done = compile(
 #include <Python.h>
 """
 )
-assert done is True, f"Compilation failed: expected True but got {type(done).__name__} object"
+assert done is True, (
+    f"Compilation failed: expected True but got {type(done).__name__} object"
+)
 
 
 def to_rdataframe(layouts, length, flatlist_as_rvec):
