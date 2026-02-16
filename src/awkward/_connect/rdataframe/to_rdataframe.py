@@ -14,13 +14,13 @@ if "CPLUS_INCLUDE_PATH" in os.environ:
 else:
     os.environ["CPLUS_INCLUDE_PATH"] = include_path
 
-import ROOT # noqa: E402
+import ROOT  # noqa: E402
 
 ROOT.gInterpreter.AddIncludePath(sysconfig.get_path("include"))
 
-import awkward as ak # noqa: E402
-import awkward._connect.cling # noqa: E402
-import awkward._lookup # noqa: E402
+import awkward as ak  # noqa: E402
+import awkward._connect.cling  # noqa: E402
+import awkward._lookup  # noqa: E402
 
 compiler_lock = threading.Lock()
 
