@@ -163,6 +163,7 @@ def awkward_reduce_argmin(
     result,
     input_data,
     parents_data,
+    offsets,
     parents_length,
     starts,
     outlength,
