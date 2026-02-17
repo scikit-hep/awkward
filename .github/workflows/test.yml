@@ -360,6 +360,12 @@ jobs:
 
           echo "=== All Python.h checks passed ==="
 
+      - name: Setup tmate session
+        if: ${{ !cancelled() && runner.debug }}
+        uses: mxschmitt/action-tmate@v3
+        # When debugging increase to a suitable value!
+        timeout-minutes: 30
+
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
 
