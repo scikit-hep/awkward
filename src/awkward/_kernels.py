@@ -70,17 +70,22 @@ class CTypesFunc(Protocol):
 
 
 class NumpyKernel(BaseKernel):
+    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
+        super().__init__(impl, key)
+        # Pre-calculate which arguments are pointers.
+        # This moves the issubclass() calls out of the hot path.
+        self._is_ptr = [issubclass(t, ctypes._Pointer) for t in self._impl.argtypes]
+        self._argtypes = self._impl.argtypes
+
     @classmethod
     def _cast(cls, x, t):
         if issubclass(t, ctypes._Pointer):
-            # Do we have a NumPy-owned array?
             if numpy.is_own_array(x):
                 assert numpy.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
                     return ctypes.cast(numpy.memory_ptr(x), t)
                 else:
                     return x
-            # Or, do we have a ctypes type
             elif hasattr(x, "_b_base_"):
                 return ctypes.cast(x, t)
             else:
@@ -92,12 +97,41 @@ class NumpyKernel(BaseKernel):
 
     def __call__(self, *args) -> None:
         assert len(args) == len(self._impl.argtypes)
-
+ 
         args = maybe_materialize(*args)
-
+ 
         return self._impl(
             *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes, strict=True))
         )
+
+
+    # def __call__(self, *args) -> None:
+    #     impl = self._impl
+
+    #     # Materialization is still necessary but expensive
+    #     args = maybe_materialize(*args)
+
+    #     # Use a list comprehension instead of a generator.
+    #     # In tight loops, [f(x) for x in y] is significantly faster
+    #     # than *(f(x) for x in y) due to unpacking mechanics.
+    #     out_args = []
+    #     for i, x in enumerate(args):
+    #         if self._is_ptr[i]:
+    #             # Only run the heavy logic for pointers
+    #             t = self._argtypes[i]
+    #             if numpy.is_own_array(x):
+    #                 # Inlined logic is faster than function calls (cast())
+    #                 out_args.append(
+    #                     ctypes.cast(numpy.memory_ptr(x), t) if x.ndim > 0 else x
+    #                 )
+    #             elif hasattr(x, "_b_base_"):
+    #                 out_args.append(ctypes.cast(x, t))
+    #             else:
+    #                 raise AssertionError(f"Expected NumPy buffer, received {x}")
+    #         else:
+    #             out_args.append(x)
+
+    #     return impl(*out_args)
 
 
 class JaxKernel(BaseKernel):
