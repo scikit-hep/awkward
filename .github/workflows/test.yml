@@ -296,6 +296,7 @@ jobs:
             numpy
             root
             gxx
+            gcc
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
