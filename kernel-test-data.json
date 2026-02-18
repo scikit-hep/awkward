@@ -23915,8 +23915,8 @@
                         "lenparents": 9,
                         "outlength": 5,
                         "parents": [0, 0, 3, 3, 1, 1, 4, 4, 2],
-                        "starts": [0, 2, 4, 6, 7],
-                        "offsets": [0, 2, 4, 6, 8, 9]
+                        "starts": [0, 2, 4, 5, 7],
+                        "offsets": [0, 2, 4, 5, 7, 9]
                     },
                     "outputs": {
                         "toptr": [0, 5, 8, 3, 7]
