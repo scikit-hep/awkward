@@ -386,10 +386,12 @@ class Sum(KernelReducer):
                         np.int64,
                         array.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         array.data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                     )
@@ -402,10 +404,12 @@ class Sum(KernelReducer):
                         np.int32,
                         array.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         array.data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                     )
@@ -428,10 +432,12 @@ class Sum(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                     )
@@ -444,10 +450,12 @@ class Sum(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                     )
