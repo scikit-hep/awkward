@@ -317,13 +317,14 @@ def reduce(
                 # Use axis=None specialization if available
                 if (
                     layout.backend.nplike.known_data
-                    and (specialization := reducer.axis_none_reducer()) is not None
+                    and (specialization := original_reducer.axis_none_reducer())
+                    is not None
                 ):
-                    reducer = specialization
+                    original_reducer = specialization
 
                 return reduce(
                     layout=layout,
-                    reducer=reducer,
+                    reducer=original_reducer,
                     axis=None,
                     mask=mask,
                     keepdims=keepdims,
