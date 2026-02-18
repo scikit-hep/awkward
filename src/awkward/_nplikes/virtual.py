@@ -322,7 +322,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         return new_virtual
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
+        return self._nplike.apply_ufunc(ufunc, method, inputs, kwargs)
 
     def __repr__(self):
         dtype = repr(self._dtype)
@@ -404,6 +404,27 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
     def __iter__(self):
         array = self.materialize()
         return iter(array)
+
+    def __array__(
+        self, dtype: DTypeLike | None = None, copy: bool | None = None
+    ) -> ArrayLike:
+        return ak._nplikes.numpy.Numpy.instance().asarray(
+            self.materialize(), dtype=dtype, copy=copy
+        )
+
+    def __cupy_get_ndarray__(self) -> ArrayLike:
+        return ak._nplikes.cupy.Cupy.instance().asarray(self.materialize())
+
+    def __jax_array__(self) -> ArrayLike:
+        return ak._nplikes.jax.Jax.instance().asarray(self.materialize())
+
+    @property
+    def __array_interface__(self) -> dict[str, Any]:
+        return self.materialize().__array_interface__  # type: ignore[attr-defined]
+
+    @property
+    def __cuda_array_interface__(self) -> dict[str, Any]:
+        return self.materialize().__cuda_array_interface__  # type: ignore[attr-defined]
 
     def __dlpack_device__(self) -> tuple[int, int]:
         return self.materialize().__dlpack_device__()  # type: ignore[attr-defined]
