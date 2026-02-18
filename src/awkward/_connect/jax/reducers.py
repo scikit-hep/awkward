@@ -379,8 +379,8 @@ class AxisNoneSum(JAXReducer):
         if array.dtype.kind == "M":
             raise TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
 
-        # Materialize and unwrap to get raw JAX array
         data = maybe_materialize(array.data)[0]
+
         if hasattr(data, "raw"):
             data = data.raw
 
@@ -733,9 +733,9 @@ class AxisNoneMax(JAXReducer):
         data = maybe_materialize(array.data)[0]
 
         # For axis=None, just use JAX's native max
-        result_scalar = jax.numpy.max(data)
-        if self._initial is not None:
-            result_scalar = jax.numpy.maximum(result_scalar, self._initial)
+        result_scalar = jax.numpy.max(data, self.initial)
+        if self.initial is not None:
+            result_scalar = jax.numpy.maximum(result_scalar, self.initial)
         result = jax.numpy.reshape(result_scalar, (1,))
         return ak.contents.NumpyArray(result, backend=array.backend)
 
