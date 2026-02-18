@@ -4173,7 +4173,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4182,7 +4182,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4191,7 +4191,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4200,7 +4200,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4209,7 +4209,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4218,7 +4218,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4227,7 +4227,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4236,7 +4236,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4245,7 +4245,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4254,7 +4254,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4276,7 +4276,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_complex128_64
@@ -4284,7 +4284,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: offsets-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
