@@ -4437,6 +4437,7 @@ kernels:
           - {name: toptr, type: "List[int8_t]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int8_t", dir: in, role: reducer-identity}
@@ -4445,6 +4446,7 @@ kernels:
           - {name: toptr, type: "List[int16_t]", dir: out}
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int16_t", dir: in, role: reducer-identity}
@@ -4453,6 +4455,7 @@ kernels:
           - {name: toptr, type: "List[int32_t]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int32_t", dir: in, role: reducer-identity}
@@ -4461,6 +4464,7 @@ kernels:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int64_t", dir: in, role: reducer-identity}
@@ -4469,6 +4473,7 @@ kernels:
           - {name: toptr, type: "List[uint8_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "uint8_t", dir: in, role: reducer-identity}
@@ -4477,6 +4482,7 @@ kernels:
           - {name: toptr, type: "List[uint16_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "uint16_t", dir: in, role: reducer-identity}
@@ -4485,6 +4491,7 @@ kernels:
           - {name: toptr, type: "List[uint32_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "uint32_t", dir: in, role: reducer-identity}
@@ -4493,6 +4500,7 @@ kernels:
           - {name: toptr, type: "List[uint64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "uint64_t", dir: in, role: reducer-identity}
@@ -4501,6 +4509,7 @@ kernels:
           - {name: toptr, type: "List[float]", dir: out}
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "float", dir: in, role: reducer-identity}
@@ -4509,12 +4518,13 @@ kernels:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "double", dir: in, role: reducer-identity}
     description: null
     definition: |
-      def awkward_reduce_max(toptr, fromptr, parents, lenparents, outlength, identity):
+      def awkward_reduce_max(toptr, fromptr, parents, offsets, lenparents, outlength, identity):
           for i in range(outlength):
               toptr[i] = identity
           for i in range(lenparents):
@@ -4529,6 +4539,7 @@ kernels:
           - {name: toptr, type: "List[float]", dir: out}
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "float", dir: in, role: reducer-identity}
@@ -4537,12 +4548,13 @@ kernels:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "double", dir: in, role: reducer-identity}
     description: null
     definition: |
-      def awkward_reduce_max_complex(toptr, fromptr, parents, lenparents, outlength, identity):
+      def awkward_reduce_max_complex(toptr, fromptr, parents, offsets, lenparents, outlength, identity):
           for i in range(outlength):
               toptr[i * 2] = identity
               toptr[i * 2 + 1] = 0
@@ -5162,6 +5174,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_int8_64
@@ -5169,6 +5182,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_int16_64
@@ -5176,6 +5190,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_int32_64
@@ -5183,6 +5198,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_int64_64
@@ -5190,6 +5206,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_uint8_64
@@ -5197,6 +5214,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_uint16_64
@@ -5204,6 +5222,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_uint32_64
@@ -5211,6 +5230,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_uint64_64
@@ -5218,6 +5238,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_float32_64
@@ -5225,6 +5246,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_float64_64
@@ -5232,11 +5254,12 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
-      def awkward_reduce_sum_bool(toptr, fromptr, parents, lenparents, outlength):
+      def awkward_reduce_sum_bool(toptr, fromptr, parents, offsets, lenparents, outlength):
           for i in range(outlength):
               toptr[i] = False
           for i in range(lenparents):
