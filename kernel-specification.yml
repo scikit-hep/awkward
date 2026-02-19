@@ -4981,6 +4981,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_prod_bool_complex128_64
@@ -4988,11 +4989,12 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
-      def awkward_reduce_prod_bool_complex(toptr, fromptr, parents, lenparents, outlength):
+      def awkward_reduce_prod_bool_complex(toptr, fromptr, parents, offsets, lenparents, outlength):
           for i in range(outlength):
               toptr[i] = 1
           for i in range(lenparents):
@@ -5273,6 +5275,7 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_complex128_64
@@ -5280,11 +5283,12 @@ kernels:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
-      def awkward_reduce_sum_bool_complex(toptr, fromptr, parents, lenparents, outlength):
+      def awkward_reduce_sum_bool_complex(toptr, fromptr, parents, offsets, lenparents, outlength):
           for i in range(outlength):
               toptr[i] = 0
           for i in range(lenparents):
