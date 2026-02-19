@@ -168,7 +168,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         if (
             content.backend.nplike.known_data
             and length is not unknown_length
-            and mask.length is not unknown_length
+            and ak._util.maybe_length_of(mask) is not unknown_length
             and length > mask.length * 8
         ):
             raise ValueError(
@@ -177,8 +177,8 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         if (
             content.backend.nplike.known_data
             and length is not unknown_length
-            and mask.length is not unknown_length
-            and length > content.length * 8
+            and ak._util.maybe_length_of(content) is not unknown_length
+            and length > content.length
         ):
             raise ValueError(
                 f"{type(self).__name__} 'length' ({length}) must be <= len(content) ({content.length})"
