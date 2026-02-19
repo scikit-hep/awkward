@@ -14,12 +14,13 @@
 // out["awkward_reduce_max_b", {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_max_a(
     T* toptr,
     const C* fromptr,
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     T identity,
@@ -34,12 +35,13 @@ awkward_reduce_max_a(
   }
 }
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_max_b(
     T* toptr,
     const C* fromptr,
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     T identity,
