@@ -266,7 +266,7 @@ class RegularArray(RegularMeta[Content], Content):
     def length(self) -> ShapeItem:
         if self._backend.nplike.known_data and self._length is unknown_length:
             self._length = _calculate_regulararray_length(
-                self._content, self._size, self._length, materialize=True
+                self._content, self._size, 0, materialize=True
             )
             assert is_integer(self._length), (
                 f"RegularArray length must be an integer for an array with concrete data, not {type(self._length)}"
