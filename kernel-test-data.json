@@ -24954,7 +24954,8 @@
                         "fromptr": [],
                         "lenparents": 0,
                         "outlength": 0,
-                        "parents": []
+                        "parents": [],
+                        "offsets": []
                     },
                     "outputs": {
                         "toptr": []
@@ -24967,7 +24968,8 @@
                         "fromptr": [0, 0],
                         "lenparents": 1,
                         "outlength": 1,
-                        "parents": [0]
+                        "parents": [0],
+                        "offsets": [0, 1]
                     },
                     "outputs": {
                         "toptr": [0]
@@ -24980,7 +24982,8 @@
                         "fromptr": [2, 2, 3, 3, 5, 5, 7, 7, 11, 11, 13, 13, 17, 17, 19, 19, 23, 23],
                         "lenparents": 9,
                         "outlength": 6,
-                        "parents": [0, 0, 0, 2, 2, 3, 4, 4, 5]
+                        "parents": [0, 0, 0, 2, 2, 3, 4, 4, 5],
+                        "offsets": [0, 3, 3, 5, 6, 8, 9]
                     },
                     "outputs": {
                         "toptr": [1, 0, 1, 1, 1, 1]
@@ -24993,7 +24996,8 @@
                         "fromptr": [1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0],
                         "lenparents": 6,
                         "outlength": 4,
-                        "parents": [0, 0, 0, 2, 2, 3]
+                        "parents": [0, 0, 0, 2, 2, 3],
+                        "offsets": [0, 3, 3, 5, 6]
                     },
                     "outputs": {
                         "toptr": [1, 0, 1, 0]
@@ -25006,7 +25010,8 @@
                         "fromptr": [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1],
                         "lenparents": 6,
                         "outlength": 4,
-                        "parents": [0, 0, 0, 2, 2, 3]
+                        "parents": [0, 0, 0, 2, 2, 3],
+                        "offsets": [0, 3, 3, 5, 6]
                     },
                     "outputs": {
                         "toptr": [1, 0, 1, 1]
@@ -25025,7 +25030,8 @@
                         "fromptr": [],
                         "lenparents": 0,
                         "outlength": 0,
-                        "parents": []
+                        "parents": [],
+                        "offsets": []
                     },
                     "outputs": {
                         "toptr": []
@@ -25038,7 +25044,8 @@
                         "fromptr": [0, 0],
                         "lenparents": 1,
                         "outlength": 1,
-                        "parents": [0]
+                        "parents": [0],
+                        "offsets": [0, 1]
                     },
                     "outputs": {
                         "toptr": [0]
@@ -25051,7 +25058,8 @@
                         "fromptr": [2, 2, 3, 3, 5, 5, 7, 7, 11, 11, 13, 13, 17, 17, 19, 19, 23, 23],
                         "lenparents": 9,
                         "outlength": 6,
-                        "parents": [0, 0, 0, 2, 2, 3, 4, 4, 5]
+                        "parents": [0, 0, 0, 2, 2, 3, 4, 4, 5],
+                        "offsets": [0, 3, 3, 5, 6, 8, 9]
                     },
                     "outputs": {
                         "toptr": [1, 1, 1, 1, 1, 1]
@@ -25064,7 +25072,8 @@
                         "fromptr": [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1],
                         "lenparents": 6,
                         "outlength": 4,
-                        "parents": [0, 0, 0, 2, 2, 3]
+                        "parents": [0, 0, 0, 2, 2, 3],
+                        "offsets": [0, 3, 3, 5, 6]
                     },
                     "outputs": {
                         "toptr": [1, 1, 1, 1]
@@ -25077,7 +25086,8 @@
                         "fromptr": [1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0],
                         "lenparents": 6,
                         "outlength": 4,
-                        "parents": [0, 0, 0, 2, 2, 3]
+                        "parents": [0, 0, 0, 2, 2, 3],
+                        "offsets": [0, 3, 3, 5, 6]
                     },
                     "outputs": {
                         "toptr": [1, 1, 0, 0]
