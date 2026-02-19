@@ -9,7 +9,7 @@ import awkward as ak
 
 
 @settings(max_examples=200)
-@given(a=st_ak.constructors.arrays(allow_virtual=False, allow_union=False))
+@given(a=st_ak.constructors.arrays(allow_virtual=True, allow_union=False))
 def test_roundtrip(a: ak.Array) -> None:
     """`to_buffers` followed by `from_buffers` reconstructs the array.
 
