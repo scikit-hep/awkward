@@ -9,7 +9,7 @@
 //         grid_size = 1
 //     atomic_toptr = cupy.array(toptr, dtype=cupy.uint32)
 //     temp = cupy.ones(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_bool_complex_a", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_bool_complex_a", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_bool_complex_b", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_bool_complex_c", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
 // out["awkward_reduce_prod_bool_complex_a", {dtype_specializations}] = None
