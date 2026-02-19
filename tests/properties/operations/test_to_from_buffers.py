@@ -8,7 +8,7 @@ from hypothesis import given, settings
 import awkward as ak
 
 
-@settings(max_examples=200)
+@settings(max_examples=500)
 @given(a=st_ak.constructors.arrays(allow_virtual=True, allow_union=False))
 def test_roundtrip(a: ak.Array) -> None:
     """`to_buffers` followed by `from_buffers` reconstructs the array.
@@ -33,7 +33,7 @@ def test_roundtrip(a: ak.Array) -> None:
     assert ak.array_equal(a, returned)
 
 
-@settings(max_examples=200)
+@settings(max_examples=500)
 @given(a=st_ak.constructors.arrays())
 def test_roundtrip_no_error(a: ak.Array) -> None:
     """`to_buffers` followed by `from_buffers` does not raise.
