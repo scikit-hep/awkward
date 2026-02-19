@@ -2,7 +2,7 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromptr, parents, lenparents, offsets, outlength, identity, invocation_index, err_code) = args
+//     (toptr, fromptr, parents, offsets, lenparents, outlength, identity, invocation_index, err_code) = args
 //     if block[0] > 0:
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
