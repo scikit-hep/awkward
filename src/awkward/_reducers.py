@@ -166,10 +166,12 @@ class ArgMin(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     outlength,
                 )
@@ -182,11 +184,13 @@ class ArgMin(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    offsets.dtype.type,
                     starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     starts.data,
                     outlength,
@@ -231,10 +235,12 @@ class ArgMax(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     outlength,
                 )
@@ -248,10 +254,12 @@ class ArgMax(KernelReducer):
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
                     starts.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     starts.data,
                     outlength,
@@ -382,10 +390,12 @@ class Sum(KernelReducer):
                         np.int64,
                         array.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         array.data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                     )
@@ -398,10 +408,12 @@ class Sum(KernelReducer):
                         np.int32,
                         array.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         array.data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                     )
@@ -424,10 +436,12 @@ class Sum(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                     )
@@ -440,10 +454,12 @@ class Sum(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                     )
@@ -509,10 +525,12 @@ class Prod(KernelReducer):
                     result.dtype.type,
                     array.dtype.type,
                     parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     array.data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     outlength,
                 )
@@ -538,10 +556,12 @@ class Prod(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                     )
@@ -554,10 +574,12 @@ class Prod(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                     )
@@ -596,10 +618,12 @@ class Any(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     outlength,
                 )
@@ -612,10 +636,12 @@ class Any(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     outlength,
                 )
@@ -650,10 +676,12 @@ class All(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     outlength,
                 )
@@ -666,10 +694,12 @@ class All(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     outlength,
                 )
@@ -731,10 +761,12 @@ class Min(KernelReducer):
                     result.dtype.type,
                     array.dtype.type,
                     parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     array.data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     outlength,
                 )
@@ -755,10 +787,12 @@ class Min(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                         self._identity_for(result.dtype),
@@ -772,10 +806,12 @@ class Min(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                         self._identity_for(result.dtype),
@@ -840,10 +876,12 @@ class Max(KernelReducer):
                     result.dtype.type,
                     array.dtype.type,
                     parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     array.data,
                     parents.data,
+                    offsets.data,
                     parents.length,
                     outlength,
                 )
@@ -864,10 +902,12 @@ class Max(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                         self._identity_for(result.dtype),
@@ -881,10 +921,12 @@ class Max(KernelReducer):
                         result.dtype.type,
                         kernel_array_data.dtype.type,
                         parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
                         parents.data,
+                        offsets.data,
                         parents.length,
                         outlength,
                         self._identity_for(result.dtype),
