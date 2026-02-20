@@ -9,6 +9,7 @@ ERROR awkward_reduce_argmax(
   OUT* toptr,
   const IN* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -27,6 +28,7 @@ ERROR awkward_reduce_argmax_int8_64(
   int64_t* toptr,
   const int8_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -34,6 +36,7 @@ ERROR awkward_reduce_argmax_int8_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     starts,
     outlength);
@@ -42,6 +45,7 @@ ERROR awkward_reduce_argmax_uint8_64(
   int64_t* toptr,
   const uint8_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -49,6 +53,7 @@ ERROR awkward_reduce_argmax_uint8_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     starts,
     outlength);
@@ -57,6 +62,7 @@ ERROR awkward_reduce_argmax_int16_64(
   int64_t* toptr,
   const int16_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -64,6 +70,7 @@ ERROR awkward_reduce_argmax_int16_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     starts,
     outlength);
@@ -72,6 +79,7 @@ ERROR awkward_reduce_argmax_uint16_64(
   int64_t* toptr,
   const uint16_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -79,6 +87,7 @@ ERROR awkward_reduce_argmax_uint16_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     starts,
     outlength);
@@ -87,6 +96,7 @@ ERROR awkward_reduce_argmax_int32_64(
   int64_t* toptr,
   const int32_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -94,6 +104,7 @@ ERROR awkward_reduce_argmax_int32_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     starts,
     outlength);
@@ -102,6 +113,7 @@ ERROR awkward_reduce_argmax_uint32_64(
   int64_t* toptr,
   const uint32_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -109,6 +121,7 @@ ERROR awkward_reduce_argmax_uint32_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     starts,
     outlength);
@@ -117,6 +130,7 @@ ERROR awkward_reduce_argmax_int64_64(
   int64_t* toptr,
   const int64_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -124,6 +138,7 @@ ERROR awkward_reduce_argmax_int64_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     starts,
     outlength);
@@ -132,6 +147,7 @@ ERROR awkward_reduce_argmax_uint64_64(
   int64_t* toptr,
   const uint64_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -139,6 +155,7 @@ ERROR awkward_reduce_argmax_uint64_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     starts,
     outlength);
@@ -147,6 +164,7 @@ ERROR awkward_reduce_argmax_float32_64(
   int64_t* toptr,
   const float* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -154,6 +172,7 @@ ERROR awkward_reduce_argmax_float32_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     starts,
     outlength);
@@ -162,6 +181,7 @@ ERROR awkward_reduce_argmax_float64_64(
   int64_t* toptr,
   const double* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   const int64_t* starts,
   int64_t outlength) {
@@ -169,6 +189,7 @@ ERROR awkward_reduce_argmax_float64_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     starts,
     outlength);
