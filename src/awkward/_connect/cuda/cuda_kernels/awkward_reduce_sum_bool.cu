@@ -2,26 +2,27 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromptr, parents, lenparents, outlength, invocation_index, err_code) = args
+//     (toptr, fromptr, parents, offsets, lenparents, outlength, invocation_index, err_code) = args
 //     if outlength == 0:
 //         return  # Nothing to do, skip the rest
 //     block_size = min(outlength, 1024)
 //     grid_size = max(1, math.ceil((max(lenparents, outlength) + block_size - 1) / block_size))
 //     atomic_toptr = cupy.array(toptr, dtype=cupy.uint32)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_a", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, toptr, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_b", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, toptr, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_c", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), (block_size,), (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, toptr, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_a", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), (block_size,), (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, toptr, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_b", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), (block_size,), (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, toptr, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_c", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), (block_size,), (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, toptr, invocation_index, err_code))
 // out["awkward_reduce_sum_bool_a", {dtype_specializations}] = None
 // out["awkward_reduce_sum_bool_b", {dtype_specializations}] = None
 // out["awkward_reduce_sum_bool_c", {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_sum_bool_a(
     T* toptr,
     const C* fromptr,
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     uint32_t* atomic_toptr,
@@ -37,12 +38,13 @@ awkward_reduce_sum_bool_a(
   }
 }
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_sum_bool_b(
     T* toptr,
     const C* fromptr,
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     uint32_t* atomic_toptr,
@@ -63,12 +65,13 @@ awkward_reduce_sum_bool_b(
   }
 }
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_sum_bool_c(
     T* toptr,
     const C* fromptr,
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     uint32_t* atomic_toptr,

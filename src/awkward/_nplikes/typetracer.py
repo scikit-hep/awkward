@@ -1647,6 +1647,15 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     ) -> TypeTracerArray:
         return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
 
+    def maximum(
+        self,
+        x1: TypeTracerArray,
+        x2: TypeTracerArray,
+        *,
+        maybe_out: TypeTracerArray | None = None,
+    ) -> TypeTracerArray:
+        return self.maximum(x1, x2, maybe_out=maybe_out)
+
     def sum(
         self,
         x: TypeTracerArray,

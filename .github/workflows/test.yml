@@ -214,7 +214,7 @@ jobs:
             python=3.13
             pandas>=0.24.0
             cccl-python
-            cupy
+            cupy>=14
             cuda-version=${{ matrix.cuda-version }}
             cuda-toolkit
             cxx-compiler
@@ -264,7 +264,11 @@ jobs:
 
       - name: Test CUDA non-kernel (Python)
         run: >-
-          python -m pytest -vv -rs tests-cuda
+          python -m pytest -vv -rs tests-cuda --ignore=tests-cuda/test_3459_virtualarray_with_cuda.py
+
+      - name: Test CUDA virtual arrays
+        run: >-
+          python -m pytest -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py
 
   Linux-ROOT:
     runs-on: ubuntu-latest
@@ -294,7 +298,7 @@ jobs:
           create-args: >-
             python=3.10
             numpy
-            root
+            root=6.36.06
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
