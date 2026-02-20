@@ -539,9 +539,8 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._mask,
             self._content._getitem_field(where, only_fields),
             self._valid_when,
-            self._length,
+            self.length,
             self._lsb_order,
-            self._length_generator,
             parameters=None,
         )
 
@@ -552,9 +551,8 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._mask,
             self._content._getitem_fields(where, only_fields),
             self._valid_when,
-            self._length,
+            self.length,
             self._lsb_order,
-            self._length_generator,
             parameters=None,
         )
 
