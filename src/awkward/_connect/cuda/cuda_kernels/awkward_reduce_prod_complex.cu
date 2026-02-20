@@ -2,24 +2,25 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromptr, parents, lenparents, outlength, invocation_index, err_code) = args
+//     (toptr, fromptr, parents, offsets, lenparents, outlength, invocation_index, err_code) = args
 //     if block[0] > 0:
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
 //     temp = cupy.zeros(2 * grid_size * block[0], dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_complex_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_complex_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_complex_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_prod_complex_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, temp, invocation_index, err_code))
 // out["awkward_reduce_prod_complex_a", {dtype_specializations}] = None
 // out["awkward_reduce_prod_complex_b", {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_prod_complex_a(
     T* toptr,
     const C* fromptr,
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     T* temp,                 // temp is a global buffer sized 2*lenparents, pre-filled with (1,0)
@@ -36,12 +37,13 @@ awkward_reduce_prod_complex_a(
   }
 }
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_prod_complex_b(
     T* toptr,
     const C* fromptr,
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     T* temp,                 // global workspace: length 2*lenparents (real, imag pairs)
