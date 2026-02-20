@@ -9,6 +9,7 @@ ERROR awkward_reduce_prod_bool_complex(
   bool* toptr,
   const IN* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   std::memset(toptr, 1, outlength * sizeof(bool));
@@ -26,12 +27,14 @@ ERROR awkward_reduce_prod_bool_complex64_64(
   bool* toptr,
   const float* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool_complex<float>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -39,12 +42,14 @@ ERROR awkward_reduce_prod_bool_complex128_64(
   bool* toptr,
   const double* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool_complex<double>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }

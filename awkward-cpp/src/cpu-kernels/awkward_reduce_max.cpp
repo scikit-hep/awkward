@@ -9,6 +9,7 @@ ERROR awkward_reduce_max(
   OUT* toptr,
   const IN* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   OUT identity) {
@@ -24,6 +25,7 @@ ERROR awkward_reduce_max_int8_int8_64(
   int8_t* toptr,
   const int8_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   int8_t identity) {
@@ -31,6 +33,7 @@ ERROR awkward_reduce_max_int8_int8_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);
@@ -39,6 +42,7 @@ ERROR awkward_reduce_max_uint8_uint8_64(
   uint8_t* toptr,
   const uint8_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   uint8_t identity) {
@@ -46,6 +50,7 @@ ERROR awkward_reduce_max_uint8_uint8_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);
@@ -54,6 +59,7 @@ ERROR awkward_reduce_max_int16_int16_64(
   int16_t* toptr,
   const int16_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   int16_t identity) {
@@ -61,6 +67,7 @@ ERROR awkward_reduce_max_int16_int16_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);
@@ -69,6 +76,7 @@ ERROR awkward_reduce_max_uint16_uint16_64(
   uint16_t* toptr,
   const uint16_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   uint16_t identity) {
@@ -76,6 +84,7 @@ ERROR awkward_reduce_max_uint16_uint16_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);
@@ -84,6 +93,7 @@ ERROR awkward_reduce_max_int32_int32_64(
   int32_t* toptr,
   const int32_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   int32_t identity) {
@@ -91,6 +101,7 @@ ERROR awkward_reduce_max_int32_int32_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);
@@ -99,6 +110,7 @@ ERROR awkward_reduce_max_uint32_uint32_64(
   uint32_t* toptr,
   const uint32_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   uint32_t identity) {
@@ -106,6 +118,7 @@ ERROR awkward_reduce_max_uint32_uint32_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);
@@ -114,6 +127,7 @@ ERROR awkward_reduce_max_int64_int64_64(
   int64_t* toptr,
   const int64_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   int64_t identity) {
@@ -121,6 +135,7 @@ ERROR awkward_reduce_max_int64_int64_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);
@@ -129,6 +144,7 @@ ERROR awkward_reduce_max_uint64_uint64_64(
   uint64_t* toptr,
   const uint64_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   uint64_t identity) {
@@ -136,6 +152,7 @@ ERROR awkward_reduce_max_uint64_uint64_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);
@@ -144,6 +161,7 @@ ERROR awkward_reduce_max_float32_float32_64(
   float* toptr,
   const float* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   float identity) {
@@ -151,6 +169,7 @@ ERROR awkward_reduce_max_float32_float32_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);
@@ -159,6 +178,7 @@ ERROR awkward_reduce_max_float64_float64_64(
   double* toptr,
   const double* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   double identity) {
@@ -166,6 +186,7 @@ ERROR awkward_reduce_max_float64_float64_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);

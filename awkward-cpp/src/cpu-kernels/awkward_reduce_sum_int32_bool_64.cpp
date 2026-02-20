@@ -8,6 +8,7 @@ ERROR awkward_reduce_sum_int32_bool_64(
   int32_t* toptr,
   const bool* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   std::memset(toptr, 0, outlength * sizeof(int32_t));
