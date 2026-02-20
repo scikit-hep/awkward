@@ -185,7 +185,7 @@ namespace awkward {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    if (std::is_arithmetic<T>::value) {
+    if constexpr (std::is_arithmetic<T>::value) {
       std::string parameters(type_to_name<T>() + "\", ");
       if (std::is_same<T, char>::value) {
         parameters = std::string(
@@ -193,27 +193,27 @@ namespace awkward {
       }
       return "{\"class\": \"NumpyArray\", \"primitive\": \"" + parameters +
              "\"form_key\": \"" + form_key.str() + "\"}";
-    } else if (is_specialization<T, std::complex>::value) {
+    } else if constexpr (is_specialization<T, std::complex>::value) {
       return "{\"class\": \"NumpyArray\", \"primitive\": \"" +
              type_to_name<T>() + "\", \"form_key\": \"" + form_key.str() +
              "\"}";
-    }
+    } else {
+      typedef typename T::value_type value_type;
 
-    typedef typename T::value_type value_type;
-
-    if (is_iterable<T>) {
-      std::string parameters("");
-      if (std::is_same<value_type, char>::value) {
-        parameters =
-            std::string(" \"parameters\": { \"__array__\": \"string\" }, ");
+      if (is_iterable<T>) {
+        std::string parameters("");
+        if (std::is_same<value_type, char>::value) {
+          parameters =
+              std::string(" \"parameters\": { \"__array__\": \"string\" }, ");
+        }
+        return "{\"class\": \"ListOffsetArray\", \"offsets\": \"" +
+              type_to_numpy_like<OFFSETS>() + "\", "
+              "\"content\":" +
+              type_to_form<value_type, OFFSETS>(form_key_id) + ", " + parameters +
+              "\"form_key\": \"" + form_key.str() + "\"}";
       }
-      return "{\"class\": \"ListOffsetArray\", \"offsets\": \"" +
-             type_to_numpy_like<OFFSETS>() + "\", "
-             "\"content\":" +
-             type_to_form<value_type, OFFSETS>(form_key_id) + ", " + parameters +
-             "\"form_key\": \"" + form_key.str() + "\"}";
+      return "unsupported type";
     }
-    return "unsupported type";
   }
 
   /// @brief Check if an RDataFrame column is an Awkward Array.
