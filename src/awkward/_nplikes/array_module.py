@@ -694,6 +694,16 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         (x,) = maybe_materialize(x)
         return self._module.max(x, axis=axis, keepdims=keepdims, out=maybe_out)
 
+    def maximum(
+        self,
+        x1: ArrayLikeT,
+        x2: ArrayLikeT,
+        *,
+        maybe_out: ArrayLikeT | None = None,
+    ) -> ArrayLikeT:
+        x1, x2 = maybe_materialize(x1, x2)
+        return self._module.maximum(x1, x2, out=maybe_out)
+
     def count_nonzero(
         self, x: ArrayLikeT, *, axis: ShapeItem | tuple[ShapeItem, ...] | None = None
     ) -> ArrayLikeT:

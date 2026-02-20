@@ -314,6 +314,14 @@ def reduce(
             # a flat array can be fully reduced with axis=None or axis=0 or axis=-1,
             # so we treat them as equivalent and recurse to the axis=None specialization
             if depth == negaxis == 1:
+                # Use axis=None specialization if available
+                if (
+                    layout.backend.nplike.known_data
+                    and (specialization := original_reducer.axis_none_reducer())
+                    is not None
+                ):
+                    original_reducer = specialization
+
                 return reduce(
                     layout=layout,
                     reducer=original_reducer,
