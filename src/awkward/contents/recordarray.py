@@ -300,11 +300,19 @@ class RecordArray(RecordMeta[Content], Content):
         contents,
         fields,
         length=None,
+        length_generator=None,
         *,
         parameters=None,
         backend=None,
     ):
-        return cls(contents, fields, length, parameters=parameters, backend=backend)
+        return cls(
+            contents,
+            fields,
+            length,
+            length_generator,
+            parameters=parameters,
+            backend=backend,
+        )
 
     def to_tuple(self) -> Self:
         return RecordArray(

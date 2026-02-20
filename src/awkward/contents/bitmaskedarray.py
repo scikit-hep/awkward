@@ -261,6 +261,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         valid_when,
         length,
         lsb_order,
+        length_generator=None,
         *,
         parameters=None,
     ):
@@ -293,6 +294,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 valid_when,
                 length,
                 lsb_order,
+                length_generator=length_generator,
                 parameters=parameters,
             )
 

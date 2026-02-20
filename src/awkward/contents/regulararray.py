@@ -229,8 +229,18 @@ class RegularArray(RegularMeta[Content], Content):
         return self.__dict__
 
     @classmethod
-    def simplified(cls, content, size, zeros_length=0, *, parameters=None):
-        return cls(content, size, zeros_length, parameters=parameters)
+    def simplified(
+        cls,
+        content,
+        size,
+        zeros_length=0,
+        zeros_length_generator=None,
+        *,
+        parameters=None,
+    ):
+        return cls(
+            content, size, zeros_length, zeros_length_generator, parameters=parameters
+        )
 
     @property
     def offsets(self) -> Index:
