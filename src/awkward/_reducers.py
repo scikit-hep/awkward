@@ -33,8 +33,7 @@ class Reducer(Protocol):
     def highlevel_function(cls):
         return getattr(ak.operations, cls.name)
 
-    @classmethod
-    def axis_none_reducer(cls) -> Reducer | None:
+    def axis_none_reducer(self) -> Reducer | None:
         """A specialized version for axis=None reductions, or None if there is none."""
         return None
 
@@ -834,6 +833,9 @@ class Max(KernelReducer):
     def initial(self):
         return self._initial
 
+    def axis_none_reducer(self):
+        return AxisNoneMax(self._initial)
+
     def _identity_for(self, dtype: DTypeLike | None):
         dtype = np.dtype(dtype)
 
@@ -935,3 +937,26 @@ class Max(KernelReducer):
             return ak.contents.NumpyArray(
                 result.view(array.dtype), backend=array.backend
             )
+
+
+class AxisNoneMax(Max):
+    def apply(self, array, _parents, _offsets, _starts, _shifts, _outlength):
+        nplike = array.backend.nplike
+        data = array.data
+
+        if data.size == 0:
+            val = (
+                self.initial
+                if self.initial is not None
+                else self._identity_for(data.dtype)
+            )
+            result_scalar = nplike.asarray(val, dtype=data.dtype)
+        else:
+            result_scalar = nplike.max(data, axis=None)
+            if self.initial is not None:
+                initial_val = nplike.asarray(self.initial, dtype=data.dtype)
+                result_scalar = nplike.maximum(result_scalar, initial_val)
+
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
