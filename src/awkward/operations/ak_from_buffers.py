@@ -642,9 +642,12 @@ def _reconstitute(
             ),
         )
 
-        # next length
         def _adjust_length(offsets):
-            return 0 if len(offsets) == 1 else offsets[-1]
+            return (
+                0
+                if len(offsets) == 1
+                else backend.nplike.index_as_shape_item(offsets[-1])
+            )
 
         def _shape_generator():
             return (_adjust_length(offsets),)
