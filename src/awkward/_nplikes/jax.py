@@ -8,9 +8,11 @@ import awkward as ak
 from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpy_like import UfuncLike
+from awkward._nplikes.numpy_like import NumpyMetadata, UfuncLike
 from awkward._nplikes.virtual import VirtualNDArray
 from awkward._typing import Final, cast
+
+np = NumpyMetadata.instance()
 
 
 @register_nplike
@@ -151,6 +153,26 @@ class Jax(ArrayModuleNumpyLike):
         del maybe_out
         x1, x2 = maybe_materialize(x1, x2)
         return self._module.divide(x1, x2)
+
+    def byteswap(self, x: ArrayLike) -> ArrayLike:
+        (x,) = maybe_materialize(x)
+
+        itemsize = x.dtype.itemsize
+        if itemsize == 1:
+            return self._module.array(x, copy=True)
+
+        if x.dtype.kind == "c":
+            raise NotImplementedError(
+                "JAX byteswap for complex dtypes is not supported"
+            )
+
+        shape = x.shape
+        as_uint8 = x.view(np.uint8)  # type: ignore[attr-defined]
+        as_uint8_2d = self._module.reshape(as_uint8, (-1, itemsize))
+        reversed_uint8_2d = self._module.flip(as_uint8_2d, axis=1)
+        reversed_uint8 = self._module.reshape(reversed_uint8_2d, (-1,))
+        swapped = reversed_uint8.view(x.dtype)  # type: ignore[attr-defined]
+        return self._module.reshape(swapped, shape)
 
     def memory_ptr(self, x: ArrayLike) -> int:
         (x,) = maybe_materialize(x)

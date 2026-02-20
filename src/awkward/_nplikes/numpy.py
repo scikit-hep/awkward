@@ -77,6 +77,10 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
         (x,) = maybe_materialize(x)
         return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)  # type: ignore[arg-type]
 
+    def byteswap(self, x: NDArray) -> NDArray:
+        (x,) = maybe_materialize(x)
+        return x.byteswap(inplace=False)
+
     def memory_ptr(self, x: NDArray) -> int:
         (x,) = maybe_materialize(x)
         return x.ctypes.data
