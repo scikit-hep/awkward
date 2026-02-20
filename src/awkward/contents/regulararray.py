@@ -54,6 +54,7 @@ def _calculate_regulararray_length(
     content: Content,
     size: int | type[unknown_length],
     zeros_length: int | type[unknown_length],
+    zeros_length_generator: Callable[[], ShapeItem] | None,
     materialize: bool = False,
 ) -> int | type[unknown_length]:
     if materialize:
@@ -64,6 +65,8 @@ def _calculate_regulararray_length(
         length = unknown_length
     elif size != 0:
         length = content.length // size  # floor division
+    elif zeros_length is unknown_length and zeros_length_generator and materialize:
+        length = zeros_length_generator()
     else:
         length = zeros_length
 
@@ -141,7 +144,15 @@ class RegularArray(RegularMeta[Content], Content):
                     raise AssertionError(where)
     """
 
-    def __init__(self, content, size, zeros_length=0, *, parameters=None):
+    def __init__(
+        self,
+        content,
+        size,
+        zeros_length=0,
+        zeros_length_generator=None,
+        *,
+        parameters=None,
+    ):
         if not isinstance(content, Content):
             raise TypeError(
                 f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
@@ -176,7 +187,10 @@ class RegularArray(RegularMeta[Content], Content):
 
         self._content = content
         self._size = size
-        self._length = _calculate_regulararray_length(content, size, zeros_length)
+        self._length = _calculate_regulararray_length(
+            content, size, zeros_length, zeros_length_generator
+        )
+        self._zeros_length_generator = zeros_length_generator
         self._init(parameters, content.backend)
 
     @property
@@ -201,6 +215,12 @@ class RegularArray(RegularMeta[Content], Content):
             content=copy.deepcopy(self._content, memo),
             parameters=copy.deepcopy(self._parameters, memo),
         )
+
+    def __getstate__(self):
+        # Calling .length resolves _length and clears _zeros_length_generator
+        # (a local closure from ak.from_buffers that can't be pickled).
+        _ = self.length
+        return self.__dict__
 
     @classmethod
     def simplified(cls, content, size, zeros_length=0, *, parameters=None):
@@ -266,11 +286,16 @@ class RegularArray(RegularMeta[Content], Content):
     def length(self) -> ShapeItem:
         if self._backend.nplike.known_data and self._length is unknown_length:
             self._length = _calculate_regulararray_length(
-                self._content, self._size, 0, materialize=True
+                self._content,
+                self._size,
+                self._length,
+                self._zeros_length_generator,
+                materialize=True,
             )
             assert is_integer(self._length), (
                 f"RegularArray length must be an integer for an array with concrete data, not {type(self._length)}"
             )
+        self._zeros_length_generator = None
         return self._length
 
     def __repr__(self):

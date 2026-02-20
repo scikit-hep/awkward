@@ -202,17 +202,11 @@ class RecordArray(RecordMeta[Content], Content):
         contents: Iterable[Content],
         fields: Iterable[str] | None,
         length: int | type[unknown_length] | None = None,
+        length_generator: Callable[[], ShapeItem] | None = None,
         *,
         parameters=None,
         backend=None,
     ):
-        if length is not None and length is not unknown_length:
-            try:
-                length = int(length)  # TODO: this should not happen!
-            except TypeError:
-                raise TypeError(
-                    f"{type(self).__name__} 'length' must be a non-negative integer or None, not {length!r}"
-                ) from None
         if not isinstance(contents, Iterable):
             raise TypeError(
                 f"{type(self).__name__} 'contents' must be iterable, not {contents!r}"
@@ -260,6 +254,7 @@ class RecordArray(RecordMeta[Content], Content):
         # TODO: maybe need to store original `length` arg separately to the
         #       computed version (for typetracer conversions)
         self._length = length
+        self._length_generator = length_generator
         self._init(parameters, backend)
 
     form_cls: Final = RecordForm
@@ -290,6 +285,12 @@ class RecordArray(RecordMeta[Content], Content):
             fields=copy.deepcopy(self._fields, memo),
             parameters=copy.deepcopy(self._parameters, memo),
         )
+
+    def __getstate__(self):
+        # Calling .length resolves _length and clears _length_generator
+        # (a local closure from ak.from_buffers that can't be pickled).
+        _ = self.length
+        return self.__dict__
 
     @classmethod
     def simplified(
@@ -369,12 +370,16 @@ class RecordArray(RecordMeta[Content], Content):
     @property
     def length(self) -> ShapeItem:
         if self._backend.nplike.known_data and self._length is unknown_length:
+            if self._length_generator:
+                length = self._length_generator()
+                length = None if length is unknown_length else length
             self._length = _calculate_recordarray_length(
-                self._contents, None, self._backend
+                self._contents, length, self._backend
             )
             assert is_integer(self._length), (
                 f"RecordArray length must be an integer for an array with concrete data, not {type(self._length)}"
             )
+        self._length_generator = None
         return self._length
 
     def __repr__(self):

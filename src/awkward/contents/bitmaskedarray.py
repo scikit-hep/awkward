@@ -137,7 +137,15 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     """
 
     def __init__(
-        self, mask, content, valid_when, length, lsb_order, *, parameters=None
+        self,
+        mask,
+        content,
+        valid_when,
+        length,
+        lsb_order,
+        length_generator=None,
+        *,
+        parameters=None,
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
             raise TypeError(
@@ -190,6 +198,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         self._content = content
         self._valid_when = valid_when
         self._length = length
+        self._length_generator = length_generator
         self._lsb_order = lsb_order
         self._init(parameters, content.backend)
 
@@ -235,6 +244,12 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             content=copy.deepcopy(self._content, memo),
             parameters=copy.deepcopy(self._parameters, memo),
         )
+
+    def __getstate__(self):
+        # Calling .length resolves _length and clears _length_generator
+        # (a local closure from ak.from_buffers that can't be pickled).
+        _ = self.length
+        return self.__dict__
 
     @classmethod
     def simplified(
@@ -338,6 +353,16 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
     @property
     def length(self) -> ShapeItem:
+        if (
+            self._backend.nplike.known_data
+            and self._length is unknown_length
+            and self._length_generator
+        ):
+            self._length = self._length_generator()
+            assert is_integer(self._length), (
+                f"BitMaskedArray length must be an integer for an array with concrete data, not {type(self._length)}"
+            )
+        self._length_generator = None
         return self._length
 
     def __repr__(self):

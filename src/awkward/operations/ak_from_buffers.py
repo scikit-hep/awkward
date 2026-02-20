@@ -371,6 +371,10 @@ def _reconstitute(
             (length,) = shape_generator()
             return (_adjust_length(length),)
 
+        def _length_generator():
+            (length,) = shape_generator()
+            return length
+
         if length is unknown_length:
             next_length = unknown_length
         else:
@@ -403,15 +407,14 @@ def _reconstitute(
             make = ak.contents.BitMaskedArray.simplified
         else:
             make = ak.contents.BitMaskedArray
-        # We need to know the length of a BitMaskedArray to initialize it
-        # as it is an argument in __init__ and is not calculated from the content
-        (length,) = shape_generator()
+
         return make(
             ak.index.Index(mask),
             content,
             form.valid_when,
             length,
             form.lsb_order,
+            _length_generator,
             parameters=form._parameters,
         )
 
@@ -666,6 +669,10 @@ def _reconstitute(
             (first,) = shape_generator()
             return (_adjust_length(first),)
 
+        def _zeros_length_generator():
+            (length,) = shape_generator()
+            return length
+
         content = _reconstitute(
             form.content,
             next_length,
@@ -681,10 +688,15 @@ def _reconstitute(
             content,
             form.size,
             length,
+            _zeros_length_generator,
             parameters=form._parameters,
         )
 
     elif isinstance(form, ak.forms.RecordForm):
+
+        def _length_generator():
+            return length
+
         contents = [
             _reconstitute(
                 content,
@@ -703,6 +715,7 @@ def _reconstitute(
             contents,
             None if form.is_tuple else form.fields,
             length,
+            _length_generator,
             parameters=form._parameters,
             backend=backend,
         )
