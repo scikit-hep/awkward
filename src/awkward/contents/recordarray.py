@@ -264,6 +264,7 @@ class RecordArray(RecordMeta[Content], Content):
         contents=UNSET,
         fields=UNSET,
         length=UNSET,
+        length_generator=UNSET,
         *,
         parameters=UNSET,
         backend=UNSET,
@@ -272,6 +273,7 @@ class RecordArray(RecordMeta[Content], Content):
             self._contents if contents is UNSET else contents,
             self._fields if fields is UNSET else fields,
             self._length if length is UNSET else length,
+            self._length_generator if length_generator is UNSET else length_generator,
             parameters=self._parameters if parameters is UNSET else parameters,
             backend=self._backend if backend is UNSET else backend,
         )
@@ -306,7 +308,12 @@ class RecordArray(RecordMeta[Content], Content):
 
     def to_tuple(self) -> Self:
         return RecordArray(
-            self._contents, None, self._length, parameters=None, backend=self._backend
+            self._contents,
+            None,
+            self._length,
+            self._length_generator,
+            parameters=None,
+            backend=self._backend,
         )
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> RecordForm:
@@ -517,7 +524,12 @@ class RecordArray(RecordMeta[Content], Content):
                     self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
                 ]
         return RecordArray(
-            contents, fields, self._length, parameters=None, backend=self._backend
+            contents,
+            fields,
+            self._length,
+            self._length_generator,
+            parameters=None,
+            backend=self._backend,
         )
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
@@ -1340,6 +1352,7 @@ class RecordArray(RecordMeta[Content], Content):
             contents,
             self._fields,
             length=self._length,
+            length_generator=self._length_generator,
             parameters=self._parameters,
             backend=backend,
         )

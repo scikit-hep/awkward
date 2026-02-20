@@ -54,7 +54,6 @@ def _calculate_regulararray_length(
     content: Content,
     size: int | type[unknown_length],
     zeros_length: int | type[unknown_length],
-    zeros_length_generator: Callable[[], ShapeItem] | None,
     materialize: bool = False,
 ) -> int | type[unknown_length]:
     if materialize:
@@ -65,8 +64,6 @@ def _calculate_regulararray_length(
         length = unknown_length
     elif size != 0:
         length = content.length // size  # floor division
-    elif zeros_length is unknown_length and zeros_length_generator and materialize:
-        length = zeros_length_generator()
     else:
         length = zeros_length
 
@@ -187,9 +184,7 @@ class RegularArray(RegularMeta[Content], Content):
 
         self._content = content
         self._size = size
-        self._length = _calculate_regulararray_length(
-            content, size, zeros_length, zeros_length_generator
-        )
+        self._length = _calculate_regulararray_length(content, size, zeros_length)
         self._zeros_length_generator = zeros_length_generator
         self._init(parameters, content.backend)
 
@@ -199,11 +194,22 @@ class RegularArray(RegularMeta[Content], Content):
 
     form_cls: Final = RegularForm
 
-    def copy(self, content=UNSET, size=UNSET, zeros_length=UNSET, *, parameters=UNSET):
+    def copy(
+        self,
+        content=UNSET,
+        size=UNSET,
+        zeros_length=UNSET,
+        zeros_length_generator=UNSET,
+        *,
+        parameters=UNSET,
+    ):
         return RegularArray(
             self._content if content is UNSET else content,
             self._size if size is UNSET else size,
             self._length if zeros_length is UNSET else zeros_length,
+            self._zeros_length_generator
+            if zeros_length_generator is UNSET
+            else zeros_length_generator,
             parameters=self._parameters if parameters is UNSET else parameters,
         )
 
@@ -285,11 +291,12 @@ class RegularArray(RegularMeta[Content], Content):
     @property
     def length(self) -> ShapeItem:
         if self._backend.nplike.known_data and self._length is unknown_length:
+            if self._zeros_length_generator:
+                zeros_length = self._zeros_length_generator()
             self._length = _calculate_regulararray_length(
                 self._content,
                 self._size,
-                self._length,
-                self._zeros_length_generator,
+                zeros_length,
                 materialize=True,
             )
             assert is_integer(self._length), (
@@ -375,6 +382,7 @@ class RegularArray(RegularMeta[Content], Content):
             self._content._getitem_field(where, only_fields),
             self._size,
             self._length,
+            self._zeros_length_generator,
             parameters=None,
         )
 
@@ -385,6 +393,7 @@ class RegularArray(RegularMeta[Content], Content):
             self._content._getitem_fields(where, only_fields),
             self._size,
             self._length,
+            self._zeros_length_generator,
             parameters=None,
         )
 
@@ -1567,7 +1576,11 @@ class RegularArray(RegularMeta[Content], Content):
     def _to_backend(self, backend: Backend) -> Self:
         content = self._content.to_backend(backend)
         return RegularArray(
-            content, self._size, zeros_length=self._length, parameters=self._parameters
+            content,
+            self._size,
+            zeros_length=self._length,
+            zeros_length_generator=self._zeros_length_generator,
+            parameters=self._parameters,
         )
 
     def _materialize(self, type_) -> Self:

@@ -407,7 +407,6 @@ def _reconstitute(
             make = ak.contents.BitMaskedArray.simplified
         else:
             make = ak.contents.BitMaskedArray
-
         return make(
             ak.index.Index(mask),
             content,

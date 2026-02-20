@@ -223,6 +223,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         valid_when=UNSET,
         length=UNSET,
         lsb_order=UNSET,
+        length_generator=UNSET,
         *,
         parameters=UNSET,
     ):
@@ -232,6 +233,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._valid_when if valid_when is UNSET else valid_when,
             self._length if length is UNSET else length,
             self._lsb_order if lsb_order is UNSET else lsb_order,
+            self._length_generator if length_generator is UNSET else length_generator,
             parameters=self._parameters if parameters is UNSET else parameters,
         )
 
@@ -539,6 +541,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._valid_when,
             self._length,
             self._lsb_order,
+            self._length_generator,
             parameters=None,
         )
 
@@ -551,6 +554,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._valid_when,
             self._length,
             self._lsb_order,
+            self._length_generator,
             parameters=None,
         )
 
@@ -903,6 +907,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             valid_when=self._valid_when,
             length=self._length,
             lsb_order=self._lsb_order,
+            length_generator=self._length_generator,
             parameters=self._parameters,
         )
 
@@ -913,7 +918,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             mask,
             content,
             valid_when=self._valid_when,
-            length=self._length,
+            length=self.length,
             lsb_order=self._lsb_order,
             parameters=self._parameters,
         )
