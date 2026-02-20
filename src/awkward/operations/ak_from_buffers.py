@@ -470,7 +470,14 @@ def _reconstitute(
         )
 
         def _adjust_length(index):
-            return 0 if len(index) == 0 else max(0, backend.nplike.max(index) + 1)
+            return (
+                0
+                if len(index) == 0
+                else max(
+                    0,
+                    backend.nplike.index_as_shape_item(backend.nplike.max(index) + 1),
+                )
+            )
 
         def _shape_generator():
             return (_adjust_length(index),)
@@ -580,7 +587,13 @@ def _reconstitute(
 
         def _adjust_length(starts, stops):
             reduced_stops = stops[starts != stops]
-            return 0 if len(reduced_stops) == 0 else backend.nplike.max(reduced_stops)
+            return (
+                0
+                if len(reduced_stops) == 0
+                else backend.nplike.index_as_shape_item(
+                    backend.nplike.max(reduced_stops)
+                )
+            )
 
         def _shape_generator():
             return (_adjust_length(starts, stops),)
@@ -753,7 +766,9 @@ def _reconstitute(
             if len(selected_index) == 0:
                 return 0
             else:
-                return backend.nplike.max(selected_index) + 1
+                return backend.nplike.index_as_shape_item(
+                    backend.nplike.max(selected_index) + 1
+                )
 
         _shape_generators = []
         for tag in range(len(form.contents)):
