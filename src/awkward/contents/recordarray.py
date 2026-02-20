@@ -40,6 +40,7 @@ from awkward.contents.content import (
     ImplementsApplyAction,
     RemoveStructureOptions,
     ToArrowOptions,
+    _is_cudf_column_constructor_error,
 )
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
@@ -1154,6 +1155,8 @@ class RecordArray(RecordMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        import inspect
+
         children = tuple(
             c._to_cudf(cudf, mask=None, length=length) for c in self.contents
         )
@@ -1161,14 +1164,56 @@ class RecordArray(RecordMeta[Content], Content):
             {field: c.dtype for field, c in zip(self.fields, children, strict=True)}
         )
         m = mask._to_cudf(cudf, None, length) if mask else None
-        return cudf.core.column.struct.StructColumn(
-            data=None,
-            children=children,
-            dtype=dt,
-            mask=m,
-            size=length,
-            offset=0,
-        )
+        struct_mod = getattr(cudf.core.column, "struct", None)
+        if struct_mod is not None:
+            StructCol = struct_mod.StructColumn
+        else:
+            StructCol = getattr(cudf.core.column, "StructColumn", None)
+        if StructCol is None:
+            raise RuntimeError("ak.to_cudf could not locate cuDF StructColumn")
+
+        if hasattr(StructCol, "from_children"):
+            kwargs = {"children": children, "dtype": dt, "mask": m, "size": length}
+            params = inspect.signature(StructCol.from_children).parameters
+            call_kwargs = {k: v for k, v in kwargs.items() if k in params}
+            try:
+                return StructCol.from_children(**call_kwargs)
+            except Exception as err:
+                if not _is_cudf_column_constructor_error(err):
+                    raise
+                out = cudf.core.column.as_column(self.to_list())
+                if m is not None:
+                    out = out.set_mask(m)
+                return out
+
+        kwargs = {
+            "data": None,
+            "children": children,
+            "dtype": dt,
+            "mask": m,
+            "size": length,
+            "offset": 0,
+        }
+        init_params = inspect.signature(StructCol.__init__).parameters
+        if "null_count" in init_params:
+            unknown_null = getattr(cudf.core.column.column, "UNKNOWN_NULL_COUNT", None)
+            if unknown_null is None:
+                unknown_null = getattr(
+                    cudf.core.column.column, "_UNKNOWN_NULL_COUNT", -1
+                )
+            kwargs["null_count"] = 0 if m is None else unknown_null
+        if "exposed" in init_params:
+            kwargs["exposed"] = True
+
+        try:
+            return StructCol(**kwargs)
+        except Exception as err:
+            if not _is_cudf_column_constructor_error(err):
+                raise
+            out = cudf.core.column.as_column(self.to_list())
+            if m is not None:
+                out = out.set_mask(m)
+            return out
 
     def _to_backend_array(self, allow_missing, backend):
         if self.fields is None:
