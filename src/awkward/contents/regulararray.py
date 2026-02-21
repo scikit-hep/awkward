@@ -141,7 +141,15 @@ class RegularArray(RegularMeta[Content], Content):
                     raise AssertionError(where)
     """
 
-    def __init__(self, content, size, zeros_length=0, *, parameters=None):
+    def __init__(
+        self,
+        content,
+        size,
+        zeros_length=0,
+        zeros_length_generator=None,
+        *,
+        parameters=None,
+    ):
         if not isinstance(content, Content):
             raise TypeError(
                 f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
@@ -177,6 +185,7 @@ class RegularArray(RegularMeta[Content], Content):
         self._content = content
         self._size = size
         self._length = _calculate_regulararray_length(content, size, zeros_length)
+        self._zeros_length_generator = zeros_length_generator
         self._init(parameters, content.backend)
 
     @property
@@ -185,11 +194,22 @@ class RegularArray(RegularMeta[Content], Content):
 
     form_cls: Final = RegularForm
 
-    def copy(self, content=UNSET, size=UNSET, zeros_length=UNSET, *, parameters=UNSET):
+    def copy(
+        self,
+        content=UNSET,
+        size=UNSET,
+        zeros_length=UNSET,
+        zeros_length_generator=UNSET,
+        *,
+        parameters=UNSET,
+    ):
         return RegularArray(
             self._content if content is UNSET else content,
             self._size if size is UNSET else size,
             self._length if zeros_length is UNSET else zeros_length,
+            self._zeros_length_generator
+            if zeros_length_generator is UNSET
+            else zeros_length_generator,
             parameters=self._parameters if parameters is UNSET else parameters,
         )
 
@@ -202,9 +222,25 @@ class RegularArray(RegularMeta[Content], Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
+    def __getstate__(self):
+        # Calling .length resolves _length and clears _zeros_length_generator
+        # (a local closure from ak.from_buffers that can't be pickled).
+        _ = self.length
+        return self.__dict__
+
     @classmethod
-    def simplified(cls, content, size, zeros_length=0, *, parameters=None):
-        return cls(content, size, zeros_length, parameters=parameters)
+    def simplified(
+        cls,
+        content,
+        size,
+        zeros_length=0,
+        zeros_length_generator=None,
+        *,
+        parameters=None,
+    ):
+        return cls(
+            content, size, zeros_length, zeros_length_generator, parameters=parameters
+        )
 
     @property
     def offsets(self) -> Index:
@@ -265,12 +301,18 @@ class RegularArray(RegularMeta[Content], Content):
     @property
     def length(self) -> ShapeItem:
         if self._backend.nplike.known_data and self._length is unknown_length:
+            if self._zeros_length_generator:
+                zeros_length = self._zeros_length_generator()
             self._length = _calculate_regulararray_length(
-                self._content, self._size, self._length, materialize=True
+                self._content,
+                self._size,
+                zeros_length,
+                materialize=True,
             )
             assert is_integer(self._length), (
                 f"RegularArray length must be an integer for an array with concrete data, not {type(self._length)}"
             )
+        self._zeros_length_generator = None
         return self._length
 
     def __repr__(self):
@@ -350,6 +392,7 @@ class RegularArray(RegularMeta[Content], Content):
             self._content._getitem_field(where, only_fields),
             self._size,
             self._length,
+            self._zeros_length_generator,
             parameters=None,
         )
 
@@ -360,6 +403,7 @@ class RegularArray(RegularMeta[Content], Content):
             self._content._getitem_fields(where, only_fields),
             self._size,
             self._length,
+            self._zeros_length_generator,
             parameters=None,
         )
 
@@ -1542,7 +1586,11 @@ class RegularArray(RegularMeta[Content], Content):
     def _to_backend(self, backend: Backend) -> Self:
         content = self._content.to_backend(backend)
         return RegularArray(
-            content, self._size, zeros_length=self._length, parameters=self._parameters
+            content,
+            self._size,
+            zeros_length=self._length,
+            zeros_length_generator=self._zeros_length_generator,
+            parameters=self._parameters,
         )
 
     def _materialize(self, type_) -> Self:
