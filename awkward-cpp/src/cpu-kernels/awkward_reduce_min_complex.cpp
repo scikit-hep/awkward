@@ -14,8 +14,8 @@ ERROR awkward_reduce_min_complex(
   int64_t outlength,
   OUT identity) {
   for (int64_t i = 0;  i < outlength;  i++) {
-   toptr[i * 2] = identity;
-   toptr[i * 2 + 1] = 0;
+    toptr[i * 2] = identity;
+    toptr[i * 2 + 1] = 0;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[i];
