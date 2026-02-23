@@ -78,7 +78,7 @@ def to_buffers(
     form_key: str | None = "node{id}",
     id_start: Integral = 0,
     backend: Backend | None = None,
-    byteorder: Literal["<", ">"] = "<",
+    byteorder: Literal["<", ">"] = ak._util.native_byteorder,
 ) -> tuple[form.Form, int, Mapping[str, Any]]:
     if container is None:
         container = {}
