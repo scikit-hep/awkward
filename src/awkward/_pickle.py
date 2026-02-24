@@ -99,6 +99,30 @@ def unpickle_array_schema_1(
     form_dict: dict,
     length: ShapeItem,
     container: Mapping[str, Any],
+    behavior: JSONMapping | None,
+    attrs: JSONMapping | None,
+) -> Array:
+    from awkward.operations.ak_from_buffers import _impl
+
+    return _impl(
+        form_dict,
+        length,
+        container,
+        backend="cpu",
+        behavior=behavior,
+        attrs=attrs,
+        highlevel=True,
+        buffer_key="{form_key}-{attribute}",
+        byteorder="<",
+        simplify=False,
+        enable_virtualarray_caching=True,
+    )
+
+
+def unpickle_array_schema_2(
+    form_dict: dict,
+    length: ShapeItem,
+    container: Mapping[str, Any],
     byteorder: str,
     behavior: JSONMapping | None,
     attrs: JSONMapping | None,
@@ -121,6 +145,35 @@ def unpickle_array_schema_1(
 
 
 def unpickle_record_schema_1(
+    form_dict: dict,
+    length: ShapeItem,
+    container: Mapping[str, Any],
+    behavior: JSONMapping | None,
+    attrs: JSONMapping | None,
+    at: int,
+) -> Record:
+    from awkward.highlevel import Record
+    from awkward.operations.ak_from_buffers import _impl
+    from awkward.record import Record as LowLevelRecord
+
+    array_layout = _impl(
+        form_dict,
+        length,
+        container,
+        backend="cpu",
+        behavior=behavior,
+        attrs=attrs,
+        highlevel=False,
+        buffer_key="{form_key}-{attribute}",
+        byteorder="<",
+        simplify=False,
+        enable_virtualarray_caching=True,
+    )
+    layout = LowLevelRecord(array_layout, at)
+    return Record(layout, behavior=behavior, attrs=attrs)
+
+
+def unpickle_record_schema_2(
     form_dict: dict,
     length: ShapeItem,
     container: Mapping[str, Any],

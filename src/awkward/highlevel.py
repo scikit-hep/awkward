@@ -38,8 +38,8 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
 from awkward._pickle import (
     custom_reduce,
-    unpickle_array_schema_1,
-    unpickle_record_schema_1,
+    unpickle_array_schema_2,
+    unpickle_record_schema_2,
 )
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
@@ -1696,7 +1696,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             attrs = without_transient_attrs(self._attrs)
 
-        return unpickle_array_schema_1, (
+        return unpickle_array_schema_2, (
             form.to_dict(),
             length,
             container,
@@ -2537,7 +2537,7 @@ class Record(NDArrayOperatorsMixin):
         else:
             attrs = without_transient_attrs(self._attrs)
 
-        return unpickle_record_schema_1, (
+        return unpickle_record_schema_2, (
             form.to_dict(),
             length,
             container,
