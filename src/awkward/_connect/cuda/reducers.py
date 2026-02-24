@@ -125,4 +125,11 @@ class ArgMin(CudaComputeReducer):
 
 
 def get_cuda_compute_reducer(reducer: Reducer) -> Reducer:
+    # can be deleted after all reducers are added
+    if reducer.name not in (
+            "argmin",
+        ):
+        return reducer
+
+
     return _overloads[type(reducer)].from_kernel_reducer(reducer)
