@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-# TODO: delete these after modifying argmin
 from cuda.compute import (
     CountingIterator,
     unary_transform,
@@ -189,3 +188,5 @@ def awkward_reduce_argmin(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_argmin, outlength)
+
+    return result

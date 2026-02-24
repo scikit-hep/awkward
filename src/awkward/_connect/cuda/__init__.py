@@ -8,6 +8,8 @@ import os
 
 import numpy
 
+from awkward._connect.cuda.reducers import get_cuda_compute_reducer  # noqa: F401
+
 try:
     import cupy
 

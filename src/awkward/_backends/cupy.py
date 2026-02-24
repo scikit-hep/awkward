@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import awkward as ak
 from awkward._backends.backend import Backend, KernelKeyType
 from awkward._backends.dispatch import register_backend
 from awkward._kernels import CudaComputeKernel, CupyKernel, NumpyKernel
@@ -105,3 +106,8 @@ class CupyBackend(Backend):
             return cuda_compute.awkward_reduce_argmin
 
         return None
+
+    def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
+        from awkward._connect.cuda import get_cuda_compute_reducer
+
+        return get_cuda_compute_reducer(reducer)
