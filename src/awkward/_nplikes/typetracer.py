@@ -1476,6 +1476,26 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         assert not isinstance(x2, PlaceholderArray)
         return self.apply_ufunc(numpy.divide, "__call__", (x1, x2))  # type: ignore[arg-type,return-value]
 
+    def minimum(
+        self,
+        x1: TypeTracerArray,
+        x2: TypeTracerArray,
+        maybe_out: TypeTracerArray | None = None,
+    ) -> TypeTracerArray:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
+        return self.apply_ufunc(numpy.minimum, "__call__", (x1, x2))  # type: ignore[arg-type,return-value]
+
+    def maximum(
+        self,
+        x1: TypeTracerArray,
+        x2: TypeTracerArray,
+        maybe_out: TypeTracerArray | None = None,
+    ) -> TypeTracerArray:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
+        return self.apply_ufunc(numpy.maximum, "__call__", (x1, x2))  # type: ignore[arg-type,return-value]
+
     ############################ almost-ufuncs
 
     def nan_to_num(
@@ -1646,16 +1666,6 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
         return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
-
-    def maximum(
-        self,
-        x1: TypeTracerArray,
-        x2: TypeTracerArray,
-        maybe_out: TypeTracerArray | None = None,
-    ) -> TypeTracerArray:
-        assert not isinstance(x1, PlaceholderArray)
-        assert not isinstance(x2, PlaceholderArray)
-        return self.apply_ufunc(numpy.maximum, "__call__", (x1, x2))  # type: ignore[arg-type,return-value]
 
     def sum(
         self,

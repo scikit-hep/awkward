@@ -356,53 +356,6 @@ class Sum(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
-@overloads(_reducers.AxisNoneSum)
-class AxisNoneSum(JAXReducer):
-    name: Final = "sum"
-    preferred_dtype: Final = np.float64
-    needs_position: Final = False
-
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.AxisNoneSum)
-        return cls()
-
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        if array.dtype.kind == "M":
-            raise TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
-
-        data = maybe_materialize(array.data)[0]
-
-        if hasattr(data, "raw"):
-            data = data.raw
-
-        if array.dtype.kind == "b":
-            data = data.astype(np.int64)
-
-        result_scalar = jax.numpy.sum(data)
-        result = jax.numpy.reshape(result_scalar, (1,))
-
-        if array.dtype.kind == "m":
-            return ak.contents.NumpyArray(
-                array.backend.nplike.asarray(result, dtype=array.dtype),
-                backend=array.backend,
-            )
-        elif np.issubdtype(array.dtype, np.complexfloating):
-            return ak.contents.NumpyArray(
-                result.view(array.dtype), backend=array.backend
-            )
-        else:
-            return ak.contents.NumpyArray(result, backend=array.backend)
-
-
 def segment_prod_with_negatives(data, segment_ids, num_segments):
     """
     Computes the product of elements in each segment, handling negatives and booleans.
@@ -701,43 +654,6 @@ class Max(JAXReducer):
             )
         else:
             return ak.contents.NumpyArray(result, backend=array.backend)
-
-
-@overloads(_reducers.AxisNoneMax)
-class AxisNoneMax(JAXReducer):
-    name: Final = "max"
-    preferred_dtype: Final = np.float64
-    needs_position: Final = False
-
-    def __init__(self, initial):
-        self._initial = initial
-
-    @property
-    def initial(self):
-        return self._initial
-
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.AxisNoneMax)
-        return cls(reducer.initial)
-
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        data = maybe_materialize(array.data)[0]
-
-        # For axis=None, just use JAX's native max
-        result_scalar = jax.numpy.max(data, self.initial)
-        if self.initial is not None:
-            result_scalar = jax.numpy.maximum(result_scalar, self.initial)
-        result = jax.numpy.reshape(result_scalar, (1,))
-        return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 def get_jax_reducer(reducer: Reducer) -> Reducer:
