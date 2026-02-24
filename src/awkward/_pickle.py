@@ -99,6 +99,7 @@ def unpickle_array_schema_1(
     form_dict: dict,
     length: ShapeItem,
     container: Mapping[str, Any],
+    byteorder: str,
     behavior: JSONMapping | None,
     attrs: JSONMapping | None,
 ) -> Array:
@@ -113,7 +114,7 @@ def unpickle_array_schema_1(
         attrs=attrs,
         highlevel=True,
         buffer_key="{form_key}-{attribute}",
-        byteorder="<",
+        byteorder=byteorder,
         simplify=False,
         enable_virtualarray_caching=True,
     )
@@ -123,6 +124,7 @@ def unpickle_record_schema_1(
     form_dict: dict,
     length: ShapeItem,
     container: Mapping[str, Any],
+    byteorder: str,
     behavior: JSONMapping | None,
     attrs: JSONMapping | None,
     at: int,
@@ -140,7 +142,7 @@ def unpickle_record_schema_1(
         attrs=attrs,
         highlevel=False,
         buffer_key="{form_key}-{attribute}",
-        byteorder="<",
+        byteorder=byteorder,
         simplify=False,
         enable_virtualarray_caching=True,
     )

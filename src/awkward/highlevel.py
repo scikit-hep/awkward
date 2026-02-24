@@ -1669,6 +1669,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return numba.typeof(self._numbaview)
 
     def __reduce_ex__(self, protocol: int) -> tuple:
+        # Allow third-party libraries to customise pickling
         result = custom_reduce(self, protocol)
         if result is not NotImplemented:
             return result
@@ -1678,7 +1679,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             packed_layout,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
 
         # For pickle >= 5, we can avoid copying the buffers
@@ -1699,6 +1700,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             form.to_dict(),
             length,
             container,
+            ak._util.native_byteorder,
             behavior,
             attrs,
         )
@@ -2518,7 +2520,7 @@ class Record(NDArrayOperatorsMixin):
             packed_layout.array,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
 
         # For pickle >= 5, we can avoid copying the buffers
@@ -2539,6 +2541,7 @@ class Record(NDArrayOperatorsMixin):
             form.to_dict(),
             length,
             container,
+            ak._util.native_byteorder,
             behavior,
             attrs,
             packed_layout.at,
