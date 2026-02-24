@@ -325,6 +325,9 @@ class Sum(JAXReducer):
         assert isinstance(reducer, _reducers.Sum)
         return cls()
 
+    def axis_none_reducer(self) -> AxisNoneSum:
+        return AxisNoneSum()
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -352,6 +355,52 @@ class Sum(JAXReducer):
             )
         elif np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(result.view(array.dtype))
+        else:
+            return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+@overloads(_reducers.AxisNoneSum)
+class AxisNoneSum(JAXReducer):
+    name: Final = "sum"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.AxisNoneSum)
+        return cls()
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "M":
+            raise TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
+
+        data = maybe_materialize(array.data)[0]
+
+        if array.dtype.kind == "b":
+            data = data.astype(np.int64)
+
+        result_scalar = jax.numpy.sum(data)
+        result = jax.numpy.reshape(result_scalar, (1,))
+
+        if array.dtype.kind == "m":
+            return ak.contents.NumpyArray(
+                array.backend.nplike.asarray(result, dtype=array.dtype),
+                backend=array.backend,
+            )
+        elif np.issubdtype(array.dtype, np.complexfloating):
+            return ak.contents.NumpyArray(
+                array.backend.nplike.asarray(result, dtype=array.dtype),
+                backend=array.backend,
+            )
         else:
             return ak.contents.NumpyArray(result, backend=array.backend)
 
@@ -546,6 +595,9 @@ class Min(JAXReducer):
         assert isinstance(reducer, _reducers.Min)
         return cls(reducer.initial)
 
+    def axis_none_reducer(self) -> AxisNoneMin:
+        return AxisNoneMin(self._initial)
+
     @staticmethod
     def _min_initial(initial, type):
         if initial is None:
@@ -592,6 +644,62 @@ class Min(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
+@overloads(_reducers.AxisNoneMin)
+class AxisNoneMin(JAXReducer):
+    name: Final = "min"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    def __init__(self, initial):
+        self._initial = initial
+
+    @property
+    def initial(self):
+        return self._initial
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.AxisNoneMin)
+        return cls(reducer.initial)
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+
+        data = maybe_materialize(array.data)[0]
+
+        if data.size == 0:
+            val = (
+                self.initial
+                if self.initial is not None
+                else Min._min_initial(None, array.dtype)
+            )
+            result_scalar = jax.numpy.asarray(val, dtype=data.dtype)
+        else:
+            result_scalar = jax.numpy.min(data)
+            if self.initial is not None:
+                result_scalar = jax.numpy.minimum(result_scalar, self.initial)
+
+        result = jax.numpy.reshape(result_scalar, (1,))
+
+        if np.issubdtype(array.dtype, np.complexfloating):
+            return ak.contents.NumpyArray(
+                array.backend.nplike.asarray(
+                    result.view(array.dtype), dtype=array.dtype
+                ),
+                backend=array.backend,
+            )
+        else:
+            return ak.contents.NumpyArray(result, backend=array.backend)
+
+
 @overloads(_reducers.Max)
 class Max(JAXReducer):
     name: Final = "max"
@@ -609,6 +717,9 @@ class Max(JAXReducer):
     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
         assert isinstance(reducer, _reducers.Max)
         return cls(reducer.initial)
+
+    def axis_none_reducer(self) -> AxisNoneMax:
+        return AxisNoneMax(self._initial)
 
     @staticmethod
     def _max_initial(initial, type):
@@ -644,6 +755,62 @@ class Max(JAXReducer):
             *maybe_materialize(array.data, parents.data), outlength
         )
         result = jax.numpy.maximum(result, self._max_initial(self.initial, array.dtype))
+
+        if np.issubdtype(array.dtype, np.complexfloating):
+            return ak.contents.NumpyArray(
+                array.backend.nplike.asarray(
+                    result.view(array.dtype), dtype=array.dtype
+                ),
+                backend=array.backend,
+            )
+        else:
+            return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+@overloads(_reducers.AxisNoneMax)
+class AxisNoneMax(JAXReducer):
+    name: Final = "max"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    def __init__(self, initial):
+        self._initial = initial
+
+    @property
+    def initial(self):
+        return self._initial
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.AxisNoneMax)
+        return cls(reducer.initial)
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+
+        data = maybe_materialize(array.data)[0]
+
+        if data.size == 0:
+            val = (
+                self.initial
+                if self.initial is not None
+                else Max._max_initial(None, array.dtype)
+            )
+            result_scalar = jax.numpy.asarray(val, dtype=data.dtype)
+        else:
+            result_scalar = jax.numpy.max(data)
+            if self.initial is not None:
+                result_scalar = jax.numpy.maximum(result_scalar, self.initial)
+
+        result = jax.numpy.reshape(result_scalar, (1,))
 
         if np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
