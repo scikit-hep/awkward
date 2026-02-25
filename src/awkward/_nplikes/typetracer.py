@@ -1651,10 +1651,11 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         self,
         x1: TypeTracerArray,
         x2: TypeTracerArray,
-        *,
         maybe_out: TypeTracerArray | None = None,
     ) -> TypeTracerArray:
-        return self.maximum(x1, x2, maybe_out=maybe_out)
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
+        return self.apply_ufunc(numpy.maximum, "__call__", (x1, x2))  # type: ignore[arg-type,return-value]
 
     def sum(
         self,
