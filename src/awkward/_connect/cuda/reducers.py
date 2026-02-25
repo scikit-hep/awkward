@@ -154,7 +154,7 @@ class ArgMin(CudaComputeReducer):
 
             # should I pass kernel_array_data here too? (instead of array.data)
             result = awkward_reduce_argmin(
-                result, array.data, parents.data, parents.length, starts, outlength
+                result, array.data, parents.data, parents.length, starts.data, outlength
             )
 
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
