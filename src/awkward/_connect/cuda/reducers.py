@@ -9,10 +9,12 @@ from awkward import _reducers
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import ShapeItem
 from awkward._reducers import Reducer
+from awkward._typing import Any as AnyType
 from awkward._typing import Final, Self, TypeVar
 
 np = NumpyMetadata.instance()
 
+DTypeLike = AnyType
 
 _overloads: dict[type[Reducer], type[CudaComputeReducer]] = {}
 
@@ -47,7 +49,7 @@ class CudaComputeReducer(Reducer):
             return dtype
 
     _use32 = ((ak._util.win or ak._util.bits32) and not ak._util.numpy2) or (
-            ak._util.numpy2 and np.intp is np.int32
+        ak._util.numpy2 and np.intp is np.int32
     )
 
 
@@ -149,7 +151,8 @@ class ArgMin(CudaComputeReducer):
             )
         else:
             from ._compute import awkward_reduce_argmin
-            #should I pass kernel_array_data here too? (instead of array.data)
+
+            # should I pass kernel_array_data here too? (instead of array.data)
             result = awkward_reduce_argmin(
                 result, array.data, parents.data, parents.length, starts, outlength
             )
