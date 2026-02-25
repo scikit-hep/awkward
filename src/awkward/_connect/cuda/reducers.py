@@ -34,6 +34,22 @@ class CudaComputeReducer(Reducer):
     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
         raise NotImplementedError
 
+    @classmethod
+    def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
+        dtype = np.dtype(dtype)
+        if dtype.kind.upper() == "M":
+            return np.dtype(np.int64)
+        elif dtype == np.complex128:
+            return np.dtype(np.float64)
+        elif dtype == np.complex64:
+            return np.dtype(np.float32)
+        else:
+            return dtype
+
+    _use32 = ((ak._util.win or ak._util.bits32) and not ak._util.numpy2) or (
+            ak._util.numpy2 and np.intp is np.int32
+    )
+
 
 # TODO: change this for a custom one?
 def apply_positional_corrections(
@@ -110,13 +126,34 @@ class ArgMin(CudaComputeReducer):
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        from ._compute import awkward_reduce_argmin
-
         assert isinstance(array, ak.contents.NumpyArray)
+        # View array data in kernel-supported dtype
+        kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
-        result = awkward_reduce_argmin(
-            result, array.data, parents.data, parents.length, starts, outlength
-        )
+
+        if array.dtype.type in (np.complex128, np.complex64):
+            assert parents.nplike is array.backend.nplike
+            array.backend.maybe_kernel_error(
+                array.backend[
+                    "awkward_reduce_argmin_complex",
+                    result.dtype.type,
+                    kernel_array_data.dtype.type,
+                    parents.dtype.type,
+                ](
+                    result,
+                    kernel_array_data,
+                    parents.data,
+                    parents.length,
+                    outlength,
+                )
+            )
+        else:
+            from ._compute import awkward_reduce_argmin
+            #should I pass kernel_array_data here too? (instead of array.data)
+            result = awkward_reduce_argmin(
+                result, array.data, parents.data, parents.length, starts, outlength
+            )
+
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
         corrected_data = apply_positional_corrections(
             result_array, parents, offsets, starts, shifts
