@@ -119,10 +119,18 @@ class ArgMin(CudaComputeReducer):
     def _return_dtype(cls, given_dtype):
         return np.int64
 
+    @classmethod
+    def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
+        dtype = np.dtype(dtype)
+        if dtype == np.bool_:
+            return np.dtype(np.int8)
+        else:
+            return super()._dtype_for_kernel(dtype)
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index,
+        parents: ak.index.Index | ak.index.ZeroIndex,
         offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
@@ -152,6 +160,7 @@ class ArgMin(CudaComputeReducer):
                 )
             )
         else:
+            assert parents.nplike is array.backend.nplike
             from ._compute import awkward_reduce_argmin
 
             # should I pass kernel_array_data here too? (instead of array.data)
@@ -172,9 +181,86 @@ class ArgMin(CudaComputeReducer):
         return corrected_data
 
 
+@overloads(_reducers.ArgMax)
+class ArgMax(CudaComputeReducer):
+    name: Final = "argmax"
+    needs_position: Final = True
+    preferred_dtype: Final = np.int64
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.ArgMax)
+        return cls()
+
+    @classmethod
+    def _return_dtype(cls, given_dtype):
+        return np.int64
+
+    @classmethod
+    def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
+        dtype = np.dtype(dtype)
+        if dtype == np.bool_:
+            return np.dtype(np.int8)
+        else:
+            return super()._dtype_for_kernel(dtype)
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        # View array data in kernel-supported dtype
+        kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+        result = array.backend.nplike.empty(outlength, dtype=np.int64)
+
+        if array.dtype.type in (np.complex128, np.complex64):
+            assert parents.nplike is array.backend.nplike
+            array.backend.maybe_kernel_error(
+                array.backend[
+                    "awkward_reduce_argmax_complex",
+                    result.dtype.type,
+                    kernel_array_data.dtype.type,
+                    parents.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    result,
+                    kernel_array_data,
+                    parents.data,
+                    offsets.data,
+                    parents.length,
+                    outlength,
+                )
+            )
+        else:
+            assert parents.nplike is array.backend.nplike
+            from ._compute import awkward_reduce_argmax
+
+            # should I pass kernel_array_data here too? (instead of array.data)
+            result = awkward_reduce_argmax(
+                result,
+                array.data,
+                parents.data,
+                offsets.data,
+                parents.length,
+                starts.data,
+                outlength,
+            )
+
+        result_array = ak.contents.NumpyArray(result, backend=array.backend)
+        corrected_data = apply_positional_corrections(
+            result_array, parents, offsets, starts, shifts
+        )
+        return corrected_data
+
+
 def get_cuda_compute_reducer(reducer: Reducer) -> Reducer:
     # can be deleted after all reducers are added
-    if reducer.name not in ("argmin",):
+    if reducer.name not in ("argmin", "argmax"):
         return reducer
 
     return _overloads[type(reducer)].from_kernel_reducer(reducer)
