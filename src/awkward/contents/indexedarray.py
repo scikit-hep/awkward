@@ -1031,6 +1031,19 @@ class IndexedArray(IndexedMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
+        # Handle empty content FIRST, before categorical path
+        # This prevents creating DictionaryArray with empty dictionary which causes
+        # "Index 0 out of bounds" error and memory corruption during GC
+        if self._content.length is not unknown_length and self._content.length == 0:
+            # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
+            # every masked value is self._content[0], unless self._content.length == 0.
+            # In that case, don't call self._content[index]; it's empty anyway.
+            next = self._content
+            next2 = next.copy(
+                parameters=parameters_union(next._parameters, self._parameters)
+            )
+            return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
         if (
             not options["categorical_as_dictionary"]
             and self.parameter("__array__") == "categorical"
@@ -1066,13 +1079,9 @@ class IndexedArray(IndexedMeta[Content], Content):
                 return out
 
         else:
-            if self._content.length is not unknown_length and self._content.length == 0:
-                # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
-                # every masked value is self._content[0], unless self._content.length == 0.
-                # In that case, don't call self._content[index]; it's empty anyway.
-                next = self._content
-            else:
-                next = self._content._carry(ak.index.Index(index), False)
+            # Original empty content check is now redundant (handled above)
+            # but kept for clarity in non-categorical path
+            next = self._content._carry(ak.index.Index(index), False)
 
             next2 = next.copy(
                 parameters=parameters_union(next._parameters, self._parameters)

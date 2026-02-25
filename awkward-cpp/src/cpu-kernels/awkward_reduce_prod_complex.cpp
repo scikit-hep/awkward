@@ -14,18 +14,23 @@ ERROR awkward_reduce_prod_complex(
   const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i * 2] = (OUT)1;
-    toptr[i * 2 + 1] = (OUT)0;
+  for (int64_t i = 0; i < outlength; i++) {
+    toptr[i * 2] = static_cast<OUT>(1);
+    toptr[i * 2 + 1] = static_cast<OUT>(0);
   }
-  for (int64_t i = 0;  i < lenparents;  i++) {
-    int64_t parent = parents[i];
-    std::complex<OUT> z =
-      std::complex<OUT>(toptr[parent * 2], toptr[parent * 2 + 1])
-      * std::complex<OUT>((OUT)fromptr[i * 2], (OUT)fromptr[i * 2 + 1]);
 
-    toptr[parent * 2] = z.real();
-    toptr[parent * 2 + 1] = z.imag();
+  for (int64_t i = 0; i < lenparents; i++) {
+    int64_t parent = parents[i];
+    int64_t parent_idx = parent * 2;
+    int64_t from_idx = i * 2;
+
+    OUT a = toptr[parent_idx];
+    OUT b = toptr[parent_idx + 1];
+    OUT c = static_cast<OUT>(fromptr[from_idx]);
+    OUT d = static_cast<OUT>(fromptr[from_idx + 1]);
+
+    toptr[parent_idx] = a * c - b * d;
+    toptr[parent_idx + 1] = a * d + b * c;
   }
 
   return success();
