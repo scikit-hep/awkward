@@ -12,11 +12,10 @@ ERROR awkward_reduce_prod_bool(
   const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = true;
-  }
+  std::memset(toptr, 1, outlength);
+
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i]] &= (fromptr[i] != 0);
+    toptr[parents[i]] = toptr[parents[i]] && (fromptr[i] != 0);
   }
   return success();
 }
