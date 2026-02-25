@@ -675,29 +675,11 @@ class AxisNoneMin(JAXReducer):
 
         data = maybe_materialize(array.data)[0]
 
-        if data.size == 0:
-            val = (
-                self.initial
-                if self.initial is not None
-                else Min._min_initial(None, array.dtype)
-            )
-            result_scalar = jax.numpy.asarray(val, dtype=data.dtype)
-        else:
-            result_scalar = jax.numpy.min(data)
-            if self.initial is not None:
-                result_scalar = jax.numpy.minimum(result_scalar, self.initial)
-
+        result_scalar = jax.numpy.min(
+            data, initial=Min._min_initial(self.initial, array.dtype)
+        )
         result = jax.numpy.reshape(result_scalar, (1,))
-
-        if np.issubdtype(array.dtype, np.complexfloating):
-            return ak.contents.NumpyArray(
-                array.backend.nplike.asarray(
-                    result.view(array.dtype), dtype=array.dtype
-                ),
-                backend=array.backend,
-            )
-        else:
-            return ak.contents.NumpyArray(result, backend=array.backend)
+        return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 @overloads(_reducers.Max)
@@ -798,29 +780,11 @@ class AxisNoneMax(JAXReducer):
 
         data = maybe_materialize(array.data)[0]
 
-        if data.size == 0:
-            val = (
-                self.initial
-                if self.initial is not None
-                else Max._max_initial(None, array.dtype)
-            )
-            result_scalar = jax.numpy.asarray(val, dtype=data.dtype)
-        else:
-            result_scalar = jax.numpy.max(data)
-            if self.initial is not None:
-                result_scalar = jax.numpy.maximum(result_scalar, self.initial)
-
+        result_scalar = jax.numpy.max(
+            data, initial=Max._max_initial(self.initial, array.dtype)
+        )
         result = jax.numpy.reshape(result_scalar, (1,))
-
-        if np.issubdtype(array.dtype, np.complexfloating):
-            return ak.contents.NumpyArray(
-                array.backend.nplike.asarray(
-                    result.view(array.dtype), dtype=array.dtype
-                ),
-                backend=array.backend,
-            )
-        else:
-            return ak.contents.NumpyArray(result, backend=array.backend)
+        return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 def get_jax_reducer(reducer: Reducer) -> Reducer:
