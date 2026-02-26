@@ -89,7 +89,7 @@ def apply_positional_corrections(
     offsets: ak.index.Index | ak.index.EmptyIndex,
     starts: ak.index.Index,
     shifts: ak.index.Index | None,
-) -> None:
+):
     if shifts is None:
         assert (
             parents.nplike is reduced.backend.nplike
@@ -720,7 +720,7 @@ class Min(KernelReducer):
     def axis_none_reducer(self) -> AxisNoneMin:
         return AxisNoneMin(self._initial)
 
-    def _identity_for(self, dtype: DTypeLike | None) -> np.generic:
+    def _identity_for(self, dtype: DTypeLike | None):
         dtype = np.dtype(dtype)
 
         assert dtype.kind.upper() != "M", (
@@ -870,7 +870,7 @@ class Max(KernelReducer):
     def axis_none_reducer(self) -> AxisNoneMax:
         return AxisNoneMax(self._initial)
 
-    def _identity_for(self, dtype: DTypeLike | None) -> np.generic:
+    def _identity_for(self, dtype: DTypeLike | None):
         dtype = np.dtype(dtype)
 
         assert dtype.kind.upper() != "M", (
