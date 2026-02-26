@@ -87,7 +87,7 @@ def apply_positional_corrections(
             and shifts.nplike is reduced.backend.nplike
         )
         reduced.backend.maybe_kernel_error(
-            reduced._backend[
+            reduced.backend[
                 "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
                 reduced.dtype.type,
                 parents.dtype.type,
@@ -163,10 +163,9 @@ class ArgMin(CudaComputeReducer):
             assert parents.nplike is array.backend.nplike
             from ._compute import awkward_reduce_argmin
 
-            # should I pass kernel_array_data here too? (instead of array.data)
             result = awkward_reduce_argmin(
                 result,
-                array.data,
+                kernel_array_data,
                 parents.data,
                 offsets.data,
                 parents.length,
@@ -240,10 +239,9 @@ class ArgMax(CudaComputeReducer):
             assert parents.nplike is array.backend.nplike
             from ._compute import awkward_reduce_argmax
 
-            # should I pass kernel_array_data here too? (instead of array.data)
             result = awkward_reduce_argmax(
                 result,
-                array.data,
+                kernel_array_data,
                 parents.data,
                 offsets.data,
                 parents.length,
