@@ -8,8 +8,15 @@ coverage:
   status:
     project:
       default:
+        # 'auto' sets the target to our current coverage %
+        # 'threshold' allows a tiny 0.5% drop to prevent "flaky" failures
+        target: auto
+        threshold: 0.5%
+    patch:
+      default:
+        # Ensures 98% of NEW code added in the PR is covered
         target: 98%
-    patch: false
+        threshold: 0%
 
 github_checks:
   annotations: false
