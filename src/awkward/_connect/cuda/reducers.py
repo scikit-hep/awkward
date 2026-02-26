@@ -258,11 +258,11 @@ class ArgMax(CudaComputeReducer):
 
 def get_cuda_compute_reducer(reducer: Reducer) -> Reducer:
     """
-    Returns the CUDA-specific reducer if registered, 
+    Returns the CUDA-specific reducer if registered,
     otherwise falls back to the original reducer.
     """
     impl = _overloads.get(type(reducer))
     if impl is None:
         return reducer
-    
+
     return impl.from_kernel_reducer(reducer)
