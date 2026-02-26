@@ -76,9 +76,7 @@ class CupyBackend(Backend):
         - awkward_sort
         - awkward_argsort (future)
         """
-        return kernel_name in (
-            "awkward_sort",
-        )
+        return kernel_name in ("awkward_sort",)
 
     def _get_cuda_compute_impl(self, kernel_name: str):
         """
