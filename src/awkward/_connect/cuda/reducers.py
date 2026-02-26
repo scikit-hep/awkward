@@ -48,10 +48,6 @@ class CudaComputeReducer(Reducer):
         else:
             return dtype
 
-    _use32 = ((ak._util.win or ak._util.bits32) and not ak._util.numpy2) or (
-        ak._util.numpy2 and np.intp is np.int32
-    )
-
 
 # TODO: change this for a custom one?
 def apply_positional_corrections(
