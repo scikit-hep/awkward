@@ -182,5 +182,5 @@ def test_union_to_record():
         df_unionarray2["z"].values, [np.nan, np.nan, 999, np.nan, np.nan]
     )
     np.testing.assert_array_equal(
-        df_unionarray2["values"].values, ["nan", "one", "nan", "two", "nan"]
+        df_unionarray2["values"].values, [None, "one", None, "two", None]
     )
