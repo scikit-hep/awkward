@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import enum
 import threading
+import warnings
 import weakref
 
 import awkward as ak
@@ -51,6 +52,12 @@ def register_and_check():
         ) from None
 
     _register()
+    warnings.warn(
+        "The JAX backend is deprecated and will be removed in a future release of Awkward Array. "
+        "Please plan to migrate your code accordingly.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
 
 HighLevelType = TypeVar(
