@@ -1,6 +1,13 @@
 codecov:
   require_ci_to_pass: true
 
+ignore:
+  # Requires specialized hardware/env (GPU/CuPy)
+  - "awkward/src/awkward/_connect/cuda/**/*"
+  - "awkward/src/awkward/_nplikes/cupy.py"
+  # Requires ROOT installation
+  - "awkward/src/awkward/_connect/rdataframe/**/*"
+
 comment:
   layout: "files"
 
