@@ -24,6 +24,8 @@ or
     conda install -c conda-forge cupy
 """
 
+from awkward._connect.cuda.reducers import get_cuda_compute_reducer  # noqa: F401
+
 cuda_streamptr_to_contexts = {}
 kernel_errors = {}
 kernel = None
