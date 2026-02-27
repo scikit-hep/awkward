@@ -363,6 +363,9 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     ) -> ArrayLikeT: ...
 
     @abstractmethod
+    def byteswap(self, x: ArrayLikeT) -> ArrayLikeT: ...
+
+    @abstractmethod
     def strides(self, x: ArrayLikeT | PlaceholderArray) -> tuple[ShapeItem, ...]: ...
 
     ############################ ufuncs
