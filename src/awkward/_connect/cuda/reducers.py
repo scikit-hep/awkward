@@ -252,6 +252,37 @@ class ArgMax(CudaComputeReducer):
         return corrected_data
 
 
+class AxisNoneReducer:
+    def __init__(self, name: str):
+        self.name = name
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _parents: ak.index.Index | ak.index.ZeroIndex,
+        _offsets: ak.index.Index | ak.index.EmptyIndex,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        from . import _compute
+
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "M":
+            raise ValueError(
+                f"cannot compute the {self.name} (ak.{self.name}) of {array.dtype!r}"
+            )
+
+        nplike = array.backend.nplike
+        reduce_fn = getattr(_compute, f"awkward_axis_none_reduce_{self.name}")
+        result_scalar = reduce_fn(array)
+
+        # is this line needed?
+        result_array = nplike._module.asarray(result_scalar).reshape((1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
 def get_cuda_compute_reducer(reducer: Reducer) -> Reducer:
     """
     Returns the CUDA-specific reducer if registered,

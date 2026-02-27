@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from cuda.compute import (
     CountingIterator,
+    reduce_into,
     unary_transform,
 )
 
@@ -194,3 +195,23 @@ def awkward_reduce_argmin(
     unary_transform(segment_ids, result, segment_reduce_argmin, outlength)
 
     return result
+
+
+def awkward_axis_none_reduce_max(array):
+    data_dtype = array.dtype
+    # initialize the minimum value depending on the dtype
+    if data_dtype.kind in "iu":  # int/uint
+        min = cp.iinfo(data_dtype).min
+    elif data_dtype.kind == "f":  # float
+        min = cp.finfo(data_dtype).min
+    else:
+        raise TypeError("Unsupported dtype to get the minimal value")
+
+    def reduce_op(a, b):
+        return max(a, b)
+
+    result_scalar = cp.empty(1, dtype=np.int64)
+    h_init = np.array([min], dtype=np.int64)
+    reduce_into(array.data, result_scalar, reduce_op, len(array.data), h_init)
+
+    return result_scalar
