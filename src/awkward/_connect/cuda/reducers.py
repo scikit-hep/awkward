@@ -199,6 +199,9 @@ class ArgMax(CudaComputeReducer):
         else:
             return super()._dtype_for_kernel(dtype)
 
+    def axis_none_reducer(self):
+        return AxisNoneReducer(self.name)
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
@@ -275,7 +278,7 @@ class AxisNoneReducer:
 
         nplike = array.backend.nplike
         reduce_fn = getattr(_compute, f"awkward_axis_none_reduce_{self.name}")
-        result_scalar = reduce_fn(array)
+        result_scalar = reduce_fn(array.data)
 
         # is this line needed?
         result_array = nplike._module.asarray(result_scalar).reshape((1,))
