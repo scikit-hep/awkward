@@ -1,6 +1,13 @@
 codecov:
   require_ci_to_pass: true
 
+ignore:
+  # Requires specialized hardware/env (GPU/CuPy)
+  - "awkward/src/awkward/_connect/cuda/**/*"
+  - "awkward/src/awkward/_nplikes/cupy.py"
+  # Requires ROOT installation
+  - "awkward/src/awkward/_connect/rdataframe/**/*"
+
 comment:
   layout: "files"
 
@@ -8,8 +15,15 @@ coverage:
   status:
     project:
       default:
-        target: 20%
-    patch: false
+        # 'auto' sets the target to our current coverage %
+        # 'threshold' allows a tiny 0.5% drop to prevent "flaky" failures
+        target: auto
+        threshold: 0.5%
+    patch:
+      default:
+        # Ensures 98% of NEW code added in the PR is covered
+        target: 98%
+        threshold: 0%
 
 github_checks:
   annotations: false
