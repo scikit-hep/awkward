@@ -137,7 +137,15 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     """
 
     def __init__(
-        self, mask, content, valid_when, length, lsb_order, *, parameters=None
+        self,
+        mask,
+        content,
+        valid_when,
+        length,
+        lsb_order,
+        length_generator=None,
+        *,
+        parameters=None,
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
             raise TypeError(
@@ -168,7 +176,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         if (
             content.backend.nplike.known_data
             and length is not unknown_length
-            and mask.length is not unknown_length
+            and ak._util.maybe_length_of(mask) is not unknown_length
             and length > mask.length * 8
         ):
             raise ValueError(
@@ -177,8 +185,8 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         if (
             content.backend.nplike.known_data
             and length is not unknown_length
-            and mask.length is not unknown_length
-            and length > content.length * 8
+            and ak._util.maybe_length_of(content) is not unknown_length
+            and length > content.length
         ):
             raise ValueError(
                 f"{type(self).__name__} 'length' ({length}) must be <= len(content) ({content.length})"
@@ -190,6 +198,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         self._content = content
         self._valid_when = valid_when
         self._length = length
+        self._length_generator = length_generator
         self._lsb_order = lsb_order
         self._init(parameters, content.backend)
 
@@ -214,6 +223,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         valid_when=UNSET,
         length=UNSET,
         lsb_order=UNSET,
+        length_generator=UNSET,
         *,
         parameters=UNSET,
     ):
@@ -223,6 +233,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._valid_when if valid_when is UNSET else valid_when,
             self._length if length is UNSET else length,
             self._lsb_order if lsb_order is UNSET else lsb_order,
+            self._length_generator if length_generator is UNSET else length_generator,
             parameters=self._parameters if parameters is UNSET else parameters,
         )
 
@@ -236,6 +247,12 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
+    def __getstate__(self):
+        # Calling .length resolves _length and clears _length_generator
+        # (a local closure from ak.from_buffers that can't be pickled).
+        _ = self.length
+        return self.__dict__
+
     @classmethod
     def simplified(
         cls,
@@ -244,6 +261,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         valid_when,
         length,
         lsb_order,
+        length_generator=None,
         *,
         parameters=None,
     ):
@@ -276,6 +294,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 valid_when,
                 length,
                 lsb_order,
+                length_generator=length_generator,
                 parameters=parameters,
             )
 
@@ -338,6 +357,16 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
     @property
     def length(self) -> ShapeItem:
+        if (
+            self._backend.nplike.known_data
+            and self._length is unknown_length
+            and self._length_generator
+        ):
+            self._length = self._length_generator()
+            assert is_integer(self._length), (
+                f"BitMaskedArray length must be an integer for an array with concrete data, not {type(self._length)}"
+            )
+        self._length_generator = None
         return self._length
 
     def __repr__(self):
@@ -512,7 +541,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._mask,
             self._content._getitem_field(where, only_fields),
             self._valid_when,
-            self._length,
+            self.length,
             self._lsb_order,
             parameters=None,
         )
@@ -524,7 +553,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._mask,
             self._content._getitem_fields(where, only_fields),
             self._valid_when,
-            self._length,
+            self.length,
             self._lsb_order,
             parameters=None,
         )
@@ -878,6 +907,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             valid_when=self._valid_when,
             length=self._length,
             lsb_order=self._lsb_order,
+            length_generator=self._length_generator,
             parameters=self._parameters,
         )
 
@@ -888,7 +918,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             mask,
             content,
             valid_when=self._valid_when,
-            length=self._length,
+            length=self.length,
             lsb_order=self._lsb_order,
             parameters=self._parameters,
         )

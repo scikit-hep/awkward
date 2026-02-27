@@ -371,6 +371,10 @@ def _reconstitute(
             (length,) = shape_generator()
             return (_adjust_length(length),)
 
+        def _length_generator():
+            (length,) = shape_generator()
+            return length
+
         if length is unknown_length:
             next_length = unknown_length
         else:
@@ -403,15 +407,13 @@ def _reconstitute(
             make = ak.contents.BitMaskedArray.simplified
         else:
             make = ak.contents.BitMaskedArray
-        # We need to know the length of a BitMaskedArray to initialize it
-        # as it is an argument in __init__ and is not calculated from the content
-        (length,) = shape_generator()
         return make(
             ak.index.Index(mask),
             content,
             form.valid_when,
             length,
             form.lsb_order,
+            _length_generator,
             parameters=form._parameters,
         )
 
@@ -467,7 +469,14 @@ def _reconstitute(
         )
 
         def _adjust_length(index):
-            return 0 if len(index) == 0 else max(0, backend.nplike.max(index) + 1)
+            return (
+                0
+                if len(index) == 0
+                else max(
+                    0,
+                    backend.nplike.index_as_shape_item(backend.nplike.max(index) + 1),
+                )
+            )
 
         def _shape_generator():
             return (_adjust_length(index),)
@@ -577,7 +586,13 @@ def _reconstitute(
 
         def _adjust_length(starts, stops):
             reduced_stops = stops[starts != stops]
-            return 0 if len(reduced_stops) == 0 else backend.nplike.max(reduced_stops)
+            return (
+                0
+                if len(reduced_stops) == 0
+                else backend.nplike.index_as_shape_item(
+                    backend.nplike.max(reduced_stops)
+                )
+            )
 
         def _shape_generator():
             return (_adjust_length(starts, stops),)
@@ -626,9 +641,12 @@ def _reconstitute(
             ),
         )
 
-        # next length
         def _adjust_length(offsets):
-            return 0 if len(offsets) == 1 else offsets[-1]
+            return (
+                0
+                if len(offsets) == 1
+                else backend.nplike.index_as_shape_item(offsets[-1])
+            )
 
         def _shape_generator():
             return (_adjust_length(offsets),)
@@ -666,6 +684,10 @@ def _reconstitute(
             (first,) = shape_generator()
             return (_adjust_length(first),)
 
+        def _zeros_length_generator():
+            (length,) = shape_generator()
+            return length
+
         content = _reconstitute(
             form.content,
             next_length,
@@ -681,10 +703,15 @@ def _reconstitute(
             content,
             form.size,
             length,
+            _zeros_length_generator,
             parameters=form._parameters,
         )
 
     elif isinstance(form, ak.forms.RecordForm):
+
+        def _length_generator():
+            return length
+
         contents = [
             _reconstitute(
                 content,
@@ -703,6 +730,7 @@ def _reconstitute(
             contents,
             None if form.is_tuple else form.fields,
             length,
+            _length_generator,
             parameters=form._parameters,
             backend=backend,
         )
@@ -740,7 +768,9 @@ def _reconstitute(
             if len(selected_index) == 0:
                 return 0
             else:
-                return backend.nplike.max(selected_index) + 1
+                return backend.nplike.index_as_shape_item(
+                    backend.nplike.max(selected_index) + 1
+                )
 
         _shape_generators = []
         for tag in range(len(form.contents)):
