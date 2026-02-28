@@ -48,7 +48,10 @@ def distinct_counts(array, *, highlevel=True, behavior=None, attrs=None):
 
 
 def _impl(array, highlevel, behavior, attrs):
+    from awkward._backends.typetracer import TypeTracerBackend
     from awkward._connect.pyarrow import import_pyarrow, import_pyarrow_compute
+    from awkward.operations.ak_from_arrow import from_arrow
+    from awkward.operations.ak_to_arrow import to_arrow
     from awkward.operations.str import _apply_through_arrow
 
     pa = import_pyarrow("ak.str.distinct_counts")
@@ -67,12 +70,24 @@ def _impl(array, highlevel, behavior, attrs):
             if sublist is None:
                 output.append(None)
             else:
-                subarray = pa.array(sublist, type=value_type)
+                subarray = pa.array(sublist)
                 output.append(pc.value_counts(subarray).to_pylist())
         return pa.array(output, type=pa.large_list(value_counts_type))
 
     def value_counts_whole_array(array_1d):
-        return pc.value_counts(array_1d)
+        if array_1d.backend is TypeTracerBackend.instance():
+            out = from_arrow(
+                pc.value_counts(
+                    to_arrow(array_1d.form.length_zero_array(), extensionarray=False)
+                ),
+                highlevel=False,
+            )
+            return out.to_typetracer(forget_length=True)
+        else:
+            return from_arrow(
+                pc.value_counts(to_arrow(array_1d, extensionarray=False)),
+                highlevel=False,
+            )
 
     any_list_of_strings = False
 
@@ -85,9 +100,7 @@ def _impl(array, highlevel, behavior, attrs):
             )
         elif _is_maybe_optional_list_of_string(layout):
             any_list_of_strings = True
-            return _apply_through_arrow(
-                value_counts_whole_array, layout, expect_option_type=False
-            )
+            return value_counts_whole_array(layout)
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array)
