@@ -36,7 +36,7 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
           *maxnextparents = nextparents[k];
         }
 
-        if (distincts[nextparents[k]] == -1) {
+        if (nextparents[k] < distinctslen && distincts[nextparents[k]] == -1) {
           distincts[nextparents[k]] = j;
           j++;
         }

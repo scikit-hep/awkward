@@ -13,16 +13,15 @@ ERROR awkward_ListOffsetArray_drop_none_indexes(
   int64_t length_indexes) {
   T nr_of_nones = 0;
   int64_t offset1 = 0;
-  int64_t offset2 = 0;
 
   for (int64_t i = 0; i < length_offsets; i++) {
-    offset2 = fromoffsets[i];
-    for (int j = offset1; j < offset2; j++) {
+    int64_t offset2 = (int64_t)fromoffsets[i] < length_indexes ? (int64_t)fromoffsets[i] : length_indexes;
+    for (int64_t j = offset1; j < offset2; j++) {
         if (noneindexes[j] < 0) {
             nr_of_nones++;
         }
     }
-    tooffsets[i] = fromoffsets[i] - nr_of_nones;
+    tooffsets[i] = (T)offset2 - nr_of_nones;
     offset1 = offset2;
   }
 
