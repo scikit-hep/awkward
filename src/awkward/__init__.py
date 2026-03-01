@@ -36,6 +36,9 @@ from awkward import jax
 from awkward import typetracer
 from awkward import _typetracer  # todo: remove this after "deprecation" period
 
+# experimental cuda
+from awkward._connect import cuda
+
 # high-level interface
 from awkward.highlevel import *
 
