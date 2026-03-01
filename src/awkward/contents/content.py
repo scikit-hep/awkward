@@ -133,6 +133,19 @@ class ToArrowOptions(TypedDict):
     record_is_scalar: bool
 
 
+def _is_cudf_column_constructor_error(err: BaseException) -> bool:
+    if not isinstance(err, (TypeError, ValueError)):
+        return False
+    message = str(err)
+    return (
+        "from_pylibcudf" in message
+        or "unexpected keyword" in message
+        or "unexpected positional argument" in message
+        or "missing required positional argument" in message
+        or "takes no arguments" in message
+    )
+
+
 class Content(Meta):
     def _init(self, parameters: dict[str, Any] | None, backend: Backend):
         if parameters is None:
