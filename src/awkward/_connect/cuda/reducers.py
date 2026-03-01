@@ -256,6 +256,9 @@ class ArgMax(CudaComputeReducer):
 
 
 class AxisNoneReducer:
+    # is this correct? (needs_position is not used in NumpyArray contents so probably yes)
+    needs_position: Final = False
+
     def __init__(self, name: str):
         self.name = name
 
