@@ -200,7 +200,7 @@ class ArgMax(CudaComputeReducer):
             return super()._dtype_for_kernel(dtype)
 
     def axis_none_reducer(self):
-        return AxisNoneReducer(self.name)
+        return AxisNoneReducerArgMax(self.name)
 
     def apply(
         self,
@@ -255,9 +255,8 @@ class ArgMax(CudaComputeReducer):
         return corrected_data
 
 
-class AxisNoneReducer:
-    # is this correct? (needs_position is not used in NumpyArray contents so probably yes)
-    needs_position: Final = False
+class AxisNoneReducerArgMax:
+    needs_position: Final = True
 
     def __init__(self, name: str):
         self.name = name
