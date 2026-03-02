@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from abc import abstractmethod
 
+from cuda.compute import (
+    ZipIterator,
+    gpu_struct,
+    reduce_into,
+)
+
 import awkward as ak
 from awkward import _reducers
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -268,8 +274,6 @@ class AxisNoneReducerArgMax(ArgMax):
         shifts: ak.index.Index | None,
         _outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
-        from . import _compute
-
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
             raise ValueError(
@@ -277,7 +281,7 @@ class AxisNoneReducerArgMax(ArgMax):
             )
 
         nplike = array.backend.nplike
-        reduce_fn = getattr(_compute, f"awkward_axis_none_reduce_{self.name}")
+        reduce_fn = globals()[f"awkward_axis_none_reduce_{self.name}"]
         result_scalar = reduce_fn(array.data)
 
         # is this line needed?
@@ -290,6 +294,61 @@ class AxisNoneReducerArgMax(ArgMax):
         )
 
         return corrected_data
+
+
+def awkward_axis_none_reduce_argmax(array):
+    import cupy as cp
+
+    data_dtype = array.dtype
+    index_dtype = np.int64
+    # initialize the minimum value depending on the dtype
+    if data_dtype.kind in "iu":  # int/uint
+        min = cp.iinfo(data_dtype).min
+    elif data_dtype.kind == "f":  # float
+        min = cp.finfo(data_dtype).min
+    elif data_dtype.kind == "c":  # complex
+        min = complex(cp.finfo(data_dtype).min, cp.finfo(data_dtype).min)
+    else:
+        raise TypeError("Unsupported dtype to get the minimal value")
+
+    ak_array = gpu_struct(
+        {
+            "data": data_dtype,
+            "local_index": index_dtype,
+        }
+    )
+
+    if data_dtype.kind == "c":
+        # Compare real and then imaginary part for complex numbers (same way as in cpu kernels)
+        def reduce_op(a: ak_array, b: ak_array):
+            real_a, imag_a = a.data.real, a.data.imag
+            real_b, imag_b = b.data.real, b.data.imag
+            # we are sorting lexicographically
+            if real_b > real_a or (real_b == real_a and imag_b > imag_a):
+                return b
+            # if the two values are equal, keep the index of the FIRST max value we encounter
+            if a.local_index < b.local_index:
+                return a
+            elif b.local_index < a.local_index:
+                return b
+            else:
+                raise IndexError("Encountered two values with the same index")
+    else:
+        # Normal numeric comparison
+        def reduce_op(a: ak_array, b: ak_array):
+            return a if a.data > b.data else b
+
+    n = len(array)
+    indices = cp.arange(n, dtype=index_dtype)
+    # Combine data and their indices into a single structure
+    input_struct = ZipIterator(array, indices)
+
+    result_scalar = cp.empty(1, dtype=ak_array)
+    h_init = ak_array(min, -1)
+    reduce_into(input_struct, result_scalar, reduce_op, len(array), h_init)
+
+    # return the index of the maximum value
+    return result_scalar.item()[1]
 
 
 def get_cuda_compute_reducer(reducer: Reducer) -> Reducer:
