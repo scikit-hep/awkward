@@ -171,6 +171,8 @@ def awkward_axis_none_reduce_argmax(array):
         min = cp.iinfo(data_dtype).min
     elif data_dtype.kind == "f":  # float
         min = cp.finfo(data_dtype).min
+    elif data_dtype.kind == "c":  # complex
+        min = complex(cp.finfo(data_dtype).min, cp.finfo(data_dtype).min)
     else:
         raise TypeError("Unsupported dtype to get the minimal value")
 
@@ -181,20 +183,32 @@ def awkward_axis_none_reduce_argmax(array):
         }
     )
 
-    def reduce_op(a: ak_array, b: ak_array):
-        return a if a.data > b.data else b
+    if data_dtype.kind == "c":
+        # Compare real and then imaginary part for complex numbers (same way as in cpu kernels)
+        def reduce_op(a: ak_array, b: ak_array):
+            real_a, imag_a = a.data.real, a.data.imag
+            real_b, imag_b = b.data.real, b.data.imag
+            # we are sorting lexicographicaly so we keep the index of the FIRST max value we encounter
+            if real_b > real_a or (real_b == real_a and imag_b > imag_a):
+                return b
+            else:
+                return a
+    else:
+        # Normal numeric comparison
+        def reduce_op(a: ak_array, b: ak_array):
+            return a if a.data > b.data else b
 
     n = len(array)
     indices = cp.arange(n, dtype=index_dtype)
     # Combine data and their indices into a single structure
     input_struct = ZipIterator(array, indices)
 
-    result_scalar = cp.empty(2, dtype=index_dtype)
+    result_scalar = cp.empty(1, dtype=ak_array)
     h_init = ak_array(min, -1)
     reduce_into(input_struct, result_scalar, reduce_op, len(array), h_init)
 
     # return the index of the maximum value
-    return result_scalar[1]
+    return result_scalar.item()[1]
 
 
 # this function is called from ~/awkward/src/awkward/_reducers.py:161 (ArgMin.apply())
