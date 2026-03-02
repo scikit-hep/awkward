@@ -200,7 +200,7 @@ class ArgMax(CudaComputeReducer):
             return super()._dtype_for_kernel(dtype)
 
     def axis_none_reducer(self):
-        return AxisNoneReducerArgMax(self.name)
+        return AxisNoneReducerArgMax()
 
     def apply(
         self,
@@ -255,12 +255,9 @@ class ArgMax(CudaComputeReducer):
         return corrected_data
 
 
-class AxisNoneReducerArgMax:
+class AxisNoneReducerArgMax(ArgMax):
     # This will construct shifts which we can use to `apply_positional_corrections` at the end.
     needs_position: Final = True
-
-    def __init__(self, name: str):
-        self.name = name
 
     def apply(
         self,
