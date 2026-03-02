@@ -188,11 +188,16 @@ def awkward_axis_none_reduce_argmax(array):
         def reduce_op(a: ak_array, b: ak_array):
             real_a, imag_a = a.data.real, a.data.imag
             real_b, imag_b = b.data.real, b.data.imag
-            # we are sorting lexicographicaly so we keep the index of the FIRST max value we encounter
+            # we are sorting lexicographically
             if real_b > real_a or (real_b == real_a and imag_b > imag_a):
                 return b
-            else:
+            # if the two values are equal, keep the index of the FIRST max value we encounter
+            if a.local_index < b.local_index:
                 return a
+            elif b.local_index < a.local_index:
+                return b
+            else:
+                raise IndexError("Encountered two values with the same index")
     else:
         # Normal numeric comparison
         def reduce_op(a: ak_array, b: ak_array):
