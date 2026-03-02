@@ -31,7 +31,7 @@ def test_argmin_overloaded_reducer():
         return None
 
     sys.settrace(tracer)
-    result = ak.argmin(awkward_array, axis=-1)
+    ak.argmin(awkward_array, axis=-1)
     sys.settrace(None)
 
     # finally we check that we are getting the reducer from ak._connect.cuda.reducers and not from awkward._reducers.ArgMin
@@ -64,7 +64,7 @@ def test_argmax_overloaded_reducer():
         return None
 
     sys.settrace(tracer)
-    result = ak.argmax(awkward_array, axis=-1)
+    ak.argmax(awkward_array, axis=-1)
     sys.settrace(None)
 
     # finally we check that we are getting the reducer from ak._connect.cuda.reducers and not from awkward._reducers.ArgMax
