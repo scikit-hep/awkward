@@ -256,6 +256,7 @@ class ArgMax(CudaComputeReducer):
 
 
 class AxisNoneReducerArgMax:
+    # This will construct shifts which we can use to `apply_positional_corrections` at the end.
     needs_position: Final = True
 
     def __init__(self, name: str):
@@ -264,10 +265,10 @@ class AxisNoneReducerArgMax:
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        _parents: ak.index.Index | ak.index.ZeroIndex,
-        _offsets: ak.index.Index | ak.index.EmptyIndex,
-        _starts: ak.index.Index,
-        _shifts: ak.index.Index | None,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
         _outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         from . import _compute
@@ -285,7 +286,13 @@ class AxisNoneReducerArgMax:
         # is this line needed?
         result_array = nplike._module.asarray(result_scalar).reshape((1,))
 
-        return ak.contents.NumpyArray(result_array, backend=array.backend)
+        result_array = ak.contents.NumpyArray(result_array, backend=array.backend)
+        # We need to do this, as for argmax we care for the position of the max element and not only the data itself.
+        corrected_data = apply_positional_corrections(
+            result_array, parents, offsets, starts, shifts
+        )
+
+        return corrected_data
 
 
 def get_cuda_compute_reducer(reducer: Reducer) -> Reducer:
