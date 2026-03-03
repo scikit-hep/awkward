@@ -279,7 +279,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test results to Codecov
-        if: ${{ !cancelled() }} && matrix.cuda-version == 13
+        if: ${{ !cancelled() && matrix.cuda-version == 13 }}
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
