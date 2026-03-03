@@ -270,7 +270,7 @@ jobs:
       - name: Test CUDA virtual arrays
         run: >-
           python -m pytest -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py
-          ${{ matrix.cuda-version == 13 && '--cov=awkward --cov-report=term --cov-report=xml:cuda-virtual-coverage.xml || '' }}
+          ${{ matrix.cuda-version == 13 && '--cov=awkward --cov-report=term --cov-report=xml:cuda-virtual-coverage.xml' || '' }}
 
       - name: Upload Codecov results
         if: matrix.cuda-version == 13
