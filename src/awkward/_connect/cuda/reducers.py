@@ -225,7 +225,13 @@ def awkward_axis_none_reduce_argmin(array):
     else:
         # Normal numeric comparison
         def reduce_op(a: ak_array, b: ak_array):
-            return a if a.data < b.data else b
+            if a.data != b.data:
+                return a if a.data < b.data else b
+            elif a.local_index != b.local_index:
+                # for the equal values always return the one with the lowest index
+                return a if a.local_index < b.local_index else b
+            else:
+                raise IndexError("Encountered two values with the same index")
 
     n = len(array)
     indices = cp.arange(n, dtype=index_dtype)
@@ -397,7 +403,13 @@ def awkward_axis_none_reduce_argmax(array):
     else:
         # Normal numeric comparison
         def reduce_op(a: ak_array, b: ak_array):
-            return a if a.data > b.data else b
+            if a.data != b.data:
+                return a if a.data > b.data else b
+            elif a.local_index != b.local_index:
+                # for the equal values always return the one with the lowest index
+                return a if a.local_index < b.local_index else b
+            else:
+                raise IndexError("Encountered two values with the same index")
 
     n = len(array)
     indices = cp.arange(n, dtype=index_dtype)
