@@ -213,8 +213,8 @@ def awkward_axis_none_reduce_argmin(array):
             real_a, imag_a = a.data.real, a.data.imag
             real_b, imag_b = b.data.real, b.data.imag
             # we are sorting lexicographically
-            if real_b < real_a or (real_b == real_a and imag_b < imag_a):
-                return b
+            if (real_b, imag_b) != (real_a, imag_a):
+                return b if (real_b, imag_b) < (real_a, imag_a) else a
             # if the two values are equal, keep the index of the FIRST min value we encounter
             if a.local_index < b.local_index:
                 return a
@@ -385,8 +385,8 @@ def awkward_axis_none_reduce_argmax(array):
             real_a, imag_a = a.data.real, a.data.imag
             real_b, imag_b = b.data.real, b.data.imag
             # we are sorting lexicographically
-            if real_b > real_a or (real_b == real_a and imag_b > imag_a):
-                return b
+            if (real_b, imag_b) != (real_a, imag_a):
+                return b if (real_b, imag_b) > (real_a, imag_a) else a
             # if the two values are equal, keep the index of the FIRST max value we encounter
             if a.local_index < b.local_index:
                 return a
