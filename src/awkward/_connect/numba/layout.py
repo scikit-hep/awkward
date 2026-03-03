@@ -399,9 +399,16 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
                     builder.icmp_signed(">=", atval, length),
                 )
             ):
-                context.call_conv.return_user_exc(
-                    builder, ValueError, ("slice index out of bounds",)
-                )
+                # since we are starting to hit an error -->
+                # `DeprecationWarning: Context.call_conv is deprecated. Use FunctionDescriptor.call_conv instead`
+                # ignore them for now
+                import warnings
+
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", DeprecationWarning)
+                    context.call_conv.return_user_exc(
+                        builder, ValueError, ("slice index out of bounds",)
+                    )
 
     return castint(context, builder, atval.type, numba.intp, atval)
 
