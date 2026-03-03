@@ -210,7 +210,7 @@ jobs:
             cuda-version=${{ matrix.cuda-version }}
             cuda-toolkit
             cxx-compiler
-            ${{ matrix.cuda-version == 13 && 'root' || '' }}
+            ${{ matrix.cuda-version == 13 && 'root=6.36.06' || '' }}
 
       - name: Generate build files
         run: |
