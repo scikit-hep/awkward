@@ -399,7 +399,7 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
                     builder.icmp_signed(">=", atval, length),
                 )
             ):
-                context.call_conv.return_user_exc(
+                context.fndesc.call_conv.return_user_exc(
                     builder, ValueError, ("slice index out of bounds",)
                 )
 

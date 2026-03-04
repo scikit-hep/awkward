@@ -124,7 +124,9 @@ def call(context, builder, fcn, args):
         builder.icmp_unsigned("!=", err, context.get_constant(numba.uint8, 0)),
         likely=False,
     ):
-        context.call_conv.return_user_exc(builder, ValueError, (fcn.name + " failed",))
+        context.fndesc.call_conv.return_user_exc(
+            builder, ValueError, (fcn.name + " failed",)
+        )
 
 
 @numba.core.typing.templates.infer_global(len)
