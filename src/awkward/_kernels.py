@@ -70,22 +70,17 @@ class CTypesFunc(Protocol):
 
 
 class NumpyKernel(BaseKernel):
-    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
-        super().__init__(impl, key)
-        # Pre-calculate which arguments are pointers.
-        # This moves the issubclass() calls out of the hot path.
-        self._is_ptr = [issubclass(t, ctypes._Pointer) for t in self._impl.argtypes]
-        self._argtypes = self._impl.argtypes
-
     @classmethod
     def _cast(cls, x, t):
         if issubclass(t, ctypes._Pointer):
+            # Do we have a NumPy-owned array?
             if numpy.is_own_array(x):
                 assert numpy.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
                     return ctypes.cast(numpy.memory_ptr(x), t)
                 else:
                     return x
+            # Or, do we have a ctypes type
             elif hasattr(x, "_b_base_"):
                 return ctypes.cast(x, t)
             else:
