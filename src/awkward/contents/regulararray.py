@@ -301,6 +301,7 @@ class RegularArray(RegularMeta[Content], Content):
     @property
     def length(self) -> ShapeItem:
         if self._backend.nplike.known_data and self._length is unknown_length:
+            zeros_length = unknown_length
             if self._zeros_length_generator:
                 zeros_length = self._zeros_length_generator()
             self._length = _calculate_regulararray_length(

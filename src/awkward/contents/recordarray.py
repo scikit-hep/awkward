@@ -385,9 +385,10 @@ class RecordArray(RecordMeta[Content], Content):
     @property
     def length(self) -> ShapeItem:
         if self._backend.nplike.known_data and self._length is unknown_length:
+            gen_length = unknown_length
             if self._length_generator:
-                length = self._length_generator()
-                length = None if length is unknown_length else length
+                gen_length = self._length_generator()
+            length = gen_length if gen_length is not unknown_length else None
             self._length = _calculate_recordarray_length(
                 self._contents, length, self._backend
             )
