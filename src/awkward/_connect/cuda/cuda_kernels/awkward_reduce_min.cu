@@ -4,9 +4,9 @@
 // def f(grid, block, args):
 //     """
 //     Min reduction for sorted, present parents on device:
-//     (toptr, fromptr, parents, lenparents, outlength, identity, invocation_index, err_code)
+//     (toptr, fromptr, parents, offsets, lenparents, outlength, identity, invocation_index, err_code)
 //     """
-//     (toptr, fromptr, parents, lenparents,
+//     (toptr, fromptr, parents, offsets, lenparents,
 //      outlength, identity, invocation_index, err_code) = args
 //     if block[0] > 0:
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
@@ -20,42 +20,46 @@
 //             "awkward_reduce_min_a",
 //             cupy.dtype(toptr.dtype).type,
 //             cupy.dtype(fromptr.dtype).type,
-//             parents.dtype
+//             parents.dtype,
+//             offsets.dtype
 //         ])
 //     )((grid_size,), block,
-//       (toptr, fromptr, parents, lenparents, outlength,
+//       (toptr, fromptr, parents, offsets, lenparents, outlength,
 //        atomic_toptr, temp, identity, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(
 //         fetch_specialization([
 //             "awkward_reduce_min_b",
 //             cupy.dtype(toptr.dtype).type,
 //             cupy.dtype(fromptr.dtype).type,
-//             parents.dtype
+//             parents.dtype,
+//             offsets.dtype
 //         ])
 //     )((grid_size,), block,
-//       (toptr, fromptr, parents, lenparents, outlength,
+//       (toptr, fromptr, parents, offsets, lenparents, outlength,
 //        atomic_toptr, temp, identity, invocation_index, err_code))
 //     cuda_kernel_templates.get_function(
 //         fetch_specialization([
 //             "awkward_reduce_min_c",
 //             cupy.dtype(toptr.dtype).type,
 //             cupy.dtype(fromptr.dtype).type,
-//             parents.dtype
+//             parents.dtype,
+//             offsets.dtype
 //         ])
 //     )((grid_size,), block,
-//       (toptr, fromptr, parents, lenparents, outlength,
+//       (toptr, fromptr, parents, offsets, lenparents, outlength,
 //        atomic_toptr, temp, identity, invocation_index, err_code))
 // out["awkward_reduce_min_a", {dtype_specializations}] = None
 // out["awkward_reduce_min_b", {dtype_specializations}] = None
 // out["awkward_reduce_min_c", {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_min_a(
     C* toptr,
     const C* fromptr,
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     C* atomic_toptr,
@@ -72,12 +76,13 @@ awkward_reduce_min_a(
   }
 }
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_min_b(
     T* toptr,                  // (unused; kept for signature compatibility)
     const C* fromptr,
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     C* atomic_toptr,
@@ -132,12 +137,13 @@ awkward_reduce_min_b(
   }
 }
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_min_c(
     C* toptr,
     const C* fromptr,
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     C* atomic_toptr,

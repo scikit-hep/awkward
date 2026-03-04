@@ -623,18 +623,18 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     def _numbers_to_type(self, name, including_unknown):
         return self.to_ByteMaskedArray()._numbers_to_type(name, including_unknown)
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, parents, offsets, outlength
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
         out = self.to_IndexedOptionArray64()._unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, parents, offsets, outlength
         )
         if negaxis is None:
             return out
@@ -642,15 +642,17 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             return out._content
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         return self.to_IndexedOptionArray64()._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         return self.to_IndexedOptionArray64()._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis, starts, parents, offsets, outlength, ascending, stable
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -665,6 +667,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -676,6 +679,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             starts,
             shifts,
             parents,
+            offsets,
             outlength,
             mask,
             keepdims,
@@ -722,7 +726,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
         m = cudf.core.buffer.as_buffer(m)
         inner = self._content._to_cudf(cudf, mask=None, length=length)
-        inner.set_base_mask(m)
+        inner = inner.set_mask(m)
         return inner
 
     def _to_backend_array(self, allow_missing, backend):

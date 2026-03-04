@@ -36,6 +36,10 @@ def test_nested():
     ]
 
 
+@pytest.mark.xfail(
+    parse_version(cudf.__version__) >= parse_version("25.12.00"),
+    reason="cudf internals changed since v25.12.00",
+)
 def test_null():
     arr = ak.Array([12, None, 21, 12])
     # calls ByteMaskedArray._to_cudf not NumpyArray
