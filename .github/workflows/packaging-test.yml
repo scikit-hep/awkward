@@ -33,17 +33,17 @@ jobs:
     - name: Build awkward-cpp SDist
       run: pipx run build --sdist awkward-cpp
 
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v7
       with:
         name: awkward-sdist
         path: dist/*.tar.gz
 
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v7
       with:
         name: awkward-wheel
         path: dist/*.whl
 
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v7
       with:
         name: awkward-cpp-sdist
         path: awkward-cpp/dist/*.tar.gz
@@ -77,7 +77,7 @@ jobs:
         package-dir: awkward-cpp
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: awkward-cpp-wheels-${{ matrix.os }}
         path: wheelhouse/*.whl
