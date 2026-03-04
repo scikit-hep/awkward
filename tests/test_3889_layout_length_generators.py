@@ -217,6 +217,27 @@ def test_RegularArray():
 
     array = ak.contents.RegularArray(
         ak.contents.NumpyArray(np.arange(13)),
+        size=5,
+        zeros_length=unknown_length,
+        zeros_length_generator=None,
+    )
+    assert array._length == 2
+    assert array.length == 2
+    assert array._length == 2
+    assert array.to_list() == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
+    simplified = array.simplified(
+        ak.contents.NumpyArray(np.arange(13)),
+        size=5,
+        zeros_length=unknown_length,
+        zeros_length_generator=None,
+    )
+    assert simplified._length == 2
+    assert simplified.length == 2
+    assert simplified._length == 2
+    assert simplified.to_list() == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
+
+    array = ak.contents.RegularArray(
+        ak.contents.NumpyArray(np.arange(13)),
         size=0,
         zeros_length=unknown_length,
         zeros_length_generator=lambda: 2,
