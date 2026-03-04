@@ -38,7 +38,6 @@ def test_BitMaskedArray():
         None,
         None,
     ]
-
     simplified = array.simplified(
         mask,
         content,
@@ -65,6 +64,35 @@ def test_BitMaskedArray():
         None,
         None,
     ]
+
+    array = ak.contents.BitMaskedArray(
+        mask,
+        content,
+        valid_when=False,
+        length=unknown_length,
+        lsb_order=False,
+        length_generator=None,
+    )
+    assert array._length is unknown_length
+    with pytest.raises(
+        AssertionError,
+        match="BitMaskedArray length must be an integer for an array with concrete data",
+    ):
+        assert array.length == 13
+    simplified = array.simplified(
+        mask,
+        content,
+        valid_when=False,
+        length=unknown_length,
+        lsb_order=False,
+        length_generator=None,
+    )
+    assert simplified._length is unknown_length
+    with pytest.raises(
+        AssertionError,
+        match="BitMaskedArray length must be an integer for an array with concrete data",
+    ):
+        assert simplified.length == 13
 
     array = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 5, 10, 13], dtype=np.int64)),

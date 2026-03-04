@@ -357,12 +357,9 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
     @property
     def length(self) -> ShapeItem:
-        if (
-            self._backend.nplike.known_data
-            and self._length is unknown_length
-            and self._length_generator
-        ):
-            self._length = self._length_generator()
+        if self._backend.nplike.known_data and self._length is unknown_length:
+            if self._length_generator:
+                self._length = self._length_generator()
             assert is_integer(self._length), (
                 f"BitMaskedArray length must be an integer for an array with concrete data, not {type(self._length)}"
             )
