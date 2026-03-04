@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-# TODO: delete these after modifying argmin
 from cuda.compute import (
     CountingIterator,
+    reduce_into,
     unary_transform,
 )
 
@@ -158,6 +158,8 @@ def awkward_reduce_argmax(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_argmax, outlength)
 
+    return result
+
 
 # this function is called from ~/awkward/src/awkward/_reducers.py:161 (ArgMin.apply())
 def awkward_reduce_argmin(
@@ -191,3 +193,26 @@ def awkward_reduce_argmin(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_argmin, outlength)
+
+    return result
+
+
+def awkward_axis_none_reduce_max(array):
+    data_dtype = array.dtype
+    index_dtype = np.int64
+    # initialize the minimum value depending on the dtype
+    if data_dtype.kind in "iu":  # int/uint
+        min = cp.iinfo(data_dtype).min
+    elif data_dtype.kind == "f":  # float
+        min = cp.finfo(data_dtype).min
+    else:
+        raise TypeError("Unsupported dtype to get the minimal value")
+
+    def reduce_op(a, b):
+        return max(a, b)
+
+    result_scalar = cp.empty(1, dtype=index_dtype)
+    h_init = np.array([min], dtype=index_dtype)
+    reduce_into(array, result_scalar, reduce_op, len(array), h_init)
+
+    return result_scalar
