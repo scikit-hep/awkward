@@ -345,19 +345,6 @@ def test_RegularArray():
     ):
         assert simplified.length == 2
 
-    # In [11]:     array = ak.contents.ListOffsetArray(
-    #     ...:         ak.index.Index64(np.array([0, 5, 10, 13], dtype=np.int64)),
-    #     ...:         ak.contents.RegularArray(
-    #     ...:             ak.contents.NumpyArray(np.arange(13)),
-    #     ...:             size=2,
-    #     ...:             zeros_length=0,
-    #     ...:             zeros_length_generator=None,
-    #     ...:         ),
-    #     ...:     )
-
-    # In [12]: array.to_list()
-    # Out[12]: [[[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]], [[10, 11]], []]
-
     array = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 5, 10, 13], dtype=np.int64)),
         ak.contents.RegularArray(
