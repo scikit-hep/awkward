@@ -67,3 +67,23 @@ def test_distinct_counts():
             ak.to_backend([b"foo", b"bar", b"bar", b"fee", b"foo"], "typetracer")
         ).layout.form
     )
+
+
+def test_uniques_nested():
+    assert ak.str.uniques([["a", "b", "a"], ["b", "c", "b"]]).tolist() == [
+        ["a", "b"],
+        ["b", "c"],
+    ]
+
+
+def test_distinct_counts_nested():
+    assert ak.str.distinct_counts([["a", "b", "a"], ["b", "c", "b"]]).tolist() == [
+        [
+            {"values": "a", "counts": 2},
+            {"values": "b", "counts": 1},
+        ],
+        [
+            {"values": "b", "counts": 2},
+            {"values": "c", "counts": 1},
+        ],
+    ]
