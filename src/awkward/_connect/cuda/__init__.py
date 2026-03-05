@@ -132,7 +132,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_prod_complex",
         "awkward_reduce_countnonzero",
         "awkward_reduce_countnonzero_complex",
-        "awkward_reduce_max",
+        # "awkward_reduce_max",
         "awkward_reduce_max_complex",
         "awkward_reduce_min",
         "awkward_reduce_min_complex",
