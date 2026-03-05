@@ -224,6 +224,7 @@ def awkward_reduce_sum(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_op, outlength)
 
+
 def awkward_reduce_max(
     result,
     input_data,
@@ -231,8 +232,8 @@ def awkward_reduce_max(
     offsets_data,
     parents_length,
     outlength,
-    #the initial value for the reduction
-    #initialize all values in `result` as `identity`? (the same as in C++ kernels)
+    # the initial value for the reduction
+    # initialize all values in `result` as `identity`? (the same as in C++ kernels)
     identity,
 ):
     index_dtype = parents_data.dtype
