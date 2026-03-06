@@ -124,9 +124,12 @@ def call(context, builder, fcn, args):
         builder.icmp_unsigned("!=", err, context.get_constant(numba.uint8, 0)),
         likely=False,
     ):
-        context.fndesc.call_conv.return_user_exc(
-            builder, ValueError, (fcn.name + " failed",)
+        call_conv = (
+            context.fndesc.call_conv
+            if context.__class__.__name__ == "CUDATargetContext"
+            else context.call_conv
         )
+        call_conv.return_user_exc(builder, ValueError, (fcn.name + " failed",))
 
 
 @numba.core.typing.templates.infer_global(len)
