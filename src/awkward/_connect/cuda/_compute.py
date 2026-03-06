@@ -125,6 +125,11 @@ def starts_to_offsets(starts, parents_length):
     return offsets
 
 
+def rearrange_by_parents(input_data, parents):
+    order = cp.argsort(parents, kind="stable")
+    return input_data[order]
+
+
 # the inputs for this function we get from file ~/awkward/src/awkward/_reducers.py:239, in ArgMax.apply(self, array, parents, starts, shifts, outlength)
 def awkward_reduce_argmax(
     result,
@@ -191,3 +196,185 @@ def awkward_reduce_argmin(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_argmin, outlength)
+
+
+def awkward_reduce_sum(
+    result,
+    input_data,
+    parents_data,
+    offsets_data,
+    parents_length,
+    outlength,
+):
+    index_dtype = parents_data.dtype
+
+    def segment_reduce_sum(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_data[start_idx:end_idx]
+        if len(segment) == 0:
+            return 0
+        return np.sum(segment)
+
+    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
+    input_data = rearrange_by_parents(input_data, parents_data)
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_sum, outlength)
+
+
+def awkward_reduce_prod(
+    result,
+    input_data,
+    parents_data,
+    offsets_data,
+    parents_length,
+    outlength,
+):
+    index_dtype = parents_data.dtype
+
+    def segment_reduce_prod(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_data[start_idx:end_idx]
+        if len(segment) == 0:
+            # that's what a cpu kernel passes for empty arrays (awkward-cpp/src/cpu-kernels/awkward_reduce_prod.cpp#L15)
+            return 1
+        return np.prod(segment)
+
+    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
+    input_data = rearrange_by_parents(input_data, parents_data)
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_prod, outlength)
+
+
+def awkward_reduce_max(
+    result,
+    input_data,
+    parents_data,
+    offsets_data,
+    parents_length,
+    outlength,
+    # the initial value for the reduction
+    identity,
+):
+    index_dtype = parents_data.dtype
+
+    def segment_reduce_max(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_data[start_idx:end_idx]
+        if len(segment) == 0:
+            return identity
+        # return identity if it is > than input_data
+        return max(max(segment), identity)
+
+    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
+    # TODO: delete this? (it is only used in tests-cuda-kernels-explicit)
+    input_data = rearrange_by_parents(input_data, parents_data)
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_max, outlength)
+
+
+def awkward_reduce_min(
+    result,
+    input_data,
+    parents_data,
+    offsets_data,
+    parents_length,
+    outlength,
+    # the initial value for the reduction
+    identity,
+):
+    index_dtype = parents_data.dtype
+
+    def segment_reduce_min(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_data[start_idx:end_idx]
+        if len(segment) == 0:
+            return identity
+        # return identity if it is > than input_data
+        return min(min(segment), identity)
+
+    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_min` directly and specify unordered parents
+    # TODO: delete this? (it is only used in tests-cuda-kernels-explicit)
+    input_data = rearrange_by_parents(input_data, parents_data)
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_min, outlength)
+
+
+def awkward_reduce_count_64(
+    result,
+    parents_data,
+    parents_length,
+    outlength,
+):
+    index_dtype = parents_data.dtype
+
+    def segment_reduce_count(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        if end_idx < start_idx:
+            # if there are empty arrays at the end (when we will pass offsets directly, this won't be needed)
+            return 0
+        return end_idx - start_idx
+
+    # initialize all results values to be 0 by default
+    result[:] = 0
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_count, outlength)

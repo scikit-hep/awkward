@@ -75,12 +75,22 @@ class CupyBackend(Backend):
         - awkward_argsort (future)
         - awkward_argmax
         - awkward_argmin
+        - awkward_sum
+        - awkward_max
+        - awkward_min
+        - awkward_prod
+        - awkward_count_64
         """
         # For now, we only support these operations
         return kernel_name in (
             "awkward_sort",
             "awkward_reduce_argmax",
             "awkward_reduce_argmin",
+            "awkward_reduce_sum",
+            "awkward_reduce_max",
+            "awkward_reduce_min",
+            "awkward_reduce_prod",
+            "awkward_reduce_count_64",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
@@ -103,5 +113,20 @@ class CupyBackend(Backend):
 
         if kernel_name == "awkward_reduce_argmin":
             return cuda_compute.awkward_reduce_argmin
+
+        if kernel_name == "awkward_reduce_sum":
+            return cuda_compute.awkward_reduce_sum
+
+        if kernel_name == "awkward_reduce_max":
+            return cuda_compute.awkward_reduce_max
+
+        if kernel_name == "awkward_reduce_min":
+            return cuda_compute.awkward_reduce_min
+
+        if kernel_name == "awkward_reduce_prod":
+            return cuda_compute.awkward_reduce_prod
+
+        if kernel_name == "awkward_reduce_count_64":
+            return cuda_compute.awkward_reduce_count_64
 
         return None
