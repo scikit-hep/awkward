@@ -276,3 +276,17 @@ def synchronize_cuda(stream=None):
                     f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
                 ),
             )
+
+
+def lazy(array):
+    if array.layout.backend.name != "cuda":
+        raise TypeError(
+            "ak.cuda.lazy is only available for arrays with the CUDA backend"
+        )
+
+    from ._lazy_impl import lazy as _lazy
+
+    return _lazy(array)
+
+
+__all__ = ("lazy",)
