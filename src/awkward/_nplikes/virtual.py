@@ -274,14 +274,17 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         return self.materialize().tolist()  # type: ignore[attr-defined]
 
     def byteswap(self, inplace=False):
+        if inplace:
+            raise NotImplementedError("inplace byteswap is not supported")
+
         if self._array is not UNMATERIALIZED:
-            return self._array.byteswap(inplace=inplace)
+            return self._nplike.byteswap(self._array)
 
         return type(self)(
             self._nplike,
             self._shape,
             self._dtype,
-            lambda: self.materialize().byteswap(inplace=inplace),
+            lambda: self._nplike.byteswap(self.materialize()),
             lambda: self.shape,
             self._buffer_key,
             __enable_caching__=self.__enable_caching__,

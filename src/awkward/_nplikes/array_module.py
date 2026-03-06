@@ -552,6 +552,29 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         (x,) = maybe_materialize(x)
         return self._module.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
 
+    def byteswap(self, x: ArrayLikeT) -> ArrayLikeT:
+        (x,) = maybe_materialize(x)
+
+        if x.dtype.kind == "c":
+            # NumPy-compatible complex byteswap swaps bytes within each real-valued
+            # component, not across real/imag component boundaries.
+            component_dtype = self._module.empty((), dtype=x.dtype).real.dtype
+            return self.byteswap(x.view(component_dtype)).view(x.dtype)  # type: ignore[attr-defined]
+
+        itemsize = x.dtype.itemsize
+        if itemsize == 1:
+            return self.astype(x, x.dtype, copy=True)
+
+        shape = x.shape
+        # Byte-swap without assuming backend arrays expose a `.byteswap()` method.
+        # This is used for buffer I/O byteorder conversion across nplikes.
+        as_uint8 = x.view(np.uint8)  # type: ignore[attr-defined]
+        as_uint8_2d = self._module.reshape(as_uint8, (-1, itemsize))
+        reversed_uint8_2d = self._module.flip(as_uint8_2d, axis=1)
+        reversed_uint8 = self._module.reshape(reversed_uint8_2d, (-1,))
+        swapped = reversed_uint8.view(x.dtype)  # type: ignore[attr-defined]
+        return self._module.reshape(swapped, shape)
+
     def broadcast_to(self, x: ArrayLikeT, shape: tuple[ShapeItem, ...]) -> ArrayLikeT:
         (x,) = maybe_materialize(x)
         return self._module.broadcast_to(x, shape)
