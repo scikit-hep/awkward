@@ -345,3 +345,34 @@ def awkward_reduce_min(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_min, outlength)
+
+
+def awkward_reduce_count_64(
+    result,
+    parents_data,
+    parents_length,
+    outlength,
+):
+    index_dtype = parents_data.dtype
+
+    def segment_reduce_count(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        if end_idx < start_idx:
+            # if there are empty arrays at the end (when we will pass offsets directly, this won't be needed)
+            return 0
+        return end_idx - start_idx
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    print(offsets)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_count, outlength)
