@@ -363,10 +363,12 @@ def awkward_reduce_count_64(
             return 0
         return end_idx - start_idx
 
+    # initialize all results values to be 0 by default
+    result[:] = 0
+
     # Prepare the start and end offsets
     # TODO: This should at least be starts_to_offsets
     offsets = parents_to_offsets(parents_data, parents_length)
-    print(offsets)
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
