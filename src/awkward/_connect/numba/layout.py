@@ -399,6 +399,7 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
                     builder.icmp_signed(">=", atval, length),
                 )
             ):
+<<<<<<< maxymnaumchyk/overload-reducers
                 # since we are starting to hit an error -->
                 # `DeprecationWarning: Context.call_conv is deprecated. Use FunctionDescriptor.call_conv instead`
                 # ignore them for now
@@ -409,6 +410,16 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
                     context.call_conv.return_user_exc(
                         builder, ValueError, ("slice index out of bounds",)
                     )
+=======
+                call_conv = (
+                    context.fndesc.call_conv
+                    if context.__class__.__name__ == "CUDATargetContext"
+                    else context.call_conv
+                )
+                call_conv.return_user_exc(
+                    builder, ValueError, ("slice index out of bounds",)
+                )
+>>>>>>> main
 
     return castint(context, builder, atval.type, numba.intp, atval)
 
