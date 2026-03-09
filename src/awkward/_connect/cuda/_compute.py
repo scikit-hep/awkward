@@ -356,6 +356,9 @@ def awkward_reduce_count_64(
     index_dtype = parents_data.dtype
 
     def segment_reduce_count(segment_id):
+        if segment_id > offsets_len:
+            # (when we will pass offsets directly, this won't be needed)
+            return 0
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         if end_idx < start_idx:
@@ -371,6 +374,7 @@ def awkward_reduce_count_64(
     offsets = parents_to_offsets(parents_data, parents_length)
     start_o = offsets[:-1]
     end_o = offsets[1:]
+    offsets_len = len(offsets) - 2
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
