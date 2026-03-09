@@ -139,7 +139,7 @@ cuda_kernels_impl = [
     "awkward_reduce_prod_bool",
     "awkward_reduce_prod_bool_complex",
     "awkward_reduce_prod_complex",
-    "awkward_reduce_countnonzero",
+    # "awkward_reduce_countnonzero",
     "awkward_reduce_countnonzero_complex",
     "awkward_sorting_ranges",
     "awkward_sorting_ranges_length",

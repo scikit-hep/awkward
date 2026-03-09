@@ -80,6 +80,7 @@ class CupyBackend(Backend):
         - awkward_min
         - awkward_prod
         - awkward_count_64
+        - awkward_countnonzero
         """
         # For now, we only support these operations
         return kernel_name in (
@@ -91,6 +92,7 @@ class CupyBackend(Backend):
             "awkward_reduce_min",
             "awkward_reduce_prod",
             "awkward_reduce_count_64",
+            "awkward_reduce_countnonzero",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
@@ -128,5 +130,8 @@ class CupyBackend(Backend):
 
         if kernel_name == "awkward_reduce_count_64":
             return cuda_compute.awkward_reduce_count_64
+
+        if kernel_name == "awkward_reduce_countnonzero":
+            return cuda_compute.awkward_reduce_countnonzero
 
         return None
