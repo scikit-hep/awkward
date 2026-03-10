@@ -207,6 +207,14 @@ class RecordArray(RecordMeta[Content], Content):
         parameters=None,
         backend=None,
     ):
+        if (
+            length is not None
+            and length is not unknown_length
+            and not (is_integer(length) and length >= 0)
+        ):
+            raise TypeError(
+                f"{type(self).__name__} 'length' must be a non-negative integer or None, not {length}"
+            )
         if not isinstance(contents, Iterable):
             raise TypeError(
                 f"{type(self).__name__} 'contents' must be iterable, not {contents!r}"
