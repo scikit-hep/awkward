@@ -287,8 +287,9 @@ def awkward_reduce_max(
         segment = input_data[start_idx:end_idx]
         if len(segment) == 0:
             return identity
-        # return identity if it is > than input_data
-        return max(max(segment), identity)
+        max_value = max(segment)
+        # return identity if it is > than max_value from input_data
+        return max(max_value, identity)
 
     # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
     # TODO: delete this? (it is only used in tests-cuda-kernels-explicit)
@@ -326,8 +327,9 @@ def awkward_reduce_min(
         segment = input_data[start_idx:end_idx]
         if len(segment) == 0:
             return identity
-        # return identity if it is > than input_data
-        return min(min(segment), identity)
+        min_value = min(segment)
+        # return identity if it is < than min_value from input_data
+        return min(min_value, identity)
 
     # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_min` directly and specify unordered parents
     # TODO: delete this? (it is only used in tests-cuda-kernels-explicit)
