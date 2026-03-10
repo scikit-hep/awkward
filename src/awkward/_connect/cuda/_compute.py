@@ -391,7 +391,7 @@ def awkward_reduce_countnonzero(
     parents_length,
     outlength,
 ):
-    if input_data.dtype == np.bool:
+    if input_data.dtype == cp.bool_:
         input_data = input_data.view(cp.int8)  # cast bool -> int8
     index_dtype = parents_data.dtype
 
