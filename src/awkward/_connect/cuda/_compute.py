@@ -391,6 +391,8 @@ def awkward_reduce_countnonzero(
     parents_length,
     outlength,
 ):
+    if input_data.dtype == np.bool:
+        input_data = input_data.view(cp.int8)  # cast bool -> int8
     index_dtype = parents_data.dtype
 
     def segment_reduce_count_nonzero(segment_id):
