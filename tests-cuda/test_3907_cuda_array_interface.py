@@ -2,13 +2,25 @@ from __future__ import annotations
 
 import timeit
 
+import cupy as cp
 import numpy as np
 import pytest
+
+import awkward as ak
+
+
+def test_numpy_array_getattr_cuda_array_interface_returns_on_cupy_backend():
+    """__getattr__ returns __cuda_array_interface__ dict on CuPy backend."""
+
+    layout = ak.to_backend(ak.Array([1.0, 2.0, 3.0]), "cuda").layout
+
+    cai = layout.__cuda_array_interface__
+    assert isinstance(cai, dict)
+    assert cai == layout._data.__cuda_array_interface__
 
 
 def test_numpy_array_cuda_array_interface_on_cupy_backend():
     """NumpyArray backed by CuPy exposes __cuda_array_interface__."""
-    ak = pytest.importorskip("awkward")
 
     array = ak.to_backend(ak.Array([1.0, 2.0, 3.0]), "cuda")
     layout = array.layout
@@ -24,7 +36,6 @@ def test_numpy_array_cuda_array_interface_on_cupy_backend():
 
 def test_numpy_array_cuda_array_interface_raises_on_numpy_backend():
     """NumpyArray backed by NumPy must NOT expose __cuda_array_interface__."""
-    ak = pytest.importorskip("awkward")
 
     array = ak.Array([1.0, 2.0, 3.0])
     layout = array.layout
@@ -35,8 +46,6 @@ def test_numpy_array_cuda_array_interface_raises_on_numpy_backend():
 
 def test_numpy_array_cuda_array_interface_passthrough():
     """__cuda_array_interface__ on NumpyArray matches the underlying CuPy array's."""
-    cp = pytest.importorskip("cupy")
-    ak = pytest.importorskip("awkward")
 
     raw = cp.array([1.0, 2.0, 3.0])
     array = ak.to_backend(ak.Array(raw), "cuda")
@@ -47,8 +56,6 @@ def test_numpy_array_cuda_array_interface_passthrough():
 
 def test_numpy_array_cuda_array_interface_accepted_by_cupy():
     """CuPy should be able to consume a NumpyArray directly via the interface."""
-    cp = pytest.importorskip("cupy")
-    ak = pytest.importorskip("awkward")
 
     array = ak.to_backend(ak.Array([1.0, 2.0, 3.0]), "cuda")
     layout = array.layout
@@ -60,8 +67,6 @@ def test_numpy_array_cuda_array_interface_accepted_by_cupy():
 
 def test_numpy_array_cuda_array_interface_accepted_by_cuda_compute():
     """cuda.compute should accept NumpyArray directly without unwrapping .data."""
-    cp = pytest.importorskip("cupy")
-    ak = pytest.importorskip("awkward")
     cuda_compute = pytest.importorskip("cuda.compute")
 
     array = ak.to_backend(ak.Array({"x": [[1.0, 2.0], [3.0]]}), "cuda")
@@ -95,8 +100,6 @@ def test_awkward_reduce_min_cupy_performance():
     Conclusion: awkward_reduce_min is the fastest correct segmented option,
     beating the native CuPy loop by ~6% and handling empty segments correctly.
     """
-    cp = pytest.importorskip("cupy")
-    ak = pytest.importorskip("awkward")
     cuda_compute = pytest.importorskip("cuda.compute")
 
     # Build a test array with at least one empty segment
