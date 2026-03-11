@@ -6,6 +6,7 @@ from __future__ import annotations
 from cuda.compute import (
     CountingIterator,
     unary_transform,
+    gpu_struct,
 )
 
 from awkward._nplikes.cupy import Cupy
@@ -308,6 +309,72 @@ def awkward_reduce_max(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_max, outlength)
 
+# original implementation of `awkward_reduce_max_complex` (doesn't work - keep for archive)
+def awkward_reduce_max_complex(
+    result,
+    input_data,
+    parents_data,
+    offsets_data,
+    parents_length,
+    outlength,
+    # the initial value for the reduction
+    identity,
+):
+    print("outlength",outlength)
+    print(input_data)
+    print(parents_data)
+    index_dtype = parents_data.dtype
+    data_dtype = input_data.dtype.type
+
+    complex_array = gpu_struct(
+        {
+            "real_data": data_dtype,
+            "imag_data": data_dtype,
+        }
+    )
+    result = result.view(complex_array.dtype)
+
+    def segment_reduce_max(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        # segment = input_data[start_idx:end_idx]
+        if end_idx <= start_idx:
+            return identity  # empty segment
+
+        max_real = identity
+        max_imag = type_wrapper(0)
+
+        for i in range(start_idx, end_idx):
+            x = input_data[i * 2]
+            y = input_data[i * 2 + 1]
+            if x > max_real or (x == max_real and y > max_imag):
+                max_real = x
+                max_imag = y
+
+        # max_value = max(segment)
+        # return identity if it is > than max_value from input_data
+        # print(complex_array(max_real, max_imag))
+        return complex_array(max_real, max_imag)
+
+    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
+    # TODO: delete this? (it is only used in tests-cuda-kernels-explicit)
+    input_data = rearrange_by_parents(input_data, parents_data)
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    print(offsets)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_max, outlength)
+
+    print("this is the result:", result)
 
 def awkward_reduce_min(
     result,
