@@ -255,6 +255,9 @@ def awkward_reduce_sum_bool(
         segment = input_data[start_idx:end_idx]
         return np.any(segment)
 
+    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
+    input_data = rearrange_by_parents(input_data, parents_data)
+
     # Prepare the start and end offsets
     # TODO: This should at least be starts_to_offsets
     offsets = parents_to_offsets(parents_data, parents_length)
@@ -356,9 +359,9 @@ def awkward_reduce_max_complex(
     # the initial value for the reduction
     identity,
 ):
-    print("outlength", outlength)
-    print(input_data)
-    print(parents_data)
+    # print("outlength", outlength)
+    # print(input_data)
+    # print(parents_data)
     index_dtype = parents_data.dtype
     data_dtype = input_data.dtype.type
 
@@ -399,7 +402,7 @@ def awkward_reduce_max_complex(
     # Prepare the start and end offsets
     # TODO: This should at least be starts_to_offsets
     offsets = parents_to_offsets(parents_data, parents_length)
-    print(offsets)
+    # print(offsets)
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
@@ -410,7 +413,7 @@ def awkward_reduce_max_complex(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_max, outlength)
 
-    print("this is the result:", result)
+    # print("this is the result:", result)
 
 
 def awkward_reduce_min(
