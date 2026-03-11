@@ -272,6 +272,46 @@ def awkward_reduce_sum_bool(
     unary_transform(segment_ids, result, segment_reduce_sum, outlength)
 
 
+# this is the same as awkward_reduce_sum (we can possibly use it after the bug on numba side is fixed)
+def awkward_reduce_sum_int32_bool_64(
+    result,
+    input_data,
+    parents_data,
+    offsets_data,
+    parents_length,
+    outlength,
+):
+    # temporary workaround - fix this (currently bools don't work because of a bug on numba side)
+    if input_data.dtype == cp.bool_:
+        input_data = input_data.view(cp.int8)  # cast bool -> int8
+
+    index_dtype = parents_data.dtype
+
+    def segment_reduce_sum(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_data[start_idx:end_idx]
+        if len(segment) == 0:
+            return 0
+        return np.sum(segment)
+
+    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
+    input_data = rearrange_by_parents(input_data, parents_data)
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_sum, outlength)
+
+
 def awkward_reduce_prod(
     result,
     input_data,
