@@ -146,6 +146,15 @@ class NumpyArray(NumpyMeta, Content):
     def data(self) -> ArrayLike:
         return self._data
 
+    @property
+    def __cuda_array_interface__(self):
+        if not isinstance(self._backend.nplike, Cupy):
+            raise AttributeError(
+                f"{type(self).__name__} is not backed by a CuPy array; "
+                "no __cuda_array_interface__ available"
+            )
+        return self._data.__cuda_array_interface__  # type: ignore[attr-defined]
+
     form_cls: Final = NumpyForm
 
     def copy(
