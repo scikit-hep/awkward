@@ -153,7 +153,7 @@ class NumpyArray(NumpyMeta, Content):
                     f"{type(self).__name__} is not backed by a CuPy array; "
                     "no __cuda_array_interface__ available"
                 )
-            return self._data.__cuda_array_interface__
+            return self._data.__cuda_array_interface__  # pragma: no cover
         raise AttributeError(
             f"{type(self).__name__!r} object has no attribute {name!r}"
         )
