@@ -307,6 +307,7 @@ def awkward_reduce_prod(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_prod, outlength)
 
+
 def awkward_reduce_prod_bool(
     result,
     input_data,
