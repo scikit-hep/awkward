@@ -4,6 +4,8 @@
 
 #include "awkward/kernels.h"
 
+#include <algorithm>
+
 ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
   int64_t* nextcarry,
   int64_t* nextparents,
@@ -16,6 +18,12 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
   int64_t length,
   const int64_t* parents,
   int64_t maxcount) {
+  if (length > 0) {
+    int64_t maxparent = *std::max_element(parents, parents + length);
+    if ((maxparent + 1) * maxcount - 1 >= distinctslen) {
+      return failure("nextparents[k] >= distinctslen", kSliceNone, kSliceNone, FILENAME(__LINE__));
+    }
+  }
   *maxnextparents = 0;
   for (int64_t i = 0;  i < distinctslen;  i++) {
     distincts[i] = -1;
@@ -35,8 +43,7 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
         if (*maxnextparents < nextparents[k]) {
           *maxnextparents = nextparents[k];
         }
-
-        if (nextparents[k] < distinctslen && distincts[nextparents[k]] == -1) {
+        if (distincts[nextparents[k]] == -1) {
           distincts[nextparents[k]] = j;
           j++;
         }
