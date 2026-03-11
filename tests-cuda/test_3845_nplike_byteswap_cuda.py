@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import cupy as cp
 import numpy as np
 import pytest
 
 import awkward as ak
 from awkward._nplikes.cupy import Cupy
+
+cp = pytest.importorskip("cupy")
 
 DTYPE_CASES = [
     np.array([1, 2, 3], dtype=dtype)

@@ -188,6 +188,38 @@ class Cupy(ArrayModuleNumpyLike):
             (x,) = maybe_materialize(x)
             return x.flags["C_CONTIGUOUS"]  # type: ignore[attr-defined]
 
+    def byteswap(self, x: ArrayLike) -> ArrayLike:
+        if isinstance(x, VirtualNDArray):
+            virtual_x = x
+            return VirtualNDArray(
+                virtual_x._nplike,
+                virtual_x._shape,
+                virtual_x._dtype,
+                lambda: self.byteswap(virtual_x.materialize()),
+                lambda: virtual_x.shape,
+                virtual_x._buffer_key,
+                __enable_caching__=virtual_x.__enable_caching__,
+            )
+
+        (x,) = maybe_materialize(x)
+
+        itemsize = x.dtype.itemsize
+        if itemsize == 1:
+            return self._module.array(x, copy=True)
+
+        x = self._module.ascontiguousarray(x)
+
+        if x.dtype.kind == "c":
+            component_dtype = self._module.empty((), dtype=x.dtype).real.dtype
+            return self.byteswap(x.view(component_dtype)).view(x.dtype)
+
+        shape = x.shape
+        bytes_arr = x.view(numpy.uint8)
+        bytes_arr = self._module.reshape(bytes_arr, (-1, itemsize))
+        bytes_arr = bytes_arr[..., ::-1]
+        swapped = self._module.reshape(bytes_arr, (-1,)).view(x.dtype)
+        return self._module.reshape(swapped, shape)
+
     def memory_ptr(self, x: ArrayLike) -> int:
         (x,) = maybe_materialize(x)
         return x.data.ptr  # type: ignore[attr-defined]

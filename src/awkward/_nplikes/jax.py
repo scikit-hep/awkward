@@ -155,6 +155,18 @@ class Jax(ArrayModuleNumpyLike):
         return self._module.divide(x1, x2)
 
     def byteswap(self, x: ArrayLike) -> ArrayLike:
+        if isinstance(x, VirtualNDArray):
+            virtual_x = x
+            return VirtualNDArray(
+                virtual_x._nplike,
+                virtual_x._shape,
+                virtual_x._dtype,
+                lambda: self.byteswap(virtual_x.materialize()),
+                lambda: virtual_x.shape,
+                virtual_x._buffer_key,
+                __enable_caching__=virtual_x.__enable_caching__,
+            )
+
         (x,) = maybe_materialize(x)
 
         itemsize = x.dtype.itemsize
@@ -162,14 +174,15 @@ class Jax(ArrayModuleNumpyLike):
             return self._module.array(x, copy=True)
 
         if x.dtype.kind == "c":
-            raise NotImplementedError(
-                "JAX byteswap for complex dtypes is not supported"
-            )
+            jax = ak.jax.import_jax()
+            real = self.byteswap(self._module.real(x))
+            imag = self.byteswap(self._module.imag(x))
+            return jax.lax.complex(real, imag)
 
         shape = x.shape
         as_uint8 = x.view(np.uint8)  # type: ignore[attr-defined]
         as_uint8_2d = self._module.reshape(as_uint8, (-1, itemsize))
-        reversed_uint8_2d = self._module.flip(as_uint8_2d, axis=1)
+        reversed_uint8_2d = as_uint8_2d[..., ::-1]
         reversed_uint8 = self._module.reshape(reversed_uint8_2d, (-1,))
         swapped = reversed_uint8.view(x.dtype)  # type: ignore[attr-defined]
         return self._module.reshape(swapped, shape)
