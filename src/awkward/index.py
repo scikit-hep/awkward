@@ -324,3 +324,49 @@ class IndexU32(Index):
 
 class Index64(Index):
     _expected_dtype = np.dtype(np.int64)
+
+
+class LazyIndex:
+    __slots__ = ("_dtype", "_factory", "_index", "_length", "_nplike")
+
+    def __init__(
+        self, factory, length: ShapeItem, nplike: NumpyLike, dtype: DType | None = None
+    ):
+        self._factory = factory
+        self._length = length
+        self._nplike = nplike
+        self._dtype = dtype
+        self._index = None
+
+    def _materialize(self) -> Index:
+        if self._index is None:
+            self._index = self._factory(self._length, self._nplike, dtype=self._dtype)
+        assert self._index is not None
+        return self._index
+
+
+class EmptyIndex(LazyIndex):
+    def __init__(self, length, nplike, dtype=None):
+        super().__init__(
+            factory=Index.empty,
+            length=length,
+            nplike=nplike,
+            dtype=dtype if dtype is not None else np.dtype(np.int64),
+        )
+
+
+class ZeroIndex(LazyIndex):
+    def __init__(self, length, nplike, dtype=None):
+        super().__init__(
+            factory=Index.zeros,
+            length=length,
+            nplike=nplike,
+            dtype=dtype if dtype is not None else np.dtype(np.int64),
+        )
+
+
+def resolve_index(index: Index | LazyIndex, backend) -> Index:
+    if isinstance(index, LazyIndex):
+        return index._materialize()
+
+    return index
