@@ -80,6 +80,7 @@ class CupyBackend(Backend):
         - awkward_max
         - awkward_min
         - awkward_prod
+        - awkward_prod_bool
         - awkward_count_64
         - awkward_countnonzero
         """
@@ -93,6 +94,7 @@ class CupyBackend(Backend):
             "awkward_reduce_max",
             "awkward_reduce_min",
             "awkward_reduce_prod",
+            "awkward_reduce_prod_bool",
             "awkward_reduce_count_64",
             "awkward_reduce_countnonzero",
         )
@@ -132,6 +134,9 @@ class CupyBackend(Backend):
 
         if kernel_name == "awkward_reduce_prod":
             return cuda_compute.awkward_reduce_prod
+
+        if kernel_name == "awkward_reduce_prod_bool":
+            return cuda_compute.awkward_reduce_prod_bool
 
         if kernel_name == "awkward_reduce_count_64":
             return cuda_compute.awkward_reduce_count_64
