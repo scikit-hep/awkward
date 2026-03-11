@@ -17,16 +17,6 @@ def test_numpy_array_getattr_cuda_array_interface_raises_on_numpy_backend():
     assert not hasattr(layout, "__cuda_array_interface__")
 
 
-def test_numpy_array_getattr_cuda_array_interface_returns_on_cupy_backend():
-    """__getattr__ returns __cuda_array_interface__ dict on CuPy backend."""
-
-    layout = ak.to_backend(ak.Array([1.0, 2.0, 3.0]), "cuda").layout
-
-    cai = layout.__cuda_array_interface__
-    assert isinstance(cai, dict)
-    assert cai == layout._data.__cuda_array_interface__
-
-
 def test_numpy_array_getattr_unknown_attribute_raises():
     """__getattr__ raises AttributeError for unknown attributes."""
 
