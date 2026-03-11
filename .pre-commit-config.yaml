@@ -28,7 +28,7 @@ repos:
     additional_dependencies: [pyyaml]
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.14.14
+  rev: v0.15.4
   hooks:
   - id: ruff-check
     args: ["--fix", "--show-fixes"]
@@ -63,7 +63,7 @@ repos:
     files: ^tests/
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.36.1
+  rev: 0.37.0
   hooks:
     - id: check-github-workflows
       args: ["--verbose"]
