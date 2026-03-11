@@ -76,6 +76,7 @@ class CupyBackend(Backend):
         - awkward_argmax
         - awkward_argmin
         - awkward_sum
+        - awkward_sum_bool
         - awkward_max
         - awkward_min
         - awkward_prod
@@ -88,6 +89,7 @@ class CupyBackend(Backend):
             "awkward_reduce_argmax",
             "awkward_reduce_argmin",
             "awkward_reduce_sum",
+            "awkward_reduce_sum_bool",
             "awkward_reduce_max",
             "awkward_reduce_min",
             "awkward_reduce_prod",
@@ -118,6 +120,9 @@ class CupyBackend(Backend):
 
         if kernel_name == "awkward_reduce_sum":
             return cuda_compute.awkward_reduce_sum
+
+        if kernel_name == "awkward_reduce_sum_bool":
+            return cuda_compute.awkward_reduce_sum_bool
 
         if kernel_name == "awkward_reduce_max":
             return cuda_compute.awkward_reduce_max
