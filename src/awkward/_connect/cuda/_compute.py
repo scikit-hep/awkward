@@ -5,8 +5,8 @@ from __future__ import annotations
 # TODO: delete these after modifying argmin
 from cuda.compute import (
     CountingIterator,
-    unary_transform,
     gpu_struct,
+    unary_transform,
 )
 
 from awkward._nplikes.cupy import Cupy
@@ -233,6 +233,7 @@ def awkward_reduce_sum(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_sum, outlength)
 
+
 # original implementation - currently bools don't work because of a bug on numba side
 def awkward_reduce_sum_bool(
     result,
@@ -266,6 +267,7 @@ def awkward_reduce_sum_bool(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_sum, outlength)
+
 
 def awkward_reduce_prod(
     result,
@@ -342,6 +344,7 @@ def awkward_reduce_max(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_max, outlength)
 
+
 # original implementation of `awkward_reduce_max_complex` (doesn't work - keep for archive)
 def awkward_reduce_max_complex(
     result,
@@ -353,7 +356,7 @@ def awkward_reduce_max_complex(
     # the initial value for the reduction
     identity,
 ):
-    print("outlength",outlength)
+    print("outlength", outlength)
     print(input_data)
     print(parents_data)
     index_dtype = parents_data.dtype
@@ -408,6 +411,7 @@ def awkward_reduce_max_complex(
     unary_transform(segment_ids, result, segment_reduce_max, outlength)
 
     print("this is the result:", result)
+
 
 def awkward_reduce_min(
     result,
