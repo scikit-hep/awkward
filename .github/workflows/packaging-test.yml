@@ -68,7 +68,7 @@ jobs:
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v3.3
+    - uses: pypa/cibuildwheel@v3.4
       env:
         CIBW_ARCHS_MACOS: universal2
         CIBW_ARCHS_WINDOWS: auto64
