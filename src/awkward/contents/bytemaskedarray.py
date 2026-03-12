@@ -134,8 +134,8 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             )
         if (
             content.backend.nplike.known_data
-            and mask.length is not unknown_length
-            and content.length is not unknown_length
+            and ak._util.maybe_length_of(mask) is not unknown_length
+            and ak._util.maybe_length_of(content) is not unknown_length
             and mask.length > content.length
         ):
             raise ValueError(
