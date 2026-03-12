@@ -307,9 +307,8 @@ jobs:
           # Cache invalidates daily by default
           cache-environment: true
           environment-name: awkward
-          # Need Python 3.10 for the cached wheels
           create-args: >-
-            python=3.10
+            python=3.14
             numpy
             root=6.36.06
 
@@ -321,7 +320,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ./awkward-cpp/dist
-          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}-py3.14
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
