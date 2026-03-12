@@ -12,7 +12,7 @@ ERROR awkward_ListOffsetArray_drop_none_indexes(
   int64_t length_offsets,
   int64_t length_indexes) {
   if (length_offsets > 0 && fromoffsets[length_offsets - 1] > length_indexes) {
-    return failure("offsets[i] > len(content)", kSliceNone, kSliceNone, FILENAME(__LINE__));
+    return failure("offsets[i] > len(content)", length_offsets - 1, kSliceNone, FILENAME(__LINE__));
   }
   T nr_of_nones = 0;
   int64_t offset1 = 0;
