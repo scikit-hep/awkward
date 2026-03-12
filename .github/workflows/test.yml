@@ -245,7 +245,7 @@ jobs:
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
           python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
-          -r "requirements-test-gpu.txt" ${{ matrix.cuda-version == 13 && '-r requirements-test-full.txt' || '' }}
+          -r requirements-test-gpu.txt ${{ matrix.cuda-version == 13 && '-r requirements-test-full.txt' || '' }}
 
       - name: Print versions
         run: python -m pip list
