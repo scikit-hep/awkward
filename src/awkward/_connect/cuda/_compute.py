@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from cuda.compute import (
     CountingIterator,
-    reduce_into,
     gpu_struct,
+    reduce_into,
     unary_transform,
 )
 
@@ -222,6 +222,7 @@ def awkward_axis_none_reduce_max(array):
     reduce_into(array, result_scalar, reduce_op, len(array), h_init)
 
     return result_scalar
+
 
 def awkward_reduce_sum(
     result,
