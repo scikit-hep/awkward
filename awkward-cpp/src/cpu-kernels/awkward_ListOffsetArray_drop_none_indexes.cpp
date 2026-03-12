@@ -11,17 +11,19 @@ ERROR awkward_ListOffsetArray_drop_none_indexes(
   const T* fromoffsets,
   int64_t length_offsets,
   int64_t length_indexes) {
-  if (length_offsets > 0 && fromoffsets[length_offsets - 1] > length_indexes) {
-    return failure("offsets[i] > len(content)", length_offsets - 1, kSliceNone, FILENAME(__LINE__));
-  }
   T nr_of_nones = 0;
   int64_t offset1 = 0;
   int64_t offset2 = 0;
 
   for (int64_t i = 0; i < length_offsets; i++) {
     offset2 = fromoffsets[i];
+    if (offset2 > length_indexes) {
+      return failure("offsets[i] > len(content)", i, kSliceNone, FILENAME(__LINE__));
+    }
     for (int64_t j = offset1; j < offset2; j++) {
-      nr_of_nones += (noneindexes[j] < 0);
+        if (noneindexes[j] < 0) {
+            nr_of_nones++;
+        }
     }
     tooffsets[i] = fromoffsets[i] - nr_of_nones;
     offset1 = offset2;
