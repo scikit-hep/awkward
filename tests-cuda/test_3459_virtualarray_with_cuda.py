@@ -1883,9 +1883,6 @@ def test_listarray_to_json(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_to_numpy(listarray, virtual_listarray):
     # ListArray can't be directly converted to numpy for non-rectangular data
     # Test with flattened data instead
@@ -1981,9 +1978,6 @@ def test_listarray_where(listarray, virtual_listarray):
     assert virtual_list_array.layout.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_flatten(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(
@@ -1993,9 +1987,6 @@ def test_listarray_flatten(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_unflatten(listarray, virtual_listarray):
     # First flatten the arrays
     flat_list = ak.flatten(listarray)
@@ -2022,9 +2013,6 @@ def test_listarray_num(listarray, virtual_listarray):
     assert not virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_count(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.all(ak.count(virtual_listarray, axis=1) == ak.count(listarray, axis=1))
@@ -2032,9 +2020,6 @@ def test_listarray_count(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_count_nonzero(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.all(
@@ -2045,9 +2030,6 @@ def test_listarray_count_nonzero(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_sum(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.all(ak.sum(virtual_listarray, axis=1) == ak.sum(listarray, axis=1))
@@ -2062,9 +2044,6 @@ def test_listarray_nansum(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_prod(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.all(ak.prod(virtual_listarray, axis=1) == ak.prod(listarray, axis=1))
@@ -2081,9 +2060,6 @@ def test_listarray_nanprod(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_any(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.all(ak.any(virtual_listarray, axis=1) == ak.any(listarray, axis=1))
@@ -2091,9 +2067,6 @@ def test_listarray_any(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_all(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.all(ak.all(virtual_listarray, axis=1) == ak.all(listarray, axis=1))
@@ -2101,9 +2074,6 @@ def test_listarray_all(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_min(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.all(ak.min(virtual_listarray, axis=1) == ak.min(listarray, axis=1))
@@ -2118,9 +2088,6 @@ def test_listarray_nanmin(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_max(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.all(ak.max(virtual_listarray, axis=1) == ak.max(listarray, axis=1))
@@ -2135,9 +2102,6 @@ def test_listarray_nanmax(listarray, virtual_listarray):
     assert virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_argmin(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(ak.argmin(virtual_listarray), ak.argmin(listarray))
@@ -2196,9 +2160,6 @@ def test_listarray_nanargmin(numpy_like):
     assert virtual_array.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_argmax(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(ak.argmax(virtual_listarray), ak.argmax(listarray))
@@ -2257,9 +2218,6 @@ def test_listarray_nanargmax(numpy_like):
     assert virtual_array.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_sort(listarray, virtual_listarray):
     assert not virtual_listarray.is_any_materialized
     assert ak.array_equal(
@@ -2687,9 +2645,6 @@ def test_listarray_local_index(listarray, virtual_listarray):
     assert not virtual_listarray.is_all_materialized
 
 
-@pytest.mark.xfail(
-    reason="Fails due to CuPy issue: https://github.com/cupy/cupy/issues/9089. Will be available in CuPy 14.0.0."
-)
 def test_listarray_run_lengths(numpy_like):
     # Create a ListArray with repeated values for run_lengths test
     starts = cp.array([0, 3], dtype=cp.int64)
