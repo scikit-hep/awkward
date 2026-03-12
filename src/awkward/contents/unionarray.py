@@ -172,8 +172,8 @@ class UnionArray(UnionMeta[Content], Content):
 
         if (
             backend.nplike.known_data
-            and tags.length is not unknown_length
-            and index.length is not unknown_length
+            and ak._util.maybe_length_of(tags) is not unknown_length
+            and ak._util.maybe_length_of(index) is not unknown_length
             and tags.length > index.length
         ):
             raise ValueError(
