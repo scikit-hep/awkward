@@ -66,7 +66,7 @@ jobs:
             cuda-version=13
             cuda-toolkit
             cxx-compiler
-            numba-cuda>=0.25,<=0.26
+            numba-cuda
             root=6.36.06
 
       - name: Generate build files
