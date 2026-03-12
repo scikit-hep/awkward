@@ -68,6 +68,7 @@ jobs:
             cxx-compiler
             numba-cuda
             root=6.36.06
+            pipx
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
