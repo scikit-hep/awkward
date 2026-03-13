@@ -182,3 +182,13 @@ def test_jagged_bytes():
             )
         ),
     )
+
+
+def test_from_buffers_result_dtype_is_native():
+    form = ak.forms.NumpyForm("float64", form_key="node0")
+    length = 3
+    container = {"node0-data": np.array([1.0, 2.0, 3.0], dtype=">f8").tobytes()}
+    array = ak.from_buffers(form, length, container, byteorder=">")
+
+    dtype = ak.to_layout(array).dtype
+    assert dtype.byteorder in ("=", ak._util.native_byteorder)

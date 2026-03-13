@@ -552,6 +552,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         (x,) = maybe_materialize(x)
         return self._module.unpackbits(x, axis=axis, count=count, bitorder=bitorder)
 
+    def byteswap(self, x: ArrayLikeT) -> ArrayLikeT:
+        raise NotImplementedError
+
     def broadcast_to(self, x: ArrayLikeT, shape: tuple[ShapeItem, ...]) -> ArrayLikeT:
         (x,) = maybe_materialize(x)
         return self._module.broadcast_to(x, shape)
