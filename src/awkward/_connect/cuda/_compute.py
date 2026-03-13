@@ -164,8 +164,6 @@ def awkward_reduce_argmax(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_argmax, outlength)
 
-    return result
-
 
 # this function is called from ~/awkward/src/awkward/_reducers.py:161 (ArgMin.apply())
 def awkward_reduce_argmin(
@@ -199,8 +197,6 @@ def awkward_reduce_argmin(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_argmin, outlength)
-
-    return result
 
 
 def awkward_axis_none_reduce_max(array):

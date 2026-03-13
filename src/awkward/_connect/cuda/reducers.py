@@ -168,7 +168,7 @@ class ArgMin(CudaComputeReducer):
             assert parents.nplike is array.backend.nplike
             from ._compute import awkward_reduce_argmin
 
-            result = awkward_reduce_argmin(
+            awkward_reduce_argmin(
                 result,
                 kernel_array_data,
                 parents.data,
@@ -308,7 +308,7 @@ class ArgMax(CudaComputeReducer):
             assert parents.nplike is array.backend.nplike
             from ._compute import awkward_reduce_argmax
 
-            result = awkward_reduce_argmax(
+            awkward_reduce_argmax(
                 result,
                 kernel_array_data,
                 parents.data,
