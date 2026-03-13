@@ -609,6 +609,7 @@ def awkward_reduce_countnonzero(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
 
+
 def awkward_localindex(toindex, length):
     # Fills toindex with [0, 1, 2, ..., length-1]
     def fill_local_index(i):
