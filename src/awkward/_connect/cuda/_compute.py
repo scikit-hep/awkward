@@ -622,9 +622,9 @@ def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsiz
     def fill_missing_repeat(counter):
         i = counter // indexlength  # number of repetition we're in
         j = counter % indexlength  # position within the current repetition
-        value_offset = i * regularsize
+        val_offset = i * regularsize
         base = index[j]
-        adjustment = index_dtype(value_offset) if base >= 0 else index_dtype(0)
+        adjustment = index_dtype(val_offset) if base >= 0 else index_dtype(0)
         return base + adjustment
 
     output_size = repetitions * indexlength
