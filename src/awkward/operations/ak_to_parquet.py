@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from os import fsdecode
+from pathlib import Path
 
 import fsspec
 
@@ -416,6 +417,9 @@ def _impl(
         ) from None
 
     fs, destination = fsspec.core.url_to_fs(destination, **(storage_options or {}))
+    # Create directories in which we write files, if necessary
+    parent_path = str(Path(destination).parent)
+    fs.mkdirs(parent_path, exist_ok=True)
     metalist = []
     with pyarrow_parquet.ParquetWriter(
         destination,
