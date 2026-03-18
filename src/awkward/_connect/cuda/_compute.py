@@ -641,9 +641,12 @@ def awkward_ListOffsetArray_reduce_local_nextparents_64(
     # subtract one, so that indexing starts from 0
     nextparents[:] = cp.searchsorted(offsets, indices, side="right") - 1
 
+
 # Basically construct offsets from parents
-def awkward_ListOffsetArray_reduce_local_outoffsets_64(outoffsets, parents, lenparents, outlength):
+def awkward_ListOffsetArray_reduce_local_outoffsets_64(
+    outoffsets, parents, lenparents, outlength
+):
     # for each output index k, find the first position i where parents[i] >= k
-    outoffsets[:outlength] = cp.searchsorted(parents, cp.arange(outlength), side='left')
+    outoffsets[:outlength] = cp.searchsorted(parents, cp.arange(outlength), side="left")
     # the last offset gets lenparents
     outoffsets[outlength] = lenparents
