@@ -636,19 +636,7 @@ def awkward_reduce_countnonzero(
 def awkward_ListOffsetArray_reduce_local_nextparents_64(
     nextparents, offsets, length, nextparents_length
 ):
-    nextparents_dtype = nextparents.dtype.type
-
-    # note: we iterate over j so that fill_nextparents() returns only one value as needed for unary_transform()
-    def fill_nextparents(j):
-        for i in range(length):
-            # offsets[0] is the `initialoffset`
-            start = offsets[i] - offsets[0]
-            # we iterate up until `nextparents_length` using unary_transform(), so we don't need to check j<nextparents_length
-            stop = offsets[i + 1] - offsets[0]
-            if start <= j < stop:
-                return nextparents_dtype(i)
-        # return -1 if there is an error (should never be returned)
-        return nextparents_dtype(-1)
-
-    segment_ids = CountingIterator(nextparents_dtype(0))
-    unary_transform(segment_ids, nextparents, fill_nextparents, nextparents_length)
+    # create indices [0, 1, ..., nextparents_length-1] shifted by the first offset (to handle non-zero starting offset)
+    indices = cp.arange(nextparents_length) + offsets[0]
+    # subtract one, so that indexing starts from 0
+    nextparents[:] = cp.searchsorted(offsets, indices, side="right") - 1
