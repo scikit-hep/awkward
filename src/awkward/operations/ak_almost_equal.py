@@ -221,7 +221,11 @@ def _impl(
             ):
                 return (
                     (left.dtype == right.dtype)
-                    and backend.nplike.all(left.data == right.data)
+                    and backend.nplike.array_equal(
+                        left.data,
+                        right.data,
+                        equal_nan=equal_nan,
+                    )
                     and left.shape == right.shape
                 )
             elif exact_eq:
