@@ -629,3 +629,26 @@ def awkward_reduce_countnonzero(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+
+
+# For each position j in nextparents, finds which list i it belongs to based on the offsets
+# Basically construct parents from offsets
+def awkward_ListOffsetArray_reduce_local_nextparents_64(
+    nextparents, offsets, length, nextparents_length
+):
+    nextparents_dtype = nextparents.dtype.type
+
+    # note: we iterate over j so that fill_nextparents() returns only one value as needed for unary_transform()
+    def fill_nextparents(j):
+        for i in range(length):
+            # offsets[0] is the `initialoffset`
+            start = offsets[i] - offsets[0]
+            # we iterate up until `nextparents_length` using unary_transform(), so we don't need to check j<nextparents_length
+            stop = offsets[i + 1] - offsets[0]
+            if start <= j < stop:
+                return nextparents_dtype(i)
+        # return -1 if there is an error (should never be returned)
+        return nextparents_dtype(-1)
+
+    segment_ids = CountingIterator(nextparents_dtype(0))
+    unary_transform(segment_ids, nextparents, fill_nextparents, nextparents_length)
