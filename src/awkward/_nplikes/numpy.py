@@ -9,6 +9,7 @@ from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._typing import TYPE_CHECKING, Final, Literal
 
 if TYPE_CHECKING:
@@ -76,6 +77,20 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
     ):
         (x,) = maybe_materialize(x)
         return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)  # type: ignore[arg-type]
+
+    def byteswap(self, x: NDArray) -> NDArray:
+        if isinstance(x, VirtualNDArray):
+            return VirtualNDArray(
+                x._nplike,
+                x._shape,
+                x._dtype,
+                lambda: self.byteswap(x.materialize()),
+                lambda: x.shape,
+                x._buffer_key,
+                __enable_caching__=x.__enable_caching__,
+            )
+        (x,) = maybe_materialize(x)
+        return x.byteswap()
 
     def memory_ptr(self, x: NDArray) -> int:
         (x,) = maybe_materialize(x)
