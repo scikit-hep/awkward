@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import numpy
-
 import awkward as ak
 from awkward._nplikes.array_like import maybe_materialize
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpy_like import ArrayLike
+from awkward._nplikes.numpy import Numpy
+from awkward._nplikes.numpy_like import ArrayLike, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.virtual import VirtualNDArray
@@ -16,6 +15,8 @@ from awkward._typing import TYPE_CHECKING, Final
 
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
+
+np = NumpyMetadata.instance()
 
 
 @register_nplike
@@ -52,7 +53,7 @@ class Cupy(ArrayModuleNumpyLike):
     ) -> ArrayLike:
         assert not isinstance(buffer, (PlaceholderArray, VirtualNDArray))
         assert not isinstance(count, (PlaceholderArray, VirtualNDArray))
-        np_array = numpy.frombuffer(buffer, dtype=dtype, count=count)
+        np_array = Numpy.instance().frombuffer(buffer, dtype=dtype, count=count)
         return self._module.asarray(np_array)
 
     def array_equal(
@@ -214,7 +215,7 @@ class Cupy(ArrayModuleNumpyLike):
             return self.byteswap(x.view(component_dtype)).view(x.dtype)
 
         shape = x.shape
-        bytes_arr = x.view(numpy.uint8)
+        bytes_arr = x.view(np.uint8)
         bytes_arr = self._module.reshape(bytes_arr, (-1, itemsize))
         bytes_arr = bytes_arr[..., ::-1]
         swapped = self._module.reshape(bytes_arr, (-1,)).view(x.dtype)
