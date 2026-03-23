@@ -125,7 +125,7 @@ class CupyBackend(Backend):
         }:
             return cuda_compute.awkward_reduce_sum_int32_bool_64
 
-        getattr(cuda_compute, kernel_name, None)
+        return getattr(cuda_compute, kernel_name, None)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
         from awkward._connect.cuda import get_cuda_compute_reducer
