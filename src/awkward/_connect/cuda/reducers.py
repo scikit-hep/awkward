@@ -43,6 +43,11 @@ class CudaComputeReducer(Reducer):
         raise NotImplementedError
 
     @classmethod
+    def _length_for_kernel(cls, type: DTypeLike, length: ShapeItem) -> ShapeItem:
+        # Complex types are implemented as double-wide arrays
+        return 2 * length if type in (np.complex128, np.complex64) else length
+
+    @classmethod
     def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
         dtype = np.dtype(dtype)
         if dtype.kind.upper() == "M":
@@ -53,6 +58,17 @@ class CudaComputeReducer(Reducer):
             return np.dtype(np.float32)
         else:
             return dtype
+
+    @classmethod
+    def _promote_integer_rank(cls, given_dtype: DTypeLike) -> DTypeLike:
+        if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
+            return np.int32 if cls._use32 else np.int64
+
+        elif given_dtype in (np.uint8, np.uint16, np.uint32):
+            return np.uint32 if cls._use32 else np.uint64
+
+        else:
+            return given_dtype
 
 
 # TODO: change this for a custom one?
@@ -422,6 +438,703 @@ def awkward_axis_none_reduce_argmax(array):
 
     # return the index of the maximum value
     return result_scalar.item()[1]
+
+
+@overloads(_reducers.Count)
+class Count(CudaComputeReducer):
+    name: Final = "count"
+    needs_position: Final = False
+    preferred_dtype: Final = np.int64
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.Count)
+        return cls()
+
+    @classmethod
+    def _return_dtype(cls, given_dtype):
+        return np.int64
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        result = array.backend.nplike.empty(outlength, dtype=np.int64)
+
+        assert parents.nplike is array.backend.nplike
+        from ._compute import awkward_reduce_count_64
+
+        awkward_reduce_count_64(
+            result,
+            parents.data,
+            parents.length,
+            outlength,
+        )
+
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+@overloads(_reducers.CountNonzero)
+class CountNonzero(CudaComputeReducer):
+    name: Final = "count_nonzero"
+    needs_position: Final = False
+    preferred_dtype: Final = np.int64
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.CountNonzero)
+        return cls()
+
+    @classmethod
+    def _return_dtype(cls, given_dtype):
+        return np.int64
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+        result = array.backend.nplike.empty(outlength, dtype=np.int64)
+
+        assert parents.nplike is array.backend.nplike
+        if np.issubdtype(array.dtype, np.complexfloating):
+            array.backend.maybe_kernel_error(
+                array.backend[
+                    "awkward_reduce_countnonzero_complex",
+                    result.dtype.type,
+                    kernel_array_data.dtype.type,
+                    parents.dtype.type,
+                ](
+                    result,
+                    kernel_array_data,
+                    parents.data,
+                    parents.length,
+                    outlength,
+                )
+            )
+        else:
+            from ._compute import awkward_reduce_countnonzero
+
+            awkward_reduce_countnonzero(
+                result,
+                kernel_array_data,
+                parents.data,
+                parents.length,
+                outlength,
+            )
+
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+@overloads(_reducers.Sum)
+class Sum(CudaComputeReducer):
+    name: Final = "sum"
+    needs_position: Final = False
+    preferred_dtype: Final = np.float64
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.Sum)
+        return cls()
+
+    def axis_none_reducer(self):
+        return AxisNoneCudaSum()
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "M":
+            raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
+
+        # Boolean kernels are special; the result is _not_ a boolean
+        if array.dtype == np.bool_:
+            result = array.backend.nplike.empty(
+                self._length_for_kernel(array.dtype.type, outlength),
+                dtype=self._promote_integer_rank(np.bool_),
+            )
+            assert parents.nplike is array.backend.nplike
+            if result.dtype in (np.int64, np.uint64, np.int32, np.uint32):
+                from ._compute import awkward_reduce_sum_bool
+
+                awkward_reduce_sum_bool(
+                    result,
+                    array.data,
+                    parents.data,
+                    offsets.data,
+                    parents.length,
+                    outlength,
+                )
+            else:
+                raise NotImplementedError
+            return ak.contents.NumpyArray(result, backend=array.backend)
+        else:
+            kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+            result = array.backend.nplike.empty(
+                self._length_for_kernel(array.dtype.type, outlength),
+                dtype=self._promote_integer_rank(kernel_array_data.dtype),
+            )
+            assert parents.nplike is array.backend.nplike
+            if array.dtype.type in (np.complex128, np.complex64):
+                array.backend.maybe_kernel_error(
+                    array.backend[
+                        "awkward_reduce_sum_complex",
+                        result.dtype.type,
+                        kernel_array_data.dtype.type,
+                        parents.dtype.type,
+                        offsets.dtype.type,
+                    ](
+                        result,
+                        kernel_array_data,
+                        parents.data,
+                        offsets.data,
+                        parents.length,
+                        outlength,
+                    )
+                )
+            else:
+                from ._compute import awkward_reduce_sum
+
+                awkward_reduce_sum(
+                    result,
+                    kernel_array_data,
+                    parents.data,
+                    offsets.data,
+                    parents.length,
+                    outlength,
+                )
+            return ak.contents.NumpyArray(
+                result.view(self._promote_integer_rank(array.dtype)),
+                backend=array.backend,
+            )
+
+
+class AxisNoneCudaSum:
+    name: Final = "sum"
+    needs_position: Final = False
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _parents: ak.index.Index | ak.index.ZeroIndex,
+        _offsets: ak.index.Index | ak.index.EmptyIndex,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "M":
+            raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
+
+        nplike = array.backend.nplike
+        reduce_fn = getattr(nplike, self.name)
+
+        result_scalar = reduce_fn(array.data, axis=None)
+        result_array = array.backend.nplike.reshape(
+            array.backend.nplike._module.asarray(result_scalar), (1,)
+        )
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
+@overloads(_reducers.Prod)
+class Prod(CudaComputeReducer):
+    name: Final = "prod"
+    needs_position: Final = False
+    preferred_dtype: Final = np.float64
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.Prod)
+        return cls()
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind.upper() == "M":
+            raise ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
+
+        # Boolean kernels are special; the result is _not_ a boolean
+        if array.dtype == np.bool_:
+            result = array.backend.nplike.empty(
+                outlength,
+                # This kernel, unlike sum, returns bools!
+                dtype=np.bool_,
+            )
+            assert parents.nplike is array.backend.nplike
+            from ._compute import awkward_reduce_prod_bool
+
+            awkward_reduce_prod_bool(
+                result,
+                array.data,
+                parents.data,
+                offsets.data,
+                parents.length,
+                outlength,
+            )
+            return ak.contents.NumpyArray(
+                array.backend.nplike.astype(
+                    result, dtype=self._promote_integer_rank(array.dtype)
+                ),
+                backend=array.backend,
+            )
+        else:
+            kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+            result = array.backend.nplike.empty(
+                self._length_for_kernel(array.dtype.type, outlength),
+                dtype=self._promote_integer_rank(kernel_array_data.dtype),
+            )
+            assert parents.nplike is array.backend.nplike
+            if array.dtype.type in (np.complex128, np.complex64):
+                array.backend.maybe_kernel_error(
+                    array.backend[
+                        "awkward_reduce_prod_complex",
+                        result.dtype.type,
+                        kernel_array_data.dtype.type,
+                        parents.dtype.type,
+                        offsets.dtype.type,
+                    ](
+                        result,
+                        kernel_array_data,
+                        parents.data,
+                        offsets.data,
+                        parents.length,
+                        outlength,
+                    )
+                )
+            else:
+                from ._compute import awkward_reduce_prod
+
+                awkward_reduce_prod(
+                    result,
+                    kernel_array_data,
+                    parents.data,
+                    offsets.data,
+                    parents.length,
+                    outlength,
+                )
+            return ak.contents.NumpyArray(
+                result.view(self._promote_integer_rank(array.dtype)),
+                backend=array.backend,
+            )
+
+
+@overloads(_reducers.Any)
+class Any(CudaComputeReducer):
+    name: Final = "any"
+    needs_position: Final = False
+    preferred_dtype: Final = np.bool_
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.Any)
+        return cls()
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+        result = array.backend.nplike.empty(outlength, dtype=np.bool_)
+
+        assert parents.nplike is array.backend.nplike
+        if array.dtype.type in (np.complex128, np.complex64):
+            array.backend.maybe_kernel_error(
+                array.backend[
+                    "awkward_reduce_sum_bool_complex",
+                    result.dtype.type,
+                    kernel_array_data.dtype.type,
+                    parents.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    result,
+                    kernel_array_data,
+                    parents.data,
+                    offsets.data,
+                    parents.length,
+                    outlength,
+                )
+            )
+        else:
+            from ._compute import awkward_reduce_sum_bool
+
+            awkward_reduce_sum_bool(
+                result,
+                kernel_array_data,
+                parents.data,
+                offsets.data,
+                parents.length,
+                outlength,
+            )
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+@overloads(_reducers.All)
+class All(CudaComputeReducer):
+    name: Final = "all"
+    needs_position: Final = False
+    preferred_dtype: Final = np.bool_
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.All)
+        return cls()
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+        result = array.backend.nplike.empty(outlength, dtype=np.bool_)
+
+        assert parents.nplike is array.backend.nplike
+        if array.dtype.type in (np.complex128, np.complex64):
+            array.backend.maybe_kernel_error(
+                array.backend[
+                    "awkward_reduce_prod_bool_complex",
+                    result.dtype.type,
+                    kernel_array_data.dtype.type,
+                    parents.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    result,
+                    kernel_array_data,
+                    parents.data,
+                    offsets.data,
+                    parents.length,
+                    outlength,
+                )
+            )
+        else:
+            from ._compute import awkward_reduce_prod_bool
+
+            awkward_reduce_prod_bool(
+                result,
+                kernel_array_data,
+                parents.data,
+                offsets.data,
+                parents.length,
+                outlength,
+            )
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+@overloads(_reducers.Min)
+class Min(CudaComputeReducer):
+    name: Final = "min"
+    needs_position: Final = False
+    preferred_dtype: Final = np.float64
+
+    def __init__(self, initial: float | None):
+        self._initial = initial
+
+    @property
+    def initial(self) -> float | None:
+        return self._initial
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.Min)
+        return cls(reducer.initial)
+
+    def axis_none_reducer(self):
+        return AxisNoneCudaMin(self._initial)
+
+    def _identity_for(self, dtype: DTypeLike | None):
+        dtype = np.dtype(dtype)
+        assert dtype.kind.upper() != "M", (
+            "datetime64/timedelta64 should be converted to int64 before reduction"
+        )
+        if self._initial is None:
+            if dtype in (
+                np.int8,
+                np.int16,
+                np.int32,
+                np.int64,
+                np.uint8,
+                np.uint16,
+                np.uint32,
+                np.uint64,
+            ):
+                return np.iinfo(dtype).max
+            else:
+                return np.inf
+        return self._initial
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype == np.bool_:
+            result = array.backend.nplike.empty(outlength, dtype=np.bool_)
+            assert parents.nplike is array.backend.nplike
+            from ._compute import awkward_reduce_prod_bool
+
+            awkward_reduce_prod_bool(
+                result,
+                array.data,
+                parents.data,
+                offsets.data,
+                parents.length,
+                outlength,
+            )
+            return ak.contents.NumpyArray(result, backend=array.backend)
+        else:
+            kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+            result = array.backend.nplike.empty(
+                self._length_for_kernel(array.dtype.type, outlength),
+                dtype=kernel_array_data.dtype,
+            )
+            assert parents.nplike is array.backend.nplike
+            if array.dtype.type in (np.complex128, np.complex64):
+                array.backend.maybe_kernel_error(
+                    array.backend[
+                        "awkward_reduce_min_complex",
+                        result.dtype.type,
+                        kernel_array_data.dtype.type,
+                        parents.dtype.type,
+                        offsets.dtype.type,
+                    ](
+                        result,
+                        kernel_array_data,
+                        parents.data,
+                        offsets.data,
+                        parents.length,
+                        outlength,
+                        self._identity_for(result.dtype),
+                    )
+                )
+            else:
+                from ._compute import awkward_reduce_min
+
+                awkward_reduce_min(
+                    result,
+                    kernel_array_data,
+                    parents.data,
+                    offsets.data,
+                    parents.length,
+                    outlength,
+                    self._identity_for(result.dtype),
+                )
+            return ak.contents.NumpyArray(
+                result.view(array.dtype), backend=array.backend
+            )
+
+
+class AxisNoneCudaMin(Min):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _parents: ak.index.Index | ak.index.ZeroIndex,
+        _offsets: ak.index.Index | ak.index.EmptyIndex,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+
+        nplike = array.backend.nplike
+        data = array.data
+
+        if data.size == 0:
+            val = (
+                self.initial
+                if self.initial is not None
+                else self._identity_for(data.dtype)
+            )
+            result_scalar = nplike.asarray(val, dtype=data.dtype)
+        else:
+            result_scalar = nplike.min(data)
+            if self.initial is not None:
+                initial_val = nplike.asarray(self.initial, dtype=data.dtype)
+                result_scalar = nplike.minimum(result_scalar, initial_val)
+
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
+@overloads(_reducers.Max)
+class Max(CudaComputeReducer):
+    name: Final = "max"
+    needs_position: Final = False
+    preferred_dtype: Final = np.float64
+
+    def __init__(self, initial: float | None):
+        self._initial = initial
+
+    @property
+    def initial(self) -> float | None:
+        return self._initial
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.Max)
+        return cls(reducer.initial)
+
+    def axis_none_reducer(self):
+        return AxisNoneCudaMax(self._initial)
+
+    def _identity_for(self, dtype: DTypeLike | None):
+        dtype = np.dtype(dtype)
+        assert dtype.kind.upper() != "M", (
+            "datetime64/timedelta64 should be converted to int64 before reduction"
+        )
+        if self._initial is None:
+            if dtype in (
+                np.int8,
+                np.int16,
+                np.int32,
+                np.int64,
+                np.uint8,
+                np.uint16,
+                np.uint32,
+                np.uint64,
+            ):
+                return np.iinfo(dtype).min
+            else:
+                return -np.inf
+        return self._initial
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index | ak.index.ZeroIndex,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype == np.bool_:
+            result = array.backend.nplike.empty(outlength, dtype=np.bool_)
+            assert parents.nplike is array.backend.nplike
+            from ._compute import awkward_reduce_sum_bool
+
+            awkward_reduce_sum_bool(
+                result,
+                array.data,
+                parents.data,
+                offsets.data,
+                parents.length,
+                outlength,
+            )
+            return ak.contents.NumpyArray(result, backend=array.backend)
+        else:
+            kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+            result = array.backend.nplike.empty(
+                self._length_for_kernel(array.dtype.type, outlength),
+                dtype=kernel_array_data.dtype,
+            )
+            assert parents.nplike is array.backend.nplike
+            if array.dtype.type in (np.complex128, np.complex64):
+                array.backend.maybe_kernel_error(
+                    array.backend[
+                        "awkward_reduce_max_complex",
+                        result.dtype.type,
+                        kernel_array_data.dtype.type,
+                        parents.dtype.type,
+                        offsets.dtype.type,
+                    ](
+                        result,
+                        kernel_array_data,
+                        parents.data,
+                        offsets.data,
+                        parents.length,
+                        outlength,
+                        self._identity_for(result.dtype),
+                    )
+                )
+            else:
+                from ._compute import awkward_reduce_max
+
+                awkward_reduce_max(
+                    result,
+                    kernel_array_data,
+                    parents.data,
+                    offsets.data,
+                    parents.length,
+                    outlength,
+                    self._identity_for(result.dtype),
+                )
+            return ak.contents.NumpyArray(
+                result.view(array.dtype), backend=array.backend
+            )
+
+
+class AxisNoneCudaMax(Max):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _parents: ak.index.Index | ak.index.ZeroIndex,
+        _offsets: ak.index.Index | ak.index.EmptyIndex,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+
+        nplike = array.backend.nplike
+        data = array.data
+
+        if data.size == 0:
+            val = (
+                self.initial
+                if self.initial is not None
+                else self._identity_for(data.dtype)
+            )
+            result_scalar = nplike.asarray(val, dtype=data.dtype)
+        else:
+            result_scalar = nplike.max(data)
+            if self.initial is not None:
+                initial_val = nplike.asarray(self.initial, dtype=data.dtype)
+                result_scalar = nplike.maximum(result_scalar, initial_val)
+
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
 
 
 def get_cuda_compute_reducer(reducer: Reducer) -> Reducer:
