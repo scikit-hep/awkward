@@ -9,9 +9,9 @@ import awkward as ak
 
 
 @settings(max_examples=1000)
-@given(a=st_ak.constructors.arrays())
+@given(a=st_ak.constructors.arrays(allow_nan=True))
 def test_roundtrip(a: ak.Array) -> None:
     """`to_buffers` followed by `from_buffers` reconstructs the array."""
     sent = ak.to_buffers(a)
     returned = ak.from_buffers(*sent)
-    assert ak.array_equal(a, returned)
+    assert ak.array_equal(a, returned, equal_nan=True)
