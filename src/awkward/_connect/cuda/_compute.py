@@ -293,7 +293,7 @@ def awkward_reduce_sum_bool(
     unary_transform(segment_ids, result, segment_reduce_sum, outlength)
 
 
-# this is the same as awkward_reduce_sum (we can possibly use it after the bug on numba side is fixed)
+# this is the same as awkward_reduce_sum (we can possibly use it instead, after the bug on numba side is fixed)
 def awkward_reduce_sum_int32_bool_64(
     result,
     input_data,

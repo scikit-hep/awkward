@@ -72,12 +72,37 @@ class CupyBackend(Backend):
         Check if the given kernel operation is supported by cuda.compute.
 
         All the reducers are handled separately in awkward/_connect/cuda/reducers.py
+        Still we keep the list of all the reducers here if someone wants to call a kernel directly from awkward._backends.cupy.instance().
+        For example these are called directly from `tests-cuda-kernels-explicit`:
+        - awkward_sum
+        - awkward_sum_int32_bool_64
+        - awkward_sum_int64_bool_64
+        - awkward_sum_bool
+        - awkward_max
+        - awkward_min
+        - awkward_prod
+        - awkward_prod_bool
+        - awkward_count_64
+        - awkward_countnonzero
+
         Other kernels that are currently supported:
         - awkward_sort
         - awkward_argsort (future)
 
         """
-        return kernel_name in ("awkward_sort",)
+        return kernel_name in (
+            "awkward_sort",
+            "awkward_reduce_sum",
+            "awkward_reduce_sum_int32_bool_64",
+            "awkward_reduce_sum_int64_bool_64",
+            "awkward_reduce_sum_bool",
+            "awkward_reduce_max",
+            "awkward_reduce_min",
+            "awkward_reduce_prod",
+            "awkward_reduce_prod_bool",
+            "awkward_reduce_count_64",
+            "awkward_reduce_countnonzero",
+        )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
         """
@@ -94,7 +119,13 @@ class CupyBackend(Backend):
         if kernel_name == "awkward_sort":
             return cuda_compute.segmented_sort
 
-        return None
+        if kernel_name in {
+            "awkward_reduce_sum_int32_bool_64",
+            "awkward_reduce_sum_int64_bool_64",
+        }:
+            return cuda_compute.awkward_reduce_sum_int32_bool_64
+
+        getattr(cuda_compute, kernel_name, None)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
         from awkward._connect.cuda import get_cuda_compute_reducer

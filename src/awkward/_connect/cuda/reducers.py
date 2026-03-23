@@ -573,9 +573,9 @@ class Sum(CudaComputeReducer):
             )
             assert parents.nplike is array.backend.nplike
             if result.dtype in (np.int64, np.uint64, np.int32, np.uint32):
-                from ._compute import awkward_reduce_sum_bool
+                from ._compute import awkward_reduce_sum_int32_bool_64
 
-                awkward_reduce_sum_bool(
+                awkward_reduce_sum_int32_bool_64(
                     result,
                     array.data,
                     parents.data,
