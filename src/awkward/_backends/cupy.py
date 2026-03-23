@@ -76,31 +76,8 @@ class CupyBackend(Backend):
         - awkward_sort
         - awkward_argsort (future)
 
-        These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
-        - awkward_sum
-        - awkward_sum_int32_bool_64
-        - awkward_sum_int64_bool_64
-        - awkward_sum_bool
-        - awkward_max
-        - awkward_min
-        - awkward_prod
-        - awkward_prod_bool
-        - awkward_count_64
-        - awkward_countnonzero
         """
-        return kernel_name in (
-            "awkward_sort",
-            "awkward_reduce_sum",
-            "awkward_reduce_sum_int32_bool_64",
-            "awkward_reduce_sum_int64_bool_64",
-            "awkward_reduce_sum_bool",
-            "awkward_reduce_max",
-            "awkward_reduce_min",
-            "awkward_reduce_prod",
-            "awkward_reduce_prod_bool",
-            "awkward_reduce_count_64",
-            "awkward_reduce_countnonzero",
-        )
+        return kernel_name in ("awkward_sort",)
 
     def _get_cuda_compute_impl(self, kernel_name: str):
         """
@@ -116,36 +93,6 @@ class CupyBackend(Backend):
 
         if kernel_name == "awkward_sort":
             return cuda_compute.segmented_sort
-
-        if kernel_name == "awkward_reduce_sum":
-            return cuda_compute.awkward_reduce_sum
-
-        if kernel_name in {
-            "awkward_reduce_sum_int32_bool_64",
-            "awkward_reduce_sum_int64_bool_64",
-        }:
-            return cuda_compute.awkward_reduce_sum_int32_bool_64
-
-        if kernel_name == "awkward_reduce_sum_bool":
-            return cuda_compute.awkward_reduce_sum_bool
-
-        if kernel_name == "awkward_reduce_max":
-            return cuda_compute.awkward_reduce_max
-
-        if kernel_name == "awkward_reduce_min":
-            return cuda_compute.awkward_reduce_min
-
-        if kernel_name == "awkward_reduce_prod":
-            return cuda_compute.awkward_reduce_prod
-
-        if kernel_name == "awkward_reduce_prod_bool":
-            return cuda_compute.awkward_reduce_prod_bool
-
-        if kernel_name == "awkward_reduce_count_64":
-            return cuda_compute.awkward_reduce_count_64
-
-        if kernel_name == "awkward_reduce_countnonzero":
-            return cuda_compute.awkward_reduce_countnonzero
 
         return None
 
