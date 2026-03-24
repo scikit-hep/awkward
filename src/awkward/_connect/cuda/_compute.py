@@ -629,3 +629,14 @@ def awkward_reduce_countnonzero(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+
+
+def awkward_NumpyArray_reduce_adjust_starts_shifts_64(
+    toptr, outlength, parents, starts, shifts
+):
+    # create a mask for non-negative entries
+    mask = toptr[:outlength] >= 0
+    # get the valid indices
+    i = toptr[:outlength]
+    # adjust toptr by shifts[i] - starts[parents[i]]
+    toptr[:outlength] = cp.where(mask, i + shifts[i] - starts[parents[i]], i)
