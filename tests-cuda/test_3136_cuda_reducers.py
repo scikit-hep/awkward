@@ -55,7 +55,7 @@ def depth_gpu(request):
         (None, None, np.int64),
         (None, None, np.uint64),
     ],
-    indirect=["depth", "depth_gpu"]
+    indirect=["depth", "depth_gpu"],
 )
 def test_sumprod_gpu(dtype, depth, depth_gpu):
     sum_gpu = ak.sum(depth_gpu, axis=-1, highlevel=False)
@@ -137,9 +137,7 @@ def test_reduce_axis_none_all(cuda_array, expected_scalars, mask_templates):
     assert ak.sum(arr[2], axis=None, mask_identity=True) is None
 
     # --- PROD ---
-    cpt.assert_allclose(
-        ak.prod(arr[1:], axis=None), expected_scalars["prod_slice"]
-    )
+    cpt.assert_allclose(ak.prod(arr[1:], axis=None), expected_scalars["prod_slice"])
     assert ak.prod(arr, axis=None) == expected_scalars["prod"]
 
     # --- MIN / MAX ---
@@ -152,4 +150,3 @@ def test_reduce_axis_none_all(cuda_array, expected_scalars, mask_templates):
 
     # --- STD ---
     cpt.assert_allclose(ak.std(arr, axis=None), expected_scalars["std"])
-
