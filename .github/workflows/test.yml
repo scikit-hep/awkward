@@ -206,7 +206,6 @@ jobs:
             cccl-python
             cupy>=14
             cuda-version=${{ matrix.cuda-version }}
-            cuda-toolkit
             cxx-compiler
             numba-cuda
             ${{ matrix.cuda-version == 13 && 'root=6.36.06' || '' }}
