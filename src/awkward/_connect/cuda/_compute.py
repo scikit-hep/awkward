@@ -658,4 +658,6 @@ def awkward_ListArray_getitem_jagged_descend(
     tooffsets[0] = 0 if sliceouterlen == 0 else slicestarts[0]
 
     # (tooffsets[i + 1] = tooffsets[i] + count) for i in range(sliceouterlen)
-    tooffsets[1 : sliceouterlen + 1] = tooffsets[0] + cp.cumsum(counts)  # tooffsets: int64
+    tooffsets[1 : sliceouterlen + 1] = tooffsets[0] + cp.cumsum(
+        counts
+    )  # tooffsets: int64
