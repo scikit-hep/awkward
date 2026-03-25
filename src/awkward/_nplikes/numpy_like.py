@@ -400,6 +400,16 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
     ) -> ArrayLikeT: ...
 
+    @abstractmethod
+    def minimum(
+        self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT: ...
+
+    @abstractmethod
+    def maximum(
+        self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT: ...
+
     ############################ almost-ufuncs
 
     @abstractmethod
@@ -464,15 +474,6 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         *,
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
-        maybe_out: ArrayLikeT | None = None,
-    ) -> ArrayLikeT: ...
-
-    @abstractmethod
-    def maximum(
-        self,
-        x1: ArrayLikeT,
-        x2: ArrayLikeT,
-        *,
         maybe_out: ArrayLikeT | None = None,
     ) -> ArrayLikeT: ...
 

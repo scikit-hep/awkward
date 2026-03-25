@@ -156,21 +156,13 @@ jobs:
 
       - name: Test non-kernels (Python)
         run: >-
-          python -m pytest -vv -rs tests --cov=awkward --cov-report=term
-          --cov-report=xml
-        if: startsWith(matrix.python-version, '3.')
+          python -m pytest -vv -rs tests
 
       - name: Test non-kernels (Python) in multiple threads
         if: matrix.python-version == '3.14t'
         run: |
           python -m pip install 'pytest-run-parallel>=0.8.2'
           python -m pytest -vv -rs tests --parallel-threads 4 --ignore=tests/test_3364_virtualarray.py --ignore=tests/test_3451_virtualarray_with_jax.py --ignore=tests/test_3475_virtualarray_unknown_length.py
-
-      - name: Upload Codecov results
-        if: (matrix.python-version == '3.10') && (matrix.runs-on == 'ubuntu-latest')
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
 
   run-gpu-tests:
     name: Run GPU Tests
@@ -210,7 +202,6 @@ jobs:
           # TODO: run the tests with cudf again when it supports numba-cuda>=0.23.0
           create-args: >-
             -c rapidsai
-            -c nvidia
             python=3.13
             pandas>=0.24.0
             cccl-python
@@ -218,6 +209,8 @@ jobs:
             cuda-version=${{ matrix.cuda-version }}
             cuda-toolkit
             cxx-compiler
+            numba-cuda
+            ${{ matrix.cuda-version == 13 && 'root=6.36.06' || '' }}
 
       - name: Generate build files
         run: |
@@ -251,7 +244,7 @@ jobs:
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
           python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
-          -r "requirements-test-gpu.txt"
+          -r requirements-test-gpu.txt ${{ matrix.cuda-version == 13 && '-r requirements-test-full.txt' || '' }}
 
       - name: Print versions
         run: python -m pip list
@@ -262,13 +255,33 @@ jobs:
       - name: Test CUDA kernels with explicitly defined values
         run: python -m pytest -vv -rs tests-cuda-kernels-explicit
 
+      - name: Test non-kernels (Python)
+        if: matrix.cuda-version == 13
+        run: >-
+          python -m pytest -vv -rs tests --cov=awkward --cov-report=term
+          --cov-report=xml:non-cuda-coverage.xml --junitxml=junit.xml -o junit_family=legacy
+
       - name: Test CUDA non-kernel (Python)
         run: >-
           python -m pytest -vv -rs tests-cuda --ignore=tests-cuda/test_3459_virtualarray_with_cuda.py
+          ${{ matrix.cuda-version == 13 && '--cov=awkward --cov-report=term --cov-report=xml:cuda-coverage.xml' || '' }}
 
       - name: Test CUDA virtual arrays
         run: >-
           python -m pytest -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py
+          ${{ matrix.cuda-version == 13 && '--cov=awkward --cov-report=term --cov-report=xml:cuda-virtual-coverage.xml' || '' }}
+
+      - name: Upload Codecov results
+        if: matrix.cuda-version == 13
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() && matrix.cuda-version == 13 }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   Linux-ROOT:
     runs-on: ubuntu-latest
@@ -294,9 +307,8 @@ jobs:
           # Cache invalidates daily by default
           cache-environment: true
           environment-name: awkward
-          # Need Python 3.10 for the cached wheels
           create-args: >-
-            python=3.10
+            python=3.14
             numpy
             root=6.36.06
 
@@ -308,7 +320,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ./awkward-cpp/dist
-          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}-py3.14
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
