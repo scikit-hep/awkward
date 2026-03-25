@@ -1259,19 +1259,40 @@ def gencudaunittests(specdict):
                                 count += 1
                             else:
                                 args += ", " + arg.name
-                        f.write(" " * 4 + "funcC(" + args + ")\n")
+
+                        # Determine if this is a cuda.compute kernel (raises errors eagerly)
+                        # or compiled CUDA kernel (raises errors after `ak_cu.synchronize_cuda()`)
+                        CUDA_COPUTE_KERNELS = {
+                            "awkward_ListArray_getitem_jagged_descend",
+                        }
+
+                        raises_error_eagerly = (
+                            spec.templatized_kernel_name in CUDA_COPUTE_KERNELS
+                        )
+
                         if test["error"]:
-                            f.write(
-                                f"""
-    error_message = re.escape("{test["message"]} in compiled CUDA code ({spec.templatized_kernel_name})")
-"""
-                            )
-                            f.write(
-                                """    with pytest.raises(ValueError, match=rf"{error_message}"):
-        ak_cu.synchronize_cuda()
-"""
-                            )
+                            error_message_line = f'    error_message = re.escape("{test["message"]} in compiled CUDA code ({spec.templatized_kernel_name})")\n'
+                            if raises_error_eagerly:
+                                # call a kernel directly inside `pytest.raises()`
+                                f.write(
+                                    "\n"
+                                    + error_message_line
+                                    + '    with pytest.raises(ValueError, match=rf"{error_message}"):\n'
+                                    + " " * 8
+                                    + "funcC("
+                                    + args
+                                    + ")\n"
+                                )
+                            else:
+                                # first call a kernel and then synchronize_cuda inside `pytest.raises()`
+                                f.write(" " * 4 + "funcC(" + args + ")\n")
+                                f.write("\n" + error_message_line)
+                                f.write(
+                                    '    with pytest.raises(ValueError, match=rf"{error_message}"):\n'
+                                    "        ak_cu.synchronize_cuda()\n"
+                                )
                         else:
+                            f.write(" " * 4 + "funcC(" + args + ")\n")
                             f.write(
                                 """
     try:

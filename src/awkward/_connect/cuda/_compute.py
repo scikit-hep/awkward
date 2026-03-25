@@ -650,7 +650,9 @@ def awkward_ListArray_getitem_jagged_descend(
     counts = fromstops[:sliceouterlen] - fromstarts[:sliceouterlen]
 
     if not cp.all(slicecounts == counts):
-        raise ValueError("jagged slice inner length differs from array inner length")
+        raise ValueError(
+            "jagged slice inner length differs from array inner length in compiled CUDA code (awkward_ListArray_getitem_jagged_descend)"
+        )
 
     # should check for len(tooffsets) == 0?
     tooffsets[0] = 0 if sliceouterlen == 0 else slicestarts[0]
