@@ -642,10 +642,10 @@ def awkward_NumpyArray_reduce_adjust_starts_shifts_64(
     toptr[:outlength] = cp.where(mask, i + shifts[i] - starts[parents[i]], i)
 
 
+# toptr.dtype is always initialized as cp.int8
 def awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
     toptr, parents, lenparents, outlength
 ):
-    # toptr.dtype is always cp.int8
     # initialize all entries to 1 (masked/invalid)
     toptr[:outlength] = 1
     # mark entries that appear in parents as 0 (unmasked/valid)
