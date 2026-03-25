@@ -56,7 +56,7 @@ cuda_kernels_impl = [
     "awkward_ListArray_combinations",
     "awkward_RegularArray_combinations_64",
     "awkward_ListArray_getitem_jagged_apply",
-    "awkward_ListArray_getitem_jagged_carrylen",
+    # "awkward_ListArray_getitem_jagged_carrylen",
     "awkward_ListArray_getitem_jagged_descend",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_numvalid",

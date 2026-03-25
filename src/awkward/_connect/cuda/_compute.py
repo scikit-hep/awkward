@@ -629,3 +629,12 @@ def awkward_reduce_countnonzero(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+
+
+def awkward_ListArray_getitem_jagged_carrylen(
+    carrylen, slicestarts, slicestops, sliceouterlen
+):
+    # sum up the lengths of all slices (stop - start) to get the total carry length
+    carrylen[0] = cp.sum(
+        slicestops[:sliceouterlen] - slicestarts[:sliceouterlen]
+    )  # out: int64
