@@ -76,6 +76,7 @@ class CupyBackend(Backend):
         - awkward_sort
         - awkward_argsort (future)
         - awkward_NumpyArray_reduce_adjust_starts_shifts_64
+        - awkward_NumpyArray_reduce_mask_ByteMaskedArray_64
 
         These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
         - awkward_sum
@@ -102,6 +103,7 @@ class CupyBackend(Backend):
             "awkward_reduce_count_64",
             "awkward_reduce_countnonzero",
             "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+            "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):

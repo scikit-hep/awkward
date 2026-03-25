@@ -40,7 +40,7 @@ cuda_kernels_impl = [
     "awkward_UnionArray_validity",
     "awkward_IndexedArray_validity",
     "awkward_ByteMaskedArray_overlay_mask",
-    "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+    # "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
     "awkward_RegularArray_getitem_carry",
     "awkward_RegularArray_localindex",
     "awkward_RegularArray_rpad_and_clip_axis1",
