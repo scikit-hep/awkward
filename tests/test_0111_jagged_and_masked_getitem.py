@@ -486,11 +486,17 @@ def test_bool_missing():
 
     x1, x2, x3, x4, x5 = True, True, True, False, None
     mask = [x1, x2, x3, x4, x5]
-    expected = [m if m is None else x for x, m in zip(data, mask) if m is not False]
+    expected = [
+        m if m is None else x for x, m in zip(data, mask, strict=True) if m is not False
+    ]
     array2 = ak.highlevel.Array(mask, check_valid=True).layout
 
     for mask in itertools.repeat([True, False, None], 5):
-        expected = [m if m is None else x for x, m in zip(data, mask) if m is not False]
+        expected = [
+            m if m is None else x
+            for x, m in zip(data, mask, strict=False)
+            if m is not False
+        ]
         array2 = ak.highlevel.Array(mask, check_valid=True).layout
         assert to_list(array[array2]) == expected
         assert array.to_typetracer()[array2].form == array[array2].form

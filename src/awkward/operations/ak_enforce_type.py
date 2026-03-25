@@ -282,7 +282,8 @@ def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
 
         if layout.is_tuple:
             return all(
-                _layout_has_type(c, t) for c, t in zip(layout.contents, type_.contents)
+                _layout_has_type(c, t)
+                for c, t in zip(layout.contents, type_.contents, strict=True)
             )
         else:
             return (frozenset(layout.fields) == frozenset(type_.fields)) and all(
@@ -296,7 +297,7 @@ def _layout_has_type(layout: ak.contents.Content, type_: ak.types.Type) -> bool:
         for contents in permutations(layout.contents):
             if all(
                 _layout_has_type(layout, type_)
-                for layout, type_ in zip(contents, type_.contents)
+                for layout, type_ in zip(contents, type_.contents, strict=True)
             ):
                 return True
         return False
@@ -383,7 +384,7 @@ def _type_is_enforceable(
                     # Require that all layouts match types for layout permutation
                     if all(
                         _layout_has_type(c, t)
-                        for c, t in zip(layout.contents, retained_types)
+                        for c, t in zip(layout.contents, retained_types, strict=True)
                     ):
                         return _TypeEnforceableResult(
                             is_enforceable=True, requires_packing=False
@@ -405,7 +406,7 @@ def _type_is_enforceable(
                     # Require that all layouts match types for layout permutation
                     if all(
                         _layout_has_type(c, t)
-                        for c, t in zip(retained_contents, type_.contents)
+                        for c, t in zip(retained_contents, type_.contents, strict=True)
                     ):
                         return _TypeEnforceableResult(
                             is_enforceable=True, requires_packing=True
@@ -423,7 +424,7 @@ def _type_is_enforceable(
                     # How many contents match types in this permutation?
                     content_matches_type = [
                         _layout_has_type(c, t)
-                        for c, t in zip(layout.contents, permuted_types)
+                        for c, t in zip(layout.contents, permuted_types, strict=True)
                     ]
                     n_matching = sum(content_matches_type, 0)
 
@@ -437,6 +438,7 @@ def _type_is_enforceable(
                             range(len(layout.contents)),
                             permuted_types,
                             content_matches_type,
+                            strict=True,
                         ):
                             if not is_match:
                                 # This content is being converted
@@ -531,7 +533,7 @@ def _type_is_enforceable(
                 type_contents = iter(type_.contents)
                 contents_enforceable = [
                     _type_is_enforceable(c, t)
-                    for c, t in zip(layout.contents, type_contents)
+                    for c, t in zip(layout.contents, type_contents, strict=True)
                 ]
                 # Anything left in `type_contents` are the types of new slots
                 for next_type in type_contents:
@@ -608,7 +610,9 @@ def _recurse_unknown_any(
     layout: ak.contents.EmptyArray, type_: ak.types.Type
 ) -> ak.contents.Content:
     type_form = ak.forms.from_type(type_)
-    return type_form.length_zero_array().copy(parameters=type_._parameters)
+    return type_form.length_zero_array(backend=layout.backend).copy(
+        parameters=type_._parameters
+    )
 
 
 def _recurse_any_unknown(layout: ak.contents.Content, type_: ak.types.UnknownType):
@@ -661,7 +665,9 @@ def _recurse_option_any(
                 else:
                     new_index[is_none] = -1
                     new_index[~is_none] = nplike.arange(
-                        layout.length - num_none,
+                        layout.length - num_none
+                        if layout.length is not unknown_length
+                        else num_none,
                         dtype=new_index.dtype,
                     )
                 return ak.contents.IndexedOptionArray(
@@ -680,7 +686,9 @@ def _recurse_option_any(
         # Check that we can build the content
         content_enforceable = _type_is_enforceable(layout.content, type_)
 
-        if layout.backend.nplike.any(layout.mask_as_bool(False)):
+        if layout.backend.nplike.known_data and layout.backend.nplike.any(
+            layout.mask_as_bool(False)
+        ):
             raise ValueError(
                 "option types can only be removed if there are no missing values"
             )
@@ -751,7 +759,8 @@ def _recurse_union_union(
             retained_types = [type_.contents[j] for j in ix_perm_contents]
             # Require that all layouts match types for layout permutation
             if all(
-                _layout_has_type(c, t) for c, t in zip(layout.contents, retained_types)
+                _layout_has_type(c, t)
+                for c, t in zip(layout.contents, retained_types, strict=True)
             ):
                 break
 
@@ -770,7 +779,8 @@ def _recurse_union_union(
         # Given that we _know_ all layouts match their types for the permutation,
         # we don't need to project these contents — they won't be operated upon (besides parameters)
         contents = [
-            _enforce_type(b, c) for b, c in zip(layout.contents, retained_types)
+            _enforce_type(b, c)
+            for b, c in zip(layout.contents, retained_types, strict=True)
         ]
         contents.extend(
             [
@@ -792,7 +802,7 @@ def _recurse_union_union(
             # Require that all layouts match types for layout permutation
             if all(
                 _layout_has_type(c, t)
-                for c, t in zip(retained_contents, type_.contents)
+                for c, t in zip(retained_contents, type_.contents, strict=True)
             ):
                 break
         else:
@@ -806,7 +816,8 @@ def _recurse_union_union(
         # Given that we _know_ all layouts match their types for the permutation,
         # we don't need to project these contents — they won't be operated upon (besides parameters)
         contents = [
-            _enforce_type(c, t) for c, t in zip(retained_contents, type_.contents)
+            _enforce_type(c, t)
+            for c, t in zip(retained_contents, type_.contents, strict=True)
         ]
 
         is_trivial_permutation = ix_perm_contents == range(n_type_contents)
@@ -821,7 +832,7 @@ def _recurse_union_union(
         # Ensure that the union references all of the tags of the permutation,
         # and re-order the tags if this is not the trivial permutation
         _total_used_tags = 0
-        for i, j in zip(ix_perm_contents, range(n_type_contents)):
+        for i, j in zip(ix_perm_contents, range(n_type_contents), strict=True):
             layout_tag_is_i = layout.tags.data == i
 
             # Rewrite the tags if they need to be condensed (i.e., not if this is the trivial permutation)
@@ -853,7 +864,8 @@ def _recurse_union_union(
 
             # How many contents match types in this permutation?
             content_matches_type = [
-                _layout_has_type(c, t) for c, t in zip(layout.contents, permuted_types)
+                _layout_has_type(c, t)
+                for c, t in zip(layout.contents, permuted_types, strict=True)
             ]
             n_matching = sum(content_matches_type, 0)
 
@@ -861,7 +873,8 @@ def _recurse_union_union(
             if n_matching == len(type_.contents):
                 # Now build the result
                 contents = [
-                    _enforce_type(c, t) for c, t in zip(layout.contents, permuted_types)
+                    _enforce_type(c, t)
+                    for c, t in zip(layout.contents, permuted_types, strict=True)
                 ]
                 return layout.copy(
                     contents=contents,
@@ -872,7 +885,10 @@ def _recurse_union_union(
                 next_contents = []
                 index: ak.index.Index | None = None
                 for tag, content_type, is_match in zip(
-                    range(len(layout.contents)), permuted_types, content_matches_type
+                    range(len(layout.contents)),
+                    permuted_types,
+                    content_matches_type,
+                    strict=True,
                 ):
                     # If the types agree between the intended type and content, then include this content
                     # as-is, only recursing to update parameters. Because the types agree, we're safe
@@ -1119,7 +1135,8 @@ def _recurse_record_any(
             # Recurse into shared contents
             type_contents = iter(type_.contents)
             next_contents = [
-                _enforce_type(c, t) for c, t in zip(layout.contents, type_contents)
+                _enforce_type(c, t)
+                for c, t in zip(layout.contents, type_contents, strict=False)
             ]
             # Anything left in `type_contents` are the types of new slots
             for next_type in type_contents:

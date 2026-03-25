@@ -110,13 +110,13 @@ class RecordForm(RecordMeta[Form], Form):
         )
 
     def _columns(self, path, output, list_indicator):
-        for content, field in zip(self._contents, self.fields):
+        for content, field in zip(self._contents, self.fields, strict=True):
             content._columns((*path, field), output, list_indicator)
 
     def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         contents = []
         fields = []
-        for content, field in zip(self._contents, self.fields):
+        for content, field in zip(self._contents, self.fields, strict=True):
             next_content = content._prune_columns(True)
             if next_content is None:
                 continue
@@ -134,7 +134,7 @@ class RecordForm(RecordMeta[Form], Form):
     def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         contents = []
         fields = []
-        for content, field in zip(self._contents, self.fields):
+        for content, field in zip(self._contents, self.fields, strict=True):
             # Try and match this field, allowing derived matcher to match any field if empty
             next_match_specifier = match_specifier(field, next_match_if_empty=True)
             if next_match_specifier is None:
@@ -186,6 +186,6 @@ class RecordForm(RecordMeta[Form], Form):
             and all(f in computed_fields_set for f in other.fields)
             and all(
                 content._is_equal_to(other.content(field), all_parameters, form_key)
-                for field, content in zip(self.fields, self._contents)
+                for field, content in zip(self.fields, self._contents, strict=True)
             )
         )

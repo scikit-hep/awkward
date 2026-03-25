@@ -9,11 +9,11 @@ from awkward import contents, highlevel, record
 from awkward._backends.jax import JaxBackend
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._typing import Generic, TypeVar, Union
+from awkward._typing import Generic, TypeVar
 from awkward.contents import Content
 
 T = TypeVar(
-    "T", bound=Union[highlevel.Array, highlevel.Record, contents.Content, record.Record]
+    "T", bound=highlevel.Array | highlevel.Record | contents.Content | record.Record
 )
 
 np = NumpyMetadata.instance()
@@ -72,7 +72,7 @@ class AuxData(Generic[T]):
         data_buffers, other_buffers = split_buffers(buffers)
 
         # now we need to flatten the data buffers
-        data_buffer_keys, data_flat_buffers = zip(*data_buffers.items())
+        data_buffer_keys, data_flat_buffers = zip(*data_buffers.items(), strict=True)
         return data_flat_buffers, AuxData(
             data_buffer_keys=data_buffer_keys,
             other_buffers=other_buffers,
@@ -95,7 +95,7 @@ class AuxData(Generic[T]):
                 )
 
         # reconstitute data buffers
-        data_buffers = dict(zip(self._data_buffer_keys, data_buffers))
+        data_buffers = dict(zip(self._data_buffer_keys, data_buffers, strict=True))
 
         # combine data buffers with other buffers
         buffers = {**self._other_buffers, **data_buffers}

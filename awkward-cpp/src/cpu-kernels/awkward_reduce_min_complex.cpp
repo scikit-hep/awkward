@@ -9,12 +9,13 @@ ERROR awkward_reduce_min_complex(
   OUT* toptr,
   const IN* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   OUT identity) {
   for (int64_t i = 0;  i < outlength;  i++) {
-   toptr[i * 2] = identity;
-   toptr[i * 2 + 1] = 0;
+    toptr[i * 2] = identity;
+    toptr[i * 2 + 1] = 0;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[i];
@@ -32,6 +33,7 @@ ERROR awkward_reduce_min_complex64_complex64_64(
   float* toptr,
   const float* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   float identity) {
@@ -39,6 +41,7 @@ ERROR awkward_reduce_min_complex64_complex64_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);
@@ -47,6 +50,7 @@ ERROR awkward_reduce_min_complex128_complex128_64(
   double* toptr,
   const double* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength,
   double identity) {
@@ -54,6 +58,7 @@ ERROR awkward_reduce_min_complex128_complex128_64(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength,
     identity);

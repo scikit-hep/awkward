@@ -99,4 +99,4 @@ def _impl(array, how, highlevel, behavior, attrs):
         items = (
             ctx.wrap(layout[n], highlevel=highlevel, allow_other=True) for n in fields
         )
-    return tuple(items) if how is tuple else dict(zip(fields, items))
+    return tuple(items) if how is tuple else dict(zip(fields, items, strict=True))

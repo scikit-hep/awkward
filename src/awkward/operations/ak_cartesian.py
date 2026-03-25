@@ -43,10 +43,15 @@ def cartesian(
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         nested (None, True, False, or iterable of str or int): If None or
             False, all combinations of elements from the `arrays` are
             produced at the same level of nesting; if True, they are grouped
@@ -232,7 +237,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
                 )
             )
             fields = list(arrays.keys())
-            array_layouts = dict(zip(fields, layouts))
+            array_layouts = dict(zip(fields, layouts, strict=True))
 
             # propagate named axis from input to output,
             #   use strategy "unify" (see: awkward._namedaxis)
@@ -329,7 +334,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
             )
         ]
         outs = [
-            ak.contents.IndexedArray.simplified(x, y) for x, y in zip(indexes, layouts)
+            ak.contents.IndexedArray.simplified(x, y)
+            for x, y in zip(indexes, layouts, strict=True)
         ]
 
         result = ak.contents.RecordArray(outs, fields, parameters=parameters)

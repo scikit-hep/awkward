@@ -58,14 +58,14 @@ jobs:
     - name: Check metadata
       run: pipx run twine check awkward-cpp/dist/*
 
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v7
       with:
         name: awkward-cpp-sdist
         path: awkward-cpp/dist/*.tar.gz
 
   build_wheels:
     needs: [determine-source-date-epoch]
-    name: "Wheel awkward-cpp: ${{ matrix.arch }} on ${{ matrix.os }} with ${{ matrix.build }}"
+    name: "Wheel awkward-cpp: ${{ matrix.arch }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
@@ -73,20 +73,19 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-15, macos-15-intel]
         arch: [auto64]
-        build: ["cp", "pp"]
 
         include:
         - os: windows-latest
           arch: auto64
-          build: "cp"
 
         - os: windows-latest
           arch: auto32
-          build: "cp"
 
         - os: ubuntu-24.04-arm
           arch: auto64
-          build: "cp"
+
+        - os: windows-11-arm
+          arch: auto64
 
     steps:
     - uses: actions/checkout@v6
@@ -104,9 +103,8 @@ jobs:
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v3.3
+    - uses: pypa/cibuildwheel@v3.4
       env:
-        CIBW_BUILD: "${{ matrix.build }}*"
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
         package-dir: awkward-cpp
@@ -115,9 +113,9 @@ jobs:
       run: pipx run twine check wheelhouse/*.whl
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
-        name: awkward-cpp-wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.build }}
+        name: awkward-cpp-wheels-${{ matrix.os }}-${{ matrix.arch }}
         path: wheelhouse/*.whl
 
   build_awkward_wheel:
@@ -143,7 +141,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check dist/*
 
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v7
       with:
         name: awkward-wheel
         path: dist/*

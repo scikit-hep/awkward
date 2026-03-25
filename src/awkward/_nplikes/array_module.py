@@ -279,7 +279,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         # Interpret the arguments under these dtypes, converting scalars to length-1 arrays
         resolved_args = [
             cast("ArrayLikeT", self.asarray(arg, dtype=dtype))
-            for arg, dtype in zip(args, resolved_dtypes)
+            for arg, dtype in zip(args, resolved_dtypes[: len(args)], strict=True)
         ]
         # Broadcast to ensure all-scalar or all-nd-array
         broadcasted_args = self.broadcast_arrays(*resolved_args)
@@ -307,7 +307,8 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         broadcasted_args = self.broadcast_arrays(*resolved_args)
         # Choose the broadcasted argument if it wasn't a Python scalar
         non_generic_value_promoted_args = [
-            y if hasattr(x, "ndim") else x for x, y in zip(args, broadcasted_args)
+            y if hasattr(x, "ndim") else x
+            for x, y in zip(args, broadcasted_args, strict=True)
         ]
         # Allow other nplikes to replace implementation
         impl = self.prepare_ufunc(ufunc)
@@ -605,6 +606,18 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         x1, x2 = maybe_materialize(x1, x2)
         return self._module.divide(x1, x2, out=maybe_out)
+
+    def minimum(
+        self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
+        x1, x2 = maybe_materialize(x1, x2)
+        return self._module.minimum(x1, x2, out=maybe_out)
+
+    def maximum(
+        self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
+        x1, x2 = maybe_materialize(x1, x2)
+        return self._module.maximum(x1, x2, out=maybe_out)
 
     ############################ almost-ufuncs
 

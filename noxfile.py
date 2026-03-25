@@ -1,4 +1,11 @@
+#!/usr/bin/env -S uv run --script
+
+# /// script
+# dependencies = ["nox>=2025.2.09"]
+# ///
+
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
 
 from __future__ import annotations
 
@@ -9,9 +16,7 @@ import shutil
 
 import nox
 
-ALL_PYTHONS = ["3.9", "3.10", "3.11", "3.12", "3.13"]
-
-nox.needs_version = ">=2024.3.2"
+nox.needs_version = ">=2025.02.09"
 nox.options.default_venv_backend = "uv|virtualenv"
 nox.options.sessions = ["lint", "tests"]
 
@@ -23,6 +28,9 @@ requirements_dev = [
     "requests",
     "tomli",
 ]
+
+PYPROJECT = nox.project.load_toml("pyproject.toml")
+ALL_PYTHONS = nox.project.python_versions(PYPROJECT)
 
 
 def remove_if_found(*paths):
@@ -38,7 +46,8 @@ def tests(session):
     """
     Run the unit and regular tests.
     """
-    session.install("-r", "requirements-test-full.txt", "./awkward-cpp", ".")
+    session.install("-r", "requirements-test-full.txt", "--only-binary=:all:")
+    session.install("./awkward-cpp", "-e.")
     session.run("pytest", *session.posargs if session.posargs else ["tests"])
 
 
@@ -194,3 +203,7 @@ def diagnostics(session):
     """
     session.install(*requirements_dev)
     session.run("python", "dev/kernel-diagnostics.py", *session.posargs)
+
+
+if __name__ == "__main__":
+    nox.main()

@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import re
 
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 
 
-def test_invalid():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_invalid(forget_length):
     layout = ak.contents.RecordArray(
         [
             ak.contents.NumpyArray([1, 2, 3]),
@@ -18,9 +19,17 @@ def test_invalid():
         ["x", "x"],
     )
     assert re.match(r".*duplicate field 'x'.*", ak.validity_error(layout)) is not None
+    assert (
+        re.match(
+            r".*duplicate field 'x'.*",
+            ak.validity_error(layout.to_typetracer(forget_length)),
+        )
+        is not None
+    )
 
 
-def test_valid():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_valid(forget_length):
     layout = ak.contents.RecordArray(
         [
             ak.contents.NumpyArray([1, 2, 3]),
@@ -29,3 +38,10 @@ def test_valid():
         ["x", "y"],
     )
     assert re.match(r".*duplicate field 'x'.*", ak.validity_error(layout)) is None
+    assert (
+        re.match(
+            r".*duplicate field 'x'.*",
+            ak.validity_error(layout.to_typetracer(forget_length)),
+        )
+        is None
+    )

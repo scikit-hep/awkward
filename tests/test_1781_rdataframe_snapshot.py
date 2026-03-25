@@ -11,8 +11,6 @@ import awkward as ak
 
 ROOT = pytest.importorskip("ROOT")
 
-ROOT.ROOT.EnableImplicitMT(1)
-
 compiler = ROOT.gInterpreter.Declare
 
 
@@ -54,12 +52,19 @@ def test_data_frame_vec_of_vec_of_real(tmp_path):
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
-    # With `ROOT.ROOT.EnableImplicitMT(1)` a SystemError becomes a Warning:
-    with warnings.catch_warnings(record=True):
-        # Warning in <TStreamerInfo::Build>: awkward::ListArray_jEomw7jWD1w:
-        # base class awkward::ArrayView has no streamer or dictionary
-        # it will not be saved
-        data_frame.Snapshot("ListArray", filename, ("x",))
+    # Without IMT, Snapshot raises a SystemError. With `ROOT.ROOT.EnableImplicitMT(1)`
+    # the SystemError becomes a Warning:
+    #   Warning in <TStreamerInfo::Build>: awkward::ListArray_jEomw7jWD1w:
+    #   base class awkward::ArrayView has no streamer or dictionary
+    #   it will not be saved
+    # Once IMT has been enabled at any point in the process (even if later disabled),
+    # the behavior changes permanently. Since other tests in the suite enable IMT,
+    # we need to handle both cases.
+    try:
+        with warnings.catch_warnings(record=True):
+            data_frame.Snapshot("ListArray", filename, ("x",))
+    except SystemError:
+        pass  # Expected when IMT was never enabled in this process
 
 
 def test_data_frame_rvec_filter(tmp_path):

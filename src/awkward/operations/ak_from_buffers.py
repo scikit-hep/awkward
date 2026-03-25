@@ -145,6 +145,14 @@ def _impl(
     enable_virtualarray_caching,
 ):
     backend = regularize_backend(backend)
+    if not backend.nplike.known_data:
+        msg = (
+            "Typetacer backend is not supported in 'ak.from_buffers'. "
+            "Typetracer-backed arrays can be constructed only from the form as they do not hold any data. "
+            "Use highlevel functions like 'ak.typetracer.typetracer_from_form' or 'ak.typetracer.typetracer_with_report' "
+            "to construct such arrays."
+        )
+        raise TypeError(msg)
 
     if isinstance(form, str):
         if ak.types.numpytype.is_primitive(form):
@@ -271,6 +279,7 @@ def _from_buffer(
         # Require 1D buffers
         copy = None if isinstance(nplike, Jax) else False  # Jax can not avoid this
         array = nplike.reshape(buffer.view(dtype), shape=(-1,), copy=copy)
+        array = ak._util.native_to_byteorder(array, byteorder)
 
         # we can't compare with count or slice when we're working with tracers
         if not (isinstance(nplike, Jax) and nplike.is_currently_tracing()):
@@ -362,6 +371,10 @@ def _reconstitute(
             (length,) = shape_generator()
             return (_adjust_length(length),)
 
+        def _length_generator():
+            (length,) = shape_generator()
+            return length
+
         if length is unknown_length:
             next_length = unknown_length
         else:
@@ -394,15 +407,13 @@ def _reconstitute(
             make = ak.contents.BitMaskedArray.simplified
         else:
             make = ak.contents.BitMaskedArray
-        # We need to know the length of a BitMaskedArray to initialize it
-        # as it is an argument in __init__ and is not calculated from the content
-        (length,) = shape_generator()
         return make(
             ak.index.Index(mask),
             content,
             form.valid_when,
             length,
             form.lsb_order,
+            _length_generator,
             parameters=form._parameters,
         )
 
@@ -458,7 +469,14 @@ def _reconstitute(
         )
 
         def _adjust_length(index):
-            return 0 if len(index) == 0 else max(0, backend.nplike.max(index) + 1)
+            return (
+                0
+                if len(index) == 0
+                else max(
+                    0,
+                    backend.nplike.index_as_shape_item(backend.nplike.max(index) + 1),
+                )
+            )
 
         def _shape_generator():
             return (_adjust_length(index),)
@@ -568,7 +586,13 @@ def _reconstitute(
 
         def _adjust_length(starts, stops):
             reduced_stops = stops[starts != stops]
-            return 0 if len(starts) == 0 else backend.nplike.max(reduced_stops)
+            return (
+                0
+                if len(reduced_stops) == 0
+                else backend.nplike.index_as_shape_item(
+                    backend.nplike.max(reduced_stops)
+                )
+            )
 
         def _shape_generator():
             return (_adjust_length(starts, stops),)
@@ -617,9 +641,12 @@ def _reconstitute(
             ),
         )
 
-        # next length
         def _adjust_length(offsets):
-            return 0 if len(offsets) == 1 else offsets[-1]
+            return (
+                0
+                if len(offsets) == 1
+                else backend.nplike.index_as_shape_item(offsets[-1])
+            )
 
         def _shape_generator():
             return (_adjust_length(offsets),)
@@ -657,6 +684,10 @@ def _reconstitute(
             (first,) = shape_generator()
             return (_adjust_length(first),)
 
+        def _zeros_length_generator():
+            (length,) = shape_generator()
+            return length
+
         content = _reconstitute(
             form.content,
             next_length,
@@ -672,10 +703,15 @@ def _reconstitute(
             content,
             form.size,
             length,
+            _zeros_length_generator,
             parameters=form._parameters,
         )
 
     elif isinstance(form, ak.forms.RecordForm):
+
+        def _length_generator():
+            return length
+
         contents = [
             _reconstitute(
                 content,
@@ -688,12 +724,13 @@ def _reconstitute(
                 shape_generator,
                 enable_virtualarray_caching,
             )
-            for content, field in zip(form.contents, form.fields)
+            for content, field in zip(form.contents, form.fields, strict=True)
         ]
         return ak.contents.RecordArray(
             contents,
             None if form.is_tuple else form.fields,
             length,
+            _length_generator,
             parameters=form._parameters,
             backend=backend,
         )
@@ -731,7 +768,9 @@ def _reconstitute(
             if len(selected_index) == 0:
                 return 0
             else:
-                return backend.nplike.max(selected_index) + 1
+                return backend.nplike.index_as_shape_item(
+                    backend.nplike.max(selected_index) + 1
+                )
 
         _shape_generators = []
         for tag in range(len(form.contents)):

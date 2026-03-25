@@ -19,7 +19,7 @@ def unpack(array: ak.Array) -> dict[str, ak.Array] | None:
     if not ak.fields(array):
         return None
     else:
-        return dict(zip(ak.fields(array), ak.unzip(array)))
+        return dict(zip(ak.fields(array), ak.unzip(array), strict=True))
 
 
 def broadcast_and_flatten(args: Sequence[Any]) -> tuple[np.ndarray]:

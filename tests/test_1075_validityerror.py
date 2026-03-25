@@ -3,18 +3,19 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 
 
-def test_ListOffsetArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_ListOffsetArray(forget_length):
     v2_array = ak.highlevel.Array(
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
     ).layout
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
     v2_array = ak.highlevel.Array(
         [
@@ -25,26 +26,29 @@ def test_ListOffsetArray():
     ).layout
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
 
-def test_RegularArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_RegularArray(forget_length):
     v2_array = ak.highlevel.Array(
         np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]])
     ).layout
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
 
-def test_NumpyArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_NumpyArray(forget_length):
     v2_array = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3]).layout
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
 
-def test_IndexedArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_IndexedArray(forget_length):
     v2_array = ak.highlevel.Array(
         [
             [0.0, 1.1, 2.2, 3.3],
@@ -58,10 +62,11 @@ def test_IndexedArray():
     ).layout
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
 
-def test_ByteMaskedArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_ByteMaskedArray(forget_length):
     content = ak.operations.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
         highlevel=False,
@@ -70,10 +75,11 @@ def test_ByteMaskedArray():
     v2_array = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
 
-def test_IndexedOptionArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_IndexedOptionArray(forget_length):
     content = ak.operations.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
         highlevel=False,
@@ -82,10 +88,11 @@ def test_IndexedOptionArray():
     v2_array = ak.contents.IndexedOptionArray(index, content)
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
 
-def test_BitMaskedArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_BitMaskedArray(forget_length):
     v2_array = ak.contents.bitmaskedarray.BitMaskedArray(
         ak.index.Index(
             np.packbits(
@@ -120,17 +127,19 @@ def test_BitMaskedArray():
     )
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
 
-def test_EmptyArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_EmptyArray(forget_length):
     v2_array = ak.contents.emptyarray.EmptyArray()
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
 
-def test_RecordArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_RecordArray(forget_length):
     v2_array = ak.contents.listarray.ListArray(
         ak.index.Index(np.array([4, 100, 1])),
         ak.index.Index(np.array([7, 100, 3, 200])),
@@ -145,10 +154,11 @@ def test_RecordArray():
     )
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
 
-def test_UnionArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_UnionArray(forget_length):
     v2_array = ak.contents.unionarray.UnionArray(
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
@@ -168,10 +178,11 @@ def test_UnionArray():
     )
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""
 
 
-def test_UnmaskedArray():
+@pytest.mark.parametrize("forget_length", [False, True])
+def test_UnmaskedArray(forget_length):
     v2_array = ak.contents.unmaskedarray.UnmaskedArray(
         ak.contents.numpyarray.NumpyArray(
             np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
@@ -179,4 +190,4 @@ def test_UnmaskedArray():
     )
 
     assert ak.validity_error(v2_array) == ""
-    assert ak.validity_error(v2_array.to_typetracer()) == ""
+    assert ak.validity_error(v2_array.to_typetracer(forget_length)) == ""

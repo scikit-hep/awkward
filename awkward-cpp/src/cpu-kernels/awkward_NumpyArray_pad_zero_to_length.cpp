@@ -14,18 +14,22 @@ ERROR awkward_NumpyArray_pad_zero_to_length(
   T* toptr) {
   int64_t l_to_char = 0;
 
-  // For each sublist
-  for (auto k_sublist = 0; k_sublist < offsetslength - 1; k_sublist++) {
-    // Copy from src to dst
-    for (int64_t j_from_char = fromoffsets[k_sublist]; j_from_char < fromoffsets[k_sublist + 1]; j_from_char++) {
-      toptr[l_to_char++] = fromptr[j_from_char];
+  for (int64_t k_sublist = 0; k_sublist < offsetslength - 1; k_sublist++) {
+    int64_t start = fromoffsets[k_sublist];
+    int64_t end = fromoffsets[k_sublist + 1];
+    int64_t count = end - start;
+
+    int64_t destination_offset = k_sublist * target;
+
+    if (count > 0) {
+        std::memcpy(&toptr[destination_offset], &fromptr[start], count * sizeof(T));
     }
-    // Pad to remaining width
-    auto n_to_pad = target - (fromoffsets[k_sublist + 1] - fromoffsets[k_sublist]);
-    for (int64_t j_from_char = 0; j_from_char < n_to_pad; j_from_char++){
-      toptr[l_to_char++] = 0;
+
+    int64_t n_to_pad = target - count;
+    if (n_to_pad > 0) {
+        std::memset(&toptr[destination_offset + count], 0, n_to_pad * sizeof(T));
     }
-  }
+}
 
   return success();
 }

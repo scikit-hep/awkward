@@ -12,9 +12,8 @@ ERROR awkward_ByteMaskedArray_overlay_mask(
   int64_t length,
   bool validwhen) {
   for (int64_t i = 0;  i < length;  i++) {
-    bool theirs = theirmask[i];
-    bool mine = ((mymask[i] != 0) != validwhen);
-    tomask[i] = ((theirs | mine) ? 1 : 0);
+    uint8_t mine = (uint8_t)((mymask[i] != 0) != validwhen);
+    tomask[i] = (int8_t)((uint8_t)theirmask[i] | mine);
   }
   return success();
 }

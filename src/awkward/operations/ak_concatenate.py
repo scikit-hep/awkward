@@ -39,10 +39,15 @@ def concatenate(
     """
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         mergebool (bool): If True, boolean and numeric data can be combined
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with
@@ -434,7 +439,8 @@ def _form_has_type(form, type_):
 
         if form.is_tuple:
             return all(
-                _form_has_type(c, t) for c, t in zip(form.contents, type_.contents)
+                _form_has_type(c, t)
+                for c, t in zip(form.contents, type_.contents, strict=True)
             )
         else:
             return (frozenset(form.fields) == frozenset(type_.fields)) and all(
@@ -447,7 +453,7 @@ def _form_has_type(form, type_):
         for contents in permutations(form.contents):
             if all(
                 _form_has_type(form, type_)
-                for form, type_ in zip(contents, type_.contents)
+                for form, type_ in zip(contents, type_.contents, strict=True)
             ):
                 return True
         return False
@@ -557,7 +563,7 @@ def enforce_concatenated_form(layout, form):
         for form_projection_indices in permutations(form_indices, len(layout.contents)):
             if all(
                 mergeable(c, form_contents[i])
-                for c, i in zip(layout.contents, form_projection_indices)
+                for c, i in zip(layout.contents, form_projection_indices, strict=True)
             ):
                 break
         else:
@@ -567,7 +573,7 @@ def enforce_concatenated_form(layout, form):
 
         next_contents = [
             enforce_concatenated_form(c, form.contents[i])
-            for c, i in zip(layout.contents, form_projection_indices)
+            for c, i in zip(layout.contents, form_projection_indices, strict=True)
         ]
         next_contents.extend(
             [

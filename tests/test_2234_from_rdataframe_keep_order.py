@@ -13,8 +13,6 @@ compiler = ROOT.gInterpreter.Declare
 
 
 def test_data_frame_filter():
-    ROOT.ROOT.EnableImplicitMT()
-
     array_x = ak.Array(
         [
             {"x": [1.1, 1.2, 1.3]},
