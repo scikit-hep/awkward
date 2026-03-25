@@ -637,4 +637,20 @@ def awkward_ListArray_getitem_jagged_carrylen(
     # sum up the lengths of all slices (stop - start) to get the total carry length
     carrylen[0] = cp.sum(
         slicestops[:sliceouterlen] - slicestarts[:sliceouterlen]
-    )  # out: int64
+    )  # carrylen: int64
+
+# Recomputes a flat offsets array from starts/stops pairs, while validating that the jagged slice shape matches the array shape
+def awkward_ListArray_getitem_jagged_descend(tooffsets, slicestarts, slicestops, sliceouterlen, fromstarts, fromstops):
+    # (slicestops[i] - slicestarts[i]) for i in range(sliceouterlen)
+    slicecounts = slicestops[:sliceouterlen] - slicestarts[:sliceouterlen]
+    # (fromstops[i] - fromstarts[i]) for i in range(sliceouterlen)
+    counts = fromstops[:sliceouterlen] - fromstarts[:sliceouterlen]
+
+    if not cp.all(slicecounts == counts):
+        raise ValueError("jagged slice inner length differs from array inner length")
+
+    # should check for len(tooffsets) == 0?
+    tooffsets[0] = 0 if sliceouterlen == 0 else slicestarts[0]
+
+    # (tooffsets[i + 1] = tooffsets[i] + count) for i in range(sliceouterlen)
+    tooffsets[1:sliceouterlen + 1] = cp.cumsum(counts) # tooffsets: int64
