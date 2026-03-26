@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import awkward as ak
 from awkward._backends.backend import Backend, KernelKeyType
 from awkward._backends.dispatch import register_backend
 from awkward._kernels import CudaComputeKernel, CupyKernel, NumpyKernel
@@ -70,17 +71,35 @@ class CupyBackend(Backend):
         """
         Check if the given kernel operation is supported by cuda.compute.
 
-        Currently supports:
+        All the reducers are handled separately in awkward/_connect/cuda/reducers.py
+        Other kernels that are currently supported:
         - awkward_sort
         - awkward_argsort (future)
-        - awkward_argmax
-        - awkward_argmin
+
+        These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
+        - awkward_sum
+        - awkward_sum_int32_bool_64
+        - awkward_sum_int64_bool_64
+        - awkward_sum_bool
+        - awkward_max
+        - awkward_min
+        - awkward_prod
+        - awkward_prod_bool
+        - awkward_count_64
+        - awkward_countnonzero
         """
-        # For now, we only support these operations
         return kernel_name in (
             "awkward_sort",
-            "awkward_reduce_argmax",
-            "awkward_reduce_argmin",
+            "awkward_reduce_sum",
+            "awkward_reduce_sum_int32_bool_64",
+            "awkward_reduce_sum_int64_bool_64",
+            "awkward_reduce_sum_bool",
+            "awkward_reduce_max",
+            "awkward_reduce_min",
+            "awkward_reduce_prod",
+            "awkward_reduce_prod_bool",
+            "awkward_reduce_count_64",
+            "awkward_reduce_countnonzero",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
@@ -98,10 +117,39 @@ class CupyBackend(Backend):
         if kernel_name == "awkward_sort":
             return cuda_compute.segmented_sort
 
-        if kernel_name == "awkward_reduce_argmax":
-            return cuda_compute.awkward_reduce_argmax
+        if kernel_name == "awkward_reduce_sum":
+            return cuda_compute.awkward_reduce_sum
 
-        if kernel_name == "awkward_reduce_argmin":
-            return cuda_compute.awkward_reduce_argmin
+        if kernel_name in {
+            "awkward_reduce_sum_int32_bool_64",
+            "awkward_reduce_sum_int64_bool_64",
+        }:
+            return cuda_compute.awkward_reduce_sum_int32_bool_64
+
+        if kernel_name == "awkward_reduce_sum_bool":
+            return cuda_compute.awkward_reduce_sum_bool
+
+        if kernel_name == "awkward_reduce_max":
+            return cuda_compute.awkward_reduce_max
+
+        if kernel_name == "awkward_reduce_min":
+            return cuda_compute.awkward_reduce_min
+
+        if kernel_name == "awkward_reduce_prod":
+            return cuda_compute.awkward_reduce_prod
+
+        if kernel_name == "awkward_reduce_prod_bool":
+            return cuda_compute.awkward_reduce_prod_bool
+
+        if kernel_name == "awkward_reduce_count_64":
+            return cuda_compute.awkward_reduce_count_64
+
+        if kernel_name == "awkward_reduce_countnonzero":
+            return cuda_compute.awkward_reduce_countnonzero
 
         return None
+
+    def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
+        from awkward._connect.cuda import get_cuda_compute_reducer
+
+        return get_cuda_compute_reducer(reducer)

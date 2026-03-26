@@ -358,8 +358,7 @@ class Sum(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
-    @classmethod
-    def axis_none_reducer(cls):
+    def axis_none_reducer(self) -> AxisNoneSum:
         return AxisNoneSum()
 
     def apply(
@@ -487,7 +486,7 @@ class AxisNoneSum(Sum):
         nplike = array.backend.nplike
         reduce_fn = getattr(nplike, self.name)
         result_scalar = reduce_fn(array.data, axis=None)
-        result_array = nplike.asarray(result_scalar).reshape((1,))
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
 
         return ak.contents.NumpyArray(result_array, backend=array.backend)
 
@@ -718,7 +717,10 @@ class Min(KernelReducer):
     def initial(self) -> float | None:
         return self._initial
 
-    def _identity_for(self, dtype: DTypeLike | None) -> float:
+    def axis_none_reducer(self) -> AxisNoneMin:
+        return AxisNoneMin(self._initial)
+
+    def _identity_for(self, dtype: DTypeLike | None):
         dtype = np.dtype(dtype)
 
         assert dtype.kind.upper() != "M", (
@@ -821,6 +823,38 @@ class Min(KernelReducer):
             )
 
 
+class AxisNoneMin(Min):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _parents: ak.index.Index | ak.index.ZeroIndex,
+        _offsets: ak.index.Index | ak.index.EmptyIndex,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        nplike = array.backend.nplike
+        data = array.data
+
+        if data.size == 0:
+            val = (
+                self.initial
+                if self.initial is not None
+                else self._identity_for(data.dtype)
+            )
+            result_scalar = nplike.asarray(val, dtype=data.dtype)
+        else:
+            result_scalar = nplike.min(data, axis=None)
+            if self.initial is not None:
+                initial_val = nplike.asarray(self.initial, dtype=data.dtype)
+                result_scalar = nplike.minimum(result_scalar, initial_val)
+
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
 class Max(KernelReducer):
     name: Final = "max"
     preferred_dtype: Final = np.float64
@@ -833,7 +867,7 @@ class Max(KernelReducer):
     def initial(self):
         return self._initial
 
-    def axis_none_reducer(self):
+    def axis_none_reducer(self) -> AxisNoneMax:
         return AxisNoneMax(self._initial)
 
     def _identity_for(self, dtype: DTypeLike | None):
@@ -940,7 +974,16 @@ class Max(KernelReducer):
 
 
 class AxisNoneMax(Max):
-    def apply(self, array, _parents, _offsets, _starts, _shifts, _outlength):
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _parents: ak.index.Index | ak.index.ZeroIndex,
+        _offsets: ak.index.Index | ak.index.EmptyIndex,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
         nplike = array.backend.nplike
         data = array.data
 

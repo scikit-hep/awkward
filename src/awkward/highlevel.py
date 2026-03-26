@@ -588,7 +588,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #ak.fields.
         """
-        return self._layout.fields
+        return self._layout.fields.copy()
 
     @property
     def is_tuple(self):
@@ -2063,7 +2063,7 @@ class Record(NDArrayOperatorsMixin):
 
         See also #ak.fields.
         """
-        return self._layout.array.fields
+        return self._layout.array.fields.copy()
 
     @property
     def is_tuple(self):

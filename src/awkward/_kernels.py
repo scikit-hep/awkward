@@ -70,22 +70,17 @@ class CTypesFunc(Protocol):
 
 
 class NumpyKernel(BaseKernel):
-    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
-        super().__init__(impl, key)
-        # Pre-calculate which arguments are pointers.
-        # This moves the issubclass() calls out of the hot path.
-        self._is_ptr = [issubclass(t, ctypes._Pointer) for t in self._impl.argtypes]
-        self._argtypes = self._impl.argtypes
-
     @classmethod
     def _cast(cls, x, t):
         if issubclass(t, ctypes._Pointer):
+            # Do we have a NumPy-owned array?
             if numpy.is_own_array(x):
                 assert numpy.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
                     return ctypes.cast(numpy.memory_ptr(x), t)
                 else:
                     return x
+            # Or, do we have a ctypes type
             elif hasattr(x, "_b_base_"):
                 return ctypes.cast(x, t)
             else:
@@ -236,7 +231,27 @@ class CudaComputeKernel(BaseKernel):
         self._cupy = Cupy.instance()
 
     def __call__(self, *args) -> None:
+        import awkward._connect.cuda as ak_cuda
+
         args = maybe_materialize(*args)
+
+        cupy = ak_cuda.import_cupy("Awkward Arrays with CUDA")
+        # initialize `cupy_stream_ptr` which is used in tests-cuda-kernels-explicit
+        # (for example, if we call awkward._connect.cuda.synchronize_cuda())
+        cupy_stream_ptr = cupy.cuda.get_current_stream().ptr
+
+        if cupy_stream_ptr not in ak_cuda.cuda_streamptr_to_contexts:
+            ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr] = (
+                cupy.array(ak_cuda.NO_ERROR),
+                [],
+            )
+        ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
+            ak_cuda.Invocation(
+                name=self.key[0],
+                error_context=ak._errors.ErrorContext.primary(),
+            )
+        )
+
         return self._impl(*args)
 
 
