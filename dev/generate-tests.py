@@ -1114,6 +1114,297 @@ def gencudakerneltests(specdict):
                     f.write("\n")
 
 
+def gencudaunittests_new(specdict):
+    print("Generating Unit Tests for CUDA kernels (parametrized)")
+
+    unit_test_map = unittestmap()
+    out_dir = os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels-explicit-parametrized")
+
+    if os.path.exists(out_dir):
+        shutil.rmtree(out_dir)
+    os.mkdir(out_dir)
+
+    with open(os.path.join(out_dir, "__init__.py"), "w") as f:
+        f.write(
+            f"""# AUTO GENERATED ON {reproducible_datetime()}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+"""
+        )
+
+    for spec in specdict.values():
+        if (
+            spec.templatized_kernel_name not in cuda_kernels_tests
+            or spec.templatized_kernel_name not in unit_test_map
+        ):
+            continue
+
+        unit_test_values = unit_test_map[spec.templatized_kernel_name]
+        tests = unit_test_values["tests"]
+        status = unit_test_values["status"]
+        dtypes = getdtypes(spec.args)
+
+        # Collect valid cases
+        valid_cases = []
+        for test in tests:
+            unit_tests = getunittests(test["inputs"], test["outputs"])
+            flag = checkuint(unit_tests.items(), spec.args)
+            rng = checkintrange(unit_tests.items(), test["error"], spec.args)
+            if flag and rng:
+                valid_cases.append(test)
+
+        filename = f"test_unit_cuda_{spec.name}.py"
+        with open(os.path.join(out_dir, filename), "w") as f:
+
+            # --- Header ---
+            f.write(
+                f"""# AUTO GENERATED ON {reproducible_datetime()}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+"""
+            )
+            f.write(
+                "import re\n"
+                "import cupy\n"
+                "import cupy.testing as cpt\n"
+                "import pytest\n\n"
+                "import awkward as ak\n"
+                "import awkward._connect.cuda as ak_cu\n"
+                "from awkward._backends.cupy import CupyBackend\n\n"
+                "cupy_backend = CupyBackend.instance()\n\n"
+            )
+
+            # --- CASES list ---
+            f.write("CASES = [\n")
+            for test in valid_cases:
+                f.write("    {\n")
+                f.write(f"        'inputs': {repr(test['inputs'])},\n")
+                f.write(f"        'outputs': {repr(test['outputs'])},\n")
+                f.write(f"        'error': {test['error']},\n")
+                f.write(f"        'message': {repr(test.get('message', ''))},\n")
+                f.write("    },\n")
+            f.write("]\n\n")
+
+            # --- Test function ---
+            if not status:
+                f.write(
+                    "@pytest.mark.skip(reason='Kernel is not implemented properly')\n"
+                )
+
+            f.write("@pytest.mark.parametrize('case', CASES)\n")
+            f.write(f"def test_unit_cuda_{spec.name}(case):\n")
+
+            f.write(
+                f"    funcC = cupy_backend['{spec.templatized_kernel_name}',"
+                f" {', '.join(dtypes)}]\n\n"
+            )
+
+            # Determine which arg names appear in both inputs and outputs.
+            # These are in-out args that must be initialised from case['inputs']
+            # rather than filled with a dummy sentinel value.
+            # We derive this from spec.args names vs the union of input/output keys
+            # across all cases (using the first valid case as representative since
+            # the structure is the same for every case of a given kernel).
+            sample_outputs = valid_cases[0]["outputs"] if valid_cases else {}
+            sample_inputs = valid_cases[0]["inputs"] if valid_cases else {}
+            inout_args = set(sample_outputs.keys()) & set(sample_inputs.keys())
+
+            # --- Allocate / initialise buffers for output args ---
+            f.write("    # --- Allocate output buffers ---\n")
+            for arg in spec.args:
+                if arg.direction != "out":
+                    continue
+                typename = remove_const(arg.typename)
+
+                if "List" not in typename:
+                    f.write(f"    {arg.name} = case['outputs']['{arg.name}']\n")
+                    continue
+
+                count = typename.count("List")
+                base = gettypename(typename)
+                if base == "bool":
+                    base += "_"
+                if base == "float":
+                    base += "32"
+
+                if arg.name in inout_args:
+                    # In-out arg: initialise from input values so the kernel
+                    # receives the correct pre-existing data (e.g. toindex for
+                    # awkward_Index_nones_as_index is read AND written).
+                    if count == 1:
+                        f.write(
+                            f"    {arg.name} = cupy.array(\n"
+                            f"        case['inputs']['{arg.name}'], dtype=cupy.{base}\n"
+                            f"    )\n"
+                        )
+                    elif count == 2:
+                        f.write(
+                            f"    {arg.name}_val = case['inputs']['{arg.name}']\n"
+                            f"    {arg.name}_array = [\n"
+                            f"        cupy.array(row, dtype=cupy.{base}) for row in {arg.name}_val\n"
+                            f"    ]\n"
+                            f"    {arg.name} = cupy.array(\n"
+                            f"        [row.data.ptr for row in {arg.name}_array]\n"
+                            f"    )\n"
+                        )
+                else:
+                    # Pure output arg: allocate a dummy-filled buffer of the
+                    # right size (mirrors gencudaunittests).
+                    if count == 1:
+                        f.write(
+                            f"    {arg.name} = cupy.array(\n"
+                            f"        [{repr(gettypeval(base))}] * len(case['outputs']['{arg.name}']),\n"
+                            f"        dtype=cupy.{base},\n"
+                            f"    )\n"
+                        )
+                    elif count == 2:
+                        f.write(
+                            f"    {arg.name}_val = case['outputs']['{arg.name}']\n"
+                            f"    {arg.name}_array = [\n"
+                            f"        cupy.array(row, dtype=cupy.{base}) for row in {arg.name}_val\n"
+                            f"    ]\n"
+                            f"    {arg.name} = cupy.array(\n"
+                            f"        [row.data.ptr for row in {arg.name}_array]\n"
+                            f"    )\n"
+                        )
+
+            # --- Prepare pure input args ---
+            f.write("\n    # --- Prepare inputs ---\n")
+            for arg in spec.args:
+                if arg.direction == "out":
+                    continue
+                typename = remove_const(arg.typename)
+
+                if "List" not in typename:
+                    if arg.name == "identity":
+                        f.write(
+                            f"    {arg.name} = {dtypes[0]}(case['inputs']['{arg.name}'])\n"
+                        )
+                    else:
+                        f.write(f"    {arg.name} = case['inputs']['{arg.name}']\n")
+                else:
+                    # In-out list args were already allocated in the output section;
+                    # skip them here to avoid overwriting the correctly initialised buffer.
+                    if arg.name in inout_args:
+                        continue
+
+                    count = typename.count("List")
+                    base = gettypename(typename)
+                    if base == "bool":
+                        base += "_"
+                    if base == "float":
+                        base += "32"
+
+                    if count == 1:
+                        f.write(
+                            f"    {arg.name} = cupy.array(\n"
+                            f"        case['inputs']['{arg.name}'], dtype=cupy.{base}\n"
+                            f"    )\n"
+                        )
+                    elif count == 2:
+                        f.write(
+                            f"    {arg.name}_val = case['inputs']['{arg.name}']\n"
+                            f"    {arg.name}_array = [\n"
+                            f"        cupy.array(row, dtype=cupy.{base}) for row in {arg.name}_val\n"
+                            f"    ]\n"
+                            f"    {arg.name} = cupy.array(\n"
+                            f"        [row.data.ptr for row in {arg.name}_array]\n"
+                            f"    )\n"
+                        )
+
+            # --- Kernel call ---
+            args_str = ", ".join(arg.name for arg in spec.args)
+            f.write(f"\n    funcC({args_str})\n")
+
+            # --- Error vs success path (mirrors gencudaunittests) ---
+            f.write(
+                f"""
+    if case['error']:
+        error_message = re.escape(
+            case['message'] + " in compiled CUDA code ({spec.templatized_kernel_name})"
+        )
+        with pytest.raises(ValueError, match=rf"{{error_message}}"):
+            ak_cu.synchronize_cuda()
+        return
+
+    try:
+        ak_cu.synchronize_cuda()
+    except Exception as e:
+        if "not implemented for given n" in str(e):
+            pytest.skip(
+                "Not implemented for given n in compiled CUDA code"
+                " ({spec.templatized_kernel_name})"
+            )
+        else:
+            pytest.fail(
+                f"Unexpected error raised: {{e}}: This test case shouldn't have raised an error"
+            )
+""".replace("{spec.templatized_kernel_name}", spec.templatized_kernel_name)
+            )
+
+            # --- Assertions (mirrors gencudaunittests bool-normalisation + allclose) ---
+            f.write("    # --- Validate outputs ---\n")
+            for arg in spec.args:
+                if arg.direction != "out":
+                    continue
+                typename = remove_const(arg.typename)
+
+                f.write(f"    pytest_{arg.name} = case['outputs']['{arg.name}']\n")
+
+                # bool normalisation (identical to gencudaunittests)
+                if "bool" in typename:
+                    if "List[List" in typename:
+                        f.write(
+                            f"    pytest_{arg.name} = [\n"
+                            f"        min(1, v) for row in pytest_{arg.name} for v in row\n"
+                            f"    ]\n"
+                        )
+                    elif "List" in typename:
+                        f.write(
+                            f"    pytest_{arg.name} = [min(1, v) for v in pytest_{arg.name}]\n"
+                        )
+                    else:
+                        f.write(
+                            f"    pytest_{arg.name} = min(1, pytest_{arg.name})\n"
+                        )
+
+                if "List" in typename:
+                    count = typename.count("List")
+                    if count == 1:
+                        f.write(
+                            f"    cpt.assert_allclose(\n"
+                            f"        {arg.name}[:len(pytest_{arg.name})],\n"
+                            f"        cupy.asarray(pytest_{arg.name}),\n"
+                            f"    )\n"
+                        )
+                    elif count == 2:
+                        f.write(
+                            f"    for row1, row2 in zip(\n"
+                            f"        pytest_{arg.name},\n"
+                            f"        {arg.name}_array[:len(pytest_{arg.name})],\n"
+                            f"    ):\n"
+                            f"        cpt.assert_allclose(row1, row2)\n"
+                        )
+                else:
+                    f.write(f"    assert {arg.name} == pytest_{arg.name}\n")
+
+            f.write("\n")
+
+
 def gencudaunittests(specdict):
     print("Generating Unit Tests for CUDA kernels")
 
@@ -1393,3 +1684,4 @@ if __name__ == "__main__":
     genunittests()
     gencudakerneltests(specdict)
     gencudaunittests(specdict_unit)
+    gencudaunittests_new(specdict_unit)
