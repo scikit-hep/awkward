@@ -692,3 +692,74 @@ def awkward_ListArray_getitem_jagged_numvalid(
 
     # count entries that are not missing and within any slice
     numvalid[0] = cp.sum(valid & positions)  # numvalid: int64
+
+
+def awkward_ListArray_getitem_jagged_shrink(
+    tocarry, tosmalloffsets, tolargeoffsets, slicestarts, slicestops, length, missing
+):
+    """
+    Args:
+        tocarry — indices of valid (non-missing) elements
+        tosmalloffsets — offsets counting only the valid elements per list (shrunk)
+        tolargeoffsets — offsets counting all elements per list including missing ones (original size)
+
+    For example with slicestarts=[0,3], slicestops=[3,6], missing=[0,-1,1,-1,2,-1]:
+    slice 0: i=0 (valid→carry), i=1 (missing), i=2 (valid→carry)
+      tocarry    = [0, 2]
+      tosmalloffsets = [0, 2]
+      tolargeoffsets = [0, 3]
+
+    slice 1: i=3 (missing), i=4 (valid→carry), i=5 (missing)
+      tocarry    = [0, 2, 4]
+      tosmalloffsets = [0, 2, 3]
+      tolargeoffsets = [0, 3, 6]
+    """
+
+    if length == 0:
+        tosmalloffsets[0] = 0
+        tolargeoffsets[0] = 0
+        return
+
+    # set the first offsets to the first slice start
+    tosmalloffsets[0] = slicestarts[0]
+    tolargeoffsets[0] = slicestarts[0]
+
+    slicestarts_ = slicestarts[:length]
+    slicestops_ = slicestops[:length]
+
+    # compute original offsets as cumulative sum of slice lengths (including invalid entries)
+    # (tolargeoffsets[i + 1] = tolargeoffsets[i] + (slicestop - slicestart)) for i in range(length)
+    tolargeoffsets[1 : length + 1] = slicestarts_[0] + cp.cumsum(
+        slicestops_ - slicestarts_
+    )  # tolargeoffsets: int64
+
+    # find valid entries: within a slice and non-negative in missing
+    minstart = int(slicestarts_[0])
+    maxstop = int(slicestops_[-1])
+
+    # create an index array [minstart, minstart+1, ..., maxstop-1] for all positions
+    all_indices = cp.arange(minstart, maxstop)
+
+    # for each position, find which slice it belongs to
+    # subtract one, so that indexing starts from 0
+    which_slice = cp.searchsorted(slicestarts_, all_indices, side="right") - 1
+    # check if each index is not past the stop (for each slice)
+    in_slice = all_indices < slicestops_[which_slice]
+
+    # index is valid if it is inside a slice AND not missing
+    valid = in_slice & (missing[minstart:maxstop] >= 0)
+
+    # the original indices of all valid positions
+    # add `minstart` if `slicestarts` don't start from 0
+    tocarry[: cp.sum(valid)] = cp.where(valid)[0] + minstart  # tocarry: int64
+
+    # count how many valid entries fall before each slicestop and slicestart
+    # the difference gives the number of valid ENTRIES PER SLICE
+    smallcounts = cp.searchsorted(
+        cp.where(valid)[0] + minstart, slicestops_, side="left"
+    ) - cp.searchsorted(cp.where(valid)[0] + minstart, slicestarts_, side="left")
+
+    # finally we construct offsets for only VALID entries
+    tosmalloffsets[1 : length + 1] = tosmalloffsets[0] + cp.cumsum(
+        smallcounts
+    )  # tosmalloffsets: int64
