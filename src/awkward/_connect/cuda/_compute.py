@@ -661,3 +661,34 @@ def awkward_ListArray_getitem_jagged_descend(
     tooffsets[1 : sliceouterlen + 1] = tooffsets[0] + cp.cumsum(
         counts
     )  # tooffsets: int64
+
+
+# Counts the number of valid entries that are within any of the jagged slices
+def awkward_ListArray_getitem_jagged_numvalid(
+    numvalid, slicestarts, slicestops, length, missing, missinglength
+):
+    optional_message = (
+        "in compiled CUDA code (awkward_ListArray_getitem_jagged_numvalid)"
+    )
+
+    slicestarts_ = slicestarts[:length]
+    slicestops_ = slicestops[:length]
+
+    if cp.any(slicestops_ < slicestarts_):
+        raise ValueError("jagged slice's stops[i] < starts[i] " + optional_message)
+
+    if cp.any(slicestops_ > missinglength):
+        raise ValueError(
+            "jagged slice's offsets extend beyond its content " + optional_message
+        )
+
+    # count the number of valid (non-negative index) entries in missing
+    valid = missing[:missinglength] >= 0
+
+    # create a mask for positions that are within any slice
+    positions = cp.zeros(missinglength, dtype=cp.bool_)
+    for i in range(length):
+        positions[slicestarts_[i] : slicestops_[i]] = True
+
+    # count entries that are not missing and within any slice
+    numvalid[0] = cp.sum(valid & positions)  # numvalid: int64

@@ -1264,6 +1264,7 @@ def gencudaunittests(specdict):
                         # or compiled CUDA kernel (raises errors after `ak_cu.synchronize_cuda()`)
                         CUDA_COPUTE_KERNELS = {
                             "awkward_ListArray_getitem_jagged_descend",
+                            "awkward_ListArray_getitem_jagged_numvalid",
                         }
 
                         raises_error_eagerly = (

@@ -77,6 +77,7 @@ class CupyBackend(Backend):
         - awkward_argsort (future)
         - awkward_ListArray_getitem_jagged_carrylen
         - awkward_ListArray_getitem_jagged_descend
+        - awkward_ListArray_getitem_jagged_numvalid
 
         These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
         - awkward_sum
@@ -104,6 +105,7 @@ class CupyBackend(Backend):
             "awkward_reduce_countnonzero",
             "awkward_ListArray_getitem_jagged_carrylen",
             "awkward_ListArray_getitem_jagged_descend",
+            "awkward_ListArray_getitem_jagged_numvalid",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
