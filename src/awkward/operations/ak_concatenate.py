@@ -71,6 +71,7 @@ def concatenate(
     ):
         yield (arrays,)
     else:
+        arrays = list(arrays)
         yield arrays
 
     # Implementation
