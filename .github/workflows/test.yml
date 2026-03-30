@@ -201,13 +201,11 @@ jobs:
           init-shell: bash
           # TODO: run the tests with cudf again when it supports numba-cuda>=0.23.0
           create-args: >-
-            -c rapidsai
             python=3.13
-            pandas>=0.24.0
+            pandas>=0.24
             cccl-python
             cupy>=14
             cuda-version=${{ matrix.cuda-version }}
-            cuda-toolkit
             cxx-compiler
             numba-cuda
             ${{ matrix.cuda-version == 13 && 'root=6.36.06' || '' }}
