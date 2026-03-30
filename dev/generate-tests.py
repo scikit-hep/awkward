@@ -1118,9 +1118,7 @@ def gencudaunittests_new(specdict):
     print("Generating Unit Tests for CUDA kernels (parametrized)")
 
     unit_test_map = unittestmap()
-    out_dir = os.path.join(
-        CURRENT_DIR, "..", "tests-cuda-kernels-explicit-parametrized"
-    )
+    out_dir = os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels-explicit-parametrized")
 
     if os.path.exists(out_dir):
         shutil.rmtree(out_dir)
@@ -1149,8 +1147,8 @@ def gencudaunittests_new(specdict):
             continue
 
         unit_test_values = unit_test_map[spec.templatized_kernel_name]
-        tests = unit_test_values["tests"]
         status = unit_test_values["status"]
+        tests = unit_test_values["tests"]
         dtypes = getdtypes(spec.args)
 
         # Collect valid cases
@@ -1162,8 +1160,17 @@ def gencudaunittests_new(specdict):
             if flag and rng:
                 valid_cases.append(test)
 
+        # Determine in-out args: union across ALL valid cases of args that
+        # appear in both inputs and outputs.  Using only the first case is
+        # fragile — some cases may omit an in-out arg from inputs when its
+        # initial value happens to be the zero vector.
+        inout_args = set()
+        for case in valid_cases:
+            inout_args |= set(case["outputs"].keys()) & set(case["inputs"].keys())
+
         filename = f"test_unit_cuda_{spec.name}.py"
         with open(os.path.join(out_dir, filename), "w") as f:
+
             # --- Header ---
             f.write(
                 f"""# AUTO GENERATED ON {reproducible_datetime()}
@@ -1189,42 +1196,35 @@ def gencudaunittests_new(specdict):
                 "cupy_backend = CupyBackend.instance()\n\n"
             )
 
-            # --- CASES list ---
-            f.write("CASES = [\n")
+            # CASES list
+            cases_name = f"CASES_{spec.name}"
+            f.write(f"{cases_name} = [\n")
             for test in valid_cases:
                 f.write("    {\n")
-                f.write(f"        'inputs': {test['inputs']!r},\n")
-                f.write(f"        'outputs': {test['outputs']!r},\n")
+                f.write(f"        'inputs': {repr(test['inputs'])},\n")
+                f.write(f"        'outputs': {repr(test['outputs'])},\n")
                 f.write(f"        'error': {test['error']},\n")
-                f.write(f"        'message': {test.get('message', '')!r},\n")
+                f.write(f"        'message': {repr(test.get('message', ''))},\n")
                 f.write("    },\n")
             f.write("]\n\n")
 
-            # --- Test function ---
+            # Session-scoped fixture: JIT-compiled once per session.
+            f.write(f"@pytest.fixture(scope='session')\n")
+            f.write(f"def funcC_{spec.name}():\n")
+            f.write(
+                f"    return cupy_backend['{spec.templatized_kernel_name}',"
+                f" {', '.join(dtypes)}]\n\n"
+            )
+
             if not status:
                 f.write(
                     "@pytest.mark.skip(reason='Kernel is not implemented properly')\n"
                 )
 
-            f.write("@pytest.mark.parametrize('case', CASES)\n")
-            f.write(f"def test_unit_cuda_{spec.name}(case):\n")
+            f.write(f"@pytest.mark.parametrize('case', {cases_name})\n")
+            f.write(f"def test_unit_cuda_{spec.name}(case, funcC_{spec.name}):\n")
 
-            f.write(
-                f"    funcC = cupy_backend['{spec.templatized_kernel_name}',"
-                f" {', '.join(dtypes)}]\n\n"
-            )
-
-            # Determine which arg names appear in both inputs and outputs.
-            # These are in-out args that must be initialised from case['inputs']
-            # rather than filled with a dummy sentinel value.
-            # We derive this from spec.args names vs the union of input/output keys
-            # across all cases (using the first valid case as representative since
-            # the structure is the same for every case of a given kernel).
-            sample_outputs = valid_cases[0]["outputs"] if valid_cases else {}
-            sample_inputs = valid_cases[0]["inputs"] if valid_cases else {}
-            inout_args = set(sample_outputs.keys()) & set(sample_inputs.keys())
-
-            # --- Allocate / initialise buffers for output args ---
+            # --- Allocate output buffers ---
             f.write("    # --- Allocate output buffers ---\n")
             for arg in spec.args:
                 if arg.direction != "out":
@@ -1243,18 +1243,27 @@ def gencudaunittests_new(specdict):
                     base += "32"
 
                 if arg.name in inout_args:
-                    # In-out arg: initialise from input values so the kernel
-                    # receives the correct pre-existing data (e.g. toindex for
-                    # awkward_Index_nones_as_index is read AND written).
+                    # In-out arg: kernel reads the buffer before writing back.
+                    # Initialise from case['inputs'] when the key is present;
+                    # fall back to zeros for cases where the initial value is
+                    # implicitly all-zeros and was omitted from the test data.
                     if count == 1:
                         f.write(
-                            f"    {arg.name} = cupy.array(\n"
-                            f"        case['inputs']['{arg.name}'], dtype=cupy.{base}\n"
-                            f"    )\n"
+                            f"    if '{arg.name}' in case['inputs']:\n"
+                            f"        {arg.name} = cupy.array(\n"
+                            f"            case['inputs']['{arg.name}'], dtype=cupy.{base}\n"
+                            f"        )\n"
+                            f"    else:\n"
+                            f"        {arg.name} = cupy.zeros(\n"
+                            f"            len(case['outputs']['{arg.name}']), dtype=cupy.{base}\n"
+                            f"        )\n"
                         )
                     elif count == 2:
                         f.write(
-                            f"    {arg.name}_val = case['inputs']['{arg.name}']\n"
+                            f"    if '{arg.name}' in case['inputs']:\n"
+                            f"        {arg.name}_val = case['inputs']['{arg.name}']\n"
+                            f"    else:\n"
+                            f"        {arg.name}_val = [[0] * len(row) for row in case['outputs']['{arg.name}']]\n"
                             f"    {arg.name}_array = [\n"
                             f"        cupy.array(row, dtype=cupy.{base}) for row in {arg.name}_val\n"
                             f"    ]\n"
@@ -1263,21 +1272,31 @@ def gencudaunittests_new(specdict):
                             f"    )\n"
                         )
                 else:
-                    # Pure output arg: allocate a dummy-filled buffer of the
-                    # right size (mirrors gencudaunittests).
+                    # Pure output: fill with the type sentinel (gettypeval).
+                    #
+                    # Partially-written kernels (e.g. ByteMaskedArray_reduce_next)
+                    # skip writing to positions where the mask does not match
+                    # validwhen.  The test data encodes gettypeval (123 for int,
+                    # 123.0 for float, True for bool) as the expected value at
+                    # those unwritten positions, so the buffer must be pre-filled
+                    # with the same sentinel for the assertion to pass.
+                    sentinel = repr(gettypeval(base))
                     if count == 1:
                         f.write(
-                            f"    {arg.name} = cupy.array(\n"
-                            f"        [{gettypeval(base)!r}] * len(case['outputs']['{arg.name}']),\n"
-                            f"        dtype=cupy.{base},\n"
+                            f"    {arg.name} = cupy.empty(\n"
+                            f"        len(case['outputs']['{arg.name}']), dtype=cupy.{base}\n"
                             f"    )\n"
+                            f"    {arg.name}.fill({sentinel})\n"
                         )
                     elif count == 2:
                         f.write(
                             f"    {arg.name}_val = case['outputs']['{arg.name}']\n"
                             f"    {arg.name}_array = [\n"
-                            f"        cupy.array(row, dtype=cupy.{base}) for row in {arg.name}_val\n"
+                            f"        cupy.empty(len(row), dtype=cupy.{base})\n"
+                            f"        for row in {arg.name}_val\n"
                             f"    ]\n"
+                            f"    for _a in {arg.name}_array:\n"
+                            f"        _a.fill({sentinel})\n"
                             f"    {arg.name} = cupy.array(\n"
                             f"        [row.data.ptr for row in {arg.name}_array]\n"
                             f"    )\n"
@@ -1298,8 +1317,7 @@ def gencudaunittests_new(specdict):
                     else:
                         f.write(f"    {arg.name} = case['inputs']['{arg.name}']\n")
                 else:
-                    # In-out list args were already allocated in the output section;
-                    # skip them here to avoid overwriting the correctly initialised buffer.
+                    # In-out list args were allocated in the output section.
                     if arg.name in inout_args:
                         continue
 
@@ -1329,9 +1347,9 @@ def gencudaunittests_new(specdict):
 
             # --- Kernel call ---
             args_str = ", ".join(arg.name for arg in spec.args)
-            f.write(f"\n    funcC({args_str})\n")
+            f.write(f"\n    funcC_{spec.name}({args_str})\n")
 
-            # --- Error vs success path (mirrors gencudaunittests) ---
+            # --- Error vs success path ---
             f.write(
                 f"""
     if case['error']:
@@ -1357,7 +1375,7 @@ def gencudaunittests_new(specdict):
 """.replace("{spec.templatized_kernel_name}", spec.templatized_kernel_name)
             )
 
-            # --- Assertions (mirrors gencudaunittests bool-normalisation + allclose) ---
+            # --- Assertions ---
             f.write("    # --- Validate outputs ---\n")
             for arg in spec.args:
                 if arg.direction != "out":
@@ -1366,7 +1384,6 @@ def gencudaunittests_new(specdict):
 
                 f.write(f"    pytest_{arg.name} = case['outputs']['{arg.name}']\n")
 
-                # bool normalisation (identical to gencudaunittests)
                 if "bool" in typename:
                     if "List[List" in typename:
                         f.write(
@@ -1379,7 +1396,9 @@ def gencudaunittests_new(specdict):
                             f"    pytest_{arg.name} = [min(1, v) for v in pytest_{arg.name}]\n"
                         )
                     else:
-                        f.write(f"    pytest_{arg.name} = min(1, pytest_{arg.name})\n")
+                        f.write(
+                            f"    pytest_{arg.name} = min(1, pytest_{arg.name})\n"
+                        )
 
                 if "List" in typename:
                     count = typename.count("List")
