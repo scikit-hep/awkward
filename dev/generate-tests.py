@@ -1118,7 +1118,9 @@ def gencudaunittests_new(specdict):
     print("Generating Unit Tests for CUDA kernels (parametrized)")
 
     unit_test_map = unittestmap()
-    out_dir = os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels-explicit-parametrized")
+    out_dir = os.path.join(
+        CURRENT_DIR, "..", "tests-cuda-kernels-explicit-parametrized"
+    )
 
     if os.path.exists(out_dir):
         shutil.rmtree(out_dir)
@@ -1170,7 +1172,6 @@ def gencudaunittests_new(specdict):
 
         filename = f"test_unit_cuda_{spec.name}.py"
         with open(os.path.join(out_dir, filename), "w") as f:
-
             # --- Header ---
             f.write(
                 f"""# AUTO GENERATED ON {reproducible_datetime()}
@@ -1201,15 +1202,15 @@ def gencudaunittests_new(specdict):
             f.write(f"{cases_name} = [\n")
             for test in valid_cases:
                 f.write("    {\n")
-                f.write(f"        'inputs': {repr(test['inputs'])},\n")
-                f.write(f"        'outputs': {repr(test['outputs'])},\n")
+                f.write(f"        'inputs': {test['inputs']!r},\n")
+                f.write(f"        'outputs': {test['outputs']!r},\n")
                 f.write(f"        'error': {test['error']},\n")
-                f.write(f"        'message': {repr(test.get('message', ''))},\n")
+                f.write(f"        'message': {test.get('message', '')!r},\n")
                 f.write("    },\n")
             f.write("]\n\n")
 
             # Session-scoped fixture: JIT-compiled once per session.
-            f.write(f"@pytest.fixture(scope='session')\n")
+            f.write("@pytest.fixture(scope='session')\n")
             f.write(f"def funcC_{spec.name}():\n")
             f.write(
                 f"    return cupy_backend['{spec.templatized_kernel_name}',"
@@ -1396,9 +1397,7 @@ def gencudaunittests_new(specdict):
                             f"    pytest_{arg.name} = [min(1, v) for v in pytest_{arg.name}]\n"
                         )
                     else:
-                        f.write(
-                            f"    pytest_{arg.name} = min(1, pytest_{arg.name})\n"
-                        )
+                        f.write(f"    pytest_{arg.name} = min(1, pytest_{arg.name})\n")
 
                 if "List" in typename:
                     count = typename.count("List")
