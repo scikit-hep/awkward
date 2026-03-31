@@ -2,8 +2,12 @@ name: Bump hypothesis-awkward
 
 on:
   schedule:
-    - cron: "0 */6 * * *" # Every 6 hours
+    - cron: "0 15 * * 3" # Every Wednesday at 15:00 UTC
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -13,21 +17,45 @@ jobs:
   bump:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Get current pinned version
         id: current
         run: |
-          version=$(grep -oP 'hypothesis-awkward==\K[0-9.]+' requirements-test-full.txt)
+          version=$(grep -oP 'hypothesis-awkward==\K[^[:space:]]+' requirements-test-full.txt)
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Get latest version from PyPI
         id: latest
         run: |
-          version=$(curl -sS https://pypi.org/pypi/hypothesis-awkward/json | python3 -c "import sys, json; print(json.load(sys.stdin)['info']['version'])")
+          pypi_json=$(curl -sSf https://pypi.org/pypi/hypothesis-awkward/json)
+          version=$(echo "$pypi_json" | python3 -c "import sys, json; print(json.load(sys.stdin)['info']['version'])")
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Update and open PR
+      - name: Update requirements file
+        if: steps.current.outputs.version != steps.latest.outputs.version
+        env:
+          CURRENT: ${{ steps.current.outputs.version }}
+          LATEST: ${{ steps.latest.outputs.version }}
+        shell: python
+        run: |
+          import os, pathlib, sys
+
+          current = os.environ["CURRENT"]
+          latest = os.environ["LATEST"]
+          path = pathlib.Path("requirements-test-full.txt")
+          text = path.read_text()
+
+          old = f"hypothesis-awkward=={current}"
+          new = f"hypothesis-awkward=={latest}"
+
+          if old not in text:
+              print(f"Expected '{old}' not found in requirements-test-full.txt", file=sys.stderr)
+              sys.exit(1)
+
+          path.write_text(text.replace(old, new))
+
+      - name: Open PR
         if: steps.current.outputs.version != steps.latest.outputs.version
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -43,11 +71,14 @@ jobs:
             exit 0
           fi
 
+          # Delete stale remote branch if it exists from a previous closed/merged PR
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null 2>&1; then
+            git push origin --delete "$branch"
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-
-          sed -i "s/hypothesis-awkward==${CURRENT}/hypothesis-awkward==${LATEST}/" requirements-test-full.txt
 
           git add requirements-test-full.txt
           git commit -m "chore: bump hypothesis-awkward from ${CURRENT} to ${LATEST}"
@@ -59,4 +90,4 @@ jobs:
 
           Release: https://pypi.org/project/hypothesis-awkward/${LATEST}/
 
-          This PR was created automatically by the [bump-hypothesis-awkward](../actions/workflows/bump-hypothesis-awkward.yml) workflow."
+          This PR was created automatically by the [bump-hypothesis-awkward](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/workflows/bump-hypothesis-awkward.yml) workflow."
