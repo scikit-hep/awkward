@@ -207,20 +207,24 @@ class Cupy(ArrayModuleNumpyLike):
             # Handle complex types by swapping real and imaginary parts independently
             if np.issubdtype(dtype, np.complexfloating):
                 component_dtype = np.finfo(dtype).dtype
-                float_view = x.view(component_dtype)
+                float_view = self._module.ascontiguousarray(x).view(component_dtype)
                 swapped = self.byteswap(float_view)
-                return swapped.view(dtype).reshape(original_shape)  # type: ignore[attr-defined]
+                return (
+                    self._module.ascontiguousarray(swapped)
+                    .view(dtype)
+                    .reshape(original_shape)
+                )
 
             itemsize = dtype.itemsize
 
             if itemsize == 1:
                 return self._module.copy(x)
 
-            bytes_arr = self.ascontiguousarray(x).view(np.uint8)
-            bytes_arr = bytes_arr.reshape(-1, itemsize)  # type: ignore[union-attr]
+            bytes_arr = self._module.ascontiguousarray(x).view(np.uint8)
+            bytes_arr = bytes_arr.reshape(-1, itemsize)
             bytes_arr = bytes_arr[..., ::-1]
             return (
-                self.ascontiguousarray(bytes_arr.reshape(-1))  # type: ignore[union-attr]
+                self._module.ascontiguousarray(bytes_arr.reshape(-1))
                 .view(dtype)
                 .reshape(original_shape)
             )

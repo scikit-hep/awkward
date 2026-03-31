@@ -184,14 +184,10 @@ class Jax(ArrayModuleNumpyLike):
             if itemsize == 1:
                 return self._module.copy(x)
 
-            bytes_arr = self.ascontiguousarray(x).view(np.uint8)
+            bytes_arr = x.view(np.uint8)
             bytes_arr = bytes_arr.reshape(-1, itemsize)  # type: ignore[attr-defined]
             bytes_arr = bytes_arr[..., ::-1]
-            return (
-                self.ascontiguousarray(bytes_arr.reshape(-1))  # type: ignore[attr-defined]
-                .view(dtype)
-                .reshape(original_shape)
-            )
+            return bytes_arr.reshape(-1).view(dtype).reshape(original_shape)
 
     def memory_ptr(self, x: ArrayLike) -> int:
         (x,) = maybe_materialize(x)
