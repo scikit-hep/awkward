@@ -37,7 +37,7 @@ jobs:
         env:
           CURRENT: ${{ steps.current.outputs.version }}
           LATEST: ${{ steps.latest.outputs.version }}
-        shell: python
+        shell: python3 {0}
         run: |
           import os, pathlib, sys
 
