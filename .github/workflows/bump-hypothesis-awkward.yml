@@ -1,0 +1,62 @@
+name: Bump hypothesis-awkward
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # Every 6 hours
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get current pinned version
+        id: current
+        run: |
+          version=$(grep -oP 'hypothesis-awkward==\K[0-9.]+' requirements-test-full.txt)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Get latest version from PyPI
+        id: latest
+        run: |
+          version=$(curl -sS https://pypi.org/pypi/hypothesis-awkward/json | python3 -c "import sys, json; print(json.load(sys.stdin)['info']['version'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Update and open PR
+        if: steps.current.outputs.version != steps.latest.outputs.version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT: ${{ steps.current.outputs.version }}
+          LATEST: ${{ steps.latest.outputs.version }}
+        run: |
+          branch="chore/bump-hypothesis-awkward-${LATEST}"
+
+          # Check if a PR already exists for this version
+          existing=$(gh pr list --head "$branch" --state open --json number --jq 'length')
+          if [ "$existing" -gt 0 ]; then
+            echo "PR already exists for $LATEST, skipping."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+
+          sed -i "s/hypothesis-awkward==${CURRENT}/hypothesis-awkward==${LATEST}/" requirements-test-full.txt
+
+          git add requirements-test-full.txt
+          git commit -m "chore: bump hypothesis-awkward from ${CURRENT} to ${LATEST}"
+          git push -u origin "$branch"
+
+          gh pr create \
+            --title "chore: bump hypothesis-awkward from ${CURRENT} to ${LATEST}" \
+            --body "Automated bump of \`hypothesis-awkward\` from \`${CURRENT}\` to \`${LATEST}\`.
+
+          Release: https://pypi.org/project/hypothesis-awkward/${LATEST}/
+
+          This PR was created automatically by the [bump-hypothesis-awkward](../actions/workflows/bump-hypothesis-awkward.yml) workflow."
