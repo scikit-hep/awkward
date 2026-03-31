@@ -56,9 +56,7 @@ def native_to_byteorder(array, byteorder: str):
     """
     assert byteorder in "<>"
     if byteorder != native_byteorder:
-        from awkward._nplikes.dispatch import nplike_of_obj
-
-        return nplike_of_obj(array).byteswap(array)
+        return ak._nplikes.dispatch.nplike_of_obj(array).byteswap(array)
     else:
         return array
 

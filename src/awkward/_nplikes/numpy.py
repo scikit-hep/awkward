@@ -78,19 +78,24 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
         (x,) = maybe_materialize(x)
         return numpy.unpackbits(x, axis=axis, count=count, bitorder=bitorder)  # type: ignore[arg-type]
 
-    def byteswap(self, x: NDArray) -> NDArray:
-        if isinstance(x, VirtualNDArray):
-            return VirtualNDArray(
-                x._nplike,
-                x._shape,
-                x._dtype,
-                lambda: self.byteswap(x.materialize()),
-                lambda: x.shape,
-                x._buffer_key,
-                __enable_caching__=x.__enable_caching__,
-            )
-        (x,) = maybe_materialize(x)
-        return x.byteswap()
+    def byteswap(self, x: NDArray | PlaceholderArray):
+        if isinstance(x, PlaceholderArray):
+            return x
+        elif isinstance(x, VirtualNDArray):
+            if x.is_materialized:
+                return self.byteswap(x.materialize())
+            else:
+                return VirtualNDArray(
+                    x._nplike,
+                    x._shape,
+                    x._dtype,
+                    lambda: self.byteswap(x.materialize()),
+                    lambda: x.shape,
+                    x._buffer_key,
+                    __enable_caching__=x.__enable_caching__,
+                )
+        else:
+            return x.byteswap(inplace=False)
 
     def memory_ptr(self, x: NDArray) -> int:
         (x,) = maybe_materialize(x)

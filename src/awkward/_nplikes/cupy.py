@@ -6,7 +6,6 @@ import awkward as ak
 from awkward._nplikes.array_like import maybe_materialize
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import ArrayLike, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem
@@ -53,8 +52,7 @@ class Cupy(ArrayModuleNumpyLike):
     ) -> ArrayLike:
         assert not isinstance(buffer, (PlaceholderArray, VirtualNDArray))
         assert not isinstance(count, (PlaceholderArray, VirtualNDArray))
-        np_array = Numpy.instance().frombuffer(buffer, dtype=dtype, count=count)
-        return self._module.asarray(np_array)
+        return self._module.frombuffer(buffer, dtype=dtype, count=count)
 
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
@@ -191,35 +189,37 @@ class Cupy(ArrayModuleNumpyLike):
 
     def byteswap(self, x: ArrayLike) -> ArrayLike:
         if isinstance(x, VirtualNDArray):
-            virtual_x = x
-            return VirtualNDArray(
-                virtual_x._nplike,
-                virtual_x._shape,
-                virtual_x._dtype,
-                lambda: self.byteswap(virtual_x.materialize()),
-                lambda: virtual_x.shape,
-                virtual_x._buffer_key,
-                __enable_caching__=virtual_x.__enable_caching__,
-            )
+            if x.is_materialized:
+                return self.byteswap(x.materialize())
+            else:
+                return VirtualNDArray(
+                    x._nplike,
+                    x._shape,
+                    x._dtype,
+                    lambda: self.byteswap(x.materialize()),
+                    lambda: x.shape,
+                    x._buffer_key,
+                    __enable_caching__=x.__enable_caching__,
+                )
+        else:
+            dtype = x.dtype
+            original_shape = x.shape
+            # Handle complex types by swapping real and imaginary parts independently
+            if np.issubdtype(dtype, np.complexfloating):
+                component_dtype = np.finfo(dtype).dtype
+                float_view = x.view(component_dtype)
+                swapped = self.byteswap(float_view)
+                return swapped.view(dtype).reshape(original_shape)  # type: ignore[attr-defined]
 
-        (x,) = maybe_materialize(x)
+            itemsize = dtype.itemsize
 
-        itemsize = x.dtype.itemsize
-        if itemsize == 1:
-            return self._module.array(x, copy=True)
+            if itemsize == 1:
+                return self._module.copy(x)
 
-        x = self._module.ascontiguousarray(x)
-
-        if x.dtype.kind == "c":
-            component_dtype = self._module.empty((), dtype=x.dtype).real.dtype
-            return self.byteswap(x.view(component_dtype)).view(x.dtype)
-
-        shape = x.shape
-        bytes_arr = x.view(np.uint8)
-        bytes_arr = self._module.reshape(bytes_arr, (-1, itemsize))
-        bytes_arr = bytes_arr[..., ::-1]
-        swapped = self._module.reshape(bytes_arr, (-1,)).view(x.dtype)
-        return self._module.reshape(swapped, shape)
+            bytes_arr = x.view(np.uint8)
+            bytes_arr = bytes_arr.reshape(-1, itemsize)  # type: ignore[attr-defined]
+            bytes_arr = bytes_arr[..., ::-1]
+            return bytes_arr.reshape(-1).view(dtype).reshape(original_shape)
 
     def memory_ptr(self, x: ArrayLike) -> int:
         (x,) = maybe_materialize(x)
