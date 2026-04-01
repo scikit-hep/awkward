@@ -52,7 +52,7 @@ jobs:
           submodules: true
 
       - name: Get micromamba
-        uses: mamba-org/setup-micromamba@v2
+        uses: mamba-org/setup-micromamba@v3
         with:
           environment-name: test-env
           init-shell: bash
@@ -115,7 +115,7 @@ jobs:
           --cov=awkward --cov-report=term --cov-report=xml:cuda-virtual-coverage.xml
 
       - name: Upload Codecov results
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
