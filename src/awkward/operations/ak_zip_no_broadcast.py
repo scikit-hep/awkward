@@ -80,6 +80,7 @@ def zip_no_broadcast(
     if isinstance(arrays, Mapping):
         yield arrays.values()
     else:
+        arrays = list(arrays)
         yield arrays
 
     # Implementation

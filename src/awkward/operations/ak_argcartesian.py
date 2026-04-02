@@ -102,6 +102,7 @@ def argcartesian(
     if isinstance(arrays, Mapping):
         yield arrays.values()
     else:
+        arrays = list(arrays)
         yield arrays
 
     # Implementation
