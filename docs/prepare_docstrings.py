@@ -177,6 +177,15 @@ def dodoc(docstring, qualname, names):
     out = re.sub(r"(\n:type|^:type)", "\n    :type", out)
     out = re.sub(r"(\n:returns|^:returns)", "\n    :returns", out)
     out = re.sub(r"(\n:raises|^:raises)", "\n    :raises", out)
+    # Indent summary lines (text before the first :param directive) so they
+    # sit inside the .. py:function:: / .. py:class:: RST directive.
+    # Only matches when there is non-whitespace text before the first :param.
+    out = re.sub(
+        r"^(\S[^\n]*(?:\n(?! *:param| *:type)\S[^\n]*)*)(\n\n? *:param)",
+        lambda m: re.sub(r"(?m)^(?=\S)", "    ", m.group(1)) + m.group(2),
+        out,
+        count=1,
+    )
     return out
 
 
@@ -383,6 +392,50 @@ test_signature_pos_or_kw()
 test_signature_kwarg()
 test_signature_vararg()
 test_signature_kwonly()
+
+
+def test_dodoc_no_summary():
+    """Existing format (no summary line) should be unchanged."""
+    docstring = (
+        "Args:\n"
+        "    array: Array-like data.\n"
+        "    axis (int): The axis to flatten.\n"
+        "\n"
+        "Returns an array with one level removed."
+    )
+    result = dodoc(docstring, "ak.test", [])
+    # :param lines should be indented
+    assert "\n    :param array:" in result
+    assert "\n    :param axis:" in result
+    # Free-text return description should NOT be indented (existing behavior)
+    assert "\nReturns an array with one level removed." in result
+    assert "\n    Returns an array" not in result
+
+
+def test_dodoc_with_summary():
+    """Google-style summary line should be indented."""
+    docstring = (
+        "Removes one level of nesting.\n"
+        "\n"
+        "Args:\n"
+        "    array: Array-like data.\n"
+        "    axis (int): The axis to flatten.\n"
+        "\n"
+        "Returns:\n"
+        "    An array with one level removed."
+    )
+    result = dodoc(docstring, "ak.test", [])
+    lines = result.split("\n")
+    # Summary should be indented with 4 spaces
+    assert lines[0] == "    Removes one level of nesting."
+    # :param lines should be indented
+    assert "\n    :param array:" in result
+    # :returns should be indented
+    assert "\n    :returns:" in result
+
+
+test_dodoc_no_summary()
+test_dodoc_with_summary()
 
 
 toctree_path = reference_path / "toctree.txt"
