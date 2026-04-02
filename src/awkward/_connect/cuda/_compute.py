@@ -663,7 +663,6 @@ def awkward_ListArray_getitem_jagged_descend(
     )  # tooffsets: int64
 
 
-# Counts the number of valid entries that are within any of the jagged slices
 def awkward_ListArray_getitem_jagged_numvalid(
     numvalid, slicestarts, slicestops, length, missing, missinglength
 ):
@@ -682,16 +681,16 @@ def awkward_ListArray_getitem_jagged_numvalid(
             "jagged slice's offsets extend beyond its content " + optional_message
         )
 
-    # count the number of valid (non-negative index) entries in missing
     valid = missing[:missinglength] >= 0
 
     # create a mask for positions that are within any slice
-    positions = cp.zeros(missinglength, dtype=cp.bool_)
-    for i in range(length):
-        positions[slicestarts_[i] : slicestops_[i]] = True
+    # +1 at starts, -1 at stops
+    counts = cp.zeros(missinglength + 1, dtype=cp.int32)
+    cp.add.at(counts, slicestarts_, 1)
+    cp.add.at(counts, slicestops_, -1)
+    positions = cp.cumsum(counts)[:missinglength] > 0
 
-    # count entries that are not missing and within any slice
-    numvalid[0] = cp.sum(valid & positions)  # numvalid: int64
+    numvalid[0] = cp.sum(valid & positions)
 
 
 def awkward_ListArray_getitem_jagged_shrink(
