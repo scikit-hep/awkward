@@ -663,6 +663,7 @@ def awkward_ListArray_getitem_jagged_descend(
     )  # tooffsets: int64
 
 
+# Counts the number of valid entries that are within any of the jagged slices
 def awkward_ListArray_getitem_jagged_numvalid(
     numvalid, slicestarts, slicestops, length, missing, missinglength
 ):
@@ -681,6 +682,7 @@ def awkward_ListArray_getitem_jagged_numvalid(
             "jagged slice's offsets extend beyond its content " + optional_message
         )
 
+    # count the number of valid (non-negative index) entries in missing
     valid = missing[:missinglength] >= 0
 
     # create a mask for positions that are within any slice
@@ -690,82 +692,5 @@ def awkward_ListArray_getitem_jagged_numvalid(
     cp.add.at(counts, slicestops_, -1)
     positions = cp.cumsum(counts)[:missinglength] > 0
 
-    numvalid[0] = cp.sum(valid & positions)
-
-
-def awkward_ListArray_getitem_jagged_shrink(
-    tocarry, tosmalloffsets, tolargeoffsets, slicestarts, slicestops, length, missing
-):
-    """
-    Args:
-        tocarry — indices of valid (non-missing) elements
-        tosmalloffsets — offsets counting only the valid elements per list (shrunk)
-        tolargeoffsets — offsets counting all elements per list including missing ones (original size)
-
-    For example with slicestarts=[0,3], slicestops=[3,6], missing=[0,-1,1,-1,2,-1]:
-    slice 0: i=0 (valid→carry), i=1 (missing), i=2 (valid→carry)
-      tocarry    = [0, 2]
-      tosmalloffsets = [0, 2]
-      tolargeoffsets = [0, 3]
-
-    slice 1: i=3 (missing), i=4 (valid→carry), i=5 (missing)
-      tocarry    = [0, 2, 4]
-      tosmalloffsets = [0, 2, 3]
-      tolargeoffsets = [0, 3, 6]
-    """
-
-    if length == 0:
-        tosmalloffsets[0] = 0
-        tolargeoffsets[0] = 0
-        return
-
-    # set the first offsets to the first slice start
-    tosmalloffsets[0] = slicestarts[0]
-    tolargeoffsets[0] = slicestarts[0]
-
-    # compute the number of elements (including missing) in each slice
-    large_counts = slicestops[:length] - slicestarts[:length]
-    # compute original offsets as cumulative sum of slice lengths
-    # (tolargeoffsets[i + 1] = tolargeoffsets[i] + (slicestop - slicestart)) for i in range(length)
-    tolargeoffsets[1 : length + 1] = int(slicestarts[0]) + cp.cumsum(large_counts)
-
-    # Note: calling cp.cumsum() twice? but saves on memory
-    # boundaries[i] = cumulative flat position where segment i starts
-    boundaries = cp.concatenate(
-        [cp.zeros(1, dtype=slicestarts.dtype), cp.cumsum(large_counts)]
-    )  # shape: length+1
-    # number of all elements (including missing)
-    flat_len = boundaries[-1]
-
-    if flat_len == 0:
-        tosmalloffsets[1 : length + 1] = tosmalloffsets[0]
-        return
-
-    # [0, 1, 2, ..., flat_len)
-    flat_pos = cp.arange(flat_len, dtype=slicestarts.dtype)
-
-    # which element belongs to which segment
-    segment_ids = cp.searchsorted(boundaries[1:], flat_pos, side="right")
-
-    # for each element, the actual index in the array
-    j_indices = slicestarts[segment_ids] + (flat_pos - boundaries[segment_ids])
-
-    # valid elements
-    valid_mask = missing[j_indices] >= 0
-    valid_segment_ids = segment_ids[valid_mask]
-
-    if len(valid_segment_ids) == 0:
-        # edge case: no valid elements
-        tosmalloffsets[1 : length + 1] = tosmalloffsets[0]
-    else:
-        # how many valid elements belong to each segment
-        # minlength=length ensures segments with zero valid elements still get a 0 count
-        small_counts = cp.bincount(valid_segment_ids, minlength=length).astype(
-            slicestarts.dtype
-        )
-
-        # tosmalloffsets[i + 1] = tosmalloffsets[i] + smallcount
-        tosmalloffsets[1 : length + 1] = int(slicestarts[0]) + cp.cumsum(small_counts)
-
-    valid_j_indices = j_indices[valid_mask]
-    tocarry[: len(valid_j_indices)] = valid_j_indices
+    # count entries that are not missing and within any slice
+    numvalid[0] = cp.sum(valid & positions)  # numvalid: int64
