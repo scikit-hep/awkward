@@ -273,20 +273,6 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
     def tolist(self) -> list:
         return self.materialize().tolist()  # type: ignore[attr-defined]
 
-    def byteswap(self, inplace=False):
-        if self._array is not UNMATERIALIZED:
-            return self._array.byteswap(inplace=inplace)
-
-        return type(self)(
-            self._nplike,
-            self._shape,
-            self._dtype,
-            lambda: self.materialize().byteswap(inplace=inplace),
-            lambda: self.shape,
-            self._buffer_key,
-            __enable_caching__=self.__enable_caching__,
-        )
-
     def tobytes(self, order="C") -> bytes:
         return self.materialize().tobytes(order)  # type: ignore[attr-defined]
 

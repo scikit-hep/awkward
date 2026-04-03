@@ -567,6 +567,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         (x,) = maybe_materialize(x)
         return x.strides
 
+    def byteswap(self, x: ArrayLikeT) -> ArrayLikeT:
+        raise NotImplementedError
+
     ############################ ufuncs
 
     def add(
@@ -791,4 +794,4 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         return cls.is_own_array_type(type(obj))
 
     def memory_ptr(self, x: ArrayLikeT) -> int:
-        raise NotImplementedError()
+        raise NotImplementedError
