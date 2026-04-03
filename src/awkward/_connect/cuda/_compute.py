@@ -629,3 +629,25 @@ def awkward_reduce_countnonzero(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+
+
+def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsize):
+    """
+    Repeats an index array `repetitions` times, adjusting valid (non-negative) indices
+    by an offset(regularsize) each repetition.
+    Missing values (-1) are preserved as-is across all repetitions.
+    """
+
+    index_dtype = outindex.dtype.type
+
+    def fill_missing_repeat(counter):
+        i = counter // indexlength  # number of repetition we're in
+        j = counter % indexlength  # position within the current repetition
+        val_offset = i * regularsize
+        base = index[j]
+        adjustment = index_dtype(val_offset) if base >= 0 else index_dtype(0)
+        return base + adjustment
+
+    output_size = repetitions * indexlength
+    counters = CountingIterator(index_dtype(0))
+    unary_transform(counters, outindex, fill_missing_repeat, output_size)
