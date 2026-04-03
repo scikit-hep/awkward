@@ -1,4 +1,4 @@
-{% if obj.display %}
+{% if obj.display and not is_internal_module(obj) %}
    {% if is_own_page %}
 {{ obj.id | ak_name }}
 {{ "=" * (obj.id | ak_name | length) }}

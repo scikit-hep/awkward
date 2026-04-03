@@ -205,11 +205,19 @@ def _process_docstring_filter(docstring, obj):
     return "\n".join(lines)
 
 
+def _is_internal_module(obj):
+    """Check if a module is an internal submodule that should be suppressed."""
+    # Modules renamed with _module. prefix are internal submodules kept only
+    # to avoid case collisions; they should not generate visible pages.
+    return "._module." in obj.output_filename()
+
+
 def autoapi_prepare_jinja_env(jinja_env):
     """Register custom filters and globals for autoapi templates."""
     jinja_env.filters["ak_name"] = _awkward_to_ak
     jinja_env.filters["process_docstring"] = _process_docstring_filter
     jinja_env.globals["github_source_link"] = _github_source_link
+    jinja_env.globals["is_internal_module"] = _is_internal_module
 
 
 # Specify a canonical version
@@ -390,9 +398,7 @@ def _skip_member(app, what, name, obj, skip, options):
     if what == "module":
         parent_child = name.rsplit(".", 1)
         if len(parent_child) == 2:
-            parent, child = parent_child
-            # Skip internal submodules that collide with class pages on
-            # case-insensitive filesystems
+            _parent, child = parent_child
             if re.match(r"awkward\.(contents|types|forms)\.\w+$", name) and child.islower():
                 return True
     return skip
