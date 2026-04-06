@@ -2,28 +2,29 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromptr, parents, lenparents, outlength, invocation_index, err_code) = args
+//     (toptr, fromptr, parents, offsets, lenparents, outlength, invocation_index, err_code) = args
 //     if block[0] > 0:
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
 //     atomic_toptr = cupy.array(toptr, dtype=cupy.uint64)
 //     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_complex_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_complex_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_complex_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, fromptr, parents, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_complex_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_complex_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_argmin_complex_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, temp, invocation_index, err_code))
 // out["awkward_reduce_argmin_complex_a", {dtype_specializations}] = None
 // out["awkward_reduce_argmin_complex_b", {dtype_specializations}] = None
 // out["awkward_reduce_argmin_complex_c", {dtype_specializations}] = None
 // END PYTHON
 
 // argmin: lexicographic compare (real, then imag), tie-breaker: lower index
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_argmin_complex_a(
     T* toptr,
     const C* fromptr,   // [real, imag] pairs
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     uint64_t* atomic_toptr,
@@ -38,12 +39,13 @@ awkward_reduce_argmin_complex_a(
   }
 }
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_argmin_complex_b(
     T* toptr,
     const C* fromptr,   // flattened [real, imag] array
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     uint64_t* atomic_toptr,
@@ -135,12 +137,13 @@ awkward_reduce_argmin_complex_b(
   }
 }
 
-template <typename T, typename C, typename U>
+template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_reduce_argmin_complex_c(
     T* toptr,
     const C* fromptr,   // unused
     const U* parents,
+    const V* offsets,
     int64_t lenparents,
     int64_t outlength,
     uint64_t* atomic_toptr,

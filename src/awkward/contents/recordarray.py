@@ -202,17 +202,19 @@ class RecordArray(RecordMeta[Content], Content):
         contents: Iterable[Content],
         fields: Iterable[str] | None,
         length: int | type[unknown_length] | None = None,
+        length_generator: Callable[[], ShapeItem] | None = None,
         *,
         parameters=None,
         backend=None,
     ):
-        if length is not None and length is not unknown_length:
-            try:
-                length = int(length)  # TODO: this should not happen!
-            except TypeError:
-                raise TypeError(
-                    f"{type(self).__name__} 'length' must be a non-negative integer or None, not {length!r}"
-                ) from None
+        if (
+            length is not None
+            and length is not unknown_length
+            and not (is_integer(length) and length >= 0)
+        ):
+            raise TypeError(
+                f"{type(self).__name__} 'length' must be a non-negative integer or None, not {length}"
+            )
         if not isinstance(contents, Iterable):
             raise TypeError(
                 f"{type(self).__name__} 'contents' must be iterable, not {contents!r}"
@@ -260,6 +262,7 @@ class RecordArray(RecordMeta[Content], Content):
         # TODO: maybe need to store original `length` arg separately to the
         #       computed version (for typetracer conversions)
         self._length = length
+        self._length_generator = length_generator
         self._init(parameters, backend)
 
     form_cls: Final = RecordForm
@@ -269,6 +272,7 @@ class RecordArray(RecordMeta[Content], Content):
         contents=UNSET,
         fields=UNSET,
         length=UNSET,
+        length_generator=UNSET,
         *,
         parameters=UNSET,
         backend=UNSET,
@@ -277,6 +281,7 @@ class RecordArray(RecordMeta[Content], Content):
             self._contents if contents is UNSET else contents,
             self._fields if fields is UNSET else fields,
             self._length if length is UNSET else length,
+            self._length_generator if length_generator is UNSET else length_generator,
             parameters=self._parameters if parameters is UNSET else parameters,
             backend=self._backend if backend is UNSET else backend,
         )
@@ -291,21 +296,40 @@ class RecordArray(RecordMeta[Content], Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
+    def __getstate__(self):
+        # Calling .length resolves _length and clears _length_generator
+        # (a local closure from ak.from_buffers that can't be pickled).
+        _ = self.length
+        return self.__dict__
+
     @classmethod
     def simplified(
         cls,
         contents,
         fields,
         length=None,
+        length_generator=None,
         *,
         parameters=None,
         backend=None,
     ):
-        return cls(contents, fields, length, parameters=parameters, backend=backend)
+        return cls(
+            contents,
+            fields,
+            length,
+            length_generator,
+            parameters=parameters,
+            backend=backend,
+        )
 
     def to_tuple(self) -> Self:
         return RecordArray(
-            self._contents, None, self._length, parameters=None, backend=self._backend
+            self._contents,
+            None,
+            self._length,
+            self._length_generator,
+            parameters=None,
+            backend=self._backend,
         )
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> RecordForm:
@@ -369,12 +393,17 @@ class RecordArray(RecordMeta[Content], Content):
     @property
     def length(self) -> ShapeItem:
         if self._backend.nplike.known_data and self._length is unknown_length:
+            gen_length = unknown_length
+            if self._length_generator:
+                gen_length = self._length_generator()
+            length = gen_length if gen_length is not unknown_length else None
             self._length = _calculate_recordarray_length(
-                self._contents, None, self._backend
+                self._contents, length, self._backend
             )
             assert is_integer(self._length), (
                 f"RecordArray length must be an integer for an array with concrete data, not {type(self._length)}"
             )
+        self._length_generator = None
         return self._length
 
     def __repr__(self):
@@ -512,7 +541,12 @@ class RecordArray(RecordMeta[Content], Content):
                     self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
                 ]
         return RecordArray(
-            contents, fields, self._length, parameters=None, backend=self._backend
+            contents,
+            fields,
+            self._length,
+            self._length_generator,
+            parameters=None,
+            backend=self._backend,
         )
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
@@ -852,21 +886,23 @@ class RecordArray(RecordMeta[Content], Content):
             backend=self._backend,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         for content in self._contents:
-            if not content._is_unique(negaxis, starts, parents, outlength):
+            if not content._is_unique(negaxis, starts, parents, offsets, outlength):
                 return False
         return True
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         raise NotImplementedError
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         raise NotImplementedError
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         if len(self.fields) == 0:
             return ak.contents.NumpyArray(
                 self._backend.nplike.instance().empty(0, dtype=np.int64),
@@ -878,7 +914,7 @@ class RecordArray(RecordMeta[Content], Content):
         for content in self._contents:
             contents.append(
                 content._sort_next(
-                    negaxis, starts, parents, outlength, ascending, stable
+                    negaxis, starts, parents, offsets, outlength, ascending, stable
                 )
             )
         return RecordArray(
@@ -916,6 +952,7 @@ class RecordArray(RecordMeta[Content], Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -1332,6 +1369,7 @@ class RecordArray(RecordMeta[Content], Content):
             contents,
             self._fields,
             length=self._length,
+            length_generator=self._length_generator,
             parameters=self._parameters,
             backend=backend,
         )

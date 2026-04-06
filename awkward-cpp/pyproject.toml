@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "51"
+version = "52"
 dependencies = [
     "numpy>=1.21.3"
 ]
@@ -81,7 +81,6 @@ cmake.version = ">=3.29"
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
-enable = ["pypy", "cpython-freethreading"]
 test-requires = ["pytest>=6", "."]
 test-command = ["echo {project}:", "ls {project}", "echo {package}:", "ls {package}",
 """
@@ -93,10 +92,9 @@ pytest -p no:cacheprovider \
        {package}/tests-spec-explicit
 """]
 skip = [
-    "pp*win*",
+    "cp310-win_arm64",  # No numpy wheels
 ]
 test-skip = [
-    "pp*",
     "*musllinux*",
 ]
 build-verbosity = 1

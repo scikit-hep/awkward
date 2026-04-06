@@ -9,13 +9,13 @@ ERROR awkward_reduce_prod_bool(
   bool* toptr,
   const IN* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = true;
-  }
+  std::memset(toptr, 1, outlength);
+
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i]] &= (fromptr[i] != 0);
+    toptr[parents[i]] = toptr[parents[i]] && (fromptr[i] != 0);
   }
   return success();
 }
@@ -23,12 +23,14 @@ ERROR awkward_reduce_prod_bool_bool_64(
   bool* toptr,
   const bool* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<bool>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -36,12 +38,14 @@ ERROR awkward_reduce_prod_bool_int8_64(
   bool* toptr,
   const int8_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<int8_t>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -49,12 +53,14 @@ ERROR awkward_reduce_prod_bool_uint8_64(
   bool* toptr,
   const uint8_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<uint8_t>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -62,12 +68,14 @@ ERROR awkward_reduce_prod_bool_int16_64(
   bool* toptr,
   const int16_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<int16_t>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -75,12 +83,14 @@ ERROR awkward_reduce_prod_bool_uint16_64(
   bool* toptr,
   const uint16_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<uint16_t>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -88,12 +98,14 @@ ERROR awkward_reduce_prod_bool_int32_64(
   bool* toptr,
   const int32_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<int32_t>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -101,12 +113,14 @@ ERROR awkward_reduce_prod_bool_uint32_64(
   bool* toptr,
   const uint32_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<uint32_t>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -114,12 +128,14 @@ ERROR awkward_reduce_prod_bool_int64_64(
   bool* toptr,
   const int64_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<int64_t>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -127,12 +143,14 @@ ERROR awkward_reduce_prod_bool_uint64_64(
   bool* toptr,
   const uint64_t* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<uint64_t>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -140,12 +158,14 @@ ERROR awkward_reduce_prod_bool_float32_64(
   bool* toptr,
   const float* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<float>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
@@ -153,12 +173,14 @@ ERROR awkward_reduce_prod_bool_float64_64(
   bool* toptr,
   const double* fromptr,
   const int64_t* parents,
+  const int64_t* offsets,
   int64_t lenparents,
   int64_t outlength) {
   return awkward_reduce_prod_bool<double>(
     toptr,
     fromptr,
     parents,
+    offsets,
     lenparents,
     outlength);
 }
