@@ -38,8 +38,8 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
 from awkward._pickle import (
     custom_reduce,
-    unpickle_array_schema_1,
-    unpickle_record_schema_1,
+    unpickle_array_schema_2,
+    unpickle_record_schema_2,
 )
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
@@ -1669,6 +1669,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return numba.typeof(self._numbaview)
 
     def __reduce_ex__(self, protocol: int) -> tuple:
+        # Allow third-party libraries to customise pickling
         result = custom_reduce(self, protocol)
         if result is not NotImplemented:
             return result
@@ -1678,7 +1679,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             packed_layout,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
 
         # For pickle >= 5, we can avoid copying the buffers
@@ -1695,10 +1696,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             attrs = without_transient_attrs(self._attrs)
 
-        return unpickle_array_schema_1, (
+        return unpickle_array_schema_2, (
             form.to_dict(),
             length,
             container,
+            ak._util.native_byteorder,
             behavior,
             attrs,
         )
@@ -2518,7 +2520,7 @@ class Record(NDArrayOperatorsMixin):
             packed_layout.array,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
 
         # For pickle >= 5, we can avoid copying the buffers
@@ -2535,10 +2537,11 @@ class Record(NDArrayOperatorsMixin):
         else:
             attrs = without_transient_attrs(self._attrs)
 
-        return unpickle_record_schema_1, (
+        return unpickle_record_schema_2, (
             form.to_dict(),
             length,
             container,
+            ak._util.native_byteorder,
             behavior,
             attrs,
             packed_layout.at,
