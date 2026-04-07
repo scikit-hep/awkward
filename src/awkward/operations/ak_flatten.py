@@ -21,7 +21,7 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def flatten(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
-    """Removes one level of nesting by merging consecutive lists.
+    """Returns an array with one or all levels of nesting removed.
 
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
