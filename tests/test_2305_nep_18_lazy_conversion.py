@@ -9,6 +9,7 @@ import awkward as ak
 
 
 def test_binary():
+    # awkward expects native byteorder
     dtype = np.dtype("u4")
     ak_array = ak.Array(np.arange(10, dtype=dtype))
     np_array = np.arange(10, dtype=dtype.newbyteorder("S"))

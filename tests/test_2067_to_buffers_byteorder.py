@@ -20,8 +20,8 @@ def test_byteorder():
 def test_byteorder_default():
     array = ak.Array([[[1, 2, 3], [4, 5], None, "hi"]])
 
-    _, _, container_little = ak.to_buffers(array, byteorder=ak._util.native_byteorder)
+    _, _, container_native = ak.to_buffers(array, byteorder=ak._util.native_byteorder)
     _, _, container_default = ak.to_buffers(array)
 
-    for name, buffer in container_little.items():
+    for name, buffer in container_native.items():
         assert buffer.tobytes() == container_default[name].tobytes()
