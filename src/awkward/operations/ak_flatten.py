@@ -133,7 +133,6 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
         </NumpyArray>
 
         However, it is important to keep in mind that this is a special case:
-
         #ak.flatten and `content` are not interchangeable!
 
         >>> array = ak.Array(
