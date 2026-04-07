@@ -195,19 +195,17 @@ jobs:
           submodules: true
 
       - name: Get micromamba
-        uses: mamba-org/setup-micromamba@v2
+        uses: mamba-org/setup-micromamba@v3
         with:
           environment-name: test-env
           init-shell: bash
           # TODO: run the tests with cudf again when it supports numba-cuda>=0.23.0
           create-args: >-
-            -c rapidsai
             python=3.13
-            pandas>=0.24.0
+            pandas>=0.24
             cccl-python
             cupy>=14
             cuda-version=${{ matrix.cuda-version }}
-            cuda-toolkit
             cxx-compiler
             numba-cuda
             ${{ matrix.cuda-version == 13 && 'root=6.36.06' || '' }}
@@ -273,7 +271,7 @@ jobs:
 
       - name: Upload Codecov results
         if: matrix.cuda-version == 13
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -302,7 +300,7 @@ jobs:
           submodules: true
 
       - name: Setup Python via Conda
-        uses: mamba-org/setup-micromamba@v2
+        uses: mamba-org/setup-micromamba@v3
         with:
           # Cache invalidates daily by default
           cache-environment: true
@@ -376,7 +374,7 @@ jobs:
           python -m build -w ./awkward-cpp
 
       - name: Extract pre-built manylinux cppyy wheels
-        uses: shrink/actions-docker-extract@v3
+        uses: shrink/actions-docker-extract@v4
         with:
           image: "docker.io/agoose77/cppyy-wheels:cp311"
           path: "/wheels/."
