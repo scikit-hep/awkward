@@ -9,7 +9,7 @@ import awkward as ak
 
 
 @settings(max_examples=200)
-@given(a=st_ak.constructors.arrays(allow_nan=True))
+@given(a=st_ak.constructors.arrays())
 def test_reflexivity(a: ak.Array) -> None:
     """An array must be equal to itself."""
     assert ak.array_equal(a, a, equal_nan=True)
@@ -17,8 +17,8 @@ def test_reflexivity(a: ak.Array) -> None:
 
 @settings(max_examples=200)
 @given(
-    a1=st_ak.constructors.arrays(allow_nan=True),
-    a2=st_ak.constructors.arrays(allow_nan=True),
+    a1=st_ak.constructors.arrays(),
+    a2=st_ak.constructors.arrays(),
 )
 def test_symmetry(a1: ak.Array, a2: ak.Array) -> None:
     """Argument order must not affect the result."""
