@@ -632,4 +632,4 @@ def awkward_reduce_countnonzero(
 
 
 def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
-    numnull[0] = int(cp.sum(fromindex[:lenindex] < 0))
+    numnull[0] = cp.sum(fromindex[:lenindex] < 0)
