@@ -630,6 +630,7 @@ def awkward_reduce_countnonzero(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
 
-
+# Counts the number of null (missing) entries in an indexed array.
 def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
-    numnull[0] = cp.sum(fromindex[:lenindex] < 0)
+    index = fromindex[:lenindex]
+    numnull[0] = cp.count_nonzero(index < 0)
