@@ -184,8 +184,8 @@ class Jax(ArrayModuleNumpyLike):
             if itemsize == 1:
                 return self._module.copy(x)
 
-            bytes_arr = x.view(np.uint8)
-            bytes_arr = bytes_arr.reshape(-1, itemsize)  # type: ignore[attr-defined]
+            bytes_arr = x.reshape(-1).view(np.uint8)  # type: ignore[attr-defined]
+            bytes_arr = bytes_arr.reshape(-1, itemsize)
             bytes_arr = bytes_arr[..., ::-1]
             return bytes_arr.reshape(-1).view(dtype).reshape(original_shape)
 
