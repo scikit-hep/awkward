@@ -62,6 +62,7 @@ autoapi_ignore = []
 autoapi_options = [
     "members",
     "undoc-members",
+    "private-members",
     "show-module-summary",
     "imported-members",
 ]
@@ -387,10 +388,12 @@ def _skip_member(app, what, name, obj, skip, options):
     # Keep the top-level awkward package
     if name == "awkward":
         return False
-    # Skip private modules (awkward._*)
-    parts = name.split(".")
-    if any(part.startswith("_") for part in parts):
-        return True
+    # Skip private modules (awkward._*) but not private methods/attributes
+    # within public classes (those are controlled by the "private-members" option)
+    if what in ("module", "package"):
+        parts = name.split(".")
+        if any(part.startswith("_") for part in parts):
+            return True
     # Skip internal submodules that would collide with class pages on
     # case-insensitive filesystems (e.g., ak.contents.recordarray vs
     # ak.contents.RecordArray). The class is re-exported at the package
