@@ -69,7 +69,7 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
     because the bitmap can be omitted when all values are valid.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class UnmaskedArray(Content):
             def __init__(self, content):
