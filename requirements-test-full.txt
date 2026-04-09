@@ -1,5 +1,5 @@
 fsspec>=2022.11.0;sys_platform != "win32"
-hypothesis-awkward==0.12.0
+hypothesis-awkward==0.13.0
 jax[cpu]>=0.2.15;sys_platform != "win32"
 numba>=0.50.0;sys_platform != "win32"
 numexpr>=2.7
