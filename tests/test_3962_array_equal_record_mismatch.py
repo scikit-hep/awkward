@@ -21,6 +21,14 @@ def test_record_different_field_names():
     assert ak.array_equal(a2, a1) is False
 
 
+def test_tuple_vs_record_same_arity():
+    a1 = ak.Array([(1,), (2,)])
+    a2 = ak.Array([{"0": 1}, {"0": 2}])
+
+    assert ak.array_equal(a1, a2) is False
+    assert ak.array_equal(a2, a1) is False
+
+
 def test_record_field_order_insensitive():
     a1 = ak.Array([{"x": 1, "y": 10}, {"x": 2, "y": 20}])
     a2 = ak.Array([{"y": 10, "x": 1}, {"y": 20, "x": 2}])
