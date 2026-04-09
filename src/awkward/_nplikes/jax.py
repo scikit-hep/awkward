@@ -155,6 +155,8 @@ class Jax(ArrayModuleNumpyLike):
         return self._module.divide(x1, x2)
 
     def byteswap(self, x: ArrayLike) -> ArrayLike:
+        lax = ak.jax.import_jax().lax
+
         if isinstance(x, VirtualNDArray):
             if x.is_materialized:
                 return self.byteswap(x.materialize())
@@ -170,24 +172,21 @@ class Jax(ArrayModuleNumpyLike):
                 )
         else:
             dtype = x.dtype
-            original_shape = x.shape
             # Handle complex types by swapping real and imaginary parts independently
             if np.issubdtype(dtype, np.complexfloating):
-                jax = ak.jax.import_jax()
                 real_swapped = self.byteswap(self._module.real(x))
                 imag_swapped = self.byteswap(self._module.imag(x))
                 # JAX flushes subnormals to zero in view(complex) and + 1j *, so use lax.complex
-                return jax.lax.complex(real_swapped, imag_swapped)
+                return lax.complex(real_swapped, imag_swapped)
 
             itemsize = dtype.itemsize
 
             if itemsize == 1:
                 return self._module.copy(x)
 
-            bytes_arr = x.reshape(-1).view(np.uint8)  # type: ignore[attr-defined]
-            bytes_arr = bytes_arr.reshape(-1, itemsize)
-            bytes_arr = bytes_arr[..., ::-1]
-            return bytes_arr.reshape(-1).view(dtype).reshape(original_shape)
+            bytes_arr = lax.bitcast_convert_type(x, np.uint8)
+            bytes_arr = lax.rev(bytes_arr, [x.ndim])
+            return lax.bitcast_convert_type(bytes_arr, dtype)
 
     def memory_ptr(self, x: ArrayLike) -> int:
         (x,) = maybe_materialize(x)
