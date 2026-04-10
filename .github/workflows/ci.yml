@@ -27,6 +27,11 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.build-wheels)
     uses: ./.github/workflows/reusable-build-wheels.yml
 
+  packaging-tests:
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.build-wheels)
+    uses: ./.github/workflows/reusable-packaging-test.yml
+
   header-only-tests:
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-header-only-tests)
@@ -65,6 +70,12 @@ jobs:
               && ''
               || '
               build-wheels,
+              '
+            }} ${{
+              fromJSON(needs.change-detection.outputs.packaging-tests)
+              && ''
+              || '
+              packaging-tests,
               '
             }} ${{
               fromJSON(needs.change-detection.outputs.run-header-only-tests)
