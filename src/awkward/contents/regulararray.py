@@ -99,7 +99,7 @@ class RegularArray(RegularMeta[Content], Content):
     [FixedSizeList](https://arrow.apache.org/docs/format/Columnar.html#fixed-size-list-layout).
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class RegularArray(Content):
             def __init__(self, content, size, zeros_length=0):
