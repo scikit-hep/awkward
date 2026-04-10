@@ -69,13 +69,7 @@ jobs:
               fromJSON(needs.change-detection.outputs.build-wheels)
               && ''
               || '
-              build-wheels,
-              '
-            }} ${{
-              fromJSON(needs.change-detection.outputs.packaging-tests)
-              && ''
-              || '
-              packaging-tests,
+              build-wheels, packaging-tests,
               '
             }} ${{
               fromJSON(needs.change-detection.outputs.run-header-only-tests)
