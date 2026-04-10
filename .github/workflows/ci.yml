@@ -49,6 +49,7 @@ jobs:
       - change-detection
       - tests
       - build-wheels
+      - packaging-tests
       - header-only-tests
       - coverage
       - docs

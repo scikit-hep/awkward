@@ -46,7 +46,7 @@ jobs:
             dev/**
             header-only/**
             src/awkward/**
-            tests/awkward/**
+            tests/**
             .gitmodules
             codecov.yml
             kernel-specification.yml
@@ -115,7 +115,7 @@ jobs:
             src/awkward/_connect/cuda/**
             src/awkward/_kernels.py
             tests-cuda/**
-      - name: Set a flag for running the header tests
+      - name: Set a flag for running the GPU tests
         if: >-
           github.event_name != 'pull_request' ||
           steps.changed-gpu-files.outputs.added_modified_renamed != '[]'

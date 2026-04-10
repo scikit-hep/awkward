@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
-    if: github.repository_owner == 'scikit-hep'
 
     steps:
       - uses: actions/checkout@v6
