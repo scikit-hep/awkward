@@ -404,6 +404,38 @@ def _skip_member(app, what, name, obj, skip, options):
     return skip
 
 
+def _add_awkward_inventory_aliases(app, exception):
+    """Duplicate ak.* inventory entries as awkward.* so intersphinx works.
+
+    Downstream projects that annotate ``awkward.Array`` (resolved from
+    ``import awkward as ak``) need ``awkward.*`` entries in objects.inv.
+    See https://github.com/scikit-hep/awkward/issues/3950.
+    """
+    if exception:
+        return
+    import zlib
+
+    inv_path = os.path.join(app.outdir, "objects.inv")
+    with open(inv_path, "rb") as f:
+        # Read the 4-line header verbatim
+        header = b"".join(f.readline() for _ in range(4))
+        # Decompress the body
+        body = zlib.decompress(f.read()).decode("utf-8")
+
+    extra_lines = []
+    for line in body.splitlines():
+        name = line.split(" ", 1)[0]
+        if name.startswith("ak."):
+            extra_lines.append("awkward." + line[3:])
+
+    if extra_lines:
+        new_body = body.rstrip("\n") + "\n" + "\n".join(extra_lines) + "\n"
+        with open(inv_path, "wb") as f:
+            f.write(header)
+            f.write(zlib.compress(new_body.encode("utf-8")))
+
+
 def setup(app):
     app.connect("html-page-context", install_jupyterlite_styles)
     app.connect("autoapi-skip-member", _skip_member)
+    app.connect("build-finished", _add_awkward_inventory_aliases)
