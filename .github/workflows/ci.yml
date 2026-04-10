@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  change-detection:
+    uses: ./.github/workflows/reusable-change-detection.yml
+
+  tests:
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-tests)
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      run-gpu-kernel-tests: ${{ needs.change-detection.outputs.run-gpu-kernel-tests }}
+
+  header-only-tests:
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-header-only-tests)
+    uses: ./.github/workflows/reusable-header-only-test.yml
+
+  coverage:
+    uses: ./.github/workflows/reusable-coverage.yml
+
+  docs:
+    uses: ./.github/workflows/reusable-docs.yml
+
+  pass:
+    if: always()
+    needs:
+      - change-detection
+      - tests
+      - header-tests
+      - coverage
+      - docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          allowed-skips: >-
+            ${{
+              fromJSON(needs.change-detection.outputs.run-tests)
+              && ''
+              || '
+              tests,
+              '
+            }} ${{
+              fromJSON(needs.change-detection.outputs.run-header-only-tests)
+              && ''
+              || '
+              header-only-tests,
+              '
+            }}
+          jobs: ${{ toJSON(needs) }}

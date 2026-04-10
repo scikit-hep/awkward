@@ -1,0 +1,98 @@
+name: Change detection
+
+on:
+  workflow_call:
+    outputs:
+      run-tests:
+        description: Whether or not run the tests
+        value: ${{ jobs.change-detection.outputs.run-tests || false }}
+      run-header-only-tests:
+        description: Whether or not run the header-only tests
+        value: ${{ jobs.change-detection.outputs.run-header-only-tests || false }}
+      run-gpu-kernel-tests:
+        description: Whether or not run the gpu kernel tests
+        value: ${{ jobs.change-detection.outputs.run-gpu-kernel-tests || false }}
+
+jobs:
+  change-detection:
+    name: Identify source changes
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    outputs:
+      run-tests: ${{ steps.code-changes.outputs.run-tests || false }}
+      run-header-only-tests: ${{ steps.header-changes.outputs.run-header-only-tests || false }}
+      run-gpu-kernel-tests: ${{ steps.gpu-changes.outputs.run-gpu-kernel-tests || false }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Changed code files
+        if: github.event_name == 'pull_request'
+        id: changed-code-files
+        uses: Ana06/get-changed-files@v2.3.0
+        with:
+          format: "json"
+          filter: |
+            .github/workflows/ci.yml
+            .github/workflows/reusable-test.yml
+            awkward-cpp/include/**
+            awkward-cpp/rapidjson/**
+            awkward-cpp/src/**
+            awkward-cpp/CMakeLists.txt
+            awkward-cpp/pyproject.toml
+            dev/**
+            header-only/**
+            src/awkward/**
+            tests/awkward/**
+            .gitmodules
+            codecov.yml
+            kernel-specification.yml
+            kernel-test-data.json
+            noxfile.py
+            pyproject.toml
+            requirements-*.txt
+      - name: Set a flag for running the tests
+        if: >-
+          github.event_name != 'pull_request' ||
+          steps.changed-code-files.outputs.added_modified_renamed != '[]'
+        id: code-changes
+        run: echo "run-tests=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Changed header files
+        if: github.event_name == 'pull_request'
+        id: changed-header-files
+        uses: Ana06/get-changed-files@v2.3.0
+        with:
+          format: "json"
+          filter: |
+            .github/workflows/ci.yml
+            .github/workflows/reusable-header-only-test.yml
+            header-only/**
+      - name: Set a flag for running the header tests
+        if: >-
+          github.event_name != 'pull_request' ||
+          steps.changed-header-files.outputs.added_modified_renamed != '[]'
+        id: header-changes
+        run: echo "run-header-only-tests=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Changed GPU code files
+        if: github.event_name == 'pull_request'
+        id: changed-gpu-files
+        uses: Ana06/get-changed-files@v2.3.0
+        with:
+          format: "json"
+          filter: |
+            .github/workflows/ci.yml
+            .github/workflows/reusable-test.yml
+            dev/**
+            kernel-specification.yml
+            kernel-test-data.json
+            src/awkward/_backends/cupy.py
+            src/awkward/_connect/cuda/**
+            src/awkward/_kernels.py
+            tests-cuda/**
+      - name: Set a flag for running the header tests
+        if: >-
+          github.event_name != 'pull_request' ||
+          steps.changed-gpu-files.outputs.added_modified_renamed != '[]'
+        id: gpu-changes
+        run: echo "run-gpu-kernel-tests=true" >> "${GITHUB_OUTPUT}"
