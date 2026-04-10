@@ -1248,9 +1248,16 @@ class NumpyArray(NumpyMeta, Content):
             return self.to_RegularArray()._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
-
         (nparray,) = maybe_materialize(self._raw(numpy))
-        storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
+
+        if (
+            np.issubdtype(nparray.dtype, np.datetime64)
+            and nparray.dtype.name == "datetime64[D]"
+        ):
+            nparray = nparray.astype("timedelta64[D]").astype(np.int32)
+            storage_type = pyarrow.date32()
+        else:
+            storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
             nparray = numpy.packbits(nparray, bitorder="little")
