@@ -131,7 +131,7 @@ def nanmin(
 
     Like #ak.min, but treating NaN ("not a number") values as missing.
 
-    Equivalent to
+    Equivalent to::
 
         ak.min(ak.nan_to_none(array))
 
