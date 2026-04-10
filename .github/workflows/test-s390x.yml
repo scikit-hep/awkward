@@ -1,0 +1,151 @@
+name: Tests (s390x)
+
+on:
+  pull_request:
+    paths-ignore:
+      - README.md
+      - CONTRIBUTING.md
+      - CITATION.cff
+      - LICENSE
+      - .readthedocs.yml
+      - docs-img/**
+      - docs/**
+      - awkward-cpp/docs/**
+      - studies/**
+
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: 'test-s390x-${{ github.head_ref || github.run_id }}'
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  linux_s390x_qemu:
+    # Only workflow_dispatch is enabled on forks.
+    if: github.repository == 'scikit-hep/awkward' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    timeout-minutes: 120
+
+    env:
+      DOCKER_CONTAINER: s390x/ubuntu:22.04
+      ARCH: s390x
+      TERM: xterm-256color
+
+    name: "s390x (big-endian)"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Initialize binfmt_misc for qemu-user-static
+        run: |
+          docker run --rm --privileged tonistiigi/binfmt:qemu-v9.2.2-52 --install s390x
+
+      - name: Cache docker container
+        uses: actions/cache@v5
+        id: container-cache
+        with:
+          path: ~/docker_s390x
+          key: container-${{ runner.os }}-s390x-${{ hashFiles('requirements-test-basic.txt', 'awkward-cpp/pyproject.toml') }}
+
+      - name: Create container
+        if: steps.container-cache.outputs.cache-hit != 'true'
+        run: |
+          docker run --platform=linux/${ARCH} --name the_container --interactive \
+            -v $(pwd):/awkward ${DOCKER_CONTAINER} /bin/bash -c "
+            apt update &&
+            apt install -y python3 python3-dev python3-pip python3-venv \
+                           cmake build-essential git pkg-config curl ca-certificates &&
+            python3 -m venv /venv &&
+            /venv/bin/pip install --upgrade pip setuptools wheel &&
+            /venv/bin/pip install 'numpy>=1.21.3' &&
+            /venv/bin/pip install 'scikit-build-core>=0.11' 'pybind11>=3' build &&
+            /venv/bin/pip install pytest pytest-xdist fsspec packaging
+          "
+          docker commit the_container the_container
+          mkdir -p ~/docker_s390x
+          docker save -o ~/docker_s390x/the_container.tar the_container
+
+      - name: Load container from cache
+        if: steps.container-cache.outputs.cache-hit == 'true'
+        run: docker load -i ~/docker_s390x/the_container.tar
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Build awkward-cpp and install awkward
+        run: |
+          docker run --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+            --name build_container \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              source /venv/bin/activate &&
+              cd /awkward &&
+              pip install -v ./awkward-cpp &&
+              pip install -v .
+            '
+          docker commit build_container the_container
+          docker rm build_container
+
+      - name: Print versions
+        run: |
+          docker run --rm --platform=linux/${ARCH} \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              source /venv/bin/activate &&
+              python3 -c "import sys; print(sys.byteorder)" &&
+              pip list
+            '
+
+      - name: Test specification
+        run: |
+          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              source /venv/bin/activate && cd /awkward &&
+              python3 -m pytest -vv -rs awkward-cpp/tests-spec
+            '
+
+      - name: Test specification with explicitly defined values
+        run: |
+          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              source /venv/bin/activate && cd /awkward &&
+              python3 -m pytest -vv -rs awkward-cpp/tests-spec-explicit
+            '
+
+      - name: Test CPU kernels
+        run: |
+          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              source /venv/bin/activate && cd /awkward &&
+              python3 -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
+            '
+
+      - name: Test CPU kernels with explicitly defined values
+        run: |
+          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              source /venv/bin/activate && cd /awkward &&
+              python3 -m pytest -vv -rs awkward-cpp/tests-cpu-kernels-explicit
+            '
+
+      - name: Test non-kernels (Python)
+        run: |
+          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              source /venv/bin/activate && cd /awkward &&
+              python3 -m pytest -vv -rs tests
+            '
