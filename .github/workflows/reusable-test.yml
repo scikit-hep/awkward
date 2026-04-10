@@ -1,22 +1,24 @@
 name: Tests
 
 on:
-  pull_request:
-    paths-ignore:
-      - README.md
-      - CONTRIBUTING.md
-      - CITATION.cff
-      - LICENSE
-      - .readthedocs.yml
-      - docs-img/**
-      - docs/**
-      - awkward-cpp/docs/**
-      - studies/**
-
   schedule:
     - cron: 0 12 1 * *
 
+  workflow_call:
+    inputs:
+      run-gpu-kernel-tests:
+        description: Whether or not to run the gpu kernel tests
+        required: false
+        default: false
+        type: boolean
+
   workflow_dispatch:
+    inputs:
+      run-gpu-kernel-tests:
+        description: Whether or not to run the gpu kernel tests
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: 'test-${{ github.head_ref || github.run_id }}'
@@ -208,7 +210,6 @@ jobs:
             cuda-version=${{ matrix.cuda-version }}
             cxx-compiler
             numba-cuda
-            ${{ matrix.cuda-version == 13 && 'root=6.36.06' || '' }}
 
       - name: Generate build files
         run: |
@@ -242,44 +243,26 @@ jobs:
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
           python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
-          -r requirements-test-gpu.txt ${{ matrix.cuda-version == 13 && '-r requirements-test-full.txt' || '' }}
+          -r requirements-test-gpu.txt
 
       - name: Print versions
         run: python -m pip list
 
       - name: Test CUDA kernels
+        if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
         run: python -m pytest -vv -rs tests-cuda-kernels
 
       - name: Test CUDA kernels with explicitly defined values
+        if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
         run: python -m pytest -vv -rs tests-cuda-kernels-explicit
-
-      - name: Test non-kernels (Python)
-        if: matrix.cuda-version == 13
-        run: >-
-          python -m pytest -vv -rs tests --cov=awkward --cov-report=term
-          --cov-report=xml:non-cuda-coverage.xml --junitxml=junit.xml -o junit_family=legacy
 
       - name: Test CUDA non-kernel (Python)
         run: >-
           python -m pytest -vv -rs tests-cuda --ignore=tests-cuda/test_3459_virtualarray_with_cuda.py
-          ${{ matrix.cuda-version == 13 && '--cov=awkward --cov-report=term --cov-report=xml:cuda-coverage.xml' || '' }}
 
       - name: Test CUDA virtual arrays
         run: >-
           python -m pytest -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py
-          ${{ matrix.cuda-version == 13 && '--cov=awkward --cov-report=term --cov-report=xml:cuda-virtual-coverage.xml' || '' }}
-
-      - name: Upload Codecov results
-        if: matrix.cuda-version == 13
-        uses: codecov/codecov-action@v6
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Upload test results to Codecov
-        if: ${{ !cancelled() && matrix.cuda-version == 13 }}
-        uses: codecov/test-results-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
 
   Linux-ROOT:
     runs-on: ubuntu-latest
@@ -390,13 +373,3 @@ jobs:
 
       - name: Test
         run: python -m pytest -vv -rs tests -k cppyy
-
-
-  pass-tests:
-    if: always()
-    needs: [ run-tests, Linux-ROOT, Linux-cppyy ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: re-actors/alls-green@release/v1
-        with:
-          jobs: ${{ toJSON(needs) }}
