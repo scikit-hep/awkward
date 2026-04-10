@@ -22,6 +22,11 @@ jobs:
     with:
       run-gpu-kernel-tests: ${{ needs.change-detection.outputs.run-gpu-kernel-tests }}
 
+  build-wheels:
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.build-wheels)
+    uses: ./.github/workflows/reusable-build-wheels.yml
+
   header-only-tests:
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-header-only-tests)
@@ -38,7 +43,8 @@ jobs:
     needs:
       - change-detection
       - tests
-      - header-tests
+      - build-wheels
+      - header-only-tests
       - coverage
       - docs
     runs-on: ubuntu-latest
@@ -53,6 +59,12 @@ jobs:
               && ''
               || '
               tests,
+              '
+            }} ${{
+              fromJSON(needs.change-detection.outputs.build-wheels)
+              && ''
+              || '
+              build-wheels,
               '
             }} ${{
               fromJSON(needs.change-detection.outputs.run-header-only-tests)

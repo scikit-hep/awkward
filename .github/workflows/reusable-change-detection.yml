@@ -6,6 +6,9 @@ on:
       run-tests:
         description: Whether or not run the tests
         value: ${{ jobs.change-detection.outputs.run-tests || false }}
+      build-wheels:
+        description: Whether or not build the wheels
+        value: ${{ jobs.change-detection.outputs.build-wheels || false }}
       run-header-only-tests:
         description: Whether or not run the header-only tests
         value: ${{ jobs.change-detection.outputs.run-header-only-tests || false }}
@@ -20,6 +23,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       run-tests: ${{ steps.code-changes.outputs.run-tests || false }}
+      build-wheels: ${{ steps.cpp-changes.outputs.build-wheels || false }}
       run-header-only-tests: ${{ steps.header-changes.outputs.run-header-only-tests || false }}
       run-gpu-kernel-tests: ${{ steps.gpu-changes.outputs.run-gpu-kernel-tests || false }}
     steps:
@@ -56,6 +60,27 @@ jobs:
           steps.changed-code-files.outputs.added_modified_renamed != '[]'
         id: code-changes
         run: echo "run-tests=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Changed C++ files
+        if: github.event_name == 'pull_request'
+        id: changed-cpp-files
+        uses: Ana06/get-changed-files@v2.3.0
+        with:
+          format: "json"
+          filter: |
+            .github/workflows/ci.yml
+            .github/workflows/reusable-build-wheels.yml
+            awkward-cpp/include/**
+            awkward-cpp/rapidjson/**
+            awkward-cpp/src/**
+            awkward-cpp/CMakeLists.txt
+            awkward-cpp/pyproject.toml
+      - name: Set a flag for building wheels
+        if: >-
+          github.event_name != 'pull_request' ||
+          steps.changed-cpp-files.outputs.added_modified_renamed != '[]'
+        id: cpp-changes
+        run: echo "build-wheels=true" >> "${GITHUB_OUTPUT}"
 
       - name: Changed header files
         if: github.event_name == 'pull_request'
