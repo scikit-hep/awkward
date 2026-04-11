@@ -87,6 +87,7 @@ class CupyBackend(Backend):
         - awkward_prod_bool
         - awkward_count_64
         - awkward_countnonzero
+        - awkward_localindex
         """
         return kernel_name in (
             "awkward_sort",
@@ -100,6 +101,7 @@ class CupyBackend(Backend):
             "awkward_reduce_prod_bool",
             "awkward_reduce_count_64",
             "awkward_reduce_countnonzero",
+            "awkward_localindex",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
@@ -146,6 +148,9 @@ class CupyBackend(Backend):
 
         if kernel_name == "awkward_reduce_countnonzero":
             return cuda_compute.awkward_reduce_countnonzero
+
+        if kernel_name == "awkward_localindex":
+            return cuda_compute.awkward_localindex
 
         return None
 
