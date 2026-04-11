@@ -39,7 +39,7 @@ jobs:
       ARCH: s390x
       TERM: xterm-256color
 
-    name: "s390x (big-endian)"
+    name: "Run s390x Tests"
     steps:
       - uses: actions/checkout@v6
         with:
