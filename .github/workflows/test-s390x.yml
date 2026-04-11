@@ -66,7 +66,7 @@ jobs:
                            libopenblas-dev liblapack-dev pkg-config &&
             curl -LsSf https://astral.sh/uv/install.sh | sh &&
             export PATH=\"/root/.local/bin:\$PATH\" &&
-            uv venv --python 3.13 .venv &&
+            uv venv --seed --python 3.13 .venv &&
             source .venv/bin/activate &&
             uv pip install -v numpy &&
             uv pip install -r /awkward/requirements-test-basic.txt
