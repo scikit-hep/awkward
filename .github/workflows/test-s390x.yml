@@ -26,6 +26,12 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Leverage reproducible builds by setting a constant SOURCE_DATE_EPOCH
+  # This will ensure that the hash of the awkward-cpp directory remains
+  # constant for unchanged files, meaning that it can be used for caching
+  SOURCE_DATE_EPOCH: "1668811211"
+
 jobs:
   linux_s390x_qemu:
     # Only workflow_dispatch is enabled on forks.
