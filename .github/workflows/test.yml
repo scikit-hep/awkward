@@ -462,10 +462,11 @@ jobs:
             /bin/bash -c '
               source .venv/bin/activate &&
               cd /awkward &&
-              pip wheel --no-deps -v ./awkward-cpp -w ./awkward-cpp/dist
+              uv pip install build &&
+              python -m build -w awkward-cpp
             '
 
-      - name: Install awkward-cpp and awkward
+      - name: Install awkward, awkward-cpp, and dependencies
         run: |
           docker run --platform=linux/${ARCH} -e "TERM=xterm-256color" \
             --name build_container \
@@ -473,8 +474,7 @@ jobs:
             /bin/bash -c '
               source .venv/bin/activate &&
               cd /awkward &&
-              pip install -v awkward-cpp/dist/*.whl &&
-              pip install -v .
+              uv pip install -v . awkward-cpp/dist/*.whl
             '
           docker commit build_container the_container
           docker rm build_container
@@ -486,7 +486,7 @@ jobs:
             /bin/bash -c '
               source .venv/bin/activate &&
               python -c "import sys; print(sys.byteorder)" &&
-              pip list
+              uv pip list
             '
 
       - name: Test specification
