@@ -460,6 +460,7 @@ jobs:
           docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
+              export PATH="/root/.local/bin:$PATH" &&
               source .venv/bin/activate &&
               cd /awkward &&
               uv pip install build &&
@@ -479,6 +480,7 @@ jobs:
             --name build_container \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
+              export PATH="/root/.local/bin:$PATH" &&
               source .venv/bin/activate &&
               cd /awkward &&
               uv pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
@@ -491,6 +493,7 @@ jobs:
           docker run --rm --platform=linux/${ARCH} \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
+              export PATH="/root/.local/bin:$PATH" &&
               source .venv/bin/activate &&
               python -c "import sys; print(sys.byteorder)" &&
               uv pip list
