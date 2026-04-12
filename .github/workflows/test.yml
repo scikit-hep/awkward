@@ -466,6 +466,13 @@ jobs:
               python -m build -w awkward-cpp
             '
 
+      - name: Find built wheel
+        uses: tj-actions/glob@v22
+        id: find-wheel
+        with:
+          files: |
+            awkward-cpp/dist/*.whl
+
       - name: Install awkward, awkward-cpp, and dependencies
         run: |
           docker run --platform=linux/${ARCH} -e "TERM=xterm-256color" \
@@ -474,7 +481,7 @@ jobs:
             /bin/bash -c '
               source .venv/bin/activate &&
               cd /awkward &&
-              uv pip install -v . awkward-cpp/dist/*.whl pytest-github-actions-annotate-failures
+              uv pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
             '
           docker commit build_container the_container
           docker rm build_container
