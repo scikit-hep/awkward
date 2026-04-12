@@ -474,7 +474,7 @@ jobs:
             /bin/bash -c '
               source .venv/bin/activate &&
               cd /awkward &&
-              uv pip install -v . awkward-cpp/dist/*.whl
+              uv pip install -v . awkward-cpp/dist/*.whl pytest-github-actions-annotate-failures
             '
           docker commit build_container the_container
           docker rm build_container
