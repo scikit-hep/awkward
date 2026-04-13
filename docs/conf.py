@@ -63,6 +63,7 @@ autoapi_options = [
     "members",
     "undoc-members",
     "private-members",
+    "special-members",
     "show-module-summary",
     "imported-members",
 ]
@@ -184,7 +185,10 @@ def _process_docstring_filter(docstring, obj):
 
     lines = docstring.split("\n")
     for i, line in enumerate(lines):
-        line = line.replace("`", "``")
+        # Promote single backticks to double-backtick inline literals, but leave
+        # already-doubled backticks untouched (``write(str)`` must stay a pair).
+        line = re.sub(r"(?<!`)`(?!`)", "``", line)
+        line = re.sub(r"<<<([^>]+)>>>", r"`\1`_", line)
         line = re.sub(
             r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])",
             r":py:obj:`\1`",
@@ -237,7 +241,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "_templates", "Thumbs.db", "jupyter_execute", ".*"]
+exclude_patterns = ["_build", "_templates", "_autoapi_templates", "Thumbs.db", "jupyter_execute", ".*"]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -388,6 +392,12 @@ def _skip_member(app, what, name, obj, skip, options):
     # Keep the top-level awkward package
     if name == "awkward":
         return False
+    # Skip module-level dunder functions (e.g., awkward.__dir__); special-members
+    # is enabled for class methods but these should not be documented as top-level.
+    if what == "function":
+        short = name.rsplit(".", 1)[-1]
+        if short.startswith("__") and short.endswith("__"):
+            return True
     # Skip private modules (awkward._*) but not private methods/attributes
     # within public classes (those are controlled by the "private-members" option)
     if what in ("module", "package"):
