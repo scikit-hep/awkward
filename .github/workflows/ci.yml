@@ -17,10 +17,10 @@ jobs:
 
   tests:
     needs: change-detection
-    if: fromJSON(needs.change-detection.outputs.run-tests)
+    #if: fromJSON(needs.change-detection.outputs.run-tests)
     uses: ./.github/workflows/reusable-test.yml
-    with:
-      run-gpu-kernel-tests: ${{ needs.change-detection.outputs.run-gpu-kernel-tests }}
+    #with:
+    #  run-gpu-kernel-tests: ${{ needs.change-detection.outputs.run-gpu-kernel-tests }}
 
   build-wheels:
     needs: change-detection
