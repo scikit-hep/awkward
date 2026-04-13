@@ -71,7 +71,7 @@ def covar(
 
     This function has no NumPy equivalent.
 
-    Passing all arguments to the reducers, the covariance is calculated as
+    Passing all arguments to the reducers, the covariance is calculated as::
 
         ak.sum((x - ak.mean(x))*(y - ak.mean(y))*weight) / ak.sum(weight)
 

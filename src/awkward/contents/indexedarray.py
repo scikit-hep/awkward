@@ -72,7 +72,7 @@ class IndexedArray(IndexedMeta[Content], Content):
     and the array can be converted to and from Arrow/Parquet's dictionary encoding.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class IndexedArray(Content):
             def __init__(self, index, content):

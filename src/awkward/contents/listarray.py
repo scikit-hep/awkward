@@ -63,7 +63,7 @@ class ListArray(ListMeta[Content], Content):
     * `stops`: The stopping index of each list.
 
     #ak.contents.ListOffsetArray `offsets` may be related to `starts` and
-    `stops` by
+    `stops` by::
 
         starts = offsets[:-1]
         stops = offsets[1:]
@@ -83,7 +83,7 @@ class ListArray(ListMeta[Content], Content):
     There is no equivalent of ListArray in Apache Arrow.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class ListArray(Content):
             def __init__(self, starts, stops, content):

@@ -131,11 +131,11 @@ def broadcast_arrays(
 
     One typically wants single-item-per-element data to be duplicated to
     match multiple-items-per-element data. Operations on the broadcasted
-    arrays like
+    arrays like::
 
         one_dimensional + nested_lists
 
-    would then have the same effect as the procedural code
+    would then have the same effect as the procedural code::
 
         for x, outer in zip(one_dimensional, nested_lists):
             output = []

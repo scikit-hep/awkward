@@ -82,7 +82,7 @@ def std(
     but it generalizes to cases where they do not.
 
     Passing all arguments to the reducers, the standard deviation is
-    calculated as
+    calculated as::
 
         np.sqrt(ak.var(x, weight))
 
@@ -150,7 +150,7 @@ def nanstd(
 
     Like #ak.std, but treating NaN ("not a number") values as missing.
 
-    Equivalent to
+    Equivalent to::
 
         ak.std(ak.nan_to_none(array))
 
