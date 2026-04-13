@@ -6,6 +6,7 @@ from cuda.compute import (
     CountingIterator,
     gpu_struct,
     reduce_into,
+    select,
     unary_transform,
 )
 
@@ -629,3 +630,33 @@ def awkward_reduce_countnonzero(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+
+
+# filters an indexed array by collecting all valid (non-negative) indices into a carry array
+def awkward_IndexedArray_flatten_nextcarry(
+    tocarry: cp.ndarray, fromindex: cp.ndarray, lenindex: int, lencontent: int
+) -> None:
+    fromindex = fromindex[:lenindex]
+    index_dtype = fromindex.dtype
+
+    has_error = cp.zeros(1, index_dtype)
+    num_selected = cp.empty(1, index_dtype)
+
+    def cond(j):
+        if j >= lencontent:
+            # set has_error flag to True
+            has_error[0] = np.int64(1)
+            return False
+        # keep index in tocarry if True
+        return j >= 0
+
+    select(fromindex, tocarry, num_selected, cond, lenindex)
+
+    if int(has_error[0]) != 0:
+        out_of_range = fromindex >= lencontent
+        invalid_i = int(cp.argmax(out_of_range))
+        invalid_j = int(fromindex[invalid_i])
+        raise IndexError(
+            f"index out of range: index {invalid_i} has value {invalid_j}, "
+            f"but lencontent is {lencontent}"
+        )
