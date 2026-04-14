@@ -80,11 +80,11 @@ def var(
     if all lists at a given dimension have the same length and no None values,
     but it generalizes to cases where they do not.
 
-    Passing all arguments to the reducers, the variance is calculated as
+    Passing all arguments to the reducers, the variance is calculated as::
 
         ak.sum((x - ak.mean(x))**2 * weight) / ak.sum(weight)
 
-    If `ddof` is not zero, the above is further corrected by a factor of
+    If `ddof` is not zero, the above is further corrected by a factor of::
 
         ak.sum(weight) / (ak.sum(weight) - ddof)
 
@@ -155,7 +155,7 @@ def nanvar(
 
     Like #ak.var, but treating NaN ("not a number") values as missing.
 
-    Equivalent to
+    Equivalent to::
 
         ak.var(ak.nan_to_none(array))
 
