@@ -15,17 +15,6 @@ jobs:
   change-detection:
     uses: ./.github/workflows/reusable-change-detection.yml
 
-  print-output:
-    needs: change-detection
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print outputs from change detection
-        run: |
-          echo "run-tests: ${{ needs.change-detection.outputs.run-tests }}"
-          echo "build-wheels: ${{ needs.change-detection.outputs.build-wheels }}"
-          echo "run-header-only-tests: ${{ needs.change-detection.outputs.run-header-only-tests }}"
-          echo "run-gpu-kernel-tests: ${{ needs.change-detection.outputs.run-gpu-kernel-tests }}"
-
   tests:
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-tests)

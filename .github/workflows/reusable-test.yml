@@ -10,7 +10,7 @@ on:
         description: Whether or not to run the gpu kernel tests
         required: false
         default: false
-        type: string
+        type: string # The workflow freezes if this is set to boolean for some reason
 
   workflow_dispatch:
     inputs:
