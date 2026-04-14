@@ -457,7 +457,7 @@ jobs:
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: |
-          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
               export PATH="/root/.local/bin:$PATH" &&
@@ -476,7 +476,7 @@ jobs:
 
       - name: Install awkward, awkward-cpp, and dependencies
         run: |
-          docker run --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+          docker run --platform=linux/${ARCH} -e "TERM=${TERM}" \
             --name build_container \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
@@ -501,7 +501,7 @@ jobs:
 
       - name: Test specification
         run: |
-          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
               source .venv/bin/activate && cd /awkward &&
@@ -510,7 +510,7 @@ jobs:
 
       - name: Test specification with explicitly defined values
         run: |
-          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
               source .venv/bin/activate && cd /awkward &&
@@ -519,7 +519,7 @@ jobs:
 
       - name: Test CPU kernels
         run: |
-          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
               source .venv/bin/activate && cd /awkward &&
@@ -528,7 +528,7 @@ jobs:
 
       - name: Test CPU kernels with explicitly defined values
         run: |
-          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
               source .venv/bin/activate && cd /awkward &&
@@ -537,7 +537,7 @@ jobs:
 
       - name: Test non-kernels (Python)
         run: |
-          docker run --rm --platform=linux/${ARCH} -e "TERM=xterm-256color" \
+          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
               source .venv/bin/activate && cd /awkward &&
