@@ -10,7 +10,7 @@ on:
         description: Whether or not to run the gpu kernel tests
         required: false
         default: false
-        type: boolean
+        type: string
 
   workflow_dispatch:
     inputs:
