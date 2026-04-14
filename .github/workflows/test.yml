@@ -396,7 +396,6 @@ jobs:
     # Only workflow_dispatch is enabled on forks.
     if: github.repository == 'scikit-hep/awkward' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
-    continue-on-error: true
     timeout-minutes: 120
 
     env:
