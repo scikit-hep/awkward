@@ -36,7 +36,7 @@ cuda_kernels_impl = [
     "awkward_IndexedArray_reduce_next_fix_offsets_64",
     "awkward_RegularArray_getitem_next_array_advanced",
     "awkward_ByteMaskedArray_toIndexedOptionArray",
-    "awkward_IndexedArray_simplify",
+    # "awkward_IndexedArray_simplify",
     "awkward_UnionArray_validity",
     "awkward_IndexedArray_validity",
     "awkward_ByteMaskedArray_overlay_mask",
