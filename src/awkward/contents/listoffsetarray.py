@@ -77,7 +77,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
     [List type](https://arrow.apache.org/docs/format/Columnar.html#variable-size-list-layout).
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class ListOffsetArray(Content):
             def __init__(self, offsets, content):

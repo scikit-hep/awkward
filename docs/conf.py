@@ -10,10 +10,12 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import re
+import subprocess
+
 import awkward
 import datetime
 import os
-import runpy
 import pathlib
 
 # -- Project information -----------------------------------------------------
@@ -44,12 +46,179 @@ extensions = [
     "sphinx_design",
     "sphinx_external_toc",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
+    "autoapi.extension",
     "myst_nb",
     # Preserve old links
     # "jupyterlite_sphinx",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
 ]
+
+# -- sphinx-autoapi configuration --------------------------------------------
+autoapi_dirs = ["../src/awkward"]
+autoapi_type = "python"
+autoapi_ignore = []
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "private-members",
+    "show-module-summary",
+    "imported-members",
+]
+autoapi_root = "reference/generated"
+autoapi_keep_files = True  # keep generated RST for inspection
+autoapi_add_toctree_entry = False  # manual toctree control
+autoapi_own_page_level = "function"  # each function/class gets own page
+
+# Napoleon settings (Google-style docstrings)
+napoleon_google_docstring = True
+napoleon_use_param = True
+napoleon_use_rtype = True
+
+
+# -- Monkey-patch autoapi to produce ak.* file names -------------------------
+# autoapi generates paths from Python module structure (awkward.operations.ak_flatten.flatten).
+# We remap to public API names (ak.flatten) to match existing URLs.
+
+def _awkward_to_ak(name):
+    """Map internal module paths to public API names.
+
+    Mirrors the mapping in the old prepare_docstrings.py:
+    - awkward.operations.ak_flatten.flatten -> ak.flatten
+    - awkward.operations.str.akstr_is_alnum.is_alnum -> ak.str.is_alnum
+    - awkward.contents.recordarray.RecordArray -> ak.contents.RecordArray
+    - awkward.highlevel.Array -> ak.Array
+    """
+    if not name.startswith("awkward"):
+        return name
+    name = re.sub(r"^awkward\.operations\.str\.akstr_\w+\.", "ak.str.", name)
+    name = re.sub(r"^awkward\.operations\.str\.", "ak.str.", name)
+    name = re.sub(r"^awkward\.operations\.ak_\w+\.", "ak.", name)
+    name = re.sub(r"^awkward\.operations\.", "ak.", name)
+    name = re.sub(r"^awkward\.highlevel\.", "ak.", name)
+    name = re.sub(r"^awkward\.(contents|types|forms|index|record)\.\w+\.", r"ak.\1.", name)
+    name = re.sub(r"^awkward\.", "ak.", name)
+    return name
+
+
+def _flat_output_dir(self, root):
+    """Put all objects in the root directory (flat structure)."""
+    return pathlib.PurePosixPath(root)
+
+
+def _ak_output_filename(self):
+    """Use public API names: awkward.flatten -> ak.flatten."""
+    name = _awkward_to_ak(self.id)
+    if name == "index":
+        name = ".index"
+    # Avoid case collisions on case-insensitive filesystems:
+    # module "ak.record" would collide with class "ak.Record".
+    # Prefix module-only pages with "_module." when they'd collide.
+    if hasattr(self, "submodules"):  # TopLevelPythonObject (module/package)
+        parts = name.rsplit(".", 1)
+        if len(parts) == 2 and parts[-1].islower():
+            # Check if a class with the same name (different case) might exist
+            # This is conservative: prefix all lowercase leaf modules under
+            # contents, types, forms, record, highlevel
+            parent = parts[0]
+            if parent in ("ak", "ak.contents", "ak.types", "ak.forms"):
+                name = parts[0] + "._module." + parts[1]
+    return name
+
+
+from autoapi._objects import PythonObject, TopLevelPythonObject  # noqa: E402
+
+PythonObject.output_dir = _flat_output_dir
+PythonObject.output_filename = _ak_output_filename
+TopLevelPythonObject.output_dir = _flat_output_dir
+TopLevelPythonObject.output_filename = _ak_output_filename
+
+autoapi_template_dir = "_autoapi_templates"
+
+_latest_commit = (
+    subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        stdout=subprocess.PIPE,
+        cwd=os.path.dirname(__file__) or ".",
+    )
+    .stdout.decode("utf-8")
+    .strip()
+)
+
+
+def _github_source_link(obj):
+    """Generate a 'Defined in module on line N' RST string with GitHub links."""
+    all_objects = getattr(obj.app.env, "autoapi_all_objects", {})
+    # For imported objects, resolve to the original definition
+    source_obj = obj
+    original_path = obj.obj.get("original_path")
+    if original_path and original_path in all_objects:
+        source_obj = all_objects[original_path]
+    # Get file_path from the source object or its parent module
+    file_path = source_obj.obj.get("file_path")
+    if not file_path:
+        module_name = source_obj.id[: -(len("." + source_obj.qual_name))] if source_obj.qual_name else source_obj.id
+        module_obj = all_objects.get(module_name)
+        if module_obj:
+            file_path = module_obj.obj.get("file_path")
+    if not file_path:
+        return ""
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    rel_path = os.path.relpath(file_path, repo_root)
+    module_name = rel_path.replace("/", ".").replace(".py", "").replace("src.", "")
+    line_no = source_obj.obj.get("from_line_no")
+    base_url = f"https://github.com/scikit-hep/awkward/blob/{_latest_commit}/{rel_path}"
+    if line_no:
+        return f"Defined in `{module_name} <{base_url}>`__ on `line {line_no} <{base_url}#L{line_no}>`__."
+    return f"Defined in `{module_name} <{base_url}>`__."
+
+
+def _process_docstring_filter(docstring, obj):
+    """Process docstring markup: backticks, cross-refs, member links."""
+    member_names = set()
+    if hasattr(obj, "children"):
+        for child in obj.children:
+            member_names.add(child.name)
+    qualname = _awkward_to_ak(obj.id)
+
+    lines = docstring.split("\n")
+    for i, line in enumerate(lines):
+        line = line.replace("`", "``")
+        line = re.sub(
+            r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])",
+            r":py:obj:`\1`",
+            line,
+        )
+        if member_names:
+            def _replace_member(m, _members=member_names, _qn=qualname):
+                member = m.group(1)
+                if member in _members:
+                    return f":py:meth:`{member} <{_qn}.{member}>`"
+                return m.group(0)
+            line = re.sub(r"#([A-Za-z_][A-Za-z0-9_]*)", _replace_member, line)
+        line = re.sub(
+            r"\[([^\]]*)\]\(([^\)]*)\)",
+            r"`\1 <\2>`__",
+            line,
+        )
+        lines[i] = line
+    return "\n".join(lines)
+
+
+def _is_internal_module(obj):
+    """Check if a module is an internal submodule that should be suppressed."""
+    # Modules renamed with _module. prefix are internal submodules kept only
+    # to avoid case collisions; they should not generate visible pages.
+    return "._module." in obj.output_filename()
+
+
+def autoapi_prepare_jinja_env(jinja_env):
+    """Register custom filters and globals for autoapi templates."""
+    jinja_env.filters["ak_name"] = _awkward_to_ak
+    jinja_env.filters["process_docstring"] = _process_docstring_filter
+    jinja_env.globals["github_source_link"] = _github_source_link
+    jinja_env.globals["is_internal_module"] = _is_internal_module
 
 
 # Specify a canonical version
@@ -205,10 +374,6 @@ if (datetime.date.today() - datetime.date(2022, 12, 13)) < datetime.timedelta(da
         ]
     )
 
-# Generate Python docstrings
-HERE = pathlib.Path(__file__).parent
-runpy.run_path(HERE / "prepare_docstrings.py", run_name="__main__")
-
 
 # Sphinx doesn't usually want content to fit the screen, so we hack the styles for this page
 def install_jupyterlite_styles(app, pagename, templatename, context, event_arg) -> None:
@@ -218,5 +383,30 @@ def install_jupyterlite_styles(app, pagename, templatename, context, event_arg) 
     app.add_css_file("css/try-awkward-array.css")
 
 
+def _skip_member(app, what, name, obj, skip, options):
+    """Skip private modules/members but keep the top-level awkward package."""
+    # Keep the top-level awkward package
+    if name == "awkward":
+        return False
+    # Skip private modules (awkward._*) but not private methods/attributes
+    # within public classes (those are controlled by the "private-members" option)
+    if what in ("module", "package"):
+        parts = name.split(".")
+        if any(part.startswith("_") for part in parts):
+            return True
+    # Skip internal submodules that would collide with class pages on
+    # case-insensitive filesystems (e.g., ak.contents.recordarray vs
+    # ak.contents.RecordArray). The class is re-exported at the package
+    # level, so the submodule page is redundant.
+    if what == "module":
+        parent_child = name.rsplit(".", 1)
+        if len(parent_child) == 2:
+            _parent, child = parent_child
+            if re.match(r"awkward\.(contents|types|forms)\.\w+$", name) and child.islower():
+                return True
+    return skip
+
+
 def setup(app):
     app.connect("html-page-context", install_jupyterlite_styles)
+    app.connect("autoapi-skip-member", _skip_member)
