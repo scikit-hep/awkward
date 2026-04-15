@@ -19,7 +19,7 @@ cuda_kernels_impl = [
     "awkward_ListArray_broadcast_tooffsets",
     "awkward_ListArray_compact_offsets",
     "awkward_ListOffsetArray_flatten_offsets",
-    "awkward_IndexedArray_overlay_mask",
+    # "awkward_IndexedArray_overlay_mask",
     "awkward_ByteMaskedArray_numnull",
     "awkward_IndexedArray_numnull",
     "awkward_IndexedArray_numnull_parents",

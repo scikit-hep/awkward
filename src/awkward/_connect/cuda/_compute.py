@@ -629,3 +629,12 @@ def awkward_reduce_countnonzero(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+
+
+# Overlays a mask onto an index array: masked positions become -1, unmasked positions keep their original index value.
+def awkward_IndexedArray_overlay_mask(toindex, mask, fromindex, length):
+    def transform(i):
+        return -1 if mask[i] else fromindex[i]
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, toindex, transform, length)
