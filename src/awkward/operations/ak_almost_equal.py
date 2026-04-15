@@ -304,7 +304,8 @@ def _impl(
                     or not check_parameters
                 )
                 and left.is_tuple == right.is_tuple
-                and (left.is_tuple or (len(left.fields) == len(right.fields)))
+                and len(left.fields) == len(right.fields)
+                and (left.is_tuple or set(left.fields) == set(right.fields))
                 and all(visitor(left.content(f), right.content(f)) for f in left.fields)
             )
         elif left.is_unknown and right.is_unknown:

@@ -119,7 +119,7 @@ def nanargmin(
 
     Like #ak.argmin, but treating NaN ("not a number") values as missing.
 
-    Equivalent to
+    Equivalent to::
 
         ak.argmin(ak.nan_to_none(array))
 

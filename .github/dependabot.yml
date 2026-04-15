@@ -9,3 +9,15 @@ updates:
       actions:
         patterns:
           - "*"
+
+  # Bump hypothesis-awkward, which is pinned to an exact version in
+  # requirements-test-full.txt. Newer versions produce more varied test
+  # samples, so existing tests might fail. Pinning + dependabot ensures
+  # those failures surface in a dedicated upgrade PR rather than
+  # randomly in unrelated CI runs.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-name: "hypothesis-awkward"
