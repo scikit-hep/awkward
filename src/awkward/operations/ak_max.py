@@ -131,7 +131,7 @@ def nanmax(
 
     Like #ak.max, but treating NaN ("not a number") values as missing.
 
-    Equivalent to
+    Equivalent to::
 
         ak.max(ak.nan_to_none(array))
 

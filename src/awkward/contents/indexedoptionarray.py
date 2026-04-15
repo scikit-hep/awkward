@@ -66,7 +66,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     IndexedOptionArray doesn't have a direct equivalent in Apache Arrow.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class IndexedOptionArray(Content):
             def __init__(self, index, content):
