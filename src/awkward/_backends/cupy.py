@@ -101,6 +101,7 @@ class CupyBackend(Backend):
             "awkward_reduce_count_64",
             "awkward_reduce_countnonzero",
             "awkward_IndexedArray_overlay_mask",
+            "awkward_IndexedArray_reduce_next_64",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):

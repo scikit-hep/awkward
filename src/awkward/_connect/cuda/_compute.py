@@ -638,3 +638,28 @@ def awkward_IndexedArray_overlay_mask(toindex, mask, fromindex, length):
 
     indices = CountingIterator(cp.int64(0))
     unary_transform(indices, toindex, transform, length)
+
+
+# Skips masked (-1) entries and packs the remaining valid entries into nextcarry and nextparents, tracking where each ended up in outindex.
+def awkward_IndexedArray_reduce_next_64(
+    nextcarry, nextparents, outindex, index, parents, length
+):
+    if length == 0:
+        return
+
+    # Compute cumulative count of valid (non-negative) indices to determine compact output positions
+    # this needs to be done before going through all the indices in parallel later
+    scan = cp.cumsum(index >= 0)
+
+    def scatter_and_fill(i):
+        if index[i] >= 0:
+            # Map valid entry to its compacted position
+            k = scan[i] - 1
+            nextcarry[k] = index[i]
+            nextparents[k] = parents[i]
+            return k
+        # Masked entries get -1 in outindex
+        return -1
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, outindex, scatter_and_fill, length)
