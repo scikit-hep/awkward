@@ -61,8 +61,8 @@ def test_sumprod_gpu(dtype, depth, depth_gpu):
     sum_gpu = ak.sum(depth_gpu, axis=-1, highlevel=False)
     prod_gpu = ak.prod(depth_gpu, axis=-1, highlevel=False)
 
-    sum_expected = cp.asarray(ak.sum(depth, axis=-1))
-    prod_expected = cp.asarray(ak.prod(depth, axis=-1))
+    sum_expected = cp.asarray(ak.sum(depth, axis=-1, highlevel=False))
+    prod_expected = cp.asarray(ak.prod(depth, axis=-1, highlevel=False))
 
     assert_gpu_equal_with_dtype(sum_gpu, sum_expected)
     assert_gpu_equal_with_dtype(prod_gpu, prod_expected)
