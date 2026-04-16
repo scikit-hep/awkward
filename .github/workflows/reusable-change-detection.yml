@@ -30,7 +30,6 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Changed code files
-        if: github.event_name == 'pull_request'
         id: changed-code-files
         uses: Ana06/get-changed-files@v2.3.0
         with:
@@ -62,7 +61,6 @@ jobs:
         run: echo "run-tests=true" >> "${GITHUB_OUTPUT}"
 
       - name: Changed C++ files
-        if: github.event_name == 'pull_request'
         id: changed-cpp-files
         uses: Ana06/get-changed-files@v2.3.0
         with:
@@ -83,7 +81,6 @@ jobs:
         run: echo "build-wheels=true" >> "${GITHUB_OUTPUT}"
 
       - name: Changed header files
-        if: github.event_name == 'pull_request'
         id: changed-header-files
         uses: Ana06/get-changed-files@v2.3.0
         with:
@@ -100,7 +97,6 @@ jobs:
         run: echo "run-header-only-tests=true" >> "${GITHUB_OUTPUT}"
 
       - name: Changed GPU code files
-        if: github.event_name == 'pull_request'
         id: changed-gpu-files
         uses: Ana06/get-changed-files@v2.3.0
         with:
@@ -116,8 +112,6 @@ jobs:
             src/awkward/_kernels.py
             tests-cuda/**
       - name: Set a flag for running the GPU tests
-        if: >-
-          github.event_name != 'pull_request' ||
-          steps.changed-gpu-files.outputs.added_modified_renamed != '[]'
+        if: steps.changed-gpu-files.outputs.added_modified_renamed != '[]'
         id: gpu-changes
         run: echo "run-gpu-kernel-tests=true" >> "${GITHUB_OUTPUT}"
