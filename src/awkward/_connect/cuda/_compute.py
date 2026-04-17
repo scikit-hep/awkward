@@ -629,3 +629,79 @@ def awkward_reduce_countnonzero(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+
+
+# Overlays a mask onto an index array: masked positions become -1, unmasked positions keep their original index value.
+def awkward_IndexedArray_overlay_mask(toindex, mask, fromindex, length):
+    def transform(i):
+        return -1 if mask[i] else fromindex[i]
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, toindex, transform, length)
+
+
+# Skips masked (-1) entries and packs the remaining valid entries into nextcarry and nextparents, tracking where each ended up in outindex.
+def awkward_IndexedArray_reduce_next_64(
+    nextcarry, nextparents, outindex, index, parents, length
+):
+    if length == 0:
+        return
+
+    # Compute cumulative count of valid (non-negative) indices to determine compact output positions
+    # this needs to be done before going through all the indices in parallel later
+    scan = cp.cumsum(index >= 0)
+
+    def scatter_and_fill(i):
+        if index[i] >= 0:
+            # Map valid entry to its compacted position
+            k = scan[i] - 1
+            nextcarry[k] = index[i]
+            nextparents[k] = parents[i]
+            return k
+        # Masked entries get -1 in outindex
+        return -1
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, outindex, scatter_and_fill, length)
+
+
+# For each valid (non-negative) entry at position i, records the number of null (negative) entries
+# that appeared before it. The k-th valid entry gets nextshifts[k] = count of nulls before position i.
+# For example, für index = [0, 1, 2, -1, 3, -1, 4] → nextshifts = [0, 0, 0, 1, 2].
+def awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64(nextshifts, index, length):
+    if length == 0:
+        return
+
+    index_slice = index[:length]
+
+    # cumsum of (index < 0) gives the running null count at each position.
+    # this is basically equivalent to calling cuda.compute.inclusive_scan on index_slice < 0
+    null_cumsum = cp.cumsum(index_slice < 0)
+    _ = cp.empty(length, dtype=cp.int64)
+
+    def scatter(i):
+        null_count = null_cumsum[i]
+        if index_slice[i] >= 0:
+            nextshifts[i - null_count] = null_count  # output slot = i - null_count
+        # return a dummy value otherwise
+        return cp.int64(0)
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, _, scatter, length)
+
+
+# Packs valid entries (where (mask[i] != 0) == validwhen) into tocarry in order.
+# mask = [0, 1, 0, 1, 1], validwhen=True  → tocarry = [1, 3, 4]
+# mask = [0, 1, 0, 1, 1], validwhen=False → tocarry = [0, 2]
+# mask = [0, 1, 0, 1, 1, -1, 1], validwhen=True → tocarry = [1, 3, 4, 5, 6]
+def awkward_ByteMaskedArray_getitem_nextcarry(tocarry, mask, length, validwhen):
+    if length == 0:
+        return
+
+    # valid = ((mask[:length] != 0) == validwhen)
+    # valid[i] is 1 when the masked element passes the validwhen condition.
+
+    # get the indices of the valid entries using cp.nonzero
+    valid_indices = cp.nonzero((mask[:length] != 0) == validwhen)[0]
+    # in case tocarry is not exactly the right size, allocate it in two steps like this
+    tocarry[: len(valid_indices)] = valid_indices
