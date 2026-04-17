@@ -663,3 +663,28 @@ def awkward_IndexedArray_reduce_next_64(
 
     indices = CountingIterator(cp.int64(0))
     unary_transform(indices, outindex, scatter_and_fill, length)
+
+
+# For each valid (non-negative) entry at position i, records the number of null (negative) entries
+# that appeared before it. The k-th valid entry gets nextshifts[k] = count of nulls before position i.
+# For example, für index = [0, 1, 2, -1, 3, -1, 4] → nextshifts = [0, 0, 0, 1, 2].
+def awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64(nextshifts, index, length):
+    if length == 0:
+        return
+
+    index_slice = index[:length]
+
+    # cumsum of (index < 0) gives the running null count at each position.
+    # this is basically equivalent to calling cuda.compute.inclusive_scan on index_slice < 0
+    null_cumsum = cp.cumsum(index_slice < 0)
+    _ = cp.empty(length, dtype=cp.int64)
+
+    def scatter(i):
+        null_count = null_cumsum[i]
+        if index_slice[i] >= 0:
+            nextshifts[i - null_count] = null_count  # output slot = i - null_count
+        # return a dummy value otherwise
+        return cp.int64(0)
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, _, scatter, length)

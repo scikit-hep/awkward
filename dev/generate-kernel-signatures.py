@@ -98,7 +98,7 @@ cuda_kernels_impl = [
     "awkward_IndexedArray_ranges_next_64",
     "awkward_IndexedArray_ranges_carry_next_64",
     # "awkward_IndexedArray_reduce_next_64",
-    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+    # "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
     "awkward_ListOffsetArray_local_preparenext_64",
