@@ -75,6 +75,10 @@ class CupyBackend(Backend):
         Other kernels that are currently supported:
         - awkward_sort
         - awkward_argsort (future)
+        - awkward_IndexedArray_overlay_mask
+        - awkward_IndexedArray_reduce_next_64
+        - awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64
+        - awkward_ByteMaskedArray_getitem_nextcarry
 
         These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
         - awkward_sum
@@ -103,6 +107,7 @@ class CupyBackend(Backend):
             "awkward_IndexedArray_overlay_mask",
             "awkward_IndexedArray_reduce_next_64",
             "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+            "awkward_ByteMaskedArray_getitem_nextcarry",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):

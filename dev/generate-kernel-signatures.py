@@ -79,7 +79,7 @@ cuda_kernels_impl = [
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_RegularArray_getitem_next_at",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
-    "awkward_ByteMaskedArray_getitem_nextcarry",
+    # "awkward_ByteMaskedArray_getitem_nextcarry",
     "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
     "awkward_ByteMaskedArray_reduce_next_64",
     "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",

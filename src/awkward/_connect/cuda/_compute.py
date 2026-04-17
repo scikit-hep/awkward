@@ -688,3 +688,20 @@ def awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64(nextshifts, index, l
 
     indices = CountingIterator(cp.int64(0))
     unary_transform(indices, _, scatter, length)
+
+
+# Packs valid entries (where (mask[i] != 0) == validwhen) into tocarry in order.
+# mask = [0, 1, 0, 1, 1], validwhen=True  → tocarry = [1, 3, 4]
+# mask = [0, 1, 0, 1, 1], validwhen=False → tocarry = [0, 2]
+# mask = [0, 1, 0, 1, 1, -1, 1], validwhen=True → tocarry = [1, 3, 4, 5, 6]
+def awkward_ByteMaskedArray_getitem_nextcarry(tocarry, mask, length, validwhen):
+    if length == 0:
+        return
+
+    # valid = ((mask[:length] != 0) == validwhen)
+    # valid[i] is 1 when the masked element passes the validwhen condition.
+
+    # get the indices of the valid entries using cp.nonzero
+    valid_indices = cp.nonzero((mask[:length] != 0) == validwhen)[0]
+    # in case tocarry is not exactly the right size, allocate it in two steps like this
+    tocarry[: len(valid_indices)] = valid_indices
