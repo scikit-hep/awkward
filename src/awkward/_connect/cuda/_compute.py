@@ -629,3 +629,29 @@ def awkward_reduce_countnonzero(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+
+
+# composes two index arrays into one by resolving outerindex through innerindex:
+# toindex[i] = innerindex[outerindex[i]], preserving -1 (missing) entries from outerindex
+def awkward_IndexedArray_simplify(
+    toindex, outerindex, outerlength, innerindex, innerlength
+):
+    if outerlength == 0:
+        return
+
+    def simplify_op(j):
+        if j < 0:
+            return -1
+        if j >= innerlength:
+            raise IndexError(
+                "index out of range in compiled CUDA code (awkward_IndexedArray_simplify)"
+            )
+        return innerindex[j]
+
+    # to prevent out-of-bounds error
+    out_buf = (
+        toindex[:outerlength]
+        if len(toindex) >= outerlength
+        else cp.empty(outerlength, dtype=toindex.dtype)
+    )
+    unary_transform(outerindex[:outerlength], out_buf, simplify_op, outerlength)
