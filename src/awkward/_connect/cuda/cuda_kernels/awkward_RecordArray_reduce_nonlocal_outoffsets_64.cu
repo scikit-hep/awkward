@@ -36,8 +36,10 @@ awkward_RecordArray_reduce_nonlocal_outoffsets_64_a(
   if (err_code[0] == NO_ERROR) {
     scan_in_array_outoffsets[0] = 0;
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (thread_id < lenparents - 1) {
+    if (thread_id == 0) {
       scan_in_array[0] = 1;
+    }
+    if (thread_id < lenparents - 1) {
       if (parents[thread_id] != parents[thread_id + 1]) {
         scan_in_array[thread_id + 1] = 1;
       }
@@ -107,7 +109,7 @@ awkward_RecordArray_reduce_nonlocal_outoffsets_64_c(
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     outoffsets[0] = 0;
     if (thread_id < lenparents) {
-      if (parents[thread_id] != parents[thread_id + 1]) {
+      if (thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
         outcarry[parents[thread_id]] = scan_in_array[thread_id] - 1;
       }
     }
