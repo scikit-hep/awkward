@@ -35,7 +35,7 @@ awkward_RecordArray_reduce_nonlocal_outoffsets_64_a(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    
+
     // Initialize shared global values once
     if (thread_id == 0) {
       scan_in_array_outoffsets[0] = 0;
@@ -114,7 +114,7 @@ awkward_RecordArray_reduce_nonlocal_outoffsets_64_c(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    
+
     if (thread_id < lenparents) {
       int64_t p_idx = parents[thread_id];
       // Only write if parent index is valid for outcarry
