@@ -2,39 +2,10 @@
 
 from __future__ import annotations
 
-from awkward.contents import NumpyArray
+from awkward.contents import BitMaskedArray, ListOffsetArray, NumpyArray, RecordArray
+from awkward.index import Index32, Index64, IndexU8
 
 __all__ = ("from_cudf",)
-
-# Maps Arrow C Data Interface format strings to NumPy dtype strings.
-# Booleans ("b") are intentionally omitted: Arrow booleans are bit-packed, so
-# the fixed-width numeric path through buffers[1] would produce incorrect data.
-# See https://arrow.apache.org/docs/format/CDataInterface.html#data-type-description-format-strings
-_ARROW_FORMAT_TO_DTYPE: dict[str, str] = {
-    "c": "int8",
-    "C": "uint8",
-    "s": "int16",
-    "S": "uint16",
-    "i": "int32",
-    "I": "uint32",
-    "l": "int64",
-    "L": "uint64",
-    "e": "float16",
-    "f": "float32",
-    "g": "float64",
-}
-
-
-def _primitive_dtype_from_arrow_format(arrow_format):
-    try:
-        return _ARROW_FORMAT_TO_DTYPE[arrow_format]
-    except KeyError as err:
-        raise NotImplementedError(
-            f"Arrow format {arrow_format!r} is not supported by ak.from_cudf. "
-            "Only flat, fixed-width numeric cudf.Series are currently supported; "
-            "nulls, booleans, strings, categorical data, and nested types are "
-            "not supported."
-        ) from err
 
 
 def _to_pylibcudf_column(series):
@@ -46,8 +17,6 @@ def _to_pylibcudf_column(series):
             "Please use cudf >= 25.02."
         ) from err
 
-    # to_pylibcudf() may return a bare Column or a (Column, metadata) tuple
-    # depending on the cuDF version.
     return result[0] if isinstance(result, tuple) else result
 
 
@@ -57,14 +26,12 @@ def from_cudf(series):
         series (cudf.Series): The cuDF Series to convert into a low-level
             Awkward layout.
 
-    Converts a flat cuDF Series into a low-level #ak.contents.NumpyArray using
-    the Arrow C Device Interface.
+    Converts a cuDF Series into a low-level Awkward layout by recursively
+    traversing the corresponding pylibcudf column.
 
-    Only flat, fixed-width numeric dtypes are supported in this initial
-    implementation. Null values, booleans, strings, categorical data, and
-    nested types raise ``NotImplementedError``.
+    Primitive, boolean, list, struct, string, and nullable columns are
+    supported. Other column types raise ``NotImplementedError``.
     """
-
     try:
         import cudf
     except ImportError as err:
@@ -76,53 +43,6 @@ or
     conda install -c rapidsai cudf cuda-version=13"""
         ) from err
 
-    if not isinstance(series, cudf.Series):
-        raise TypeError(
-            f"ak.from_cudf accepts only cudf.Series, not {type(series).__name__!r}"
-        )
-
-    #  Obtain the pylibcudf Column via the public API (cuDF >= 25.02)
-    plc_column = _to_pylibcudf_column(series)
-
-    # Verify the Arrow C Device Interface is present on this object
-
-    if not hasattr(plc_column, "__arrow_c_device_array__"):
-        raise RuntimeError("pylibcudf column does not support Arrow device interface")
-
-    # Import nanoarrow (required to consume the PyCapsule protocol)
-
-    try:
-        import nanoarrow.device as nanoarrow_device
-    except ImportError as err:
-        raise ImportError(
-            """to use ak.from_cudf, you must install the 'nanoarrow' package with:
-
-    pip install nanoarrow"""
-        ) from err
-
-    try:
-        # nanoarrow.device.c_device_array() consumes the public
-        # __arrow_c_device_array__() protocol — no data is copied.
-        device_array = nanoarrow_device.c_device_array(plc_column)
-    except (TypeError, ValueError, RuntimeError) as err:
-        raise RuntimeError(
-            "failed to build a nanoarrow device array from the pylibcudf column"
-        ) from err
-
-    if device_array.null_count > 0:
-        raise NotImplementedError(
-            "ak.from_cudf does not yet support cudf.Series with null values. "
-            "Use series.dropna() or series.fillna() before converting."
-        )
-
-    # Resolve dtype from the Arrow schema format string
-    # device_array.schema.format is  Arrow C Data Interface format string,
-    # rejected because Arrow booleans are bit-packed — treating their values
-    # buffer as fixed-width bytes would silently produce incorrect results.
-    dtype = _primitive_dtype_from_arrow_format(device_array.schema.format)
-
-    #  CuPy
-
     try:
         import cupy as cp
     except ImportError as err:
@@ -132,47 +52,222 @@ or
     pip install cupy-cuda13x"""
         ) from err
 
-    # Extract the values buffer and build a CuPy array
-    # Arrow primitive buffer layout:
-    #   buffers[0] -> validity bitmap (ignored — null_count == 0 is enforced above)
-    #   buffers[1] -> values buffer
-    buffers = device_array.buffers
-    if len(buffers) < 2:
-        raise RuntimeError(
-            "The exported Arrow device array does not have the primitive values "
-            "buffer expected by ak.from_cudf."
+    try:
+        import pylibcudf as plc
+    except ImportError as err:
+        raise ImportError(
+            """to use ak.from_cudf, you must install the 'pylibcudf' package with:
+
+    pip install pylibcudf-cu13"""
+        ) from err
+
+    if not isinstance(series, cudf.Series):
+        raise TypeError(
+            f"ak.from_cudf accepts only cudf.Series, not {type(series).__name__!r}"
         )
 
-    data_buffer = buffers[1]
+    plc_column = _to_pylibcudf_column(series)
 
-    if data_buffer is None:
-        # Arrow permits NULL buffers for empty arrays.  There is no device
-        # memory to share, so construct an empty CuPy array with the right dtype.
-        if device_array.length == 0:
-            return NumpyArray(cp.asarray((), dtype=dtype))
+    primitive_type_id_to_dtype = {
+        plc.types.TypeId.INT8: "int8",
+        plc.types.TypeId.INT16: "int16",
+        plc.types.TypeId.INT32: "int32",
+        plc.types.TypeId.INT64: "int64",
+        plc.types.TypeId.UINT8: "uint8",
+        plc.types.TypeId.UINT16: "uint16",
+        plc.types.TypeId.UINT32: "uint32",
+        plc.types.TypeId.UINT64: "uint64",
+        plc.types.TypeId.FLOAT32: "float32",
+        plc.types.TypeId.FLOAT64: "float64",
+        plc.types.TypeId.TIMESTAMP_DAYS: "datetime64[D]",
+        plc.types.TypeId.TIMESTAMP_SECONDS: "datetime64[s]",
+        plc.types.TypeId.TIMESTAMP_MILLISECONDS: "datetime64[ms]",
+        plc.types.TypeId.TIMESTAMP_MICROSECONDS: "datetime64[us]",
+        plc.types.TypeId.TIMESTAMP_NANOSECONDS: "datetime64[ns]",
+        plc.types.TypeId.DURATION_DAYS: "timedelta64[D]",
+        plc.types.TypeId.DURATION_SECONDS: "timedelta64[s]",
+        plc.types.TypeId.DURATION_MILLISECONDS: "timedelta64[ms]",
+        plc.types.TypeId.DURATION_MICROSECONDS: "timedelta64[us]",
+        plc.types.TypeId.DURATION_NANOSECONDS: "timedelta64[ns]",
+    }
 
-        raise RuntimeError(
-            "The exported Arrow device array is missing its values buffer."
-        )
+    def _empty_array(dtype):
+        return cp.asarray((), dtype=dtype)
 
-    # cp.asarray() honours the __cuda_array_interface__ exposed by nanoarrow
-    # buffer objects — no host copy occurs.
-    data = cp.asarray(data_buffer, dtype=dtype)
+    def _column_size(col):
+        return col.size() if callable(col.size) else col.size
 
-    # 10. Apply Arrow offset (e.g. from a sliced cuDF Series)
+    def _column_offset(col):
+        return col.offset() if callable(col.offset) else col.offset
 
-    # Arrow allows a non-zero offset into the backing allocation so that
-    # slices share memory with the parent.  We must respect it.
-    if device_array.offset != 0 or data.shape[0] != device_array.length:
-        start = device_array.offset
-        stop = start + device_array.length
+    def _column_null_count(col):
+        return col.null_count() if callable(col.null_count) else col.null_count
 
-        if data.shape[0] < stop:
+    def _asarray(buffer, dtype=None):
+        data = cp.asarray(buffer)
+
+        if dtype is None:
+            return data
+
+        target_dtype = cp.dtype(dtype)
+        if data.dtype == target_dtype:
+            return data
+
+        if data.dtype.itemsize == target_dtype.itemsize:
+            return data.view(target_dtype)
+
+        return cp.asarray(buffer, dtype=target_dtype)
+
+    def _data_to_cupy(col, dtype):
+        buffer = col.data_buffer()
+
+        if buffer is None:
+            if _column_size(col) == 0:
+                return _empty_array(dtype)
+            raise RuntimeError("non-empty pylibcudf column is missing its data buffer")
+
+        return _asarray(buffer, dtype=dtype)
+
+    def _offsets_to_index(offsets_source):
+        if offsets_source is None:
+            offsets = _empty_array("int64")
+        else:
+            buffer = offsets_source.data_buffer()
+            if buffer is None:
+                if _column_size(offsets_source) == 0:
+                    offsets = _empty_array("int64")
+                else:
+                    raise RuntimeError(
+                        "non-empty pylibcudf offsets column is missing its data buffer"
+                    )
+            else:
+                offsets = _asarray(buffer)
+
+        if offsets.shape[0] == 0:
+            offsets = cp.asarray((0,), dtype="int64")
+            return Index64(offsets)
+
+        if offsets.dtype == cp.dtype("int32"):
+            return Index32(offsets)
+        elif offsets.dtype == cp.dtype("int64"):
+            return Index64(offsets)
+        else:
+            return Index64(cp.asarray(offsets, dtype="int64"))
+
+    def _struct_fields(col, dtype, num_children):
+        fields_method = getattr(col.type(), "fields", None)
+        if callable(fields_method):
+            fields = list(fields_method())
+        elif fields_method is None:
+            fields = []
+        else:
+            fields = list(fields_method)
+
+        names = []
+        for i, field in enumerate(fields[:num_children]):
+            field_name = getattr(field, "name", None)
+            if callable(field_name):
+                field_name = field_name()
+            if field_name is None and isinstance(field, tuple) and len(field) > 0:
+                field_name = field[0]
+            names.append(str(i) if field_name is None else field_name)
+
+        child_dtypes = []
+        dtype_fields = getattr(dtype, "fields", None)
+        if dtype_fields is not None:
+            child_dtypes.extend(child_dtype for _, child_dtype in dtype_fields.items())
+
+            if len(names) < num_children:
+                for name in dtype_fields:
+                    if len(names) == num_children:
+                        break
+                    if name not in names:
+                        names.append(name)
+
+        if len(names) < num_children:
+            names.extend(str(i) for i in range(len(names), num_children))
+
+        if len(child_dtypes) < num_children:
+            child_dtypes.extend([None] * (num_children - len(child_dtypes)))
+
+        return names, child_dtypes[:num_children]
+
+    def _finalize(layout, col):
+        offset = _column_offset(col)
+        size = _column_size(col)
+        stop = offset + size
+
+        if layout.length < stop:
             raise RuntimeError(
-                "The exported Arrow device array has an unexpected values buffer "
-                "shape for ak.from_cudf."
+                "pylibcudf column buffers have an unexpected shape for ak.from_cudf"
             )
 
-        data = data[start:stop]
+        if _column_null_count(col) != 0:
+            mask = col.null_mask()
+            if mask is not None:
+                layout = BitMaskedArray.simplified(
+                    IndexU8(cp.asarray(mask, dtype=cp.uint8)),
+                    layout,
+                    valid_when=True,
+                    length=stop,
+                    lsb_order=True,
+                )
 
-    return NumpyArray(data)
+        if offset != 0 or layout.length != size:
+            layout = layout[offset:stop]
+
+        return layout
+
+    def recurse(col, dtype=None):
+        type_id = col.type().id()
+
+        if type_id in primitive_type_id_to_dtype:
+            layout = NumpyArray(_data_to_cupy(col, primitive_type_id_to_dtype[type_id]))
+
+        elif type_id == plc.types.TypeId.BOOL8:
+            # cuDF stores bool as bytes, so a cast is required here.
+            layout = NumpyArray(_data_to_cupy(col, cp.uint8).astype(cp.bool_))
+
+        elif type_id == plc.types.TypeId.LIST:
+            offsets_source = col.offsets()
+            child_col = col.child(0)
+            child_dtype = getattr(dtype, "element_type", None)
+            layout = ListOffsetArray(
+                _offsets_to_index(offsets_source),
+                recurse(child_col, child_dtype),
+            )
+
+        elif type_id == plc.types.TypeId.STRUCT:
+            num_children = len(col.children())
+            field_names, child_dtypes = _struct_fields(col, dtype, num_children)
+            contents = [
+                recurse(col.child(i), child_dtypes[i]) for i in range(num_children)
+            ]
+            layout = RecordArray(
+                contents,
+                field_names,
+                length=_column_offset(col) + _column_size(col),
+            )
+
+        elif type_id == plc.types.TypeId.STRING:
+            offsets_col = col.child(0)
+            chars_buffer = col.data_buffer()
+            layout = ListOffsetArray(
+                _offsets_to_index(offsets_col),
+                NumpyArray(
+                    _empty_array(cp.uint8)
+                    if chars_buffer is None
+                    else _asarray(chars_buffer, dtype=cp.uint8),
+                    parameters={"__array__": "char"},
+                ),
+                parameters={"__array__": "string"},
+            )
+
+        else:
+            raise NotImplementedError(
+                f"pylibcudf type id {type_id!r} is not supported by ak.from_cudf"
+            )
+
+        return _finalize(layout, col)
+
+    return recurse(plc_column, series.dtype)

@@ -20,12 +20,12 @@ def from_cudf(series, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts a flat cuDF Series into an Awkward Array using the Arrow C Device
-    Interface.
+    Converts a cuDF Series into an Awkward Array by recursively traversing
+    the underlying pylibcudf column structure.
 
-    Only flat, fixed-width numeric Series are currently supported. Null values,
-    booleans, strings, categorical data, and nested types raise
-    ``NotImplementedError``.
+    Primitive, boolean, list, struct, string, and nullable columns are
+    supported. The conversion is zero-copy on GPU for numeric buffers via
+    CuPy. Other column types raise ``NotImplementedError``.
 
     See also #ak.to_cudf, #ak.from_cupy, and #ak.from_dlpack.
     """

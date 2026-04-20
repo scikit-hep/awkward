@@ -10,8 +10,7 @@ import awkward as ak
 
 cudf = pytest.importorskip("cudf")
 cp = pytest.importorskip("cupy")
-pytest.importorskip("nanoarrow")
-na_device = pytest.importorskip("nanoarrow.device")
+pytest.importorskip("pylibcudf")
 
 pytestmark = pytest.mark.skipif(
     parse_version(cudf.__version__) < parse_version("25.02.00"),
@@ -22,10 +21,9 @@ pytestmark = pytest.mark.skipif(
 def _device_values(series):
     plc_column = series.to_pylibcudf()
     plc_column = plc_column[0] if isinstance(plc_column, tuple) else plc_column
-    device_array = na_device.c_device_array(plc_column)
-    data = cp.asarray(device_array.buffers[1], dtype=series.dtype)
-    if device_array.offset != 0 or data.shape[0] != device_array.length:
-        data = data[device_array.offset : device_array.offset + device_array.length]
+    data = cp.asarray(plc_column.data_buffer(), dtype=series.dtype)
+    if plc_column.offset() != 0 or data.shape[0] != plc_column.size():
+        data = data[plc_column.offset() : plc_column.offset() + plc_column.size()]
     return data
 
 
@@ -80,6 +78,65 @@ def test_from_cudf_empty_series():
     assert result.layout.data.dtype == cp.dtype(np.int64)
 
 
+def test_from_cudf_boolean():
+    series = cudf.Series([True, False, True, False])
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [True, False, True, False]
+    assert ak.backend(result) == "cuda"
+
+
+def test_from_cudf_nullable_int():
+    series = cudf.Series([1, None, 3], dtype="Int64")
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [1, None, 3]
+    assert ak.backend(result) == "cuda"
+
+
+def test_from_cudf_nullable_float():
+    series = cudf.Series([1.1, None, 3.3], dtype="float64")
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [1.1, None, 3.3]
+
+
+def test_from_cudf_list_of_int():
+    series = cudf.Series([[1, 2, 3], [], [4, 5]])
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [[1, 2, 3], [], [4, 5]]
+    assert ak.backend(result) == "cuda"
+
+
+def test_from_cudf_list_nested():
+    series = cudf.Series([[[1, 2], [3]], [[4]]])
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [[[1, 2], [3]], [[4]]]
+
+
+def test_from_cudf_struct():
+    series = cudf.Series([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}])
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}]
+    assert ak.backend(result) == "cuda"
+
+
+def test_from_cudf_struct_with_null():
+    series = cudf.Series([{"x": 1, "y": 1.1}, None, {"x": 3, "y": 3.3}])
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [{"x": 1, "y": 1.1}, None, {"x": 3, "y": 3.3}]
+
+
+def test_from_cudf_strings():
+    series = cudf.Series(["hello", "world", "awkward"])
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == ["hello", "world", "awkward"]
+    assert ak.backend(result) == "cuda"
+
+
+def test_from_cudf_strings_with_null():
+    series = cudf.Series(["hello", None, "awkward"])
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == ["hello", None, "awkward"]
+
+
 def test_from_cudf_respects_arrow_offset():
     series = cudf.Series([10, 20, 30, 40], dtype=np.int64)
     sliced = series[1:3]
@@ -114,19 +171,6 @@ def test_from_cudf_rejects_wrong_input():
         ak.from_cudf(np.array([1, 2, 3]))
 
 
-def test_from_cudf_rejects_nulls():
-    series = cudf.Series([1, None, 3])
-    with pytest.raises(NotImplementedError, match="null"):
-        ak.from_cudf(series)
-
-
-def test_from_cudf_rejects_strings():
-    series = cudf.Series(["one", "two", "three"])
-    with pytest.raises(NotImplementedError):
-        ak.from_cudf(series)
-
-
-def test_from_cudf_rejects_booleans():
-    series = cudf.Series([True, False, True])
-    with pytest.raises(NotImplementedError):
-        ak.from_cudf(series)
+def test_from_cudf_rejects_wrong_input_list():
+    with pytest.raises(TypeError, match=r"cudf\.Series"):
+        ak.from_cudf([1, 2, 3])
