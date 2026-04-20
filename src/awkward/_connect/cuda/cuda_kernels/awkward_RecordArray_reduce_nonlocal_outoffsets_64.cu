@@ -34,16 +34,19 @@ awkward_RecordArray_reduce_nonlocal_outoffsets_64_a(
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    scan_in_array_outoffsets[0] = 0;
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    // Initialize shared global values once
     if (thread_id == 0) {
-      scan_in_array[0] = 1;
+      scan_in_array_outoffsets[0] = 0;
+      if (lenparents > 0) scan_in_array[0] = 1;
+      outoffsets[0] = 0;
     }
+
     if (thread_id < lenparents - 1) {
-      if (parents[thread_id] != parents[thread_id + 1]) {
-        scan_in_array[thread_id + 1] = 1;
-      }
+      scan_in_array[thread_id + 1] = (parents[thread_id] != parents[thread_id + 1]) ? 1 : 0;
     }
+
     if (thread_id < outlength) {
       scan_in_array_outoffsets[thread_id + 1] = 0;
       outcarry[thread_id] = -1;
@@ -76,7 +79,7 @@ awkward_RecordArray_reduce_nonlocal_outoffsets_64_b(
     if (thread_id < lenparents) {
       for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
         int64_t val = 0;
-        if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
+        if (idx >= stride && parents[thread_id] == parents[thread_id - stride]) {
           val = temp[thread_id - stride];
         }
         __syncthreads();
@@ -84,9 +87,13 @@ awkward_RecordArray_reduce_nonlocal_outoffsets_64_b(
         __syncthreads();
       }
 
-      int64_t parent = parents[thread_id];
-      if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicAdd(&scan_in_array_outoffsets[scan_in_array[thread_id]], temp[thread_id]);
+      // Check boundary before atomicAdd
+      // scan_in_array is 1-indexed after cumsum, so we use scan_in_array[thread_id]
+      int64_t group_idx = scan_in_array[thread_id];
+      if (group_idx <= outlength) { // Ensure we don't exceed outlength + 1
+          if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
+            atomicAdd(&scan_in_array_outoffsets[group_idx], temp[thread_id]);
+          }
       }
     }
   }
@@ -107,15 +114,21 @@ awkward_RecordArray_reduce_nonlocal_outoffsets_64_c(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    outoffsets[0] = 0;
+    
     if (thread_id < lenparents) {
-      if (thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        outcarry[parents[thread_id]] = scan_in_array[thread_id] - 1;
+      int64_t p_idx = parents[thread_id];
+      // Only write if parent index is valid for outcarry
+      if (p_idx >= 0 && p_idx < outlength) {
+          if (thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
+            outcarry[p_idx] = (C)(scan_in_array[thread_id] - 1);
+          }
       }
     }
+
     if (thread_id < outlength) {
       if (outcarry[thread_id] == -1) {
-        outcarry[thread_id] = lenparents > 0 && outlength > 1 ? atomicAdd(&scan_in_array[lenparents - 1], 1) : 0;
+        // Safe atomic use: only if lenparents > 0 to avoid reading scan_in_array[-1]
+        outcarry[thread_id] = (lenparents > 0) ? (C)atomicAdd(&scan_in_array[lenparents - 1], 1) : 0;
       }
       outoffsets[thread_id + 1] = (T)scan_in_array_outoffsets[thread_id + 1];
     }
