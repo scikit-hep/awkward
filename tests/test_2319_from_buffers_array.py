@@ -74,7 +74,9 @@ def test_2d_1d_fortran_ordered():
         }
     """
 
-    with pytest.raises(ValueError, match="cannot reshape array without copying"):
+    with pytest.raises(
+        ValueError, match="Unable to avoid creating a copy while reshaping"
+    ):
         ak.from_buffers(form, array.size, container, highlevel=False)
 
 
@@ -91,7 +93,9 @@ def test_2d_2d_fortran_ordered():
         }
     """
 
-    with pytest.raises(ValueError, match="cannot reshape array without copying"):
+    with pytest.raises(
+        ValueError, match="Unable to avoid creating a copy while reshaping"
+    ):
         ak.from_buffers(form, array.size, container, highlevel=False)
 
 
