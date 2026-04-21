@@ -1050,6 +1050,17 @@
                     "outputs": {
                         "toindex": [0]
                     }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 5,
+                        "target": 9
+                    },
+                    "outputs": {
+                        "toindex": [0, 1, 2, 3, 4, -1, -1, -1, -1]
+                    }
                 }
             ]
         },
