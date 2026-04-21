@@ -730,7 +730,6 @@ def awkward_RegularArray_getitem_jagged_expand(
     # Reshape as (regularlength, regularsize) views (no copy) and broadcast-assign
     # singleoffsets[:-1] / singleoffsets[1:] across all rows.
     multistarts.reshape(regularlength, regularsize)[:] = singleoffsets[:regularsize]
-    multistops.reshape(regularlength, regularsize)[:] = singleoffsets[1:]
     multistops.reshape(regularlength, regularsize)[:] = singleoffsets[
         1 : regularsize + 1
     ]
