@@ -80,6 +80,7 @@ class CupyBackend(Backend):
         - awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64
         - awkward_ByteMaskedArray_getitem_nextcarry
         - awkward_ByteMaskedArray_numnull
+        - awkward_RegularArray_getitem_jagged_expand
 
         These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
         - awkward_sum
@@ -110,6 +111,7 @@ class CupyBackend(Backend):
             "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
             "awkward_ByteMaskedArray_getitem_nextcarry",
             "awkward_ByteMaskedArray_numnull",
+            "awkward_RegularArray_getitem_jagged_expand",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):

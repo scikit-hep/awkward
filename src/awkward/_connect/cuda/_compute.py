@@ -714,3 +714,20 @@ def awkward_ByteMaskedArray_getitem_nextcarry(tocarry, mask, length, validwhen):
 # mask = [0, 1, 0, 1, 1], validwhen=False → numnull = 3  (positions 1, 3 and 4 are null)
 def awkward_ByteMaskedArray_numnull(numnull, mask, length, validwhen):
     numnull[0] = cp.count_nonzero((mask[:length] != 0) != validwhen)
+
+
+# Broadcasts a single jagged offset array across all rows of a regular array
+# Example:
+# singleoffsets = [0, 2, 5], regularsize = 2, regularlength = 3
+# multistarts = [0, 2, 0, 2, 0, 2]
+# multistops  = [2, 5, 2, 5, 2, 5]
+def awkward_RegularArray_getitem_jagged_expand(
+    multistarts, multistops, singleoffsets, regularsize, regularlength
+):
+    if regularlength == 0 or regularsize == 0:
+        return
+
+    # Reshape as (regularlength, regularsize) views (no copy) and broadcast-assign
+    # singleoffsets[:-1] / singleoffsets[1:] across all rows.
+    multistarts.reshape(regularlength, regularsize)[:] = singleoffsets[:regularsize]
+    multistops.reshape(regularlength, regularsize)[:] = singleoffsets[1:]
