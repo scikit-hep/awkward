@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from cuda.compute import (
     CountingIterator,
+    DiscardIterator,
     gpu_struct,
     reduce_into,
     unary_transform,
@@ -733,3 +734,26 @@ def awkward_RegularArray_getitem_jagged_expand(
     multistops.reshape(regularlength, regularsize)[:] = singleoffsets[
         1 : regularsize + 1
     ]
+
+
+# For each position i where fromtags[i] == fromwhich, sets totags[i] = towhich and
+# toindex[i] = fromindex[i] + base. Other positions are left unchanged.
+# Example:
+# fromtags  = [0, 1, 0, 1, 0], fromindex = [0, 0, 1, 1, 2]
+# fromwhich=1, towhich=2, base=10
+# totags  = [0, 2, 0, 2, 0]
+# toindex = [0, 10, 1, 11, 2]
+def awkward_UnionArray_simplify_one(
+    totags, toindex, fromtags, fromindex, towhich, fromwhich, length, base
+):
+    if length == 0:
+        return
+
+    def transform(i):
+        if fromtags[i] == fromwhich:
+            totags[i] = towhich
+            toindex[i] = fromindex[i] + base
+        return 0  # discarded
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, DiscardIterator(), transform, length)

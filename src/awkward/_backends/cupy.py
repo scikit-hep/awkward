@@ -81,6 +81,7 @@ class CupyBackend(Backend):
         - awkward_ByteMaskedArray_getitem_nextcarry
         - awkward_ByteMaskedArray_numnull
         - awkward_RegularArray_getitem_jagged_expand
+        - awkward_UnionArray_simplify_one
 
         These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
         - awkward_sum
@@ -112,6 +113,7 @@ class CupyBackend(Backend):
             "awkward_ByteMaskedArray_getitem_nextcarry",
             "awkward_ByteMaskedArray_numnull",
             "awkward_RegularArray_getitem_jagged_expand",
+            "awkward_UnionArray_simplify_one",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
