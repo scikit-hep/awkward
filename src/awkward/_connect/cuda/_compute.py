@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from cuda.compute import (
     CountingIterator,
+    OpKind,
+    TransformIterator,
     gpu_struct,
     reduce_into,
     unary_transform,
@@ -629,3 +631,16 @@ def awkward_reduce_countnonzero(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+
+
+# Counts the number of null (missing) entries in an indexed array.
+def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
+    index_dtype = numnull.dtype
+
+    def is_null(x):
+        return 1 if x < 0 else 0
+
+    null_iter = TransformIterator(fromindex[:lenindex], is_null)
+
+    h_init = np.array([0], dtype=index_dtype)
+    reduce_into(null_iter, numnull, OpKind.PLUS, lenindex, h_init)
