@@ -796,3 +796,23 @@ def awkward_ListArray_broadcast_tooffsets(
         return 0
 
     unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill_list, length)
+
+
+# For each segment i, it fills toindex with the local position of each element within that segment — i.e. 0, 1, 2, ...
+# Example:
+# offsets = [0, 3, 5]
+# toindex = [0, 1, 2, 0, 1]
+def awkward_ListArray_localindex(toindex, offsets, length):
+    if length == 0:
+        return
+
+    starts = offsets[:length]
+    stops = offsets[1 : length + 1]
+
+    def fill(i):
+        start = starts[i]
+        stop = stops[i]
+        toindex[start:stop] = cp.arange(stop - start, dtype=toindex.dtype)
+        return 0
+
+    unary_transform(CountingIterator(cp.int8(0)), DiscardIterator(), fill, length)
