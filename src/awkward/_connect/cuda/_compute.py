@@ -812,7 +812,8 @@ def awkward_ListArray_localindex(toindex, offsets, length):
     def fill(i):
         start = starts[i]
         stop = stops[i]
-        toindex[start:stop] = cp.arange(stop - start, dtype=toindex.dtype)
+        for j in range(start, stop):
+            toindex[j] = j - start
         return 0
 
-    unary_transform(CountingIterator(cp.int8(0)), DiscardIterator(), fill, length)
+    unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill, length)
