@@ -82,6 +82,8 @@ class CupyBackend(Backend):
         - awkward_ByteMaskedArray_numnull
         - awkward_RegularArray_getitem_jagged_expand
         - awkward_UnionArray_simplify_one
+        TODO: fix the tests for this kernel -->
+        - awkward_ListArray_broadcast_tooffsets
 
         These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
         - awkward_sum
