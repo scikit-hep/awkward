@@ -6,6 +6,7 @@ from cuda.compute import (
     CountingIterator,
     DiscardIterator,
     gpu_struct,
+    inclusive_scan,
     reduce_into,
     unary_transform,
 )
@@ -817,3 +818,29 @@ def awkward_ListArray_localindex(toindex, offsets, length):
         return 0
 
     unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill, length)
+
+
+# TODO: fix tests for this kernel that are deliberately raising an error
+# Converts a ListArray's (starts, stops) pairs into offsets.
+# tooffsets[0] = 0, tooffsets[i+1] = tooffsets[i] + (fromstops[i] - fromstarts[i])
+# Example:
+# fromstarts = [10, 20], fromstops = [13, 22], length = 2
+# tooffsets = [0, 3, 5]
+def awkward_ListArray_compact_offsets(tooffsets, fromstarts, fromstops, length):
+    tooffsets[0] = 0
+    if length == 0:
+        return
+
+    sizes = fromstops[:length] - fromstarts[:length]
+
+    if cp.any(sizes < 0):
+        raise ValueError("stops[i] < starts[i]")
+
+    # the same as `tooffsets[1 : length + 1] = cp.cumsum(sizes)`
+    inclusive_scan(
+        sizes,
+        tooffsets[1 : length + 1],
+        lambda a, b: a + b,
+        cp.array([0], dtype=tooffsets.dtype),
+        length,
+    )

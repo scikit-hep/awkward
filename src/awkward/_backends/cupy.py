@@ -85,6 +85,8 @@ class CupyBackend(Backend):
         TODO: fix the tests for this kernel -->
         - awkward_ListArray_broadcast_tooffsets
         - awkward_ListArray_localindex
+        TODO: fix the tests for this kernel -->
+        - awkward_ListArray_compact_offsets
 
         These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
         - awkward_sum
