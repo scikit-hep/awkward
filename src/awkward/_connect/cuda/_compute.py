@@ -844,3 +844,62 @@ def awkward_ListArray_compact_offsets(tooffsets, fromstarts, fromstops, length):
         cp.array([0], dtype=tooffsets.dtype),
         length,
     )
+
+
+# For each list i, counts the number of n-combinations of its elements
+# (with or without replacement) and builds an offsets array into tooffsets.
+# totallen[0] is set to the total number of combinations across all lists.
+#
+# Example (n=2, replacement=False):
+# starts=[0, 0, 0], stops=[2, 3, 4]
+# sizes = [2, 3, 4]
+# C(2,2)=1, C(3,2)=3, C(4,2)=6
+# Then the output will be: tooffsets = [0, 1, 4, 10]
+# totallen  = 10
+def awkward_ListArray_combinations_length(
+    totallen, tooffsets, n, replacement, starts, stops, length
+):
+    tooffsets[0] = 0
+    if length == 0:
+        totallen[0] = 0
+        return
+
+    def combinations_len(i):
+        size = stops[i] - starts[i]
+        if replacement:
+            size = size + (n - 1)
+        thisn = n
+        if thisn > size:
+            return 0
+        elif thisn == size:
+            return 1
+        else:
+            # C(size, n) == C(size, size-n), so use the smaller one
+            # of the two to minimise the number of loop iterations
+            if thisn * 2 > size:
+                thisn = size - thisn
+
+            # Compute C(size, thisn) = size! / (thisn! * (size-thisn)!) incrementally:
+            # result = size * (size-1) * ... * (size-thisn+1) / thisn!
+            result = size
+            for j in range(2, thisn + 1):
+                result = result * (size - j + 1)
+                result = result // j
+            return result
+
+    # Compute the number of combinations for each list
+    counts = cp.empty(length, dtype=tooffsets.dtype)
+    unary_transform(CountingIterator(cp.int64(0)), counts, combinations_len, length)
+
+    # Convert counts to offsets:
+    # tooffsets[i+1] = sum(counts[0..i])
+    inclusive_scan(
+        counts,
+        tooffsets[1 : length + 1],
+        lambda a, b: a + b,
+        cp.array([0], dtype=tooffsets.dtype),
+        length,
+    )
+
+    # Total number of combinations across all lists
+    totallen[0] = tooffsets[length]
