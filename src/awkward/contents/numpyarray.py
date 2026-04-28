@@ -49,7 +49,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
-from awkward.index import Index, resolve_index
+from awkward.index import Index, parents_to_offsets_aligned, resolve_index
 from awkward.types.numpytype import primitive_to_dtype
 
 if TYPE_CHECKING:
@@ -1175,7 +1175,21 @@ class NumpyArray(NumpyMeta, Content):
         assert self._data.ndim == 1
 
         parents = resolve_index(parents, self._backend)
-        offsets = resolve_index(offsets, self._backend)
+        offsets = parents_to_offsets_aligned(parents, outlength, self._backend)
+        # self._backend.maybe_kernel_error(
+        #         self._backend[
+        #         "awkward_Index_parents_to_offsets",
+        #         offsets.dtype.type,
+        #         parents.dtype.type,
+        #     ](
+        #         offsets,
+        #         parents.data,
+        #         parents.length,
+        #         outlength,
+        #     )
+        # )
+        # print("parents:", parents)
+        # print("offsets:", offsets)
 
         out = reducer.apply(self, parents, offsets, starts, shifts, outlength)
 

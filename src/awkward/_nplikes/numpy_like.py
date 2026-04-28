@@ -551,3 +551,12 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
 
     @abstractmethod
     def memory_ptr(self, x: ArrayLikeT) -> int: ...
+
+    @abstractmethod
+    def bincount(
+        self,
+        x: ArrayLikeT,
+        *,
+        weights: ArrayLikeT | None = None,
+        minlength: int = 0,
+    ) -> ArrayLikeT: ...

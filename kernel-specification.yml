@@ -4001,6 +4001,27 @@ kernels:
                   num_non_null += 1
     automatic-tests: false
 
+  - name: awkward_Index_parents_to_offsets
+    specializations:
+      - name: awkward_Index_parents_to_offsets_64
+        args:
+          - {name: tooffsets, type: "List[int64_t]", dir: out}
+          - {name: fromparents, type: "Const[List[int64_t]]", dir: in}
+          - {name: lenparents, type: "int64_t", dir: in, role: default}
+          - {name: outlength, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_Index_parents_to_offsets(tooffsets, fromparents, lenparents, outlength):
+          for i in range(outlength):
+              tooffsets[i] = 0
+          for i in range(lenparents):
+              p = fromparents[i]
+              if p < outlength:
+                  tooffsets[p+1] = tooffsets[p+1] + 1
+          for i in range(1, outlength + 1):
+              tooffsets[i] = tooffsets[i] + tooffsets[i-1]
+    automatic-tests: false
+
   - name: awkward_localindex
     specializations:
       - name: awkward_localindex_64

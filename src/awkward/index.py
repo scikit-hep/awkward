@@ -370,3 +370,36 @@ def resolve_index(index: Index | LazyIndex, backend) -> Index:
         return index._materialize()
 
     return index
+
+
+def parents_to_offsets_aligned(
+    parents_index: Index | LazyIndex, outlength: int, backend
+) -> Index:
+    """
+    Translates a parents Index into an offsets Index.
+
+    Args:
+        parents_index (Index | LazyIndex): The parents array as an Awkward Index.
+        outlength (int): The number of output lists.
+        backend: The awkward backend (e.g., ak._backends.cpu.CPUBackend()).
+
+    Returns:
+        Index: An Awkward Index object containing the offsets.
+    """
+    resolved_parents = resolve_index(parents_index, backend)
+    parents_data = resolved_parents.data
+    nplike = backend.nplike
+
+    counts = nplike.bincount(parents_data, minlength=outlength)
+
+    if nplike.known_data:
+        offsets_len = len(counts) + 1
+    else:
+        offsets_len = outlength
+
+    offsets = nplike.empty(offsets_len, dtype=np.int64)
+
+    offsets[0] = 0
+    offsets[1:] = nplike.cumsum(counts)
+
+    return Index(offsets)

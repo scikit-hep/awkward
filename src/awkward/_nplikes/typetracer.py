@@ -1682,6 +1682,17 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
     ) -> TypeTracerArray:
         return self.min(x, axis=axis, keepdims=keepdims, maybe_out=maybe_out)
 
+    # statistics
+
+    def bincount(
+        self,
+        x: TypeTracerArray,
+        *,
+        weights=None,
+        minlength=0,
+    ) -> TypeTracerArray:
+        return self.empty(minlength, dtype=x.dtype)
+
     def array_str(
         self,
         x: TypeTracerArray,
