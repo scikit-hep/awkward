@@ -103,9 +103,10 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
 
     def bincount(
         self,
-        x,
+        x: NDArray,
         *,
-        weights=None,
-        minlength=0,
-    ):
+        weights: NDArray | None = None,
+        minlength: int = 0,
+    ) -> NDArray:
+        (x,) = maybe_materialize(x)
         return numpy.bincount(x, weights=weights, minlength=minlength)
