@@ -108,6 +108,4 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
         weights=None,
         minlength=0,
     ):
-        import numpy as np
-
-        return np.bincount(x, weights=weights, minlength=minlength)
+        return numpy.bincount(x, weights=weights, minlength=minlength)
