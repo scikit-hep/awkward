@@ -10,17 +10,18 @@ ERROR awkward_Index_parents_to_offsets(
   const T* fromparents,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0; i <= outlength; i++) {
-    tooffsets[i] = 0;
-  }
-
+  // offsets are initialized to 0, so
+  // we only need to count the number of
+  // parents for each offset.
   for (int64_t i = 0; i < lenparents; i++) {
     int64_t p = fromparents[i];
     if (p < outlength) {
       tooffsets[p + 1]++;
     }
   }
-
+  // offsets length is outlength + 1, so
+  // we need to do a cumulative sum
+  // to get the correct offsets.
   for (int64_t i = 1; i <= outlength; i++) {
     tooffsets[i] += tooffsets[i - 1];
   }

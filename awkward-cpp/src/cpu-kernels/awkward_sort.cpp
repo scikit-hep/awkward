@@ -28,7 +28,7 @@ ERROR awkward_sort(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  int64_t parentslength,
+  int64_t _parentslength,
   bool ascending,
   bool stable) {
   std::vector<int64_t> index(length);
@@ -60,7 +60,7 @@ ERROR awkward_sort(
       }
     }
   }
-
+  int64_t parentslength = offsets[offsetslength - 1];
   int64_t copy_length = (parentslength < length) ? parentslength : length;
   for (int64_t i = 0; i < copy_length; i++) {
     toptr[i] = fromptr[index[i]];

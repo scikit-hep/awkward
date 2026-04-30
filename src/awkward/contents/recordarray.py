@@ -44,7 +44,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.recordform import RecordForm
-from awkward.index import Index
+from awkward.index import Index, parents_to_offsets_aligned
 from awkward.record import Record
 
 if TYPE_CHECKING:
@@ -1068,15 +1068,18 @@ class RecordArray(RecordMeta[Content], Content):
                     outmask.nplike is self._backend.nplike
                     and parents.nplike is self._backend.nplike
                 )
+                # FIXME:
+                offsets = ak.index.Index64.zeros(outlength + 1, self._backend.nplike)
+                parents_to_offsets_aligned(parents, offsets, outlength, self._backend)
+
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
                         outmask.dtype.type,
-                        parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         outmask.data,
-                        parents.data,
-                        parents.length,
+                        offsets.data,
                         outlength,
                     )
                 )

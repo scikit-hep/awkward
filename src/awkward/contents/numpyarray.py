@@ -1175,21 +1175,10 @@ class NumpyArray(NumpyMeta, Content):
         assert self._data.ndim == 1
 
         parents = resolve_index(parents, self._backend)
-        offsets = parents_to_offsets_aligned(parents, outlength, self._backend)
-        # self._backend.maybe_kernel_error(
-        #         self._backend[
-        #         "awkward_Index_parents_to_offsets",
-        #         offsets.dtype.type,
-        #         parents.dtype.type,
-        #     ](
-        #         offsets,
-        #         parents.data,
-        #         parents.length,
-        #         outlength,
-        #     )
-        # )
-        # print("parents:", parents)
-        # print("offsets:", offsets)
+
+        # FIXME:
+        offsets = ak.index.Index64.zeros(outlength + 1, self._backend.nplike)
+        parents_to_offsets_aligned(parents, offsets, outlength, self._backend)
 
         out = reducer.apply(self, parents, offsets, starts, shifts, outlength)
 
@@ -1203,16 +1192,14 @@ class NumpyArray(NumpyMeta, Content):
                 self._backend[
                     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
                     outmask.dtype.type,
-                    parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     outmask.data,
-                    parents.data,
-                    parents.length,
+                    offsets.data,
                     outlength,
                 )
             )
             out = ak.contents.ByteMaskedArray(outmask, out, False, parameters=None)
-
         if keepdims:
             out = ak.contents.RegularArray(out, 1, self.length, parameters=None)
 
