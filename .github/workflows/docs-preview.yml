@@ -1,7 +1,7 @@
 name: Docs Preview
 on:
   workflow_run:
-    workflows: [Docs]
+    workflows: [CI]
     types:
       - completed
 
