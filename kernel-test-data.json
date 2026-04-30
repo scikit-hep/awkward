@@ -21206,7 +21206,7 @@
             ]
         },
         {
-            "name": "awkward_NumpyArray_reduce_mask_ByteMaskedArray_offsets_64",
+            "name": "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
             "status": true,
             "tests": [
                 {
