@@ -113,7 +113,7 @@ def test_List_ByteMaskedArray_NumpyArray():
 
 def test_ListOffsetArray_ByteMaskedArray_NumpyArray():
     a = ak.contents.listoffsetarray.ListOffsetArray(
-        ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
+        ak.index.Index(np.array([1, 4, 4, 5, 5], np.int64)),
         ak.contents.bytemaskedarray.ByteMaskedArray(
             ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
             ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
