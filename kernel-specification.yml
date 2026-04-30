@@ -2658,9 +2658,9 @@ kernels:
       ):
           for i in range(outlength):
               if offsets[i + 1] - offsets[i] > 0:
-                toptr[i] = 1
-              else:
                 toptr[i] = 0
+              else:
+                toptr[i] = 1
     automatic-tests: true
 
   - name: awkward_ListOffsetArray_argsort_strings
