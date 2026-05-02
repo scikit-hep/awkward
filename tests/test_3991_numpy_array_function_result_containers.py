@@ -55,7 +55,7 @@ def test_dict_of_arrays():
     @array_function_dispatch(dict_of_arrays_dispatcher)
     def dict_of_arrays(array):
         array = np.asarray(array)
-        return {"array": array, "nested": {"copy": array.copy()}}
+        return {"array": array, "nested": {"copy": array.copy(), "label": "copy"}}
 
     result = dict_of_arrays(ak.Array([1, 2, 3]))
 
@@ -65,3 +65,4 @@ def test_dict_of_arrays():
     assert result["array"].to_list() == [1, 2, 3]
     assert isinstance(result["nested"]["copy"], ak.Array)
     assert result["nested"]["copy"].to_list() == [1, 2, 3]
+    assert result["nested"]["label"] == "copy"
