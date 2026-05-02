@@ -36,7 +36,7 @@ def register_and_check():
     try:
         import jax  # noqa: TID251
 
-        # ak.from_buffers needs this
+        jax.config.update("jax_platform_name", "cpu")
         jax.config.update("jax_enable_x64", True)
 
     except ModuleNotFoundError:
@@ -58,6 +58,16 @@ def register_and_check():
         DeprecationWarning,
         stacklevel=2,
     )
+
+
+def ensure_jax_config():
+    import jax  # noqa: TID251
+
+    if not jax.config.read("jax_enable_x64"):
+        raise RuntimeError("Awkward's JAX backend requires jax_enable_x64=True")
+
+    if jax.default_backend() != "cpu":
+        raise RuntimeError("Awkward's JAX backend requires the JAX CPU backend")
 
 
 HighLevelType = TypeVar(

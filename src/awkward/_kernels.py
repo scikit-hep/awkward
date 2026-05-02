@@ -124,6 +124,10 @@ class JaxKernel(BaseKernel):
                     raise ValueError(msg)
                 assert self._jax.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
+                    if x.device.platform != "cpu":
+                        raise RuntimeError(
+                            "Awkward's JAX backend requires CPU JAX buffers"
+                        )
                     return ctypes.cast(self._jax.memory_ptr(x), t)
                 else:
                     return x
