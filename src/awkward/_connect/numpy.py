@@ -112,17 +112,7 @@ def array_function(
         result = func(*rectilinear_args, **rectilinear_kwargs)
 
         def wrap_result(x):
-            if isinstance(x, tuple):
-                wrapped = tuple(wrap_result(y) for y in x)
-                if hasattr(x, "_fields"):
-                    return type(x)(*wrapped)
-                else:
-                    return wrapped
-            elif isinstance(x, list):
-                return [wrap_result(y) for y in x]
-            elif type(x) is dict:
-                return {key: wrap_result(value) for key, value in x.items()}
-            elif backend.nplike.is_own_array(x) or isinstance(
+            if backend.nplike.is_own_array(x) or isinstance(
                 x, (numpy.ndarray, numpy.generic)
             ):
                 out = ak.operations.ak_to_layout._impl(
@@ -138,6 +128,16 @@ def array_function(
                 return wrap_layout(
                     out, behavior=behavior, allow_other=True, attrs=attrs
                 )
+            elif isinstance(x, tuple):
+                wrapped = tuple(wrap_result(y) for y in x)
+                if hasattr(x, "_fields"):
+                    return type(x)(*wrapped)
+                else:
+                    return wrapped
+            elif isinstance(x, list):
+                return [wrap_result(y) for y in x]
+            elif type(x) is dict:
+                return {key: wrap_result(value) for key, value in x.items()}
             else:
                 return x
 
