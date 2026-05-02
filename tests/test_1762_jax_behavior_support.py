@@ -8,7 +8,6 @@ import pytest
 import awkward as ak
 
 jax = pytest.importorskip("jax")
-jax.config.update("jax_platform_name", "cpu")
 
 ak.jax.register_and_check()
 
