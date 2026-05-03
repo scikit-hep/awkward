@@ -64,10 +64,10 @@ def ensure_jax_config():
     import jax  # noqa: TID251
 
     if not jax.config.read("jax_enable_x64"):
-        raise RuntimeError("Awkward's JAX backend requires jax_enable_x64=True")
+        raise RuntimeError("The JAX backend requires jax_enable_x64=True")
 
     if jax.default_backend() != "cpu":
-        raise RuntimeError("Awkward's JAX backend requires the JAX CPU backend")
+        raise RuntimeError("The JAX backend requires the JAX CPU backend")
 
 
 HighLevelType = TypeVar(
