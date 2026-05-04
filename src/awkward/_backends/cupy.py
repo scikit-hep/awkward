@@ -88,6 +88,7 @@ class CupyBackend(Backend):
         TODO: fix the tests for this kernel -->
         - awkward_ListArray_compact_offsets
         - awkward_ListArray_combinations_length
+        - awkward_ListArray_combinations
 
         These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
         - awkward_sum
@@ -122,6 +123,7 @@ class CupyBackend(Backend):
             "awkward_UnionArray_simplify_one",
             "awkward_ListArray_localindex",
             "awkward_ListArray_combinations_length",
+            "awkward_ListArray_combinations",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):

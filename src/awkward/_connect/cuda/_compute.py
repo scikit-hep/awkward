@@ -903,3 +903,161 @@ def awkward_ListArray_combinations_length(
 
     # Total number of combinations across all lists
     totallen[0] = tooffsets[length]
+
+
+# For each list i, enumerates all n-combinations (with or without replacement)
+# of its elements and writes the indices into n output carry arrays.
+#
+# tocarry_ptrs is a CuPy int64 array of length n holding raw device pointers;
+# each pointer refers to a pre-allocated int64 array of length totallen.
+#
+# Example (n=2, replacement=False):
+# starts=[0], stops=[3]  → elements [0,1,2]
+# C(3,2) = 3 combinations in total
+# combinations: (0,1),(0,2),(1,2)
+#
+# Output:
+# tocarry_ptrs[0] → [0, 0, 1],  tocarry_ptrs[1] → [1, 2, 2]
+# toindex: [3, 3]
+def awkward_ListArray_combinations(
+    tocarry_ptrs, toindex, fromindex, n, replacement, starts, stops, length
+):
+    if length == 0:
+        return
+
+    # Step 1: compute per-list combination counts (same as combinations_length!!)
+    # TODO: we can just pass combination offsets directly in the future (from src/awkward/contents/listoffsetarray.py:1405)
+    def combinations_len(i):
+        size = stops[i] - starts[i]
+        if replacement:
+            size = size + (n - 1)
+        thisn = n
+        if thisn > size:
+            return 0
+        elif thisn == size:
+            return 1
+        else:
+            if thisn * 2 > size:
+                thisn = size - thisn
+            result = size
+            for j in range(2, thisn + 1):
+                result = result * (size - j + 1)
+                result = result // j
+            return result
+
+    counts = cp.empty(length, dtype=cp.int64)
+    unary_transform(CountingIterator(cp.int64(0)), counts, combinations_len, length)
+
+    offsets = cp.empty(length + 1, dtype=cp.int64)
+    offsets[0] = 0
+    inclusive_scan(
+        counts,
+        offsets[1:],
+        lambda a, b: a + b,
+        cp.array([0], dtype=cp.int64),
+        length,
+    )
+
+    totallen = int(offsets[length])
+    if totallen == 0:
+        return
+
+    # Step 2: wrap raw pointers from tocarry_ptrs into CuPy arrays
+    # raw int64 pointer values from tocarry_ptrs[k] can't be dereferenced inside a Numba closure, so
+    # we need this intermediate step
+    #
+    # (the pointers themselves are allocated at src/awkward/contents/listoffsetarray.py:1456-1464)
+    carry_arrays = []
+    for k in range(n):
+        ptr_val = int(tocarry_ptrs[k])
+        mem = cp.cuda.UnownedMemory(ptr_val, totallen * 8, None)
+        memptr = cp.cuda.MemoryPointer(mem, 0)
+        carry_arrays.append(cp.ndarray(totallen, dtype=cp.int64, memptr=memptr))
+
+    # -------------------------------------------------------------------------
+    # Step 3: fill carry_arrays[k] for each combination position k in turn.
+    #
+    # For each output slot g in [0, totallen):
+    #
+    #   a) Binary search offsets to find which source list i owns slot g,
+    #      and compute the rank of this combination within that list
+    #      (rank = g - offsets[i], i.e. the 0-based index among all combinations
+    #      of list i in lexicographic order).
+    #
+    #   b) Unrank: decode the rank back into the actual combination tuple using
+    #      a combinatorial number system. Iterating over positions pos=0..n-1,
+    #      at each position scan forward through candidate values j, counting
+    #      how many combinations start with values < j at this position
+    #      (= C(effective_size-j-1, n-pos-1)). Subtract from remaining rank
+    #      until we find the j where remaining < count — that j is the value
+    #      at position pos.
+    #
+    #   c) Early exit: once pos==k we have the value for position k and write
+    #      it to carry_k[g], skipping the rest of the unranking. This is why
+    #      we do n separate passes (one per k) rather than one pass writing all
+    #      n positions: each pass only needs to unrank up to position k.
+    #
+    #   d) Content index: add start (the list's base offset into content) to
+    #      convert from a within-list index to an absolute content index.
+    #      For replacement, subtract pos to undo the stars-and-bars shift.
+    # -------------------------------------------------------------------------
+    def make_pass(k, carry_k):
+        def fill_pos(g):
+            # a) Find source list i via binary search on offsets
+            lo = 0
+            hi = length - 1
+            while lo < hi:
+                mid = (lo + hi) >> 1
+                if offsets[mid + 1] <= g:
+                    lo = mid + 1
+                else:
+                    hi = mid
+            list_i = lo
+            start = starts[list_i]
+            size = stops[list_i] - starts[list_i]
+            rank = g - offsets[list_i]
+            # For replacement use stars-and-bars effective size
+            effective_size = size + n - 1 if replacement else size
+
+            # b) Unrank: decode rank into the combination tuple
+            lower = 0  # lower bound for j at each position (enforces ordering)
+            remaining = rank
+            for pos in range(n):
+                for j in range(lower, effective_size - (n - pos - 1)):
+                    # Count combinations where position pos has value j:
+                    # = C(effective_size - j - 1, n - pos - 1)
+                    top = effective_size - j - 1
+                    choose = n - pos - 1
+                    if choose == 0:
+                        count = 1
+                    else:
+                        if choose * 2 > top:  # use smaller equivalent
+                            choose = top - choose
+                        c = top
+                        for q in range(2, choose + 1):
+                            c = c * (top - q + 1)
+                            c = c // q
+                        count = c
+                    if remaining < count:
+                        # c) j is the value at position pos
+                        if pos == k:
+                            # d) write absolute content index and exit early
+                            carry_k[g] = (j - pos if replacement else j) + start
+                            return 0
+                        lower = j + 1  # next position must be >= j+1 (no repeat)
+                        break
+                    remaining -= count
+            return 0
+
+        return fill_pos
+
+    # One parallel pass per combination position k
+    for k in range(n):
+        unary_transform(
+            CountingIterator(cp.int64(0)),
+            DiscardIterator(),
+            make_pass(k, carry_arrays[k]),
+            totallen,
+        )
+
+    toindex[:n] = totallen
