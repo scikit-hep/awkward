@@ -1,19 +1,7 @@
 name: Codecov
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - README.md
-      - CONTRIBUTING.md
-      - CITATION.cff
-      - LICENSE
-      - .readthedocs.yml
-      - docs-img/**
-      - docs/**
-      - awkward-cpp/docs/**
-      - studies/**
+  workflow_call:
 
   workflow_dispatch:
 
@@ -121,6 +109,7 @@ jobs:
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results

@@ -15,9 +15,12 @@ ERROR awkward_ListOffsetArray_drop_none_indexes(
   int64_t offset1 = 0;
   int64_t offset2 = 0;
 
+  if (length_offsets > 0 && fromoffsets[length_offsets - 1] > length_indexes) {
+    return failure("offsets[i] > len(content)", length_offsets - 1, kSliceNone, FILENAME(__LINE__));
+  }
   for (int64_t i = 0; i < length_offsets; i++) {
     offset2 = fromoffsets[i];
-    for (int j = offset1; j < offset2; j++) {
+    for (int64_t j = offset1; j < offset2; j++) {
         if (noneindexes[j] < 0) {
             nr_of_nones++;
         }

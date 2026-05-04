@@ -106,15 +106,15 @@ def sum(
     left before summing, to the right before summing, or something else.
     As suggested by the way the text has been aligned, we choose the
     left-alignment convention: the first `axis=0` result is the sum of all
-    first elements
+    first elements::
 
         60.4 = 0.1 + 10.1 + 20.1 + 30.1
 
-    the second is the sum of all second elements
+    the second is the sum of all second elements::
 
         50.6 = 0.2 + 20.2 + 30.2
 
-    and the third is the sum of the only third element
+    and the third is the sum of the only third element::
 
         20.3 = 20.3
 
@@ -145,7 +145,7 @@ def sum(
         >>> ak.sum(array, axis=0)
         <Array [20.1, 50.4, 60.8] type='3 * float64'>
 
-    because
+    because::
 
         20.1 = 20.1
         50.4 = 0.1 + 20.2 + 30.1
@@ -170,7 +170,7 @@ def sum(
         >>> ak.sum(array, axis=0)
         <Array [50.3, 50.6, 50.9] type='3 * float64'>
 
-    which is
+    which is::
 
         50.3 = 0.1 + (None) + 20.1 + 30.1
         50.6 = 0.2 + (None) + 20.2 + 30.2
@@ -259,7 +259,7 @@ def nansum(
 
     Like #ak.sum, but treating NaN ("not a number") values as missing.
 
-    Equivalent to
+    Equivalent to::
 
         ak.sum(ak.nan_to_none(array))
 

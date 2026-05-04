@@ -36,7 +36,8 @@ def broadcast_arrays(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Broadcasts arrays together so they can be combined element-by-element.
+
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
         depth_limit (None or int, default is None): If None, attempt to fully
@@ -59,33 +60,35 @@ def broadcast_arrays(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Like NumPy's
-    [broadcast_arrays](https://docs.scipy.org/doc/numpy/reference/generated/numpy.broadcast_arrays.html)
-    function, this function returns the input `arrays` with enough elements
-    duplicated that they can be combined element-by-element.
+    Returns:
+        Like NumPy's
+        [broadcast_arrays](https://docs.scipy.org/doc/numpy/reference/generated/numpy.broadcast_arrays.html)
+        function, this function returns the input `arrays` with enough elements
+        duplicated that they can be combined element-by-element.
 
-    For NumPy arrays, this means that scalars are replaced with arrays with
-    the same scalar value repeated at every element of the array, and regular
-    dimensions are created to increase low-dimensional data into
-    high-dimensional data.
+        For NumPy arrays, this means that scalars are replaced with arrays with
+        the same scalar value repeated at every element of the array, and regular
+        dimensions are created to increase low-dimensional data into
+        high-dimensional data.
 
-    For example,
+    Examples:
+        For example,
 
         >>> ak.broadcast_arrays(5,
         ...                     [1, 2, 3, 4, 5])
         [<Array [5, 5, 5, 5, 5] type='5 * int64'>,
          <Array [1, 2, 3, 4, 5] type='5 * int64'>]
 
-    and
+        and
 
         >>> ak.broadcast_arrays(np.array([1, 2, 3]),
         ...                     np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
         [<Array [[  1,   2,   3], [ 1,  2,  3]] type='2 * 3 * int64'>,
          <Array [[0.1, 0.2, 0.3], [10, 20, 30]] type='2 * 3 * float64'>]
 
-    Note that in the second example, when the `3 * int64` array is expanded
-    to match the `2 * 3 * float64` array, it is the deepest dimension that
-    is aligned. If we try to match a `2 * int64` with the `2 * 3 * float64`,
+        Note that in the second example, when the `3 * int64` array is expanded
+        to match the `2 * 3 * float64` array, it is the deepest dimension that
+        is aligned. If we try to match a `2 * int64` with the `2 * 3 * float64`,
 
         >>> ak.broadcast_arrays(np.array([1, 2]),
         ...                     np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
@@ -102,68 +105,68 @@ def broadcast_arrays(
             )
         Error details: cannot broadcast RegularArray of size 2 with RegularArray of size 3
 
-    NumPy has the same behavior: arrays with different numbers of dimensions
-    are aligned to the right before expansion. One can control this by
-    explicitly adding a new axis (reshape to add a dimension of length 1)
-    where the expansion is supposed to take place because a dimension of
-    length 1 can be expanded like a scalar.
+        NumPy has the same behavior: arrays with different numbers of dimensions
+        are aligned to the right before expansion. One can control this by
+        explicitly adding a new axis (reshape to add a dimension of length 1)
+        where the expansion is supposed to take place because a dimension of
+        length 1 can be expanded like a scalar.
 
         >>> ak.broadcast_arrays(np.array([1, 2])[:, np.newaxis],
         ...                     np.array([[0.1, 0.2, 0.3], [10, 20, 30]]))
         [<Array [[  1,   1,   1], [ 2,  2,  2]] type='2 * 3 * int64'>,
          <Array [[0.1, 0.2, 0.3], [10, 20, 30]] type='2 * 3 * float64'>]
 
-    Again, NumPy does the same thing (`np.newaxis` is equal to None, so this
-    trick is often shown with None in the slice-tuple). Where the broadcasting
-    happens can be controlled, but numbers of dimensions that don't match are
-    implicitly aligned to the right (fitting innermost structure, not
-    outermost).
+        Again, NumPy does the same thing (`np.newaxis` is equal to None, so this
+        trick is often shown with None in the slice-tuple). Where the broadcasting
+        happens can be controlled, but numbers of dimensions that don't match are
+        implicitly aligned to the right (fitting innermost structure, not
+        outermost).
 
-    While that might be an arbitrary decision for rectilinear arrays, it is
-    much more natural for implicit broadcasting to align left for tree-like
-    structures. That is, the root of each data structure should agree and
-    leaves may be duplicated to match. For example,
+        While that might be an arbitrary decision for rectilinear arrays, it is
+        much more natural for implicit broadcasting to align left for tree-like
+        structures. That is, the root of each data structure should agree and
+        leaves may be duplicated to match. For example,
 
         >>> ak.broadcast_arrays([            100,   200,        300],
         ...                     [[1.1, 2.2, 3.3],    [], [4.4, 5.5]])
         [<Array [[100, 100, 100], [], [300, 300]] type='3 * var * int64'>,
          <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>]
 
-    One typically wants single-item-per-element data to be duplicated to
-    match multiple-items-per-element data. Operations on the broadcasted
-    arrays like
+        One typically wants single-item-per-element data to be duplicated to
+        match multiple-items-per-element data. Operations on the broadcasted
+        arrays like::
 
-        one_dimensional + nested_lists
+            one_dimensional + nested_lists
 
-    would then have the same effect as the procedural code
+        would then have the same effect as the procedural code::
 
-        for x, outer in zip(one_dimensional, nested_lists):
-            output = []
-            for inner in outer:
-                output.append(x + inner)
-            yield output
+            for x, outer in zip(one_dimensional, nested_lists):
+                output = []
+                for inner in outer:
+                    output.append(x + inner)
+                yield output
 
-    where `x` has the same value for each `inner` in the inner loop.
+        where `x` has the same value for each `inner` in the inner loop.
 
-    Awkward Array's broadcasting manages to have it both ways by applying the
-    following rules:
+        Awkward Array's broadcasting manages to have it both ways by applying the
+        following rules:
 
-    * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
-      implicit broadcasting aligns to the right, like NumPy.
-    * If any dimension is variable (i.e. #ak.types.ListType), which can
-      never be true of NumPy, implicit broadcasting aligns to the left.
-    * Explicit broadcasting with a length-1 regular dimension always
-      broadcasts, like NumPy.
+        * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
+          implicit broadcasting aligns to the right, like NumPy.
+        * If any dimension is variable (i.e. #ak.types.ListType), which can
+          never be true of NumPy, implicit broadcasting aligns to the left.
+        * Explicit broadcasting with a length-1 regular dimension always
+          broadcasts, like NumPy.
 
-    Thus, it is important to be aware of the distinction between a dimension
-    that is declared to be regular in the type specification and a dimension
-    that is allowed to be variable (even if it happens to have the same length
-    for all elements). This distinction is can be accessed through the
-    #ak.Array.type, but it is lost when converting an array into JSON or
-    Python objects.
+        Thus, it is important to be aware of the distinction between a dimension
+        that is declared to be regular in the type specification and a dimension
+        that is allowed to be variable (even if it happens to have the same length
+        for all elements). This distinction is can be accessed through the
+        #ak.Array.type, but it is lost when converting an array into JSON or
+        Python objects.
 
-    If arrays have the same depth but different lengths of nested
-    lists, attempting to broadcast them together is a broadcasting error.
+        If arrays have the same depth but different lengths of nested
+        lists, attempting to broadcast them together is a broadcasting error.
 
         >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
         >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
@@ -180,8 +183,8 @@ def broadcast_arrays(
             )
         Error details: cannot broadcast nested list
 
-    For this, one can set the `depth_limit` to prevent the operation from
-    attempting to broadcast what can't be broadcasted.
+        For this, one can set the `depth_limit` to prevent the operation from
+        attempting to broadcast what can't be broadcasted.
 
         >>> this, that = ak.broadcast_arrays(one, two, depth_limit=1)
         >>> this.show()
