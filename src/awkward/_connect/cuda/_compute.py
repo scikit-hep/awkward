@@ -737,6 +737,68 @@ def awkward_RegularArray_getitem_jagged_expand(
     ]
 
 
+# THIS KERNEL IS NOT USED (just for archive)
+# Fills a tagged index for one union type: assigns a constant tag and
+# sequential index into each segment defined by the starts/counts ranges
+# Example input:
+# tmpstarts = [0, 3], tag = 1, fromcounts = [3, 2]
+# Example output:
+# totags  = [1, 1, 1, 1, 1]
+# toindex = [0, 1, 2, 0, 1]
+# also, the tmpstarts get rewritten with stops: tmpstarts = [3, 5]
+def awkward_UnionArray_nestedfill_tags_index(
+    totags, toindex, tmpstarts, tag, fromcounts, length
+):
+    if length == 0:
+        return
+
+    starts = tmpstarts[:length]
+    counts = fromcounts[:length]
+
+    # Total span of the output arrays we need to touch:
+    # the last segment's start + its count gives the furthest written position
+    total_size = int(starts[length - 1]) + int(counts[length - 1])
+
+    if total_size == 0:
+        return
+
+    # +1 at each segment start, -1 just past each segment end.
+    # cumsum of this will later yield 1 inside any covered range, 0 in gaps.
+    diff = cp.zeros(total_size + 1, dtype=cp.int8)
+
+    def scatter_and_update(i):
+        start = starts[i]
+        count = counts[i]
+        # Mark this segment's range in the difference array
+        diff[start] += cp.int8(1)
+        diff[start + count] -= cp.int8(1)
+        # update tmpstarts (for the next call of this kernel (for a different union type))?
+        tmpstarts[i] = start + count
+        return 0
+
+    # Scatter segment's ranges and update tmpstarts
+    unary_transform(
+        CountingIterator(cp.int64(0)), DiscardIterator(), scatter_and_update, length
+    )
+
+    # coverage[j] == 1 if position j falls inside any segment's range, 0 otherwise
+    coverage = cp.cumsum(diff[:total_size])
+
+    # scan[j] == local index of element j within its segment
+    # Since it's a cumsum, the first index starts from 1, 2, 3 ...
+    # so we'll have to -1 before writing it in toindex
+    scan = cp.cumsum(coverage, dtype=cp.int64)
+
+    def fill(j):
+        if coverage[j]:
+            # Mark this position as belonging to the current tag
+            totags[j] = tag
+            toindex[j] = scan[j] - 1
+        return 0
+
+    unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill, total_size)
+
+
 # For each position i where fromtags[i] == fromwhich, sets totags[i] = towhich and
 # toindex[i] = fromindex[i] + base. Other positions are left unchanged.
 # Example:
