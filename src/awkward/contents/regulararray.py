@@ -40,7 +40,7 @@ from awkward.contents.content import (
 )
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.regularform import RegularForm
-from awkward.index import Index, resolve_index
+from awkward.index import Index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -886,25 +886,23 @@ class RegularArray(RegularMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         if self.length == 0:
             return True
 
         return self.to_ListOffsetArray64(True)._is_unique(
             negaxis,
             starts,
-            parents,
             offsets,
             outlength,
         )
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         if self.length == 0:
             return self
         out = self.to_ListOffsetArray64(True)._unique(
             negaxis,
             starts,
-            parents,
             offsets,
             outlength,
         )
@@ -921,11 +919,11 @@ class RegularArray(RegularMeta[Content], Content):
         return out
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         next = self.to_ListOffsetArray64(True)
         out = next._argsort_next(
-            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
         if isinstance(out, ak.contents.RegularArray):
@@ -939,26 +937,85 @@ class RegularArray(RegularMeta[Content], Content):
 
         return out
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         out = self.to_ListOffsetArray64(True)._sort_next(
-            negaxis, starts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, offsets, outlength, ascending, stable
         )
-
-        # FIXME
-        # if isinstance(out, ak.contents.RegularArray):
-        #     if isinstance(out._content, ak.contents.ListOffsetArray):
-        #         return ak.contents.RegularArray(
-        #             out._content.to_RegularArray(),
-        #             out._size,
-        #             out.length,
-        #             None,
-        #             out._parameters,
-        #             self._backend.nplike,
-        #         )
-
         return out
+
+    # def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    #     if self.length == 0:
+    #         return True
+
+    #     return self.to_ListOffsetArray64(True)._is_unique(
+    #         negaxis,
+    #         starts,
+    #         parents,
+    #         offsets,
+    #         outlength,
+    #     )
+
+    # def _unique(self, negaxis, starts, parents, offsets, outlength):
+    #     if self.length == 0:
+    #         return self
+    #     out = self.to_ListOffsetArray64(True)._unique(
+    #         negaxis,
+    #         starts,
+    #         parents,
+    #         offsets,
+    #         outlength,
+    #     )
+
+    #     if isinstance(out, ak.contents.RegularArray):
+    #         if isinstance(out._content, ak.contents.ListOffsetArray):
+    #             return ak.contents.RegularArray(
+    #                 out._content.to_RegularArray(),
+    #                 out._size,
+    #                 out.length,
+    #                 parameters=out._parameters,
+    #             )
+
+    #     return out
+
+    # def _argsort_next(
+    #     self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+    # ):
+    #     next = self.to_ListOffsetArray64(True)
+    #     out = next._argsort_next(
+    #         negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+    #     )
+
+    #     if isinstance(out, ak.contents.RegularArray):
+    #         if isinstance(out._content, ak.contents.ListOffsetArray):
+    #             return ak.contents.RegularArray(
+    #                 out._content.to_RegularArray(),
+    #                 out._size,
+    #                 out.length,
+    #                 parameters=out._parameters,
+    #             )
+
+    #     return out
+
+    # def _sort_next(
+    #     self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    # ):
+    #     out = self.to_ListOffsetArray64(True)._sort_next(
+    #         negaxis, starts, parents, offsets, outlength, ascending, stable
+    #     )
+
+    #     # FIXME
+    #     # if isinstance(out, ak.contents.RegularArray):
+    #     #     if isinstance(out._content, ak.contents.ListOffsetArray):
+    #     #         return ak.contents.RegularArray(
+    #     #             out._content.to_RegularArray(),
+    #     #             out._size,
+    #     #             out.length,
+    #     #             None,
+    #     #             out._parameters,
+    #     #             self._backend.nplike,
+    #     #         )
+
+    #     return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         nplike = self._backend.nplike
@@ -1057,7 +1114,6 @@ class RegularArray(RegularMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -1067,49 +1123,37 @@ class RegularArray(RegularMeta[Content], Content):
         nplike = self._backend.nplike
         branch, depth = self.branch_depth
         nextlen = self.length * self._size
+
         if not branch and negaxis == depth:
             nextcarry = ak.index.Index64.empty(nextlen, nplike=nplike)
-            nextparents = ak.index.Index64.empty(nextlen, nplike=nplike)
-            parents = resolve_index(parents, self._backend)
+            nextoutlength = outlength * self._size
+            nextoffsets = ak.index.Index64.empty(nextoutlength + 1, nplike=nplike)
 
             assert (
-                parents.nplike is nplike
+                offsets.nplike is nplike
                 and nextcarry.nplike is nplike
-                and nextparents.nplike is nplike
+                and nextoffsets.nplike is nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_RegularArray_reduce_nonlocal_preparenext_64",
                     nextcarry.dtype.type,
-                    nextparents.dtype.type,
-                    parents.dtype.type,
+                    nextoffsets.dtype.type,
+                    offsets.dtype.type,
                 ](
                     nextcarry.data,
-                    nextparents.data,
-                    parents.data,
+                    nextoffsets.data,
+                    offsets.data,
                     self._size,
                     self.length,
+                    outlength,
                 )
             )
-            nextstarts = ak.index.Index64.empty(
-                # `starts` must have at least enough elements for the largest `nextparent` to index into
-                # The upper bound for this value is given by `nextlen` (each item in this list belonging
-                # to a distinct reduction), but the length of `starts` should equate to `maxnextparents - 1`.
-                starts.length * self._size,
-                nplike=nplike,
-            )
-            assert nextstarts.nplike is nplike and nextparents.nplike is nplike
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
-                    nextstarts.dtype.type,
-                    nextparents.dtype.type,
-                ](
-                    nextstarts.data,
-                    nextparents.data,
-                    nextlen,
-                )
-            )
+
+            # In the offsets representation, nextstarts is just nextoffsets[:-1].
+            # The original `awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64`
+            # kernel call is no longer needed.
+            nextstarts = nextoffsets[:-1]
 
             if reducer.needs_position:
                 # Regular arrays have the same length rows, so there can be no "missing" values
@@ -1119,15 +1163,12 @@ class RegularArray(RegularMeta[Content], Content):
                 nextshifts = None
 
             nextcontent = self._content._carry(nextcarry, False)
-            nextoutlength = outlength * self._size
             outcontent = nextcontent._reduce_next(
                 reducer,
                 negaxis - 1,
                 nextstarts,
                 nextshifts,
-                nextparents,
-                offsets,
-                # We want a result of length
+                nextoffsets,
                 nextoutlength,
                 mask,
                 False,
@@ -1141,94 +1182,42 @@ class RegularArray(RegularMeta[Content], Content):
             if keepdims:
                 out = ak.contents.RegularArray(out, 1, self.length, parameters=None)
             return out
+
         else:
-            nextparents = ak.index.Index64.empty(nextlen, nplike)
-
-            assert nextparents.nplike is nplike
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_RegularArray_reduce_local_nextparents_64",
-                    nextparents.dtype.type,
-                ](
-                    nextparents.data,
-                    self._size,
-                    self.length,
-                )
-            )
-
-            if self._size is not unknown_length and self._size > 0:
-                nextstarts = ak.index.Index64(
-                    nplike.arange(0, nextlen, self._size),
-                    nplike=nplike,
-                )
-            else:
-                assert nextlen is unknown_length or nextlen == 0
-                nextstarts = ak.index.Index64(
-                    nplike.zeros(nextlen, dtype=np.int64),
-                    nplike=nplike,
-                )
+            # Local reduction case: nextoffsets is just `arange(0, nextlen+1, size)`,
+            # which is exactly what `_compact_offsets64(True)` returns. No kernel needed.
+            nextoffsets = self._compact_offsets64(True)
+            nextstarts = nextoffsets[:-1]
 
             outcontent = self._content._reduce_next(
                 reducer,
                 negaxis,
                 nextstarts,
                 shifts,
-                nextparents,
-                offsets,
+                nextoffsets,
                 self.length,
                 mask,
                 keepdims,
                 behavior,
             )
 
-            # Understanding this logic is nontrivial without examples. So, let's start with a
-            # somewhat simple example of `5 * 4 * 3 * int64`. This is composed of the following layouts
-            #                                     ^........^ NumpyArray(5*4*3)
-            #                                 ^............^ RegularArray(..., size=3)
-            #                             ^................^ RegularArray(..., size=4)
-            # If the reduction axis is 2 (or -1), then the resulting shape is `5 * 4 * int64`.
-            # This corresponds to `RegularArray(NumpyArray(5*4), size=4)`, i.e. the `size=3` layout
-            # *disappears*, and is replaced by the bare reduction `NumpyArray`. Therefore, if
-            # this layout is _directly_ above the reduction, it won't survive the reduction.
-            #
-            # The `_reduce_next` mechanism returns its first result (by recursion) from the
-            # leaf `NumpyArray`. The parent `RegularArray` takes the `negaxis != depth` branch,
-            # and asks the `NumpyArray` to perform the reduction. The `_reduce_next` is such that the
-            # callee must wrap the reduction result into a list whose length is given by the *caller*,
-            # i.e. the parent. Therefore, the `RegularArray(..., size=3)` layout reduces its content with
-            # `outlength=len(self)=5*4`. The parent of this `RegularArray` (with `size=4`)
-            # will reduce its contents with `outlength=5`. It is *this* reduction that must be returned as a
-            # `RegularArray(..., size=4)`. Clearly, the `RegularArray(..., size=3)` layout has disappeared
-            # and been replaced by a `NumpyArray` of the appropriate size for the `RegularArray(..., size=4)`
-            # to wrap. Hence, we only want to interpret the content as a `RegularArray(..., size=self._size)`
-            # iff. we are not the direct parent of the reduced layout.
-
-            # At `depth == negaxis+1`, we are above the dimension being reduced. All implemented
-            # _dimensional_ types should return `RegularArray` for `keepdims=True`, so we don't need
-            # to convert `outcontent` to a `RegularArray`
+            # Same "is the reduction immediately below us?" handling as before,
+            # unchanged because it doesn't touch parents/offsets.
             if keepdims and depth == negaxis + 1:
                 assert outcontent.is_regular
-            # At `depth >= negaxis + 2`, we are wrapping at _least_ one other list type. This list-type
-            # may return a ListOffsetArray, which we need to convert to a `RegularArray`. We know that
-            # the result can be reinterpreted as a `RegularArray`, because it's not the immediate parent
-            # of the reduction, so it must exist in the type.
             elif depth >= negaxis + 2:
                 if outcontent.is_list:
-                    # Let's only deal with ListOffsetArray
                     outcontent = outcontent.to_ListOffsetArray64(False)
-                    # Fast-path to convert data that we know should be regular (avoid a kernel call)
                     start, stop = (
                         outcontent.offsets[0],
                         outcontent.offsets[outcontent.offsets.length - 1],
                     )
-
                     trimmed = outcontent.content._getitem_range(start, stop)
                     assert (
                         trimmed.length is unknown_length
                         or outcontent.length is unknown_length
                         or trimmed.length == self._size * outcontent.length
                     )
-
                     outcontent = ak.contents.RegularArray(
                         trimmed,
                         size=self._size,
@@ -1237,23 +1226,12 @@ class RegularArray(RegularMeta[Content], Content):
                 else:
                     assert outcontent.is_regular
 
-            outoffsets = ak.index.Index64.empty(outlength + 1, nplike)
-
-            parents = resolve_index(parents, self._backend)
-
-            assert outoffsets.nplike is nplike and parents.nplike is nplike
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
-                    outoffsets.dtype.type,
-                    parents.dtype.type,
-                ](
-                    outoffsets.data,
-                    parents.data,
-                    parents.length,
-                    outlength,
-                )
-            )
+            # outoffsets used to come from
+            # `awkward_ListOffsetArray_reduce_local_outoffsets_64(parents, ...)`,
+            # which produced the offsets-rep of `parents`. With offsets already in
+            # hand, we just use them.
+            assert offsets.length == outlength + 1
+            outoffsets = offsets
 
             return ak.contents.ListOffsetArray(outoffsets, outcontent, parameters=None)
 

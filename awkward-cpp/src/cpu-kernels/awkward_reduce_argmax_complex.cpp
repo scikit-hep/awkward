@@ -8,59 +8,38 @@ template <typename OUT, typename IN>
 ERROR awkward_reduce_argmax_complex(
   OUT* toptr,
   const IN* fromptr,
-  const int64_t* parents,
   const int64_t* offsets,
-  int64_t lenparents,
   int64_t outlength) {
-
-  std::fill_n(toptr, outlength, static_cast<OUT>(-1));
-
-  for (int64_t i = 0; i < lenparents; i++) {
-    int64_t parent = parents[i];
-    int64_t current_idx = toptr[parent];
-
-    if (current_idx == -1) {
-      toptr[parent] = i;
-    } else {
-      IN real_i = fromptr[i * 2];
-      IN imag_i = fromptr[i * 2 + 1];
-      IN real_max = fromptr[current_idx * 2];
-      IN imag_max = fromptr[current_idx * 2 + 1];
-
-      if (real_i > real_max || (real_i == real_max && imag_i > imag_max)) {
-        toptr[parent] = i;
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    int64_t best = -1;
+    for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
+      if (best == -1) {
+        best = i;
+      } else {
+        IN x = fromptr[i * 2];
+        IN y = fromptr[i * 2 + 1];
+        IN bx = fromptr[best * 2];
+        IN by = fromptr[best * 2 + 1];
+        if (x > bx || (x == bx && y > by)) {
+          best = i;
+        }
       }
     }
+    toptr[bin] = static_cast<OUT>(best);
   }
   return success();
 }
 ERROR awkward_reduce_argmax_complex64_64(
   int64_t* toptr,
   const float* fromptr,
-  const int64_t* parents,
   const int64_t* offsets,
-  int64_t lenparents,
   int64_t outlength) {
-  return awkward_reduce_argmax_complex<int64_t, float>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength);
+  return awkward_reduce_argmax_complex<int64_t, float>(toptr, fromptr, offsets, outlength);
 }
 ERROR awkward_reduce_argmax_complex128_64(
   int64_t* toptr,
   const double* fromptr,
-  const int64_t* parents,
   const int64_t* offsets,
-  int64_t lenparents,
   int64_t outlength) {
-  return awkward_reduce_argmax_complex<int64_t, double>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength);
+  return awkward_reduce_argmax_complex<int64_t, double>(toptr, fromptr, offsets, outlength);
 }

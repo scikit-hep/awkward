@@ -1,4 +1,11 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+//
+// DEPRECATED — offsets → parents converter (local reduction path).
+//
+// In the migrated pipeline, the caller passes `self._offsets` directly as the
+// next-layer offsets (normalized to start at zero), so this expansion into a
+// per-element parents array is no longer needed. The function is preserved
+// for ABI compatibility; remove once all callers have migrated.
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_ListOffsetArray_reduce_local_nextparents_64.cpp", line)
 

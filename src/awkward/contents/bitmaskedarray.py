@@ -649,18 +649,18 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     def _numbers_to_type(self, name, including_unknown):
         return self.to_ByteMaskedArray()._numbers_to_type(name, including_unknown)
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
-            negaxis, starts, parents, offsets, outlength
+            negaxis, starts, offsets, outlength
         )
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
         out = self.to_IndexedOptionArray64()._unique(
-            negaxis, starts, parents, offsets, outlength
+            negaxis, starts, offsets, outlength
         )
         if negaxis is None:
             return out

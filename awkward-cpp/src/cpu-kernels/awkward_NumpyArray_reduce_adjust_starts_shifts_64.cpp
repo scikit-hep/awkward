@@ -7,15 +7,16 @@
 ERROR awkward_NumpyArray_reduce_adjust_starts_shifts_64(
   int64_t* toptr,
   int64_t outlength,
-  const int64_t* parents,
+  const int64_t* /* offsets */,   // unused: see note in adjust_starts_64
   const int64_t* starts,
   const int64_t* shifts) {
-  for (int64_t k = 0;  k < outlength;  k++) {
+  // See `awkward_NumpyArray_reduce_adjust_starts_64` for the rationale.
+  // `parents[toptr[k]] == k` by construction of argmin/argmax, so we use k
+  // directly to look up the bin's start.
+  for (int64_t k = 0; k < outlength; k++) {
     int64_t i = toptr[k];
     if (i >= 0) {
-      int64_t parent = parents[i];
-      int64_t start = starts[parent];
-      toptr[k] += shifts[i] - start;
+      toptr[k] += shifts[i] - starts[k];
     }
   }
   return success();

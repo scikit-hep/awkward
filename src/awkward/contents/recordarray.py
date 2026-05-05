@@ -44,7 +44,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.recordform import RecordForm
-from awkward.index import Index, parents_to_offsets_aligned
+from awkward.index import Index
 from awkward.record import Record
 
 if TYPE_CHECKING:
@@ -886,23 +886,21 @@ class RecordArray(RecordMeta[Content], Content):
             backend=self._backend,
         )
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         for content in self._contents:
-            if not content._is_unique(negaxis, starts, parents, offsets, outlength):
+            if not content._is_unique(negaxis, starts, offsets, outlength):
                 return False
         return True
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         raise NotImplementedError
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         raise NotImplementedError
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         if len(self.fields) == 0:
             return ak.contents.NumpyArray(
                 self._backend.nplike.instance().empty(0, dtype=np.int64),
@@ -914,7 +912,7 @@ class RecordArray(RecordMeta[Content], Content):
         for content in self._contents:
             contents.append(
                 content._sort_next(
-                    negaxis, starts, parents, offsets, outlength, ascending, stable
+                    negaxis, starts, offsets, outlength, ascending, stable
                 )
             )
         return RecordArray(
@@ -951,7 +949,6 @@ class RecordArray(RecordMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -972,10 +969,7 @@ class RecordArray(RecordMeta[Content], Content):
 
             # Convert parents into offsets to build a list for axis=1 reduction
             offsets = ak.index.Index64.empty(outlength + 1, self._backend.nplike)
-            assert (
-                offsets.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-            )
+            assert offsets.nplike is self._backend.nplike
             # `parents` are possibly non monotonic increasing, so we must re-order the result
             # This happens naturally for the `NumpyArray` reducers.
             carry = ak.index.Index64.empty(outlength, self._backend.nplike)
@@ -1023,7 +1017,6 @@ class RecordArray(RecordMeta[Content], Content):
                 if shifts is None:
                     assert (
                         out.backend is self._backend
-                        and parents.nplike is self._backend.nplike
                         and starts.nplike is self._backend.nplike
                     )
                     self._backend.maybe_kernel_error(
@@ -1042,7 +1035,6 @@ class RecordArray(RecordMeta[Content], Content):
                 else:
                     assert (
                         out.backend is self._backend
-                        and parents.nplike is self._backend.nplike
                         and starts.nplike is self._backend.nplike
                         and shifts.nplike is self._backend.nplike
                     )
@@ -1064,13 +1056,7 @@ class RecordArray(RecordMeta[Content], Content):
 
             if mask:
                 outmask = ak.index.Index8.empty(outlength, self._backend.nplike)
-                assert (
-                    outmask.nplike is self._backend.nplike
-                    and parents.nplike is self._backend.nplike
-                )
-                # FIXME:
-                offsets = ak.index.Index64.zeros(outlength + 1, self._backend.nplike)
-                parents_to_offsets_aligned(parents, offsets, outlength, self._backend)
+                assert outmask.nplike is self._backend.nplike
 
                 self._backend.maybe_kernel_error(
                     self._backend[
