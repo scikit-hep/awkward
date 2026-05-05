@@ -1025,6 +1025,117 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 outoffsets, outcontent, parameters=self._parameters
             )
 
+    # def _unique(self, negaxis, starts, parents, offsets, outlength):
+    #     if self._offsets.length - 1 == 0:
+    #         return self
+
+    #     branch, depth = self.branch_depth
+
+    #     if (
+    #         self.parameter("__array__") == "string"
+    #         or self.parameter("__array__") == "bytestring"
+    #     ):
+    #         if branch or (negaxis != depth):
+    #             raise AxisError("array with strings can only be sorted with axis=-1")
+
+    #         # FIXME: check validity error
+
+    #         if isinstance(self._content, ak.contents.NumpyArray):
+    #             out, nextoffsets = self._content._as_unique_strings(self._offsets)
+    #             return ak.contents.ListOffsetArray(
+    #                 nextoffsets, out, parameters=self._parameters
+    #             )
+
+    #     if not branch and (negaxis == depth):
+    #         if (
+    #             self.parameter("__array__") == "string"
+    #             or self.parameter("__array__") == "bytestring"
+    #         ):
+    #             raise AxisError("array with strings can only be sorted with axis=-1")
+
+    #         if self._backend.nplike.known_data and parents.nplike.known_data:
+    #             assert self._offsets.length - 1 == parents.length
+
+    #         (
+    #             _distincts,
+    #             _maxcount,
+    #             maxnextparents,
+    #             nextcarry,
+    #             nextparents,
+    #             nextstarts,
+    #         ) = self._rearrange_prepare_next(outlength, parents)
+
+    #         nextcontent = self._content._carry(nextcarry, False)
+    #         outcontent = nextcontent._unique(
+    #             negaxis - 1,
+    #             nextstarts,
+    #             nextparents,
+    #             maxnextparents[0] + 1,
+    #         )
+
+    #         outcarry = Index64.empty(nextcarry.length, self._backend.nplike)
+    #         assert (
+    #             outcarry.nplike is self._backend.nplike
+    #             and nextcarry.nplike is self._backend.nplike
+    #         )
+    #         self._backend.maybe_kernel_error(
+    #             self._backend[
+    #                 "awkward_ListOffsetArray_local_preparenext_64",
+    #                 outcarry.dtype.type,
+    #                 nextcarry.dtype.type,
+    #             ](
+    #                 outcarry.data,
+    #                 nextcarry.data,
+    #                 nextcarry.length,
+    #             )
+    #         )
+
+    #         return ak.contents.ListOffsetArray(
+    #             outcontent._compact_offsets64(True),
+    #             outcontent._content._carry(outcarry, False),
+    #             parameters=self._parameters,
+    #         )
+
+    #     else:
+    #         nextlen = self._backend.nplike.index_as_shape_item(
+    #             self._offsets[-1] - self._offsets[0]
+    #         )
+    #         nextparents = Index64.empty(nextlen, self._backend.nplike)
+
+    #         assert (
+    #             nextparents.nplike is self._backend.nplike
+    #             and self._offsets.nplike is self._backend.nplike
+    #         )
+    #         self._backend.maybe_kernel_error(
+    #             self._backend[
+    #                 "awkward_ListOffsetArray_reduce_local_nextparents_64",
+    #                 nextparents.dtype.type,
+    #                 self._offsets.dtype.type,
+    #             ](
+    #                 nextparents.data,
+    #                 self._offsets.data,
+    #                 self._offsets.length - 1,
+    #                 nextparents.length,
+    #             )
+    #         )
+
+    #         trimmed = self._content[self._offsets[0] : self._offsets[-1]]
+    #         outcontent = trimmed._unique(
+    #             negaxis,
+    #             self._offsets[:-1],
+    #             nextparents,
+    #             offsets,
+    #             self._offsets.length - 1,
+    #         )
+
+    #         if negaxis is None or negaxis == depth - 1:
+    #             return outcontent
+
+    #         outoffsets = self._compact_offsets64(True)
+    #         return ak.contents.ListOffsetArray(
+    #             outoffsets, outcontent, parameters=self._parameters
+    #         )
+
     def _argsort_next(
         self,
         negaxis,
