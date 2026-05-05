@@ -34,9 +34,11 @@ jobs:
 
   coverage:
     uses: ./.github/workflows/reusable-coverage.yml
+    secrets: inherit
 
   docs:
     uses: ./.github/workflows/reusable-docs.yml
+    secrets: inherit
 
   pass:
     if: always()
