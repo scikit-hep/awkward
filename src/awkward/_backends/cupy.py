@@ -82,10 +82,8 @@ class CupyBackend(Backend):
         - awkward_ByteMaskedArray_numnull
         - awkward_RegularArray_getitem_jagged_expand
         - awkward_UnionArray_simplify_one
-        TODO: fix the tests for this kernel -->
         - awkward_ListArray_broadcast_tooffsets
         - awkward_ListArray_localindex
-        TODO: fix the tests for this kernel -->
         - awkward_ListArray_compact_offsets
         - awkward_ListArray_combinations_length
         - awkward_ListArray_combinations
@@ -121,7 +119,9 @@ class CupyBackend(Backend):
             "awkward_ByteMaskedArray_numnull",
             "awkward_RegularArray_getitem_jagged_expand",
             "awkward_UnionArray_simplify_one",
+            "awkward_ListArray_broadcast_tooffsets",
             "awkward_ListArray_localindex",
+            "awkward_ListArray_compact_offsets",
             "awkward_ListArray_combinations_length",
             "awkward_ListArray_combinations",
         )

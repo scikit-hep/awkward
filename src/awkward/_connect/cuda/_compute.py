@@ -822,7 +822,6 @@ def awkward_UnionArray_simplify_one(
     unary_transform(indices, DiscardIterator(), transform, length)
 
 
-# TODO: fix tests for this kernel that are deliberately raising an error
 # producing a carry index that maps each output element back to its position in the original content
 # Example input:
 # fromoffsets = [0, 3, 5], fromstarts = [10, 20], fromstops = [13, 22], lencontent = 25
@@ -842,12 +841,15 @@ def awkward_ListArray_broadcast_tooffsets(
     # counts[i] = how many elements list i should have
     counts = fromoffsets[1:offsetslength] - fromoffsets[:length]
 
-    if int(cp.any(counts < 0)):
-        raise ValueError("broadcast's offsets must be monotonically increasing")
-    if int(cp.any(stops - starts != counts)):
-        raise ValueError("cannot broadcast nested list")
+    _K = "awkward_ListArray_broadcast_tooffsets"
     if int(cp.any((starts != stops) & (stops > lencontent))):
-        raise ValueError("stops[i] > len(content)")
+        raise ValueError(f"stops[i] > len(content) in compiled CUDA code ({_K})")
+    if int(cp.any(counts < 0)):
+        raise ValueError(
+            f"broadcast's offsets must be monotonically increasing in compiled CUDA code ({_K})"
+        )
+    if int(cp.any(stops - starts != counts)):
+        raise ValueError(f"cannot broadcast nested list in compiled CUDA code ({_K})")
 
     # For each segment i, write the content indices starts[i], starts[i]+1, ..., stops[i]-1
     # into the contiguous output slice tocarry[fromoffsets[i] : fromoffsets[i+1]].
@@ -882,7 +884,6 @@ def awkward_ListArray_localindex(toindex, offsets, length):
     unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill, length)
 
 
-# TODO: fix tests for this kernel that are deliberately raising an error
 # Converts a ListArray's (starts, stops) pairs into offsets.
 # tooffsets[0] = 0, tooffsets[i+1] = tooffsets[i] + (fromstops[i] - fromstarts[i])
 # Example:
@@ -896,7 +897,9 @@ def awkward_ListArray_compact_offsets(tooffsets, fromstarts, fromstops, length):
     sizes = fromstops[:length] - fromstarts[:length]
 
     if cp.any(sizes < 0):
-        raise ValueError("stops[i] < starts[i]")
+        raise ValueError(
+            "stops[i] < starts[i] in compiled CUDA code (awkward_ListArray_compact_offsets)"
+        )
 
     # the same as `tooffsets[1 : length + 1] = cp.cumsum(sizes)`
     inclusive_scan(
