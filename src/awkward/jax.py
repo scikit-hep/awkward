@@ -64,10 +64,16 @@ def ensure_jax_config():
     import jax  # noqa: TID251
 
     if not jax.config.read("jax_enable_x64"):
-        raise RuntimeError("The JAX backend requires jax_enable_x64=True")
+        raise RuntimeError(
+            "The JAX backend requires 64-bit dtypes. You can enable them with"
+            " jax.config.update('jax_enable_x64', True) or by setting JAX_ENABLE_X64=1."
+        )
 
     if jax.default_backend() != "cpu":
-        raise RuntimeError("The JAX backend requires the JAX CPU backend")
+        raise RuntimeError(
+            "The JAX backend requires the JAX CPU backend to be the default. You can make it the default"
+            " with jax.config.update('jax_platform_name', 'cpu') or by setting JAX_PLATFORM_NAME=cpu."
+        )
 
 
 HighLevelType = TypeVar(

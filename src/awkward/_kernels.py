@@ -125,7 +125,10 @@ class JaxKernel(BaseKernel):
                 assert self._jax.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
                     if x.device.platform != "cpu":
-                        raise RuntimeError("The JAX backend requires CPU JAX buffers")
+                        raise RuntimeError(
+                            "The JAX backend requires CPU JAX buffers to be the default. You can make CPU the default backend"
+                            " with jax.config.update('jax_platform_name', 'cpu') or by setting JAX_PLATFORM_NAME=cpu."
+                        )
                     return ctypes.cast(self._jax.memory_ptr(x), t)
                 else:
                     return x
