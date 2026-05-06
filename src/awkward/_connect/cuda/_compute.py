@@ -842,13 +842,13 @@ def awkward_ListArray_broadcast_tooffsets(
     counts = fromoffsets[1:offsetslength] - fromoffsets[:length]
 
     _K = "awkward_ListArray_broadcast_tooffsets"
-    if int(cp.any((starts != stops) & (stops > lencontent))):
+    if cp.any((starts != stops) & (stops > lencontent)):
         raise ValueError(f"stops[i] > len(content) in compiled CUDA code ({_K})")
-    if int(cp.any(counts < 0)):
+    if cp.any(counts < 0):
         raise ValueError(
             f"broadcast's offsets must be monotonically increasing in compiled CUDA code ({_K})"
         )
-    if int(cp.any(stops - starts != counts)):
+    if cp.any(stops - starts != counts):
         raise ValueError(f"cannot broadcast nested list in compiled CUDA code ({_K})")
 
     # For each segment i, write the content indices starts[i], starts[i]+1, ..., stops[i]-1
@@ -894,12 +894,15 @@ def awkward_ListArray_compact_offsets(tooffsets, fromstarts, fromstops, length):
     if length == 0:
         return
 
-    sizes = fromstops[:length] - fromstarts[:length]
+    starts = fromstarts[:length]
+    stops = fromstops[:length]
 
-    if cp.any(sizes < 0):
+    if cp.any(stops < starts):
         raise ValueError(
             "stops[i] < starts[i] in compiled CUDA code (awkward_ListArray_compact_offsets)"
         )
+
+    sizes = stops - starts
 
     # the same as `tooffsets[1 : length + 1] = cp.cumsum(sizes)`
     inclusive_scan(
