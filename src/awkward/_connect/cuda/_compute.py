@@ -1068,7 +1068,7 @@ def awkward_ListArray_combinations(
         ptr_val = int(tocarry_ptrs[k])
         mem = cp.cuda.UnownedMemory(ptr_val, totallen * 8, None)
         memptr = cp.cuda.MemoryPointer(mem, 0)
-        carry_arrays.append(cp.ndarray(totallen, dtype=cp.int64, memptr=memptr))
+        carry_arrays.append(cp.ndarray(totallen, dtype=cp.int64, memptr=memptr))  # pylint: disable=unexpected-keyword-arg
 
     # -------------------------------------------------------------------------
     # Step 3: fill carry_arrays[k] for each combination position k in turn.
