@@ -13,7 +13,7 @@
 
 template <typename C>
 ERROR awkward_ListOffsetArray_reduce_local_nextparents_64(
-  int64_t* nextparents,
+  C* nextparents,
   const C* offsets,
   int64_t length,
   int64_t nextparents_length) {
@@ -28,7 +28,7 @@ ERROR awkward_ListOffsetArray_reduce_local_nextparents_64(
   return success();
 }
 ERROR awkward_ListOffsetArray32_reduce_local_nextparents_64(
-  int64_t* nextparents,
+  int32_t* nextparents,
   const int32_t* offsets,
   int64_t length,
   int64_t nextparents_length) {
@@ -39,7 +39,7 @@ ERROR awkward_ListOffsetArray32_reduce_local_nextparents_64(
     nextparents_length);
 }
 ERROR awkward_ListOffsetArrayU32_reduce_local_nextparents_64(
-  int64_t* nextparents,
+  uint32_t* nextparents,
   const uint32_t* offsets,
   int64_t length,
   int64_t nextparents_length) {

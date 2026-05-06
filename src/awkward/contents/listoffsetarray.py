@@ -1391,11 +1391,16 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             if isinstance(self._content, ak.contents.NumpyArray):
                 nextcarry = Index64.empty(self._offsets.length - 1, nplike)
 
+                # `awkward_ListOffsetArray_argsort_strings` is still parents-based,
+                # so reconstruct parents on the fly from offsets+outlength. The
+                # `offsets` parameter here is the outer-bin offsets (length
+                # outlength + 1), NOT self._offsets (which is the per-string
+                # byte offsets and has a different shape).
                 parents_data = nplike.repeat(
                     nplike.arange(
                         nplike.shape_item_as_index(outlength), dtype=np.int64
                     ),
-                    self._offsets.data[1:] - self._offsets.data[:-1],
+                    offsets.data[1:] - offsets.data[:-1],
                 )
                 parents = Index64(parents_data, nplike=nplike)
 

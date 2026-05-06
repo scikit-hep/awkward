@@ -968,8 +968,8 @@ class RecordArray(RecordMeta[Content], Content):
             reducer_should_mask = mask and not reducer.needs_position
 
             # Convert parents into offsets to build a list for axis=1 reduction
-            offsets = ak.index.Index64.empty(outlength + 1, self._backend.nplike)
-            assert offsets.nplike is self._backend.nplike
+            ##?? offsets = ak.index.Index64.empty(outlength + 1, self._backend.nplike)
+            ## ?? assert offsets.nplike is self._backend.nplike
             # `parents` are possibly non monotonic increasing, so we must re-order the result
             # This happens naturally for the `NumpyArray` reducers.
             carry = ak.index.Index64.empty(outlength, self._backend.nplike)
@@ -978,20 +978,20 @@ class RecordArray(RecordMeta[Content], Content):
             # the simpler `ListOffsetArray_reduce_local_outoffsets_64`. However, if our parent was reduced,
             # we would still see `negaxis == depth`, so this kernel has to be used instead.
             assert carry.nplike is self._backend.nplike
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
-                    offsets.dtype.type,
-                    carry.dtype.type,
-                    parents.dtype.type,
-                ](
-                    offsets.data,
-                    carry.data,
-                    parents.data,
-                    parents.length,
-                    outlength,
-                )
-            )
+            # self._backend.maybe_kernel_error(
+            #     self._backend[
+            #         "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
+            #         offsets.dtype.type,
+            #         carry.dtype.type,
+            #         parents.dtype.type,
+            #     ](
+            #         offsets.data,
+            #         carry.data,
+            #         parents.data,
+            #         parents.length,
+            #         outlength,
+            #     )
+            # )
             out = _apply_record_reducer(
                 reducer_recordclass,
                 ak.contents.ListOffsetArray(offsets, self),

@@ -2167,7 +2167,7 @@ kernels:
     specializations:
       - name: awkward_ListOffsetArray32_reduce_local_nextparents_64
         args:
-          - {name: nextparents, type: "List[int64_t]", dir: out}
+          - {name: nextparents, type: "List[int32_t]", dir: out}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: reducer-offsets}
           - {name: length, type: "int64_t", dir: in, role: reducer-length}
           - {name: nextparents_length, type: "int64_t", dir: in, role: default}
@@ -2179,7 +2179,7 @@ kernels:
           - {name: nextparents_length, type: "int64_t", dir: in, role: default}
       - name: awkward_ListOffsetArrayU32_reduce_local_nextparents_64
         args:
-          - {name: nextparents, type: "List[int64_t]", dir: out}
+          - {name: nextparents, type: "List[uint32_t]", dir: out}
           - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: reducer-offsets}
           - {name: length, type: "int64_t", dir: in, role: reducer-length}
           - {name: nextparents_length, type: "int64_t", dir: in, role: default}
@@ -3814,7 +3814,34 @@ kernels:
 
   - name: awkward_argsort
     specializations:
-      - name: awkward_argsort_bool
+      - name: awkward_argsort_bool_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_bool_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_bool_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_bool_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[bool]]", dir: in, role: IndexedArray-index}
@@ -3823,7 +3850,34 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_int8
+      - name: awkward_argsort_int8_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int8_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int8_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int8_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: IndexedArray-index}
@@ -3832,7 +3886,34 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_int16
+      - name: awkward_argsort_int16_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int16_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int16_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int16_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: IndexedArray-index}
@@ -3841,7 +3922,34 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_int32
+      - name: awkward_argsort_int32_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int32_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int32_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int32_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
@@ -3850,7 +3958,34 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_int64
+      - name: awkward_argsort_int64_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int64_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int64_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int64_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
@@ -3859,7 +3994,34 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_uint8
+      - name: awkward_argsort_uint8_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint8_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint8_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint8_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: IndexedArray-index}
@@ -3868,7 +4030,34 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_uint16
+      - name: awkward_argsort_uint16_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint16_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint16_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint16_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: IndexedArray-index}
@@ -3877,7 +4066,34 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_uint32
+      - name: awkward_argsort_uint32_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint32_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint32_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint32_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
@@ -3886,7 +4102,34 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_uint64
+      - name: awkward_argsort_uint64_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint64_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint64_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint64_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: IndexedArray-index}
@@ -3895,7 +4138,34 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_float32
+      - name: awkward_argsort_float32_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_float32_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_float32_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_float32_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: IndexedArray-index}
@@ -3904,7 +4174,34 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_float64
+      - name: awkward_argsort_float64_int32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_float64_uint32
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_float64_uint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[uint64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_float64_int64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: IndexedArray-index}

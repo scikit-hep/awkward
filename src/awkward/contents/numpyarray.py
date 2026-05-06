@@ -835,34 +835,49 @@ class NumpyArray(NumpyMeta, Content):
                 outlength,
             )
         else:
-            # The two `awkward_sorting_ranges_*` calls go away — they were
-            # the parents → offsets reconstruction step we no longer need.
-            offsets_length = offsets.length
-            parents_length = self._backend.nplike.index_as_shape_item(offsets[-1])
+            # The incoming `offsets` is the per-bin offsets-rep of length
+            # outlength + 1, possibly with empty bins represented as
+            # consecutive equal values (e.g. [0, 3, 3, 5, 6, 10, 10]).
+            # `awkward_unique_ranges` and `awkward_unique_offsets` are still
+            # parents-era kernels that expect a *compact* offsets array (one
+            # entry per non-empty bin, like the original `awkward_sorting_ranges`
+            # output). Compact the offsets here, run the unchanged kernels on
+            # the compact form, then let `awkward_unique_offsets` re-expand to
+            # the full outlength+1 outoffsets using `starts`.
+            nplike = self._backend.nplike
+            keep = nplike.empty(offsets.length, dtype=np.bool_)
+            keep[0] = True
+            keep[1:] = offsets.data[1:] != offsets.data[:-1]
+            compact_data = offsets.data[keep]
+            compact_offsets = ak.index.Index64(compact_data, nplike=nplike)
+            compact_offsets_length = compact_offsets.length
+            parents_length = nplike.index_as_shape_item(offsets.data[-1])
 
-            out = self._backend.nplike.empty(self.length, dtype=self.dtype)
-            assert offsets.nplike is self._backend.nplike
+            out = nplike.empty(self.length, dtype=self.dtype)
+            assert compact_offsets.nplike is self._backend.nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_sort",
                     out.dtype.type,
                     self._data.dtype.type,
-                    offsets.dtype.type,
+                    compact_offsets.dtype.type,
                 ](
                     out,
                     self._data,
                     self.shape[0],
-                    offsets.data,
-                    offsets_length,
+                    compact_offsets.data,
+                    compact_offsets_length,
                     parents_length,
                     True,
                     False,
                 )
             )
 
-            nextoffsets = ak.index.Index64.empty(offsets.length, self._backend.nplike)
+            nextoffsets = ak.index.Index64.empty(
+                compact_offsets_length, self._backend.nplike
+            )
             assert (
-                offsets.nplike is self._backend.nplike
+                compact_offsets.nplike is self._backend.nplike
                 and nextoffsets.nplike is self._backend.nplike
             )
             if out.dtype == np.bool_:
@@ -870,12 +885,12 @@ class NumpyArray(NumpyMeta, Content):
                     self._backend[
                         "awkward_unique_ranges_bool",
                         out.dtype.type,
-                        offsets.dtype.type,
+                        compact_offsets.dtype.type,
                         nextoffsets.dtype.type,
                     ](
                         out,
-                        offsets.data,
-                        offsets.length,
+                        compact_offsets.data,
+                        compact_offsets_length,
                         nextoffsets.data,
                     )
                 )
@@ -884,12 +899,12 @@ class NumpyArray(NumpyMeta, Content):
                     self._backend[
                         "awkward_unique_ranges",
                         out.dtype.type,
-                        offsets.dtype.type,
+                        compact_offsets.dtype.type,
                         nextoffsets.dtype.type,
                     ](
                         out,
-                        offsets.data,
-                        offsets.length,
+                        compact_offsets.data,
+                        compact_offsets_length,
                         nextoffsets.data,
                     )
                 )
