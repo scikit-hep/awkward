@@ -110,18 +110,34 @@ def array_function(
         rectilinear_args = tuple(_to_rectilinear(x, backend) for x in args)
         rectilinear_kwargs = {k: _to_rectilinear(v, backend) for k, v in kwargs.items()}
         result = func(*rectilinear_args, **rectilinear_kwargs)
-        # We want the result to be a layout (this will fail for functions returning non-array convertibles)
-        out = ak.operations.ak_to_layout._impl(
-            result,
-            allow_record=True,
-            allow_unknown=True,
-            none_policy="pass-through",
-            regulararray=True,
-            use_from_iter=True,
-            primitive_policy="pass-through",
-            string_policy="pass-through",
-        )
-        return wrap_layout(out, behavior=behavior, allow_other=True, attrs=attrs)
+
+        def wrap_result(x):
+            if isinstance(x, tuple):
+                wrapped = tuple(wrap_result(y) for y in x)
+                if hasattr(x, "_fields"):
+                    return type(x)(*wrapped)
+                else:
+                    return wrapped
+            elif isinstance(x, list):
+                return [wrap_result(y) for y in x]
+            elif type(x) is dict:
+                return {key: wrap_result(value) for key, value in x.items()}
+            else:
+                out = ak.operations.ak_to_layout._impl(
+                    x,
+                    allow_record=True,
+                    allow_unknown=True,
+                    none_policy="pass-through",
+                    regulararray=True,
+                    use_from_iter=True,
+                    primitive_policy="pass-through",
+                    string_policy="pass-through",
+                )
+                return wrap_layout(
+                    out, behavior=behavior, allow_other=True, attrs=attrs
+                )
+
+        return wrap_result(result)
 
 
 def implements(numpy_function):
