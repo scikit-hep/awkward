@@ -73,15 +73,6 @@ def ensure_known_scalar(value: T, default: S) -> T | S:
     return default if is_unknown_scalar(value) else value
 
 
-def _emptyarray(x):
-    if is_unknown_scalar(x):
-        return numpy.empty(0, x._dtype)
-    elif hasattr(x, "dtype"):
-        return numpy.empty(0, x.dtype)
-    else:
-        return numpy.empty(0, numpy.array(x).dtype)
-
-
 class MaybeNone:
     def __init__(self, content):
         self._content = content
@@ -1317,7 +1308,6 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             try_touch_data(x)
 
         inner_shape = None
-        emptyarrays = []
         for x in arrays:
             assert isinstance(x, TypeTracerArray)
             if inner_shape is None:
@@ -1326,13 +1316,13 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                 raise ValueError(
                     f"inner dimensions don't match in concatenate: {inner_shape} vs {x.shape[1:]}"
                 )
-            emptyarrays.append(_emptyarray(x))
 
         if inner_shape is None:
             raise ValueError("need at least one array to concatenate")
 
         return TypeTracerArray._new(
-            numpy.concatenate(emptyarrays).dtype, (unknown_length, *inner_shape)
+            numpy.result_type(*[x.dtype for x in arrays]),
+            (unknown_length, *inner_shape),
         )
 
     def repeat(

@@ -519,7 +519,39 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int | None = 0,
-    ) -> ArrayLikeT:
+    ) -> ArrayLike:
+        if any(isinstance(x, VirtualNDArray) and not x.is_materialized for x in arrays):
+            dtype = self._module.result_type(*[x.dtype for x in arrays])
+
+            if axis is None:
+                shape = (sum((x.size for x in arrays), 0),)
+            else:
+                ref = arrays[0]
+                if axis < 0:
+                    axis += ref.ndim
+                for i, x in enumerate(arrays[1:], start=1):
+                    for dim, (ref_d, x_d) in enumerate(
+                        zip(ref.shape, x.shape, strict=True)
+                    ):
+                        if dim != axis and ref_d != x_d:
+                            raise ValueError(
+                                "all the input array dimensions except for the concatenation axis "
+                                f"must match exactly, but along dimension {dim}, the array at index 0 "
+                                f"has size {ref_d} and the array at index {i} has size {x_d}"
+                            )
+                shape = (  # type: ignore[assignment]
+                    *ref.shape[:axis],
+                    sum((x.shape[axis] for x in arrays), 0),
+                    *ref.shape[axis + 1 :],
+                )
+
+            return VirtualNDArray(
+                self,
+                shape,
+                dtype,
+                lambda: self.concat(maybe_materialize(*arrays), axis=axis),
+            )
+
         arrays = maybe_materialize(*arrays)
         if _nplike_concatenate_has_casting(self._module):
             return self._module.concatenate(arrays, axis=axis, casting="same_kind")

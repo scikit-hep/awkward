@@ -323,7 +323,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int | None = 0,
-    ) -> ArrayLikeT: ...
+    ) -> ArrayLike: ...
 
     @abstractmethod
     def repeat(
