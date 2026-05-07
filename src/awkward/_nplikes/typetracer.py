@@ -1323,8 +1323,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             raise ValueError("need at least one array to concatenate")
 
         return TypeTracerArray._new(
-            numpy.concatenate(emptyarrays).dtype,
-            (unknown_length, *inner_shape),
+            numpy.concatenate(emptyarrays).dtype, (unknown_length, *inner_shape)
         )
 
     def repeat(
