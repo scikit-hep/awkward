@@ -521,7 +521,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         axis: int | None = 0,
     ) -> ArrayLike:
         if any(isinstance(x, VirtualNDArray) and not x.is_materialized for x in arrays):
-            dtype = self._module.result_type(*[x.dtype for x in arrays])
+            dtype = self._module.concatenate(
+                [self._module.empty(0, x.dtype) for x in arrays]
+            ).dtype
 
             if axis is None:
                 shape = (sum((x.size for x in arrays), 0),)

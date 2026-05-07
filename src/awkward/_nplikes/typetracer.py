@@ -1308,6 +1308,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             try_touch_data(x)
 
         inner_shape = None
+        emptyarrays = []
         for x in arrays:
             assert isinstance(x, TypeTracerArray)
             if inner_shape is None:
@@ -1316,12 +1317,13 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
                 raise ValueError(
                     f"inner dimensions don't match in concatenate: {inner_shape} vs {x.shape[1:]}"
                 )
+            emptyarrays.append(numpy.empty(0, x.dtype))
 
         if inner_shape is None:
             raise ValueError("need at least one array to concatenate")
 
         return TypeTracerArray._new(
-            numpy.result_type(*[x.dtype for x in arrays]),
+            numpy.concatenate(emptyarrays).dtype,
             (unknown_length, *inner_shape),
         )
 
