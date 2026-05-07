@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from cuda.compute import (
     CountingIterator,
+    DiscardIterator,
     gpu_struct,
+    inclusive_scan,
     reduce_into,
     unary_transform,
 )
@@ -656,9 +658,502 @@ def awkward_reduce_countnonzero(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+
+
+# Overlays a mask onto an index array: masked positions become -1, unmasked positions keep their original index value.
+def awkward_IndexedArray_overlay_mask(toindex, mask, fromindex, length):
+    def transform(i):
+        return -1 if mask[i] else fromindex[i]
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, toindex, transform, length)
+
+
+# Skips masked (-1) entries and packs the remaining valid entries into nextcarry and nextparents, tracking where each ended up in outindex.
+def awkward_IndexedArray_reduce_next_64(
+    nextcarry, nextparents, outindex, index, parents, length
+):
+    if length == 0:
+        return
+
+    # Compute cumulative count of valid (non-negative) indices to determine compact output positions
+    # this needs to be done before going through all the indices in parallel later
+    scan = cp.cumsum(index >= 0)
+
+    def scatter_and_fill(i):
+        if index[i] >= 0:
+            # Map valid entry to its compacted position
+            k = scan[i] - 1
+            nextcarry[k] = index[i]
+            nextparents[k] = parents[i]
+            return k
+        # Masked entries get -1 in outindex
+        return -1
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, outindex, scatter_and_fill, length)
+
+
+# For each valid (non-negative) entry at position i, records the number of null (negative) entries
+# that appeared before it. The k-th valid entry gets nextshifts[k] = count of nulls before position i.
+# For example, für index = [0, 1, 2, -1, 3, -1, 4] → nextshifts = [0, 0, 0, 1, 2].
+def awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64(nextshifts, index, length):
+    if length == 0:
+        return
+
+    index_slice = index[:length]
+
+    # cumsum of (index < 0) gives the running null count at each position.
+    # this is basically equivalent to calling cuda.compute.inclusive_scan on index_slice < 0
+    null_cumsum = cp.cumsum(index_slice < 0)
+    _ = cp.empty(length, dtype=cp.int64)
+
+    def scatter(i):
+        null_count = null_cumsum[i]
+        if index_slice[i] >= 0:
+            nextshifts[i - null_count] = null_count  # output slot = i - null_count
+        # return a dummy value otherwise
+        return cp.int64(0)
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, _, scatter, length)
+
+
+# Packs valid entries (where (mask[i] != 0) == validwhen) into tocarry in order.
+# Examples:
+# mask = [0, 1, 0, 1, 1], validwhen=True  → tocarry = [1, 3, 4]
+# mask = [0, 1, 0, 1, 1], validwhen=False → tocarry = [0, 2]
+# mask = [0, 1, 0, 1, 1, -1, 1], validwhen=True → tocarry = [1, 3, 4, 5, 6]
+def awkward_ByteMaskedArray_getitem_nextcarry(tocarry, mask, length, validwhen):
+    if length == 0:
+        return
+
+    # valid = ((mask[:length] != 0) == validwhen)
+    # valid[i] is 1 when the masked element passes the validwhen condition.
+
+    # get the indices of the valid entries using cp.nonzero
+    valid_indices = cp.nonzero((mask[:length] != 0) == validwhen)[0]
+    # in case tocarry is not exactly the right size, allocate it in two steps like this
+    tocarry[: len(valid_indices)] = valid_indices
+
+
+# Counts null (invalid) entries: positions where (mask[i] != 0) != validwhen.
+# Examples:
+# mask = [0, 1, 0, 1, 1], validwhen=True  → numnull = 2  (positions 0 and 2 are null)
+# mask = [0, 1, 0, 1, 1], validwhen=False → numnull = 3  (positions 1, 3 and 4 are null)
+def awkward_ByteMaskedArray_numnull(numnull, mask, length, validwhen):
+    numnull[0] = cp.count_nonzero((mask[:length] != 0) != validwhen)
+
+
+# Broadcasts a single jagged offset array across all rows of a regular array
+# Example:
+# singleoffsets = [0, 2, 5], regularsize = 2, regularlength = 3
+# multistarts = [0, 2, 0, 2, 0, 2]
+# multistops  = [2, 5, 2, 5, 2, 5]
+def awkward_RegularArray_getitem_jagged_expand(
+    multistarts, multistops, singleoffsets, regularsize, regularlength
+):
+    if regularlength == 0 or regularsize == 0:
+        return
+
+    # Reshape as (regularlength, regularsize) views (no copy) and broadcast-assign
+    # singleoffsets[:-1] / singleoffsets[1:] across all rows.
+    multistarts.reshape(regularlength, regularsize)[:] = singleoffsets[:regularsize]
+    multistops.reshape(regularlength, regularsize)[:] = singleoffsets[
+        1 : regularsize + 1
+    ]
+
+
+# THIS KERNEL IS NOT USED (just for archive)
+# Fills a tagged index for one union type: assigns a constant tag and
+# sequential index into each segment defined by the starts/counts ranges
+# Example input:
+# tmpstarts = [0, 3], tag = 1, fromcounts = [3, 2]
+# Example output:
+# totags  = [1, 1, 1, 1, 1]
+# toindex = [0, 1, 2, 0, 1]
+# also, the tmpstarts get rewritten with stops: tmpstarts = [3, 5]
+def awkward_UnionArray_nestedfill_tags_index(
+    totags, toindex, tmpstarts, tag, fromcounts, length
+):
+    if length == 0:
+        return
+
+    starts = tmpstarts[:length]
+    counts = fromcounts[:length]
+
+    # Total span of the output arrays we need to touch:
+    # the last segment's start + its count gives the furthest written position
+    total_size = int(starts[length - 1]) + int(counts[length - 1])
+
+    if total_size == 0:
+        return
+
+    # +1 at each segment start, -1 just past each segment end.
+    # cumsum of this will later yield 1 inside any covered range, 0 in gaps.
+    diff = cp.zeros(total_size + 1, dtype=cp.int8)
+
+    def scatter_and_update(i):
+        start = starts[i]
+        count = counts[i]
+        # Mark this segment's range in the difference array
+        diff[start] += cp.int8(1)
+        diff[start + count] -= cp.int8(1)
+        # update tmpstarts (for the next call of this kernel (for a different union type))?
+        tmpstarts[i] = start + count
+        return 0
+
+    # Scatter segment's ranges and update tmpstarts
     unary_transform(
-        d_in=segment_ids,
-        d_out=result,
-        op=segment_reduce_count_nonzero,
-        num_items=outlength,
+        CountingIterator(cp.int64(0)), DiscardIterator(), scatter_and_update, length
     )
+
+    # coverage[j] == 1 if position j falls inside any segment's range, 0 otherwise
+    coverage = cp.cumsum(diff[:total_size])
+
+    # scan[j] == local index of element j within its segment
+    # Since it's a cumsum, the first index starts from 1, 2, 3 ...
+    # so we'll have to -1 before writing it in toindex
+    scan = cp.cumsum(coverage, dtype=cp.int64)
+
+    def fill(j):
+        if coverage[j]:
+            # Mark this position as belonging to the current tag
+            totags[j] = tag
+            toindex[j] = scan[j] - 1
+        return 0
+
+    unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill, total_size)
+
+
+# For each position i where fromtags[i] == fromwhich, sets totags[i] = towhich and
+# toindex[i] = fromindex[i] + base. Other positions are left unchanged.
+# Example:
+# fromtags  = [0, 1, 0, 1, 0], fromindex = [0, 0, 1, 1, 2]
+# fromwhich=1, towhich=2, base=10
+# totags  = [0, 2, 0, 2, 0]
+# toindex = [0, 10, 1, 11, 2]
+def awkward_UnionArray_simplify_one(
+    totags, toindex, fromtags, fromindex, towhich, fromwhich, length, base
+):
+    if length == 0:
+        return
+
+    def transform(i):
+        if fromtags[i] == fromwhich:
+            totags[i] = towhich
+            toindex[i] = fromindex[i] + base
+        return 0  # discarded
+
+    indices = CountingIterator(cp.int64(0))
+    unary_transform(indices, DiscardIterator(), transform, length)
+
+
+# producing a carry index that maps each output element back to its position in the original content
+# Example input:
+# fromoffsets = [0, 3, 5], fromstarts = [10, 20], fromstops = [13, 22], lencontent = 25
+# Example output:
+# i=0: range [10, 13) → [10, 11, 12]
+# i=1: range [20, 22) → [20, 21]
+# tocarry = [10, 11, 12, 20, 21]
+def awkward_ListArray_broadcast_tooffsets(
+    tocarry, fromoffsets, offsetslength, fromstarts, fromstops, lencontent
+):
+    if offsetslength <= 1:
+        return
+
+    length = offsetslength - 1
+    starts = fromstarts[:length]
+    stops = fromstops[:length]
+    # counts[i] = how many elements list i should have
+    counts = fromoffsets[1:offsetslength] - fromoffsets[:length]
+
+    _K = "awkward_ListArray_broadcast_tooffsets"
+    if cp.any((starts != stops) & (stops > lencontent)):
+        raise ValueError(f"stops[i] > len(content) in compiled CUDA code ({_K})")
+    if cp.any(counts < 0):
+        raise ValueError(
+            f"broadcast's offsets must be monotonically increasing in compiled CUDA code ({_K})"
+        )
+    if cp.any(stops - starts != counts):
+        raise ValueError(f"cannot broadcast nested list in compiled CUDA code ({_K})")
+
+    # For each segment i, write the content indices starts[i], starts[i]+1, ..., stops[i]-1
+    # into the contiguous output slice tocarry[fromoffsets[i] : fromoffsets[i+1]].
+    def fill_list(i):
+        start = starts[i]
+        stop = stops[i]
+        for j in range(start, stop):
+            tocarry[fromoffsets[i] + j - start] = j
+        return 0
+
+    unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill_list, length)
+
+
+# For each segment i, it fills toindex with the local position of each element within that segment — i.e. 0, 1, 2, ...
+# Example:
+# offsets = [0, 3, 5]
+# toindex = [0, 1, 2, 0, 1]
+def awkward_ListArray_localindex(toindex, offsets, length):
+    if length == 0:
+        return
+
+    starts = offsets[:length]
+    stops = offsets[1 : length + 1]
+
+    def fill(i):
+        start = starts[i]
+        stop = stops[i]
+        for j in range(start, stop):
+            toindex[j] = j - start
+        return 0
+
+    unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill, length)
+
+
+# Converts a ListArray's (starts, stops) pairs into offsets.
+# tooffsets[0] = 0, tooffsets[i+1] = tooffsets[i] + (fromstops[i] - fromstarts[i])
+# Example:
+# fromstarts = [10, 20], fromstops = [13, 22], length = 2
+# tooffsets = [0, 3, 5]
+def awkward_ListArray_compact_offsets(tooffsets, fromstarts, fromstops, length):
+    tooffsets[0] = 0
+    if length == 0:
+        return
+
+    starts = fromstarts[:length]
+    stops = fromstops[:length]
+
+    if cp.any(stops < starts):
+        raise ValueError(
+            "stops[i] < starts[i] in compiled CUDA code (awkward_ListArray_compact_offsets)"
+        )
+
+    sizes = stops - starts
+
+    # the same as `tooffsets[1 : length + 1] = cp.cumsum(sizes)`
+    inclusive_scan(
+        sizes,
+        tooffsets[1 : length + 1],
+        lambda a, b: a + b,
+        cp.array([0], dtype=tooffsets.dtype),
+        length,
+    )
+
+
+# For each list i, counts the number of n-combinations of its elements
+# (with or without replacement) and builds an offsets array into tooffsets.
+# totallen[0] is set to the total number of combinations across all lists.
+#
+# Example (n=2, replacement=False):
+# starts=[0, 0, 0], stops=[2, 3, 4]
+# sizes = [2, 3, 4]
+# C(2,2)=1, C(3,2)=3, C(4,2)=6
+# Then the output will be: tooffsets = [0, 1, 4, 10]
+# totallen  = 10
+def awkward_ListArray_combinations_length(
+    totallen, tooffsets, n, replacement, starts, stops, length
+):
+    tooffsets[0] = 0
+    if length == 0:
+        totallen[0] = 0
+        return
+
+    def combinations_len(i):
+        size = stops[i] - starts[i]
+        if replacement:
+            size = size + (n - 1)
+        thisn = n
+        if thisn > size:
+            return 0
+        elif thisn == size:
+            return 1
+        else:
+            # C(size, n) == C(size, size-n), so use the smaller one
+            # of the two to minimise the number of loop iterations
+            if thisn * 2 > size:
+                thisn = size - thisn
+
+            # Compute C(size, thisn) = size! / (thisn! * (size-thisn)!) incrementally:
+            # result = size * (size-1) * ... * (size-thisn+1) / thisn!
+            result = size
+            for j in range(2, thisn + 1):
+                result = result * (size - j + 1)
+                result = result // j
+            return result
+
+    # Compute the number of combinations for each list
+    counts = cp.empty(length, dtype=tooffsets.dtype)
+    unary_transform(CountingIterator(cp.int64(0)), counts, combinations_len, length)
+
+    # Convert counts to offsets:
+    # tooffsets[i+1] = sum(counts[0..i])
+    inclusive_scan(
+        counts,
+        tooffsets[1 : length + 1],
+        lambda a, b: a + b,
+        cp.array([0], dtype=tooffsets.dtype),
+        length,
+    )
+
+    # Total number of combinations across all lists
+    totallen[0] = tooffsets[length]
+
+
+# For each list i, enumerates all n-combinations (with or without replacement)
+# of its elements and writes the indices into n output carry arrays.
+#
+# tocarry_ptrs is a CuPy int64 array of length n holding raw device pointers;
+# each pointer refers to a pre-allocated int64 array of length totallen.
+#
+# Example (n=2, replacement=False):
+# starts=[0], stops=[3]  → elements [0,1,2]
+# C(3,2) = 3 combinations in total
+# combinations: (0,1),(0,2),(1,2)
+#
+# Output:
+# tocarry_ptrs[0] → [0, 0, 1],  tocarry_ptrs[1] → [1, 2, 2]
+# toindex: [3, 3]
+def awkward_ListArray_combinations(
+    tocarry_ptrs, toindex, fromindex, n, replacement, starts, stops, length
+):
+    if length == 0:
+        return
+
+    # Step 1: compute per-list combination counts (same as combinations_length!!)
+    # TODO: we can just pass combination offsets directly in the future (from src/awkward/contents/listoffsetarray.py:1405)
+    def combinations_len(i):
+        size = stops[i] - starts[i]
+        if replacement:
+            size = size + (n - 1)
+        thisn = n
+        if thisn > size:
+            return 0
+        elif thisn == size:
+            return 1
+        else:
+            if thisn * 2 > size:
+                thisn = size - thisn
+            result = size
+            for j in range(2, thisn + 1):
+                result = result * (size - j + 1)
+                result = result // j
+            return result
+
+    counts = cp.empty(length, dtype=cp.int64)
+    unary_transform(CountingIterator(cp.int64(0)), counts, combinations_len, length)
+
+    offsets = cp.empty(length + 1, dtype=cp.int64)
+    offsets[0] = 0
+    inclusive_scan(
+        counts,
+        offsets[1:],
+        lambda a, b: a + b,
+        cp.array([0], dtype=cp.int64),
+        length,
+    )
+
+    totallen = int(offsets[length])
+    if totallen == 0:
+        return
+
+    # Step 2: wrap raw pointers from tocarry_ptrs into CuPy arrays
+    # raw int64 pointer values from tocarry_ptrs[k] can't be dereferenced inside a Numba closure, so
+    # we need this intermediate step
+    #
+    # (the pointers themselves are allocated at src/awkward/contents/listoffsetarray.py:1456-1464)
+    carry_arrays = []
+    for k in range(n):
+        ptr_val = int(tocarry_ptrs[k])
+        mem = cp.cuda.UnownedMemory(ptr_val, totallen * 8, None)
+        memptr = cp.cuda.MemoryPointer(mem, 0)
+        carry_arrays.append(cp.ndarray(totallen, dtype=cp.int64, memptr=memptr))  # pylint: disable=unexpected-keyword-arg
+
+    # -------------------------------------------------------------------------
+    # Step 3: fill carry_arrays[k] for each combination position k in turn.
+    #
+    # For each output slot g in [0, totallen):
+    #
+    #   a) Binary search offsets to find which source list i owns slot g,
+    #      and compute the rank of this combination within that list
+    #      (rank = g - offsets[i], i.e. the 0-based index among all combinations
+    #      of list i in lexicographic order).
+    #
+    #   b) Unrank: decode the rank back into the actual combination tuple using
+    #      a combinatorial number system. Iterating over positions pos=0..n-1,
+    #      at each position scan forward through candidate values j, counting
+    #      how many combinations start with values < j at this position
+    #      (= C(effective_size-j-1, n-pos-1)). Subtract from remaining rank
+    #      until we find the j where remaining < count — that j is the value
+    #      at position pos.
+    #
+    #   c) Early exit: once pos==k we have the value for position k and write
+    #      it to carry_k[g], skipping the rest of the unranking. This is why
+    #      we do n separate passes (one per k) rather than one pass writing all
+    #      n positions: each pass only needs to unrank up to position k.
+    #
+    #   d) Content index: add start (the list's base offset into content) to
+    #      convert from a within-list index to an absolute content index.
+    #      For replacement, subtract pos to undo the stars-and-bars shift.
+    # -------------------------------------------------------------------------
+    def make_pass(k, carry_k):
+        def fill_pos(g):
+            # a) Find source list i via binary search on offsets
+            lo = 0
+            hi = length - 1
+            while lo < hi:
+                mid = (lo + hi) >> 1
+                if offsets[mid + 1] <= g:
+                    lo = mid + 1
+                else:
+                    hi = mid
+            list_i = lo
+            start = starts[list_i]
+            size = stops[list_i] - starts[list_i]
+            rank = g - offsets[list_i]
+            # For replacement use stars-and-bars effective size
+            effective_size = size + n - 1 if replacement else size
+
+            # b) Unrank: decode rank into the combination tuple
+            lower = 0  # lower bound for j at each position (enforces ordering)
+            remaining = rank
+            for pos in range(n):
+                for j in range(lower, effective_size - (n - pos - 1)):
+                    # Count combinations where position pos has value j:
+                    # = C(effective_size - j - 1, n - pos - 1)
+                    top = effective_size - j - 1
+                    choose = n - pos - 1
+                    if choose == 0:
+                        count = 1
+                    else:
+                        if choose * 2 > top:  # use smaller equivalent
+                            choose = top - choose
+                        c = top
+                        for q in range(2, choose + 1):
+                            c = c * (top - q + 1)
+                            c = c // q
+                        count = c
+                    if remaining < count:
+                        # c) j is the value at position pos
+                        if pos == k:
+                            # d) write absolute content index and exit early
+                            carry_k[g] = (j - pos if replacement else j) + start
+                            return 0
+                        lower = j + 1  # next position must be >= j+1 (no repeat)
+                        break
+                    remaining -= count
+            return 0
+
+        return fill_pos
+
+    # One parallel pass per combination position k
+    for k in range(n):
+        unary_transform(
+            CountingIterator(cp.int64(0)),
+            DiscardIterator(),
+            make_pass(k, carry_arrays[k]),
+            totallen,
+        )
+
+    toindex[:n] = totallen

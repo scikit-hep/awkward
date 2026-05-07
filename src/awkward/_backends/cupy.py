@@ -75,6 +75,18 @@ class CupyBackend(Backend):
         Other kernels that are currently supported:
         - awkward_sort
         - awkward_argsort (future)
+        - awkward_IndexedArray_overlay_mask
+        - awkward_IndexedArray_reduce_next_64
+        - awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64
+        - awkward_ByteMaskedArray_getitem_nextcarry
+        - awkward_ByteMaskedArray_numnull
+        - awkward_RegularArray_getitem_jagged_expand
+        - awkward_UnionArray_simplify_one
+        - awkward_ListArray_broadcast_tooffsets
+        - awkward_ListArray_localindex
+        - awkward_ListArray_compact_offsets
+        - awkward_ListArray_combinations_length
+        - awkward_ListArray_combinations
 
         These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
         - awkward_sum
@@ -100,6 +112,18 @@ class CupyBackend(Backend):
             "awkward_reduce_prod_bool",
             "awkward_reduce_count_64",
             "awkward_reduce_countnonzero",
+            "awkward_IndexedArray_overlay_mask",
+            "awkward_IndexedArray_reduce_next_64",
+            "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+            "awkward_ByteMaskedArray_getitem_nextcarry",
+            "awkward_ByteMaskedArray_numnull",
+            "awkward_RegularArray_getitem_jagged_expand",
+            "awkward_UnionArray_simplify_one",
+            "awkward_ListArray_broadcast_tooffsets",
+            "awkward_ListArray_localindex",
+            "awkward_ListArray_compact_offsets",
+            "awkward_ListArray_combinations_length",
+            "awkward_ListArray_combinations",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
@@ -147,7 +171,7 @@ class CupyBackend(Backend):
         if kernel_name == "awkward_reduce_countnonzero":
             return cuda_compute.awkward_reduce_countnonzero
 
-        return None
+        return getattr(cuda_compute, kernel_name, None)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
         from awkward._connect.cuda import get_cuda_compute_reducer
