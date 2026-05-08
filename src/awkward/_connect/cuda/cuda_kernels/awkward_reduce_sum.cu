@@ -2,7 +2,15 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromptr, parents, offsets, lenparents, outlength, invocation_index, err_code) = args
+//     (toptr, fromptr, offsets, outlength, invocation_index, err_code) = args
+//     # Offsets-pipeline: derive parents from offsets+outlength so the kernel
+//     # body (which still reads parents internally) runs unchanged.
+//     lenparents = int(offsets[int(outlength)].item()) if int(outlength) >= 0 else 0
+//     if int(outlength) > 0 and lenparents > 0:
+//         counts = offsets[1:int(outlength) + 1] - offsets[:int(outlength)]
+//         parents = cupy.repeat(cupy.arange(int(outlength), dtype=cupy.int64), counts.astype(cupy.int64))
+//     else:
+//         parents = cupy.zeros(0, dtype=cupy.int64)
 //     if block[0] > 0:
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:

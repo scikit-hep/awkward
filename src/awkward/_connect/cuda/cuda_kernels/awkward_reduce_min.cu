@@ -2,52 +2,23 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     """
-//     Min reduction for sorted, present parents on device:
-//     (toptr, fromptr, parents, offsets, lenparents, outlength, identity, invocation_index, err_code)
-//     """
-//     (toptr, fromptr, parents, offsets, lenparents,
-//      outlength, identity, invocation_index, err_code) = args
+//     (toptr, fromptr, offsets, outlength, identity, invocation_index, err_code) = args
+//     # Offsets-pipeline: derive parents from offsets+outlength.
+//     lenparents = int(offsets[int(outlength)].item()) if int(outlength) >= 0 else 0
+//     if int(outlength) > 0 and lenparents > 0:
+//         counts = offsets[1:int(outlength) + 1] - offsets[:int(outlength)]
+//         parents = cupy.repeat(cupy.arange(int(outlength), dtype=cupy.int64), counts.astype(cupy.int64))
+//     else:
+//         parents = cupy.zeros(0, dtype=cupy.int64)
 //     if block[0] > 0:
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
-//     # atomic_toptr initialized to identity
 //     atomic_toptr = cupy.full(outlength, identity, dtype=fromptr.dtype)
 //     temp = cupy.zeros(lenparents, dtype=fromptr.dtype)
-//     cuda_kernel_templates.get_function(
-//         fetch_specialization([
-//             "awkward_reduce_min_a",
-//             cupy.dtype(toptr.dtype).type,
-//             cupy.dtype(fromptr.dtype).type,
-//             parents.dtype,
-//             offsets.dtype
-//         ])
-//     )((grid_size,), block,
-//       (toptr, fromptr, parents, offsets, lenparents, outlength,
-//        atomic_toptr, temp, identity, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(
-//         fetch_specialization([
-//             "awkward_reduce_min_b",
-//             cupy.dtype(toptr.dtype).type,
-//             cupy.dtype(fromptr.dtype).type,
-//             parents.dtype,
-//             offsets.dtype
-//         ])
-//     )((grid_size,), block,
-//       (toptr, fromptr, parents, offsets, lenparents, outlength,
-//        atomic_toptr, temp, identity, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(
-//         fetch_specialization([
-//             "awkward_reduce_min_c",
-//             cupy.dtype(toptr.dtype).type,
-//             cupy.dtype(fromptr.dtype).type,
-//             parents.dtype,
-//             offsets.dtype
-//         ])
-//     )((grid_size,), block,
-//       (toptr, fromptr, parents, offsets, lenparents, outlength,
-//        atomic_toptr, temp, identity, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_min_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, temp, identity, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_min_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, temp, identity, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_min_c", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, temp, identity, invocation_index, err_code))
 // out["awkward_reduce_min_a", {dtype_specializations}] = None
 // out["awkward_reduce_min_b", {dtype_specializations}] = None
 // out["awkward_reduce_min_c", {dtype_specializations}] = None

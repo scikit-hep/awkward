@@ -2,7 +2,16 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toindex, fromindex, lenindex, parents, starts, invocation_index, err_code) = args
+//     (toindex, fromindex, offsets, outlength, starts, invocation_index, err_code) = args
+//     # In the offsets-pipeline, "lenindex" = total elements = offsets[outlength].
+//     lenindex = int(offsets[int(outlength)].item())
+//     # Derive parents from offsets so the kernel body (still parents-driven)
+//     # runs unchanged.
+//     if int(outlength) > 0 and lenindex > 0:
+//         counts = offsets[1:int(outlength) + 1] - offsets[:int(outlength)]
+//         parents = cupy.repeat(cupy.arange(int(outlength), dtype=cupy.int64), counts.astype(cupy.int64))
+//     else:
+//         parents = cupy.zeros(0, dtype=cupy.int64)
 //     scan_in_array = cupy.zeros(lenindex, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_IndexedArray_index_of_nulls_a", toindex.dtype, fromindex.dtype, parents.dtype, starts.dtype]))(grid, block, (toindex, fromindex, lenindex, parents, starts, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)

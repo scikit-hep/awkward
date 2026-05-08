@@ -2,9 +2,24 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (tocarry, starts, parents, parentslength, nextparents, nextlen, invocation_index, err_code) = args
+//     (tocarry, starts, offsets, nextoffsets, outlength, invocation_index, err_code) = args
+//     # Offsets-pipeline: derive parents/parentslength and nextparents/nextlen
+//     # from offsets/nextoffsets so the (parents-driven) kernel body runs
+//     # unchanged.
+//     parentslength = int(offsets[int(outlength)].item())
+//     nextlen = int(nextoffsets[int(outlength)].item())
+//     if int(outlength) > 0 and parentslength > 0:
+//         outer_counts = offsets[1:int(outlength) + 1] - offsets[:int(outlength)]
+//         parents = cupy.repeat(cupy.arange(int(outlength), dtype=cupy.int64), outer_counts.astype(cupy.int64))
+//     else:
+//         parents = cupy.zeros(0, dtype=cupy.int64)
+//     if int(outlength) > 0 and nextlen > 0:
+//         inner_counts = nextoffsets[1:int(outlength) + 1] - nextoffsets[:int(outlength)]
+//         nextparents = cupy.repeat(cupy.arange(int(outlength), dtype=cupy.int64), inner_counts.astype(cupy.int64))
+//     else:
+//         nextparents = cupy.zeros(0, dtype=cupy.int64)
 //     if nextlen < 1024:
-//         block_size = nextlen
+//         block_size = nextlen if nextlen > 0 else 1
 //     else:
 //         block_size = 1024
 //     if block_size > 0:
