@@ -153,7 +153,7 @@ class CupyBackend(Backend):
 
         if kernel_name == "awkward_missing_repeat":
             return cuda_compute.awkward_missing_repeat
-          
+
         if kernel_name == "awkward_index_rpad_and_clip_axis0":
             return cuda_compute.awkward_index_rpad_and_clip_axis0
 
