@@ -697,3 +697,37 @@ def awkward_localindex(toindex, length):
     unary_transform(
         d_in=segment_ids, d_out=toindex, op=fill_local_index, num_items=length
     )
+
+      
+# Fills tostarts and tostops with evenly spaced offsets of size `target` for each of the `length` lists
+def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
+    def fill(i):
+        tostarts[i] = tostarts.dtype.type(i * target)
+        return tostarts.dtype.type(i * target + target)
+
+    segment_ids = CountingIterator(tostarts.dtype.type(0))
+    unary_transform(d_in=segment_ids, d_out=tostops, op=fill, num_items=length)
+
+
+def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsize):
+    """
+    Repeats an index array `repetitions` times, adjusting valid (non-negative) indices
+    by an offset(regularsize) each repetition.
+    Missing values (-1) are preserved as-is across all repetitions.
+    """
+
+    index_dtype = outindex.dtype.type
+
+    def fill_missing_repeat(counter):
+        i = counter // indexlength  # number of repetition we're in
+        j = counter % indexlength  # position within the current repetition
+        val_offset = i * regularsize
+        base = index[j]
+        adjustment = index_dtype(val_offset) if base >= 0 else index_dtype(0)
+        return base + adjustment
+
+    output_size = repetitions * indexlength
+    counters = CountingIterator(index_dtype(0))
+    unary_transform(
+        d_in=counters, d_out=outindex, op=fill_missing_repeat, num_items=output_size
+    )

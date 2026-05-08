@@ -88,7 +88,9 @@ class CupyBackend(Backend):
         - awkward_count_64
         - awkward_countnonzero
         - awkward_localindex
+        - awkward_missing_repeat
         - awkward_index_rpad_and_clip_axis0
+        - awkward_index_rpad_and_clip_axis1
         """
 
         return kernel_name in (
@@ -104,7 +106,9 @@ class CupyBackend(Backend):
             "awkward_reduce_count_64",
             "awkward_reduce_countnonzero",
             "awkward_localindex",
+            "awkward_missing_repeat",
             "awkward_index_rpad_and_clip_axis0",
+            "awkward_index_rpad_and_clip_axis1",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
@@ -155,8 +159,14 @@ class CupyBackend(Backend):
         if kernel_name == "awkward_localindex":
             return cuda_compute.awkward_localindex
 
+        if kernel_name == "awkward_missing_repeat":
+            return cuda_compute.awkward_missing_repeat
+
         if kernel_name == "awkward_index_rpad_and_clip_axis0":
             return cuda_compute.awkward_index_rpad_and_clip_axis0
+
+        if kernel_name == "awkward_index_rpad_and_clip_axis1":
+            return cuda_compute.awkward_index_rpad_and_clip_axis1
 
         return None
 
