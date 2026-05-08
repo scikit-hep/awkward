@@ -577,6 +577,16 @@ def awkward_index_rpad_and_clip_axis0(toindex, target, length):
     )
 
 
+# Fills tostarts and tostops with evenly spaced offsets of size `target` for each of the `length` lists
+def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
+    def fill(i):
+        tostarts[i] = tostarts.dtype.type(i * target)
+        return tostarts.dtype.type(i * target + target)
+
+    segment_ids = CountingIterator(tostarts.dtype.type(0))
+    unary_transform(d_in=segment_ids, d_out=tostops, op=fill, num_items=length)
+
+
 def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsize):
     """
     Repeats an index array `repetitions` times, adjusting valid (non-negative) indices
