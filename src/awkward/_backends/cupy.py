@@ -75,6 +75,8 @@ class CupyBackend(Backend):
         Other kernels that are currently supported:
         - awkward_sort
         - awkward_argsort (future)
+        - awkward_NumpyArray_reduce_adjust_starts_shifts_64
+        - awkward_NumpyArray_reduce_mask_ByteMaskedArray_64
 
         These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
         - awkward_sum
@@ -101,6 +103,8 @@ class CupyBackend(Backend):
             "awkward_reduce_prod_bool",
             "awkward_reduce_count_64",
             "awkward_reduce_countnonzero",
+            "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+            "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
             "awkward_index_rpad_and_clip_axis0",
         )
 
@@ -149,10 +153,7 @@ class CupyBackend(Backend):
         if kernel_name == "awkward_reduce_countnonzero":
             return cuda_compute.awkward_reduce_countnonzero
 
-        if kernel_name == "awkward_index_rpad_and_clip_axis0":
-            return cuda_compute.awkward_index_rpad_and_clip_axis0
-
-        return None
+        return getattr(cuda_compute, kernel_name, None)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
         from awkward._connect.cuda import get_cuda_compute_reducer
