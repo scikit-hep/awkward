@@ -87,6 +87,7 @@ class CupyBackend(Backend):
         - awkward_prod_bool
         - awkward_count_64
         - awkward_countnonzero
+        - awkward_missing_repeat
         - awkward_index_rpad_and_clip_axis0
         - awkward_index_rpad_and_clip_axis1
         """
@@ -102,6 +103,7 @@ class CupyBackend(Backend):
             "awkward_reduce_prod_bool",
             "awkward_reduce_count_64",
             "awkward_reduce_countnonzero",
+            "awkward_missing_repeat",
             "awkward_index_rpad_and_clip_axis0",
             "awkward_index_rpad_and_clip_axis1",
         )
@@ -150,6 +152,9 @@ class CupyBackend(Backend):
 
         if kernel_name == "awkward_reduce_countnonzero":
             return cuda_compute.awkward_reduce_countnonzero
+
+        if kernel_name == "awkward_missing_repeat":
+            return cuda_compute.awkward_missing_repeat
 
         if kernel_name == "awkward_index_rpad_and_clip_axis0":
             return cuda_compute.awkward_index_rpad_and_clip_axis0
