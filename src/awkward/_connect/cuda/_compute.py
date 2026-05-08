@@ -678,6 +678,7 @@ def awkward_index_rpad_and_clip_axis0(toindex, target, length):
 
     def fill(i):
         return dtype(i) if i < shorter else dtype(-1)
+
     counters = CountingIterator(dtype(0))
     unary_transform(
         d_in=counters,
