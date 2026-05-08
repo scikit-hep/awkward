@@ -10,7 +10,7 @@ from awkward._backends.cupy import CupyBackend
 cupy_backend = CupyBackend.instance()
 
 
-# tests for `missing_repeat` that are mising at `tests-cuda-kernels-explicit`
+# tests for `missing_repeat` that are missing at `tests-cuda-kernels-explicit`
 # (with multiple repetitions and regularsize > 1)
 def test_unit_cudaawkward_missing_repeat_64_repetitions_2():
     outindex = cupy.array(
