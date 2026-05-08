@@ -1,12 +1,11 @@
 name: Docs
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+  workflow_call:
+
+  workflow_dispatch:
+
   release:
     types: [released]
-  workflow_dispatch:
 
 concurrency:
   group: 'docs-${{ github.head_ref || github.run_id }}'
@@ -68,7 +67,7 @@ jobs:
       # solve with different external library versions. By default,
       # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
-      uses: mamba-org/setup-micromamba@v2
+      uses: mamba-org/setup-micromamba@v3
       with:
         # Cache invalidates daily by default
         cache-environment: true
@@ -134,7 +133,7 @@ jobs:
         python-version: "${{ env.X86_64_PYTHON_VERSION }}"
 
     - name: Extract pre-built manylinux cppyy wheels
-      uses: shrink/actions-docker-extract@v3
+      uses: shrink/actions-docker-extract@v4
       with:
         image: "docker.io/agoose77/cppyy-wheels:cp311"
         path: "/wheels/."
@@ -191,7 +190,7 @@ jobs:
       # solve with different external library versions. By default,
       # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
-      uses: mamba-org/setup-micromamba@v2
+      uses: mamba-org/setup-micromamba@v3
       with:
         # Cache invalidates daily by default
         cache-environment: true

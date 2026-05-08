@@ -1055,11 +1055,22 @@
                     "error": false,
                     "message": "",
                     "inputs": {
-                        "length": 5,
-                        "target": 9
+                        "length": 3,
+                        "target": 5
                     },
                     "outputs": {
-                        "toindex": [0, 1, 2, 3, 4, -1, -1, -1, -1]
+                        "toindex": [0, 1, 2, -1, -1]
+                    }
+                },
+                {
+                    "error": false,
+                    "message": "",
+                    "inputs": {
+                        "length": 0,
+                        "target": 3
+                    },
+                    "outputs": {
+                        "toindex": [-1, -1, -1]
                     }
                 }
             ]

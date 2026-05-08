@@ -96,7 +96,7 @@ class NumpyArray(NumpyMeta, Content):
     Arrow [Primitive array](https://arrow.apache.org/docs/format/Columnar.html#fixed-size-primitive-layout).
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class NumpyArray(Content):
             def __init__(self, data):
@@ -145,18 +145,6 @@ class NumpyArray(NumpyMeta, Content):
     @property
     def data(self) -> ArrayLike:
         return self._data
-
-    def __getattr__(self, name):
-        if name == "__cuda_array_interface__":
-            if not isinstance(self._backend.nplike, Cupy):
-                raise AttributeError(
-                    f"{type(self).__name__} is not backed by a CuPy array; "
-                    "no __cuda_array_interface__ available"
-                )
-            return self._data.__cuda_array_interface__  # pragma: no cover
-        raise AttributeError(
-            f"{type(self).__name__!r} object has no attribute {name!r}"
-        )
 
     form_cls: Final = NumpyForm
 

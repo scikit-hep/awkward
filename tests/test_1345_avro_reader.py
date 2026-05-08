@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import os
+import sys
 
 import numpy as np  # noqa: F401
 import pytest
 
 import awkward as ak
+
+pytestmark = pytest.mark.skipif(
+    sys.byteorder == "big",
+    reason="avro reader not yet supported on big-endian systems",
+)
 
 DIR = os.path.dirname(__file__)
 SAMPLES_DIR = os.path.join(os.path.abspath(DIR), "samples")

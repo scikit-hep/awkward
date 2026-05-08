@@ -15,7 +15,7 @@ import awkward as ak
 
 @contextlib.contextmanager
 def temporary_module():
-    name = str(uuid.uuid1()).replace("-", "_")
+    name = "_" + uuid.uuid4().hex
     module = types.ModuleType(name)
     sys.modules[name] = module
     yield module

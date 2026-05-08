@@ -8,9 +8,11 @@ import awkward as ak
 from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.array_module import ArrayModuleNumpyLike
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpy_like import UfuncLike
+from awkward._nplikes.numpy_like import NumpyMetadata, UfuncLike
 from awkward._nplikes.virtual import VirtualNDArray
 from awkward._typing import Final, cast
+
+np = NumpyMetadata.instance()
 
 
 @register_nplike
@@ -151,6 +153,40 @@ class Jax(ArrayModuleNumpyLike):
         del maybe_out
         x1, x2 = maybe_materialize(x1, x2)
         return self._module.divide(x1, x2)
+
+    def byteswap(self, x: ArrayLike) -> ArrayLike:
+        lax = ak.jax.import_jax().lax
+
+        if isinstance(x, VirtualNDArray):
+            if x.is_materialized:
+                return self.byteswap(x.materialize())
+            else:
+                return VirtualNDArray(
+                    x._nplike,
+                    x._shape,
+                    x._dtype,
+                    lambda: self.byteswap(x.materialize()),
+                    lambda: x.shape,
+                    x._buffer_key,
+                    __enable_caching__=x.__enable_caching__,
+                )
+        else:
+            dtype = x.dtype
+            # Handle complex types by swapping real and imaginary parts independently
+            if np.issubdtype(dtype, np.complexfloating):
+                real_swapped = self.byteswap(self._module.real(x))
+                imag_swapped = self.byteswap(self._module.imag(x))
+                # JAX flushes subnormals to zero in view(complex) and + 1j *, so use lax.complex
+                return lax.complex(real_swapped, imag_swapped)
+
+            itemsize = dtype.itemsize
+
+            if itemsize == 1:
+                return self._module.copy(x)
+
+            bytes_arr = lax.bitcast_convert_type(x, np.uint8)
+            bytes_arr = lax.rev(bytes_arr, [x.ndim])
+            return lax.bitcast_convert_type(bytes_arr, dtype)
 
     def memory_ptr(self, x: ArrayLike) -> int:
         (x,) = maybe_materialize(x)

@@ -240,7 +240,13 @@ def awkward_axis_none_reduce_argmin(array):
 
     result_scalar = cp.empty(1, dtype=ak_array)
     h_init = ak_array(max, -1)
-    reduce_into(input_struct, result_scalar, reduce_op, len(array), h_init)
+    reduce_into(
+        d_in=input_struct,
+        d_out=result_scalar,
+        op=reduce_op,
+        num_items=len(array),
+        h_init=h_init,
+    )
 
     # return the index of the maximum value
     return result_scalar.item()[1]
@@ -418,7 +424,13 @@ def awkward_axis_none_reduce_argmax(array):
 
     result_scalar = cp.empty(1, dtype=ak_array)
     h_init = ak_array(min, -1)
-    reduce_into(input_struct, result_scalar, reduce_op, len(array), h_init)
+    reduce_into(
+        d_in=input_struct,
+        d_out=result_scalar,
+        op=reduce_op,
+        num_items=len(array),
+        h_init=h_init,
+    )
 
     # return the index of the maximum value
     return result_scalar.item()[1]
