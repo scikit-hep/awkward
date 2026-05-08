@@ -7,7 +7,7 @@
 ERROR awkward_NumpyArray_reduce_adjust_starts_64(
   int64_t* toptr,
   int64_t outlength,
-  const int64_t* /* offsets */,   // unused: see note below
+  const int64_t* offsets,   // unused: see note below
   const int64_t* starts) {
   // For output bin k, toptr[k] is the argmin/argmax result — i.e. the index
   // (within the flat input) of the chosen element. By construction that

@@ -48056,374 +48056,147 @@
       "status": true,
       "tests": [
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [],
-            "outlength": 0,
-            "offsets": [
-              0
-            ]
+              "toptr": [],
+              "starts": [],
+              "outlength": 0,
+              "offsets": [0]
           },
           "outputs": {
-            "toptr": []
-          },
-          "error": false
+              "toptr": []
+          }
         },
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14
-            ],
-            "outlength": 15,
-            "offsets": [
-              0,
-              2,
-              4,
-              6,
-              8,
-              10,
-              12,
-              14,
-              16,
-              18,
-              20,
-              22,
-              24,
-              26,
-              28,
-              30
-            ]
+              "toptr": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+              "starts": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+              "outlength": 15,
+              "offsets": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
           },
           "outputs": {
-            "toptr": [
-              0,
-              -1,
-              -2,
-              -3,
-              -4,
-              -5,
-              -6,
-              -7,
-              -8,
-              -9,
-              -10,
-              -11,
-              -12,
-              -13,
-              -14
-            ]
-          },
-          "error": false
+              "toptr": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          }
         },
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            "outlength": 6,
-            "offsets": [
-              0,
-              5,
-              8,
-              9,
-              14,
-              17,
-              18
-            ]
+              "toptr": [0, 0, 0, 0, 0, 0],
+              "starts": [0, 0, 0, 0, 0, 0],
+              "outlength": 6,
+              "offsets": [0, 5, 8, 9, 14, 17, 18]
           },
           "outputs": {
-            "toptr": [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ]
-          },
-          "error": false
+              "toptr": [0, 0, 0, 0, 0, 0]
+          }
         },
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [
-              -1
-            ],
-            "outlength": 1,
-            "offsets": [
-              0,
-              5
-            ]
+              "toptr": [0],
+              "starts": [-1],
+              "outlength": 1,
+              "offsets": [0, 5]
           },
           "outputs": {
-            "toptr": [
-              1
-            ]
-          },
-          "error": false
+              "toptr": [1]
+          }
         },
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [
-              8,
-              7,
-              6,
-              5,
-              4,
-              3,
-              2,
-              1
-            ],
-            "outlength": 8,
-            "offsets": [
-              0,
-              5,
-              8,
-              9,
-              9,
-              14,
-              18,
-              21,
-              22
-            ]
+              "toptr": [0, 0, 0, 1, 0, 0, 0, 0],
+              "starts": [8, 7, 6, 5, 4, 3, 2, 1],
+              "outlength": 8,
+              "offsets": [0, 5, 8, 9, 9, 14, 18, 21, 22]
           },
           "outputs": {
-            "toptr": [
-              -8,
-              -7,
-              -6,
-              -4,
-              -4,
-              -3,
-              -2,
-              -1
-            ]
-          },
-          "error": false
+              "toptr": [-8, -8, -8, -7, -8, -8, -8, -8]
+          }
         },
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [
-              -1,
-              -2,
-              -3,
-              -4,
-              -5,
-              -6,
-              -7,
-              -8
-            ],
-            "outlength": 8,
-            "offsets": [
-              0,
-              3,
-              5,
-              5,
-              5,
-              5,
-              5,
-              7,
-              8
-            ]
+              "toptr": [0, 0, 0, 1, 1, 1, 0, 0],
+              "starts": [-1, -2, -3, -4, -5, -6, -7, -8],
+              "outlength": 8,
+              "offsets": [0, 3, 5, 5, 5, 5, 5, 7, 8]
           },
           "outputs": {
-            "toptr": [
-              1,
-              2,
-              3,
-              5,
-              6,
-              7,
-              7,
-              8
-            ]
-          },
-          "error": false
+              "toptr": [1, 1, 1, 2, 2, 2, 1, 1]
+          }
         },
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [
-              -1,
-              -2,
-              -3,
-              -4,
-              -5,
-              -6,
-              -7,
-              -8
-            ],
-            "outlength": 8,
-            "offsets": [
-              0,
-              3,
-              5,
-              5,
-              5,
-              5,
-              5,
-              7,
-              8
-            ]
+              "toptr": [0, 0, 0, -1, -1, -1, 0, 0],
+              "starts": [-1, -2, -3, -4, -5, -6, -7, -8],
+              "outlength": 8,
+              "offsets": [0, 3, 5, 5, 5, 5, 5, 7, 8]
           },
           "outputs": {
-            "toptr": [
-              1,
-              2,
-              3,
-              -1,
-              -1,
-              -1,
-              7,
-              8
-            ]
-          },
-          "error": false
+              "toptr": [1, 1, 1, -1, -1, -1, 1, 1]
+          }
         },
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [
-              -1,
-              1,
-              0,
-              -5,
-              2,
-              3
-            ],
-            "outlength": 6,
-            "offsets": [
-              0,
-              3,
-              3,
-              5,
-              6,
-              8,
-              9
-            ]
+              "toptr": [0, 1, 0, 0, 0, 0],
+              "starts": [-1, 1, 0, -5, 2, 3],
+              "outlength": 6,
+              "offsets": [0, 3, 3, 5, 6, 8, 9]
           },
           "outputs": {
-            "toptr": [
-              1,
-              0,
-              0,
-              5,
-              -2,
-              -3
-            ]
-          },
-          "error": false
+              "toptr": [1, 2, 1, 1, 1, 1]
+          }
         },
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [
-              -1,
-              0,
-              1
-            ],
-            "outlength": 3,
-            "offsets": [
-              0,
-              2,
-              2,
-              3
-            ]
+              "toptr": [0, 1, 0],
+              "starts": [-1, 0, 1],
+              "outlength": 3,
+              "offsets": [0, 2, 2, 3]
           },
           "outputs": {
-            "toptr": [
-              1,
-              1,
-              -1
-            ]
-          },
-          "error": false
+              "toptr": [1, 2, 1]
+          }
         },
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [
-              0,
-              1,
-              0,
-              2,
-              1,
-              0,
-              3
-            ],
-            "outlength": 7,
-            "offsets": [
-              0,
-              3,
-              3,
-              5,
-              6,
-              6,
-              6,
-              9
-            ]
+              "toptr": [-1, -1, -1, -1, -1, -1, -1],
+              "starts": [0, 1, 0, 2, 1, 0, 3],
+              "outlength": 7,
+              "offsets": [0, 3, 3, 5, 6, 6, 6, 9]
           },
           "outputs": {
-            "toptr": [
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          "error": false
+              "toptr": [-1, -1, -1, -1, -1, -1, -1]
+          }
         },
         {
+          "error": false,
+          "message": "",
           "inputs": {
-            "starts": [
-              0,
-              1,
-              0,
-              2,
-              1,
-              0,
-              3
-            ],
-            "outlength": 7,
-            "offsets": [
-              0,
-              3,
-              3,
-              5,
-              6,
-              6,
-              6,
-              9
-            ]
+              "toptr": [0, 1, 0, 0, 1, 1, 0],
+              "starts": [0, 1, 0, 2, 1, 0, 3],
+              "outlength": 7,
+              "offsets": [0, 3, 3, 5, 6, 6, 6, 9]
           },
           "outputs": {
-            "toptr": [
-              0,
-              0,
-              0,
-              -2,
-              0,
-              1,
-              -3
-            ]
-          },
-          "error": false
+              "toptr": [0, 1, 0, 0, 1, 1, 0]
+          }
         }
       ]
     },

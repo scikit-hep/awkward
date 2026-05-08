@@ -991,50 +991,17 @@ class RecordArray(RecordMeta[Content], Content):
                     f"returned an option when it was not expected ({reason})"
                 )
 
-            if reducer.needs_position:
-                assert isinstance(out, ak.contents.NumpyArray)
-
-                if shifts is None:
-                    assert (
-                        out.backend is self._backend
-                        and starts.nplike is self._backend.nplike
-                        and offsets.nplike is self._backend.nplike
-                    )
-                    self._backend.maybe_kernel_error(
-                        self._backend[
-                            "awkward_NumpyArray_reduce_adjust_starts_64",
-                            out.data.dtype.type,
-                            offsets.dtype.type,
-                            starts.dtype.type,
-                        ](
-                            out.data,
-                            outlength,
-                            offsets.data,
-                            starts.data,
-                        )
-                    )
-                else:
-                    assert (
-                        out.backend is self._backend
-                        and starts.nplike is self._backend.nplike
-                        and shifts.nplike is self._backend.nplike
-                        and offsets.nplike is self._backend.nplike
-                    )
-                    self._backend.maybe_kernel_error(
-                        self._backend[
-                            "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
-                            out.data.dtype.type,
-                            offsets.dtype.type,
-                            starts.dtype.type,
-                            shifts.dtype.type,
-                        ](
-                            out.data,
-                            outlength,
-                            offsets.data,
-                            starts.data,
-                            shifts.data,
-                        )
-                    )
+            # Record-reducer overrides (e.g. `_argmin_pair`, `overload_argmax`)
+            # already return *row-relative* indices: the user typically writes
+            # something like `ak.argmax(array["rho"], axis=-1, ...)` inside
+            # their override, which yields per-row indices. The standard
+            # `awkward_NumpyArray_reduce_adjust_starts_*` kernels are designed
+            # to convert ABSOLUTE argmin/argmax indices (as produced by the
+            # leaf NumpyArray reducer) into row-relative form by subtracting
+            # `starts[k]`. Applying that subtraction here would be a second
+            # adjustment on already-correct values, producing negatives like
+            # `0 - 3 = -3`. So we skip the adjust step for record reducers —
+            # the override is the authoritative source of position info.
 
             if mask:
                 outmask = ak.index.Index8.empty(outlength, self._backend.nplike)

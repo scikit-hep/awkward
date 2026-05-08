@@ -928,7 +928,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             starts = self._offsets[:-1]
             return self._content._is_unique(negaxis, starts, self._offsets, outlength)
 
-
     def _unique(self, negaxis, starts, offsets, outlength):
         if self._offsets.length - 1 == 0:
             return self
@@ -1025,7 +1024,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             return ak.contents.ListOffsetArray(
                 outoffsets, outcontent, parameters=self._parameters
             )
-
 
     def _argsort_next(
         self,
