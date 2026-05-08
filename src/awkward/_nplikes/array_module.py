@@ -519,7 +519,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int | None = 0,
-    ) -> ArrayLike:
+    ) -> ArrayLikeT | VirtualNDArray:
         if any(isinstance(x, VirtualNDArray) and not x.is_materialized for x in arrays):
             dtype = self._module.concatenate(
                 [self._module.empty(0, x.dtype) for x in arrays]
