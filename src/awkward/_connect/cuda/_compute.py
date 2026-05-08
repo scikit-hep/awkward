@@ -664,19 +664,27 @@ def awkward_reduce_countnonzero(
     )
 
 
-# Fills toindex with [0, 1, ..., shorter, -1, -1, -1, ...] where shorter = min(target, length)
-# Valid indices point to existing elements, -1 pads the remaining slots up to target
 def awkward_index_rpad_and_clip_axis0(toindex, target, length):
+    """
+    Fill ``toindex[0..target)`` with the identity mapping ``[0..shorter)``
+    followed by ``target - shorter`` entries of ``-1``, where
+    ``shorter = min(target, length)``.
+
+    Called from ``Content._pad_none_axis0`` in
+    ``src/awkward/contents/content.py``.
+    """
+    dtype = toindex.dtype.type
     shorter = min(target, length)
 
-    def fill_index(i):
-        if i < shorter:
-            return toindex.dtype.type(i)
-        else:
-            return toindex.dtype.type(-1)
-
-    segment_ids = CountingIterator(toindex.dtype.type(0))
-    unary_transform(d_in=segment_ids, d_out=toindex, op=fill_index, num_items=target)
+    def fill(i):
+        return dtype(i) if i < shorter else dtype(-1)
+    counters = CountingIterator(dtype(0))
+    unary_transform(
+        d_in=counters,
+        d_out=toindex,
+        op=fill,
+        num_items=target,
+    )
 
 
 # Fills tostarts and tostops with evenly spaced offsets of size `target` for each of the `length` lists
