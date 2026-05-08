@@ -18,7 +18,10 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
   int64_t outlength,
   int64_t maxcount) {
   // Initialize outputs.
-  *maxnextparents = 0;
+  // -1 sentinel: callers compute the next-layer outlength as
+  // `maxnextparents + 1`, so when no elements are processed (empty input)
+  // we want that expression to evaluate to 0, not 1.
+  *maxnextparents = -1;
   for (int64_t i = 0; i < distinctslen; i++) {
     distincts[i] = -1;
   }

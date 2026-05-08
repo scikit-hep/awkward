@@ -2361,7 +2361,8 @@ kernels:
           distincts, distinctslen, offsetscopy, offsets, length,
           outer_offsets, outlength, maxcount,
       ):
-          maxnextparents[0] = 0
+          # -1 sentinel so callers compute (maxnextparents + 1) == 0 for empty input
+          maxnextparents[0] = -1
           for i in range(distinctslen):
               distincts[i] = -1
 
