@@ -656,7 +656,9 @@ def awkward_reduce_countnonzero(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_count_nonzero, num_items=outlength
+    )
 
 
 # Fills toindex with [0, 1, ..., shorter, -1, -1, -1, ...] where shorter = min(target, length)
@@ -671,7 +673,7 @@ def awkward_index_rpad_and_clip_axis0(toindex, target, length):
             return toindex.dtype.type(-1)
 
     segment_ids = CountingIterator(toindex.dtype.type(0))
-    unary_transform(segment_ids, toindex, fill_index, target)
+    unary_transform(d_in=segment_ids, d_out=toindex, op=fill_index, num_items=target)
 
 
 # Fills tostarts and tostops with evenly spaced offsets of size `target` for each of the `length` lists
@@ -681,4 +683,4 @@ def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
         return tostarts.dtype.type(i * target + target)
 
     segment_ids = CountingIterator(tostarts.dtype.type(0))
-    unary_transform(segment_ids, tostops, fill, length)
+    unary_transform(d_in=segment_ids, d_out=tostops, op=fill, num_items=length)
