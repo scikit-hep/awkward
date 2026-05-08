@@ -29,7 +29,8 @@ def zip(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Combines arrays into records or tuples, broadcasting them together.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
@@ -53,23 +54,25 @@ def zip(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Combines `arrays` into a single structure as the fields of a collection
-    of records or the slots of a collection of tuples. If the `arrays` have
-    nested structure, they are broadcasted with one another to form the
-    records or tuples as deeply as possible, though this can be limited by
-    `depth_limit`.
+    Returns:
+        Combines `arrays` into a single structure as the fields of a collection
+        of records or the slots of a collection of tuples. If the `arrays` have
+        nested structure, they are broadcasted with one another to form the
+        records or tuples as deeply as possible, though this can be limited by
+        `depth_limit`.
 
-    This operation may be thought of as the opposite of projection in
-    #ak.Array.__getitem__, which extracts fields one at a time, or
-    #ak.unzip, which extracts them all in one call.
+        This operation may be thought of as the opposite of projection in
+        #ak.Array.__getitem__, which extracts fields one at a time, or
+        #ak.unzip, which extracts them all in one call.
 
-    Consider the following arrays, `one` and `two`.
+    Examples:
+        Consider the following arrays, `one` and `two`.
 
         >>> one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]])
         >>> two = ak.Array([["a", "b", "c"], [], ["d", "e"], ["f"]])
 
-    Zipping them together using a dict creates a collection of records with
-    the same nesting structure as `one` and `two`.
+        Zipping them together using a dict creates a collection of records with
+        the same nesting structure as `one` and `two`.
 
         >>> ak.zip({"x": one, "y": two}).show()
         [[{x: 1.1, y: 'a'}, {x: 2.2, y: 'b'}, {x: 3.3, y: 'c'}],
@@ -77,7 +80,7 @@ def zip(
          [{x: 4.4, y: 'd'}, {x: 5.5, y: 'e'}],
          [{x: 6.6, y: 'f'}]]
 
-    Doing so with a list creates tuples, whose fields are not named.
+        Doing so with a list creates tuples, whose fields are not named.
 
         >>> ak.zip([one, two]).show()
         [[(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
@@ -85,9 +88,9 @@ def zip(
          [(4.4, 'd'), (5.5, 'e')],
          [(6.6, 'f')]]
 
-    Adding a third array with the same length as `one` and `two` but less
-    internal structure is okay: it gets broadcasted to match the others.
-    (See #ak.broadcast_arrays for broadcasting rules.)
+        Adding a third array with the same length as `one` and `two` but less
+        internal structure is okay: it gets broadcasted to match the others.
+        (See #ak.broadcast_arrays for broadcasting rules.)
 
         >>> three = ak.Array([100, 200, 300, 400])
         >>> ak.zip([one, two, three]).show()
@@ -96,8 +99,8 @@ def zip(
          [(4.4, 'd', 300), (5.5, 'e', 300)],
          [(6.6, 'f', 400)]]
 
-    However, if arrays have the same depth but different lengths of nested
-    lists, attempting to zip them together is a broadcasting error.
+        However, if arrays have the same depth but different lengths of nested
+        lists, attempting to zip them together is a broadcasting error.
 
         >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
         >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
@@ -115,30 +118,30 @@ def zip(
             )
         Error details: cannot broadcast nested list
 
-    For this, one can set the `depth_limit` to prevent the operation from
-    attempting to broadcast what can't be broadcasted.
+        For this, one can set the `depth_limit` to prevent the operation from
+        attempting to broadcast what can't be broadcasted.
 
         >>> ak.zip([one, two], depth_limit=1).show()
         [([[1, 2, 3], [], [4, ...], [6]], [[1.1, ...], ...]),
          ([], []),
          ([[7, 8]], [[6.6]])]
 
-    As an extreme, `depth_limit=1` is a handy way to make a record structure
-    at the outermost level, regardless of whether the fields have matching
-    structure or not.
+        As an extreme, `depth_limit=1` is a handy way to make a record structure
+        at the outermost level, regardless of whether the fields have matching
+        structure or not.
 
-    When zipping together arrays with optional values, it can be useful to create
-    the #ak.contents.RecordArray node after the option types. By default, #ak.zip
-    does not do this:
+        When zipping together arrays with optional values, it can be useful to create
+        the #ak.contents.RecordArray node after the option types. By default, #ak.zip
+        does not do this:
 
         >>> one = ak.Array([1, 2, None])
         >>> two = ak.Array([None, 5, 6])
         >>> ak.zip([one, two])
         <Array [(1, None), (2, 5), (None, 6)] type='3 * (?int64, ?int64)'>
 
-    If the `optiontype_outside_record` option is set to `True`, Awkward will continue to
-    broadcast the arrays together at the depth_limit until it reaches non-option
-    types. This effectively takes the union of the option mask:
+        If the `optiontype_outside_record` option is set to `True`, Awkward will continue to
+        broadcast the arrays together at the depth_limit until it reaches non-option
+        types. This effectively takes the union of the option mask:
 
         >>> ak.zip([one, two], optiontype_outside_record=True)
         <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
