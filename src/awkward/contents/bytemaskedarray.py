@@ -72,7 +72,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
     to mask all node types.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class ByteMaskedArray(Content):
             def __init__(self, mask, content, valid_when):

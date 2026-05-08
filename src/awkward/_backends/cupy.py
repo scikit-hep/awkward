@@ -89,6 +89,7 @@ class CupyBackend(Backend):
         - awkward_prod_bool
         - awkward_count_64
         - awkward_countnonzero
+        - awkward_index_rpad_and_clip_axis0
         """
         return kernel_name in (
             "awkward_sort",
@@ -104,6 +105,7 @@ class CupyBackend(Backend):
             "awkward_reduce_countnonzero",
             "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
             "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+            "awkward_index_rpad_and_clip_axis0",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):

@@ -85,7 +85,7 @@ cuda_kernels_impl = [
     "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
     "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
     "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
-    "awkward_index_rpad_and_clip_axis0",
+    # "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
     "awkward_NumpyArray_subrange_equal",
     "awkward_NumpyArray_subrange_equal_bool",

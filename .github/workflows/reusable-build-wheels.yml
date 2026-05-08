@@ -8,12 +8,9 @@ on:
   workflow_dispatch:
   # Use from other workflows
   workflow_call:
-  pull_request:
-    paths:
-      - .github/workflows/build-wheels.yml
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: build-wheels-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -22,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
-    if: github.repository_owner == 'scikit-hep'
 
     steps:
       - uses: actions/checkout@v6
@@ -98,7 +94,7 @@ jobs:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@v8.1.0
 
     - name: Prepare build files
       run: pipx run nox -s prepare
@@ -130,7 +126,7 @@ jobs:
         submodules: true
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@v8.1.0
 
     - name: Prepare build files
       run: pipx run nox -s prepare

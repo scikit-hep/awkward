@@ -10,7 +10,7 @@ on:
 jobs:
 
   build-wheels:
-    uses: ./.github/workflows/build-wheels.yml
+    uses: ./.github/workflows/reusable-build-wheels.yml
 
   upload-awkward-cpp:
     needs: [build-wheels]
@@ -39,4 +39,4 @@ jobs:
       with:
         subject-path: "dist/awkward*cpp-*"
 
-    - uses: pypa/gh-action-pypi-publish@v1.13.0
+    - uses: pypa/gh-action-pypi-publish@v1.14.0

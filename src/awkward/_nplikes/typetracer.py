@@ -1418,6 +1418,11 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             out = (item * out[0], *out)
         return out
 
+    def byteswap(self, x: TypeTracerArray) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        return TypeTracerArray._new(x.dtype, shape=x.shape)
+
     ############################ ufuncs
 
     def add(

@@ -129,7 +129,7 @@ class RecordArray(RecordMeta[Content], Content):
     [struct type](https://arrow.apache.org/docs/format/Columnar.html#struct-layout).
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class RecordArray(Content):
             def __init__(self, contents, fields, length):
