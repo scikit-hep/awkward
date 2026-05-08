@@ -981,11 +981,18 @@ class NumpyArray(NumpyMeta, Content):
                 # shift index it reads parents[i] to find the outer bin. We
                 # derive parents from offsets here.
                 nplike = self._backend.nplike
+                # Cast `counts` to np.intp because np.repeat enforces the
+                # 'safe' casting rule on its `repeats` parameter, and on
+                # platforms where np.intp is int32 (Windows 64-bit numpy <2.0,
+                # 32-bit numpy 2.x) an int64 counts array would raise
+                # "Cannot cast array data from dtype('int64') to dtype('int32')
+                # according to the rule 'safe'".
+                counts = offsets.data[1:] - offsets.data[:-1]
                 parents_data = nplike.repeat(
                     nplike.arange(
                         nplike.shape_item_as_index(outlength), dtype=np.int64
                     ),
-                    offsets.data[1:] - offsets.data[:-1],
+                    nplike.astype(counts, np.intp),
                 )
                 parents = ak.index.Index64(parents_data, nplike=nplike)
                 assert (

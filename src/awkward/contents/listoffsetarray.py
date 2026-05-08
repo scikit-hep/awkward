@@ -1054,11 +1054,14 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
                 # `awkward_ListOffsetArray_argsort_strings` is still parents-based,
                 # so reconstruct parents on the fly from offsets+outlength.
+                # Cast counts to np.intp; see numpyarray._argsort_next for the
+                # cross-platform 'safe' cast rationale.
+                counts = offsets.data[1:] - offsets.data[:-1]
                 parents_data = nplike.repeat(
                     nplike.arange(
                         nplike.shape_item_as_index(outlength), dtype=np.int64
                     ),
-                    offsets.data[1:] - offsets.data[:-1],
+                    nplike.astype(counts, np.intp),
                 )
                 parents = Index64(parents_data, nplike=nplike)
 
@@ -1224,11 +1227,14 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 # `offsets` parameter here is the outer-bin offsets (length
                 # outlength + 1), NOT self._offsets (which is the per-string
                 # byte offsets and has a different shape).
+                # Cast counts to np.intp; see numpyarray._argsort_next for the
+                # cross-platform 'safe' cast rationale.
+                counts = offsets.data[1:] - offsets.data[:-1]
                 parents_data = nplike.repeat(
                     nplike.arange(
                         nplike.shape_item_as_index(outlength), dtype=np.int64
                     ),
-                    offsets.data[1:] - offsets.data[:-1],
+                    nplike.astype(counts, np.intp),
                 )
                 parents = Index64(parents_data, nplike=nplike)
 
