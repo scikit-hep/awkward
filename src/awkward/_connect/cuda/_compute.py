@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-# TODO: delete these after modifying argmin
 from cuda.compute import (
     CountingIterator,
     gpu_struct,
+    reduce_into,
     unary_transform,
 )
 
@@ -66,16 +66,16 @@ def segmented_sort(
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
 
     segmented_sort(
-        fromptr,  # d_in_keys
-        toptr,  # d_out_keys
-        None,  # d_in_values (not sorting values, just keys)
-        None,  # d_out_values
-        num_items,  # num_items
-        num_segments,  # num_segments
-        start_offsets,  # start_offsets_in
-        end_offsets,  # end_offsets_in
-        order,  # order (ASCENDING or DESCENDING)
-        None,  # stream (use default stream)
+        d_in_keys=fromptr,
+        d_out_keys=toptr,
+        d_in_values=None,
+        d_out_values=None,
+        num_items=num_items,
+        num_segments=num_segments,
+        start_offsets_in=start_offsets,
+        end_offsets_in=end_offsets,
+        order=order,
+        stream=None,
     )
 
 
@@ -162,7 +162,9 @@ def awkward_reduce_argmax(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_argmax, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_argmax, num_items=outlength
+    )
 
 
 # this function is called from ~/awkward/src/awkward/_reducers.py:161 (ArgMin.apply())
@@ -196,7 +198,36 @@ def awkward_reduce_argmin(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_argmin, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_argmin, num_items=outlength
+    )
+
+
+def awkward_axis_none_reduce_max(array):
+    data_dtype = array.dtype
+    index_dtype = np.int64
+    # initialize the minimum value depending on the dtype
+    if data_dtype.kind in "iu":  # int/uint
+        min = cp.iinfo(data_dtype).min
+    elif data_dtype.kind == "f":  # float
+        min = cp.finfo(data_dtype).min
+    else:
+        raise TypeError("Unsupported dtype to get the minimal value")
+
+    def reduce_op(a, b):
+        return max(a, b)
+
+    result_scalar = cp.empty(1, dtype=index_dtype)
+    h_init = np.array([min], dtype=index_dtype)
+    reduce_into(
+        d_in=array,
+        d_out=result_scalar,
+        op=reduce_op,
+        num_items=len(array),
+        h_init=h_init,
+    )
+
+    return result_scalar
 
 
 def awkward_reduce_sum(
@@ -231,7 +262,9 @@ def awkward_reduce_sum(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_sum, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_sum, num_items=outlength
+    )
 
 
 # original implementation - currently bools don't work because of a bug on numba side
@@ -269,7 +302,9 @@ def awkward_reduce_sum_bool(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_sum, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_sum, num_items=outlength
+    )
 
 
 # this is the same as awkward_reduce_sum (we can possibly use it after the bug on numba side is fixed)
@@ -309,7 +344,9 @@ def awkward_reduce_sum_int32_bool_64(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_sum, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_sum, num_items=outlength
+    )
 
 
 def awkward_reduce_prod(
@@ -345,7 +382,9 @@ def awkward_reduce_prod(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_prod, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_prod, num_items=outlength
+    )
 
 
 def awkward_reduce_prod_bool(
@@ -382,7 +421,9 @@ def awkward_reduce_prod_bool(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_prod, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_prod, num_items=outlength
+    )
 
 
 def awkward_reduce_max(
@@ -422,7 +463,9 @@ def awkward_reduce_max(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_max, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_max, num_items=outlength
+    )
 
 
 # original implementation of `awkward_reduce_max_complex` (doesn't work - keep for archive)
@@ -488,7 +531,9 @@ def awkward_reduce_max_complex(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_max, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_max, num_items=outlength
+    )
 
     # print("this is the result:", result)
 
@@ -530,7 +575,9 @@ def awkward_reduce_min(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_min, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_min, num_items=outlength
+    )
 
 
 def awkward_reduce_count_64(
@@ -567,7 +614,9 @@ def awkward_reduce_count_64(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_count, outlength)
+    unary_transform(
+        d_in=segment_ids, d_out=result, op=segment_reduce_count, num_items=outlength
+    )
 
 
 def awkward_reduce_countnonzero(

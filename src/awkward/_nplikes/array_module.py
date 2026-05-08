@@ -37,6 +37,17 @@ def _nplike_concatenate_has_casting(module: Any) -> bool:
         return True
 
 
+@lru_cache
+def _nplike_reshape_has_copy(module: Any) -> bool:
+    x = module.zeros(2)
+    try:
+        module.reshape(x, (2,), copy=False)
+    except TypeError:
+        return False
+    else:
+        return True
+
+
 ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
 
 
@@ -371,10 +382,14 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             return self._module.reshape(self._module.copy(x, order="C"), shape)
         else:
             result = self._module.asarray(x)
+            if _nplike_reshape_has_copy(self._module):
+                return self._module.reshape(result, shape, copy=False)
             try:
                 result.shape = shape
             except AttributeError:
-                raise ValueError("cannot reshape array without copying") from None
+                raise ValueError(
+                    "Unable to avoid creating a copy while reshaping."
+                ) from None
             return result
 
     def shape_item_as_index(self, x1: ShapeItem) -> int:
@@ -566,6 +581,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
         (x,) = maybe_materialize(x)
         return x.strides
+
+    def byteswap(self, x: ArrayLikeT) -> ArrayLikeT:
+        raise NotImplementedError
 
     ############################ ufuncs
 
@@ -791,4 +809,4 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         return cls.is_own_array_type(type(obj))
 
     def memory_ptr(self, x: ArrayLikeT) -> int:
-        raise NotImplementedError()
+        raise NotImplementedError
