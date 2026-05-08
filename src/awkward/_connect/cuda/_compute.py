@@ -135,13 +135,13 @@ def rearrange_by_parents(input_data, parents):
 def awkward_reduce_argmax(
     result,
     input_data,
-    parents_data,
     offsets_data,
-    parents_length,
     starts,
     outlength,
 ):
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_argmax(segment_id):
         start_idx = start_o[segment_id]
@@ -151,11 +151,6 @@ def awkward_reduce_argmax(
             return -1
         # return a global index
         return np.argmax(segment) + start_idx
-
-    # Prepare the start and end offsets
-    offsets = starts_to_offsets(starts, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
 
     # Perform the segmented reduce
     # type_wrapper is always cp.int64
@@ -171,13 +166,13 @@ def awkward_reduce_argmax(
 def awkward_reduce_argmin(
     result,
     input_data,
-    parents_data,
     offsets_data,
-    parents_length,
     starts,
     outlength,
 ):
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_argmin(segment_id):
         start_idx = start_o[segment_id]
@@ -187,11 +182,6 @@ def awkward_reduce_argmin(
             return -1
         # return a global index
         return np.argmin(segment) + start_idx
-
-    # Prepare the start and end offsets
-    offsets = starts_to_offsets(starts, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
 
     # Perform the segmented reduce
     # type_wrapper is always cp.int64
@@ -233,12 +223,12 @@ def awkward_axis_none_reduce_max(array):
 def awkward_reduce_sum(
     result,
     input_data,
-    parents_data,
     offsets_data,
-    parents_length,
     outlength,
 ):
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_sum(segment_id):
         start_idx = start_o[segment_id]
@@ -247,15 +237,6 @@ def awkward_reduce_sum(
         if len(segment) == 0:
             return 0
         return np.sum(segment)
-
-    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
-    input_data = rearrange_by_parents(input_data, parents_data)
-
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
@@ -271,31 +252,22 @@ def awkward_reduce_sum(
 def awkward_reduce_sum_bool(
     result,
     input_data,
-    parents_data,
     offsets_data,
-    parents_length,
     outlength,
 ):
     # temporary workaround - fix this (currently bools don't work because of a bug on numba side)
     if input_data.dtype == cp.bool_:
         input_data = input_data.view(cp.int8)  # cast bool -> int8
 
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_sum(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
         return np.any(segment)
-
-    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
-    input_data = rearrange_by_parents(input_data, parents_data)
-
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
@@ -311,16 +283,16 @@ def awkward_reduce_sum_bool(
 def awkward_reduce_sum_int32_bool_64(
     result,
     input_data,
-    parents_data,
     offsets_data,
-    parents_length,
     outlength,
 ):
     # temporary workaround - fix this (currently bools don't work because of a bug on numba side)
     if input_data.dtype == cp.bool_:
         input_data = input_data.view(cp.int8)  # cast bool -> int8
 
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_sum(segment_id):
         start_idx = start_o[segment_id]
@@ -329,15 +301,6 @@ def awkward_reduce_sum_int32_bool_64(
         if len(segment) == 0:
             return 0
         return np.sum(segment)
-
-    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
-    input_data = rearrange_by_parents(input_data, parents_data)
-
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
@@ -352,12 +315,12 @@ def awkward_reduce_sum_int32_bool_64(
 def awkward_reduce_prod(
     result,
     input_data,
-    parents_data,
     offsets_data,
-    parents_length,
     outlength,
 ):
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_prod(segment_id):
         start_idx = start_o[segment_id]
@@ -367,15 +330,6 @@ def awkward_reduce_prod(
             # that's what a cpu kernel passes for empty arrays (awkward-cpp/src/cpu-kernels/awkward_reduce_prod.cpp#L15)
             return 1
         return np.prod(segment)
-
-    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
-    input_data = rearrange_by_parents(input_data, parents_data)
-
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
@@ -390,31 +344,22 @@ def awkward_reduce_prod(
 def awkward_reduce_prod_bool(
     result,
     input_data,
-    parents_data,
     offsets_data,
-    parents_length,
     outlength,
 ):
     # temporary workaround - fix this (currently bools don't work because of a bug on numba side)
     if input_data.dtype == cp.bool_:
         input_data = input_data.view(cp.int8)  # cast bool -> int8
 
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_prod(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
         return np.all(segment)
-
-    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
-    input_data = rearrange_by_parents(input_data, parents_data)
-
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
@@ -429,14 +374,14 @@ def awkward_reduce_prod_bool(
 def awkward_reduce_max(
     result,
     input_data,
-    parents_data,
     offsets_data,
-    parents_length,
     outlength,
     # the initial value for the reduction
     identity,
 ):
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_max(segment_id):
         start_idx = start_o[segment_id]
@@ -447,16 +392,6 @@ def awkward_reduce_max(
         max_value = max(segment)
         # return identity if it is > than max_value from input_data
         return max(max_value, identity)
-
-    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
-    # TODO: delete this? (it is only used in tests-cuda-kernels-explicit)
-    input_data = rearrange_by_parents(input_data, parents_data)
-
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
@@ -472,17 +407,14 @@ def awkward_reduce_max(
 def awkward_reduce_max_complex(
     result,
     input_data,
-    parents_data,
     offsets_data,
-    parents_length,
     outlength,
     # the initial value for the reduction
     identity,
 ):
     # print("outlength", outlength)
     # print(input_data)
-    # print(parents_data)
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
     data_dtype = input_data.dtype.type
 
     complex_array = gpu_struct(
@@ -492,6 +424,9 @@ def awkward_reduce_max_complex(
         }
     )
     result = result.view(complex_array.dtype)
+
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_max(segment_id):
         start_idx = start_o[segment_id]
@@ -515,17 +450,6 @@ def awkward_reduce_max_complex(
         # print(complex_array(max_real, max_imag))
         return complex_array(max_real, max_imag)
 
-    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
-    # TODO: delete this? (it is only used in tests-cuda-kernels-explicit)
-    input_data = rearrange_by_parents(input_data, parents_data)
-
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
-    # print(offsets)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
-
     # Perform the segmented reduce
     # type_wrapper: cp.int64
     type_wrapper = cp.dtype(index_dtype).type
@@ -541,14 +465,14 @@ def awkward_reduce_max_complex(
 def awkward_reduce_min(
     result,
     input_data,
-    parents_data,
     offsets_data,
-    parents_length,
     outlength,
     # the initial value for the reduction
     identity,
 ):
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_min(segment_id):
         start_idx = start_o[segment_id]
@@ -559,16 +483,6 @@ def awkward_reduce_min(
         min_value = min(segment)
         # return identity if it is < than min_value from input_data
         return min(min_value, identity)
-
-    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_min` directly and specify unordered parents
-    # TODO: delete this? (it is only used in tests-cuda-kernels-explicit)
-    input_data = rearrange_by_parents(input_data, parents_data)
-
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
@@ -582,32 +496,15 @@ def awkward_reduce_min(
 
 def awkward_reduce_count_64(
     result,
-    parents_data,
-    parents_length,
+    offsets_data,
     outlength,
 ):
-    index_dtype = parents_data.dtype
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_count(segment_id):
-        if segment_id > offsets_len:
-            # (when we will pass offsets directly, this won't be needed)
-            return 0
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-        if end_idx < start_idx:
-            # if there are empty arrays at the end (when we will pass offsets directly, this won't be needed)
-            return 0
-        return end_idx - start_idx
-
-    # initialize all results values to be 0 by default
-    result[:] = 0
-
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
-    offsets_len = len(offsets) - 2
+        return end_o[segment_id] - start_o[segment_id]
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
@@ -622,19 +519,18 @@ def awkward_reduce_count_64(
 def awkward_reduce_countnonzero(
     result,
     input_data,
-    parents_data,
-    parents_length,
+    offsets_data,
     outlength,
 ):
     # temporary workaround - fix this (currently bools don't work because of a bug on numba side)
     if input_data.dtype == cp.bool_:
         input_data = input_data.view(cp.int8)  # cast bool -> int8
-    index_dtype = parents_data.dtype
+
+    index_dtype = offsets_data.dtype
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
 
     def segment_reduce_count_nonzero(segment_id):
-        if segment_id > offsets_len:
-            # (when we will pass offsets directly, this won't be needed)
-            return 0
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
@@ -643,13 +539,6 @@ def awkward_reduce_countnonzero(
             if segment[i] != 0:
                 count += 1
         return count
-
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    offsets = parents_to_offsets(parents_data, parents_length)
-    start_o = offsets[:-1]
-    end_o = offsets[1:]
-    offsets_len = len(offsets) - 2
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
