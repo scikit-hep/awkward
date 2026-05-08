@@ -698,7 +698,7 @@ def awkward_localindex(toindex, length):
         d_in=segment_ids, d_out=toindex, op=fill_local_index, num_items=length
     )
 
-      
+
 # Fills tostarts and tostops with evenly spaced offsets of size `target` for each of the `length` lists
 def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
     def fill(i):
