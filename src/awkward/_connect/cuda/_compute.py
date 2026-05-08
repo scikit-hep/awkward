@@ -686,3 +686,27 @@ def awkward_index_rpad_and_clip_axis0(toindex, target, length):
         op=fill,
         num_items=target,
     )
+
+
+def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsize):
+    """
+    Repeats an index array `repetitions` times, adjusting valid (non-negative) indices
+    by an offset(regularsize) each repetition.
+    Missing values (-1) are preserved as-is across all repetitions.
+    """
+
+    index_dtype = outindex.dtype.type
+
+    def fill_missing_repeat(counter):
+        i = counter // indexlength  # number of repetition we're in
+        j = counter % indexlength  # position within the current repetition
+        val_offset = i * regularsize
+        base = index[j]
+        adjustment = index_dtype(val_offset) if base >= 0 else index_dtype(0)
+        return base + adjustment
+
+    output_size = repetitions * indexlength
+    counters = CountingIterator(index_dtype(0))
+    unary_transform(
+        d_in=counters, d_out=outindex, op=fill_missing_repeat, num_items=output_size
+    )
