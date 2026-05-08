@@ -90,6 +90,7 @@ class CupyBackend(Backend):
         - awkward_localindex
         - awkward_index_rpad_and_clip_axis0
         """
+
         return kernel_name in (
             "awkward_sort",
             "awkward_reduce_sum",
