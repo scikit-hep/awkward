@@ -657,7 +657,10 @@ def awkward_reduce_countnonzero(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_count_nonzero, num_items=outlength
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_count_nonzero,
+        num_items=outlength,
     )
 
 
