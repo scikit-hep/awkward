@@ -656,7 +656,36 @@ def awkward_reduce_countnonzero(
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
-    unary_transform(segment_ids, result, segment_reduce_count_nonzero, outlength)
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_count_nonzero,
+        num_items=outlength,
+    )
+
+
+def awkward_index_rpad_and_clip_axis0(toindex, target, length):
+    """
+    Fill ``toindex[0..target)`` with the identity mapping ``[0..shorter)``
+    followed by ``target - shorter`` entries of ``-1``, where
+    ``shorter = min(target, length)``.
+
+    Called from ``Content._pad_none_axis0`` in
+    ``src/awkward/contents/content.py``.
+    """
+    dtype = toindex.dtype.type
+    shorter = min(target, length)
+
+    def fill(i):
+        return dtype(i) if i < shorter else dtype(-1)
+
+    counters = CountingIterator(dtype(0))
+    unary_transform(
+        d_in=counters,
+        d_out=toindex,
+        op=fill,
+        num_items=target,
+    )
 
 
 def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsize):
@@ -678,4 +707,6 @@ def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsiz
 
     output_size = repetitions * indexlength
     counters = CountingIterator(index_dtype(0))
-    unary_transform(counters, outindex, fill_missing_repeat, output_size)
+    unary_transform(
+        d_in=counters, d_out=outindex, op=fill_missing_repeat, num_items=output_size
+    )
