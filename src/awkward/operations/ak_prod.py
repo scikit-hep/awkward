@@ -109,7 +109,7 @@ def nanprod(
 
     Like #ak.prod, but treating NaN ("not a number") values as missing.
 
-    Equivalent to
+    Equivalent to::
 
         ak.prod(ak.nan_to_none(array))
 

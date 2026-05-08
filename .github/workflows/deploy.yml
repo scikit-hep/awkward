@@ -135,7 +135,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: gh attestation verify dist/awkward-*.whl --repo ${{ github.repository }}
 
-    - uses: pypa/gh-action-pypi-publish@v1.13.0
+    - uses: pypa/gh-action-pypi-publish@v1.14.0
 
   publish-headers:
     name: "Publish header-only libraries alongside release"
@@ -151,6 +151,6 @@ jobs:
       run: |
         # Don't include `header-only` parent directory
         env -C header-only/ zip -r header-only.zip .
-    - uses: softprops/action-gh-release@v2
+    - uses: softprops/action-gh-release@v3
       with:
         files: header-only/header-only.zip

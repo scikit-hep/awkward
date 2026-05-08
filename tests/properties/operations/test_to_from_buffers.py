@@ -14,4 +14,4 @@ def test_roundtrip(a: ak.Array) -> None:
     """`to_buffers` followed by `from_buffers` reconstructs the array."""
     sent = ak.to_buffers(a)
     returned = ak.from_buffers(*sent)
-    assert ak.array_equal(a, returned)
+    assert ak.array_equal(a, returned, equal_nan=True)

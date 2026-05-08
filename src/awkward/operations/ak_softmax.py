@@ -69,7 +69,7 @@ def softmax(
 
     This function has no NumPy equivalent.
 
-    Passing all arguments to the reducers, the softmax is calculated as
+    Passing all arguments to the reducers, the softmax is calculated as::
 
         np.exp(x) / ak.sum(np.exp(x))
 

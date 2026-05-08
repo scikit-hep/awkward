@@ -61,12 +61,12 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     BitMaskedArray has an additional parameter, `lsb_order`; if True,
     the position of each bit is in
     [Least-Significant Bit order](https://en.wikipedia.org/wiki/Bit_numbering)
-    (LSB):
+    (LSB)::
 
         is_valid[j] = bool(mask[j // 8] & (1 << (j % 8))) == valid_when
 
     If False, the position of each bit is in Most-Significant Bit order
-    (MSB):
+    (MSB)::
 
         is_valid[j] = bool(mask[j // 8] & (128 >> (j % 8))) == valid_when
 
@@ -79,7 +79,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     to mask their data, with `valid_when=True` and `lsb_order=True`.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class BitMaskedArray(Content):
             def __init__(self, mask, content, valid_when, length, lsb_order):
