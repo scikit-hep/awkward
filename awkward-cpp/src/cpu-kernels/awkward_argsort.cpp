@@ -35,6 +35,12 @@ ERROR awkward_argsort(
     return ascending ? (l < r) : (l > r);
   };
 
+  // Bin loop is embarrassingly parallel: each segment of `toptr` is sorted
+  // independently. The `if(...)` clause keeps the parallel region inert for
+  // tiny outputs where thread-startup would dominate.
+  #ifdef _OPENMP
+  #pragma omp parallel for if(offsetslength > 1024) schedule(dynamic, 64)
+  #endif
   for (int64_t i = 0; i < offsetslength - 1; i++) {
     int64_t lo = static_cast<int64_t>(offsets[i]);
     int64_t hi = static_cast<int64_t>(offsets[i + 1]);

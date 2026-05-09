@@ -39,6 +39,11 @@ ERROR awkward_sort(
     return ascending ? (l < r) : (l > r);
   };
 
+  // Bin loop is embarrassingly parallel: each segment of `index` is sorted
+  // independently. `dynamic` schedule helps when bin sizes are uneven.
+  #ifdef _OPENMP
+  #pragma omp parallel for if(offsetslength > 1024) schedule(dynamic, 64)
+  #endif
   for (int64_t i = 0; i < offsetslength - 1; i++) {
     auto first = index.begin() + offsets[i];
     auto last  = index.begin() + offsets[i + 1];

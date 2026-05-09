@@ -16,6 +16,9 @@ ERROR awkward_reduce_countnonzero(
   const IN* __restrict__ fromptr,
   const int64_t* __restrict__ offsets,
   int64_t outlength) {
+  #ifdef _OPENMP
+  #pragma omp parallel for if(outlength > 1024) schedule(static)
+  #endif
   for (int64_t bin = 0; bin < outlength; bin++) {
     const int64_t start = offsets[bin];
     const int64_t stop  = offsets[bin + 1];
