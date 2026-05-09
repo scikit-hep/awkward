@@ -3,106 +3,38 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (toptr, fromptr, offsets, outlength, invocation_index, err_code) = args
-//     # Offsets-pipeline: derive parents from offsets+outlength so the kernel
-//     # body (which still reads parents internally) runs unchanged.
-//     lenparents = int(offsets[int(outlength)].item()) if int(outlength) >= 0 else 0
-//     if int(outlength) > 0 and lenparents > 0:
-//         counts = offsets[1:int(outlength) + 1] - offsets[:int(outlength)]
-//         parents = cupy.repeat(cupy.arange(int(outlength), dtype=cupy.int64), counts.astype(cupy.int64))
-//     else:
-//         parents = cupy.zeros(0, dtype=cupy.int64)
 //     if block[0] > 0:
-//         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
+//         grid_size = math.floor((int(outlength) + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
-//     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_complex_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_complex_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, temp, invocation_index, err_code))
-// out["awkward_reduce_sum_bool_complex_a", {dtype_specializations}] = None
-// out["awkward_reduce_sum_bool_complex_b", {dtype_specializations}] = None
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_reduce_sum_bool_complex_kernel', cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, offsets.dtype]))((grid_size,), block, (toptr, fromptr, offsets, outlength, invocation_index, err_code))
+// out['awkward_reduce_sum_bool_complex_kernel', {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C, typename U, typename V>
+// One thread per bin, mirroring awkward_reduce_sum_bool_complex.cpp.
+// Early-exit on first nonzero complex value.
+template <typename T, typename C, typename V>
 __global__ void
-awkward_reduce_sum_bool_complex_a(
+awkward_reduce_sum_bool_complex_kernel(
     T* toptr,
     const C* fromptr,
-    const U* parents,
     const V* offsets,
-    int64_t lenparents,
     int64_t outlength,
-    uint32_t* atomic_toptr,
-    T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (thread_id < outlength) {
-      atomic_toptr[thread_id] = 0;
-    }
-  }
-}
-
-template <typename T, typename C, typename U, typename V>
-__global__ void
-awkward_reduce_sum_bool_complex_b(
-    T* toptr,
-    const C* fromptr,
-    const U* parents,
-    const V* offsets,
-    int64_t lenparents,
-    int64_t outlength,
-    uint32_t* atomic_toptr,
-    T* temp,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
-  if (err_code[0] == NO_ERROR) {
-    int64_t idx = threadIdx.x;
-    int64_t thread_id = blockIdx.x * blockDim.x + idx;
-
-    if (thread_id < lenparents) {
-      temp[thread_id] = (fromptr[thread_id * 2] != 0  ||  fromptr[thread_id * 2 + 1] != 0);
-    }
-    __syncthreads();
-
-    if (thread_id < lenparents) {
-      for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-        T val = 0;
-        if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-          val = temp[thread_id - stride];
+    int64_t bin = blockIdx.x * blockDim.x + threadIdx.x;
+    if (bin < outlength) {
+      bool found = false;
+      int64_t start = (int64_t)offsets[bin];
+      int64_t stop  = (int64_t)offsets[bin + 1];
+      for (int64_t i = start; i < stop; i++) {
+        if (fromptr[i * 2] != (C)0 || fromptr[i * 2 + 1] != (C)0) {
+          found = true;
+          break;
         }
-        __syncthreads();
-        temp[thread_id] |= val;
-        __syncthreads();
       }
-
-      int64_t parent = parents[thread_id];
-      if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicOr(&atomic_toptr[parent], temp[thread_id]);
-      }
-    }
-  }
-}
-
-template <typename T, typename C, typename U, typename V>
-__global__ void
-awkward_reduce_sum_bool_complex_c(
-    T* toptr,
-    const C* fromptr,
-    const U* parents,
-    const V* offsets,
-    int64_t lenparents,
-    int64_t outlength,
-    uint32_t* atomic_toptr,
-    T* temp,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
-  if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (thread_id < outlength) {
-      toptr[thread_id] = (T)(atomic_toptr[thread_id]);
+      toptr[bin] = found;
     }
   }
 }

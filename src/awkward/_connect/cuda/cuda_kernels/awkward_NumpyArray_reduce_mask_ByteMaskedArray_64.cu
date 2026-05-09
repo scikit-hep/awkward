@@ -6,7 +6,7 @@
 
 template <typename T, typename C>
 __global__ void
-awkward_NumpyArray_reduce_mask_ByteMaskedArray_offsets_64(
+awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
     T* toptr,
     const C* offsets,
     int64_t outlength,
