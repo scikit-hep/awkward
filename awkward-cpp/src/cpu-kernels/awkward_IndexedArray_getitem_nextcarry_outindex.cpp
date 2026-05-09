@@ -28,42 +28,12 @@ ERROR awkward_IndexedArray_getitem_nextcarry_outindex(
   }
   return success();
 }
-ERROR awkward_IndexedArray32_getitem_nextcarry_outindex_64(
-  int64_t* tocarry,
-  int32_t* toindex,
-  const int32_t* fromindex,
-  int64_t lenindex,
-  int64_t lencontent) {
-  return awkward_IndexedArray_getitem_nextcarry_outindex<int32_t, int64_t>(
-    tocarry,
-    toindex,
-    fromindex,
-    lenindex,
-    lencontent);
-}
-ERROR awkward_IndexedArrayU32_getitem_nextcarry_outindex_64(
-  int64_t* tocarry,
-  uint32_t* toindex,
-  const uint32_t* fromindex,
-  int64_t lenindex,
-  int64_t lencontent) {
-  return awkward_IndexedArray_getitem_nextcarry_outindex<uint32_t, int64_t>(
-    tocarry,
-    toindex,
-    fromindex,
-    lenindex,
-    lencontent);
-}
-ERROR awkward_IndexedArray64_getitem_nextcarry_outindex_64(
-  int64_t* tocarry,
-  int64_t* toindex,
-  const int64_t* fromindex,
-  int64_t lenindex,
-  int64_t lencontent) {
-  return awkward_IndexedArray_getitem_nextcarry_outindex<int64_t, int64_t>(
-    tocarry,
-    toindex,
-    fromindex,
-    lenindex,
-    lencontent);
-}
+
+#define WRAPPER(SUFFIX, C, T) \
+  ERROR awkward_IndexedArray##SUFFIX(T* tocarry, C* toindex, const C* fromindex, int64_t lenindex, int64_t lencontent) { \
+    return awkward_IndexedArray_getitem_nextcarry_outindex<C, T>(tocarry, toindex, fromindex, lenindex, lencontent); \
+  }
+
+WRAPPER(32_getitem_nextcarry_outindex_64, int32_t, int64_t)
+WRAPPER(U32_getitem_nextcarry_outindex_64, uint32_t, int64_t)
+WRAPPER(64_getitem_nextcarry_outindex_64, int64_t, int64_t)

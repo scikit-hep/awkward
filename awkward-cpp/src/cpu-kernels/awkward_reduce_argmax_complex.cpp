@@ -29,17 +29,11 @@ ERROR awkward_reduce_argmax_complex(
   }
   return success();
 }
-ERROR awkward_reduce_argmax_complex64_64(
-  int64_t* toptr,
-  const float* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_argmax_complex<int64_t, float>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_argmax_complex128_64(
-  int64_t* toptr,
-  const double* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_argmax_complex<int64_t, double>(toptr, fromptr, offsets, outlength);
-}
+
+#define WRAPPER(SUFFIX, OUT, IN) \
+  ERROR awkward_reduce_argmax_complex##SUFFIX(OUT* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
+    return awkward_reduce_argmax_complex<OUT, IN>(toptr, fromptr, offsets, outlength); \
+  }
+
+WRAPPER(64_64, int64_t, float)
+WRAPPER(128_64, int64_t, double)

@@ -5,22 +5,15 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
-#include <vector>
+#include <type_traits>
 
 #include "awkward/kernels.h"
 
-template <typename T>
-bool argsort_order_ascending(T l, T r)
-{
-  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l < r);
-}
-
-template <typename T>
-bool argsort_order_descending(T l, T r)
-{
-  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l > r);
-}
-
+// Per-segment argsort. NaNs are pushed to the high end (matching NumPy /
+// the older hand-rolled comparator). The ascending/descending choice and
+// the floating-point NaN handling are folded into a single inline lambda;
+// `if constexpr` lets the bool / integer specialisations compile without
+// an `std::isnan(bool)` instantiation.
 template <typename T, typename U>
 ERROR awkward_argsort(
   int64_t* toptr,
@@ -30,100 +23,56 @@ ERROR awkward_argsort(
   int64_t offsetslength,
   bool ascending,
   bool stable) {
-  std::iota(toptr, toptr + length, 0);
+  std::iota(toptr, toptr + length, int64_t{0});
+
+  auto less = [&](int64_t a, int64_t b) -> bool {
+    T l = fromptr[a];
+    T r = fromptr[b];
+    if constexpr (std::is_floating_point_v<T>) {
+      if (std::isnan(r)) return false;
+      if (std::isnan(l)) return true;
+    }
+    return ascending ? (l < r) : (l > r);
+  };
 
   for (int64_t i = 0; i < offsetslength - 1; i++) {
-    int64_t start_off = static_cast<int64_t>(offsets[i]);
-    int64_t stop_off = static_cast<int64_t>(offsets[i + 1]);
+    int64_t lo = static_cast<int64_t>(offsets[i]);
+    int64_t hi = static_cast<int64_t>(offsets[i + 1]);
+    int64_t* first = toptr + lo;
+    int64_t* last  = toptr + hi;
 
-    int64_t* segment_start = toptr + start_off;
-    int64_t* segment_stop = toptr + stop_off;
+    if (stable) std::stable_sort(first, last, less);
+    else        std::sort(first, last, less);
 
-    auto comparator = [&fromptr, ascending](int64_t i1, int64_t i2) {
-        if (ascending) return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
-        else return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
-    };
-
-    if (stable) {
-        std::stable_sort(segment_start, segment_stop, comparator);
-    } else {
-        std::sort(segment_start, segment_stop, comparator);
-    }
-
-    std::transform(segment_start, segment_stop, segment_start, [start_off](int64_t j) {
-        return j - start_off;
-    });
+    std::transform(first, last, first,
+                   [lo](int64_t j) { return j - lo; });
   }
-
   return success();
 }
 
-#define EXPORT_AWKWARD_ARGSORT(TYPE, TYPE_NAME)                                            \
-  ERROR awkward_argsort_##TYPE_NAME##_int32(                                               \
-    int64_t* toptr,                                                                        \
-    const TYPE* fromptr,                                                                   \
-    int64_t length,                                                                        \
-    const int32_t* offsets,                                                                \
-    int64_t offsetslength,                                                                 \
-    bool ascending,                                                                        \
-    bool stable) {                                                                         \
-    return awkward_argsort<TYPE, int32_t>(                                                 \
-      toptr, fromptr, length, offsets, offsetslength, ascending, stable);                  \
-  }                                                                                        \
-  ERROR awkward_argsort_##TYPE_NAME##_uint32(                                               \
-    int64_t* toptr,                                                                        \
-    const TYPE* fromptr,                                                                   \
-    int64_t length,                                                                        \
-    const uint32_t* offsets,                                                               \
-    int64_t offsetslength,                                                                 \
-    bool ascending,                                                                        \
-    bool stable) {                                                                         \
-    return awkward_argsort<TYPE, uint32_t>(                                                \
-      toptr, fromptr, length, offsets, offsetslength, ascending, stable);                  \
-  }                                                                                        \
-  ERROR awkward_argsort_##TYPE_NAME##_uint64(                                              \
-    int64_t* toptr,                                                                        \
-    const TYPE* fromptr,                                                                   \
-    int64_t length,                                                                        \
-    const uint64_t* offsets,                                                               \
-    int64_t offsetslength,                                                                 \
-    bool ascending,                                                                        \
-    bool stable) {                                                                         \
-    return awkward_argsort<TYPE, uint64_t>(                                                \
-      toptr, fromptr, length, offsets, offsetslength, ascending, stable);                  \
-  }                                                                                        \
-  ERROR awkward_argsort_##TYPE_NAME##_int64(                                               \
-    int64_t* toptr,                                                                        \
-    const TYPE* fromptr,                                                                   \
-    int64_t length,                                                                        \
-    const int64_t* offsets,                                                                \
-    int64_t offsetslength,                                                                 \
-    bool ascending,                                                                        \
-    bool stable) {                                                                         \
-    return awkward_argsort<TYPE, int64_t>(                                                 \
-      toptr, fromptr, length, offsets, offsetslength, ascending, stable);                  \
+#define ARGSORT_OFF(T, NAME, U, ONAME)                                      \
+  ERROR awkward_argsort_##NAME##_##ONAME(                                   \
+    int64_t* toptr, const T* fromptr, int64_t length,                       \
+    const U* offsets, int64_t offsetslength,                                \
+    bool ascending, bool stable) {                                          \
+    return awkward_argsort<T, U>(                                           \
+      toptr, fromptr, length, offsets, offsetslength, ascending, stable);   \
   }
 
-EXPORT_AWKWARD_ARGSORT(bool, bool)
-EXPORT_AWKWARD_ARGSORT(int8_t, int8)
-EXPORT_AWKWARD_ARGSORT(uint8_t, uint8)
-EXPORT_AWKWARD_ARGSORT(int16_t, int16)
-EXPORT_AWKWARD_ARGSORT(uint16_t, uint16)
-EXPORT_AWKWARD_ARGSORT(int32_t, int32)
-EXPORT_AWKWARD_ARGSORT(uint32_t, uint32)
-EXPORT_AWKWARD_ARGSORT(int64_t, int64)
-EXPORT_AWKWARD_ARGSORT(uint64_t, uint64)
-EXPORT_AWKWARD_ARGSORT(float, float32)
-EXPORT_AWKWARD_ARGSORT(double, float64)
+#define ARGSORT(T, NAME)                  \
+  ARGSORT_OFF(T, NAME, int32_t,  int32)   \
+  ARGSORT_OFF(T, NAME, uint32_t, uint32)  \
+  ARGSORT_OFF(T, NAME, uint64_t, uint64)  \
+  ARGSORT_OFF(T, NAME, int64_t,  int64)
 
-template <>
-bool argsort_order_ascending(bool l, bool r)
-{
-  return l < r;
-}
-
-template <>
-bool argsort_order_descending(bool l, bool r)
-{
-  return l > r;
-}
+ARGSORT(bool,     bool)
+ARGSORT(int8_t,   int8)
+ARGSORT(uint8_t,  uint8)
+ARGSORT(int16_t,  int16)
+ARGSORT(uint16_t, uint16)
+ARGSORT(int32_t,  int32)
+ARGSORT(uint32_t, uint32)
+ARGSORT(int64_t,  int64)
+ARGSORT(uint64_t, uint64)
+ARGSORT(float,    float32)
+ARGSORT(double,   float64)

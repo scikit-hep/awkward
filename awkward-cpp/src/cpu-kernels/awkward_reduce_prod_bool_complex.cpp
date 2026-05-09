@@ -19,17 +19,11 @@ ERROR awkward_reduce_prod_bool_complex(
   }
   return success();
 }
-ERROR awkward_reduce_prod_bool_complex64_64(
-  bool* toptr,
-  const float* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool_complex<float>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_complex128_64(
-  bool* toptr,
-  const double* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool_complex<double>(toptr, fromptr, offsets, outlength);
-}
+
+#define WRAPPER(SUFFIX, IN) \
+  ERROR awkward_reduce_prod_bool_complex##SUFFIX(bool* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
+    return awkward_reduce_prod_bool_complex<IN>(toptr, fromptr, offsets, outlength); \
+  }
+
+WRAPPER(64_64, float)
+WRAPPER(128_64, double)

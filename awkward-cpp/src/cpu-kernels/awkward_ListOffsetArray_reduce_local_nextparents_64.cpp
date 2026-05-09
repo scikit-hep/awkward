@@ -27,36 +27,12 @@ ERROR awkward_ListOffsetArray_reduce_local_nextparents_64(
   }
   return success();
 }
-ERROR awkward_ListOffsetArray32_reduce_local_nextparents_64(
-  int32_t* nextparents,
-  const int32_t* offsets,
-  int64_t length,
-  int64_t nextparents_length) {
-  return awkward_ListOffsetArray_reduce_local_nextparents_64(
-    nextparents,
-    offsets,
-    length,
-    nextparents_length);
-}
-ERROR awkward_ListOffsetArrayU32_reduce_local_nextparents_64(
-  uint32_t* nextparents,
-  const uint32_t* offsets,
-  int64_t length,
-  int64_t nextparents_length) {
-  return awkward_ListOffsetArray_reduce_local_nextparents_64(
-    nextparents,
-    offsets,
-    length,
-    nextparents_length);
-}
-ERROR awkward_ListOffsetArray64_reduce_local_nextparents_64(
-  int64_t* nextparents,
-  const int64_t* offsets,
-  int64_t length,
-  int64_t nextparents_length) {
-  return awkward_ListOffsetArray_reduce_local_nextparents_64(
-    nextparents,
-    offsets,
-    length,
-    nextparents_length);
-}
+
+#define WRAPPER(SUFFIX, C) \
+  ERROR awkward_ListOffsetArray##SUFFIX(C* nextparents, const C* offsets, int64_t length, int64_t nextparents_length) { \
+    return awkward_ListOffsetArray_reduce_local_nextparents_64<C>(nextparents, offsets, length, nextparents_length); \
+  }
+
+WRAPPER(32_reduce_local_nextparents_64,  int32_t)
+WRAPPER(U32_reduce_local_nextparents_64, uint32_t)
+WRAPPER(64_reduce_local_nextparents_64,  int64_t)

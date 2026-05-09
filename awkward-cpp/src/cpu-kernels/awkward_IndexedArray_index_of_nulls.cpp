@@ -22,42 +22,12 @@ ERROR awkward_IndexedArray_index_of_nulls(
   }
   return success();
 }
-ERROR awkward_IndexedArray32_index_of_nulls(
-  int64_t* toindex,
-  const int32_t* fromindex,
-  const int64_t* offsets,
-  int64_t outlength,
-  const int64_t* starts) {
-  return awkward_IndexedArray_index_of_nulls<int32_t>(
-    toindex,
-    fromindex,
-    offsets,
-    outlength,
-    starts);
-}
-ERROR awkward_IndexedArrayU32_index_of_nulls(
-  int64_t* toindex,
-  const uint32_t* fromindex,
-  const int64_t* offsets,
-  int64_t outlength,
-  const int64_t* starts) {
-  return awkward_IndexedArray_index_of_nulls<uint32_t>(
-    toindex,
-    fromindex,
-    offsets,
-    outlength,
-    starts);
-}
-ERROR awkward_IndexedArray64_index_of_nulls(
-  int64_t* toindex,
-  const int64_t* fromindex,
-  const int64_t* offsets,
-  int64_t outlength,
-  const int64_t* starts) {
-  return awkward_IndexedArray_index_of_nulls<int64_t>(
-    toindex,
-    fromindex,
-    offsets,
-    outlength,
-    starts);
-}
+
+#define WRAPPER(SUFFIX, C) \
+  ERROR awkward_IndexedArray##SUFFIX(int64_t* toindex, const C* fromindex, const int64_t* offsets, int64_t outlength, const int64_t* starts) { \
+    return awkward_IndexedArray_index_of_nulls<C>(toindex, fromindex, offsets, outlength, starts); \
+  }
+
+WRAPPER(32_index_of_nulls, int32_t)
+WRAPPER(U32_index_of_nulls, uint32_t)
+WRAPPER(64_index_of_nulls, int64_t)

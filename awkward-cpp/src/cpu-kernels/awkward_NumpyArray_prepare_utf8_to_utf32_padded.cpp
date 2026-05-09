@@ -40,38 +40,11 @@ ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded(
   return success();
 }
 
-ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded_int32(
-  const uint8_t *fromptr,
-  const int32_t *fromoffsets,
-  int64_t offsetslength,
-  int64_t *outmaxcodepoints) {
-  return awkward_NumpyArray_prepare_utf8_to_utf32_padded<int32_t>(
-    fromptr,
-    fromoffsets,
-    offsetslength,
-    outmaxcodepoints);
-}
+#define WRAPPER(SUFFIX, T) \
+  ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded_##SUFFIX(const uint8_t *fromptr, const T *fromoffsets, int64_t offsetslength, int64_t *outmaxcodepoints) { \
+    return awkward_NumpyArray_prepare_utf8_to_utf32_padded<T>(fromptr, fromoffsets, offsetslength, outmaxcodepoints); \
+  }
 
-ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded_uint32(
-  const uint8_t *fromptr,
-  const uint32_t *fromoffsets,
-  int64_t offsetslength,
-  int64_t *outmaxcodepoints) {
-  return awkward_NumpyArray_prepare_utf8_to_utf32_padded<uint32_t>(
-    fromptr,
-    fromoffsets,
-    offsetslength,
-    outmaxcodepoints);
-}
-
-ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded_int64(
-  const uint8_t *fromptr,
-  const int64_t *fromoffsets,
-  int64_t offsetslength,
-  int64_t *outmaxcodepoints) {
-  return awkward_NumpyArray_prepare_utf8_to_utf32_padded<int64_t>(
-    fromptr,
-    fromoffsets,
-    offsetslength,
-    outmaxcodepoints);
-}
+WRAPPER(int32, int32_t)
+WRAPPER(uint32, uint32_t)
+WRAPPER(int64, int64_t)

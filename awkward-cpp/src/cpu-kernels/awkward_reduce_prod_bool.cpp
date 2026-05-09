@@ -4,95 +4,41 @@
 
 #include "awkward/kernels.h"
 
+// Per-bin "all nonzero" reduction. See `awkward_reduce_sum_bool` for
+// the rationale behind keeping the early-exit and adding `__restrict__`.
 template <typename IN>
 ERROR awkward_reduce_prod_bool(
-  bool* toptr,
-  const IN* fromptr,
-  const int64_t* offsets,
+  bool* __restrict__ toptr,
+  const IN* __restrict__ fromptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength) {
   for (int64_t bin = 0; bin < outlength; bin++) {
+    const int64_t start = offsets[bin];
+    const int64_t stop  = offsets[bin + 1];
     bool all_nonzero = true;
-    for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
+    for (int64_t i = start; i < stop; i++) {
       if (fromptr[i] == 0) { all_nonzero = false; break; }
     }
     toptr[bin] = all_nonzero;
   }
   return success();
 }
-ERROR awkward_reduce_prod_bool_bool_64(
-  bool* toptr,
-  const bool* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<bool>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_int8_64(
-  bool* toptr,
-  const int8_t* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<int8_t>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_uint8_64(
-  bool* toptr,
-  const uint8_t* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<uint8_t>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_int16_64(
-  bool* toptr,
-  const int16_t* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<int16_t>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_uint16_64(
-  bool* toptr,
-  const uint16_t* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<uint16_t>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_int32_64(
-  bool* toptr,
-  const int32_t* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<int32_t>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_uint32_64(
-  bool* toptr,
-  const uint32_t* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<uint32_t>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_int64_64(
-  bool* toptr,
-  const int64_t* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<int64_t>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_uint64_64(
-  bool* toptr,
-  const uint64_t* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<uint64_t>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_float32_64(
-  bool* toptr,
-  const float* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<float>(toptr, fromptr, offsets, outlength);
-}
-ERROR awkward_reduce_prod_bool_float64_64(
-  bool* toptr,
-  const double* fromptr,
-  const int64_t* offsets,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool<double>(toptr, fromptr, offsets, outlength);
-}
+
+#define REDUCE_PROD_BOOL(IN_T, IN_N)                                                     \
+  ERROR awkward_reduce_prod_bool_##IN_N##_64(                                            \
+    bool* toptr, const IN_T* fromptr,                                                    \
+    const int64_t* offsets, int64_t outlength) {                                         \
+    return awkward_reduce_prod_bool<IN_T>(toptr, fromptr, offsets, outlength);           \
+  }
+
+REDUCE_PROD_BOOL(bool,     bool)
+REDUCE_PROD_BOOL(int8_t,   int8)
+REDUCE_PROD_BOOL(uint8_t,  uint8)
+REDUCE_PROD_BOOL(int16_t,  int16)
+REDUCE_PROD_BOOL(uint16_t, uint16)
+REDUCE_PROD_BOOL(int32_t,  int32)
+REDUCE_PROD_BOOL(uint32_t, uint32)
+REDUCE_PROD_BOOL(int64_t,  int64)
+REDUCE_PROD_BOOL(uint64_t, uint64)
+REDUCE_PROD_BOOL(float,    float32)
+REDUCE_PROD_BOOL(double,   float64)
