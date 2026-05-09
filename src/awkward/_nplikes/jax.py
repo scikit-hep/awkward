@@ -195,10 +195,8 @@ class Jax(ArrayModuleNumpyLike):
     def bincount(
         self,
         x: ArrayLike,
+        *,
         weights: ArrayLike | None = None,
         minlength: int = 0,
-        *,
-        _length: int | None = None,
     ) -> ArrayLike:
-
         return self._module.bincount(x, weights=weights, minlength=minlength)
