@@ -94,6 +94,7 @@ class CupyBackend(Backend):
         - awkward_RegularArray_getitem_next_range
         - awkward_RegularArray_getitem_next_array_advanced
         - awkward_RegularArray_getitem_next_array
+        - awkward_index_rpad_and_clip_axis1
         """
         return kernel_name in (
             "awkward_sort",
@@ -114,6 +115,7 @@ class CupyBackend(Backend):
             "awkward_RegularArray_getitem_next_range",
             "awkward_RegularArray_getitem_next_array_advanced",
             "awkward_RegularArray_getitem_next_array",
+            "awkward_index_rpad_and_clip_axis1",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
