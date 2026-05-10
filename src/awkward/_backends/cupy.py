@@ -89,6 +89,11 @@ class CupyBackend(Backend):
         - awkward_countnonzero
         - awkward_missing_repeat
         - awkward_index_rpad_and_clip_axis0
+        - awkward_RegularArray_localindex
+        - awkward_RegularArray_getitem_next_range_spreadadvanced
+        - awkward_RegularArray_getitem_next_range
+        - awkward_RegularArray_getitem_next_array_advanced
+        - awkward_RegularArray_getitem_next_array
         """
         return kernel_name in (
             "awkward_sort",
@@ -104,6 +109,11 @@ class CupyBackend(Backend):
             "awkward_reduce_countnonzero",
             "awkward_missing_repeat",
             "awkward_index_rpad_and_clip_axis0",
+            "awkward_RegularArray_localindex",
+            "awkward_RegularArray_getitem_next_range_spreadadvanced",
+            "awkward_RegularArray_getitem_next_range",
+            "awkward_RegularArray_getitem_next_array_advanced",
+            "awkward_RegularArray_getitem_next_array",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
@@ -157,7 +167,7 @@ class CupyBackend(Backend):
         if kernel_name == "awkward_index_rpad_and_clip_axis0":
             return cuda_compute.awkward_index_rpad_and_clip_axis0
 
-        return None
+        return getattr(cuda_compute, kernel_name, None)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
         from awkward._connect.cuda import get_cuda_compute_reducer

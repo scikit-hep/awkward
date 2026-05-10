@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from cuda.compute import (
     CountingIterator,
+    DiscardIterator,
     gpu_struct,
     reduce_into,
     unary_transform,
@@ -709,4 +710,132 @@ def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsiz
     counters = CountingIterator(index_dtype(0))
     unary_transform(
         d_in=counters, d_out=outindex, op=fill_missing_repeat, num_items=output_size
+    )
+
+
+# For each element in a regular array of `length` sublists of fixed `size`,
+# writes its position within its sublist (0, 1, ..., size-1) into toindex.
+# Example: size=3, length=2 → toindex = [0, 1, 2, 0, 1, 2]
+def awkward_RegularArray_localindex(toindex, size, length):
+    if length == 0 or size == 0:
+        return
+
+    dtype = toindex.dtype.type
+
+    def fill(k):
+        return dtype(k % size)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=toindex,
+        op=fill,
+        num_items=length * size,
+    )
+
+
+# Broadcasts each element of fromadvanced across nextsize consecutive slots in toadvanced.
+# Example: fromadvanced=[3, 7], nextsize=3 → toadvanced=[3, 3, 3, 7, 7, 7]
+def awkward_RegularArray_getitem_next_range_spreadadvanced(
+    toadvanced, fromadvanced, length, nextsize
+):
+    if length == 0 or nextsize == 0:
+        return
+
+    dtype = toadvanced.dtype.type
+
+    def fill(k):
+        return fromadvanced[k // nextsize]
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=toadvanced,
+        op=fill,
+        num_items=length * nextsize,
+    )
+
+
+# Builds the carry index for slicing a RegularArray with a slice (start:stop:step).
+# A RegularArray holds `length` sublists of fixed `size` in a flat content array.
+# Applying a slice selects `nextsize` elements from each sublist starting at
+# `regular_start` with stride `step`. The carry index maps each output position
+# back to its source in the flat content:
+#   tocarry[i*nextsize + j] = i*size + regular_start + j*step
+# Example: size=6, length=3, slice 1:6:2 → regular_start=1, step=2, nextsize=3
+#   tocarry = [1, 3, 5,  7, 9, 11,  13, 15, 17]
+def awkward_RegularArray_getitem_next_range(
+    tocarry, regular_start, step, length, size, nextsize
+):
+    if length == 0 or nextsize == 0:
+        return
+
+    dtype = tocarry.dtype.type
+
+    def fill(k):
+        i = k // nextsize
+        j = k % nextsize
+        return dtype(i * size + regular_start + j * step)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=tocarry,
+        op=fill,
+        num_items=length * nextsize,
+    )
+
+
+# For each row i, picks fromarray[fromadvanced[i]] within that row and records i as the advanced index.
+# tocarry[i] = i*size + fromarray[fromadvanced[i]], toadvanced[i] = i
+def awkward_RegularArray_getitem_next_array_advanced(
+    tocarry, toadvanced, fromadvanced, fromarray, length, size
+):
+    if length == 0:
+        return
+
+    dtype = tocarry.dtype.type
+
+    def fill_carry(i):
+        return dtype(i * size + fromarray[fromadvanced[i]])
+
+    adtype = toadvanced.dtype.type
+
+    def fill_advanced(i):
+        return adtype(i)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=tocarry,
+        op=fill_carry,
+        num_items=length,
+    )
+    unary_transform(
+        d_in=CountingIterator(adtype(0)),
+        d_out=toadvanced,
+        op=fill_advanced,
+        num_items=length,
+    )
+
+
+# For each row i and array index j, carries the j-th selected element from row i
+# and records j as the advanced index.
+# tocarry[i*lenarray + j] = i*size + fromarray[j], toadvanced[i*lenarray + j] = j
+def awkward_RegularArray_getitem_next_array(
+    tocarry, toadvanced, fromarray, length, lenarray, size
+):
+    if length == 0 or lenarray == 0:
+        return
+
+    dtype = tocarry.dtype.type
+
+    def fill_both(k):
+        j = k % lenarray
+        i = k // lenarray
+        tocarry[k] = dtype(i * size + fromarray[j])
+        toadvanced[k] = dtype(j)
+        return dtype(0)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=DiscardIterator(),
+        op=fill_both,
+        num_items=length * lenarray,
     )
