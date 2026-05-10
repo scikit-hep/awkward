@@ -21,7 +21,7 @@ def from_jax(
 ):
     """
     Args:
-        array (jax.numpy.DeviceArray): The JAX DeviceArray to convert into an Awkward Array.
+        array (jax.Array): The JAX Array to convert into an Awkward Array.
         regulararray (bool): If True and the array is multidimensional,
             the dimensions are represented by nested #ak.contents.RegularArray
             nodes; if False and the array is multidimensional, the dimensions
@@ -34,7 +34,7 @@ def from_jax(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts a JAX DeviceArray array into an Awkward Array.
+    Converts a JAX Array into an Awkward Array.
 
     The resulting layout may involve the following #ak.contents.Content types
     (only):
