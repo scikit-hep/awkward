@@ -1,1 +1,0 @@
-This folder contains full code for awkward project. The cpu-kernels are in awkward-cpp/src/cpu-kernels. Review and migrate the kernels from using parents to offsets.
