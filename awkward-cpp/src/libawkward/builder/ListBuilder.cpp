@@ -13,7 +13,7 @@
 namespace awkward {
   const BuilderPtr
   ListBuilder::fromempty(const BuilderOptions& options) {
-    GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
+    GrowableBuffer<std::int64_t> offsets = GrowableBuffer<std::int64_t>::empty(options);
     offsets.append(0);
     return std::make_shared<ListBuilder>(options,
                                          std::move(offsets),
@@ -22,7 +22,7 @@ namespace awkward {
   }
 
   ListBuilder::ListBuilder(const BuilderOptions& options,
-                           GrowableBuffer<int64_t> offsets,
+                           GrowableBuffer<std::int64_t> offsets,
                            const BuilderPtr& content,
                            bool begun)
       : options_(options)
@@ -36,23 +36,23 @@ namespace awkward {
   };
 
   const std::string
-  ListBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  ListBuilder::to_buffers(BuffersContainer& container, std::int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
     void* ptr = container.empty_buffer(form_key.str() + "-offsets",
-      (int64_t)offsets_.length() * (int64_t)sizeof(int64_t));
+      (std::int64_t)offsets_.length() * (std::int64_t)sizeof(std::int64_t));
 
-    offsets_.concatenate(reinterpret_cast<int64_t*>(ptr));
+    offsets_.concatenate(reinterpret_cast<std::int64_t*>(ptr));
 
     return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
            + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""
            + form_key.str() + "\"}";
   }
 
-  int64_t
+  std::int64_t
   ListBuilder::length() const {
-    return (int64_t)offsets_.length() - 1;
+    return (std::int64_t)offsets_.length() - 1;
   }
 
   void
@@ -94,7 +94,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  ListBuilder::integer(int64_t x) {
+  ListBuilder::integer(std::int64_t x) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->integer(x);
@@ -133,7 +133,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  ListBuilder::datetime(int64_t x, const std::string& unit) {
+  ListBuilder::datetime(std::int64_t x, const std::string& unit) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->datetime(x, unit);
@@ -146,7 +146,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  ListBuilder::timedelta(int64_t x, const std::string& unit) {
+  ListBuilder::timedelta(std::int64_t x, const std::string& unit) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->timedelta(x, unit);
@@ -159,7 +159,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  ListBuilder::string(const char* x, int64_t length, const char* encoding) {
+  ListBuilder::string(const char* x, std::int64_t length, const char* encoding) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->string(x, length, encoding);
@@ -200,7 +200,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  ListBuilder::begintuple(int64_t numfields) {
+  ListBuilder::begintuple(std::int64_t numfields) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->begintuple(numfields);
@@ -213,7 +213,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  ListBuilder::index(int64_t index) {
+  ListBuilder::index(std::int64_t index) {
     if (!begun_) {
       throw std::invalid_argument(
         std::string("called 'index' without 'begin_tuple' at the same level before it")

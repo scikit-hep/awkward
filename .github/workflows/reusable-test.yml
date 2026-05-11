@@ -291,7 +291,7 @@ jobs:
           create-args: >-
             python=3.14
             numpy
-            root=6.36.06
+            root
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests

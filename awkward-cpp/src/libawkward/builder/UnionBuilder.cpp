@@ -29,8 +29,8 @@ namespace awkward {
   }
 
   UnionBuilder::UnionBuilder(const BuilderOptions& options,
-                             GrowableBuffer<int8_t> tags,
-                             GrowableBuffer<int64_t> index,
+                             GrowableBuffer<std::int8_t> tags,
+                             GrowableBuffer<std::int64_t> index,
                              std::vector<BuilderPtr>& contents)
       : options_(options)
       , tags_(std::move(tags))
@@ -44,23 +44,23 @@ namespace awkward {
   };
 
   const std::string
-  UnionBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  UnionBuilder::to_buffers(BuffersContainer& container, std::int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
     tags_.concatenate(
-      reinterpret_cast<int8_t*>(
+      reinterpret_cast<std::int8_t*>(
         container.empty_buffer(form_key.str() + "-tags",
-        (int64_t)tags_.length() * (int64_t)sizeof(int8_t))));
+        (std::int64_t)tags_.length() * (std::int64_t)sizeof(std::int8_t))));
 
     index_.concatenate(
-      reinterpret_cast<int64_t*>(
+      reinterpret_cast<std::int64_t*>(
         container.empty_buffer(form_key.str() + "-index",
-        (int64_t)index_.length() * (int64_t)sizeof(int64_t))));
+        (std::int64_t)index_.length() * (std::int64_t)sizeof(std::int64_t))));
 
     std::stringstream out;
     out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";
-    for (size_t i = 0;  i < contents_.size();  i++) {
+    for (std::size_t i = 0;  i < contents_.size();  i++) {
       if (i != 0) {
         out << ", ";
       }
@@ -70,9 +70,9 @@ namespace awkward {
     return out.str();
   }
 
-  int64_t
+  std::int64_t
   UnionBuilder::length() const {
-    return (int64_t)tags_.length();
+    return (std::int64_t)tags_.length();
   }
 
   void
@@ -112,20 +112,20 @@ namespace awkward {
         contents_.emplace_back(BoolBuilder::fromempty(options_));
         tofill = --contents_.end();
       }
-      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
-      int64_t length = tofill->get()->length();
+      std::int8_t i = (std::int8_t)std::distance(contents_.begin(), tofill);
+      std::int64_t length = tofill->get()->length();
       tofill->get()->boolean(x);
       tags_.append(i);
       index_.append(length);
     }
     else {
-      contents_[(size_t)current_].get()->boolean(x);
+      contents_[(std::size_t)current_].get()->boolean(x);
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  UnionBuilder::integer(int64_t x) {
+  UnionBuilder::integer(std::int64_t x) {
     if (current_ == -1) {
       auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
         return dynamic_cast<Int64Builder*>(p.get());
@@ -134,14 +134,14 @@ namespace awkward {
         contents_.emplace_back(Int64Builder::fromempty(options_));
         tofill = --contents_.end();
       }
-      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
-      int64_t len = tofill->get()->length();
+      std::int8_t i = (std::int8_t)std::distance(contents_.begin(), tofill);
+      std::int64_t len = tofill->get()->length();
       tofill->get()->integer(x);
       tags_.append(i);
       index_.append(len);
     }
     else {
-      contents_[(size_t)current_].get()->integer(x);
+      contents_[(std::size_t)current_].get()->integer(x);
     }
     return shared_from_this();
   }
@@ -166,14 +166,14 @@ namespace awkward {
           tofill = --contents_.end();
         }
       }
-      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
-      int64_t length = tofill->get()->length();
+      std::int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
+      std::int64_t length = tofill->get()->length();
       tofill->get()->real(x);
       tags_.append(i);
       index_.append(length);
     }
     else {
-      contents_[(size_t)current_].get()->real(x);
+      contents_[(std::size_t)current_].get()->real(x);
     }
     return shared_from_this();
   }
@@ -208,14 +208,14 @@ namespace awkward {
           tofill = --contents_.end();
         }
       }
-      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
-      int64_t length = tofill->get()->length();
+      std::int8_t i = (std::int8_t)std::distance(contents_.begin(), tofill);
+      std::int64_t length = tofill->get()->length();
       tofill->get()->complex(x);
       tags_.append(i);
       index_.append(length);
     }
     else {
-      contents_[(size_t)current_].get()->complex(x);
+      contents_[(std::size_t)current_].get()->complex(x);
     }
     return shared_from_this();
   }
@@ -231,14 +231,14 @@ namespace awkward {
         contents_.emplace_back(DatetimeBuilder::fromempty(options_, unit));
         tofill = --contents_.end();
       }
-      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
-      int64_t len = tofill->get()->length();
+      std::int8_t i = (std::int8_t)std::distance(contents_.begin(), tofill);
+      std::int64_t len = tofill->get()->length();
       tofill->get()->datetime(x, unit);
       tags_.append(i);
       index_.append(len);
     }
     else {
-      contents_[(size_t)current_].get()->datetime(x, unit);
+      contents_[(std::size_t)current_].get()->datetime(x, unit);
     }
     return shared_from_this();
   }
@@ -254,14 +254,14 @@ namespace awkward {
         contents_.emplace_back(DatetimeBuilder::fromempty(options_, unit));
         tofill = --contents_.end();
       }
-      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
-      int64_t len = tofill->get()->length();
+      std::int8_t i = (std::int8_t)std::distance(contents_.begin(), tofill);
+      std::int64_t len = tofill->get()->length();
       tofill->get()->timedelta(x, unit);
       tags_.append(i);
       index_.append(len);
     }
     else {
-      contents_[(size_t)current_].get()->timedelta(x, unit);
+      contents_[(std::size_t)current_].get()->timedelta(x, unit);
     }
     return shared_from_this();
   }
@@ -277,14 +277,14 @@ namespace awkward {
         contents_.emplace_back(StringBuilder::fromempty(options_, encoding));
         tofill = --contents_.end();
       }
-      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
-      int64_t len = tofill->get()->length();
+      std::int8_t i = (std::int8_t)std::distance(contents_.begin(), tofill);
+      std::int64_t len = tofill->get()->length();
       tofill->get()->string(x, length, encoding);
       tags_.append(i);
       index_.append(len);
     }
     else {
-      contents_[(size_t)current_].get()->string(x, length, encoding);
+      contents_[(std::size_t)current_].get()->string(x, length, encoding);
     }
     return shared_from_this();
   }
@@ -300,10 +300,10 @@ namespace awkward {
         tofill = --contents_.end();
       }
       tofill->get()->beginlist();
-      current_ = (int8_t)std::distance(contents_.begin(), tofill);
+      current_ = (std::int8_t)std::distance(contents_.begin(), tofill);
     }
     else {
-      contents_[(size_t)current_].get()->beginlist();
+      contents_[(std::size_t)current_].get()->beginlist();
     }
     return shared_from_this();
   }
@@ -316,9 +316,9 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      int64_t length = contents_[(size_t)current_].get()->length();
-      contents_[(size_t)current_].get()->endlist();
-      if (length != contents_[(size_t)current_].get()->length()) {
+      std::int64_t length = contents_[(std::size_t)current_].get()->length();
+      contents_[(std::size_t)current_].get()->endlist();
+      if (length != contents_[(std::size_t)current_].get()->length()) {
         tags_.append(current_);
         index_.append(length);
         current_ = -1;
@@ -328,7 +328,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  UnionBuilder::begintuple(int64_t numfields) {
+  UnionBuilder::begintuple(std::int64_t numfields) {
     if (current_ == -1) {
       auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
         const auto& raw = dynamic_cast<TupleBuilder*>(p.get());
@@ -339,23 +339,23 @@ namespace awkward {
         tofill = --contents_.end();
       }
       tofill->get()->begintuple(numfields);
-      current_ = (int8_t)std::distance(contents_.begin(), tofill);
+      current_ = (std::int8_t)std::distance(contents_.begin(), tofill);
     }
     else {
-      contents_[(size_t)current_].get()->begintuple(numfields);
+      contents_[(std::size_t)current_].get()->begintuple(numfields);
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  UnionBuilder::index(int64_t index) {
+  UnionBuilder::index(std::int64_t index) {
     if (current_ == -1) {
       throw std::invalid_argument(
         std::string("called 'index' without 'begin_tuple' at the same level before it")
         + FILENAME(__LINE__));
     }
     else {
-      contents_[(size_t)current_].get()->index(index);
+      contents_[(std::size_t)current_].get()->index(index);
     }
     return shared_from_this();
   }
@@ -368,9 +368,9 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      int64_t length = contents_[(size_t)current_].get()->length();
-      contents_[(size_t)current_].get()->endtuple();
-      if (length != contents_[(size_t)current_].get()->length()) {
+      std::int64_t length = contents_[(std::size_t)current_].get()->length();
+      contents_[(std::size_t)current_].get()->endtuple();
+      if (length != contents_[(std::size_t)current_].get()->length()) {
         tags_.append(current_);
         index_.append(length);
         current_ = -1;
@@ -393,10 +393,10 @@ namespace awkward {
         tofill = --contents_.end();
       }
       tofill->get()->beginrecord(name, check);
-      current_ = (int8_t)std::distance(contents_.begin(), tofill);
+      current_ = (std::int8_t)std::distance(contents_.begin(), tofill);
     }
     else {
-      contents_[(size_t)current_].get()->beginrecord(name, check);
+      contents_[(std::size_t)current_].get()->beginrecord(name, check);
     }
     return shared_from_this();
   }
@@ -409,7 +409,7 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      contents_[(size_t)current_].get()->field(key, check);
+      contents_[(std::size_t)current_].get()->field(key, check);
     }
   }
 
@@ -421,9 +421,9 @@ namespace awkward {
                     "before it") + FILENAME(__LINE__));
     }
     else {
-      int64_t length = contents_[(size_t)current_].get()->length();
-      contents_[(size_t)current_].get()->endrecord();
-      if (length != contents_[(size_t)current_].get()->length()) {
+      std::int64_t length = contents_[(std::size_t)current_].get()->length();
+      contents_[(std::size_t)current_].get()->endrecord();
+      if (length != contents_[(std::size_t)current_].get()->length()) {
         tags_.append(current_);
         index_.append(length);
         current_ = -1;
