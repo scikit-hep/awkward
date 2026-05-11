@@ -24,11 +24,10 @@ JAX, amongst other things, is a powerful tool for computing derivatives of nativ
 How to differentiate Awkward Arrays?
 ------------------------------------
 
-For this notebook (which is evaluated on a CPU), we need to configure JAX to use only the CPU.
+First, import JAX.
 
 ```{code-cell}
 import jax
-jax.config.update("jax_platform_name", "cpu")
 ```
 
 Next, we must call {func}`ak.jax.register_and_check()` to register Awkward's JAX integration.
