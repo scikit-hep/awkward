@@ -5,7 +5,6 @@ from __future__ import annotations
 from cuda.compute import (
     CountingIterator,
     DiscardIterator,
-    gpu_struct,
     inclusive_scan,
     reduce_into,
     unary_transform,
