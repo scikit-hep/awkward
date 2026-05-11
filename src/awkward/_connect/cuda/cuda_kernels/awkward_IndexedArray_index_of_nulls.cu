@@ -8,8 +8,13 @@
 //     # Derive parents from offsets so the kernel body (still parents-driven)
 //     # runs unchanged.
 //     if int(outlength) > 0 and lenindex > 0:
-//         counts = offsets[1:int(outlength) + 1] - offsets[:int(outlength)]
-//         parents = cupy.repeat(cupy.arange(int(outlength), dtype=cupy.int64), counts.astype(cupy.int64))
+//         # CuPy refuses cupy.ndarray as `repeats`; use searchsorted to
+//         # derive parents on-device with the same result.
+//         parents = cupy.searchsorted(
+//             offsets[1:int(outlength) + 1],
+//             cupy.arange(int(lenindex), dtype=cupy.int64),
+//             side='right',
+//         ).astype(cupy.int64)
 //     else:
 //         parents = cupy.zeros(0, dtype=cupy.int64)
 //     scan_in_array = cupy.zeros(lenindex, dtype=cupy.int64)

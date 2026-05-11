@@ -8,14 +8,22 @@
 //     # unchanged.
 //     parentslength = int(offsets[int(outlength)].item())
 //     nextlen = int(nextoffsets[int(outlength)].item())
+//     # CuPy refuses cupy.ndarray as `repeats`; use searchsorted to derive
+//     # parents/nextparents on-device with the same result.
 //     if int(outlength) > 0 and parentslength > 0:
-//         outer_counts = offsets[1:int(outlength) + 1] - offsets[:int(outlength)]
-//         parents = cupy.repeat(cupy.arange(int(outlength), dtype=cupy.int64), outer_counts.astype(cupy.int64))
+//         parents = cupy.searchsorted(
+//             offsets[1:int(outlength) + 1],
+//             cupy.arange(int(parentslength), dtype=cupy.int64),
+//             side='right',
+//         ).astype(cupy.int64)
 //     else:
 //         parents = cupy.zeros(0, dtype=cupy.int64)
 //     if int(outlength) > 0 and nextlen > 0:
-//         inner_counts = nextoffsets[1:int(outlength) + 1] - nextoffsets[:int(outlength)]
-//         nextparents = cupy.repeat(cupy.arange(int(outlength), dtype=cupy.int64), inner_counts.astype(cupy.int64))
+//         nextparents = cupy.searchsorted(
+//             nextoffsets[1:int(outlength) + 1],
+//             cupy.arange(int(nextlen), dtype=cupy.int64),
+//             side='right',
+//         ).astype(cupy.int64)
 //     else:
 //         nextparents = cupy.zeros(0, dtype=cupy.int64)
 //     if nextlen < 1024:

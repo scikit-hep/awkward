@@ -7,8 +7,13 @@
 //     # body (which still reads parents internally) runs unchanged.
 //     lenparents = int(offsets[int(outlength)].item()) if int(outlength) >= 0 else 0
 //     if int(outlength) > 0 and lenparents > 0:
-//         counts = offsets[1:int(outlength) + 1] - offsets[:int(outlength)]
-//         parents = cupy.repeat(cupy.arange(int(outlength), dtype=cupy.int64), counts.astype(cupy.int64))
+//         # CuPy refuses cupy.ndarray as `repeats`; use searchsorted to
+//         # derive parents on-device with the same result.
+//         parents = cupy.searchsorted(
+//             offsets[1:int(outlength) + 1],
+//             cupy.arange(int(lenparents), dtype=cupy.int64),
+//             side='right',
+//         ).astype(cupy.int64)
 //     else:
 //         parents = cupy.zeros(0, dtype=cupy.int64)
 //     if block[0] > 0:
