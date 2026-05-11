@@ -6,9 +6,11 @@ from cuda.compute import (
     CountingIterator,
     DiscardIterator,
     gpu_struct,
+    inclusive_scan,
     reduce_into,
     unary_transform,
 )
+from cuda.compute.op import OpKind
 
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
@@ -991,3 +993,135 @@ def awkward_MaskedArray_getitem_next_jagged_project(
     n = len(indices)
     starts_out[:n] = starts_in[indices]
     stops_out[:n] = stops_in[indices]
+
+
+# Builds a gather index to pad/clip a RegularArray from `size` to `target` elements per row.
+# Output has length*target entries. For row i and slot j (q = i*target + j):
+#   j < min(target, size)  →  i*size + j   (copy from source)
+#   j >= min(target, size) →  -1            (pad with missing)
+# When target <= size every slot maps to source (pure clip, no -1s).
+# When target > size the last (target - size) slots per row are -1 (pure pad).
+#
+# Example size=3, target=5, length=2: toindex = [0, 1, 2, -1, -1,  3, 4, 5, -1, -1]
+# Example size=5, target=3, length=2: toindex = [0, 1, 2,  5, 6, 7]
+def awkward_RegularArray_rpad_and_clip_axis1(toindex, target, size, length):
+    if length == 0 or target == 0:
+        return
+    shorter = min(target, size)
+    dtype = toindex.dtype.type
+
+    def fill(q):
+        i = q // target
+        j = q % target
+        if j < shorter:
+            return dtype(i * size + j)
+        return dtype(-1)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=toindex,
+        op=fill,
+        num_items=length * target,
+    )
+
+
+# IS NOT USED (keep for archive). Takes too long to check for error cases.
+# Normalizes indices for a regular array of size `size`:
+# adds size to negative values, then checks bounds.
+# Raises ValueError immediately if any index is still out of [0, size).
+#
+# Example (size=5): fromarray=[-1, 2, 0] → toarray=[4, 2, 0]
+def awkward_RegularArray_getitem_next_array_regularize(
+    toarray, fromarray, lenarray, size
+):
+    if lenarray == 0:
+        return
+    dtype = toarray.dtype.type
+    unary_transform(
+        d_in=fromarray[:lenarray],
+        d_out=toarray[:lenarray],
+        op=lambda v: dtype(v + size) if v < 0 else dtype(v),
+        num_items=lenarray,
+    )
+    if cp.any((toarray[:lenarray] < 0) | (toarray[:lenarray] >= size)):
+        raise ValueError(
+            "index out of range in compiled CUDA code (awkward_RegularArray_getitem_next_array_regularize)"
+        )
+
+
+# Builds a gather index for selecting one element per row from a RegularArray.
+# A RegularArray stores `length` rows of exactly `size` elements in a flat buffer,
+# so row i occupies flat positions [i*size, (i+1)*size).
+# `at` is the column index to select (negative values wrap: at += size).
+# tocarry[i] = i*size + at, which is then used to gather the chosen column from the flat data.
+# Raises ValueError if at is out of [-size, size).
+#
+# Example size=5, at=2,  length=4: tocarry = [2, 7, 12, 17]
+# Example size=5, at=-1, length=4: tocarry = [4, 9, 14, 19]  (last element of each row)
+def awkward_RegularArray_getitem_next_at(tocarry, at, length, size):
+    regular_at = at
+    if regular_at < 0:
+        regular_at += size
+    if not (0 <= regular_at < size):
+        raise ValueError(
+            "index out of range in compiled CUDA code (awkward_RegularArray_getitem_next_at)"
+        )
+    if length == 0:
+        return
+    dtype = tocarry.dtype.type
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=tocarry[:length],
+        op=lambda q: dtype(q * size + regular_at),
+        num_items=length,
+    )
+
+
+# IS NOT USED (keep for archive). Takes too long to check for error cases.
+# Checks that all sublists have equal length and writes that length to size[0].
+# Raises ValueError immediately if offsets decrease or sublists have different lengths.
+#
+# Example: fromoffsets=[0, 2, 4, 6] → size[0]=2
+def awkward_ListOffsetArray_toRegularArray(size, fromoffsets, offsetslength):
+    if offsetslength <= 1:
+        size[:1] = cp.zeros(1, dtype=size.dtype)
+        return
+    n = offsetslength - 1
+    counts = fromoffsets[1:offsetslength].astype(cp.int64) - fromoffsets[:n].astype(
+        cp.int64
+    )
+    if cp.any(counts < 0):
+        raise ValueError(
+            "offsets must be monotonically increasing in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
+        )
+    if not cp.all(counts == counts[0]):
+        raise ValueError(
+            "cannot convert to RegularArray because subarray lengths are not regular in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
+        )
+    size[:1] = counts[:1].astype(size.dtype)  # GPU→GPU
+
+
+# Pads each sublist to at least target length (longer sublists kept as-is).
+# Writes new sublist boundaries to tooffsets and total output length to tolength[0].
+#
+# Example (target=3): fromoffsets=[0,1,5,7] → tooffsets=[0,3,7,10], tolength[0]=10
+def awkward_ListOffsetArray_rpad_length_axis1(
+    tooffsets, fromoffsets, fromlength, target, tolength
+):
+    if fromlength == 0:
+        tooffsets[:1] = cp.zeros(1, dtype=tooffsets.dtype)
+        tolength[:1] = cp.zeros(1, dtype=tolength.dtype)
+        return
+    counts = fromoffsets[1 : fromlength + 1] - fromoffsets[:fromlength]
+    padded = cp.maximum(counts, target)
+    tooffsets[:1] = cp.zeros(1, dtype=tooffsets.dtype)
+    inclusive_scan(
+        d_in=padded,
+        d_out=tooffsets[1 : fromlength + 1],
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=fromlength,
+    )
+    tolength[:1] = tooffsets[fromlength : fromlength + 1].astype(
+        tolength.dtype
+    )  # GPU→GPU, no sync
