@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from cuda.compute import (
     CountingIterator,
-    gpu_struct,
     reduce_into,
     unary_transform,
 )
@@ -468,7 +467,6 @@ def awkward_reduce_max(
     )
 
 
-# original implementation of `awkward_reduce_max_complex` (doesn't work - keep for archive)
 def awkward_reduce_max_complex(
     result,
     input_data,
@@ -476,53 +474,48 @@ def awkward_reduce_max_complex(
     offsets_data,
     parents_length,
     outlength,
-    # the initial value for the reduction
+    # the initial value for the reduction (real component; imag identity is 0)
     identity,
 ):
-    # print("outlength", outlength)
-    # print(input_data)
-    # print(parents_data)
-    index_dtype = parents_data.dtype
-    data_dtype = input_data.dtype.type
+    # Complex values arrive as a flat float32/float64 array of length 2*N
+    # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
+    # (or complex64 -> float32) and doubles the length. We re-view those buffers
+    # back to the matching complex dtype so the segment reducer can read the
+    # real/imag components via .real / .imag attribute access, avoiding the
+    # gpu_struct pattern that failed in earlier attempts.
+    if input_data.dtype == cp.float32:
+        complex_dtype = cp.complex64
+    else:
+        complex_dtype = cp.complex128
 
-    complex_array = gpu_struct(
-        {
-            "real_data": data_dtype,
-            "imag_data": data_dtype,
-        }
-    )
-    result = result.view(complex_array.dtype)
+    input_complex = input_data.view(complex_dtype)
+    result_complex = result.view(complex_dtype)
+
+    index_dtype = parents_data.dtype
 
     def segment_reduce_max(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-        # segment = input_data[start_idx:end_idx]
-        if end_idx <= start_idx:
-            return identity  # empty segment
-
+        # Start with (identity, 0) per the CPU kernel; empty segments keep this.
         max_real = identity
-        max_imag = type_wrapper(0)
-
+        max_imag = 0.0
         for i in range(start_idx, end_idx):
-            x = input_data[i * 2]
-            y = input_data[i * 2 + 1]
+            c = input_complex[i]
+            x = c.real
+            y = c.imag
+            # Lex compare on (real, imag)
             if x > max_real or (x == max_real and y > max_imag):
                 max_real = x
                 max_imag = y
+        return complex(max_real, max_imag)
 
-        # max_value = max(segment)
-        # return identity if it is > than max_value from input_data
-        # print(complex_array(max_real, max_imag))
-        return complex_array(max_real, max_imag)
-
-    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max` directly and specify unordered parents
-    # TODO: delete this? (it is only used in tests-cuda-kernels-explicit)
-    input_data = rearrange_by_parents(input_data, parents_data)
+    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_max_complex`
+    # directly and specify unordered parents
+    input_complex = rearrange_by_parents(input_complex, parents_data)
 
     # Prepare the start and end offsets
     # TODO: This should at least be starts_to_offsets
     offsets = parents_to_offsets(parents_data, parents_length)
-    # print(offsets)
     start_o = offsets[:-1]
     end_o = offsets[1:]
 
@@ -532,10 +525,11 @@ def awkward_reduce_max_complex(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_max, num_items=outlength
+        d_in=segment_ids,
+        d_out=result_complex,
+        op=segment_reduce_max,
+        num_items=outlength,
     )
-
-    # print("this is the result:", result)
 
 
 def awkward_reduce_min(
@@ -751,6 +745,16 @@ def awkward_index_rpad_and_clip_axis0(toindex, target, length):
         op=fill,
         num_items=target,
     )
+
+
+# Fills tostarts and tostops with evenly spaced offsets of size `target` for each of the `length` lists
+def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
+    def fill(i):
+        tostarts[i] = tostarts.dtype.type(i * target)
+        return tostarts.dtype.type(i * target + target)
+
+    segment_ids = CountingIterator(tostarts.dtype.type(0))
+    unary_transform(d_in=segment_ids, d_out=tostops, op=fill, num_items=length)
 
 
 def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsize):
