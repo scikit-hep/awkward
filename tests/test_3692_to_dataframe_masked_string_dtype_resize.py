@@ -18,13 +18,13 @@ def test_masked_string_array_with_option():
     # Convert to dataframe - should not raise an error about dtype width
     df = ak.operations.to_dataframe(array_str)
 
-    # Verify the conversion worked and "nan" appears for None values
+    # Verify the conversion worked and None values are preserved
     assert df["values"].values[0] == "a"
-    assert df["values"].values[1] == "nan"
+    assert df["values"].values[1] is None
     assert df["values"].values[2] == "c"
     assert df["values"].values[3] == "d"
     assert df["values"].values[4] == "e"
-    assert df["values"].values[5] == "nan"
+    assert df["values"].values[5] is None
 
 
 def test_masked_bytestring_array_with_option():
@@ -35,13 +35,13 @@ def test_masked_bytestring_array_with_option():
     # Convert to dataframe - should not raise an error about dtype width
     df = ak.operations.to_dataframe(array_bytes)
 
-    # Verify the conversion worked and b"nan" appears for None values
+    # Verify the conversion worked and None values are preserved
     assert df["values"].values[0] == b"x"
-    assert df["values"].values[1] == b"nan"
+    assert df["values"].values[1] is None
     assert df["values"].values[2] == b"z"
     assert df["values"].values[3] == b"a"
     assert df["values"].values[4] == b"b"
-    assert df["values"].values[5] == b"nan"
+    assert df["values"].values[5] is None
 
 
 def test_union_with_narrow_strings():
@@ -55,14 +55,14 @@ def test_union_with_narrow_strings():
 
     # Verify conversion works without dtype errors
     assert len(df) == 3
-    # The x column should have "nan" for missing values
-    assert df["x"].values[1] == "nan"
+    # The x column should have None for missing values
+    assert df["x"].values[1] is None
 
 
 def test_single_char_strings_with_none():
     """Test very short strings with None values."""
     # Single character strings with None values
-    # This is the edge case that needs dtype resizing
+    # This tests that even very short strings work correctly
     array = ak.Array([["a", "b"], [None, "c"], ["d", None]])
 
     df = ak.operations.to_dataframe(array)
@@ -73,8 +73,8 @@ def test_single_char_strings_with_none():
     assert "b" in values
     assert "c" in values
     assert "d" in values
-    # Check that "nan" string appears for None values
-    assert values.count("nan") == 2
+    # Check that None appears for None values
+    assert values.count(None) == 2
 
 
 def test_single_byte_bytestrings_with_none():
@@ -90,13 +90,13 @@ def test_single_byte_bytestrings_with_none():
     assert b"b" in values
     assert b"c" in values
     assert b"d" in values
-    # Check that b"nan" appears for None values
-    assert values.count(b"nan") == 2
+    # Check that None appears for None values
+    assert values.count(None) == 2
 
 
 def test_two_char_strings_with_none():
     """Test two-character strings with None values (edge case)."""
-    # Two character strings - exactly the edge case where "nan" (3 chars) won't fit
+    # Two character strings - tests that any string length works correctly
     array = ak.Array([["ab", None], [None, "cd"]])
 
     df = ak.operations.to_dataframe(array)
@@ -104,5 +104,5 @@ def test_two_char_strings_with_none():
     values = df["values"].values.tolist()
     assert "ab" in values
     assert "cd" in values
-    # "nan" should appear (3 characters)
-    assert values.count("nan") == 2
+    # None should appear for None values
+    assert values.count(None) == 2
