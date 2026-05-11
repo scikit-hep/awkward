@@ -101,6 +101,7 @@ class CupyBackend(Backend):
             "awkward_reduce_sum_int64_bool_64",
             "awkward_reduce_sum_bool",
             "awkward_reduce_max",
+            "awkward_reduce_max_complex",
             "awkward_reduce_min",
             "awkward_reduce_prod",
             "awkward_reduce_prod_bool",
@@ -143,6 +144,9 @@ class CupyBackend(Backend):
 
         if kernel_name == "awkward_reduce_max":
             return cuda_compute.awkward_reduce_max
+
+        if kernel_name == "awkward_reduce_max_complex":
+            return cuda_compute.awkward_reduce_max_complex
 
         if kernel_name == "awkward_reduce_min":
             return cuda_compute.awkward_reduce_min

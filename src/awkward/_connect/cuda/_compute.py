@@ -473,11 +473,9 @@ def awkward_reduce_max_complex(
     def segment_reduce_max(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-
         # Start with (identity, 0) per the CPU kernel; empty segments keep this.
         max_real = identity
         max_imag = 0.0
-
         for i in range(start_idx, end_idx):
             c = input_complex[i]
             x = c.real
