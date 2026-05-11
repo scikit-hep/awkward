@@ -95,6 +95,11 @@ class CupyBackend(Backend):
         - awkward_RegularArray_getitem_next_array_advanced
         - awkward_RegularArray_getitem_next_array
         - awkward_index_rpad_and_clip_axis1
+        - awkward_RegularArray_getitem_carry
+        - awkward_NumpyArray_subrange_equal
+        - awkward_NumpyArray_pad_zero_to_length
+        - awkward_NumpyArray_subrange_equal_bool
+        - awkward_MaskedArray_getitem_next_jagged_project
         """
         return kernel_name in (
             "awkward_sort",
@@ -116,6 +121,11 @@ class CupyBackend(Backend):
             "awkward_RegularArray_getitem_next_array_advanced",
             "awkward_RegularArray_getitem_next_array",
             "awkward_index_rpad_and_clip_axis1",
+            "awkward_RegularArray_getitem_carry",
+            "awkward_NumpyArray_subrange_equal",
+            "awkward_NumpyArray_pad_zero_to_length",
+            "awkward_NumpyArray_subrange_equal_bool",
+            "awkward_MaskedArray_getitem_next_jagged_project",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):

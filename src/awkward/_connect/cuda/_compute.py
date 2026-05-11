@@ -793,8 +793,13 @@ def awkward_RegularArray_getitem_next_range(
     )
 
 
-# For each row i, picks fromarray[fromadvanced[i]] within that row and records i as the advanced index.
-# tocarry[i] = i*size + fromarray[fromadvanced[i]], toadvanced[i] = i
+# Used when a RegularArray is indexed by two simultaneous advanced indices.
+# fromadvanced[i] says which element of fromarray to use for row i, giving the
+# intra-row column: col = fromarray[fromadvanced[i]].
+# tocarry[i] = i*size + col  (flat content index)
+# toadvanced[i] = i          (advanced-axis position for broadcast alignment)
+# Example: size=4, fromarray=[1,3,0,2], fromadvanced=[0,2,1]
+#   → tocarry=[1, 4, 11],  toadvanced=[0, 1, 2]
 def awkward_RegularArray_getitem_next_array_advanced(
     tocarry, toadvanced, fromadvanced, fromarray, length, size
 ):
@@ -825,9 +830,13 @@ def awkward_RegularArray_getitem_next_array_advanced(
     )
 
 
-# For each row i and array index j, carries the j-th selected element from row i
-# and records j as the advanced index.
-# tocarry[i*lenarray + j] = i*size + fromarray[j], toadvanced[i*lenarray + j] = j
+# Used when a RegularArray is indexed by a 1-D array (fromarray) of intra-row positions.
+# Each of the `length` rows contributes `lenarray` output elements — one per entry in
+# fromarray — so the output has shape (length, lenarray) laid out flat.
+# tocarry[i*lenarray + j] = i*size + fromarray[j]  (flat content index for row i, column fromarray[j])
+# toadvanced[i*lenarray + j] = j                   (which fromarray entry was used, for broadcast alignment)
+# Example: length=2, size=5, fromarray=[1,3,0]
+#   → tocarry=[1,3,0, 6,8,5],  toadvanced=[0,1,2, 0,1,2]
 def awkward_RegularArray_getitem_next_array(
     tocarry, toadvanced, fromarray, length, lenarray, size
 ):
@@ -849,3 +858,136 @@ def awkward_RegularArray_getitem_next_array(
         op=fill_both,
         num_items=length * lenarray,
     )
+
+
+# Expands a carry index over a RegularArray of fixed-size sublists.
+# For each carry element fromcarry[i] and intra-sublist position j,
+# tocarry[i*size + j] = fromcarry[i]*size + j
+# Example: fromcarry=[2, 0], size=3 → tocarry=[6, 7, 8, 0, 1, 2]
+def awkward_RegularArray_getitem_carry(tocarry, fromcarry, lencarry, size):
+    if lencarry == 0 or size == 0:
+        return
+
+    dtype = tocarry.dtype.type
+
+    def fill(k):
+        i = k // size
+        j = k % size
+        return dtype(fromcarry[i] * size + j)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=tocarry,
+        op=fill,
+        num_items=lencarry * size,
+    )
+
+
+# Checks whether any two subranges of tmpptr (defined by fromstarts/fromstops) are equal.
+# toequal[0] reflects the result of the last equal-length pair found
+#
+# Example:
+#   tmpptr=[1,2,3,1,2,3,9], fromstarts=[0,3,6], fromstops=[3,6,7], length=3
+#   Subranges 0 and 1 are both [1,2,3] → toequal[0] = True
+def awkward_NumpyArray_subrange_equal(tmpptr, fromstarts, fromstops, length, toequal):
+    n = length - 1
+    # n<=1 → 0 pairs (triu_indices(n,k=1) is empty for n<2)
+    if n <= 1:
+        toequal[0] = cp.bool_(False)
+        return
+    lengths = fromstops[:n] - fromstarts[:n]
+
+    # Enumerate all (i < ii) pairs
+    i_idx, ii_idx = cp.triu_indices(n, k=1)
+    pair_lengths_equal = lengths[i_idx] == lengths[ii_idx]
+
+    has_valid = cp.any(pair_lengths_equal)  # 0-d GPU bool
+
+    # Last equal-length pair: argmax on the reversed mask gives its distance from the end.
+    # When all-False, argmax returns 0 and last_pos = num_pairs-1; has_valid corrects the result.
+    num_pairs = len(i_idx)
+    last_pos = (num_pairs - 1) - cp.argmax(pair_lengths_equal[::-1])
+
+    si = fromstarts[i_idx[last_pos]]  # 0-d GPU int
+    sii = fromstarts[ii_idx[last_pos]]
+    li = lengths[i_idx[last_pos]]
+
+    # Use len(tmpptr) as the arange upper bound
+    N = len(tmpptr)
+    j = cp.arange(N, dtype=cp.int64)
+    in_range = j < li  # GPU broadcast
+    safe_j = cp.where(in_range, j, cp.int64(0))  # clamp out-of-range positions to 0
+    differs = in_range & (tmpptr[si + safe_j] != tmpptr[sii + safe_j])
+
+    toequal[:1] = (has_valid & ~cp.any(differs)).reshape(1)  # GPU→GPU, no sync
+
+
+# Pads each variable-length sublist to a fixed target length, producing a flat output array.
+#
+# Layout:
+#   fromptr      - flat source data
+#   fromoffsets  - offsetslength boundary values; sublist k spans fromptr[fromoffsets[k]:fromoffsets[k+1]]
+#   toptr        - flat output of size num_sublists * target
+#
+# For each output position q = k*target + j  (k = sublist index, j = intra-sublist position):
+#   if j < count[k]:  toptr[q] = fromptr[fromoffsets[k] + j]   (copy)
+#   else:             toptr[q] = 0                              (zero-fill)
+#
+# Example (target=3):
+#   fromptr     = [10, 20, 30, 40, 50]
+#   fromoffsets = [0, 2, 3, 5]          → sublists [10,20], [30], [40,50]
+#   toptr       = [10, 20, 0, 30, 0, 0, 40, 50, 0]
+def awkward_NumpyArray_pad_zero_to_length(
+    fromptr, fromoffsets, offsetslength, target, toptr
+):
+    num_sublists = offsetslength - 1
+    if num_sublists <= 0 or target == 0:
+        return
+
+    dtype = toptr.dtype.type
+
+    def fill(q):
+        k = q // target
+        j = q % target
+        start = fromoffsets[k]
+        count = fromoffsets[k + 1] - start
+        if j < count:
+            return dtype(fromptr[start + j])
+        return dtype(0)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=toptr,
+        op=fill,
+        num_items=num_sublists * target,
+    )
+
+
+# Same as awkward_NumpyArray_subrange_equal but for bool arrays.
+# tmpptr is bool* (C++) / cupy.bool_ (Python), so values are always 0 or 1;
+def awkward_NumpyArray_subrange_equal_bool(
+    tmpptr, fromstarts, fromstops, length, toequal
+):
+    awkward_NumpyArray_subrange_equal(tmpptr, fromstarts, fromstops, length, toequal)
+
+
+# Projects a jagged array through a mask: copies (starts_in[i], stops_in[i]) to the
+# next output slot only for entries where index[i] >= 0 (i.e. not masked out).
+# Example:
+#   index      = [ 0, -1,  2, -1,  4]   (entries 1 and 3 are masked)
+#   starts_in  = [10, 20, 30, 40, 50]
+#   stops_in   = [12, 25, 33, 44, 51]
+#   length     = 5
+#
+#   starts_out = [10, 30, 50]            (slots for entries 0, 2, 4)
+#   stops_out  = [12, 33, 51]
+def awkward_MaskedArray_getitem_next_jagged_project(
+    index, starts_in, stops_in, starts_out, stops_out, length
+):
+    if length == 0:
+        return
+    mask = index[:length] >= 0
+    indices = cp.where(mask)[0]
+    n = len(indices)
+    starts_out[:n] = starts_in[indices]
+    stops_out[:n] = stops_in[indices]
