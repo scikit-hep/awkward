@@ -1110,7 +1110,7 @@ def awkward_RegularArray_getitem_next_at(tocarry, at, length, size):
     regular_at = at
     if regular_at < 0:
         regular_at += size
-    if not (0 <= regular_at < size):
+    if regular_at < 0 or regular_at >= size:
         raise ValueError(
             "index out of range in compiled CUDA code (awkward_RegularArray_getitem_next_at)"
         )
