@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from cuda.compute import (
     CountingIterator,
-    gpu_struct,
     reduce_into,
     unary_transform,
 )
@@ -312,7 +311,7 @@ def awkward_reduce_sum_int32_bool_64(
     )
 
 
-def awkward_reduce_prod(
+def awkward_reduce_sum_complex(
     result,
     input_data,
     offsets_data,
@@ -322,14 +321,13 @@ def awkward_reduce_prod(
     start_o = offsets_data[:-1]
     end_o = offsets_data[1:]
 
-    def segment_reduce_prod(segment_id):
+    def segment_reduce_sum(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
         if len(segment) == 0:
-            # that's what a cpu kernel passes for empty arrays (awkward-cpp/src/cpu-kernels/awkward_reduce_prod.cpp#L15)
-            return 1
-        return np.prod(segment)
+            return 0
+        return np.sum(segment)
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
@@ -337,7 +335,52 @@ def awkward_reduce_prod(
     segment_ids = CountingIterator(type_wrapper(0))
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_prod, num_items=outlength
+        d_in=segment_ids, d_out=result, op=segment_reduce_sum, num_items=outlength
+    )
+
+
+def awkward_reduce_prod(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+):
+    # Complex values arrive as a flat float32/float64 array of length 2*N
+    # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
+    # (or complex64 -> float32) and doubles the length. We re-view those buffers
+    # back to the matching complex dtype so we can reuse the same segmented-sum
+    # pattern as `awkward_reduce_sum`.
+    if input_data.dtype == cp.float32:
+        complex_dtype = cp.complex64
+    else:
+        complex_dtype = cp.complex128
+
+    input_complex = input_data.view(complex_dtype)
+    result_complex = result.view(complex_dtype)
+
+    index_dtype = offsets_data.dtype
+
+    def segment_reduce_sum(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_complex[start_idx:end_idx]
+        if len(segment) == 0:
+            return complex_dtype(0)
+        return np.sum(segment)
+
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result_complex,
+        op=segment_reduce_sum,
+        num_items=outlength,
     )
 
 
@@ -403,63 +446,63 @@ def awkward_reduce_max(
     )
 
 
-# original implementation of `awkward_reduce_max_complex` (doesn't work - keep for archive)
 def awkward_reduce_max_complex(
     result,
     input_data,
     offsets_data,
     outlength,
-    # the initial value for the reduction
+    # the initial value for the reduction (real component; imag identity is 0)
     identity,
 ):
-    # print("outlength", outlength)
-    # print(input_data)
+    # Complex values arrive as a flat float32/float64 array of length 2*N
+    # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
+    # (or complex64 -> float32) and doubles the length. We re-view those buffers
+    # back to the matching complex dtype so the segment reducer can read the
+    # real/imag components via .real / .imag attribute access, avoiding the
+    # gpu_struct pattern that failed in earlier attempts.
+    if input_data.dtype == cp.float32:
+        complex_dtype = cp.complex64
+    else:
+        complex_dtype = cp.complex128
+
+    input_complex = input_data.view(complex_dtype)
+    result_complex = result.view(complex_dtype)
+
     index_dtype = offsets_data.dtype
-    data_dtype = input_data.dtype.type
-
-    complex_array = gpu_struct(
-        {
-            "real_data": data_dtype,
-            "imag_data": data_dtype,
-        }
-    )
-    result = result.view(complex_array.dtype)
-
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
 
     def segment_reduce_max(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-        # segment = input_data[start_idx:end_idx]
-        if end_idx <= start_idx:
-            return identity  # empty segment
 
+        # Start with (identity, 0) per the CPU kernel; empty segments keep this.
         max_real = identity
-        max_imag = type_wrapper(0)
+        max_imag = 0.0
 
         for i in range(start_idx, end_idx):
-            x = input_data[i * 2]
-            y = input_data[i * 2 + 1]
+            c = input_complex[i]
+            x = c.real
+            y = c.imag
+            # Lex compare on (real, imag)
             if x > max_real or (x == max_real and y > max_imag):
                 max_real = x
                 max_imag = y
-
-        # max_value = max(segment)
-        # return identity if it is > than max_value from input_data
-        # print(complex_array(max_real, max_imag))
-        return complex_array(max_real, max_imag)
+        return complex(max_real, max_imag)
 
     # Perform the segmented reduce
     # type_wrapper: cp.int64
     type_wrapper = cp.dtype(index_dtype).type
     segment_ids = CountingIterator(type_wrapper(0))
+
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
+
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_max, num_items=outlength
+        d_in=segment_ids,
+        d_out=result_complex,
+        op=segment_reduce_max,
+        num_items=outlength,
     )
-
-    # print("this is the result:", result)
 
 
 def awkward_reduce_min(
@@ -491,6 +534,64 @@ def awkward_reduce_min(
     # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
     unary_transform(
         d_in=segment_ids, d_out=result, op=segment_reduce_min, num_items=outlength
+    )
+
+
+def awkward_reduce_min_complex(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+    # the initial value for the reduction (real component; imag identity is 0)
+    identity,
+):
+    # Complex values arrive as a flat float32/float64 array of length 2*N
+    # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
+    # (or complex64 -> float32) and doubles the length. We re-view those buffers
+    # back to the matching complex dtype so the segment reducer can read the
+    # real/imag components via .real / .imag attribute access, avoiding the
+    # gpu_struct pattern that failed in the archived attempt below.
+    if input_data.dtype == cp.float32:
+        complex_dtype = cp.complex64
+    else:
+        complex_dtype = cp.complex128
+
+    input_complex = input_data.view(complex_dtype)
+    result_complex = result.view(complex_dtype)
+
+    index_dtype = offsets_data.dtype
+
+    def segment_reduce_min(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        # Start with (identity, 0) per the CPU kernel; empty segments keep this.
+        min_real = identity
+        min_imag = 0.0
+        for i in range(start_idx, end_idx):
+            c = input_complex[i]
+            x = c.real
+            y = c.imag
+            # Lex compare on (real, imag)
+            if x < min_real or (x == min_real and y < min_imag):
+                min_real = x
+                min_imag = y
+        return complex(min_real, min_imag)
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    start_o = offsets_data[:-1]
+    end_o = offsets_data[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result_complex,
+        op=segment_reduce_min,
+        num_items=outlength,
     )
 
 
