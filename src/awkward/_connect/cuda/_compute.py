@@ -187,6 +187,40 @@ def awkward_reduce_argmax(
     )
 
 
+def awkward_reduce_argmax_complex(
+    result,
+    input_data,
+    offsets_data,
+    starts,
+    outlength,
+):
+    complex_dtype = infer_complex_dtype(input_data.dtype)
+
+    input_complex = input_data.view(complex_dtype)
+
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
+
+    def segment_reduce_argmax(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_complex[start_idx:end_idx]
+        if start_idx == end_idx:
+            return index_dtype(-1)
+        # return a global index
+        return np.argmax(segment) + start_idx
+
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_argmax,
+        num_items=outlength,
+    )
+
+
 def awkward_reduce_argmin(
     result,
     input_data,
@@ -209,6 +243,42 @@ def awkward_reduce_argmin(
     segment_ids = CountingIterator(index_dtype(0))
 
     # TODO: replace with segmented_reduce once available/fixed in CCCL
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_argmin,
+        num_items=outlength,
+    )
+
+
+def awkward_reduce_argmin_complex(
+    result,
+    input_data,
+    offsets_data,
+    starts,
+    outlength,
+):
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+
+    complex_dtype = infer_complex_dtype(input_data.dtype)
+    input_complex = input_data.view(complex_dtype)
+
+    start_o, end_o = make_segment_views(offsets_data)
+
+    def segment_reduce_argmin(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+
+        segment = input_complex[start_idx:end_idx]
+
+        if len(segment) == 0:
+            return index_dtype(-1)
+
+        # np.argmin over complex uses lexicographic ordering (real, then imag)
+        return np.argmin(segment) + start_idx
+
+    segment_ids = CountingIterator(index_dtype(0))
+
     unary_transform(
         d_in=segment_ids,
         d_out=result,
@@ -297,6 +367,41 @@ def awkward_reduce_sum_bool(
     segment_ids = CountingIterator(index_dtype(0))
 
     # TODO: replace with segmented_reduce once available/fixed in CCCL
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_sum,
+        num_items=outlength,
+    )
+
+
+def awkward_reduce_sum_bool_complex(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+):
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+
+    complex_dtype = infer_complex_dtype(input_data.dtype)
+    input_complex = input_data.view(complex_dtype)
+
+    start_o, end_o = make_segment_views(offsets_data)
+
+    def segment_reduce_sum(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+
+        if start_idx == end_idx:
+            return 0
+
+        segment = input_complex[start_idx:end_idx]
+
+        # any non-zero complex value -> True (1)
+        return np.any(segment != complex_dtype(0))
+
+    segment_ids = CountingIterator(index_dtype(0))
+
     unary_transform(
         d_in=segment_ids,
         d_out=result,
