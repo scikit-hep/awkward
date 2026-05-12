@@ -1085,10 +1085,14 @@ def awkward_RegularArray_getitem_next_array_regularize(
     if lenarray == 0:
         return
     dtype = toarray.dtype.type
+
+    def _regularize(v):
+        return dtype(v + size) if v < 0 else dtype(v)
+
     unary_transform(
         d_in=fromarray[:lenarray],
         d_out=toarray[:lenarray],
-        op=lambda v: dtype(v + size) if v < 0 else dtype(v),
+        op=_regularize,
         num_items=lenarray,
     )
     if cp.any((toarray[:lenarray] < 0) | (toarray[:lenarray] >= size)):
@@ -1107,7 +1111,7 @@ def awkward_RegularArray_getitem_next_array_regularize(
 # Example size=5, at=2,  length=4: tocarry = [2, 7, 12, 17]
 # Example size=5, at=-1, length=4: tocarry = [4, 9, 14, 19]  (last element of each row)
 def awkward_RegularArray_getitem_next_at(tocarry, at, length, size):
-    regular_at = at
+    regular_at = int(at)
     if regular_at < 0:
         regular_at += size
     if regular_at < 0 or regular_at >= size:
@@ -1117,10 +1121,14 @@ def awkward_RegularArray_getitem_next_at(tocarry, at, length, size):
     if length == 0:
         return
     dtype = tocarry.dtype.type
+
+    def _index(q):
+        return dtype(q * size + regular_at)
+
     unary_transform(
         d_in=CountingIterator(dtype(0)),
         d_out=tocarry[:length],
-        op=lambda q: dtype(q * size + regular_at),
+        op=_index,
         num_items=length,
     )
 
