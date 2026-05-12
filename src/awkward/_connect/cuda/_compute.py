@@ -736,6 +736,17 @@ def awkward_index_rpad_and_clip_axis0(toindex, target, length):
     )
 
 
+def awkward_localindex(toindex, length):
+    # Fills toindex with [0, 1, 2, ..., length-1]
+    def fill_local_index(i):
+        return i
+
+    segment_ids = CountingIterator(toindex.dtype.type(0))
+    unary_transform(
+        d_in=segment_ids, d_out=toindex, op=fill_local_index, num_items=length
+    )
+
+
 # Fills tostarts and tostops with evenly spaced offsets of size `target` for each of the `length` lists
 def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
     def fill(i):
