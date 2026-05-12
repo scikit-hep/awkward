@@ -141,6 +141,9 @@ class CupyBackend(Backend):
         if kernel_name == "awkward_reduce_sum_bool":
             return cuda_compute.awkward_reduce_sum_bool
 
+        if kernel_name == "awkward_reduce_sum_complex":
+            return cuda_compute.awkward_reduce_sum_complex
+
         if kernel_name == "awkward_reduce_max":
             return cuda_compute.awkward_reduce_max
 

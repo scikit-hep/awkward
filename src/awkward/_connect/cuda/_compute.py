@@ -266,6 +266,60 @@ def awkward_reduce_sum(
     )
 
 
+def awkward_reduce_sum_complex(
+    result,
+    input_data,
+    parents_data,
+    offsets_data,
+    parents_length,
+    outlength,
+):
+    # Complex values arrive as a flat float32/float64 array of length 2*N
+    # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
+    # (or complex64 -> float32) and doubles the length. We re-view those buffers
+    # back to the matching complex dtype so we can reuse the same segmented-sum
+    # pattern as `awkward_reduce_sum`.
+    if input_data.dtype == cp.float32:
+        complex_dtype = cp.complex64
+    else:
+        complex_dtype = cp.complex128
+
+    input_complex = input_data.view(complex_dtype)
+    result_complex = result.view(complex_dtype)
+
+    index_dtype = parents_data.dtype
+
+    def segment_reduce_sum(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_complex[start_idx:end_idx]
+        if len(segment) == 0:
+            return complex_dtype(0)
+        return np.sum(segment)
+
+    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_sum_complex`
+    # directly and specify unordered parents
+    input_complex = rearrange_by_parents(input_complex, parents_data)
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result_complex,
+        op=segment_reduce_sum,
+        num_items=outlength,
+    )
+
+
 # original implementation - currently bools don't work because of a bug on numba side
 def awkward_reduce_sum_bool(
     result,
