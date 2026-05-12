@@ -103,6 +103,9 @@ class CupyBackend(Backend):
         - awkward_RegularArray_rpad_and_clip_axis1
         - awkward_RegularArray_getitem_next_at
         - awkward_ListOffsetArray_rpad_length_axis1
+        - awkward_ListOffsetArray_rpad_and_clip_axis1
+        - awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64
+        - awkward_ListOffsetArray_local_preparenext_64
         - awkward_reduce_sum_complex
         - awkward_index_rpad_and_clip_axis1
         - awkward_reduce_max_complex
@@ -137,6 +140,9 @@ class CupyBackend(Backend):
             "awkward_RegularArray_rpad_and_clip_axis1",
             "awkward_RegularArray_getitem_next_at",
             "awkward_ListOffsetArray_rpad_length_axis1",
+            "awkward_ListOffsetArray_rpad_and_clip_axis1",
+            "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+            "awkward_ListOffsetArray_local_preparenext_64",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):

@@ -1181,3 +1181,163 @@ def awkward_ListOffsetArray_rpad_length_axis1(
     tolength[:1] = tooffsets[fromlength : fromlength + 1].astype(
         tolength.dtype
     )  # GPU→GPU, no sync
+
+
+## NOT USED (revisit later)
+# Builds a flat gather index for padding each sublist to at least `target` elements.
+# The output size per row is max(len_i, target): longer sublists are kept in full,
+# shorter ones are extended with -1 (missing).  toindex is sized to sum(max(len_i, target)).
+# For output element q in row i at intra-row position j:
+#   j < len_i  →  fromoffsets[i] + j   (copy actual element)
+#   j >= len_i →  -1                    (pad with missing)
+#
+# Example (target=3): fromoffsets=[0,1,5,7], fromlength=3
+#   row lengths: [1, 4, 2], padded: [3, 4, 3]
+#   toindex = [0,-1,-1, 1,2,3,4, 5,6,-1]
+def awkward_ListOffsetArray_rpad_axis1(toindex, fromoffsets, fromlength, target):
+    if fromlength == 0 or len(toindex) == 0:
+        return
+    counts = fromoffsets[1 : fromlength + 1] - fromoffsets[:fromlength]
+    starts = cp.empty(fromlength + 1, dtype=fromoffsets.dtype)
+    padded = cp.maximum(counts, target).astype(starts.dtype)
+    starts[0] = 0
+    inclusive_scan(
+        d_in=padded,
+        d_out=starts[1 : fromlength + 1],
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=fromlength,
+    )
+    dtype = toindex.dtype.type
+
+    # For each flat output index q, binary-searches starts to find which row i that position belongs to.
+    # Computes the intra-row offset j = q - starts[i], and returns
+    # either the source index (fromoffsets[i] + j) if within the original sublist length,
+    # or -1 if it's a padding slot.
+    def fill(q):
+        lo = 0
+        hi = fromlength - 1
+        while lo < hi:
+            mid = (lo + hi + 1) >> 1
+            if starts[mid] <= q:
+                lo = mid
+            else:
+                hi = mid - 1
+        i = lo
+        j = q - starts[i]
+        if j < counts[i]:
+            return dtype(fromoffsets[i] + j)
+        return dtype(-1)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=toindex,
+        op=fill,
+        num_items=len(toindex),
+    )
+
+
+# Builds a flat gather index for padding/clipping each sublist to exactly `target` elements.
+# Unlike rpad_axis1 the output size is always length*target (rows are never extended beyond target).
+# For output element q in row i at intra-row slot j = q % target:
+#   j < min(target, len_i)  →  fromoffsets[i] + j  (copy actual element)
+#   j >= min(target, len_i) →  -1                   (pad with missing)
+#
+# Example (target=3): fromoffsets=[0,1,5,7], length=3
+#   toindex = [0,-1,-1, 1,2,3, 5,6,-1]
+def awkward_ListOffsetArray_rpad_and_clip_axis1(toindex, fromoffsets, length, target):
+    if length == 0 or target == 0:
+        return
+    dtype = toindex.dtype.type
+
+    def fill(q):
+        i = q // target
+        j = q % target
+        rangeval = fromoffsets[i + 1] - fromoffsets[i]
+        shorter = rangeval if rangeval < target else target
+        if j < shorter:
+            return dtype(fromoffsets[i] + j)
+        return dtype(-1)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=toindex,
+        op=fill,
+        num_items=length * target,
+    )
+
+
+# Copies offsets[0:length+1] into offsetscopy and finds the maximum sublist length.
+# maxcount[0] = max(offsets[i+1] - offsets[i] for i in range(length)), or 0 if length==0.
+#
+# Example: offsets=[0,3,3,7,8], length=4
+#   offsetscopy = [0, 3, 3, 7, 8]
+#   counts = [3, 0, 4, 1]  →  maxcount = [4]
+def awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
+    maxcount, offsetscopy, offsets, length
+):
+    offsetscopy[: length + 1] = offsets[: length + 1]
+    if length > 0:
+        counts = offsets[1 : length + 1] - offsets[:length]
+        maxcount[:1] = cp.max(counts)
+    else:
+        maxcount[:1] = cp.zeros(1, dtype=maxcount.dtype)
+
+
+# Writes the argsort of fromindex into tocarry.
+# Used to reorder elements into the sorted order needed for nonlocal reductions.
+#
+# Example: fromindex=[2,0,3,1], length=4
+#   tocarry = [1, 3, 0, 2]  (position of 0, 1, 2, 3 in fromindex)
+def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
+    if length == 0:
+        return
+    tocarry[:length] = cp.argsort(fromindex[:length])
+
+
+## NOT USED (revisit later)
+# Gathers inneroffsets at positions given by outeroffsets:
+# tooffsets[i] = inneroffsets[outeroffsets[i]] for i in [0, outeroffsetslen).
+# Used when flattening a nested ListOffsetArray: the outer offsets index into
+# the inner offset array to produce the combined flat offsets.
+#
+# Example: outeroffsets=[0,2,3], inneroffsets=[0,4,7,9,11]
+#   tooffsets = [inneroffsets[0], inneroffsets[2], inneroffsets[3]] = [0, 9, 11]
+def awkward_ListOffsetArray_flatten_offsets(
+    tooffsets, outeroffsets, outeroffsetslen, inneroffsets
+):
+    if outeroffsetslen == 0:
+        return
+    tooffsets[:outeroffsetslen] = inneroffsets[outeroffsets[:outeroffsetslen]]
+
+
+## NOT USED (revisit later)
+# Rewrites fromoffsets to exclude None entries counted by noneindexes.
+# tooffsets[i] = fromoffsets[i] - (number of nones in noneindexes[0:fromoffsets[i]])
+# which equals the number of non-None elements before position fromoffsets[i].
+#
+# Computed via a single inclusive scan over the None mask, then indexed at each fromoffsets value.
+#
+# Example: noneindexes=[-1, 0, -1, 0, 0, -1, 0], fromoffsets=[0,2,3,5,7], length_offsets=5
+#   none mask:        [1, 0, 1, 0, 0, 1, 0]
+#   cumulative_nones: [0, 1, 1, 2, 2, 2, 3, 3]
+#   tooffsets = fromoffsets - cumulative_nones[fromoffsets] = [0,2,3,5,7] - [0,1,2,2,3] = [0,1,1,3,4]
+def awkward_ListOffsetArray_drop_none_indexes(
+    tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes
+):
+    if length_offsets == 0:
+        return
+    # cumulative_nones[k] = number of nones in noneindexes[0:k]
+    cumulative_nones = cp.empty(length_indexes + 1, dtype=cp.int64)
+    cumulative_nones[0] = 0
+    if length_indexes > 0:
+        none_mask = (noneindexes[:length_indexes] < 0).astype(cumulative_nones.dtype)
+        inclusive_scan(
+            d_in=none_mask,
+            d_out=cumulative_nones[1 : length_indexes + 1],
+            op=OpKind.PLUS,
+            init_value=None,
+            num_items=length_indexes,
+        )
+    idx = fromoffsets[:length_offsets]
+    tooffsets[:length_offsets] = (idx - cumulative_nones[idx]).astype(tooffsets.dtype)
