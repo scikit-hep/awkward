@@ -5,6 +5,8 @@ from __future__ import annotations
 from cuda.compute import (
     CountingIterator,
     DiscardIterator,
+    TransformIterator,
+    ZipIterator,
     inclusive_scan,
     reduce_into,
     unary_transform,
@@ -1341,3 +1343,220 @@ def awkward_ListOffsetArray_drop_none_indexes(
         )
     idx = fromoffsets[:length_offsets]
     tooffsets[:length_offsets] = (idx - cumulative_nones[idx]).astype(tooffsets.dtype)
+
+
+## NOT USED (revisit later)
+# Validates that each non-empty row satisfies 0 <= starts[i] <= stops[i] <= lencontent.
+# Empty rows (starts[i] == stops[i]) are skipped.
+# Raises ValueError on the first failing row
+#
+# Example: starts=[0,2,5], stops=[2,5,8], lencontent=8  → no error
+# Example: starts=[0,3], stops=[2,1], lencontent=8      → raises "start[i] > stop[i]"
+def awkward_ListArray_validity(starts, stops, length, lencontent):
+    if length == 0:
+        return
+    s = starts[:length]
+    e = stops[:length]
+    nonempty = s != e
+    # Fuse all three condition checks into one cp.any() so the happy path
+    # (no errors, the common case) only needs a single GPU→CPU sync instead of three.
+    if not cp.any(nonempty & ((s > e) | (s < 0) | (e > lencontent))):
+        return
+    # Error path: identify which condition failed and find its first index.
+    mask = nonempty & (s > e)
+    if cp.any(mask):
+        raise ValueError(f"start[i] > stop[i] at i={int(cp.argmax(mask))}")
+    mask = nonempty & (s < 0)
+    if cp.any(mask):
+        raise ValueError(f"start[i] < 0 at i={int(cp.argmax(mask))}")
+    mask = nonempty & (e > lencontent)
+    raise ValueError(f"stop[i] > len(content) at i={int(cp.argmax(mask))}")
+
+
+## NOT USED (revisit later)
+# Pads each sublist to at least `target` elements, writing -1 for padding slots.
+# Also writes tostarts/tostops describing the new (padded) layout.
+# Unlike the ListOffsetArray variant, starts/stops are separate arrays rather than a single offsets array.
+#
+# For each row i with rangeval = stops[i] - starts[i]:
+#   tostarts[i] = cumulative offset of row i in the output
+#   tostops[i]  = tostarts[i] + max(rangeval, target)
+#   toindex[tostarts[i]+j] = starts[i]+j  for j < rangeval  (copy from source)
+#   toindex[tostarts[i]+j] = -1           for j >= rangeval  (padding)
+#
+# Example: starts=[0,3,3], stops=[3,3,5], target=4
+#   tostarts=[0,4,8], tostops=[4,8,9]  (row 1 is empty → padded to 4; row 2 has 2 elems → stays 4 max(2,4)=4... wait)
+#   Actually: max(3,4)=4, max(0,4)=4, max(2,4)=4 → tostarts=[0,4,8], tostops=[4,8,12]
+#   toindex = [0,1,2,-1, -1,-1,-1,-1, 3,4,-1,-1]
+def awkward_ListArray_rpad_axis1(
+    toindex, fromstarts, fromstops, tostarts, tostops, target, length
+):
+    if length == 0:
+        return
+    counts = fromstops[:length] - fromstarts[:length]
+    row_starts = cp.empty(length + 1, dtype=tostarts.dtype)
+    row_starts[0] = 0
+    inclusive_scan(
+        d_in=cp.maximum(counts, target).astype(row_starts.dtype),
+        d_out=row_starts[1 : length + 1],
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=length,
+    )
+    tostarts[:length] = row_starts[:length]
+    tostops[:length] = row_starts[1 : length + 1]
+    total = int(row_starts[length])
+    if total == 0:
+        return
+    dtype = toindex.dtype.type
+
+    def fill(q):
+        lo = 0
+        hi = length - 1
+        while lo < hi:
+            mid = (lo + hi + 1) >> 1
+            if row_starts[mid] <= q:
+                lo = mid
+            else:
+                hi = mid - 1
+        i = lo
+        j = q - row_starts[i]
+        if j < counts[i]:
+            return dtype(fromstarts[i] + j)
+        return dtype(-1)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=toindex[:total],
+        op=fill,
+        num_items=total,
+    )
+
+
+# Computes the total output length for rpad_axis1 on a ListArray:
+# tomin[0] = sum(max(target, stops[i] - starts[i])) for i in [0, lenstarts).
+#
+# Example: starts=[0,3,3], stops=[3,3,5], target=4
+#   lengths=[3,0,2] → max with 4 → [4,4,4] → sum=12  →  tomin=[12]
+def awkward_ListArray_rpad_and_clip_length_axis1(
+    tomin, fromstarts, fromstops, target, lenstarts
+):
+    if lenstarts == 0:
+        tomin[:1] = 0
+        return
+    counts = fromstops[:lenstarts] - fromstarts[:lenstarts]
+    tomin[:1] = cp.sum(cp.maximum(counts, target)).astype(tomin.dtype)
+
+
+# Computes the minimum sublist length across all rows.
+# tomin[0] = min(stops[i] - starts[i]) for i in [0, lenstarts).
+#
+# Example: starts=[0,3,5], stops=[3,5,6]
+#   lengths=[3,2,1]  →  tomin=[1]
+def awkward_ListArray_min_range(tomin, fromstarts, fromstops, lenstarts):
+    if lenstarts == 0:
+        return
+
+    # Single-pass min(stops[i] - starts[i]) via ZipIterator + TransformIterator:
+    def diff(pair):
+        return pair.field_0 - pair.field_1
+
+    dtype = fromstops.dtype
+    zipped = ZipIterator(fromstops[:lenstarts], fromstarts[:lenstarts])
+    lengths_iter = TransformIterator(zipped, diff)
+    # should account for floats with `np.finfo` too?
+    h_init = np.array([np.iinfo(dtype).max], dtype=dtype)
+    if tomin.dtype == dtype:
+        reduce_into(
+            d_in=lengths_iter,
+            d_out=tomin[:1],
+            op=OpKind.MINIMUM,
+            num_items=lenstarts,
+            h_init=h_init,
+        )
+    else:
+        result = cp.empty(1, dtype=dtype)
+        reduce_into(
+            d_in=lengths_iter,
+            d_out=result,
+            op=OpKind.MINIMUM,
+            num_items=lenstarts,
+            h_init=h_init,
+        )
+        tomin[:1] = result.astype(tomin.dtype)
+
+
+## NOT USED (revisit later)
+# Broadcasts fromadvanced[i] across all positions in row i's output range [fromoffsets[i], fromoffsets[i+1]).
+# toadvanced[fromoffsets[i] + j] = fromadvanced[i] for j in [0, fromoffsets[i+1] - fromoffsets[i]).
+#
+# Example: fromadvanced=[7,8,9], fromoffsets=[0,2,2,3]
+#   toadvanced = [7,7, 9]  (row 1 is empty, row 2 has 1 element)
+def awkward_ListArray_getitem_next_range_spreadadvanced(
+    toadvanced, fromadvanced, fromoffsets, lenstarts
+):
+    if lenstarts == 0:
+        return
+    total = int(fromoffsets[lenstarts])
+    if total == 0:
+        return
+    dtype = toadvanced.dtype.type
+
+    def lookup(q):
+        lo = 0
+        hi = lenstarts - 1
+        while lo < hi:
+            mid = (lo + hi + 1) >> 1
+            if fromoffsets[mid] <= q:
+                lo = mid
+            else:
+                hi = mid - 1
+        return dtype(fromadvanced[lo])
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=toadvanced[:total],
+        op=lookup,
+        num_items=total,
+    )
+
+
+# Computes the total number of elements across all rows: fromoffsets[lenstarts] - fromoffsets[0].
+#
+# Example: fromoffsets=[0,3,3,5]  →  total=[5]
+def awkward_ListArray_getitem_next_range_counts(total, fromoffsets, lenstarts):
+    if lenstarts == 0:
+        total[:1] = 0
+        return
+    total[:1] = (fromoffsets[lenstarts] - fromoffsets[0]).astype(total.dtype)
+
+
+## NOT USED (revisit later)
+# For each row i, selects the element at position `at` within that row.
+# Negative `at` wraps relative to each row's own length: regular_at = at + (stops[i] - starts[i]).
+# tocarry[i] = starts[i] + regular_at.
+# Raises ValueError if any regular_at is out of [0, length_i).
+#
+# Example: starts=[0,3,5], stops=[3,5,6], at=-1
+#   lengths=[3,2,1], regular_at=[2,1,0]  →  tocarry=[2,4,5]
+def awkward_ListArray_getitem_next_at(tocarry, fromstarts, fromstops, lenstarts, at):
+    if lenstarts == 0:
+        return
+    dtype = tocarry.dtype.type
+
+    def compute(i):
+        length = fromstops[i] - fromstarts[i]
+        reg = length + at if at < 0 else at
+        if reg < 0 or reg >= length:
+            return dtype(-1)
+        return dtype(fromstarts[i] + reg)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=tocarry[:lenstarts],
+        op=compute,
+        num_items=lenstarts,
+    )
+    if cp.any(tocarry[:lenstarts] < 0):
+        i = int(cp.argmax(tocarry[:lenstarts] < 0))
+        raise ValueError(f"index out of range at i={i}, at={at}")

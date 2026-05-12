@@ -109,6 +109,9 @@ class CupyBackend(Backend):
         - awkward_reduce_sum_complex
         - awkward_index_rpad_and_clip_axis1
         - awkward_reduce_max_complex
+        - awkward_ListArray_rpad_and_clip_length_axis1
+        - awkward_ListArray_min_range
+        - awkward_ListArray_getitem_next_range_counts
         """
         return kernel_name in (
             "awkward_sort",
@@ -143,6 +146,9 @@ class CupyBackend(Backend):
             "awkward_ListOffsetArray_rpad_and_clip_axis1",
             "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
             "awkward_ListOffsetArray_local_preparenext_64",
+            "awkward_ListArray_rpad_and_clip_length_axis1",
+            "awkward_ListArray_min_range",
+            "awkward_ListArray_getitem_next_range_counts",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):

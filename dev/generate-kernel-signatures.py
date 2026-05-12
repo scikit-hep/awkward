@@ -13,7 +13,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 cuda_kernels_impl = [
     "awkward_Index_nones_as_index",
-    "awkward_ListArray_min_range",
+    # "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_broadcast_tooffsets",
@@ -66,8 +66,8 @@ cuda_kernels_impl = [
     "awkward_ListArray_getitem_next_at",
     "awkward_ListArray_getitem_next_range",
     "awkward_ListArray_getitem_next_range_carrylength",
-    "awkward_ListArray_getitem_next_range_counts",
-    "awkward_ListArray_rpad_and_clip_length_axis1",
+    # "awkward_ListArray_getitem_next_range_counts",
+    # "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListArray_rpad_axis1",
     "awkward_UnionArray_regular_index",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
