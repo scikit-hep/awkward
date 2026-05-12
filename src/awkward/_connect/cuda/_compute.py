@@ -768,3 +768,54 @@ def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsiz
     unary_transform(
         d_in=counters, d_out=outindex, op=fill_missing_repeat, num_items=output_size
     )
+
+
+def awkward_IndexedArray_fill(toindex, toindexoffset, fromindex, length, base):
+    """
+    Fill ``toindex[toindexoffset : toindexoffset + length]`` by mapping each
+    element of ``fromindex[:length]`` through ``x -> -1 if x < 0 else x + base``.
+    Negative sentinels are preserved; valid indices are rebased by ``base``.
+
+    Called during ``IndexedArray._mergemany`` and ``IndexedOptionArray._mergemany``
+    to concatenate indexed arrays (e.g. ``ak.concatenate``).
+    """
+    if length == 0:
+        return
+
+    to_dtype = toindex.dtype.type
+
+    def fill(x):
+        return to_dtype(-1) if x < 0 else to_dtype(x + base)
+
+    unary_transform(
+        d_in=fromindex[:length],
+        d_out=toindex[toindexoffset : toindexoffset + length],
+        op=fill,
+        num_items=length,
+    )
+
+
+def awkward_IndexedArray_fill_count(toindex, toindexoffset, length, base):
+    """
+    Fill ``toindex[toindexoffset : toindexoffset + length]`` with the sequence
+    ``[base, base + 1, ..., base + length - 1]``.
+
+    Called during ``IndexedArray._mergemany`` and ``IndexedOptionArray._mergemany``
+    for non-indexed segments: each position gets a contiguous identity index
+    shifted by ``base`` (the running content-length offset during concatenation).
+    """
+    if length == 0:
+        return
+
+    dtype = toindex.dtype.type
+
+    def fill(i):
+        return dtype(i + base)
+
+    counters = CountingIterator(dtype(0))
+    unary_transform(
+        d_in=counters,
+        d_out=toindex[toindexoffset : toindexoffset + length],
+        op=fill,
+        num_items=length,
+    )
