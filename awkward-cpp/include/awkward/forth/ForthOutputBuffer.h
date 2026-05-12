@@ -5,7 +5,6 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include <concepts>
 
 namespace awkward {
   #define NATIVELY_BIG_ENDIAN (*(std::uint16_t *)"\0\xff" < 0x100)
