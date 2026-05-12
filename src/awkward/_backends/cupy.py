@@ -181,6 +181,15 @@ class CupyBackend(Backend):
         if kernel_name == "awkward_reduce_min_complex":
             return cuda_compute.awkward_reduce_min_complex
 
+        if kernel_name == "awkward_reduce_prod_complex":
+            return cuda_compute.awkward_reduce_prod_complex
+
+        if kernel_name == "awkward_reduce_countnonzero_complex":
+            return cuda_compute.awkward_reduce_countnonzero_complex
+
+        if kernel_name == "awkward_reduce_prod_bool_complex":
+            return cuda_compute.awkward_reduce_prod_bool_complex
+
         return None
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:

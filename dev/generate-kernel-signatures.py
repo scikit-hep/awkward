@@ -135,12 +135,12 @@ cuda_kernels_impl = [
     # "awkward_reduce_sum_complex",
     # "awkward_reduce_sum_int32_bool_64",
     # "awkward_reduce_sum_int64_bool_64",
-    # "awkward_reduce_prod",
+    # "awkward_reduce_prod", # FIXME
     # "awkward_reduce_prod_bool",
-    "awkward_reduce_prod_bool_complex",
-    "awkward_reduce_prod_complex",
+    # "awkward_reduce_prod_bool_complex", # FIXME
+    # "awkward_reduce_prod_complex", # FIXME
     # "awkward_reduce_countnonzero",
-    "awkward_reduce_countnonzero_complex",
+    # "awkward_reduce_countnonzero_complex", # FIXME
     "awkward_sorting_ranges",
     "awkward_sorting_ranges_length",
 ]

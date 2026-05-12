@@ -37,6 +37,33 @@ def is_available() -> bool:
     return _cuda_compute_available
 
 
+def make_segment_views(offsets):
+    """
+    Returns (starts, stops) views for segmented operations.
+    """
+    return offsets[:-1], offsets[1:]
+
+
+def normalize_index_dtype(dtype):
+    dt = cp.dtype(dtype)
+    if dt.kind in ("u", "i"):
+        return cp.int64
+    return dt
+
+
+def infer_complex_dtype(dtype):
+    dt = cp.dtype(dtype)
+    if dt == cp.float32:
+        return cp.complex64
+    if dt == cp.float64:
+        return cp.complex128
+    raise TypeError(f"Expected float32/float64 interleaved complex buffer, got {dt}")
+
+
+def as_complex_view(data):
+    return data.view(infer_complex_dtype(data.dtype))
+
+
 def segmented_sort(
     toptr,
     fromptr,
@@ -59,8 +86,7 @@ def segmented_sort(
     num_segments = offsetslength - 1
     num_items = int(offsets[-1]) if len(offsets) > 0 else 0
 
-    start_offsets = offsets[:-1]
-    end_offsets = offsets[1:]
+    start_o, end_o = make_segment_views(offsets)
 
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
 
@@ -71,8 +97,8 @@ def segmented_sort(
         d_out_values=None,
         num_items=num_items,
         num_segments=num_segments,
-        start_offsets_in=start_offsets,
-        end_offsets_in=end_offsets,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
         order=order,
         stream=None,
     )
@@ -130,7 +156,6 @@ def rearrange_by_parents(input_data, parents):
     return input_data[order]
 
 
-# the inputs for this function we get from file ~/awkward/src/awkward/_reducers.py:239, in ArgMax.apply(self, array, parents, starts, shifts, outlength)
 def awkward_reduce_argmax(
     result,
     input_data,
@@ -138,30 +163,30 @@ def awkward_reduce_argmax(
     starts,
     outlength,
 ):
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_argmax(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
-        if len(segment) == 0:
+        if start_idx == end_idx:
             return -1
         # return a global index
         return np.argmax(segment) + start_idx
 
-    # Perform the segmented reduce
-    # type_wrapper is always cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_argmax, num_items=outlength
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_argmax,
+        num_items=outlength,
     )
 
 
-# this function is called from ~/awkward/src/awkward/_reducers.py:161 (ArgMin.apply())
 def awkward_reduce_argmin(
     result,
     input_data,
@@ -169,45 +194,46 @@ def awkward_reduce_argmin(
     starts,
     outlength,
 ):
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_argmin(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
-        if len(segment) == 0:
+        if start_idx == end_idx:
             return -1
         # return a global index
         return np.argmin(segment) + start_idx
 
-    # Perform the segmented reduce
-    # type_wrapper is always cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_argmin, num_items=outlength
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_argmin,
+        num_items=outlength,
     )
 
 
 def awkward_axis_none_reduce_max(array):
     data_dtype = array.dtype
-    index_dtype = np.int64
-    # initialize the minimum value depending on the dtype
-    if data_dtype.kind in "iu":  # int/uint
-        min = cp.iinfo(data_dtype).min
+
+    # Initialize identity depending on dtype
+    if data_dtype.kind in "iu":  # int / uint
+        identity = cp.iinfo(data_dtype).min
     elif data_dtype.kind == "f":  # float
-        min = cp.finfo(data_dtype).min
+        identity = cp.finfo(data_dtype).min
     else:
-        raise TypeError("Unsupported dtype to get the minimal value")
+        raise TypeError("Unsupported dtype for max reduction")
 
     def reduce_op(a, b):
-        return max(a, b)
+        return a if a > b else b
 
-    result_scalar = cp.empty(1, dtype=index_dtype)
-    h_init = np.array([min], dtype=index_dtype)
+    result_scalar = cp.empty(1, dtype=data_dtype)
+    h_init = np.array([identity], dtype=data_dtype)
+
     reduce_into(
         d_in=array,
         d_out=result_scalar,
@@ -225,89 +251,89 @@ def awkward_reduce_sum(
     offsets_data,
     outlength,
 ):
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_sum(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
-        if len(segment) == 0:
+        if start_idx == end_idx:
             return 0
         return np.sum(segment)
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_sum, num_items=outlength
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_sum,
+        num_items=outlength,
     )
 
 
-# original implementation - currently bools don't work because of a bug on numba side
 def awkward_reduce_sum_bool(
     result,
     input_data,
     offsets_data,
     outlength,
 ):
-    # temporary workaround - fix this (currently bools don't work because of a bug on numba side)
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    # Temporary workaround: bool reductions are unreliable on current backend
     if input_data.dtype == cp.bool_:
-        input_data = input_data.view(cp.int8)  # cast bool -> int8
+        input_data = input_data.view(cp.int8)
 
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_sum(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
+        if start_idx == end_idx:
+            return 0
         return np.any(segment)
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_sum, num_items=outlength
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_sum,
+        num_items=outlength,
     )
 
 
-# this is the same as awkward_reduce_sum (we can possibly use it after the bug on numba side is fixed)
 def awkward_reduce_sum_int32_bool_64(
     result,
     input_data,
     offsets_data,
     outlength,
 ):
-    # temporary workaround - fix this (currently bools don't work because of a bug on numba side)
+    # Temporary workaround: bool instability in backend
     if input_data.dtype == cp.bool_:
-        input_data = input_data.view(cp.int8)  # cast bool -> int8
+        input_data = input_data.view(cp.int8)
 
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_sum(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
-        if len(segment) == 0:
+        if start_idx == end_idx:
             return 0
         return np.sum(segment)
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_sum, num_items=outlength
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_sum,
+        num_items=outlength,
     )
 
 
@@ -317,25 +343,30 @@ def awkward_reduce_sum_complex(
     offsets_data,
     outlength,
 ):
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    complex_dtype = infer_complex_dtype(input_data.dtype)
+
+    input_complex = input_data.view(complex_dtype)
+    result_complex = result.view(complex_dtype)
+
+    start_o, end_o = make_segment_views(offsets_data)
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
 
     def segment_reduce_sum(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-        segment = input_data[start_idx:end_idx]
-        if len(segment) == 0:
+        segment = input_complex[start_idx:end_idx]
+        if start_idx == end_idx:
             return 0
         return np.sum(segment)
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_sum, num_items=outlength
+        d_in=segment_ids,
+        d_out=result_complex,
+        op=segment_reduce_sum,
+        num_items=outlength,
     )
 
 
@@ -345,41 +376,61 @@ def awkward_reduce_prod(
     offsets_data,
     outlength,
 ):
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
+
+    def segment_reduce_prod(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_data[start_idx:end_idx]
+        if start_idx == end_idx:
+            return 1
+        return np.prod(segment)
+
+    segment_ids = CountingIterator(index_dtype(0))
+
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_prod,
+        num_items=outlength,
+    )
+
+
+def awkward_reduce_prod_complex(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+):
     # Complex values arrive as a flat float32/float64 array of length 2*N
     # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
-    # (or complex64 -> float32) and doubles the length. We re-view those buffers
-    # back to the matching complex dtype so we can reuse the same segmented-sum
-    # pattern as `awkward_reduce_sum`.
-    if input_data.dtype == cp.float32:
-        complex_dtype = cp.complex64
-    else:
-        complex_dtype = cp.complex128
+    # (or complex64 -> float32) and doubles the length. Re-view the buffers
+    # back to complex dtype for the reduction.
+
+    complex_dtype = infer_complex_dtype(input_data.dtype)
 
     input_complex = input_data.view(complex_dtype)
     result_complex = result.view(complex_dtype)
 
-    index_dtype = offsets_data.dtype
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
-    def segment_reduce_sum(segment_id):
+    def segment_reduce_prod(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_complex[start_idx:end_idx]
-        if len(segment) == 0:
-            return complex_dtype(0)
-        return np.sum(segment)
+        if start_idx == end_idx:
+            return complex_dtype(1.0 + 0.0j)
+        return np.prod(segment)
 
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    segment_ids = CountingIterator(index_dtype(0))
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
         d_in=segment_ids,
         d_out=result_complex,
-        op=segment_reduce_sum,
+        op=segment_reduce_prod,
         num_items=outlength,
     )
 
@@ -390,13 +441,13 @@ def awkward_reduce_prod_bool(
     offsets_data,
     outlength,
 ):
-    # temporary workaround - fix this (currently bools don't work because of a bug on numba side)
+    # Temporary workaround:
+    # bool reductions currently fail on the numba side, so reinterpret as int8.
     if input_data.dtype == cp.bool_:
-        input_data = input_data.view(cp.int8)  # cast bool -> int8
+        input_data = input_data.view(cp.int8)
 
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_prod(segment_id):
         start_idx = start_o[segment_id]
@@ -404,13 +455,60 @@ def awkward_reduce_prod_bool(
         segment = input_data[start_idx:end_idx]
         return np.all(segment)
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_prod, num_items=outlength
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_prod,
+        num_items=outlength,
+    )
+
+
+def awkward_reduce_prod_bool_complex(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+):
+    # Complex values arrive as a flat float32/float64 array of length 2*N
+    # (real/imag interleaved). Re-view the buffers back to complex dtype.
+
+    complex_dtype = infer_complex_dtype(input_data.dtype)
+
+    input_complex = input_data.view(complex_dtype)
+
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
+
+    def segment_reduce_prod(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+
+        # Identity for logical AND semantics
+        if start_idx == end_idx:
+            return True
+
+        acc = True
+
+        for i in range(start_idx, end_idx):
+            acc = acc and (input_complex[i] != complex_dtype(0))
+
+            # Early exit
+            if not acc:
+                break
+
+        return acc
+
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_prod,
+        num_items=outlength,
     )
 
 
@@ -419,30 +517,31 @@ def awkward_reduce_max(
     input_data,
     offsets_data,
     outlength,
-    # the initial value for the reduction
+    # initial value for the reduction
     identity,
 ):
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_max(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
-        if len(segment) == 0:
+        # Empty segment -> identity
+        if start_idx == end_idx:
             return identity
         max_value = max(segment)
         # return identity if it is > than max_value from input_data
         return max(max_value, identity)
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_max, num_items=outlength
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_max,
+        num_items=outlength,
     )
 
 
@@ -451,50 +550,47 @@ def awkward_reduce_max_complex(
     input_data,
     offsets_data,
     outlength,
-    # the initial value for the reduction (real component; imag identity is 0)
+    # initial value for the reduction (real component; imag identity is 0)
     identity,
 ):
     # Complex values arrive as a flat float32/float64 array of length 2*N
     # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
-    # (or complex64 -> float32) and doubles the length. We re-view those buffers
-    # back to the matching complex dtype so the segment reducer can read the
-    # real/imag components via .real / .imag attribute access, avoiding the
-    # gpu_struct pattern that failed in earlier attempts.
-    if input_data.dtype == cp.float32:
-        complex_dtype = cp.complex64
-    else:
-        complex_dtype = cp.complex128
+    # (or complex64 -> float32) and doubles the length. Re-view the buffers
+    # back to complex dtype for the reduction.
+
+    complex_dtype = infer_complex_dtype(input_data.dtype)
 
     input_complex = input_data.view(complex_dtype)
     result_complex = result.view(complex_dtype)
 
-    index_dtype = offsets_data.dtype
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_max(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-        # Start with (identity, 0) per the CPU kernel; empty segments keep this.
+
+        # Identity semantics:
+        # empty segment => (identity, 0)
         max_real = identity
         max_imag = 0.0
+
         for i in range(start_idx, end_idx):
             c = input_complex[i]
-            x = c.real
-            y = c.imag
-            # Lex compare on (real, imag)
-            if x > max_real or (x == max_real and y > max_imag):
-                max_real = x
-                max_imag = y
-        return complex(max_real, max_imag)
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
+            real = c.real
+            imag = c.imag
 
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+            # Lexicographic comparison on (real, imag)
+            if real > max_real or (real == max_real and imag > max_imag):
+                max_real = real
+                max_imag = imag
 
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+        return complex_dtype(max_real + 1j * max_imag)
+
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
         d_in=segment_ids,
         d_out=result_complex,
@@ -508,30 +604,32 @@ def awkward_reduce_min(
     input_data,
     offsets_data,
     outlength,
-    # the initial value for the reduction
+    # initial value for the reduction
     identity,
 ):
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_min(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
         segment = input_data[start_idx:end_idx]
-        if len(segment) == 0:
+
+        # Empty segment -> identity
+        if start_idx == end_idx:
             return identity
         min_value = min(segment)
         # return identity if it is < than min_value from input_data
         return min(min_value, identity)
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_min, num_items=outlength
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_min,
+        num_items=outlength,
     )
 
 
@@ -540,51 +638,47 @@ def awkward_reduce_min_complex(
     input_data,
     offsets_data,
     outlength,
-    # the initial value for the reduction (real component; imag identity is 0)
+    # initial value for the reduction (real component; imag identity is 0)
     identity,
 ):
     # Complex values arrive as a flat float32/float64 array of length 2*N
     # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
-    # (or complex64 -> float32) and doubles the length. We re-view those buffers
-    # back to the matching complex dtype so the segment reducer can read the
-    # real/imag components via .real / .imag attribute access, avoiding the
-    # gpu_struct pattern that failed in the archived attempt below.
-    if input_data.dtype == cp.float32:
-        complex_dtype = cp.complex64
-    else:
-        complex_dtype = cp.complex128
+    # (or complex64 -> float32) and doubles the length. Re-view the buffers
+    # back to complex dtype for the reduction.
+
+    complex_dtype = infer_complex_dtype(input_data.dtype)
 
     input_complex = input_data.view(complex_dtype)
     result_complex = result.view(complex_dtype)
 
-    index_dtype = offsets_data.dtype
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_min(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-        # Start with (identity, 0) per the CPU kernel; empty segments keep this.
+
+        # Identity semantics:
+        # empty segment => (identity, 0)
         min_real = identity
         min_imag = 0.0
+
         for i in range(start_idx, end_idx):
             c = input_complex[i]
-            x = c.real
-            y = c.imag
-            # Lex compare on (real, imag)
-            if x < min_real or (x == min_real and y < min_imag):
-                min_real = x
-                min_imag = y
-        return complex(min_real, min_imag)
 
-    # Prepare the start and end offsets
-    # TODO: This should at least be starts_to_offsets
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+            real = c.real
+            imag = c.imag
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+            # Lexicographic comparison on (real, imag)
+            if real < min_real or (real == min_real and imag < min_imag):
+                min_real = real
+                min_imag = imag
+
+        return complex_dtype(min_real + 1j * min_imag)
+
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
         d_in=segment_ids,
         d_out=result_complex,
@@ -598,20 +692,22 @@ def awkward_reduce_count_64(
     offsets_data,
     outlength,
 ):
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_count(segment_id):
-        return end_o[segment_id] - start_o[segment_id]
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+        return end_idx - start_idx
+
+    segment_ids = CountingIterator(index_dtype(0))
+
     unary_transform(
-        d_in=segment_ids, d_out=result, op=segment_reduce_count, num_items=outlength
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_count,
+        num_items=outlength,
     )
 
 
@@ -621,33 +717,69 @@ def awkward_reduce_countnonzero(
     offsets_data,
     outlength,
 ):
-    # temporary workaround - fix this (currently bools don't work because of a bug on numba side)
+    # Temporary workaround for bool instability
     if input_data.dtype == cp.bool_:
-        input_data = input_data.view(cp.int8)  # cast bool -> int8
+        input_data = input_data.view(cp.int8)
 
-    index_dtype = offsets_data.dtype
-    start_o = offsets_data[:-1]
-    end_o = offsets_data[1:]
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
 
-    def segment_reduce_count_nonzero(segment_id):
+    def segment_reduce_countnonzero(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-        segment = input_data[start_idx:end_idx]
+
         count = 0
-        for i in range(end_idx - start_idx):
-            if segment[i] != 0:
+
+        for i in range(start_idx, end_idx):
+            if input_data[i] != 0:
                 count += 1
+
         return count
 
-    # Perform the segmented reduce
-    # type_wrapper: cp.int64
-    type_wrapper = cp.dtype(index_dtype).type
-    segment_ids = CountingIterator(type_wrapper(0))
-    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    segment_ids = CountingIterator(index_dtype(0))
+
     unary_transform(
         d_in=segment_ids,
         d_out=result,
-        op=segment_reduce_count_nonzero,
+        op=segment_reduce_countnonzero,
+        num_items=outlength,
+    )
+
+
+def awkward_reduce_countnonzero_complex(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+):
+    # Complex values arrive as a flat float32/float64 array of length 2*N
+    # (real/imag interleaved). Re-view into complex dtype for reduction.
+
+    complex_dtype = infer_complex_dtype(input_data.dtype)
+
+    input_complex = input_data.view(complex_dtype)
+
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
+
+    def segment_reduce_countnonzero(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+
+        count = 0
+
+        for i in range(start_idx, end_idx):
+            if input_complex[i] != complex_dtype(0):
+                count += 1
+
+        return count
+
+    segment_ids = CountingIterator(index_dtype(0))
+
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_countnonzero,
         num_items=outlength,
     )
 
@@ -676,35 +808,63 @@ def awkward_index_rpad_and_clip_axis0(toindex, target, length):
     )
 
 
-# Fills tostarts and tostops with evenly spaced offsets of size `target` for each of the `length` lists
 def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
+    """
+    Fills `tostarts` and `tostops` with rpad/clip offsets for axis=1 lists.
+    Each list is padded or clipped to length `target`.
+    """
+
     def fill(i):
-        tostarts[i] = tostarts.dtype.type(i * target)
-        return tostarts.dtype.type(i * target + target)
+        start = i * target
+        end = start + target
+
+        tostarts[i] = tostarts.dtype.type(start)
+        return tostarts.dtype.type(end)
 
     segment_ids = CountingIterator(tostarts.dtype.type(0))
-    unary_transform(d_in=segment_ids, d_out=tostops, op=fill, num_items=length)
+
+    unary_transform(
+        d_in=segment_ids,
+        d_out=tostops,
+        op=fill,
+        num_items=length,
+    )
 
 
-def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsize):
+def awkward_missing_repeat(
+    outindex,
+    index,
+    indexlength,
+    repetitions,
+    regularsize,
+):
     """
-    Repeats an index array `repetitions` times, adjusting valid (non-negative) indices
-    by an offset(regularsize) each repetition.
-    Missing values (-1) are preserved as-is across all repetitions.
+    Repeats an index array `repetitions` times, adjusting valid (non-negative)
+    indices by an offset of `regularsize` per repetition.
+    Missing values (-1) are preserved.
     """
 
     index_dtype = outindex.dtype.type
 
-    def fill_missing_repeat(counter):
-        i = counter // indexlength  # number of repetition we're in
-        j = counter % indexlength  # position within the current repetition
-        val_offset = i * regularsize
-        base = index[j]
-        adjustment = index_dtype(val_offset) if base >= 0 else index_dtype(0)
-        return base + adjustment
-
     output_size = repetitions * indexlength
+
+    def fill(counter):
+        i = counter // indexlength  # repetition id
+        j = counter % indexlength  # position within repetition
+
+        base = index[j]
+
+        # shift only valid indices
+        if base >= 0:
+            return index_dtype(base + i * regularsize)
+        else:
+            return index_dtype(-1)
+
     counters = CountingIterator(index_dtype(0))
+
     unary_transform(
-        d_in=counters, d_out=outindex, op=fill_missing_repeat, num_items=output_size
+        d_in=counters,
+        d_out=outindex,
+        op=fill,
+        num_items=output_size,
     )
