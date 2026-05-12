@@ -628,6 +628,71 @@ def awkward_reduce_min(
     )
 
 
+def awkward_reduce_min_complex(
+    result,
+    input_data,
+    parents_data,
+    offsets_data,
+    parents_length,
+    outlength,
+    # the initial value for the reduction (real component; imag identity is 0)
+    identity,
+):
+    # Complex values arrive as a flat float32/float64 array of length 2*N
+    # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
+    # (or complex64 -> float32) and doubles the length. We re-view those buffers
+    # back to the matching complex dtype so the segment reducer can read the
+    # real/imag components via .real / .imag attribute access, avoiding the
+    # gpu_struct pattern that failed in the archived attempt below.
+    if input_data.dtype == cp.float32:
+        complex_dtype = cp.complex64
+    else:
+        complex_dtype = cp.complex128
+
+    input_complex = input_data.view(complex_dtype)
+    result_complex = result.view(complex_dtype)
+
+    index_dtype = parents_data.dtype
+
+    def segment_reduce_min(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        # Start with (identity, 0) per the CPU kernel; empty segments keep this.
+        min_real = identity
+        min_imag = 0.0
+        for i in range(start_idx, end_idx):
+            c = input_complex[i]
+            x = c.real
+            y = c.imag
+            # Lex compare on (real, imag)
+            if x < min_real or (x == min_real and y < min_imag):
+                min_real = x
+                min_imag = y
+        return complex(min_real, min_imag)
+
+    # sort input in case a user wants to call `CudaComputeKernel awkward_reduce_min_complex`
+    # directly and specify unordered parents
+    input_complex = rearrange_by_parents(input_complex, parents_data)
+
+    # Prepare the start and end offsets
+    # TODO: This should at least be starts_to_offsets
+    offsets = parents_to_offsets(parents_data, parents_length)
+    start_o = offsets[:-1]
+    end_o = offsets[1:]
+
+    # Perform the segmented reduce
+    # type_wrapper: cp.int64
+    type_wrapper = cp.dtype(index_dtype).type
+    segment_ids = CountingIterator(type_wrapper(0))
+    # TODO: try using segmented_reduce instead when https://github.com/NVIDIA/cccl/issues/6171 is fixed
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result_complex,
+        op=segment_reduce_min,
+        num_items=outlength,
+    )
+
+
 def awkward_reduce_count_64(
     result,
     parents_data,
