@@ -87,3 +87,42 @@ def test_distinct_counts_nested():
             {"values": "c", "counts": 1},
         ],
     ]
+
+
+def test_nested_options_empty_and_nulls():
+    array = [[[None, None], ["a", None, "a"], []], None, [["b", "b"]]]
+
+    assert ak.str.uniques(array).tolist() == [
+        [[], ["a"], []],
+        None,
+        [["b"]],
+    ]
+    assert ak.str.distinct_counts(array).tolist() == [
+        [
+            [],
+            [{"values": "a", "counts": 2}],
+            [],
+        ],
+        None,
+        [[{"values": "b", "counts": 2}]],
+    ]
+
+
+def test_nested_typetracer_forms():
+    array = ak.Array([[["a", "b", "a"], ["b", "c", "b"]], [["x", "x"]]])
+
+    assert (
+        ak.str.uniques(array).layout.form
+        == ak.str.uniques(ak.to_backend(array, "typetracer")).layout.form
+    )
+    assert (
+        ak.str.distinct_counts(array).layout.form
+        == ak.str.distinct_counts(ak.to_backend(array, "typetracer")).layout.form
+    )
+
+
+def test_nested_attrs():
+    array = ak.Array([[["a", "b", "a"]]], attrs={"note": "keep"})
+
+    assert ak.str.uniques(array).attrs == {"note": "keep"}
+    assert ak.str.distinct_counts(array).attrs == {"note": "keep"}
