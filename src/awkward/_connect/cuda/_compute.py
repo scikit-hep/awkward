@@ -442,6 +442,38 @@ def awkward_reduce_sum_int32_bool_64(
     )
 
 
+def awkward_reduce_sum_int64_bool_64(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+):
+    # Temporary workaround: bool instability in backend
+    if input_data.dtype == cp.bool_:
+        input_data = input_data.view(cp.int8)
+
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
+
+    def segment_reduce_sum(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+        segment = input_data[start_idx:end_idx]
+        if start_idx == end_idx:
+            return 0
+        return np.sum(segment)
+
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_sum,
+        num_items=outlength,
+    )
+
+
 def awkward_reduce_sum_complex(
     result,
     input_data,
@@ -471,6 +503,45 @@ def awkward_reduce_sum_complex(
         d_in=segment_ids,
         d_out=result_complex,
         op=segment_reduce_sum,
+        num_items=outlength,
+    )
+
+
+def awkward_reduce_sum_bool_complex128_64(
+    result,  # Expected dtype: bool
+    input_data,  # Expected dtype: float64 (viewed as complex128)
+    offsets_data,  # Expected dtype: int64
+    outlength,
+):
+    # '128' in the name implies complex128 (two 64-bit floats)
+    input_complex = input_data.view(np.complex128)
+
+    # Note: result is NOT viewed as complex; it remains boolean
+    start_o, end_o = make_segment_views(offsets_data)
+    index_dtype = normalize_index_dtype(offsets_data.dtype)
+
+    def segment_any_non_zero(segment_id):
+        start_idx = start_o[segment_id]
+        end_idx = end_o[segment_id]
+
+        # Identity for an empty segment in a logical OR is False
+        if start_idx == end_idx:
+            return False
+
+        segment = input_complex[start_idx:end_idx]
+
+        # This matches the C++: (real != 0 || imag != 0)
+        # In NumPy/CuPy, comparing a complex array to 0
+        # checks if either component is non-zero.
+        return np.any(segment != 0)
+
+    segment_ids = CountingIterator(index_dtype(0))
+
+    # Perform the transform: result[i] = segment_any_non_zero(i)
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_any_non_zero,
         num_items=outlength,
     )
 
