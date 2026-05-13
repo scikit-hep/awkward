@@ -5,6 +5,7 @@ from __future__ import annotations
 from cuda.compute import (
     CountingIterator,
     reduce_into,
+    segmented_reduce,
     unary_transform,
 )
 
@@ -385,6 +386,7 @@ def awkward_reduce_sum_bool_complex(
 
     complex_dtype = infer_complex_dtype(input_data.dtype)
     input_complex = input_data.view(complex_dtype)
+    d_result = result.view(cp.int8)
 
     start_o, end_o = make_segment_views(offsets_data)
 
@@ -404,7 +406,7 @@ def awkward_reduce_sum_bool_complex(
 
     unary_transform(
         d_in=segment_ids,
-        d_out=result,
+        d_out=d_result,
         op=segment_reduce_sum,
         num_items=outlength,
     )
@@ -508,15 +510,16 @@ def awkward_reduce_sum_complex(
 
 
 def awkward_reduce_sum_bool_complex128_64(
-    result,  # Expected dtype: bool
-    input_data,  # Expected dtype: float64 (viewed as complex128)
-    offsets_data,  # Expected dtype: int64
+    result,
+    input_data,
+    offsets_data,
     outlength,
 ):
+    d_result = result.view(cp.int8)
+
     # '128' in the name implies complex128 (two 64-bit floats)
     input_complex = input_data.view(np.complex128)
 
-    # Note: result is NOT viewed as complex; it remains boolean
     start_o, end_o = make_segment_views(offsets_data)
     index_dtype = normalize_index_dtype(offsets_data.dtype)
 
@@ -537,10 +540,9 @@ def awkward_reduce_sum_bool_complex128_64(
 
     segment_ids = CountingIterator(index_dtype(0))
 
-    # Perform the transform: result[i] = segment_any_non_zero(i)
     unary_transform(
         d_in=segment_ids,
-        d_out=result,
+        d_out=d_result,
         op=segment_any_non_zero,
         num_items=outlength,
     )
@@ -552,24 +554,20 @@ def awkward_reduce_prod(
     offsets_data,
     outlength,
 ):
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
     start_o, end_o = make_segment_views(offsets_data)
+    h_init = np.asarray(1, dtype=input_data.dtype)
 
-    def segment_reduce_prod(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-        segment = input_data[start_idx:end_idx]
-        if start_idx == end_idx:
-            return 1
-        return np.prod(segment)
+    def prod_op(a, b):
+        return a * b
 
-    segment_ids = CountingIterator(index_dtype(0))
-
-    unary_transform(
-        d_in=segment_ids,
+    segmented_reduce(
+        d_in=input_data,
         d_out=result,
-        op=segment_reduce_prod,
-        num_items=outlength,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=prod_op,
+        h_init=h_init,
     )
 
 
@@ -579,35 +577,25 @@ def awkward_reduce_prod_complex(
     offsets_data,
     outlength,
 ):
-    # Complex values arrive as a flat float32/float64 array of length 2*N
-    # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
-    # (or complex64 -> float32) and doubles the length. Re-view the buffers
-    # back to complex dtype for the reduction.
-
     complex_dtype = infer_complex_dtype(input_data.dtype)
 
     input_complex = input_data.view(complex_dtype)
     result_complex = result.view(complex_dtype)
-
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
     start_o, end_o = make_segment_views(offsets_data)
 
-    def segment_reduce_prod(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-        segment = input_complex[start_idx:end_idx]
-        if start_idx == end_idx:
-            return complex_dtype(1.0 + 0.0j)
-        return np.prod(segment)
+    h_init = np.asarray(1.0 + 0.0j, dtype=complex_dtype)
 
-    segment_ids = CountingIterator(index_dtype(0))
+    def prod_op(a, b):
+        return a * b
 
-    # TODO: replace with segmented_reduce once available/fixed in CCCL
-    unary_transform(
-        d_in=segment_ids,
+    segmented_reduce(
+        d_in=input_complex,
         d_out=result_complex,
-        op=segment_reduce_prod,
-        num_items=outlength,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=prod_op,
+        h_init=h_init,
     )
 
 
@@ -617,28 +605,24 @@ def awkward_reduce_prod_bool(
     offsets_data,
     outlength,
 ):
-    # Temporary workaround:
-    # bool reductions currently fail on the numba side, so reinterpret as int8.
-    if input_data.dtype == cp.bool_:
-        input_data = input_data.view(cp.int8)
+    d_input = input_data.view(cp.int8)
+    d_result = result.view(cp.int8)
 
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
     start_o, end_o = make_segment_views(offsets_data)
 
-    def segment_reduce_prod(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-        segment = input_data[start_idx:end_idx]
-        return np.all(segment)
+    h_init = np.asarray(1, dtype=cp.int8)
 
-    segment_ids = CountingIterator(index_dtype(0))
+    def prod_op(a, b):
+        return a * b
 
-    # TODO: replace with segmented_reduce once available/fixed in CCCL
-    unary_transform(
-        d_in=segment_ids,
-        d_out=result,
-        op=segment_reduce_prod,
-        num_items=outlength,
+    segmented_reduce(
+        d_in=d_input,
+        d_out=d_result,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=prod_op,
+        h_init=h_init,
     )
 
 

@@ -102,6 +102,7 @@ class CupyBackend(Backend):
             "awkward_sort": cuda_compute.segmented_sort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
             "awkward_reduce_sum_bool": cuda_compute.awkward_reduce_sum_bool,
+            "awkward_reduce_sum_bool_complex64_64": cuda_compute.awkward_reduce_sum_bool_complex,
             "awkward_reduce_sum_bool_complex128_64": cuda_compute.awkward_reduce_sum_bool_complex128_64,
             "awkward_reduce_sum_int32_bool_64": cuda_compute.awkward_reduce_sum_int32_bool_64,
             "awkward_reduce_sum_int64_bool_64": cuda_compute.awkward_reduce_sum_int64_bool_64,
