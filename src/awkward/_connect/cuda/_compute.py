@@ -509,42 +509,81 @@ def awkward_reduce_sum_complex(
     )
 
 
+def awkward_reduce_sum_bool_complex64_64(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+):
+    d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
+
+    input_complex = input_data.view(np.complex64)
+
+    mapped_data = cp.empty(input_complex.shape, dtype=cp.int8)
+
+    def is_nonzero_complex(c):
+        return cp.int8(1) if (c.real != 0 or c.imag != 0) else cp.int8(0)
+
+    unary_transform(
+        d_in=input_complex,
+        d_out=mapped_data,
+        op=is_nonzero_complex,
+        num_items=input_complex.size,
+    )
+
+    start_o, end_o = make_segment_views(offsets_data)
+    h_init = np.asarray(0, dtype=cp.int8)  # False
+
+    def max_op(a, b):
+        return a if a > b else b
+
+    segmented_reduce(
+        d_in=mapped_data,
+        d_out=d_out,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=max_op,
+        h_init=h_init,
+    )
+
+
 def awkward_reduce_sum_bool_complex128_64(
     result,
     input_data,
     offsets_data,
     outlength,
 ):
-    d_result = result.view(cp.int8)
+    d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
 
-    # '128' in the name implies complex128 (two 64-bit floats)
     input_complex = input_data.view(np.complex128)
 
-    start_o, end_o = make_segment_views(offsets_data)
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    mapped_data = cp.empty(input_complex.shape, dtype=cp.int8)
 
-    def segment_any_non_zero(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-
-        # Identity for an empty segment in a logical OR is False
-        if start_idx == end_idx:
-            return False
-
-        segment = input_complex[start_idx:end_idx]
-
-        # This matches the C++: (real != 0 || imag != 0)
-        # In NumPy/CuPy, comparing a complex array to 0
-        # checks if either component is non-zero.
-        return np.any(segment != 0)
-
-    segment_ids = CountingIterator(index_dtype(0))
+    def is_nonzero_complex(c):
+        return cp.int8(1) if (c.real != 0 or c.imag != 0) else cp.int8(0)
 
     unary_transform(
-        d_in=segment_ids,
-        d_out=d_result,
-        op=segment_any_non_zero,
-        num_items=outlength,
+        d_in=input_complex,
+        d_out=mapped_data,
+        op=is_nonzero_complex,
+        num_items=input_complex.size,
+    )
+
+    start_o, end_o = make_segment_views(offsets_data)
+    h_init = np.asarray(0, dtype=cp.int8)  # False
+
+    def max_op(a, b):
+        return a if a > b else b
+
+    segmented_reduce(
+        d_in=mapped_data,
+        d_out=d_out,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=max_op,
+        h_init=h_init,
     )
 
 
@@ -789,25 +828,9 @@ def awkward_reduce_min_complex(
 def awkward_reduce_count_64(
     result,
     offsets_data,
-    outlength,
+    _outlength,
 ):
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
-    start_o, end_o = make_segment_views(offsets_data)
-
-    def segment_reduce_count(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-
-        return end_idx - start_idx
-
-    segment_ids = CountingIterator(index_dtype(0))
-
-    unary_transform(
-        d_in=segment_ids,
-        d_out=result,
-        op=segment_reduce_count,
-        num_items=outlength,
-    )
+    result[:] = offsets_data[1:] - offsets_data[:-1]
 
 
 def awkward_reduce_countnonzero(
@@ -820,28 +843,40 @@ def awkward_reduce_countnonzero(
     if input_data.dtype == cp.bool_:
         input_data = input_data.view(cp.int8)
 
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    # index_dtype = normalize_index_dtype(offsets_data.dtype)
     start_o, end_o = make_segment_views(offsets_data)
 
-    def segment_reduce_countnonzero(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
+    # def segment_reduce_countnonzero(segment_id):
+    #     start_idx = start_o[segment_id]
+    #     end_idx = end_o[segment_id]
 
-        count = 0
+    #     count = 0
 
-        for i in range(start_idx, end_idx):
-            if input_data[i] != 0:
-                count += 1
+    #     for i in range(start_idx, end_idx):
+    #         if input_data[i] != 0:
+    #             count += 1
 
-        return count
+    #     return count
 
-    segment_ids = CountingIterator(index_dtype(0))
+    # segment_ids = CountingIterator(index_dtype(0))
 
-    unary_transform(
-        d_in=segment_ids,
+    # unary_transform(
+    #     d_in=segment_ids,
+    #     d_out=result,
+    #     op=segment_reduce_countnonzero,
+    #     num_items=outlength,
+    # )
+
+    h_init = np.asarray(0, dtype=result.dtype)
+
+    segmented_reduce(
+        d_in=input_data,
         d_out=result,
-        op=segment_reduce_countnonzero,
-        num_items=outlength,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=lambda a, b: (1 if a != 0 else 0) + (1 if b != 0 else 0),
+        h_init=h_init,
     )
 
 
