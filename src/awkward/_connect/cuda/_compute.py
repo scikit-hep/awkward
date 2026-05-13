@@ -554,14 +554,16 @@ def awkward_reduce_prod(
     offsets_data,
     outlength,
 ):
+    d_input = input_data.astype(result.dtype, copy=False)
+
     start_o, end_o = make_segment_views(offsets_data)
-    h_init = np.asarray(1, dtype=input_data.dtype)
+    h_init = np.asarray(1, dtype=result.dtype)
 
     def prod_op(a, b):
         return a * b
 
     segmented_reduce(
-        d_in=input_data,
+        d_in=d_input,
         d_out=result,
         num_segments=outlength,
         start_offsets_in=start_o,
