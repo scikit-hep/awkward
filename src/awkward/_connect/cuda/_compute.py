@@ -1528,7 +1528,7 @@ def awkward_ListArray_getitem_next_range_counts(total, fromoffsets, lenstarts):
     if lenstarts == 0:
         total[:1] = 0
         return
-    total[:1] = (fromoffsets[lenstarts] - fromoffsets[0]).astype(total.dtype)
+    total[:1] = fromoffsets[lenstarts].astype(total.dtype) - fromoffsets[0].astype(total.dtype)
 
 
 ## NOT USED (revisit later)
