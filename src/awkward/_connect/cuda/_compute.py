@@ -605,8 +605,10 @@ def awkward_reduce_prod_bool(
     offsets_data,
     outlength,
 ):
-    d_input = input_data.view(cp.int8)
-    d_result = result.view(cp.int8)
+    # Temporary workaround:
+    # bool reductions currently fail on the numba side, so reinterpret as int8.
+    if input_data.dtype == cp.bool_:
+        input_data = input_data.view(cp.int8)
 
     start_o, end_o = make_segment_views(offsets_data)
 
@@ -616,8 +618,8 @@ def awkward_reduce_prod_bool(
         return a * b
 
     segmented_reduce(
-        d_in=d_input,
-        d_out=d_result,
+        d_in=input_data,
+        d_out=result,
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
@@ -632,43 +634,37 @@ def awkward_reduce_prod_bool_complex(
     offsets_data,
     outlength,
 ):
-    # Complex values arrive as a flat float32/float64 array of length 2*N
-    # (real/imag interleaved). Re-view the buffers back to complex dtype.
-
     complex_dtype = infer_complex_dtype(input_data.dtype)
-
     input_complex = input_data.view(complex_dtype)
 
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
-    start_o, end_o = make_segment_views(offsets_data)
+    mapped_input = cp.empty(input_complex.shape, dtype=cp.int8)
 
-    def segment_reduce_prod(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
+    def is_nonzero(c):
+        return cp.int8(c.real != 0 or c.imag != 0)
 
-        # Identity for logical AND semantics
-        if start_idx == end_idx:
-            return True
-
-        acc = True
-
-        for i in range(start_idx, end_idx):
-            acc = acc and (input_complex[i] != complex_dtype(0))
-
-            # Early exit
-            if not acc:
-                break
-
-        return acc
-
-    segment_ids = CountingIterator(index_dtype(0))
-
-    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
-        d_in=segment_ids,
-        d_out=result,
-        op=segment_reduce_prod,
-        num_items=outlength,
+        d_in=input_complex,
+        d_out=mapped_input,
+        op=is_nonzero,
+        num_items=input_complex.size,
+    )
+
+    start_o, end_o = make_segment_views(offsets_data)
+    d_result = result.view(cp.int8)
+
+    h_init = np.asarray(1, dtype=cp.int8)
+
+    def prod_op(a, b):
+        return a * b
+
+    segmented_reduce(
+        d_in=mapped_input,
+        d_out=d_result,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=prod_op,
+        h_init=h_init,
     )
 
 
@@ -677,31 +673,23 @@ def awkward_reduce_max(
     input_data,
     offsets_data,
     outlength,
-    # initial value for the reduction
     identity,
 ):
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
     start_o, end_o = make_segment_views(offsets_data)
 
-    def segment_reduce_max(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-        segment = input_data[start_idx:end_idx]
-        # Empty segment -> identity
-        if start_idx == end_idx:
-            return identity
-        max_value = max(segment)
-        # return identity if it is > than max_value from input_data
-        return max(max_value, identity)
+    h_init = np.asarray(identity, dtype=input_data.dtype)
 
-    segment_ids = CountingIterator(index_dtype(0))
+    def max_op(a, b):
+        return a if a > b else b
 
-    # TODO: replace with segmented_reduce once available/fixed in CCCL
-    unary_transform(
-        d_in=segment_ids,
+    segmented_reduce(
+        d_in=input_data,
         d_out=result,
-        op=segment_reduce_max,
-        num_items=outlength,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=max_op,
+        h_init=h_init,
     )
 
 
@@ -710,52 +698,31 @@ def awkward_reduce_max_complex(
     input_data,
     offsets_data,
     outlength,
-    # initial value for the reduction (real component; imag identity is 0)
     identity,
 ):
-    # Complex values arrive as a flat float32/float64 array of length 2*N
-    # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
-    # (or complex64 -> float32) and doubles the length. Re-view the buffers
-    # back to complex dtype for the reduction.
-
     complex_dtype = infer_complex_dtype(input_data.dtype)
-
     input_complex = input_data.view(complex_dtype)
     result_complex = result.view(complex_dtype)
 
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
     start_o, end_o = make_segment_views(offsets_data)
 
-    def segment_reduce_max(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
+    h_init = np.asarray(identity + 0.0j, dtype=complex_dtype)
 
-        # Identity semantics:
-        # empty segment => (identity, 0)
-        max_real = identity
-        max_imag = 0.0
+    def lex_max_op(a, b):
+        if a.real > b.real:
+            return a
+        if a.real == b.real and a.imag > b.imag:
+            return a
+        return b
 
-        for i in range(start_idx, end_idx):
-            c = input_complex[i]
-
-            real = c.real
-            imag = c.imag
-
-            # Lexicographic comparison on (real, imag)
-            if real > max_real or (real == max_real and imag > max_imag):
-                max_real = real
-                max_imag = imag
-
-        return complex_dtype(max_real + 1j * max_imag)
-
-    segment_ids = CountingIterator(index_dtype(0))
-
-    # TODO: replace with segmented_reduce once available/fixed in CCCL
-    unary_transform(
-        d_in=segment_ids,
+    segmented_reduce(
+        d_in=input_complex,
         d_out=result_complex,
-        op=segment_reduce_max,
-        num_items=outlength,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=lex_max_op,
+        h_init=h_init,
     )
 
 
@@ -764,32 +731,23 @@ def awkward_reduce_min(
     input_data,
     offsets_data,
     outlength,
-    # initial value for the reduction
     identity,
 ):
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
     start_o, end_o = make_segment_views(offsets_data)
 
-    def segment_reduce_min(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-        segment = input_data[start_idx:end_idx]
+    h_init = np.asarray(identity, dtype=input_data.dtype)
 
-        # Empty segment -> identity
-        if start_idx == end_idx:
-            return identity
-        min_value = min(segment)
-        # return identity if it is < than min_value from input_data
-        return min(min_value, identity)
+    def min_op(a, b):
+        return a if a < b else b
 
-    segment_ids = CountingIterator(index_dtype(0))
-
-    # TODO: replace with segmented_reduce once available/fixed in CCCL
-    unary_transform(
-        d_in=segment_ids,
+    segmented_reduce(
+        d_in=input_data,
         d_out=result,
-        op=segment_reduce_min,
-        num_items=outlength,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=min_op,
+        h_init=h_init,
     )
 
 
@@ -798,52 +756,31 @@ def awkward_reduce_min_complex(
     input_data,
     offsets_data,
     outlength,
-    # initial value for the reduction (real component; imag identity is 0)
     identity,
 ):
-    # Complex values arrive as a flat float32/float64 array of length 2*N
-    # (real/imag interleaved). Caller in _reducers.py views complex128 -> float64
-    # (or complex64 -> float32) and doubles the length. Re-view the buffers
-    # back to complex dtype for the reduction.
-
     complex_dtype = infer_complex_dtype(input_data.dtype)
-
     input_complex = input_data.view(complex_dtype)
     result_complex = result.view(complex_dtype)
 
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
     start_o, end_o = make_segment_views(offsets_data)
 
-    def segment_reduce_min(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
+    h_init = np.asarray(identity + 0.0j, dtype=complex_dtype)
 
-        # Identity semantics:
-        # empty segment => (identity, 0)
-        min_real = identity
-        min_imag = 0.0
+    def lex_min_op(a, b):
+        if a.real < b.real:
+            return a
+        if a.real == b.real and a.imag < b.imag:
+            return a
+        return b
 
-        for i in range(start_idx, end_idx):
-            c = input_complex[i]
-
-            real = c.real
-            imag = c.imag
-
-            # Lexicographic comparison on (real, imag)
-            if real < min_real or (real == min_real and imag < min_imag):
-                min_real = real
-                min_imag = imag
-
-        return complex_dtype(min_real + 1j * min_imag)
-
-    segment_ids = CountingIterator(index_dtype(0))
-
-    # TODO: replace with segmented_reduce once available/fixed in CCCL
-    unary_transform(
-        d_in=segment_ids,
+    segmented_reduce(
+        d_in=input_complex,
         d_out=result_complex,
-        op=segment_reduce_min,
-        num_items=outlength,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=lex_min_op,
+        h_init=h_init,
     )
 
 
