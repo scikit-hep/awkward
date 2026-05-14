@@ -89,9 +89,35 @@ class CupyBackend(Backend):
         - awkward_countnonzero
         - awkward_missing_repeat
         - awkward_index_rpad_and_clip_axis0
+        - awkward_RegularArray_localindex
+        - awkward_RegularArray_getitem_next_range_spreadadvanced
+        - awkward_RegularArray_getitem_next_range
+        - awkward_RegularArray_getitem_next_array_advanced
+        - awkward_RegularArray_getitem_next_array
+        - awkward_index_rpad_and_clip_axis1
+        - awkward_RegularArray_getitem_carry
+        - awkward_NumpyArray_subrange_equal
+        - awkward_NumpyArray_pad_zero_to_length
+        - awkward_NumpyArray_subrange_equal_bool
+        - awkward_MaskedArray_getitem_next_jagged_project
+        - awkward_RegularArray_rpad_and_clip_axis1
+        - awkward_RegularArray_getitem_next_at
+        - awkward_ListOffsetArray_rpad_length_axis1
+        - awkward_ListOffsetArray_rpad_and_clip_axis1
+        - awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64
+        - awkward_ListOffsetArray_local_preparenext_64
         - awkward_reduce_sum_complex
         - awkward_index_rpad_and_clip_axis1
         - awkward_reduce_max_complex
+        - awkward_ListArray_rpad_and_clip_length_axis1
+        - awkward_ListArray_min_range
+        - awkward_ListArray_getitem_next_range_counts
+        - awkward_ListArray_getitem_next_range_carrylength
+        - awkward_ListArray_fill
+        - awkward_IndexedOptionArray_rpad_and_clip_mask_axis1
+        - awkward_IndexedArray_validity
+        - awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64
+        - awkward_IndexedArray_reduce_next_fix_offsets_64
         """
         return kernel_name in (
             "awkward_sort",
@@ -109,7 +135,32 @@ class CupyBackend(Backend):
             "awkward_reduce_countnonzero",
             "awkward_missing_repeat",
             "awkward_index_rpad_and_clip_axis0",
+            "awkward_RegularArray_localindex",
+            "awkward_RegularArray_getitem_next_range_spreadadvanced",
+            "awkward_RegularArray_getitem_next_range",
+            "awkward_RegularArray_getitem_next_array_advanced",
+            "awkward_RegularArray_getitem_next_array",
             "awkward_index_rpad_and_clip_axis1",
+            "awkward_RegularArray_getitem_carry",
+            "awkward_NumpyArray_subrange_equal",
+            "awkward_NumpyArray_pad_zero_to_length",
+            "awkward_NumpyArray_subrange_equal_bool",
+            "awkward_MaskedArray_getitem_next_jagged_project",
+            "awkward_RegularArray_rpad_and_clip_axis1",
+            "awkward_RegularArray_getitem_next_at",
+            "awkward_ListOffsetArray_rpad_length_axis1",
+            "awkward_ListOffsetArray_rpad_and_clip_axis1",
+            "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+            "awkward_ListOffsetArray_local_preparenext_64",
+            "awkward_ListArray_rpad_and_clip_length_axis1",
+            "awkward_ListArray_min_range",
+            "awkward_ListArray_getitem_next_range_counts",
+            "awkward_ListArray_getitem_next_range_carrylength",
+            "awkward_ListArray_fill",
+            "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+            "awkward_IndexedArray_validity",
+            "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+            "awkward_IndexedArray_reduce_next_fix_offsets_64",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
@@ -169,10 +220,7 @@ class CupyBackend(Backend):
         if kernel_name == "awkward_index_rpad_and_clip_axis0":
             return cuda_compute.awkward_index_rpad_and_clip_axis0
 
-        if kernel_name == "awkward_index_rpad_and_clip_axis1":
-            return cuda_compute.awkward_index_rpad_and_clip_axis1
-
-        return None
+        return getattr(cuda_compute, kernel_name, None)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
         from awkward._connect.cuda import get_cuda_compute_reducer
