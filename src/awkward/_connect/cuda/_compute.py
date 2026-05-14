@@ -843,39 +843,67 @@ def awkward_reduce_countnonzero(
     if input_data.dtype == cp.bool_:
         input_data = input_data.view(cp.int8)
 
-    # index_dtype = normalize_index_dtype(offsets_data.dtype)
-    start_o, end_o = make_segment_views(offsets_data)
+    # # index_dtype = normalize_index_dtype(offsets_data.dtype)
+    # start_o, end_o = make_segment_views(offsets_data)
 
-    # def segment_reduce_countnonzero(segment_id):
-    #     start_idx = start_o[segment_id]
-    #     end_idx = end_o[segment_id]
+    # # def segment_reduce_countnonzero(segment_id):
+    # #     start_idx = start_o[segment_id]
+    # #     end_idx = end_o[segment_id]
 
-    #     count = 0
+    # #     count = 0
 
-    #     for i in range(start_idx, end_idx):
-    #         if input_data[i] != 0:
-    #             count += 1
+    # #     for i in range(start_idx, end_idx):
+    # #         if input_data[i] != 0:
+    # #             count += 1
 
-    #     return count
+    # #     return count
 
-    # segment_ids = CountingIterator(index_dtype(0))
+    # # segment_ids = CountingIterator(index_dtype(0))
 
-    # unary_transform(
-    #     d_in=segment_ids,
+    # # unary_transform(
+    # #     d_in=segment_ids,
+    # #     d_out=result,
+    # #     op=segment_reduce_countnonzero,
+    # #     num_items=outlength,
+    # # )
+
+    # h_init = np.asarray(0, dtype=result.dtype)
+
+    # segmented_reduce(
+    #     d_in=input_data,
     #     d_out=result,
-    #     op=segment_reduce_countnonzero,
-    #     num_items=outlength,
+    #     num_segments=outlength,
+    #     start_offsets_in=start_o,
+    #     end_offsets_in=end_o,
+    #     op=lambda a, b: (1 if a != 0 else 0) + (1 if b != 0 else 0),
+    #     h_init=h_init,
     # )
 
+    mapped_data = cp.empty(input_data.shape, dtype=result.dtype)
+
+    def is_nonzero_map(x):
+        return result.dtype.type(1) if x != 0 else result.dtype.type(0)
+
+    unary_transform(
+        d_in=input_data,
+        d_out=mapped_data,
+        op=is_nonzero_map,
+        num_items=input_data.size,
+    )
+
+    start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=result.dtype)
 
+    def sum_op(a, b):
+        return a + b
+
     segmented_reduce(
-        d_in=input_data,
+        d_in=mapped_data,
         d_out=result,
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=lambda a, b: (1 if a != 0 else 0) + (1 if b != 0 else 0),
+        op=sum_op,
         h_init=h_init,
     )
 
