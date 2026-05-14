@@ -195,6 +195,9 @@ def awkward_reduce_argmax_complex(
     offsets_data,
     outlength,
 ):
+    # Lexicographic argmax on (real, imag) — matches the CPU kernel
+    # (awkward_reduce_argmax_complex.cpp). NumPy's argmax of a complex
+    # array compares by magnitude, which is the wrong semantics here.
     complex_dtype = infer_complex_dtype(input_data.dtype)
 
     input_complex = input_data.view(complex_dtype)
@@ -205,11 +208,14 @@ def awkward_reduce_argmax_complex(
     def segment_reduce_argmax(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-        segment = input_complex[start_idx:end_idx]
         if start_idx == end_idx:
             return index_dtype(-1)
-        # return a global index
-        return np.argmax(segment) + start_idx
+        segment = input_complex[start_idx:end_idx]
+        # np.lexsort sorts by last key as primary, so (imag, real) gives
+        # us "primary by real, secondary by imag". The lex-MAX is the
+        # last entry of that sort.
+        local_idx = np.lexsort((segment.imag, segment.real))[-1]
+        return local_idx + start_idx
 
     segment_ids = CountingIterator(index_dtype(0))
 
@@ -258,6 +264,9 @@ def awkward_reduce_argmin_complex(
     offsets_data,
     outlength,
 ):
+    # Lexicographic argmin on (real, imag) — matches the CPU kernel
+    # (awkward_reduce_argmin_complex.cpp). NumPy's argmin of a complex
+    # array compares by magnitude, which is the wrong semantics here.
     index_dtype = normalize_index_dtype(offsets_data.dtype)
 
     complex_dtype = infer_complex_dtype(input_data.dtype)
@@ -268,17 +277,18 @@ def awkward_reduce_argmin_complex(
     def segment_reduce_argmin(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-
-        segment = input_complex[start_idx:end_idx]
-
-        if len(segment) == 0:
+        if start_idx == end_idx:
             return index_dtype(-1)
-
-        # np.argmin over complex uses lexicographic ordering (real, then imag)
-        return np.argmin(segment) + start_idx
+        segment = input_complex[start_idx:end_idx]
+        # np.lexsort sorts by last key as primary, so (imag, real) gives
+        # us "primary by real, secondary by imag". The lex-MIN is the
+        # first entry of that sort.
+        local_idx = np.lexsort((segment.imag, segment.real))[0]
+        return local_idx + start_idx
 
     segment_ids = CountingIterator(index_dtype(0))
 
+    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
         d_in=segment_ids,
         d_out=result,
@@ -472,82 +482,11 @@ def awkward_reduce_sum_complex(
     )
 
 
-def awkward_reduce_sum_bool_complex64_64(
-    result,
-    input_data,
-    offsets_data,
-    outlength,
-):
-    d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
-
-    input_complex = input_data.view(np.complex64)
-
-    mapped_data = cp.empty(input_complex.shape, dtype=cp.int8)
-
-    def is_nonzero_complex(c):
-        if c.real != 0 or c.imag != 0:
-            return 1
-        else:
-            return 0
-
-    unary_transform(
-        d_in=input_complex,
-        d_out=mapped_data,
-        op=is_nonzero_complex,
-        num_items=input_complex.size,
-    )
-
-    start_o, end_o = make_segment_views(offsets_data)
-    h_init = np.asarray(0, dtype=cp.int8)  # False
-
-    segmented_reduce(
-        d_in=mapped_data,
-        d_out=d_out,
-        num_segments=outlength,
-        start_offsets_in=start_o,
-        end_offsets_in=end_o,
-        op=OpKind.MAXIMUM,
-        h_init=h_init,
-    )
-
-
-def awkward_reduce_sum_bool_complex128_64(
-    result,
-    input_data,
-    offsets_data,
-    outlength,
-):
-    d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
-
-    input_complex = input_data.view(np.complex128)
-
-    mapped_data = cp.empty(input_complex.shape, dtype=cp.int8)
-
-    def is_nonzero_complex(c):
-        if c.real != 0 or c.imag != 0:
-            return 1
-        else:
-            return 0
-
-    unary_transform(
-        d_in=input_complex,
-        d_out=mapped_data,
-        op=is_nonzero_complex,
-        num_items=input_complex.size,
-    )
-
-    start_o, end_o = make_segment_views(offsets_data)
-    h_init = np.asarray(0, dtype=cp.int8)  # False
-
-    segmented_reduce(
-        d_in=mapped_data,
-        d_out=d_out,
-        num_segments=outlength,
-        start_offsets_in=start_o,
-        end_offsets_in=end_o,
-        op=OpKind.MAXIMUM,
-        h_init=h_init,
-    )
+# `awkward_reduce_sum_bool_complex` (above) handles both float32- and
+# float64-interleaved inputs via `infer_complex_dtype`. The previous
+# `awkward_reduce_sum_bool_complex64_64` / `_complex128_64` specialisations
+# were verbatim duplicates with a hardcoded complex dtype — dispatch now
+# routes both names to the generic implementation in _backends/cupy.py.
 
 
 def awkward_reduce_prod(
@@ -952,6 +891,6 @@ def awkward_missing_repeat(
     unary_transform(
         d_in=counters,
         d_out=outindex,
-        n=output_size,  # Assuming 'n' or 'num_items' per your API
+        num_items=output_size,
         op=fill,
     )

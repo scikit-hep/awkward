@@ -66,8 +66,8 @@ class CupyBackend(Backend):
             "awkward_reduce_sum",
             "awkward_reduce_sum_bool",
             "awkward_reduce_sum_bool_complex",
-            "awkward_reduce_sum_bool_complex64_64",  # FIXME
-            "awkward_reduce_sum_bool_complex128_64",  # FIXME
+            "awkward_reduce_sum_bool_complex64_64",  # alias → _bool_complex
+            "awkward_reduce_sum_bool_complex128_64",  # alias → _bool_complex
             "awkward_reduce_sum_int32_bool_64",
             "awkward_reduce_sum_int64_bool_64",
             "awkward_reduce_sum_complex",
@@ -108,8 +108,8 @@ class CupyBackend(Backend):
             "awkward_reduce_sum_int64_bool_64": cuda_compute.awkward_reduce_sum_int64_bool_64,
             "awkward_reduce_sum_complex": cuda_compute.awkward_reduce_sum_complex,
             "awkward_reduce_sum_bool_complex": cuda_compute.awkward_reduce_sum_bool_complex,
-            "awkward_reduce_sum_bool_complex64_64": cuda_compute.awkward_reduce_sum_bool_complex64_64,
-            "awkward_reduce_sum_bool_complex128_64": cuda_compute.awkward_reduce_sum_bool_complex128_64,
+            "awkward_reduce_sum_bool_complex64_64": cuda_compute.awkward_reduce_sum_bool_complex,
+            "awkward_reduce_sum_bool_complex128_64": cuda_compute.awkward_reduce_sum_bool_complex,
             "awkward_reduce_max": cuda_compute.awkward_reduce_max,
             "awkward_reduce_max_complex": cuda_compute.awkward_reduce_max_complex,
             "awkward_reduce_min": cuda_compute.awkward_reduce_min,
