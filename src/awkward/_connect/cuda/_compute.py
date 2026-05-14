@@ -522,7 +522,10 @@ def awkward_reduce_sum_bool_complex64_64(
     mapped_data = cp.empty(input_complex.shape, dtype=cp.int8)
 
     def is_nonzero_complex(c):
-        return cp.int8(1) if (c.real != 0 or c.imag != 0) else cp.int8(0)
+        if c.real != 0 or c.imag != 0:
+            return 1
+        else:
+            return 0
 
     unary_transform(
         d_in=input_complex,
@@ -561,7 +564,10 @@ def awkward_reduce_sum_bool_complex128_64(
     mapped_data = cp.empty(input_complex.shape, dtype=cp.int8)
 
     def is_nonzero_complex(c):
-        return cp.int8(1) if (c.real != 0 or c.imag != 0) else cp.int8(0)
+        if c.real != 0 or c.imag != 0:
+            return 1
+        else:
+            return 0
 
     unary_transform(
         d_in=input_complex,
