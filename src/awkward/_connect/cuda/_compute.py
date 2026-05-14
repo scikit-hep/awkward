@@ -5,7 +5,6 @@ from __future__ import annotations
 from cuda.compute import (
     CountingIterator,
     OpKind,
-    reduce_into,
     segmented_reduce,
     unary_transform,
 )
@@ -62,10 +61,6 @@ def infer_complex_dtype(dtype):
     raise TypeError(f"Expected float32/float64 interleaved complex buffer, got {dt}")
 
 
-def as_complex_view(data):
-    return data.view(infer_complex_dtype(data.dtype))
-
-
 def segmented_sort(
     toptr,
     fromptr,
@@ -104,58 +99,6 @@ def segmented_sort(
         order=order,
         stream=None,
     )
-
-
-def parents_to_offsets(parents, parents_length):
-    if parents_length == 0:
-        return cp.array([0], dtype=parents.dtype)
-
-    # count how many elements belong to each parent
-    counts = cp.bincount(parents)
-
-    # add a start offset
-    offsets = cp.concatenate([cp.array([0], dtype=counts.dtype), counts.cumsum()])
-
-    return offsets
-
-
-def local_idx_from_parents(parents, parents_length):
-    if parents_length == 0:
-        return cp.empty(0, dtype=parents.dtype)
-
-    # mark the beginning of each subarray
-    new_group = cp.empty(parents_length, dtype=cp.bool_)
-    new_group[0] = True
-    new_group[1:] = parents[1:] != parents[:-1]
-
-    # find the start index of each subarray
-    group_starts = cp.nonzero(new_group)[0]  # shape = (num_groups,)
-
-    # Assign subarray id (1..#subarray) to each element
-    group_id = cp.cumsum(new_group)
-
-    # For each element, the start index of its group
-    start_pos = group_starts[group_id - 1]
-
-    # local_index = global_index - start_pos
-    return cp.arange(parents_length) - start_pos
-
-
-def starts_to_offsets(starts, parents_length):
-    offsets_dtype = starts.dtype
-
-    if parents_length == 0:
-        return cp.array([0], dtype=offsets_dtype)
-
-    offsets = cp.empty(len(starts) + 1, dtype=offsets_dtype)
-    offsets[:-1] = starts
-    offsets[-1] = parents_length
-    return offsets
-
-
-def rearrange_by_parents(input_data, parents):
-    order = cp.argsort(parents, kind="stable")
-    return input_data[order]
 
 
 def awkward_reduce_argmax(
@@ -295,34 +238,6 @@ def awkward_reduce_argmin_complex(
         op=segment_reduce_argmin,
         num_items=outlength,
     )
-
-
-def awkward_axis_none_reduce_max(array):
-    data_dtype = array.dtype
-
-    # Initialize identity depending on dtype
-    if data_dtype.kind in "iu":  # int / uint
-        identity = cp.iinfo(data_dtype).min
-    elif data_dtype.kind == "f":  # float
-        identity = cp.finfo(data_dtype).min
-    else:
-        raise TypeError("Unsupported dtype for max reduction")
-
-    def reduce_op(a, b):
-        return a if a > b else b
-
-    result_scalar = cp.empty(1, dtype=data_dtype)
-    h_init = np.array([identity], dtype=data_dtype)
-
-    reduce_into(
-        d_in=array,
-        d_out=result_scalar,
-        op=reduce_op,
-        num_items=len(array),
-        h_init=h_init,
-    )
-
-    return result_scalar
 
 
 def awkward_reduce_sum(
