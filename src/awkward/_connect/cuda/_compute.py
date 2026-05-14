@@ -1639,15 +1639,15 @@ def awkward_ListArray_getitem_next_range_carrylength(
         carrylength[:1] = 0
         return
 
-    dtype = fromstarts.dtype.type
-    counts = cp.empty(lenstarts, dtype=fromstarts.dtype)
+    # create an int64 type specifically, so that _make_count_row() doesn't break
+    counts = cp.empty(lenstarts, dtype=cp.int64)
     unary_transform(
-        d_in=CountingIterator(dtype(0)),
+        d_in=CountingIterator(fromstarts.dtype.type(0)),
         d_out=counts,
-        op=_make_count_row(fromstarts, fromstops, start, stop, step, dtype),
+        op=_make_count_row(fromstarts, fromstops, start, stop, step, cp.int64),
         num_items=lenstarts,
     )
-    h_init = np.array([0], dtype=fromstarts.dtype)
+    h_init = np.array([0], dtype=np.int64)
     reduce_into(
         d_in=counts,
         d_out=carrylength[:1],
@@ -1674,16 +1674,15 @@ def awkward_ListArray_getitem_next_range(
         tooffsets[:1] = 0
         return
 
-    starts_dtype = fromstarts.dtype.type
-    counts = cp.empty(lenstarts, dtype=fromstarts.dtype)
+    counts = cp.empty(lenstarts, dtype=cp.int64)
     unary_transform(
-        d_in=CountingIterator(starts_dtype(0)),
+        d_in=CountingIterator(fromstarts.dtype.type(0)),
         d_out=counts,
-        op=_make_count_row(fromstarts, fromstops, start, stop, step, starts_dtype),
+        op=_make_count_row(fromstarts, fromstops, start, stop, step, cp.int64),
         num_items=lenstarts,
     )
 
-    offsets = cp.empty(lenstarts + 1, dtype=fromstarts.dtype)
+    offsets = cp.empty(lenstarts + 1, dtype=cp.int64)
     offsets[0] = 0
     inclusive_scan(
         d_in=counts,
