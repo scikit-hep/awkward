@@ -193,7 +193,6 @@ def awkward_reduce_argmax_complex(
     result,
     input_data,
     offsets_data,
-    starts,
     outlength,
 ):
     complex_dtype = infer_complex_dtype(input_data.dtype)
@@ -257,7 +256,6 @@ def awkward_reduce_argmin_complex(
     result,
     input_data,
     offsets_data,
-    starts,
     outlength,
 ):
     index_dtype = normalize_index_dtype(offsets_data.dtype)
@@ -353,9 +351,6 @@ def awkward_reduce_sum_bool(
 
     h_init = np.asarray(0, dtype=cp.int8)
 
-    # def max_op(a, b):
-    #     return a if a > b else b
-
     segmented_reduce(
         d_in=d_in,
         d_out=d_out,
@@ -395,9 +390,6 @@ def awkward_reduce_sum_bool_complex(
 
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=cp.int8)  # Identity for OR is False
-
-    # def max_op(a, b):
-    #     return a if a > b else b
 
     segmented_reduce(
         d_in=mapped_data,
@@ -508,9 +500,6 @@ def awkward_reduce_sum_bool_complex64_64(
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=cp.int8)  # False
 
-    # def max_op(a, b):
-    #     return a if a > b else b
-
     segmented_reduce(
         d_in=mapped_data,
         d_out=d_out,
@@ -549,9 +538,6 @@ def awkward_reduce_sum_bool_complex128_64(
 
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=cp.int8)  # False
-
-    # def max_op(a, b):
-    #     return a if a > b else b
 
     segmented_reduce(
         d_in=mapped_data,
@@ -755,9 +741,6 @@ def awkward_reduce_min(
 
     h_init = np.asarray(identity, dtype=input_data.dtype)
 
-    # def min_op(a, b):
-    #     return a if a < b else b
-
     segmented_reduce(
         d_in=input_data,
         d_out=result,
@@ -943,28 +926,32 @@ def awkward_missing_repeat(
     indices by an offset of `regularsize` per repetition.
     Missing values (-1) are preserved.
     """
-
     index_dtype = outindex.dtype.type
-
     output_size = repetitions * indexlength
 
+    reg_size = index_dtype(regularsize)
+    idx_len = index_dtype(indexlength)
+
     def fill(counter):
-        i = counter // indexlength  # repetition id
-        j = counter % indexlength  # position within repetition
+        # Position in the original index array
+        j = counter % idx_len
+        # Which repetition block are we in?
+        i = counter // idx_len
 
         base = index[j]
 
-        # shift only valid indices
+        # Awkward convention: -1 and lower are masked/missing
         if base >= 0:
-            return index_dtype(base + i * regularsize)
+            return index_dtype(base + i * reg_size)
         else:
-            return index_dtype(-1)
+            # Preserve the exact missing value (usually -1)
+            return base
 
     counters = CountingIterator(index_dtype(0))
 
     unary_transform(
         d_in=counters,
         d_out=outindex,
+        n=output_size,  # Assuming 'n' or 'num_items' per your API
         op=fill,
-        num_items=output_size,
     )
