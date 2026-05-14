@@ -1571,6 +1571,7 @@ def gencudaunittests(specdict):
                         # or compiled CUDA kernel (raises errors after `ak_cu.synchronize_cuda()`)
                         CUDA_COMPUTE_KERNELS = {
                             "awkward_RegularArray_getitem_next_at",
+                            "awkward_IndexedArray_validity",
                         }
 
                         raises_error_eagerly = (

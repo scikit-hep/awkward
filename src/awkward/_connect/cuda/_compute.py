@@ -1562,3 +1562,495 @@ def awkward_ListArray_getitem_next_at(tocarry, fromstarts, fromstops, lenstarts,
     if cp.any(tocarry[:lenstarts] < 0):
         i = int(cp.argmax(tocarry[:lenstarts] < 0))
         raise ValueError(f"index out of range at i={i}, at={at}")
+
+
+# kSliceNone sentinel value (matches C++ kMaxInt64 + 1 = 2**63 - 1)
+# also used in raw CUDA (at src/awkward/_connect/cuda/cuda_kernels/cuda_common.cu#L60)
+_kSliceNone = 9223372036854775807
+
+
+# an analogy of what is used in raw cuda kernels (awkward_regularize_rangeslice() inside cuda_common.cu)
+def _make_count_row(fromstarts, fromstops, start, stop, step, dtype):
+    def count_row(i):
+        length = fromstops[i] - fromstarts[i]
+        rs = start
+        re = stop
+        if step > 0:
+            if rs == _kSliceNone:
+                rs = 0
+            elif rs < 0:
+                rs = rs + length
+            if rs < 0:
+                rs = 0
+            if rs > length:
+                rs = length
+            if re == _kSliceNone:
+                re = length
+            elif re < 0:
+                re = re + length
+            if re < 0:
+                re = 0
+            if re > length:
+                re = length
+            if re < rs:
+                re = rs
+            diff = re - rs
+            if diff <= 0:
+                return dtype(0)
+            return dtype((diff + step - 1) // step)
+        else:
+            if rs == _kSliceNone:
+                rs = length - 1
+            elif rs < 0:
+                rs = rs + length
+            if rs < -1:
+                rs = -1
+            if rs > length - 1:
+                rs = length - 1
+            if re == _kSliceNone:
+                re = -1
+            elif re < 0:
+                re = re + length
+            if re < -1:
+                re = -1
+            if re > length - 1:
+                re = length - 1
+            if re > rs:
+                re = rs
+            diff = rs - re
+            if diff <= 0:
+                return dtype(0)
+            neg_step = -step
+            return dtype((diff + neg_step - 1) // neg_step)
+
+    return count_row
+
+
+# Computes total elements selected by slice(start, stop, step) across all rows.
+# carrylength[0] = sum over i of the count of positions selected in row i of length
+# fromstops[i] - fromstarts[i] by the range slice.
+#
+# Example: fromstarts=[0,3,5], fromstops=[3,5,6], start=kSliceNone, stop=kSliceNone, step=1
+#   lengths=[3,2,1], all rows selected fully → carrylength=[6]
+def awkward_ListArray_getitem_next_range_carrylength(
+    carrylength, fromstarts, fromstops, lenstarts, start, stop, step
+):
+    if lenstarts == 0:
+        carrylength[:1] = 0
+        return
+
+    dtype = fromstarts.dtype.type
+    counts = cp.empty(lenstarts, dtype=fromstarts.dtype)
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=counts,
+        op=_make_count_row(fromstarts, fromstops, start, stop, step, dtype),
+        num_items=lenstarts,
+    )
+    h_init = np.array([0], dtype=fromstarts.dtype)
+    reduce_into(
+        d_in=counts,
+        d_out=carrylength[:1],
+        op=OpKind.PLUS,
+        num_items=lenstarts,
+        h_init=h_init,
+    )
+
+
+## NOT USED (revisit later) (1.76x slower than raw CUDA)
+# Applies a range slice to a ListArray, writing offsets and carry indices.
+# tooffsets[i] is the start of row i in the flat carry output.
+# tocarry[tooffsets[i] + j] = fromstarts[i] + regular_start_i + j*step  for j in [0, count_i).
+#
+# Example: fromstarts=[0,3,5], fromstops=[3,5,6], start=1, stop=kSliceNone, step=1
+#   row 0: length=3, rs=1, re=3 → count=2 → carry [1,2]
+#   row 1: length=2, rs=1, re=2 → count=1 → carry [4]
+#   row 2: length=1, rs=1, re=1 → count=0
+#   tooffsets=[0,2,3,3], tocarry=[1,2,4]
+def awkward_ListArray_getitem_next_range(
+    tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step
+):
+    if lenstarts == 0:
+        tooffsets[:1] = 0
+        return
+
+    starts_dtype = fromstarts.dtype.type
+    counts = cp.empty(lenstarts, dtype=fromstarts.dtype)
+    unary_transform(
+        d_in=CountingIterator(starts_dtype(0)),
+        d_out=counts,
+        op=_make_count_row(fromstarts, fromstops, start, stop, step, starts_dtype),
+        num_items=lenstarts,
+    )
+
+    offsets = cp.empty(lenstarts + 1, dtype=fromstarts.dtype)
+    offsets[0] = 0
+    inclusive_scan(
+        d_in=counts,
+        d_out=offsets[1:],
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=lenstarts,
+    )
+    tooffsets[: lenstarts + 1] = offsets.astype(tooffsets.dtype)
+
+    total = int(offsets[lenstarts])
+    if total == 0:
+        return
+
+    dtype = tocarry.dtype.type
+
+    def fill_carry(q):
+        lo = 0
+        hi = lenstarts - 1
+        while lo < hi:
+            mid = (lo + hi + 1) >> 1
+            if offsets[mid] <= q:
+                lo = mid
+            else:
+                hi = mid - 1
+        i = lo
+        j = q - offsets[i]
+        length = fromstops[i] - fromstarts[i]
+        rs = start
+        if step > 0:
+            if rs == _kSliceNone:
+                rs = 0
+            elif rs < 0:
+                rs = rs + length
+            if rs < 0:
+                rs = 0
+            if rs > length:
+                rs = length
+        else:
+            if rs == _kSliceNone:
+                rs = length - 1
+            elif rs < 0:
+                rs = rs + length
+            if rs < -1:
+                rs = -1
+            if rs > length - 1:
+                rs = length - 1
+        return dtype(fromstarts[i] + rs + j * step)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=tocarry[:total],
+        op=fill_carry,
+        num_items=total,
+    )
+
+
+## NOT USED (revisit later) (error checks take too much time)
+# Selects one element per row using two simultaneous advanced indices.
+# fromadvanced[i] selects which index in fromarray to use for row i.
+# tocarry[i] = fromstarts[i] + fromarray[fromadvanced[i]]  (content index)
+# toadvanced[i] = i  (output advanced position)
+# Raises ValueError if stops < starts, stops > lencontent, or index out of range.
+#
+# Example: fromstarts=[0,3], fromstops=[3,5], fromarray=[1,2,0], fromadvanced=[2,0]
+#   row 0: reg_at=fromarray[2]=0 → tocarry[0]=0
+#   row 1: reg_at=fromarray[0]=1 → tocarry[1]=4
+#   toadvanced=[0,1]
+def awkward_ListArray_getitem_next_array_advanced(
+    tocarry,
+    toadvanced,
+    fromstarts,
+    fromstops,
+    fromarray,
+    fromadvanced,
+    lenstarts,
+    lencontent,
+):
+    if lenstarts == 0:
+        return
+
+    starts = fromstarts[:lenstarts]
+    stops = fromstops[:lenstarts]
+    if cp.any(stops < starts):
+        raise ValueError("stops[i] < starts[i]")
+    nonempty = starts != stops
+    if cp.any(nonempty & (stops > lencontent)):
+        raise ValueError("stops[i] > len(content)")
+
+    dtype = tocarry.dtype.type
+    adtype = toadvanced.dtype.type
+
+    def fill(i):
+        length = fromstops[i] - fromstarts[i]
+        reg_at = fromarray[fromadvanced[i]]
+        if reg_at < 0:
+            reg_at = reg_at + length
+        if reg_at < 0 or reg_at >= length:
+            tocarry[i] = dtype(-1)
+        else:
+            tocarry[i] = dtype(fromstarts[i] + reg_at)
+        toadvanced[i] = adtype(i)
+        return dtype(0)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=DiscardIterator(),
+        op=fill,
+        num_items=lenstarts,
+    )
+    if cp.any(tocarry[:lenstarts] < 0):
+        raise ValueError("index out of range")
+
+
+## NOT USED (revisit later) (error checks take too much time)
+# Indexes each row of a ListArray by a 1-D array, producing lenstarts*lenarray outputs.
+# tocarry[i*lenarray + j] = fromstarts[i] + fromarray[j]  (content index)
+# toadvanced[i*lenarray + j] = j  (which fromarray entry was used)
+# Raises ValueError if stops < starts, stops > lencontent, or index out of range.
+#
+# Example: fromstarts=[0,3], fromstops=[3,5], fromarray=[1,0], lenstarts=2, lenarray=2
+#   tocarry=[1,0, 4,3],  toadvanced=[0,1, 0,1]
+def awkward_ListArray_getitem_next_array(
+    tocarry,
+    toadvanced,
+    fromstarts,
+    fromstops,
+    fromarray,
+    lenstarts,
+    lenarray,
+    lencontent,
+):
+    if lenstarts == 0 or lenarray == 0:
+        return
+
+    starts = fromstarts[:lenstarts]
+    stops = fromstops[:lenstarts]
+    if cp.any(stops < starts):
+        raise ValueError("stops[i] < starts[i]")
+    nonempty = starts != stops
+    if cp.any(nonempty & (stops > lencontent)):
+        raise ValueError("stops[i] > len(content)")
+
+    dtype = tocarry.dtype.type
+    adtype = toadvanced.dtype.type
+
+    def fill(k):
+        i = k // lenarray
+        j = k % lenarray
+        length = fromstops[i] - fromstarts[i]
+        reg_at = fromarray[j]
+        if reg_at < 0:
+            reg_at = reg_at + length
+        if reg_at < 0 or reg_at >= length:
+            tocarry[k] = dtype(-1)
+        else:
+            tocarry[k] = dtype(fromstarts[i] + reg_at)
+        toadvanced[k] = adtype(j)
+        return dtype(0)
+
+    unary_transform(
+        d_in=CountingIterator(dtype(0)),
+        d_out=DiscardIterator(),
+        op=fill,
+        num_items=lenstarts * lenarray,
+    )
+    if cp.any(tocarry[: lenstarts * lenarray] < 0):
+        raise ValueError("index out of range")
+
+
+## NOT USED (revisit later) (error checks take too much time)
+# Expands a ListArray to accommodate jagged indexing, producing length*jaggedsize outputs.
+# Each row i must have exactly jaggedsize elements.
+# multistarts[i*jaggedsize + j] = singleoffsets[j]
+# multistops[i*jaggedsize + j]  = singleoffsets[j+1]
+# tocarry[i*jaggedsize + j]     = fromstarts[i] + j
+# Raises ValueError if stops < starts or row size != jaggedsize.
+#
+# Example: fromstarts=[0,2], fromstops=[2,4], singleoffsets=[0,3,5], jaggedsize=2, length=2
+#   multistarts=[0,3, 0,3],  multistops=[3,5, 3,5],  tocarry=[0,1, 2,3]
+def awkward_ListArray_getitem_jagged_expand(
+    multistarts,
+    multistops,
+    singleoffsets,
+    tocarry,
+    fromstarts,
+    fromstops,
+    jaggedsize,
+    length,
+):
+    if length == 0 or jaggedsize == 0:
+        return
+
+    starts = fromstarts[:length]
+    stops = fromstops[:length]
+    if cp.any(stops < starts):
+        raise ValueError("stops[i] < starts[i]")
+    if cp.any((stops - starts) != jaggedsize):
+        raise ValueError("cannot fit jagged slice into nested list")
+
+    dtype_ms = multistarts.dtype.type
+    dtype_me = multistops.dtype.type
+    dtype_c = tocarry.dtype.type
+
+    def fill(k):
+        i = k // jaggedsize
+        j = k % jaggedsize
+        multistarts[k] = dtype_ms(singleoffsets[j])
+        multistops[k] = dtype_me(singleoffsets[j + 1])
+        tocarry[k] = dtype_c(fromstarts[i] + j)
+        return dtype_c(0)
+
+    unary_transform(
+        d_in=CountingIterator(dtype_c(0)),
+        d_out=DiscardIterator(),
+        op=fill,
+        num_items=length * jaggedsize,
+    )
+
+
+# Copies fromstarts/fromstops into tostarts/tostops at the given offsets, adding base.
+# tostarts[tostartsoffset + i] = fromstarts[i] + base
+# tostops[tostopsoffset + i]   = fromstops[i] + base
+#
+# Example: fromstarts=[0,3], fromstops=[3,5], tostartsoffset=2, tostopsoffset=2, base=10
+#   tostarts[2:4] = [10, 13],  tostops[2:4] = [13, 15]
+def awkward_ListArray_fill(
+    tostarts,
+    tostartsoffset,
+    tostops,
+    tostopsoffset,
+    fromstarts,
+    fromstops,
+    length,
+    base,
+):
+    if length == 0:
+        return
+    # these two calls can be fused into one with unary_transform, but the performance is the same
+    cp.add(
+        fromstarts[:length],
+        base,
+        out=tostarts[tostartsoffset : tostartsoffset + length],
+    )
+    cp.add(
+        fromstops[:length], base, out=tostops[tostopsoffset : tostopsoffset + length]
+    )
+
+
+# Builds an output index for rpad_and_clip on an IndexedOptionArray at axis=1.
+# frommask[i] != 0 means the position is masked (option-None).
+# toindex[i] = -1 if masked, else the 0-based position among non-masked elements up to i.
+#
+# Example: frommask=[0,1,0,0,1], length=5
+#   valid counts: [1,1,2,3,3] → toindex=[0,-1,1,2,-1]
+def awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(toindex, frommask, length):
+    if length == 0:
+        return
+
+    # valid[i]=1 where not masked, 0 where masked — reused for both scan and output.
+    valid = (frommask[:length] == 0).astype(toindex.dtype)
+    inclusive_scan(
+        d_in=valid,
+        d_out=toindex[:length],
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=length,
+    )
+    # Branchless in-place: valid=1 → toindex[i]-1, valid=0 → -1. No temporaries.
+    toindex[:length] *= valid
+    toindex[:length] -= 1
+
+
+# Checks that every entry in index is a valid content index.
+# If not isoption: raises ValueError when index[i] < 0.
+# Always raises ValueError when index[i] >= lencontent.
+#
+# Example: index=[0,2,1], length=3, lencontent=3, isoption=False → no error
+#          index=[0,3,1], length=3, lencontent=3, isoption=False → error at i=1
+def awkward_IndexedArray_validity(index, length, lencontent, isoption):
+    if length == 0:
+        return
+    idx = index[:length]
+    if isoption:
+        if cp.max(idx) >= lencontent:
+            raise ValueError(
+                "index[i] >= len(content) in compiled CUDA code (awkward_IndexedArray_validity)"
+            )
+    else:
+        # Zero-copy view as unsigned: negative signed values bitcast to large
+        # unsigned values, so one max catches both "x < 0" and "x >= lencontent"
+        # with a single kernel instead of a min + max pair.
+        udtype = cp.dtype(f"u{idx.dtype.itemsize}")
+        if int(cp.max(idx.view(udtype))) >= lencontent:
+            if cp.any(idx < 0):
+                raise ValueError(
+                    "index[i] < 0 in compiled CUDA code (awkward_IndexedArray_validity)"
+                )
+            raise ValueError(
+                "index[i] >= len(content) in compiled CUDA code (awkward_IndexedArray_validity)"
+            )
+
+
+# Computes nextshifts for a non-local indexed reduction that starts from existing shifts.
+# For each valid position (index[i] >= 0) at output slot k:
+#   nextshifts[k] = shifts[i] + (number of null positions before i)
+# Null positions (index[i] < 0) contribute to the null count but produce no output slot.
+#
+# Example: index=[0,-1,2,-1,3], shifts=[0,0,0,0,0], length=5
+#   valid at i=0,2,4 → k=0,1,2; nullsum before each = 0,1,2
+#   nextshifts = [0+0, 0+1, 0+2] = [0,1,2]
+def awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+    nextshifts, index, length, shifts
+):
+    if length == 0:
+        return
+
+    # Dynamically select dtypes based on input arrays
+    idx_dtype = index.dtype
+    out_dtype = nextshifts.dtype
+
+    # 1. Calculate the mapping to the output slots (k) using one scan
+    # valid_mask is 1 if index >= 0, else 0
+    valid_mask = (index[:length] >= 0).astype(idx_dtype)
+    scan_k = cp.empty(length, dtype=idx_dtype)
+
+    inclusive_scan(
+        d_in=valid_mask,
+        d_out=scan_k,
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=length,
+    )
+
+    def compute_and_scatter(i):
+        idx_val = index[i]
+        if idx_val >= 0:
+            k = scan_k[i] - 1
+            # Relationship: null_count = i - (valid_count_before_i)
+            # which simplifies to i - k
+            null_count = i - k
+            nextshifts[k] = out_dtype.type(shifts[i] + null_count)
+        return 0
+
+    # We use a CountingIterator to drive the transform across the input indices
+    unary_transform(
+        d_in=cp.arange(length, dtype=idx_dtype),
+        d_out=DiscardIterator(),
+        op=compute_and_scatter,
+        num_items=length,
+    )
+
+
+# Converts a starts array into an offsets array for an indexed reduction.
+# outoffsets[i] = starts[i] for i in [0, startslength), outoffsets[startslength] = outindexlength.
+#
+# Example: starts=[0,3,5], startslength=3, outindexlength=7
+#   outoffsets=[0,3,5,7]
+def awkward_IndexedArray_reduce_next_fix_offsets_64(
+    outoffsets, starts, startslength, outindexlength
+):
+    if startslength == 0:
+        outoffsets[0] = outindexlength
+        return
+    if starts.dtype == outoffsets.dtype:
+        outoffsets[:startslength] = starts[:startslength]
+    else:
+        # just in case
+        cp.copyto(outoffsets[:startslength], starts[:startslength], casting="same_kind")
+    outoffsets[startslength] = outindexlength
