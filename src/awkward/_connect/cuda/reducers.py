@@ -11,12 +11,10 @@ from cuda.compute import (
 )
 
 import awkward as ak
-from awkward import _reducers
 from awkward._nplikes.numpy_like import NumpyMetadata
-from awkward._nplikes.shape import ShapeItem
 from awkward._reducers import Reducer
 from awkward._typing import Any as AnyType
-from awkward._typing import Final, Self, TypeVar
+from awkward._typing import Self, TypeVar
 
 np = NumpyMetadata.instance()
 
@@ -106,83 +104,83 @@ def apply_positional_corrections(
         return reduced
 
 
-@overloads(_reducers.ArgMin)
-class ArgMin(CudaComputeReducer):
-    name: Final = "argmin"
-    needs_position: Final = True
-    preferred_dtype: Final = np.int64
+# @overloads(_reducers.ArgMin)
+# class ArgMin(CudaComputeReducer):
+#     name: Final = "argmin"
+#     needs_position: Final = True
+#     preferred_dtype: Final = np.int64
 
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.ArgMin)
-        return cls()
+#     @classmethod
+#     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+#         assert isinstance(reducer, _reducers.ArgMin)
+#         return cls()
 
-    @classmethod
-    def _return_dtype(cls, given_dtype):
-        return np.int64
+#     @classmethod
+#     def _return_dtype(cls, given_dtype):
+#         return np.int64
 
-    @classmethod
-    def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
-        dtype = np.dtype(dtype)
-        if dtype == np.bool_:
-            return np.dtype(np.int8)
-        else:
-            return super()._dtype_for_kernel(dtype)
+#     @classmethod
+#     def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
+#         dtype = np.dtype(dtype)
+#         if dtype == np.bool_:
+#             return np.dtype(np.int8)
+#         else:
+#             return super()._dtype_for_kernel(dtype)
 
-    def axis_none_reducer(self):
-        return AxisNoneReducerArgMaxMin(self.name)
+#     def axis_none_reducer(self):
+#         return AxisNoneReducerArgMaxMin(self.name)
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        assert isinstance(array, ak.contents.NumpyArray)
-        # View array data in kernel-supported dtype
-        kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
-        result = array.backend.nplike.empty(outlength, dtype=np.int64)
+#     def apply(
+#         self,
+#         array: ak.contents.NumpyArray,
+#         parents: ak.index.Index | ak.index.ZeroIndex,
+#         offsets: ak.index.Index | ak.index.EmptyIndex,
+#         starts: ak.index.Index,
+#         shifts: ak.index.Index | None,
+#         outlength: ShapeItem,
+#     ) -> ak.contents.NumpyArray:
+#         assert isinstance(array, ak.contents.NumpyArray)
+#         # View array data in kernel-supported dtype
+#         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+#         result = array.backend.nplike.empty(outlength, dtype=np.int64)
 
-        if array.dtype.type in (np.complex128, np.complex64):
-            assert parents.nplike is array.backend.nplike
-            array.backend.maybe_kernel_error(
-                array.backend[
-                    "awkward_reduce_argmin_complex",
-                    result.dtype.type,
-                    kernel_array_data.dtype.type,
-                    parents.dtype.type,
-                    offsets.dtype.type,
-                ](
-                    result,
-                    kernel_array_data,
-                    parents.data,
-                    offsets.data,
-                    parents.length,
-                    outlength,
-                )
-            )
-        else:
-            assert parents.nplike is array.backend.nplike
-            from ._compute import awkward_reduce_argmin
+#         if array.dtype.type in (np.complex128, np.complex64):
+#             assert parents.nplike is array.backend.nplike
+#             array.backend.maybe_kernel_error(
+#                 array.backend[
+#                     "awkward_reduce_argmin_complex",
+#                     result.dtype.type,
+#                     kernel_array_data.dtype.type,
+#                     parents.dtype.type,
+#                     offsets.dtype.type,
+#                 ](
+#                     result,
+#                     kernel_array_data,
+#                     parents.data,
+#                     offsets.data,
+#                     parents.length,
+#                     outlength,
+#                 )
+#             )
+#         else:
+#             assert parents.nplike is array.backend.nplike
+#             from ._compute import awkward_reduce_argmin
 
-            awkward_reduce_argmin(
-                result,
-                kernel_array_data,
-                parents.data,
-                offsets.data,
-                parents.length,
-                starts.data,
-                outlength,
-            )
+#             awkward_reduce_argmin(
+#                 result,
+#                 kernel_array_data,
+#                 parents.data,
+#                 offsets.data,
+#                 parents.length,
+#                 starts.data,
+#                 outlength,
+#             )
 
-        result_array = ak.contents.NumpyArray(result, backend=array.backend)
-        corrected_data = apply_positional_corrections(
-            result_array, parents, offsets, starts, shifts
-        )
-        return corrected_data
+#         result_array = ak.contents.NumpyArray(result, backend=array.backend)
+#         corrected_data = apply_positional_corrections(
+#             result_array, parents, offsets, starts, shifts
+#         )
+#         return corrected_data
 
 
 def awkward_axis_none_reduce_argmin(array):
@@ -252,121 +250,121 @@ def awkward_axis_none_reduce_argmin(array):
     return result_scalar.item()[1]
 
 
-@overloads(_reducers.ArgMax)
-class ArgMax(CudaComputeReducer):
-    name: Final = "argmax"
-    needs_position: Final = True
-    preferred_dtype: Final = np.int64
+# @overloads(_reducers.ArgMax)
+# class ArgMax(CudaComputeReducer):
+#     name: Final = "argmax"
+#     needs_position: Final = True
+#     preferred_dtype: Final = np.int64
 
-    @classmethod
-    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
-        assert isinstance(reducer, _reducers.ArgMax)
-        return cls()
+#     @classmethod
+#     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+#         assert isinstance(reducer, _reducers.ArgMax)
+#         return cls()
 
-    @classmethod
-    def _return_dtype(cls, given_dtype):
-        return np.int64
+#     @classmethod
+#     def _return_dtype(cls, given_dtype):
+#         return np.int64
 
-    @classmethod
-    def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
-        dtype = np.dtype(dtype)
-        if dtype == np.bool_:
-            return np.dtype(np.int8)
-        else:
-            return super()._dtype_for_kernel(dtype)
+#     @classmethod
+#     def _dtype_for_kernel(cls, dtype: DTypeLike) -> DTypeLike:
+#         dtype = np.dtype(dtype)
+#         if dtype == np.bool_:
+#             return np.dtype(np.int8)
+#         else:
+#             return super()._dtype_for_kernel(dtype)
 
-    def axis_none_reducer(self):
-        return AxisNoneReducerArgMaxMin(self.name)
+#     def axis_none_reducer(self):
+#         return AxisNoneReducerArgMaxMin(self.name)
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        assert isinstance(array, ak.contents.NumpyArray)
-        # View array data in kernel-supported dtype
-        kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
-        result = array.backend.nplike.empty(outlength, dtype=np.int64)
+#     def apply(
+#         self,
+#         array: ak.contents.NumpyArray,
+#         parents: ak.index.Index | ak.index.ZeroIndex,
+#         offsets: ak.index.Index | ak.index.EmptyIndex,
+#         starts: ak.index.Index,
+#         shifts: ak.index.Index | None,
+#         outlength: ShapeItem,
+#     ) -> ak.contents.NumpyArray:
+#         assert isinstance(array, ak.contents.NumpyArray)
+#         # View array data in kernel-supported dtype
+#         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+#         result = array.backend.nplike.empty(outlength, dtype=np.int64)
 
-        if array.dtype.type in (np.complex128, np.complex64):
-            assert parents.nplike is array.backend.nplike
-            array.backend.maybe_kernel_error(
-                array.backend[
-                    "awkward_reduce_argmax_complex",
-                    result.dtype.type,
-                    kernel_array_data.dtype.type,
-                    parents.dtype.type,
-                    offsets.dtype.type,
-                ](
-                    result,
-                    kernel_array_data,
-                    parents.data,
-                    offsets.data,
-                    parents.length,
-                    outlength,
-                )
-            )
-        else:
-            assert parents.nplike is array.backend.nplike
-            from ._compute import awkward_reduce_argmax
+#         if array.dtype.type in (np.complex128, np.complex64):
+#             assert parents.nplike is array.backend.nplike
+#             array.backend.maybe_kernel_error(
+#                 array.backend[
+#                     "awkward_reduce_argmax_complex",
+#                     result.dtype.type,
+#                     kernel_array_data.dtype.type,
+#                     parents.dtype.type,
+#                     offsets.dtype.type,
+#                 ](
+#                     result,
+#                     kernel_array_data,
+#                     parents.data,
+#                     offsets.data,
+#                     parents.length,
+#                     outlength,
+#                 )
+#             )
+#         else:
+#             assert parents.nplike is array.backend.nplike
+#             from ._compute import awkward_reduce_argmax
 
-            awkward_reduce_argmax(
-                result,
-                kernel_array_data,
-                parents.data,
-                offsets.data,
-                parents.length,
-                starts.data,
-                outlength,
-            )
+#             awkward_reduce_argmax(
+#                 result,
+#                 kernel_array_data,
+#                 parents.data,
+#                 offsets.data,
+#                 parents.length,
+#                 starts.data,
+#                 outlength,
+#             )
 
-        result_array = ak.contents.NumpyArray(result, backend=array.backend)
-        corrected_data = apply_positional_corrections(
-            result_array, parents, offsets, starts, shifts
-        )
-        return corrected_data
+#         result_array = ak.contents.NumpyArray(result, backend=array.backend)
+#         corrected_data = apply_positional_corrections(
+#             result_array, parents, offsets, starts, shifts
+#         )
+#         return corrected_data
 
 
-class AxisNoneReducerArgMaxMin:
-    # This will construct shifts which we can use to `apply_positional_corrections` at the end.
-    needs_position: Final = True
+# class AxisNoneReducerArgMaxMin:
+#     # This will construct shifts which we can use to `apply_positional_corrections` at the end.
+#     needs_position: Final = True
 
-    def __init__(self, name: str):
-        self.name = name
+#     def __init__(self, name: str):
+#         self.name = name
 
-    def apply(
-        self,
-        array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
-        starts: ak.index.Index,
-        shifts: ak.index.Index | None,
-        _outlength: ShapeItem,
-    ) -> ak.contents.NumpyArray:
-        assert isinstance(array, ak.contents.NumpyArray)
-        if array.dtype.kind == "M":
-            raise ValueError(
-                f"cannot compute the {self.name} (ak.{self.name}) of {array.dtype!r}"
-            )
+#     def apply(
+#         self,
+#         array: ak.contents.NumpyArray,
+#         parents: ak.index.Index | ak.index.ZeroIndex,
+#         offsets: ak.index.Index | ak.index.EmptyIndex,
+#         starts: ak.index.Index,
+#         shifts: ak.index.Index | None,
+#         _outlength: ShapeItem,
+#     ) -> ak.contents.NumpyArray:
+#         assert isinstance(array, ak.contents.NumpyArray)
+#         if array.dtype.kind == "M":
+#             raise ValueError(
+#                 f"cannot compute the {self.name} (ak.{self.name}) of {array.dtype!r}"
+#             )
 
-        nplike = array.backend.nplike
-        reduce_fn = globals()[f"awkward_axis_none_reduce_{self.name}"]
-        result_scalar = reduce_fn(array.data)
+#         nplike = array.backend.nplike
+#         reduce_fn = globals()[f"awkward_axis_none_reduce_{self.name}"]
+#         result_scalar = reduce_fn(array.data)
 
-        # is this line needed?
-        result_array = nplike._module.asarray(result_scalar).reshape((1,))
+#         # is this line needed?
+#         result_array = nplike._module.asarray(result_scalar).reshape((1,))
 
-        result_array = ak.contents.NumpyArray(result_array, backend=array.backend)
-        # We need to do this, as for argmax we care for the position of the max element and not only the data itself.
-        corrected_data = apply_positional_corrections(
-            result_array, parents, offsets, starts, shifts
-        )
+#         result_array = ak.contents.NumpyArray(result_array, backend=array.backend)
+#         # We need to do this, as for argmax we care for the position of the max element and not only the data itself.
+#         corrected_data = apply_positional_corrections(
+#             result_array, parents, offsets, starts, shifts
+#         )
 
-        return corrected_data
+#         return corrected_data
 
 
 def awkward_axis_none_reduce_argmax(array):

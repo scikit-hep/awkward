@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from cuda.compute import (
     CountingIterator,
+    OpKind,
     reduce_into,
     segmented_reduce,
     unary_transform,
@@ -327,16 +328,13 @@ def awkward_reduce_sum(
 
     h_init = np.asarray(0, dtype=result.dtype)
 
-    def sum_op(a, b):
-        return a + b
-
     segmented_reduce(
         d_in=d_input,
         d_out=result,
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=sum_op,
+        op=OpKind.PLUS,
         h_init=h_init,
     )
 
@@ -422,16 +420,13 @@ def awkward_reduce_sum_int32_bool_64(
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=result.dtype)
 
-    def sum_op(a, b):
-        return a + b
-
     segmented_reduce(
         d_in=d_input,
         d_out=result,
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=sum_op,
+        op=OpKind.PLUS,
         h_init=h_init,
     )
 
@@ -446,16 +441,13 @@ def awkward_reduce_sum_int64_bool_64(
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=result.dtype)
 
-    def sum_op(a, b):
-        return a + b
-
     segmented_reduce(
         d_in=d_input,
         d_out=result,
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=sum_op,
+        op=OpKind.PLUS,
         h_init=h_init,
     )
 
@@ -474,16 +466,13 @@ def awkward_reduce_sum_complex(
 
     h_init = np.asarray(0, dtype=complex_dtype)
 
-    def sum_op(a, b):
-        return a + b
-
     segmented_reduce(
         d_in=input_complex,
         d_out=result_complex,
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=sum_op,
+        op=OpKind.PLUS,
         h_init=h_init,
     )
 
@@ -843,16 +832,13 @@ def awkward_reduce_countnonzero(
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=result.dtype)
 
-    def sum_op(a, b):
-        return a + b
-
     segmented_reduce(
         d_in=mapped_data,
         d_out=result,
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=sum_op,
+        op=OpKind.PLUS,
         h_init=h_init,
     )
 
