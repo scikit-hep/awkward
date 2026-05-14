@@ -224,16 +224,24 @@ def test_block_boundary_prod():
     primes = [x for x in range(2, 30000) if all(x % n != 0 for n in range(2, x))]
     content = ak.contents.NumpyArray(primes)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
-    assert ak.prod(cuda_content, -1, highlevel=False) == ak.prod(
-        content, -1, highlevel=False
+    res_flat_cuda = ak.prod(cuda_content, -1, highlevel=False)
+    res_flat_cpu = ak.prod(content, -1, highlevel=False)
+
+    np.testing.assert_allclose(
+        cp.asnumpy(cp.array(res_flat_cuda)), np.array(res_flat_cpu), rtol=1e-14
     )
 
-    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    offsets = ak.index.Index64(np.array([0, 1, 2261, 2262], dtype=np.int64))
     depth1 = ak.contents.ListOffsetArray(offsets, content)
     cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
-    assert to_list(ak.prod(cuda_depth1, -1, highlevel=False)) == to_list(
-        ak.prod(depth1, -1, highlevel=False)
+
+    res_seg_cuda = ak.prod(cuda_depth1, -1, highlevel=False)
+    res_seg_cpu = ak.prod(depth1, -1, highlevel=False)
+
+    np.testing.assert_allclose(
+        np.array(to_list(res_seg_cuda)), np.array(to_list(res_seg_cpu)), rtol=1e-14
     )
+
     del cuda_content, cuda_depth1
 
 

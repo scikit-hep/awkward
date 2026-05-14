@@ -353,8 +353,8 @@ def awkward_reduce_sum_bool(
 
     h_init = np.asarray(0, dtype=cp.int8)
 
-    def max_op(a, b):
-        return a if a > b else b
+    # def max_op(a, b):
+    #     return a if a > b else b
 
     segmented_reduce(
         d_in=d_in,
@@ -362,7 +362,7 @@ def awkward_reduce_sum_bool(
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=max_op,
+        op=OpKind.MAXIMUM,
         h_init=h_init,
     )
 
@@ -396,8 +396,8 @@ def awkward_reduce_sum_bool_complex(
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=cp.int8)  # Identity for OR is False
 
-    def max_op(a, b):
-        return a if a > b else b
+    # def max_op(a, b):
+    #     return a if a > b else b
 
     segmented_reduce(
         d_in=mapped_data,
@@ -405,7 +405,7 @@ def awkward_reduce_sum_bool_complex(
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=max_op,
+        op=OpKind.MAXIMUM,
         h_init=h_init,
     )
 
@@ -508,8 +508,8 @@ def awkward_reduce_sum_bool_complex64_64(
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=cp.int8)  # False
 
-    def max_op(a, b):
-        return a if a > b else b
+    # def max_op(a, b):
+    #     return a if a > b else b
 
     segmented_reduce(
         d_in=mapped_data,
@@ -517,7 +517,7 @@ def awkward_reduce_sum_bool_complex64_64(
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=max_op,
+        op=OpKind.MAXIMUM,
         h_init=h_init,
     )
 
@@ -550,8 +550,8 @@ def awkward_reduce_sum_bool_complex128_64(
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=cp.int8)  # False
 
-    def max_op(a, b):
-        return a if a > b else b
+    # def max_op(a, b):
+    #     return a if a > b else b
 
     segmented_reduce(
         d_in=mapped_data,
@@ -559,7 +559,7 @@ def awkward_reduce_sum_bool_complex128_64(
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=max_op,
+        op=OpKind.MAXIMUM,
         h_init=h_init,
     )
 
@@ -697,8 +697,8 @@ def awkward_reduce_max(
 
     h_init = np.asarray(identity, dtype=input_data.dtype)
 
-    def max_op(a, b):
-        return a if a > b else b
+    # def max_op(a, b):
+    #     return a if a > b else b
 
     segmented_reduce(
         d_in=input_data,
@@ -706,7 +706,7 @@ def awkward_reduce_max(
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=max_op,
+        op=OpKind.MAXIMUM,
         h_init=h_init,
     )
 
@@ -755,8 +755,8 @@ def awkward_reduce_min(
 
     h_init = np.asarray(identity, dtype=input_data.dtype)
 
-    def min_op(a, b):
-        return a if a < b else b
+    # def min_op(a, b):
+    #     return a if a < b else b
 
     segmented_reduce(
         d_in=input_data,
@@ -764,7 +764,7 @@ def awkward_reduce_min(
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=min_op,
+        op=OpKind.MINIMUM,
         h_init=h_init,
     )
 
