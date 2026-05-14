@@ -466,13 +466,16 @@ def awkward_reduce_sum_complex(
 
     h_init = np.asarray(0, dtype=complex_dtype)
 
+    def sum_op(a, b):
+        return a + b
+
     segmented_reduce(
         d_in=input_complex,
         d_out=result_complex,
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=OpKind.PLUS,
+        op=sum_op,
         h_init=h_init,
     )
 
