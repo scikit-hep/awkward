@@ -118,6 +118,15 @@ class CupyBackend(Backend):
         - awkward_IndexedArray_validity
         - awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64
         - awkward_IndexedArray_reduce_next_fix_offsets_64
+        - awkward_IndexedArray_ranges_next_64
+        - awkward_IndexedArray_ranges_carry_next_64
+        - awkward_IndexedArray_numnull_unique_64
+        - awkward_IndexedArray_numnull_parents
+        - awkward_IndexedArray_getitem_nextcarry_outindex
+        - awkward_IndexedArray_getitem_nextcarry
+        - awkward_IndexedArray_flatten_none2empty
+        - awkward_Index_nones_as_index
+        - awkward_Content_getitem_next_missing_jagged_getmaskstartstop
         """
         return kernel_name in (
             "awkward_sort",
@@ -161,6 +170,15 @@ class CupyBackend(Backend):
             "awkward_IndexedArray_validity",
             "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
             "awkward_IndexedArray_reduce_next_fix_offsets_64",
+            "awkward_IndexedArray_ranges_next_64",
+            "awkward_IndexedArray_ranges_carry_next_64",
+            "awkward_IndexedArray_numnull_unique_64",
+            "awkward_IndexedArray_numnull_parents",
+            "awkward_IndexedArray_getitem_nextcarry_outindex",
+            "awkward_IndexedArray_getitem_nextcarry",
+            "awkward_IndexedArray_flatten_none2empty",
+            "awkward_Index_nones_as_index",
+            "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):

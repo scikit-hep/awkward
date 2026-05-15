@@ -59,7 +59,7 @@ def segmented_sort(
 
     # Ensure offsets are int64 as expected by segmented_sort
     if offsets.dtype != cp.int64:
-        offsets = offsets.astype(cp.int64)
+        offsets = offsets.astype(cp.int64, copy=False)
 
     num_segments = offsetslength - 1
     num_items = int(offsets[-1]) if len(offsets) > 0 else 0
@@ -966,9 +966,11 @@ def awkward_NumpyArray_subrange_equal(tmpptr, fromstarts, fromstops, length, toe
 
     # Use len(tmpptr) as the arange upper bound
     N = len(tmpptr)
-    j = cp.arange(N, dtype=cp.int64)
+    j = cp.arange(N, dtype=fromstarts.dtype)
     in_range = j < li  # GPU broadcast
-    safe_j = cp.where(in_range, j, cp.int64(0))  # clamp out-of-range positions to 0
+    safe_j = cp.where(
+        in_range, j, fromstarts.dtype.type(0)
+    )  # clamp out-of-range positions to 0
     differs = in_range & (tmpptr[si + safe_j] != tmpptr[sii + safe_j])
 
     toequal[:1] = (has_valid & ~cp.any(differs)).reshape(1)  # GPU→GPU, no sync
@@ -1145,9 +1147,7 @@ def awkward_ListOffsetArray_toRegularArray(size, fromoffsets, offsetslength):
         size[:1] = cp.zeros(1, dtype=size.dtype)
         return
     n = offsetslength - 1
-    counts = fromoffsets[1:offsetslength].astype(cp.int64) - fromoffsets[:n].astype(
-        cp.int64
-    )
+    counts = fromoffsets[1:offsetslength] - fromoffsets[:n]
     if cp.any(counts < 0):
         raise ValueError(
             "offsets must be monotonically increasing in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
@@ -1156,7 +1156,7 @@ def awkward_ListOffsetArray_toRegularArray(size, fromoffsets, offsetslength):
         raise ValueError(
             "cannot convert to RegularArray because subarray lengths are not regular in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
         )
-    size[:1] = counts[:1].astype(size.dtype)  # GPU→GPU
+    size[:1] = counts[:1].astype(size.dtype, copy=False)  # GPU→GPU
 
 
 # Pads each sublist to at least target length (longer sublists kept as-is).
@@ -1181,7 +1181,7 @@ def awkward_ListOffsetArray_rpad_length_axis1(
         num_items=fromlength,
     )
     tolength[:1] = tooffsets[fromlength : fromlength + 1].astype(
-        tolength.dtype
+        tolength.dtype, copy=False
     )  # GPU→GPU, no sync
 
 
@@ -1201,7 +1201,7 @@ def awkward_ListOffsetArray_rpad_axis1(toindex, fromoffsets, fromlength, target)
         return
     counts = fromoffsets[1 : fromlength + 1] - fromoffsets[:fromlength]
     starts = cp.empty(fromlength + 1, dtype=fromoffsets.dtype)
-    padded = cp.maximum(counts, target).astype(starts.dtype)
+    padded = cp.maximum(counts, target).astype(starts.dtype, copy=False)
     starts[0] = 0
     inclusive_scan(
         d_in=padded,
@@ -1330,10 +1330,12 @@ def awkward_ListOffsetArray_drop_none_indexes(
     if length_offsets == 0:
         return
     # cumulative_nones[k] = number of nones in noneindexes[0:k]
-    cumulative_nones = cp.empty(length_indexes + 1, dtype=cp.int64)
+    cumulative_nones = cp.empty(length_indexes + 1, dtype=tooffsets.dtype)
     cumulative_nones[0] = 0
     if length_indexes > 0:
-        none_mask = (noneindexes[:length_indexes] < 0).astype(cumulative_nones.dtype)
+        none_mask = (noneindexes[:length_indexes] < 0).astype(
+            cumulative_nones.dtype, copy=False
+        )
         inclusive_scan(
             d_in=none_mask,
             d_out=cumulative_nones[1 : length_indexes + 1],
@@ -1342,7 +1344,9 @@ def awkward_ListOffsetArray_drop_none_indexes(
             num_items=length_indexes,
         )
     idx = fromoffsets[:length_offsets]
-    tooffsets[:length_offsets] = (idx - cumulative_nones[idx]).astype(tooffsets.dtype)
+    tooffsets[:length_offsets] = (idx - cumulative_nones[idx]).astype(
+        tooffsets.dtype, copy=False
+    )
 
 
 ## NOT USED (revisit later)
@@ -1397,7 +1401,7 @@ def awkward_ListArray_rpad_axis1(
     row_starts = cp.empty(length + 1, dtype=tostarts.dtype)
     row_starts[0] = 0
     inclusive_scan(
-        d_in=cp.maximum(counts, target).astype(row_starts.dtype),
+        d_in=cp.maximum(counts, target).astype(row_starts.dtype, copy=False),
         d_out=row_starts[1 : length + 1],
         op=OpKind.PLUS,
         init_value=None,
@@ -1445,7 +1449,7 @@ def awkward_ListArray_rpad_and_clip_length_axis1(
         tomin[:1] = 0
         return
     counts = fromstops[:lenstarts] - fromstarts[:lenstarts]
-    tomin[:1] = cp.sum(cp.maximum(counts, target)).astype(tomin.dtype)
+    tomin[:1] = cp.sum(cp.maximum(counts, target)).astype(tomin.dtype, copy=False)
 
 
 # Computes the minimum sublist length across all rows.
@@ -1483,7 +1487,7 @@ def awkward_ListArray_min_range(tomin, fromstarts, fromstops, lenstarts):
             num_items=lenstarts,
             h_init=h_init,
         )
-        tomin[:1] = result.astype(tomin.dtype)
+        tomin[:1] = result.astype(tomin.dtype, copy=False)
 
 
 ## NOT USED (revisit later)
@@ -1528,9 +1532,9 @@ def awkward_ListArray_getitem_next_range_counts(total, fromoffsets, lenstarts):
     if lenstarts == 0:
         total[:1] = 0
         return
-    total[:1] = fromoffsets[lenstarts].astype(total.dtype) - fromoffsets[0].astype(
-        total.dtype
-    )
+    total[:1] = fromoffsets[lenstarts].astype(total.dtype, copy=False) - fromoffsets[
+        0
+    ].astype(total.dtype, copy=False)
 
 
 ## NOT USED (revisit later)
@@ -1647,13 +1651,12 @@ def awkward_ListArray_getitem_next_range_carrylength(
         op=_make_count_row(fromstarts, fromstops, start, stop, step, cp.int64),
         num_items=lenstarts,
     )
-    h_init = np.array([0], dtype=np.int64)
     reduce_into(
         d_in=counts,
         d_out=carrylength[:1],
         op=OpKind.PLUS,
         num_items=lenstarts,
-        h_init=h_init,
+        h_init=np.array([0], dtype=counts.dtype),
     )
 
 
@@ -1673,7 +1676,7 @@ def awkward_ListArray_getitem_next_range(
     if lenstarts == 0:
         tooffsets[:1] = 0
         return
-
+    # create an int64 type specifically, so that _make_count_row() doesn't break
     counts = cp.empty(lenstarts, dtype=cp.int64)
     unary_transform(
         d_in=CountingIterator(fromstarts.dtype.type(0)),
@@ -1682,7 +1685,7 @@ def awkward_ListArray_getitem_next_range(
         num_items=lenstarts,
     )
 
-    offsets = cp.empty(lenstarts + 1, dtype=cp.int64)
+    offsets = cp.empty(lenstarts + 1, dtype=tooffsets.dtype)
     offsets[0] = 0
     inclusive_scan(
         d_in=counts,
@@ -1691,7 +1694,7 @@ def awkward_ListArray_getitem_next_range(
         init_value=None,
         num_items=lenstarts,
     )
-    tooffsets[: lenstarts + 1] = offsets.astype(tooffsets.dtype)
+    tooffsets[: lenstarts + 1] = offsets
 
     total = int(offsets[lenstarts])
     if total == 0:
@@ -1943,7 +1946,7 @@ def awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(toindex, frommask, lengt
         return
 
     # valid[i]=1 where not masked, 0 where masked — reused for both scan and output.
-    valid = (frommask[:length] == 0).astype(toindex.dtype)
+    valid = (frommask[:length] == 0).astype(toindex.dtype, copy=False)
     inclusive_scan(
         d_in=valid,
         d_out=toindex[:length],
@@ -2006,7 +2009,7 @@ def awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
 
     # 1. Calculate the mapping to the output slots (k) using one scan
     # valid_mask is 1 if index >= 0, else 0
-    valid_mask = (index[:length] >= 0).astype(idx_dtype)
+    valid_mask = (index[:length] >= 0).astype(idx_dtype, copy=False)
     scan_k = cp.empty(length, dtype=idx_dtype)
 
     inclusive_scan(
@@ -2053,3 +2056,304 @@ def awkward_IndexedArray_reduce_next_fix_offsets_64(
         # just in case
         cp.copyto(outoffsets[:startslength], starts[:startslength], casting="same_kind")
     outoffsets[startslength] = outindexlength
+
+
+def _make_count_valid(index, fromstarts, fromstops, out_dtype):
+    def count_valid(i):
+        start = fromstarts[i]
+        stop = fromstops[i]
+        count = out_dtype.type(0)
+        for j in range(start, stop):
+            if index[j] >= 0:
+                count = count + out_dtype.type(1)
+        return count
+
+    return count_valid
+
+
+# For each row i in [0, length): counts non-negative entries in index[fromstarts[i]:fromstops[i]].
+# tostarts[i] / tostops[i] are the prefix-sum start/end of those non-negative entries.
+# tolength[0] = total number of non-negative entries across all rows.
+def awkward_IndexedArray_ranges_next_64(
+    index, fromstarts, fromstops, length, tostarts, tostops, tolength
+):
+    if length == 0:
+        tolength[:1] = 0
+        return
+    out_dtype = tostarts.dtype
+    row_counts = cp.empty(length, dtype=out_dtype)
+    unary_transform(
+        d_in=CountingIterator(out_dtype.type(0)),
+        d_out=row_counts,
+        op=_make_count_valid(index, fromstarts[:length], fromstops[:length], out_dtype),
+        num_items=length,
+    )
+    scan = cp.empty(length + 1, dtype=out_dtype)
+    scan[0] = 0
+    inclusive_scan(
+        d_in=row_counts,
+        d_out=scan[1:],
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=length,
+    )
+    tostarts[:length] = scan[:length]
+    tostops[:length] = scan[1:]
+    tolength[:1] = scan[length]
+
+
+# Collects non-negative values from index[fromstarts[i]:fromstops[i]] for each row i
+# into tocarry, compactly (no gaps).
+def awkward_IndexedArray_ranges_carry_next_64(
+    index, fromstarts, fromstops, length, tocarry
+):
+    if length == 0:
+        return
+    out_dtype = tocarry.dtype
+    row_counts = cp.empty(length, dtype=out_dtype)
+    unary_transform(
+        d_in=CountingIterator(out_dtype.type(0)),
+        d_out=row_counts,
+        op=_make_count_valid(index, fromstarts[:length], fromstops[:length], out_dtype),
+        num_items=length,
+    )
+    scan = cp.empty(length + 1, dtype=out_dtype)
+    scan[0] = 0
+    inclusive_scan(
+        d_in=row_counts,
+        d_out=scan[1:],
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=length,
+    )
+    if int(scan[length]) == 0:
+        return
+
+    def _make_fill_carry_valid(index, starts, stops, scan, tocarry):
+        def fill_carry(i):
+            start = starts[i]
+            stop = stops[i]
+            out_pos = scan[i]
+            for j in range(start, stop):
+                val = index[j]
+                if val >= 0:
+                    tocarry[out_pos] = val
+                    out_pos = out_pos + scan.dtype.type(1)
+            return scan.dtype.type(0)
+
+        return fill_carry
+
+    unary_transform(
+        d_in=CountingIterator(out_dtype.type(0)),
+        d_out=DiscardIterator(),
+        op=_make_fill_carry_valid(
+            index, fromstarts[:length], fromstops[:length], scan, tocarry
+        ),
+        num_items=length,
+    )
+
+
+# Fills toindex[0..lenindex] with [0, 1, ..., lenindex-1, -1].
+# (The last entry is -1 to represent the None slot appended for unique.)
+def awkward_IndexedArray_numnull_unique_64(toindex, lenindex):
+    unary_transform(
+        d_in=CountingIterator(toindex.dtype.type(0)),
+        d_out=toindex[:lenindex],
+        op=OpKind.IDENTITY,
+        num_items=lenindex,
+    )
+    toindex[lenindex] = toindex.dtype.type(-1)
+
+
+# For each element in fromindex[0..lenindex): sets numnull[i]=1 if fromindex[i]<0, else 0.
+# tolength[0] = total number of nulls.
+def awkward_IndexedArray_numnull_parents(numnull, tolength, fromindex, lenindex):
+    if lenindex == 0:
+        tolength[:1] = 0
+        return
+    idx = fromindex[:lenindex]
+
+    def _make_is_null(idx):
+        def is_null(x):
+            return idx.dtype.type(1) if x < 0 else idx.dtype.type(0)
+
+        return is_null
+
+    unary_transform(
+        d_in=idx, d_out=numnull[:lenindex], op=_make_is_null(idx), num_items=lenindex
+    )
+    scan = cp.empty(lenindex, dtype=idx.dtype)
+    inclusive_scan(
+        d_in=numnull[:lenindex],
+        d_out=scan,
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=lenindex,
+    )
+    tolength[:1] = scan[lenindex - 1]
+
+
+# For each i in [0, lenindex): if fromindex[i] < 0 → toindex[i] = -1,
+# else tocarry[scan[i]-1] = fromindex[i] and toindex[i] = scan[i]-1.
+# Raises ValueError if fromindex[i] >= lencontent.
+def awkward_IndexedArray_getitem_nextcarry_outindex(
+    tocarry, toindex, fromindex, lenindex, lencontent
+):
+    if lenindex == 0:
+        return
+    idx = fromindex[:lenindex]
+    if cp.any(idx >= lencontent):
+        raise ValueError("index out of range")
+
+    def is_valid(x):
+        return cp.int64(1) if x >= 0 else cp.int64(0)
+
+    scan = cp.empty(lenindex, dtype=idx.dtype)
+    inclusive_scan(
+        d_in=TransformIterator(idx, is_valid),
+        d_out=scan,
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=lenindex,
+    )
+
+    def _make_fill_outindex(idx, scan, tocarry):
+        def fill_outindex(i):
+            v = idx[i]
+            if v >= 0:
+                pos = scan[i] - scan.dtype.type(1)
+                tocarry[pos] = v
+                return pos
+            return idx.dtype.type(-1)
+
+        return fill_outindex
+
+    unary_transform(
+        d_in=CountingIterator(idx.dtype.type(0)),
+        d_out=toindex[:lenindex],
+        op=_make_fill_outindex(idx, scan, tocarry),
+        num_items=lenindex,
+    )
+
+
+# Copies non-negative fromindex entries into tocarry compactly.
+# Raises ValueError if any fromindex[i] < 0 or >= lencontent.
+def awkward_IndexedArray_getitem_nextcarry(tocarry, fromindex, lenindex, lencontent):
+    if lenindex == 0:
+        return
+    idx = fromindex[:lenindex]
+    if cp.any((idx < 0) | (idx >= lencontent)):
+        raise ValueError("index out of range")
+    tocarry[:lenindex] = idx.astype(tocarry.dtype, copy=False)
+
+
+# For each i in [0, outindexlength): if outindex[i] < 0 → empty slice (size 0),
+# else outoffsets[k] = offsets[outindex[i]+1] - offsets[outindex[i]].
+# outoffsets[0] = offsets[0]; outoffsets[k] = cumulative sizes.
+# Raises ValueError if outindex[i]+1 >= offsetslength.
+def awkward_IndexedArray_flatten_none2empty(
+    outoffsets, outindex, outindexlength, offsets, offsetslength
+):
+    if outindexlength == 0:
+        outoffsets[:1] = offsets[:1].astype(outoffsets.dtype, copy=False)
+        return
+    idx = outindex[:outindexlength]
+    if cp.any((idx >= 0) & (idx + 1 >= offsetslength)):
+        raise ValueError("flattening offset out of range")
+
+    def compute_size(i):
+        v = idx[i]
+        if v < 0:
+            return offsets.dtype.type(0)
+        return offsets[v + 1] - offsets[v]
+
+    base = int(offsets[0])
+    outoffsets[0] = base
+    unary_transform(
+        d_in=CountingIterator(idx.dtype.type(0)),
+        d_out=outoffsets[1 : outindexlength + 1],
+        op=compute_size,
+        num_items=outindexlength,
+    )
+    inclusive_scan(
+        d_in=outoffsets[1 : outindexlength + 1],
+        d_out=outoffsets[1 : outindexlength + 1],
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=outindexlength,
+    )
+    cp.add(
+        outoffsets[1 : outindexlength + 1], base, out=outoffsets[1 : outindexlength + 1]
+    )
+
+
+# Replaces each -1 in toindex with (n_non_null + rank_among_nulls).
+# Non-(-1) entries are unchanged. Operates in-place on toindex[0..length).
+def awkward_Index_nones_as_index(toindex, length):
+    if length == 0:
+        return
+    idx = toindex[:length]
+
+    def is_none(x):
+        return cp.int64(1) if x == -1 else cp.int64(0)
+
+    scan_null = cp.empty(length, dtype=idx.dtype)
+    inclusive_scan(
+        d_in=TransformIterator(idx, is_none),
+        d_out=scan_null,
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=length,
+    )
+    n_non_null = length - int(scan_null[length - 1])
+    toindex[:length] = cp.where(
+        idx == -1,
+        (n_non_null + scan_null - 1).astype(toindex.dtype, copy=False),
+        idx,
+    )
+
+
+# For each i in [0, length): computes starts_out[i], stops_out[i], mask_out[i]
+# based on whether index_in[i] >= 0 (present) or < 0 (missing).
+# scan = prefix sum of (index_in >= 0).
+# starts_out[i] = offsets_in[scan[i]], stops_out[i] = offsets_in[scan[i+1]]
+# mask_out[i] = i if present, -1 if missing.
+def awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
+    index_in, offsets_in, mask_out, starts_out, stops_out, length
+):
+    if length == 0:
+        return
+    idx = index_in[:length]
+
+    def is_present(x):
+        return cp.int64(1) if x >= 0 else cp.int64(0)
+
+    scan = cp.empty(length + 1, dtype=idx.dtype)
+    scan[0] = 0
+    inclusive_scan(
+        d_in=TransformIterator(idx, is_present),
+        d_out=scan[1:],
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=length,
+    )
+
+    def _make_fill_jagged(idx, scan, offsets_in, starts_out, stops_out):
+        def fill_jagged(i):
+            s = scan[i]
+            starts_out[i] = offsets_in[s]
+            stops_out[i] = offsets_in[scan[i + scan.dtype.type(1)]]
+            if idx[i] < 0:
+                return idx.dtype.type(-1)
+            return idx.dtype.type(i)
+
+        return fill_jagged
+
+    unary_transform(
+        d_in=CountingIterator(idx.dtype.type(0)),
+        d_out=mask_out[:length],
+        op=_make_fill_jagged(
+            idx, scan, offsets_in, starts_out[:length], stops_out[:length]
+        ),
+        num_items=length,
+    )
