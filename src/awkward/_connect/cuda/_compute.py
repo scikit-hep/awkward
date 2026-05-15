@@ -138,9 +138,6 @@ def awkward_reduce_argmax_complex(
     offsets_data,
     outlength,
 ):
-    # Lexicographic argmax on (real, imag) — matches the CPU kernel
-    # (awkward_reduce_argmax_complex.cpp). NumPy's argmax of a complex
-    # array compares by magnitude, which is the wrong semantics here.
     complex_dtype = infer_complex_dtype(input_data.dtype)
 
     input_complex = input_data.view(complex_dtype)
@@ -154,11 +151,7 @@ def awkward_reduce_argmax_complex(
         if start_idx == end_idx:
             return index_dtype(-1)
         segment = input_complex[start_idx:end_idx]
-        # np.lexsort sorts by last key as primary, so (imag, real) gives
-        # us "primary by real, secondary by imag". The lex-MAX is the
-        # last entry of that sort.
-        local_idx = np.lexsort((segment.imag, segment.real))[-1]
-        return local_idx + start_idx
+        return np.argmax(segment) + start_idx
 
     segment_ids = CountingIterator(index_dtype(0))
 
@@ -207,9 +200,6 @@ def awkward_reduce_argmin_complex(
     offsets_data,
     outlength,
 ):
-    # Lexicographic argmin on (real, imag) — matches the CPU kernel
-    # (awkward_reduce_argmin_complex.cpp). NumPy's argmin of a complex
-    # array compares by magnitude, which is the wrong semantics here.
     index_dtype = normalize_index_dtype(offsets_data.dtype)
 
     complex_dtype = infer_complex_dtype(input_data.dtype)
@@ -223,11 +213,7 @@ def awkward_reduce_argmin_complex(
         if start_idx == end_idx:
             return index_dtype(-1)
         segment = input_complex[start_idx:end_idx]
-        # np.lexsort sorts by last key as primary, so (imag, real) gives
-        # us "primary by real, secondary by imag". The lex-MIN is the
-        # first entry of that sort.
-        local_idx = np.lexsort((segment.imag, segment.real))[0]
-        return local_idx + start_idx
+        return np.argmin(segment) + start_idx
 
     segment_ids = CountingIterator(index_dtype(0))
 

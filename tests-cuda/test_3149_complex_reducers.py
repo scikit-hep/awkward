@@ -550,9 +550,8 @@ def test_block_boundary_prod_complex12():
 def test_block_boundary_prod_complex13():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(50, size=1000)
-    complex_array = np.vectorize(complex)(
-        array[0 : len(array) : 2], array[1 : len(array) : 2]
-    )
+    complex_array = np.vectorize(complex)(array[::2], array[1::2])
+
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
     cpt.assert_allclose(
