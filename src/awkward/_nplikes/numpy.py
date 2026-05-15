@@ -100,13 +100,3 @@ class Numpy(ArrayModuleNumpyLike["NDArray"]):
     def memory_ptr(self, x: NDArray) -> int:
         (x,) = maybe_materialize(x)
         return x.ctypes.data
-
-    def bincount(
-        self,
-        x: NDArray,
-        *,
-        weights: NDArray | None = None,
-        minlength: int = 0,
-    ) -> NDArray:
-        (x,) = maybe_materialize(x)
-        return numpy.bincount(x, weights=weights, minlength=minlength)

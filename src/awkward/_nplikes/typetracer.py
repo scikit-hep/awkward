@@ -1684,21 +1684,6 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
 
     # statistics
 
-    def bincount(
-        self,
-        x: TypeTracerArray,
-        *,
-        weights: TypeTracerArray | None = None,
-        minlength: int = 0,
-    ) -> TypeTracerArray:
-        if x.ndim != 1:
-            raise ValueError("The input array must be 1D.")
-
-        return self.empty(
-            (unknown_length,),
-            dtype=np.int64 if weights is None else weights.dtype,
-        )
-
     def array_str(
         self,
         x: TypeTracerArray,

@@ -232,13 +232,3 @@ class Cupy(ArrayModuleNumpyLike):
     def memory_ptr(self, x: ArrayLike) -> int:
         (x,) = maybe_materialize(x)
         return x.data.ptr  # type: ignore[attr-defined]
-
-    def bincount(
-        self,
-        x: ArrayLike,
-        *,
-        weights: ArrayLike | None = None,
-        minlength: int = 0,
-    ) -> ArrayLike:
-        (x,) = maybe_materialize(x)
-        return self._module.bincount(x, weights=weights, minlength=minlength)
