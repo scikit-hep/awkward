@@ -240,4 +240,5 @@ class Cupy(ArrayModuleNumpyLike):
         weights: ArrayLike | None = None,
         minlength: int = 0,
     ) -> ArrayLike:
+        (x,) = maybe_materialize(x)
         return self._module.bincount(x, weights=weights, minlength=minlength)

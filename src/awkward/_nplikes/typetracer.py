@@ -1688,10 +1688,16 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         self,
         x: TypeTracerArray,
         *,
-        weights=None,
-        minlength=0,
+        weights: TypeTracerArray | None = None,
+        minlength: int = 0,
     ) -> TypeTracerArray:
-        return self.empty(minlength, dtype=x.dtype)
+        if x.ndim != 1:
+            raise ValueError("The input array must be 1D.")
+
+        return self.empty(
+            (unknown_length,),
+            dtype=np.int64 if weights is None else weights.dtype,
+        )
 
     def array_str(
         self,

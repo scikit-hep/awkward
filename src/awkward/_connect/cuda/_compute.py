@@ -9,6 +9,7 @@ from cuda.compute import (
     unary_transform,
 )
 
+from awkward._connect import cuda
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 
@@ -132,6 +133,27 @@ def awkward_reduce_argmax(
     )
 
 
+@cuda.jit(device=True)
+def lexargmax_complex(values, start_idx, end_idx):
+    if start_idx == end_idx:
+        return np.int64(-1)
+
+    best_idx = start_idx
+    best = values[start_idx]
+
+    i = start_idx + 1
+    while i < end_idx:
+        value = values[i]
+        if value.real > best.real or (
+            value.real == best.real and value.imag > best.imag
+        ):
+            best = value
+            best_idx = i
+        i += 1
+
+    return best_idx
+
+
 def awkward_reduce_argmax_complex(
     result,
     input_data,
@@ -139,23 +161,20 @@ def awkward_reduce_argmax_complex(
     outlength,
 ):
     complex_dtype = infer_complex_dtype(input_data.dtype)
-
     input_complex = input_data.view(complex_dtype)
 
     index_dtype = normalize_index_dtype(offsets_data.dtype)
     start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_argmax(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-        if start_idx == end_idx:
-            return index_dtype(-1)
-        segment = input_complex[start_idx:end_idx]
-        return np.argmax(segment) + start_idx
+        return lexargmax_complex(
+            input_complex,
+            start_o[segment_id],
+            end_o[segment_id],
+        )
 
     segment_ids = CountingIterator(index_dtype(0))
 
-    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
         d_in=segment_ids,
         d_out=result,
@@ -194,6 +213,28 @@ def awkward_reduce_argmin(
     )
 
 
+@cuda.jit(device=True)
+def lexargmin_complex(values, start_idx, end_idx):
+    if start_idx == end_idx:
+        return np.int64(-1)
+
+    best_idx = start_idx
+    best = values[start_idx]
+
+    i = start_idx + 1
+    while i < end_idx:
+        value = values[i]
+
+        if value.real < best.real or (
+            value.real == best.real and value.imag < best.imag
+        ):
+            best = value
+            best_idx = i
+        i += 1
+
+    return best_idx
+
+
 def awkward_reduce_argmin_complex(
     result,
     input_data,
@@ -208,16 +249,14 @@ def awkward_reduce_argmin_complex(
     start_o, end_o = make_segment_views(offsets_data)
 
     def segment_reduce_argmin(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-        if start_idx == end_idx:
-            return index_dtype(-1)
-        segment = input_complex[start_idx:end_idx]
-        return np.argmin(segment) + start_idx
+        return lexargmin_complex(
+            input_complex,
+            start_o[segment_id],
+            end_o[segment_id],
+        )
 
     segment_ids = CountingIterator(index_dtype(0))
 
-    # TODO: replace with segmented_reduce once available/fixed in CCCL
     unary_transform(
         d_in=segment_ids,
         d_out=result,
