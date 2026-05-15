@@ -549,7 +549,11 @@ def test_block_boundary_prod_complex12():
 
 def test_block_boundary_prod_complex13():
     rng = np.random.default_rng(seed=42)
-    array = rng.integers(50, size=1000)
+    # 2000 ints → 1000 complex values, matching the offsets [0, 5, 996, 1000]
+    # below. The earlier size=1000 produced only 500 complex values and the
+    # ListOffsetArray indexed past the end of `content`, so both backends read
+    # uninitialised memory for bin 2 and disagreed on the resulting garbage.
+    array = rng.integers(50, size=2000)
     complex_array = np.vectorize(complex)(array[::2], array[1::2])
 
     content = ak.contents.NumpyArray(complex_array)

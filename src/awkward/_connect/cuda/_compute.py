@@ -293,16 +293,32 @@ def awkward_reduce_sum_bool(
     offsets_data,
     outlength,
 ):
-    d_in = input_data.view(cp.int8) if input_data.dtype == cp.bool_ else input_data
+    # ak.any semantics: result is True for a bin iff any element is non-zero.
+    # If we feed wider-than-bool input straight into a MAX reduction and then
+    # truncate to int8 on store, an input like [256, 512, ...] reduces to MAX
+    # = 512 which truncates to 0 → spurious False. Map to {0, 1} first, then
+    # MAX = OR. Symmetric to awkward_reduce_prod_bool (MIN = AND).
+    if input_data.dtype == cp.bool_:
+        mapped = input_data.view(cp.int8)
+    else:
+        mapped = cp.empty(input_data.shape, dtype=cp.int8)
+
+        def is_nonzero(x):
+            return cp.int8(1) if x != 0 else cp.int8(0)
+
+        unary_transform(
+            d_in=input_data,
+            d_out=mapped,
+            op=is_nonzero,
+            num_items=input_data.size,
+        )
 
     d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
-
     start_o, end_o = make_segment_views(offsets_data)
-
-    h_init = np.asarray(0, dtype=cp.int8)
+    h_init = np.asarray(0, dtype=cp.int8)  # identity for MAX over {0, 1}
 
     segmented_reduce(
-        d_in=d_in,
+        d_in=mapped,
         d_out=d_out,
         num_segments=outlength,
         start_offsets_in=start_o,
@@ -488,25 +504,35 @@ def awkward_reduce_prod_bool(
     offsets_data,
     outlength,
 ):
-    # Temporary workaround:
-    # bool reductions currently fail on the numba side, so reinterpret as int8.
-    if input_data.dtype == cp.bool_:
-        input_data = input_data.view(cp.int8)
+    # ak.all semantics: result is True for a bin iff every element is non-zero.
+    # We must NOT use integer multiplication here — for an int64 input array,
+    # the running product overflows mod 2^64 and frequently collapses to 0
+    # even when every element is non-zero, giving a spurious False.
+    # Instead, map each element to {0, 1} once and reduce with MIN (= AND).
+    # This mirrors awkward_reduce_sum_bool's MAX-over-{0,1} for ak.any.
+    mapped = cp.empty(input_data.shape, dtype=cp.int8)
 
+    def is_nonzero(x):
+        return cp.int8(1) if x != 0 else cp.int8(0)
+
+    unary_transform(
+        d_in=input_data,
+        d_out=mapped,
+        op=is_nonzero,
+        num_items=input_data.size,
+    )
+
+    d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
     start_o, end_o = make_segment_views(offsets_data)
-
-    h_init = np.asarray(1, dtype=cp.int8)
-
-    def prod_op(a, b):
-        return a * b
+    h_init = np.asarray(1, dtype=cp.int8)  # identity for MIN over {0, 1}
 
     segmented_reduce(
-        d_in=input_data,
-        d_out=result,
+        d_in=mapped,
+        d_out=d_out,
         num_segments=outlength,
         start_offsets_in=start_o,
         end_offsets_in=end_o,
-        op=prod_op,
+        op=OpKind.MINIMUM,
         h_init=h_init,
     )
 
