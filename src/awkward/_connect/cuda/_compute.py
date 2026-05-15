@@ -8,8 +8,8 @@ from cuda.compute import (
     segmented_reduce,
     unary_transform,
 )
+from numba import cuda
 
-from awkward._connect import cuda
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 
