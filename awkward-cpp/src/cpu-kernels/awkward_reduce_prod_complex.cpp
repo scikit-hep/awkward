@@ -10,58 +10,29 @@ template <typename OUT, typename IN>
 ERROR awkward_reduce_prod_complex(
   OUT* toptr,
   const IN* fromptr,
-  const int64_t* parents,
   const int64_t* offsets,
-  int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0; i < outlength; i++) {
-    toptr[i * 2] = static_cast<OUT>(1);
-    toptr[i * 2 + 1] = static_cast<OUT>(0);
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    OUT a = static_cast<OUT>(1);
+    OUT b = static_cast<OUT>(0);
+    for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
+      OUT c = static_cast<OUT>(fromptr[i * 2]);
+      OUT d = static_cast<OUT>(fromptr[i * 2 + 1]);
+      OUT na = a * c - b * d;
+      OUT nb = a * d + b * c;
+      a = na;
+      b = nb;
+    }
+    toptr[bin * 2] = a;
+    toptr[bin * 2 + 1] = b;
   }
-
-  for (int64_t i = 0; i < lenparents; i++) {
-    int64_t parent = parents[i];
-    int64_t parent_idx = parent * 2;
-    int64_t from_idx = i * 2;
-
-    OUT a = toptr[parent_idx];
-    OUT b = toptr[parent_idx + 1];
-    OUT c = static_cast<OUT>(fromptr[from_idx]);
-    OUT d = static_cast<OUT>(fromptr[from_idx + 1]);
-
-    toptr[parent_idx] = a * c - b * d;
-    toptr[parent_idx + 1] = a * d + b * c;
-  }
-
   return success();
 }
-ERROR awkward_reduce_prod_complex64_complex64_64(
-  float* toptr,
-  const float* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength) {
-  return awkward_reduce_prod_complex<float, float>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength);
-}
-ERROR awkward_reduce_prod_complex128_complex128_64(
-  double* toptr,
-  const double* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength) {
-  return awkward_reduce_prod_complex<double, double>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength);
-}
+
+#define WRAPPER(SUFFIX, OUT, IN) \
+  ERROR awkward_reduce_prod_complex##SUFFIX(OUT* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
+    return awkward_reduce_prod_complex<OUT, IN>(toptr, fromptr, offsets, outlength); \
+  }
+
+WRAPPER(64_complex64_64, float, float)
+WRAPPER(128_complex128_64, double, double)

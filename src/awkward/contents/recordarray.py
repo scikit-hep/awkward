@@ -886,23 +886,21 @@ class RecordArray(RecordMeta[Content], Content):
             backend=self._backend,
         )
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         for content in self._contents:
-            if not content._is_unique(negaxis, starts, parents, offsets, outlength):
+            if not content._is_unique(negaxis, starts, offsets, outlength):
                 return False
         return True
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         raise NotImplementedError
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         raise NotImplementedError
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         if len(self.fields) == 0:
             return ak.contents.NumpyArray(
                 self._backend.nplike.instance().empty(0, dtype=np.int64),
@@ -914,7 +912,7 @@ class RecordArray(RecordMeta[Content], Content):
         for content in self._contents:
             contents.append(
                 content._sort_next(
-                    negaxis, starts, parents, offsets, outlength, ascending, stable
+                    negaxis, starts, offsets, outlength, ascending, stable
                 )
             )
         return RecordArray(
@@ -951,7 +949,6 @@ class RecordArray(RecordMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -970,41 +967,18 @@ class RecordArray(RecordMeta[Content], Content):
             # so asking for a mask doesn't help us!
             reducer_should_mask = mask and not reducer.needs_position
 
-            # Convert parents into offsets to build a list for axis=1 reduction
-            offsets = ak.index.Index64.empty(outlength + 1, self._backend.nplike)
-            assert (
-                offsets.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-            )
-            # `parents` are possibly non monotonic increasing, so we must re-order the result
-            # This happens naturally for the `NumpyArray` reducers.
-            carry = ak.index.Index64.empty(outlength, self._backend.nplike)
-
-            # Note: if we knew that `negaxis == depth` exclusively for this layout, we could use
-            # the simpler `ListOffsetArray_reduce_local_outoffsets_64`. However, if our parent was reduced,
-            # we would still see `negaxis == depth`, so this kernel has to be used instead.
-            assert carry.nplike is self._backend.nplike
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
-                    offsets.dtype.type,
-                    carry.dtype.type,
-                    parents.dtype.type,
-                ](
-                    offsets.data,
-                    carry.data,
-                    parents.data,
-                    parents.length,
-                    outlength,
-                )
-            )
+            # In the offsets-pipeline, `offsets` is already monotonic by
+            # construction (one entry per outer bin in order), so we don't
+            # need the parents -> offsets converter that the original
+            # `awkward_RecordArray_reduce_nonlocal_outoffsets_64` provided
+            # nor its companion `carry` rearrangement: the reducer's output
+            # is already in bin order.
             out = _apply_record_reducer(
                 reducer_recordclass,
                 ak.contents.ListOffsetArray(offsets, self),
                 reducer_should_mask,
                 behavior,
             )
-            out = out._carry(carry, allow_lazy=True)
 
             if out.is_option and not reducer_should_mask:
                 reason = (
@@ -1017,66 +991,30 @@ class RecordArray(RecordMeta[Content], Content):
                     f"returned an option when it was not expected ({reason})"
                 )
 
-            if reducer.needs_position:
-                assert isinstance(out, ak.contents.NumpyArray)
-
-                if shifts is None:
-                    assert (
-                        out.backend is self._backend
-                        and parents.nplike is self._backend.nplike
-                        and starts.nplike is self._backend.nplike
-                    )
-                    self._backend.maybe_kernel_error(
-                        self._backend[
-                            "awkward_NumpyArray_reduce_adjust_starts_64",
-                            out.data.dtype.type,
-                            parents.dtype.type,
-                            starts.dtype.type,
-                        ](
-                            out.data,
-                            outlength,
-                            parents.data,
-                            starts.data,
-                        )
-                    )
-                else:
-                    assert (
-                        out.backend is self._backend
-                        and parents.nplike is self._backend.nplike
-                        and starts.nplike is self._backend.nplike
-                        and shifts.nplike is self._backend.nplike
-                    )
-                    self._backend.maybe_kernel_error(
-                        self._backend[
-                            "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
-                            out.data.dtype.type,
-                            parents.dtype.type,
-                            starts.dtype.type,
-                            shifts.dtype.type,
-                        ](
-                            out.data,
-                            outlength,
-                            parents.data,
-                            starts.data,
-                            shifts.data,
-                        )
-                    )
+            # Record-reducer overrides (e.g. `_argmin_pair`, `overload_argmax`)
+            # already return *row-relative* indices: the user typically writes
+            # something like `ak.argmax(array["rho"], axis=-1, ...)` inside
+            # their override, which yields per-row indices. The standard
+            # `awkward_NumpyArray_reduce_adjust_starts_*` kernels are designed
+            # to convert ABSOLUTE argmin/argmax indices (as produced by the
+            # leaf NumpyArray reducer) into row-relative form by subtracting
+            # `starts[k]`. Applying that subtraction here would be a second
+            # adjustment on already-correct values, producing negatives like
+            # `0 - 3 = -3`. So we skip the adjust step for record reducers —
+            # the override is the authoritative source of position info.
 
             if mask:
                 outmask = ak.index.Index8.empty(outlength, self._backend.nplike)
-                assert (
-                    outmask.nplike is self._backend.nplike
-                    and parents.nplike is self._backend.nplike
-                )
+                assert outmask.nplike is self._backend.nplike
+
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
                         outmask.dtype.type,
-                        parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         outmask.data,
-                        parents.data,
-                        parents.length,
+                        offsets.data,
                         outlength,
                     )
                 )

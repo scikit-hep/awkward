@@ -4,190 +4,44 @@
 
 #include "awkward/kernels.h"
 
+// Per-bin maximum. See `awkward_reduce_min` for the rationale.
 template <typename OUT, typename IN>
 ERROR awkward_reduce_max(
-  OUT* toptr,
-  const IN* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
+  OUT* __restrict__ toptr,
+  const IN* __restrict__ fromptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength,
   OUT identity) {
-  std::fill_n(toptr, outlength, identity);
-
-  for (int64_t i = 0;  i < lenparents;  i++) {
-    IN x = fromptr[i];
-    toptr[parents[i]] = (x > toptr[parents[i]] ? x : toptr[parents[i]]);
+  #ifdef _OPENMP
+  #pragma omp parallel for if(outlength > 1024) schedule(static)
+  #endif
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    const int64_t start = offsets[bin];
+    const int64_t stop  = offsets[bin + 1];
+    OUT best = identity;
+    for (int64_t i = start; i < stop; i++) {
+      OUT v = static_cast<OUT>(fromptr[i]);
+      best = (v > best) ? v : best;
+    }
+    toptr[bin] = best;
   }
   return success();
 }
-ERROR awkward_reduce_max_int8_int8_64(
-  int8_t* toptr,
-  const int8_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength,
-  int8_t identity) {
-  return awkward_reduce_max<int8_t, int8_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength,
-    identity);
-}
-ERROR awkward_reduce_max_uint8_uint8_64(
-  uint8_t* toptr,
-  const uint8_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength,
-  uint8_t identity) {
-  return awkward_reduce_max<uint8_t, uint8_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength,
-    identity);
-}
-ERROR awkward_reduce_max_int16_int16_64(
-  int16_t* toptr,
-  const int16_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength,
-  int16_t identity) {
-  return awkward_reduce_max<int16_t, int16_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength,
-    identity);
-}
-ERROR awkward_reduce_max_uint16_uint16_64(
-  uint16_t* toptr,
-  const uint16_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength,
-  uint16_t identity) {
-  return awkward_reduce_max<uint16_t, uint16_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength,
-    identity);
-}
-ERROR awkward_reduce_max_int32_int32_64(
-  int32_t* toptr,
-  const int32_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength,
-  int32_t identity) {
-  return awkward_reduce_max<int32_t, int32_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength,
-    identity);
-}
-ERROR awkward_reduce_max_uint32_uint32_64(
-  uint32_t* toptr,
-  const uint32_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength,
-  uint32_t identity) {
-  return awkward_reduce_max<uint32_t, uint32_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength,
-    identity);
-}
-ERROR awkward_reduce_max_int64_int64_64(
-  int64_t* toptr,
-  const int64_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength,
-  int64_t identity) {
-  return awkward_reduce_max<int64_t, int64_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength,
-    identity);
-}
-ERROR awkward_reduce_max_uint64_uint64_64(
-  uint64_t* toptr,
-  const uint64_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength,
-  uint64_t identity) {
-  return awkward_reduce_max<uint64_t, uint64_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength,
-    identity);
-}
-ERROR awkward_reduce_max_float32_float32_64(
-  float* toptr,
-  const float* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength,
-  float identity) {
-  return awkward_reduce_max<float, float>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength,
-    identity);
-}
-ERROR awkward_reduce_max_float64_float64_64(
-  double* toptr,
-  const double* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength,
-  double identity) {
-  return awkward_reduce_max<double, double>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength,
-    identity);
-}
+
+#define REDUCE_MAX(T, NAME)                                                          \
+  ERROR awkward_reduce_max_##NAME##_##NAME##_64(                                     \
+    T* toptr, const T* fromptr,                                                      \
+    const int64_t* offsets, int64_t outlength, T identity) {                         \
+    return awkward_reduce_max<T, T>(toptr, fromptr, offsets, outlength, identity);   \
+  }
+
+REDUCE_MAX(int8_t,   int8)
+REDUCE_MAX(uint8_t,  uint8)
+REDUCE_MAX(int16_t,  int16)
+REDUCE_MAX(uint16_t, uint16)
+REDUCE_MAX(int32_t,  int32)
+REDUCE_MAX(uint32_t, uint32)
+REDUCE_MAX(int64_t,  int64)
+REDUCE_MAX(uint64_t, uint64)
+REDUCE_MAX(float,    float32)
+REDUCE_MAX(double,   float64)

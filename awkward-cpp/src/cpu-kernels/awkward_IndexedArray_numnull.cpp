@@ -17,30 +17,12 @@ ERROR awkward_IndexedArray_numnull(
   }
   return success();
 }
-ERROR awkward_IndexedArray32_numnull(
-  int64_t* numnull,
-  const int32_t* fromindex,
-  int64_t lenindex) {
-  return awkward_IndexedArray_numnull<int32_t>(
-    numnull,
-    fromindex,
-    lenindex);
-}
-ERROR awkward_IndexedArrayU32_numnull(
-  int64_t* numnull,
-  const uint32_t* fromindex,
-  int64_t lenindex) {
-  return awkward_IndexedArray_numnull<uint32_t>(
-    numnull,
-    fromindex,
-    lenindex);
-}
-ERROR awkward_IndexedArray64_numnull(
-  int64_t* numnull,
-  const int64_t* fromindex,
-  int64_t lenindex) {
-  return awkward_IndexedArray_numnull<int64_t>(
-    numnull,
-    fromindex,
-    lenindex);
-}
+
+#define WRAPPER(SUFFIX, C) \
+  ERROR awkward_IndexedArray##SUFFIX(int64_t* numnull, const C* fromindex, int64_t lenindex) { \
+    return awkward_IndexedArray_numnull<C>(numnull, fromindex, lenindex); \
+  }
+
+WRAPPER(32_numnull, int32_t)
+WRAPPER(U32_numnull, uint32_t)
+WRAPPER(64_numnull, int64_t)

@@ -34,44 +34,11 @@ ERROR awkward_NumpyArray_pad_zero_to_length(
   return success();
 }
 
-ERROR awkward_NumpyArray_pad_zero_to_length_uint8_int32(
-  const uint8_t* fromptr,
-  const int32_t* fromoffsets,
-  int64_t offsetslength,
-  int64_t target,
-  uint8_t* toptr) {
-  return awkward_NumpyArray_pad_zero_to_length<uint8_t, int32_t>(
-    fromptr,
-    fromoffsets,
-    offsetslength,
-    target,
-    toptr);
-}
+#define WRAPPER(SUFFIX, T, C) \
+  ERROR awkward_NumpyArray_pad_zero_to_length_uint8_##SUFFIX(const T* fromptr, const C* fromoffsets, int64_t offsetslength, int64_t target, T* toptr) { \
+    return awkward_NumpyArray_pad_zero_to_length<T, C>(fromptr, fromoffsets, offsetslength, target, toptr); \
+  }
 
-ERROR awkward_NumpyArray_pad_zero_to_length_uint8_uint32(
-  const uint8_t* fromptr,
-  const uint32_t* fromoffsets,
-  int64_t offsetslength,
-  int64_t target,
-  uint8_t* toptr) {
-  return awkward_NumpyArray_pad_zero_to_length<uint8_t, uint32_t>(
-    fromptr,
-    fromoffsets,
-    offsetslength,
-    target,
-    toptr);
-}
-
-ERROR awkward_NumpyArray_pad_zero_to_length_uint8_int64(
-  const uint8_t* fromptr,
-  const int64_t* fromoffsets,
-  int64_t offsetslength,
-  int64_t target,
-  uint8_t* toptr) {
-  return awkward_NumpyArray_pad_zero_to_length<uint8_t, int64_t>(
-    fromptr,
-    fromoffsets,
-    offsetslength,
-    target,
-    toptr);
-}
+WRAPPER(int32, uint8_t, int32_t)
+WRAPPER(uint32, uint8_t, uint32_t)
+WRAPPER(int64, uint8_t, int64_t)

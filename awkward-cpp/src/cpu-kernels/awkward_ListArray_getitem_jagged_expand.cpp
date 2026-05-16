@@ -31,60 +31,12 @@ ERROR awkward_ListArray_getitem_jagged_expand(
   }
   return success();
 }
-ERROR awkward_ListArray32_getitem_jagged_expand_64(
-  int64_t* multistarts,
-  int64_t* multistops,
-  const int64_t* singleoffsets,
-  int64_t* tocarry,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int64_t jaggedsize,
-  int64_t length) {
-  return awkward_ListArray_getitem_jagged_expand<int32_t, int64_t>(
-    multistarts,
-    multistops,
-    singleoffsets,
-    tocarry,
-    fromstarts,
-    fromstops,
-    jaggedsize,
-    length);
-}
-ERROR awkward_ListArrayU32_getitem_jagged_expand_64(
-  int64_t* multistarts,
-  int64_t* multistops,
-  const int64_t* singleoffsets,
-  int64_t* tocarry,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  int64_t jaggedsize,
-  int64_t length) {
-  return awkward_ListArray_getitem_jagged_expand<uint32_t, int64_t>(
-    multistarts,
-    multistops,
-    singleoffsets,
-    tocarry,
-    fromstarts,
-    fromstops,
-    jaggedsize,
-    length);
-}
-ERROR awkward_ListArray64_getitem_jagged_expand_64(
-  int64_t* multistarts,
-  int64_t* multistops,
-  const int64_t* singleoffsets,
-  int64_t* tocarry,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t jaggedsize,
-  int64_t length) {
-  return awkward_ListArray_getitem_jagged_expand<int64_t, int64_t>(
-    multistarts,
-    multistops,
-    singleoffsets,
-    tocarry,
-    fromstarts,
-    fromstops,
-    jaggedsize,
-    length);
-}
+
+#define WRAPPER(SUFFIX, C, T) \
+  ERROR awkward_ListArray##SUFFIX(T* multistarts, T* multistops, const T* singleoffsets, T* tocarry, const C* fromstarts, const C* fromstops, int64_t jaggedsize, int64_t length) { \
+    return awkward_ListArray_getitem_jagged_expand<C, T>(multistarts, multistops, singleoffsets, tocarry, fromstarts, fromstops, jaggedsize, length); \
+  }
+
+WRAPPER(32_getitem_jagged_expand_64, int32_t, int64_t)
+WRAPPER(U32_getitem_jagged_expand_64, uint32_t, int64_t)
+WRAPPER(64_getitem_jagged_expand_64, int64_t, int64_t)

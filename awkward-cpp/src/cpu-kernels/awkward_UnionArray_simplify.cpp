@@ -33,253 +33,28 @@ ERROR awkward_UnionArray_simplify(
   }
   return success();
 }
-ERROR awkward_UnionArray8_32_simplify8_32_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* outertags,
-  const int32_t* outerindex,
-  const int8_t* innertags,
-  const int32_t* innerindex,
-  int64_t towhich,
-  int64_t innerwhich,
-  int64_t outerwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify<int8_t, int32_t, int8_t, int32_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    outertags,
-    outerindex,
-    innertags,
-    innerindex,
-    towhich,
-    innerwhich,
-    outerwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray8_32_simplify8_U32_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* outertags,
-  const int32_t* outerindex,
-  const int8_t* innertags,
-  const uint32_t* innerindex,
-  int64_t towhich,
-  int64_t innerwhich,
-  int64_t outerwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify<int8_t, int32_t, int8_t, uint32_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    outertags,
-    outerindex,
-    innertags,
-    innerindex,
-    towhich,
-    innerwhich,
-    outerwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray8_32_simplify8_64_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* outertags,
-  const int32_t* outerindex,
-  const int8_t* innertags,
-  const int64_t* innerindex,
-  int64_t towhich,
-  int64_t innerwhich,
-  int64_t outerwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify<int8_t, int32_t, int8_t, int64_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    outertags,
-    outerindex,
-    innertags,
-    innerindex,
-    towhich,
-    innerwhich,
-    outerwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray8_U32_simplify8_32_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* outertags,
-  const uint32_t* outerindex,
-  const int8_t* innertags,
-  const int32_t* innerindex,
-  int64_t towhich,
-  int64_t innerwhich,
-  int64_t outerwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify<int8_t, uint32_t, int8_t, int32_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    outertags,
-    outerindex,
-    innertags,
-    innerindex,
-    towhich,
-    innerwhich,
-    outerwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray8_U32_simplify8_U32_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* outertags,
-  const uint32_t* outerindex,
-  const int8_t* innertags,
-  const uint32_t* innerindex,
-  int64_t towhich,
-  int64_t innerwhich,
-  int64_t outerwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify<int8_t, uint32_t, int8_t, uint32_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    outertags,
-    outerindex,
-    innertags,
-    innerindex,
-    towhich,
-    innerwhich,
-    outerwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray8_U32_simplify8_64_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* outertags,
-  const uint32_t* outerindex,
-  const int8_t* innertags,
-  const int64_t* innerindex,
-  int64_t towhich,
-  int64_t innerwhich,
-  int64_t outerwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify<int8_t, uint32_t, int8_t, int64_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    outertags,
-    outerindex,
-    innertags,
-    innerindex,
-    towhich,
-    innerwhich,
-    outerwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray8_64_simplify8_32_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* outertags,
-  const int64_t* outerindex,
-  const int8_t* innertags,
-  const int32_t* innerindex,
-  int64_t towhich,
-  int64_t innerwhich,
-  int64_t outerwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify<int8_t, int64_t, int8_t, int32_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    outertags,
-    outerindex,
-    innertags,
-    innerindex,
-    towhich,
-    innerwhich,
-    outerwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray8_64_simplify8_U32_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* outertags,
-  const int64_t* outerindex,
-  const int8_t* innertags,
-  const uint32_t* innerindex,
-  int64_t towhich,
-  int64_t innerwhich,
-  int64_t outerwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify<int8_t, int64_t, int8_t, uint32_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    outertags,
-    outerindex,
-    innertags,
-    innerindex,
-    towhich,
-    innerwhich,
-    outerwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray8_64_simplify8_64_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* outertags,
-  const int64_t* outerindex,
-  const int8_t* innertags,
-  const int64_t* innerindex,
-  int64_t towhich,
-  int64_t innerwhich,
-  int64_t outerwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify<int8_t, int64_t, int8_t, int64_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    outertags,
-    outerindex,
-    innertags,
-    innerindex,
-    towhich,
-    innerwhich,
-    outerwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray64_64_simplify8_64_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int64_t* outertags,
-  const int64_t* outerindex,
-  const int8_t* innertags,
-  const int64_t* innerindex,
-  int64_t towhich,
-  int64_t innerwhich,
-  int64_t outerwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify<int64_t, int64_t, int8_t, int64_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    outertags,
-    outerindex,
-    innertags,
-    innerindex,
-    towhich,
-    innerwhich,
-    outerwhich,
-    length,
-    base);
-}
+
+#define UNION_SIMPLIFY(SUFFIX, OUTERTAGS, OUTERINDEX, INNERTAGS, INNERINDEX, TOTAGS, TOINDEX) \
+  ERROR awkward_UnionArray##SUFFIX(                                                           \
+    TOTAGS* totags, TOINDEX* toindex,                                                         \
+    const OUTERTAGS* outertags, const OUTERINDEX* outerindex,                                 \
+    const INNERTAGS* innertags, const INNERINDEX* innerindex,                                 \
+    int64_t towhich, int64_t innerwhich, int64_t outerwhich,                                  \
+    int64_t length, int64_t base) {                                                           \
+    return awkward_UnionArray_simplify<OUTERTAGS, OUTERINDEX, INNERTAGS, INNERINDEX, TOTAGS, TOINDEX>( \
+      totags, toindex, outertags, outerindex, innertags, innerindex,                          \
+      towhich, innerwhich, outerwhich, length, base);                                         \
+  }
+
+// All 10 ABI specialisations. Outer/inner index dtypes vary across
+// {int32, uint32, int64}; tag dtypes are int8 (or int64 in the last row).
+UNION_SIMPLIFY(8_32_simplify8_32_to8_64,    int8_t,  int32_t,  int8_t,  int32_t,  int8_t, int64_t)
+UNION_SIMPLIFY(8_32_simplify8_U32_to8_64,   int8_t,  int32_t,  int8_t,  uint32_t, int8_t, int64_t)
+UNION_SIMPLIFY(8_32_simplify8_64_to8_64,    int8_t,  int32_t,  int8_t,  int64_t,  int8_t, int64_t)
+UNION_SIMPLIFY(8_U32_simplify8_32_to8_64,   int8_t,  uint32_t, int8_t,  int32_t,  int8_t, int64_t)
+UNION_SIMPLIFY(8_U32_simplify8_U32_to8_64,  int8_t,  uint32_t, int8_t,  uint32_t, int8_t, int64_t)
+UNION_SIMPLIFY(8_U32_simplify8_64_to8_64,   int8_t,  uint32_t, int8_t,  int64_t,  int8_t, int64_t)
+UNION_SIMPLIFY(8_64_simplify8_32_to8_64,    int8_t,  int64_t,  int8_t,  int32_t,  int8_t, int64_t)
+UNION_SIMPLIFY(8_64_simplify8_U32_to8_64,   int8_t,  int64_t,  int8_t,  uint32_t, int8_t, int64_t)
+UNION_SIMPLIFY(8_64_simplify8_64_to8_64,    int8_t,  int64_t,  int8_t,  int64_t,  int8_t, int64_t)
+UNION_SIMPLIFY(64_64_simplify8_64_to8_64,   int64_t, int64_t,  int8_t,  int64_t,  int8_t, int64_t)

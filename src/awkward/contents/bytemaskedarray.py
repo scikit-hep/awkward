@@ -45,7 +45,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.forms.form import Form, FormKeyPathT
-from awkward.index import Index, resolve_index
+from awkward.index import Index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -802,32 +802,30 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
-            negaxis, starts, parents, offsets, outlength
+            negaxis, starts, offsets, outlength
         )
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
         return self.to_IndexedOptionArray64()._unique(
-            negaxis, starts, parents, offsets, outlength
+            negaxis, starts, offsets, outlength
         )
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         return self.to_IndexedOptionArray64()._argsort_next(
-            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         return self.to_IndexedOptionArray64()._sort_next(
-            negaxis, starts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, offsets, outlength, ascending, stable
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -853,7 +851,6 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -883,33 +880,33 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
 
         next_length = mask_length - numnull
         nextcarry = ak.index.Index64.empty(next_length, nplike=self._backend.nplike)
-        nextparents = ak.index.Index64.empty(next_length, nplike=self._backend.nplike)
+        # nextoffsets describes the same `outlength` bins, but counting only the
+        # valid (unmasked) elements that survived this layer.
+        nextoffsets = ak.index.Index64.empty(outlength + 1, nplike=self._backend.nplike)
         outindex = ak.index.Index64.empty(mask_length, nplike=self._backend.nplike)
-
-        parents = resolve_index(parents, self._backend)
 
         assert (
             nextcarry.nplike is self._backend.nplike
-            and nextparents.nplike is self._backend.nplike
+            and nextoffsets.nplike is self._backend.nplike
             and outindex.nplike is self._backend.nplike
             and self._mask.nplike is self._backend.nplike
-            and parents.nplike is self._backend.nplike
+            and offsets.nplike is self._backend.nplike
         )
         self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_ByteMaskedArray_reduce_next_64",
                 nextcarry.dtype.type,
-                nextparents.dtype.type,
+                nextoffsets.dtype.type,
                 outindex.dtype.type,
                 self._mask.dtype.type,
-                parents.dtype.type,
+                offsets.dtype.type,
             ](
                 nextcarry.data,
-                nextparents.data,
+                nextoffsets.data,
                 outindex.data,
                 self._mask.data,
-                parents.data,
-                mask_length,
+                offsets.data,
+                outlength,
                 self._valid_when,
             )
         )
@@ -966,8 +963,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             negaxis,
             starts,
             nextshifts,
-            nextparents,
-            offsets,
+            nextoffsets,
             outlength,
             mask,
             keepdims,
@@ -980,8 +976,9 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             if isinstance(out, ak.contents.RegularArray):
                 out_content = out.content
             elif isinstance(out, ak.contents.ListOffsetArray):
-                # The `outindex` that will index into `out_content` is 0-based, so we should ensure that we normalise
-                # the list content to start at the first offset.
+                # The `outindex` that will index into `out_content` is 0-based,
+                # so we should ensure that we normalise the list content to start
+                # at the first offset.
                 out_content = out.content[out.offsets[0] :]
             else:
                 raise ValueError(

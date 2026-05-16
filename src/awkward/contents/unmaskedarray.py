@@ -416,21 +416,21 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         if self._content.length is not unknown_length and self._content.length == 0:
             return True
-        return self._content._is_unique(negaxis, starts, parents, offsets, outlength)
+        return self._content._is_unique(negaxis, starts, offsets, outlength)
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         if self._content.length is not unknown_length and self._content.length == 0:
             return self
-        return self._content._unique(negaxis, starts, parents, offsets, outlength)
+        return self._content._unique(negaxis, starts, offsets, outlength)
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         out = self._content._argsort_next(
-            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
         if isinstance(out, ak.contents.RegularArray):
@@ -440,11 +440,9 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         else:
             return out
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         out = self._content._sort_next(
-            negaxis, starts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, offsets, outlength, ascending, stable
         )
 
         if isinstance(out, ak.contents.RegularArray):
@@ -477,7 +475,6 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -489,7 +486,6 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
             negaxis,
             starts,
             shifts,
-            parents,
             offsets,
             outlength,
             mask,

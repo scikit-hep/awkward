@@ -15,36 +15,12 @@ ERROR awkward_UnionArray_fillindex(
   }
   return success();
 }
-ERROR awkward_UnionArray_fillindex_to64_from32(
-  int64_t* toindex,
-  int64_t toindexoffset,
-  const int32_t* fromindex,
-  int64_t length) {
-  return awkward_UnionArray_fillindex<int32_t, int64_t>(
-    toindex,
-    toindexoffset,
-    fromindex,
-    length);
-}
-ERROR awkward_UnionArray_fillindex_to64_fromU32(
-  int64_t* toindex,
-  int64_t toindexoffset,
-  const uint32_t* fromindex,
-  int64_t length) {
-  return awkward_UnionArray_fillindex<uint32_t, int64_t>(
-    toindex,
-    toindexoffset,
-    fromindex,
-    length);
-}
-ERROR awkward_UnionArray_fillindex_to64_from64(
-  int64_t* toindex,
-  int64_t toindexoffset,
-  const int64_t* fromindex,
-  int64_t length) {
-  return awkward_UnionArray_fillindex<int64_t, int64_t>(
-    toindex,
-    toindexoffset,
-    fromindex,
-    length);
-}
+
+#define WRAPPER(SUFFIX, FROM, TO) \
+  ERROR awkward_UnionArray_fillindex_to64_from##SUFFIX(TO* toindex, int64_t toindexoffset, const FROM* fromindex, int64_t length) { \
+    return awkward_UnionArray_fillindex<FROM, TO>(toindex, toindexoffset, fromindex, length); \
+  }
+
+WRAPPER(32, int32_t, int64_t)
+WRAPPER(U32, uint32_t, int64_t)
+WRAPPER(64, int64_t, int64_t)
