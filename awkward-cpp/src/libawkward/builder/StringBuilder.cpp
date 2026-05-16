@@ -14,7 +14,7 @@ namespace awkward {
   const BuilderPtr
   StringBuilder::fromempty(const BuilderOptions& options,
                            const char* encoding) {
-    GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
+    GrowableBuffer<std::int64_t> offsets = GrowableBuffer<std::int64_t>::empty(options);
     offsets.append(0);
     GrowableBuffer<uint8_t> content = GrowableBuffer<uint8_t>::empty(options);
     return std::make_shared<StringBuilder>(options,
@@ -24,8 +24,8 @@ namespace awkward {
   }
 
   StringBuilder::StringBuilder(const BuilderOptions& options,
-                               GrowableBuffer<int64_t> offsets,
-                               GrowableBuffer<uint8_t> content,
+                               GrowableBuffer<std::int64_t> offsets,
+                               GrowableBuffer<std::uint8_t> content,
                                const char* encoding)
       : options_(options)
       , offsets_(std::move(offsets))
@@ -43,21 +43,21 @@ namespace awkward {
   }
 
   const std::string
-  StringBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  StringBuilder::to_buffers(BuffersContainer& container, std::int64_t& form_key_id) const {
     std::stringstream outer_form_key;
     std::stringstream inner_form_key;
     outer_form_key << "node" << (form_key_id++);
     inner_form_key << "node" << (form_key_id++);
 
     offsets_.concatenate(
-      reinterpret_cast<int64_t*>(
+      reinterpret_cast<std::int64_t*>(
         container.empty_buffer(outer_form_key.str() + "-offsets",
-        (int64_t)offsets_.length() * (int64_t)sizeof(int64_t))));
+        (std::int64_t)offsets_.length() * (std::int64_t)sizeof(std::int64_t))));
 
     content_.concatenate(
-      reinterpret_cast<uint8_t*>(
+      reinterpret_cast<std::uint8_t*>(
         container.empty_buffer(inner_form_key.str() + "-data",
-        (int64_t)content_.length() * (int64_t)sizeof(uint8_t))));
+        (std::int64_t)content_.length() * (std::int64_t)sizeof(std::uint8_t))));
 
     std::string char_parameter;
     std::string string_parameter;
@@ -81,9 +81,9 @@ namespace awkward {
            + ", \"form_key\": \"" + outer_form_key.str() + "\"}";
   }
 
-  int64_t
+  std::int64_t
   StringBuilder::length() const {
-    return (int64_t)offsets_.length() - 1;
+    return (std::int64_t)offsets_.length() - 1;
   }
 
   void
@@ -148,18 +148,18 @@ namespace awkward {
   }
 
   const BuilderPtr
-  StringBuilder::string(const char* x, int64_t length, const char* /* encoding */) {
+  StringBuilder::string(const char* x, std::int64_t length, const char* /* encoding */) {
     if (length < 0) {
-      for (int64_t i = 0;  x[i] != 0;  i++) {
-        content_.append((uint8_t)x[i]);
+      for (std::int64_t i = 0;  x[i] != 0;  i++) {
+        content_.append((std::uint8_t)x[i]);
       }
     }
     else {
-      for (int64_t i = 0;  i < length;  i++) {
-        content_.append((uint8_t)x[i]);
+      for (std::int64_t i = 0;  i < length;  i++) {
+        content_.append((std::uint8_t)x[i]);
       }
     }
-    offsets_.append((int64_t)content_.length());
+    offsets_.append((std::int64_t)content_.length());
     return shared_from_this();
   }
 
@@ -178,14 +178,14 @@ namespace awkward {
   }
 
   const BuilderPtr
-  StringBuilder::begintuple(int64_t numfields) {
+  StringBuilder::begintuple(std::int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
     return out;
   }
 
   const BuilderPtr
-  StringBuilder::index(int64_t /* index */) {
+  StringBuilder::index(std::int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
