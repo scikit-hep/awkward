@@ -7,20 +7,15 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
+#include <type_traits>
 #include <vector>
 
-template <typename T>
-bool sort_order_ascending(T l, T r)
-{
-  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l < r);
-}
-
-template <typename T>
-bool sort_order_descending(T l, T r)
-{
-  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l > r);
-}
-
+// Per-segment sort by value. NaNs are pushed to the high end (matching
+// NumPy / the older hand-rolled comparator). Direction and NaN handling
+// fold into a single inline lambda; `if constexpr` lets the bool/integer
+// specialisations skip the floating-point NaN branch entirely (so we
+// never instantiate `std::isnan(bool)` and the explicit bool override
+// helpers are no longer needed).
 template <typename T>
 ERROR awkward_sort(
   T* toptr,
@@ -28,264 +23,60 @@ ERROR awkward_sort(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  int64_t parentslength,
+  int64_t /* parentslength */,
   bool ascending,
   bool stable) {
   std::vector<int64_t> index(length);
-  std::iota(index.begin(), index.end(), 0);
+  std::iota(index.begin(), index.end(), int64_t{0});
 
-  for (int64_t i = 0; i < offsetslength - 1; i++) {
-    auto start = index.begin() + offsets[i];
-    auto stop = index.begin() + offsets[i + 1];
-
-    if (stable) {
-      if (ascending) {
-        std::stable_sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
-          return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
-        });
-      } else {
-        std::stable_sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
-          return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
-        });
-      }
-    } else {
-      if (ascending) {
-        std::sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
-          return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
-        });
-      } else {
-        std::sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
-          return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
-        });
-      }
+  auto less = [&](int64_t a, int64_t b) -> bool {
+    T l = fromptr[a];
+    T r = fromptr[b];
+    if constexpr (std::is_floating_point_v<T>) {
+      if (std::isnan(r)) return false;
+      if (std::isnan(l)) return true;
     }
+    return ascending ? (l < r) : (l > r);
+  };
+
+  // Bin loop is embarrassingly parallel: each segment of `index` is sorted
+  // independently. `dynamic` schedule helps when bin sizes are uneven.
+  #ifdef _OPENMP
+  #pragma omp parallel for if(offsetslength > 1024) schedule(dynamic, 64)
+  #endif
+  for (int64_t i = 0; i < offsetslength - 1; i++) {
+    auto first = index.begin() + offsets[i];
+    auto last  = index.begin() + offsets[i + 1];
+    if (stable) std::stable_sort(first, last, less);
+    else        std::sort(first, last, less);
   }
 
-  int64_t copy_length = (parentslength < length) ? parentslength : length;
+  int64_t parentslength_eff = offsets[offsetslength - 1];
+  int64_t copy_length = (parentslength_eff < length) ? parentslength_eff : length;
   for (int64_t i = 0; i < copy_length; i++) {
     toptr[i] = fromptr[index[i]];
   }
-
   return success();
 }
-ERROR awkward_sort_bool(
-  bool* toptr,
-  const bool* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<bool>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
-ERROR awkward_sort_int8(
-  int8_t* toptr,
-  const int8_t* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<int8_t>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
-ERROR awkward_sort_uint8(
-  uint8_t* toptr,
-  const uint8_t* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<uint8_t>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
-ERROR awkward_sort_int16(
-  int16_t* toptr,
-  const int16_t* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<int16_t>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
-ERROR awkward_sort_uint16(
-  uint16_t* toptr,
-  const uint16_t* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<uint16_t>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
-ERROR awkward_sort_int32(
-  int32_t* toptr,
-  const int32_t* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<int32_t>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
-ERROR awkward_sort_uint32(
-  uint32_t* toptr,
-  const uint32_t* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<uint32_t>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
-ERROR awkward_sort_int64(
-  int64_t* toptr,
-  const int64_t* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<int64_t>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
-ERROR awkward_sort_uint64(
-  uint64_t* toptr,
-  const uint64_t* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<uint64_t>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
-ERROR awkward_sort_float32(
-  float* toptr,
-  const float* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<float>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
-ERROR awkward_sort_float64(
-  double* toptr,
-  const double* fromptr,
-  int64_t length,
-  const int64_t* offsets,
-  int64_t offsetslength,
-  int64_t parentslength,
-  bool ascending,
-  bool stable) {
-  return awkward_sort<double>(
-    toptr,
-    fromptr,
-    length,
-    offsets,
-    offsetslength,
-    parentslength,
-    ascending,
-    stable);
-}
 
-template <>
-bool sort_order_ascending(bool l, bool r)
-{
-  return l < r;
-}
+#define SORT(T, NAME)                                                      \
+  ERROR awkward_sort_##NAME(                                               \
+    T* toptr, const T* fromptr, int64_t length,                            \
+    const int64_t* offsets, int64_t offsetslength, int64_t parentslength,  \
+    bool ascending, bool stable) {                                         \
+    return awkward_sort<T>(                                                \
+      toptr, fromptr, length, offsets, offsetslength,                      \
+      parentslength, ascending, stable);                                   \
+  }
 
-template <>
-bool sort_order_descending(bool l, bool r)
-{
-  return l > r;
-}
+SORT(bool,     bool)
+SORT(int8_t,   int8)
+SORT(uint8_t,  uint8)
+SORT(int16_t,  int16)
+SORT(uint16_t, uint16)
+SORT(int32_t,  int32)
+SORT(uint32_t, uint32)
+SORT(int64_t,  int64)
+SORT(uint64_t, uint64)
+SORT(float,    float32)
+SORT(double,   float64)

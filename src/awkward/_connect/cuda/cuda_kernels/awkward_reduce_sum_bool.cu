@@ -2,87 +2,35 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromptr, parents, offsets, lenparents, outlength, invocation_index, err_code) = args
-//     if outlength == 0:
-//         return  # Nothing to do, skip the rest
-//     block_size = min(outlength, 1024)
-//     grid_size = max(1, math.ceil((max(lenparents, outlength) + block_size - 1) / block_size))
-//     atomic_toptr = cupy.array(toptr, dtype=cupy.uint32)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_a", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), (block_size,), (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, toptr, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_b", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), (block_size,), (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, toptr, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_bool_c", bool_, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), (block_size,), (toptr, fromptr, parents, offsets, lenparents, outlength, atomic_toptr, toptr, invocation_index, err_code))
-// out["awkward_reduce_sum_bool_a", {dtype_specializations}] = None
-// out["awkward_reduce_sum_bool_b", {dtype_specializations}] = None
-// out["awkward_reduce_sum_bool_c", {dtype_specializations}] = None
+//     (toptr, fromptr, offsets, outlength, invocation_index, err_code) = args
+//     if block[0] > 0:
+//         grid_size = math.floor((int(outlength) + block[0] - 1) / block[0])
+//     else:
+//         grid_size = 1
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_reduce_sum_bool_kernel', cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, offsets.dtype]))((grid_size,), block, (toptr, fromptr, offsets, outlength, invocation_index, err_code))
+// out['awkward_reduce_sum_bool_kernel', {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C, typename U, typename V>
+// Per-bin "any nonzero" with early-exit, mirroring awkward_reduce_sum_bool.cpp.
+template <typename T, typename C, typename V>
 __global__ void
-awkward_reduce_sum_bool_a(
+awkward_reduce_sum_bool_kernel(
     T* toptr,
     const C* fromptr,
-    const U* parents,
     const V* offsets,
-    int64_t lenparents,
     int64_t outlength,
-    uint32_t* atomic_toptr,
-    T* /*unused*/,
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (thread_id < outlength) {
-      atomic_toptr[thread_id] = 0;
-    }
-  }
-}
-
-template <typename T, typename C, typename U, typename V>
-__global__ void
-awkward_reduce_sum_bool_b(
-    T* toptr,
-    const C* fromptr,
-    const U* parents,
-    const V* offsets,
-    int64_t lenparents,
-    int64_t outlength,
-    uint32_t* atomic_toptr,
-    T* /*unused*/,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
-
-  if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (thread_id < lenparents) {
-      T val = (fromptr[thread_id] != 0) ? 1 : 0;
-      int64_t parent = parents[thread_id];
-      if (parent >= 0 && parent < outlength) {
-        atomicOr(&atomic_toptr[parent], val);
+    int64_t bin = blockIdx.x * blockDim.x + threadIdx.x;
+    if (bin < outlength) {
+      bool found = false;
+      int64_t start = (int64_t)offsets[bin];
+      int64_t stop  = (int64_t)offsets[bin + 1];
+      for (int64_t i = start; i < stop; i++) {
+        if (fromptr[i] != (C)0) { found = true; break; }
       }
-    }
-  }
-}
-
-template <typename T, typename C, typename U, typename V>
-__global__ void
-awkward_reduce_sum_bool_c(
-    T* toptr,
-    const C* fromptr,
-    const U* parents,
-    const V* offsets,
-    int64_t lenparents,
-    int64_t outlength,
-    uint32_t* atomic_toptr,
-    T* /*unused*/,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
-  if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (thread_id < outlength) {
-      toptr[thread_id] = (T)(atomic_toptr[thread_id]);
+      toptr[bin] = found;
     }
   }
 }

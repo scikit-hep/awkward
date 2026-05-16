@@ -84,6 +84,18 @@ set_target_properties(
              VISIBILITY_INLINES_HIDDEN ON
              CXX_EXTENSIONS NO)
 
+# Optional OpenMP threading for the reducers / sorts. The kernels gate every `#pragma omp parallel
+# for` on `_OPENMP`, so the same source compiles cleanly without OpenMP and runs serially in that
+# case. We don't fail the build if OpenMP isn't available — users who lack it (e.g. macOS Apple
+# Clang without a separate `libomp`) just get the serial path.
+find_package(OpenMP COMPONENTS CXX)
+if(OpenMP_CXX_FOUND)
+  target_link_libraries(awkward-cpu-kernels PRIVATE OpenMP::OpenMP_CXX)
+  message(STATUS "OpenMP found: cpu-kernels will use threading where it pays")
+else()
+  message(STATUS "OpenMP not found: cpu-kernels will run serially")
+endif()
+
 # Second tier: libawkward
 add_library(awkward SHARED ${LIBAWKWARD_SOURCES})
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")

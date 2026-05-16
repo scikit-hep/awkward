@@ -4,196 +4,52 @@
 
 #include "awkward/kernels.h"
 
+// Per-bin argmax. See `awkward_reduce_argmin` for the rationale.
 template <typename OUT, typename IN>
 ERROR awkward_reduce_argmax(
-  OUT* toptr,
-  const IN* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
+  OUT* __restrict__ toptr,
+  const IN* __restrict__ fromptr,
+  const int64_t* __restrict__ offsets,
+  const int64_t* /* starts */,
   int64_t outlength) {
-  std::fill_n(toptr, outlength, static_cast<OUT>(-1));
-
-  for (int64_t i = 0; i < lenparents; i++) {
-    int64_t parent = parents[i];
-    int64_t current_best_idx = toptr[parent];
-
-    auto candidate_val = fromptr[i];
-
-    if (current_best_idx == -1 || candidate_val > fromptr[current_best_idx]) {
-      toptr[parent] = i;
+  #ifdef _OPENMP
+  #pragma omp parallel for if(outlength > 1024) schedule(static)
+  #endif
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    const int64_t start = offsets[bin];
+    const int64_t stop  = offsets[bin + 1];
+    int64_t best = -1;
+    if (start < stop) {
+      best = start;
+      IN best_val = fromptr[start];
+      for (int64_t i = start + 1; i < stop; i++) {
+        IN v = fromptr[i];
+        if (v > best_val) {
+          best_val = v;
+          best = i;
+        }
+      }
     }
+    toptr[bin] = static_cast<OUT>(best);
   }
   return success();
 }
-ERROR awkward_reduce_argmax_int8_64(
-  int64_t* toptr,
-  const int8_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
-  int64_t outlength) {
-  return awkward_reduce_argmax<int64_t, int8_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    starts,
-    outlength);
-}
-ERROR awkward_reduce_argmax_uint8_64(
-  int64_t* toptr,
-  const uint8_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
-  int64_t outlength) {
-  return awkward_reduce_argmax<int64_t, uint8_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    starts,
-    outlength);
-}
-ERROR awkward_reduce_argmax_int16_64(
-  int64_t* toptr,
-  const int16_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
-  int64_t outlength) {
-  return awkward_reduce_argmax<int64_t, int16_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    starts,
-    outlength);
-}
-ERROR awkward_reduce_argmax_uint16_64(
-  int64_t* toptr,
-  const uint16_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
-  int64_t outlength) {
-  return awkward_reduce_argmax<int64_t, uint16_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    starts,
-    outlength);
-}
-ERROR awkward_reduce_argmax_int32_64(
-  int64_t* toptr,
-  const int32_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
-  int64_t outlength) {
-  return awkward_reduce_argmax<int64_t, int32_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    starts,
-    outlength);
-}
-ERROR awkward_reduce_argmax_uint32_64(
-  int64_t* toptr,
-  const uint32_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
-  int64_t outlength) {
-  return awkward_reduce_argmax<int64_t, uint32_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    starts,
-    outlength);
-}
-ERROR awkward_reduce_argmax_int64_64(
-  int64_t* toptr,
-  const int64_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
-  int64_t outlength) {
-  return awkward_reduce_argmax<int64_t, int64_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    starts,
-    outlength);
-}
-ERROR awkward_reduce_argmax_uint64_64(
-  int64_t* toptr,
-  const uint64_t* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
-  int64_t outlength) {
-  return awkward_reduce_argmax<int64_t, uint64_t>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    starts,
-    outlength);
-}
-ERROR awkward_reduce_argmax_float32_64(
-  int64_t* toptr,
-  const float* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
-  int64_t outlength) {
-  return awkward_reduce_argmax<int64_t, float>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    starts,
-    outlength);
-}
-ERROR awkward_reduce_argmax_float64_64(
-  int64_t* toptr,
-  const double* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  const int64_t* starts,
-  int64_t outlength) {
-  return awkward_reduce_argmax<int64_t, double>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    starts,
-    outlength);
-}
+
+#define REDUCE_ARGMAX(IN_T, IN_N)                                                       \
+  ERROR awkward_reduce_argmax_##IN_N##_64(                                              \
+    int64_t* toptr, const IN_T* fromptr,                                                \
+    const int64_t* offsets, const int64_t* starts, int64_t outlength) {                 \
+    return awkward_reduce_argmax<int64_t, IN_T>(                                        \
+      toptr, fromptr, offsets, starts, outlength);                                      \
+  }
+
+REDUCE_ARGMAX(int8_t,   int8)
+REDUCE_ARGMAX(uint8_t,  uint8)
+REDUCE_ARGMAX(int16_t,  int16)
+REDUCE_ARGMAX(uint16_t, uint16)
+REDUCE_ARGMAX(int32_t,  int32)
+REDUCE_ARGMAX(uint32_t, uint32)
+REDUCE_ARGMAX(int64_t,  int64)
+REDUCE_ARGMAX(uint64_t, uint64)
+REDUCE_ARGMAX(float,    float32)
+REDUCE_ARGMAX(double,   float64)

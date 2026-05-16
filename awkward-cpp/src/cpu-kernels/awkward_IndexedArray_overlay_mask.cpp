@@ -16,36 +16,12 @@ ERROR awkward_IndexedArray_overlay_mask(
   }
   return success();
 }
-ERROR awkward_IndexedArray32_overlay_mask8_to64(
-  int64_t* toindex,
-  const int8_t* mask,
-  const int32_t* fromindex,
-  int64_t length) {
-  return awkward_IndexedArray_overlay_mask<int32_t, int8_t, int64_t>(
-    toindex,
-    mask,
-    fromindex,
-    length);
-}
-ERROR awkward_IndexedArrayU32_overlay_mask8_to64(
-  int64_t* toindex,
-  const int8_t* mask,
-  const uint32_t* fromindex,
-  int64_t length) {
-  return awkward_IndexedArray_overlay_mask<uint32_t, int8_t, int64_t>(
-    toindex,
-    mask,
-    fromindex,
-    length);
-}
-ERROR awkward_IndexedArray64_overlay_mask8_to64(
-  int64_t* toindex,
-  const int8_t* mask,
-  const int64_t* fromindex,
-  int64_t length) {
-  return awkward_IndexedArray_overlay_mask<int64_t, int8_t, int64_t>(
-    toindex,
-    mask,
-    fromindex,
-    length);
-}
+
+#define WRAPPER(SUFFIX, C, M, TO) \
+  ERROR awkward_IndexedArray##SUFFIX(TO* toindex, const M* mask, const C* fromindex, int64_t length) { \
+    return awkward_IndexedArray_overlay_mask<C, M, TO>(toindex, mask, fromindex, length); \
+  }
+
+WRAPPER(32_overlay_mask8_to64, int32_t, int8_t, int64_t)
+WRAPPER(U32_overlay_mask8_to64, uint32_t, int8_t, int64_t)
+WRAPPER(64_overlay_mask8_to64, int64_t, int8_t, int64_t)

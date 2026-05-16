@@ -2,85 +2,46 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromptr, parents, offsets, lenparents, outlength, identity, invocation_index, err_code) = args
+//     (toptr, fromptr, offsets, outlength, identity, invocation_index, err_code) = args
 //     if block[0] > 0:
-//         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
+//         grid_size = math.floor((int(outlength) + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
-//     temp = cupy.tile([identity, 0], lenparents)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_min_complex_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, toptr.dtype.type(identity), temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_min_complex_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, toptr.dtype.type(identity), temp, invocation_index, err_code))
-// out["awkward_reduce_min_complex_a", {dtype_specializations}] = None
-// out["awkward_reduce_min_complex_b", {dtype_specializations}] = None
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_reduce_min_complex_kernel', cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, offsets.dtype]))((grid_size,), block, (toptr, fromptr, offsets, outlength, identity, invocation_index, err_code))
+// out['awkward_reduce_min_complex_kernel', {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C, typename U, typename V>
+// One thread per bin, mirroring awkward_reduce_min_complex.cpp.
+// Lexicographic compare on (real, imag).
+template <typename T, typename C, typename V>
 __global__ void
-awkward_reduce_min_complex_a(
+awkward_reduce_min_complex_kernel(
     T* toptr,
     const C* fromptr,
-    const U* parents,
     const V* offsets,
-    int64_t lenparents,
     int64_t outlength,
     T identity,
-    T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (thread_id < outlength) {
-      toptr[thread_id * 2] = (T)identity;
-      toptr[thread_id * 2 + 1] = (T)0;
-    }
-  }
-}
-
-template <typename T, typename C, typename U, typename V>
-__global__ void
-awkward_reduce_min_complex_b(
-    T* toptr,
-    const C* fromptr,
-    const U* parents,
-    const V* offsets,
-    int64_t lenparents,
-    int64_t outlength,
-    T identity,
-    T* temp,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
-  if (err_code[0] == NO_ERROR) {
-    int64_t idx = threadIdx.x;
-    int64_t thread_id = blockIdx.x * blockDim.x + idx;
-    if (thread_id < lenparents) {
-      temp[thread_id * 2] = fromptr[thread_id * 2];
-      temp[thread_id * 2 + 1] = fromptr[thread_id * 2 + 1];
-    }
-    __syncthreads();
-
-    if (thread_id < lenparents) {
-      for (int stride = 1; stride < blockDim.x; stride *= 2) {
-        T stride_real = identity;
-        T stride_imag = 0;
-        if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-          T current_real = temp[thread_id * 2];
-          T current_imag = temp[thread_id * 2 + 1];
-          stride_real = temp[(thread_id - stride) * 2];
-          stride_imag = temp[(thread_id - stride) * 2 + 1];
-
-          if (stride_real < current_real || (stride_real == current_real && stride_imag < current_imag)) {
-            temp[thread_id * 2] = stride_real;
-            temp[thread_id * 2 + 1] = stride_imag;
-          }
+    int64_t bin = blockIdx.x * blockDim.x + threadIdx.x;
+    if (bin < outlength) {
+      T best_re = identity;
+      T best_im = (T)0;
+      bool seen = false;
+      int64_t start = (int64_t)offsets[bin];
+      int64_t stop  = (int64_t)offsets[bin + 1];
+      for (int64_t i = start; i < stop; i++) {
+        C x = fromptr[i * 2];
+        C y = fromptr[i * 2 + 1];
+        if (!seen || x < best_re || (x == best_re && y < best_im)) {
+          best_re = (T)x;
+          best_im = (T)y;
+          seen = true;
         }
-        __syncthreads();
       }
-
-      int parent = parents[thread_id];
-      if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicMinComplex(&toptr[parent * 2], &toptr[parent * 2 + 1], temp[thread_id * 2], temp[thread_id * 2 + 1]);
-      }
+      toptr[bin * 2]     = best_re;
+      toptr[bin * 2 + 1] = best_im;
     }
   }
 }

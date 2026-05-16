@@ -23,36 +23,12 @@ ERROR awkward_IndexedArray_validity(
   }
   return success();
 }
-ERROR awkward_IndexedArray32_validity(
-  const int32_t* index,
-  int64_t length,
-  int64_t lencontent,
-  bool isoption) {
-  return awkward_IndexedArray_validity<int32_t>(
-    index,
-    length,
-    lencontent,
-    isoption);
-}
-ERROR awkward_IndexedArrayU32_validity(
-  const uint32_t* index,
-  int64_t length,
-  int64_t lencontent,
-  bool isoption) {
-  return awkward_IndexedArray_validity<uint32_t>(
-    index,
-    length,
-    lencontent,
-    isoption);
-}
-ERROR awkward_IndexedArray64_validity(
-  const int64_t* index,
-  int64_t length,
-  int64_t lencontent,
-  bool isoption) {
-  return awkward_IndexedArray_validity<int64_t>(
-    index,
-    length,
-    lencontent,
-    isoption);
-}
+
+#define WRAPPER(SUFFIX, C) \
+  ERROR awkward_IndexedArray##SUFFIX(const C* index, int64_t length, int64_t lencontent, bool isoption) { \
+    return awkward_IndexedArray_validity<C>(index, length, lencontent, isoption); \
+  }
+
+WRAPPER(32_validity, int32_t)
+WRAPPER(U32_validity, uint32_t)
+WRAPPER(64_validity, int64_t)

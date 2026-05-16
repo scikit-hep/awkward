@@ -2,71 +2,28 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, parents, lenparents, outlength, invocation_index, err_code) = args
+//     (toptr, offsets, outlength, invocation_index, err_code) = args
 //     if block[0] > 0:
-//         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
+//         grid_size = math.floor((int(outlength) + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
-//     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_count_64_a", cupy.dtype(toptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, parents, lenparents, outlength, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_count_64_b", cupy.dtype(toptr.dtype).type, parents.dtype]))((grid_size,), block, (toptr, parents, lenparents, outlength, temp, invocation_index, err_code))
-// out["awkward_reduce_count_64_a", {dtype_specializations}] = None
-// out["awkward_reduce_count_64_b", {dtype_specializations}] = None
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_reduce_count_64_kernel', cupy.dtype(toptr.dtype).type, offsets.dtype]))((grid_size,), block, (toptr, offsets, outlength, invocation_index, err_code))
+// out['awkward_reduce_count_64_kernel', {dtype_specializations}] = None
 // END PYTHON
 
-template <typename T, typename C>
+// Per-bin element count = offsets[bin+1] - offsets[bin]. One thread per bin.
+template <typename T, typename V>
 __global__ void
-awkward_reduce_count_64_a(
+awkward_reduce_count_64_kernel(
     T* toptr,
-    const C* parents,
-    int64_t lenparents,
+    const V* offsets,
     int64_t outlength,
-    T* temp,
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (thread_id < outlength) {
-      toptr[thread_id] = 0;
-    }
-  }
-}
-
-template <typename T, typename C>
-__global__ void
-awkward_reduce_count_64_b(
-    T* toptr,
-    const C* parents,
-    int64_t lenparents,
-    int64_t outlength,
-    T* temp,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
-  if (err_code[0] == NO_ERROR) {
-    int64_t idx = threadIdx.x;
-    int64_t thread_id = blockIdx.x * blockDim.x + idx;
-
-    if (thread_id < lenparents) {
-      temp[thread_id] = 1;
-    }
-    __syncthreads();
-
-    if (thread_id < lenparents) {
-      for (int64_t stride = 1; stride < blockDim.x; stride *= 2) {
-        int64_t val = 0;
-        if (idx >= stride && thread_id < lenparents && parents[thread_id] == parents[thread_id - stride]) {
-          val = temp[thread_id - stride];
-        }
-        __syncthreads();
-        temp[thread_id] += val;
-        __syncthreads();
-      }
-
-      int64_t parent = parents[thread_id];
-      if (idx == blockDim.x - 1 || thread_id == lenparents - 1 || parents[thread_id] != parents[thread_id + 1]) {
-        atomicAdd(&toptr[parent], temp[thread_id]);
-      }
+    int64_t bin = blockIdx.x * blockDim.x + threadIdx.x;
+    if (bin < outlength) {
+      toptr[bin] = (T)((int64_t)offsets[bin + 1] - (int64_t)offsets[bin]);
     }
   }
 }

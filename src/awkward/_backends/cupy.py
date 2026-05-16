@@ -36,143 +36,99 @@ class CupyBackend(Backend):
 
         kernel_name = index[0] if index else ""
 
-        # Try CuPy kernels first (primary implementation)
         cupy = cuda.import_cupy("Awkward Arrays with CUDA")
         _cuda_kernels = cuda.initialize_cuda_kernels(cupy)
         func = _cuda_kernels[index]
 
         if func is not None:
-            # CuPy kernel exists, use it
             return CupyKernel(func, index)
 
-        # CuPy kernel not found, try cuda.compute as fallback
         if self._supports_cuda_compute(kernel_name):
             if cuda_compute.is_available():
-                # Return CudaComputeKernel for supported operations
                 compute_impl = self._get_cuda_compute_impl(kernel_name)
                 if compute_impl is not None:
                     return CudaComputeKernel(compute_impl, index)
             else:
-                # cuda.compute is needed but not available
                 raise NotImplementedError(
-                    f"Operation '{kernel_name}' on CUDA backend requires cuda.compute library "
-                    f"(no CuPy kernel available). "
-                    f"Please install cuda.compute or use the CPU backend: "
-                    f"ak.to_backend(array, 'cpu')"
+                    f"Operation '{kernel_name}' requires cuda.compute but it is not available."
                 )
 
-        # Neither CuPy kernel nor cuda.compute implementation found
         raise AssertionError(
-            f"Operation '{kernel_name}' is not supported on CUDA backend. "
-            f"CuPy kernel not found: {index!r}"
+            f"Operation '{kernel_name}' is not supported on CUDA backend."
         )
 
+    # ---------------------------------------------------------
+    # CUDA compute support table
+    # ---------------------------------------------------------
     def _supports_cuda_compute(self, kernel_name: str) -> bool:
-        """
-        Check if the given kernel operation is supported by cuda.compute.
-
-        All the reducers are handled separately in awkward/_connect/cuda/reducers.py
-        Other kernels that are currently supported:
-        - awkward_sort
-        - awkward_argsort (future)
-
-        These kernels should be moved to awkward/_connect/cuda/reducers.py too in the next PR:
-        - awkward_sum
-        - awkward_sum_int32_bool_64
-        - awkward_sum_int64_bool_64
-        - awkward_sum_bool
-        - awkward_max
-        - awkward_min
-        - awkward_prod
-        - awkward_prod_bool
-        - awkward_count_64
-        - awkward_countnonzero
-        - awkward_missing_repeat
-        - awkward_index_rpad_and_clip_axis0
-        - awkward_reduce_sum_complex
-        - awkward_index_rpad_and_clip_axis1
-        - awkward_reduce_max_complex
-        """
         return kernel_name in (
-            "awkward_sort",
+            # core reducers
             "awkward_reduce_sum",
+            "awkward_reduce_sum_bool",
+            "awkward_reduce_sum_bool_complex",
+            "awkward_reduce_sum_bool_complex64_64",  # alias → _bool_complex
+            "awkward_reduce_sum_bool_complex128_64",  # alias → _bool_complex
             "awkward_reduce_sum_int32_bool_64",
             "awkward_reduce_sum_int64_bool_64",
-            "awkward_reduce_sum_bool",
             "awkward_reduce_sum_complex",
             "awkward_reduce_max",
             "awkward_reduce_max_complex",
             "awkward_reduce_min",
+            "awkward_reduce_min_complex",
             "awkward_reduce_prod",
             "awkward_reduce_prod_bool",
+            "awkward_reduce_prod_complex",
+            "awkward_reduce_prod_bool_complex",
+            "awkward_reduce_argmax",
+            "awkward_reduce_argmax_complex",
+            "awkward_reduce_argmin",
+            "awkward_reduce_argmin_complex",
             "awkward_reduce_count_64",
             "awkward_reduce_countnonzero",
+            "awkward_reduce_countnonzero_complex",
+            # indexing / structure
             "awkward_missing_repeat",
             "awkward_index_rpad_and_clip_axis0",
             "awkward_index_rpad_and_clip_axis1",
+            # sort
+            "awkward_sort",
         )
 
+    # ---------------------------------------------------------
+    # CUDA compute dispatch table
+    # ---------------------------------------------------------
     def _get_cuda_compute_impl(self, kernel_name: str):
-        """
-        Get the cuda.compute implementation for a kernel operation.
-
-        Args:
-            kernel_name: Name of the kernel operation (e.g., "awkward_sort")
-
-        Returns:
-            Callable implementing the operation, or None if not supported
-        """
         from awkward._connect.cuda import _compute as cuda_compute
 
-        if kernel_name == "awkward_sort":
-            return cuda_compute.segmented_sort
-
-        if kernel_name == "awkward_reduce_sum":
-            return cuda_compute.awkward_reduce_sum
-
-        if kernel_name in {
-            "awkward_reduce_sum_int32_bool_64",
-            "awkward_reduce_sum_int64_bool_64",
-        }:
-            return cuda_compute.awkward_reduce_sum_int32_bool_64
-
-        if kernel_name == "awkward_reduce_sum_bool":
-            return cuda_compute.awkward_reduce_sum_bool
-
-        if kernel_name == "awkward_reduce_sum_complex":
-            return cuda_compute.awkward_reduce_sum_complex
-
-        if kernel_name == "awkward_reduce_max":
-            return cuda_compute.awkward_reduce_max
-
-        if kernel_name == "awkward_reduce_max_complex":
-            return cuda_compute.awkward_reduce_max_complex
-
-        if kernel_name == "awkward_reduce_min":
-            return cuda_compute.awkward_reduce_min
-
-        if kernel_name == "awkward_reduce_prod":
-            return cuda_compute.awkward_reduce_prod
-
-        if kernel_name == "awkward_reduce_prod_bool":
-            return cuda_compute.awkward_reduce_prod_bool
-
-        if kernel_name == "awkward_reduce_count_64":
-            return cuda_compute.awkward_reduce_count_64
-
-        if kernel_name == "awkward_reduce_countnonzero":
-            return cuda_compute.awkward_reduce_countnonzero
-
-        if kernel_name == "awkward_missing_repeat":
-            return cuda_compute.awkward_missing_repeat
-
-        if kernel_name == "awkward_index_rpad_and_clip_axis0":
-            return cuda_compute.awkward_index_rpad_and_clip_axis0
-
-        if kernel_name == "awkward_index_rpad_and_clip_axis1":
-            return cuda_compute.awkward_index_rpad_and_clip_axis1
-
-        return None
+        return {
+            "awkward_sort": cuda_compute.segmented_sort,
+            "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
+            "awkward_reduce_sum_bool": cuda_compute.awkward_reduce_sum_bool,
+            "awkward_reduce_sum_int32_bool_64": cuda_compute.awkward_reduce_sum_int32_bool_64,
+            "awkward_reduce_sum_int64_bool_64": cuda_compute.awkward_reduce_sum_int64_bool_64,
+            "awkward_reduce_sum_complex": cuda_compute.awkward_reduce_sum_complex,
+            "awkward_reduce_sum_bool_complex": cuda_compute.awkward_reduce_sum_bool_complex,
+            "awkward_reduce_sum_bool_complex64_64": cuda_compute.awkward_reduce_sum_bool_complex,
+            "awkward_reduce_sum_bool_complex128_64": cuda_compute.awkward_reduce_sum_bool_complex,
+            "awkward_reduce_max": cuda_compute.awkward_reduce_max,
+            "awkward_reduce_max_complex": cuda_compute.awkward_reduce_max_complex,
+            "awkward_reduce_min": cuda_compute.awkward_reduce_min,
+            "awkward_reduce_min_complex": cuda_compute.awkward_reduce_min_complex,
+            "awkward_reduce_prod": cuda_compute.awkward_reduce_prod,
+            "awkward_reduce_prod_bool": cuda_compute.awkward_reduce_prod_bool,
+            "awkward_reduce_prod_complex": cuda_compute.awkward_reduce_prod_complex,
+            "awkward_reduce_prod_bool_complex": cuda_compute.awkward_reduce_prod_bool_complex,
+            "awkward_reduce_argmax": cuda_compute.awkward_reduce_argmax,
+            "awkward_reduce_argmax_complex": cuda_compute.awkward_reduce_argmax_complex,
+            "awkward_reduce_argmin": cuda_compute.awkward_reduce_argmin,
+            "awkward_reduce_argmin_complex": cuda_compute.awkward_reduce_argmin_complex,
+            "awkward_reduce_count_64": cuda_compute.awkward_reduce_count_64,
+            "awkward_reduce_countnonzero": cuda_compute.awkward_reduce_countnonzero,
+            "awkward_reduce_countnonzero_complex": cuda_compute.awkward_reduce_countnonzero_complex,
+            "awkward_missing_repeat": cuda_compute.awkward_missing_repeat,
+            "awkward_index_rpad_and_clip_axis0": cuda_compute.awkward_index_rpad_and_clip_axis0,
+            "awkward_index_rpad_and_clip_axis1": cuda_compute.awkward_index_rpad_and_clip_axis1,
+        }.get(kernel_name)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
         from awkward._connect.cuda import get_cuda_compute_reducer

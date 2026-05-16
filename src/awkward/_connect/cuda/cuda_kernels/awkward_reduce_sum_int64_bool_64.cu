@@ -2,14 +2,27 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromptr, parents, offsets, lenparents, outlength, invocation_index, err_code) = args
+//     (toptr, fromptr, offsets, outlength, invocation_index, err_code) = args
+//     # Offsets-pipeline: derive parents from offsets+outlength so the kernel
+//     # body (which still reads parents internally) runs unchanged.
+//     lenparents = int(offsets[int(outlength)].item()) if int(outlength) >= 0 else 0
+//     if int(outlength) > 0 and lenparents > 0:
+//         # CuPy refuses cupy.ndarray as `repeats`; use searchsorted to
+//         # derive parents on-device with the same result.
+//         parents = cupy.searchsorted(
+//             offsets[1:int(outlength) + 1],
+//             cupy.arange(int(lenparents), dtype=cupy.int64),
+//             side='right',
+//         ).astype(cupy.int64)
+//     else:
+//         parents = cupy.zeros(0, dtype=cupy.int64)
 //     if block[0] > 0:
 //         grid_size = math.floor((lenparents + block[0] - 1) / block[0])
 //     else:
 //         grid_size = 1
 //     temp = cupy.zeros(lenparents, dtype=toptr.dtype)
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int64_bool_64_a", int64, bool_, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, temp, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int64_bool_64_b", int64, bool_, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int64_bool_64_a", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, temp, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_reduce_sum_int64_bool_64_b", cupy.dtype(toptr.dtype).type, cupy.dtype(fromptr.dtype).type, parents.dtype, offsets.dtype]))((grid_size,), block, (toptr, fromptr, parents, offsets, lenparents, outlength, temp, invocation_index, err_code))
 // out["awkward_reduce_sum_int64_bool_64_a", {dtype_specializations}] = None
 // out["awkward_reduce_sum_int64_bool_64_b", {dtype_specializations}] = None
 // END PYTHON

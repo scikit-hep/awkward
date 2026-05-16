@@ -21,36 +21,12 @@ ERROR awkward_ListArray_compact_offsets(
   }
   return success();
 }
-ERROR awkward_ListArray32_compact_offsets_64(
-  int64_t* tooffsets,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int64_t length) {
-  return awkward_ListArray_compact_offsets<int32_t, int64_t>(
-    tooffsets,
-    fromstarts,
-    fromstops,
-    length);
-}
-ERROR awkward_ListArrayU32_compact_offsets_64(
-  int64_t* tooffsets,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  int64_t length) {
-  return awkward_ListArray_compact_offsets<uint32_t, int64_t>(
-    tooffsets,
-    fromstarts,
-    fromstops,
-    length);
-}
-ERROR awkward_ListArray64_compact_offsets_64(
-  int64_t* tooffsets,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length) {
-  return awkward_ListArray_compact_offsets<int64_t, int64_t>(
-    tooffsets,
-    fromstarts,
-    fromstops,
-    length);
-}
+
+#define WRAPPER(SUFFIX, C, T) \
+  ERROR awkward_ListArray##SUFFIX(T* tooffsets, const C* fromstarts, const C* fromstops, int64_t length) { \
+    return awkward_ListArray_compact_offsets<C, T>(tooffsets, fromstarts, fromstops, length); \
+  }
+
+WRAPPER(32_compact_offsets_64, int32_t, int64_t)
+WRAPPER(U32_compact_offsets_64, uint32_t, int64_t)
+WRAPPER(64_compact_offsets_64, int64_t, int64_t)

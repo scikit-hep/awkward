@@ -8,48 +8,25 @@ template <typename OUT, typename IN>
 ERROR awkward_reduce_sum_complex(
   OUT* toptr,
   const IN* fromptr,
-  const int64_t* parents,
   const int64_t* offsets,
-  int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i * 2] = (OUT)0;
-    toptr[i * 2 + 1] = (OUT)0;
-  }
-  for (int64_t i = 0;  i < lenparents;  i++) {
-    int64_t parent = parents[i];
-    toptr[parent * 2] += fromptr[i * 2];
-    toptr[parent * 2 + 1] += fromptr[i * 2 + 1];
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    OUT real = static_cast<OUT>(0);
+    OUT imag = static_cast<OUT>(0);
+    for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
+      real += static_cast<OUT>(fromptr[i * 2]);
+      imag += static_cast<OUT>(fromptr[i * 2 + 1]);
+    }
+    toptr[bin * 2] = real;
+    toptr[bin * 2 + 1] = imag;
   }
   return success();
 }
-ERROR awkward_reduce_sum_complex64_complex64_64(
-  float* toptr,
-  const float* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength) {
-  return awkward_reduce_sum_complex<float, float>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength);
-}
-ERROR awkward_reduce_sum_complex128_complex128_64(
-  double* toptr,
-  const double* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
-  int64_t outlength) {
-  return awkward_reduce_sum_complex<double, double>(
-    toptr,
-    fromptr,
-    parents,
-    offsets,
-    lenparents,
-    outlength);
-}
+
+#define WRAPPER(SUFFIX, OUT, IN) \
+  ERROR awkward_reduce_sum_complex##SUFFIX(OUT* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
+    return awkward_reduce_sum_complex<OUT, IN>(toptr, fromptr, offsets, outlength); \
+  }
+
+WRAPPER(64_complex64_64, float, float)
+WRAPPER(128_complex128_64, double, double)

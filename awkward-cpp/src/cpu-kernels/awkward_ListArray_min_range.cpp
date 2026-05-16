@@ -18,36 +18,12 @@ ERROR awkward_ListArray_min_range(
   *tomin = shorter;
   return success();
 }
-ERROR awkward_ListArray32_min_range(
-  int64_t* tomin,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int64_t lenstarts) {
-  return awkward_ListArray_min_range<int32_t>(
-    tomin,
-    fromstarts,
-    fromstops,
-    lenstarts);
-}
-ERROR awkward_ListArrayU32_min_range(
-  int64_t* tomin,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  int64_t lenstarts) {
-  return awkward_ListArray_min_range<uint32_t>(
-    tomin,
-    fromstarts,
-    fromstops,
-    lenstarts);
-}
-ERROR awkward_ListArray64_min_range(
-  int64_t* tomin,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t lenstarts) {
-  return awkward_ListArray_min_range<int64_t>(
-    tomin,
-    fromstarts,
-    fromstops,
-    lenstarts);
-}
+
+#define WRAPPER(SUFFIX, C) \
+  ERROR awkward_ListArray##SUFFIX(int64_t* tomin, const C* fromstarts, const C* fromstops, int64_t lenstarts) { \
+    return awkward_ListArray_min_range<C>(tomin, fromstarts, fromstops, lenstarts); \
+  }
+
+WRAPPER(32_min_range, int32_t)
+WRAPPER(U32_min_range, uint32_t)
+WRAPPER(64_min_range, int64_t)
