@@ -1572,6 +1572,9 @@ def gencudaunittests(specdict):
                         CUDA_COMPUTE_KERNELS = {
                             "awkward_RegularArray_getitem_next_at",
                             "awkward_IndexedArray_validity",
+                            "awkward_IndexedArray_getitem_nextcarry_outindex",
+                            "awkward_IndexedArray_getitem_nextcarry",
+                            "awkward_IndexedArray_flatten_none2empty",
                         }
 
                         raises_error_eagerly = (

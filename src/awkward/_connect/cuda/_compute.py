@@ -2074,6 +2074,14 @@ def _make_count_valid(index, fromstarts, fromstops, out_dtype):
 # For each row i in [0, length): counts non-negative entries in index[fromstarts[i]:fromstops[i]].
 # tostarts[i] / tostops[i] are the prefix-sum start/end of those non-negative entries.
 # tolength[0] = total number of non-negative entries across all rows.
+#
+# Example:
+#   index      = [3, -1, 5,  2, -1,  7, -1, -1, 4]
+#   fromstarts = [0, 3, 6],  fromstops = [3, 6, 9],  length = 3
+#   row 0: [3, -1, 5]   → 2 valid
+#   row 1: [2, -1,  7]  → 2 valid
+#   row 2: [-1, -1, 4]  → 1 valid
+#   tostarts = [0, 2, 4],  tostops = [2, 4, 5],  tolength = [5]
 def awkward_IndexedArray_ranges_next_64(
     index, fromstarts, fromstops, length, tostarts, tostops, tolength
 ):
@@ -2104,6 +2112,14 @@ def awkward_IndexedArray_ranges_next_64(
 
 # Collects non-negative values from index[fromstarts[i]:fromstops[i]] for each row i
 # into tocarry, compactly (no gaps).
+#
+# Example:
+#   index      = [3, -1, 5,  2, -1,  7, -1, -1, 4]
+#   fromstarts = [0, 3, 6],  fromstops = [3, 6, 9],  length = 3
+#   row 0: [3, -1, 5]   → valid: [3, 5]
+#   row 1: [2, -1,  7]  → valid: [2, 7]
+#   row 2: [-1, -1, 4]  → valid: [4]
+#   tocarry = [3, 5, 2, 7, 4]
 def awkward_IndexedArray_ranges_carry_next_64(
     index, fromstarts, fromstops, length, tocarry
 ):
@@ -2155,6 +2171,10 @@ def awkward_IndexedArray_ranges_carry_next_64(
 
 # Fills toindex[0..lenindex] with [0, 1, ..., lenindex-1, -1].
 # (The last entry is -1 to represent the None slot appended for unique.)
+#
+# Example:
+#   lenindex = 4,  len(toindex) >= 5
+#   toindex = [0, 1, 2, 3, -1]
 def awkward_IndexedArray_numnull_unique_64(toindex, lenindex):
     unary_transform(
         d_in=CountingIterator(toindex.dtype.type(0)),
@@ -2167,6 +2187,11 @@ def awkward_IndexedArray_numnull_unique_64(toindex, lenindex):
 
 # For each element in fromindex[0..lenindex): sets numnull[i]=1 if fromindex[i]<0, else 0.
 # tolength[0] = total number of nulls.
+#
+# Example:
+#   fromindex = [3, -1, 5, -1, -1, 2],  lenindex = 6
+#   numnull   = [0,  1, 0,  1,  1, 0]
+#   tolength  = [3]
 def awkward_IndexedArray_numnull_parents(numnull, tolength, fromindex, lenindex):
     if lenindex == 0:
         tolength[:1] = 0
@@ -2196,6 +2221,17 @@ def awkward_IndexedArray_numnull_parents(numnull, tolength, fromindex, lenindex)
 # For each i in [0, lenindex): if fromindex[i] < 0 → toindex[i] = -1,
 # else tocarry[scan[i]-1] = fromindex[i] and toindex[i] = scan[i]-1.
 # Raises ValueError if fromindex[i] >= lencontent.
+#
+# Example:
+#   fromindex  = [3, -1, 5, 2, -1],  lenindex = 5,  lencontent = 10
+#   is_valid   = [1,   0, 1, 1,   0]
+#   scan       = [1,   1, 2, 3,   3]  (cumulative sum of is_valid)
+#   i=0: pos=0 → tocarry[0]=3, toindex[0]=0
+#   i=1: null  → toindex[1]=-1
+#   i=2: pos=1 → tocarry[1]=5, toindex[2]=1
+#   i=3: pos=2 → tocarry[2]=2, toindex[3]=2
+#   i=4: null  → toindex[4]=-1
+#   tocarry = [3, 5, 2],  toindex = [0, -1, 1, 2, -1]
 def awkward_IndexedArray_getitem_nextcarry_outindex(
     tocarry, toindex, fromindex, lenindex, lencontent
 ):
@@ -2203,12 +2239,17 @@ def awkward_IndexedArray_getitem_nextcarry_outindex(
         return
     idx = fromindex[:lenindex]
     if cp.any(idx >= lencontent):
-        raise ValueError("index out of range")
+        raise ValueError(
+            "index[i] >= len(content) in compiled CUDA code"
+            " (awkward_IndexedArray_getitem_nextcarry_outindex)"
+        )
+
+    out_dtype = idx.dtype
 
     def is_valid(x):
-        return cp.int64(1) if x >= 0 else cp.int64(0)
+        return out_dtype.type(1) if x >= 0 else out_dtype.type(0)
 
-    scan = cp.empty(lenindex, dtype=idx.dtype)
+    scan = cp.empty(lenindex, dtype=out_dtype)
     inclusive_scan(
         d_in=TransformIterator(idx, is_valid),
         d_out=scan,
@@ -2238,12 +2279,19 @@ def awkward_IndexedArray_getitem_nextcarry_outindex(
 
 # Copies non-negative fromindex entries into tocarry compactly.
 # Raises ValueError if any fromindex[i] < 0 or >= lencontent.
+#
+# Example:
+#   fromindex = [3, 5, 2, 7],  lenindex = 4,  lencontent = 10
+#   tocarry   = [3, 5, 2, 7]
 def awkward_IndexedArray_getitem_nextcarry(tocarry, fromindex, lenindex, lencontent):
     if lenindex == 0:
         return
     idx = fromindex[:lenindex]
     if cp.any((idx < 0) | (idx >= lencontent)):
-        raise ValueError("index out of range")
+        raise ValueError(
+            "index[i] < 0 or index[i] >= len(content) in compiled CUDA code"
+            " (awkward_IndexedArray_getitem_nextcarry)"
+        )
     tocarry[:lenindex] = idx.astype(tocarry.dtype, copy=False)
 
 
@@ -2251,6 +2299,13 @@ def awkward_IndexedArray_getitem_nextcarry(tocarry, fromindex, lenindex, lencont
 # else outoffsets[k] = offsets[outindex[i]+1] - offsets[outindex[i]].
 # outoffsets[0] = offsets[0]; outoffsets[k] = cumulative sizes.
 # Raises ValueError if outindex[i]+1 >= offsetslength.
+#
+# Example:
+#   outindex  = [1, -1, 2, 0],  outindexlength = 4
+#   offsets   = [0, 3, 3, 7, 10],  offsetslength = 5
+#   sizes: [offsets[2]-offsets[1], 0, offsets[3]-offsets[2], offsets[1]-offsets[0]]
+#        = [0, 0, 4, 3]
+#   outoffsets = [0, 0, 0, 4, 7]
 def awkward_IndexedArray_flatten_none2empty(
     outoffsets, outindex, outindexlength, offsets, offsetslength
 ):
@@ -2259,7 +2314,10 @@ def awkward_IndexedArray_flatten_none2empty(
         return
     idx = outindex[:outindexlength]
     if cp.any((idx >= 0) & (idx + 1 >= offsetslength)):
-        raise ValueError("flattening offset out of range")
+        raise ValueError(
+            "index[i] + 1 >= len(offsets) in compiled CUDA code"
+            " (awkward_IndexedArray_flatten_none2empty)"
+        )
 
     def compute_size(i):
         v = idx[i]
@@ -2289,15 +2347,25 @@ def awkward_IndexedArray_flatten_none2empty(
 
 # Replaces each -1 in toindex with (n_non_null + rank_among_nulls).
 # Non-(-1) entries are unchanged. Operates in-place on toindex[0..length).
+#
+# Example:
+#   toindex   = [0, -1, 2, -1, -1, 1],  length = 6
+#   is_none   = [0,  1, 0,  1,  1, 0]
+#   scan_null = [0,  1, 1,  2,  3, 3]  (cumulative sum of is_none)
+#   n_non_null = 6 - 3 = 3
+#   nulls get indices: 3+1-1=3, 3+2-1=4, 3+3-1=5
+#   toindex   = [0, 3, 2, 4, 5, 1]   (a permutation of 0..5)
 def awkward_Index_nones_as_index(toindex, length):
     if length == 0:
         return
     idx = toindex[:length]
 
-    def is_none(x):
-        return cp.int64(1) if x == -1 else cp.int64(0)
+    out_dtype = idx.dtype
 
-    scan_null = cp.empty(length, dtype=idx.dtype)
+    def is_none(x):
+        return out_dtype.type(1) if x == -1 else out_dtype.type(0)
+
+    scan_null = cp.empty(length, dtype=out_dtype)
     inclusive_scan(
         d_in=TransformIterator(idx, is_none),
         d_out=scan_null,
@@ -2318,6 +2386,17 @@ def awkward_Index_nones_as_index(toindex, length):
 # scan = prefix sum of (index_in >= 0).
 # starts_out[i] = offsets_in[scan[i]], stops_out[i] = offsets_in[scan[i+1]]
 # mask_out[i] = i if present, -1 if missing.
+#
+# Example:
+#   index_in   = [0, -1,  1,  2, -1],  length = 5
+#   offsets_in = [0,  3,  7, 10]        (3 present items → 3 intervals)
+#   scan       = [0,  1,  1,  2,  3,  3]  (0 prepended; cumulative is_present)
+#   i=0 (present): starts=offsets_in[0]=0,  stops=offsets_in[1]=3,  mask=0
+#   i=1 (missing): starts=offsets_in[1]=3,  stops=offsets_in[1]=3,  mask=-1
+#   i=2 (present): starts=offsets_in[1]=3,  stops=offsets_in[2]=7,  mask=2
+#   i=3 (present): starts=offsets_in[2]=7,  stops=offsets_in[3]=10, mask=3
+#   i=4 (missing): starts=offsets_in[3]=10, stops=offsets_in[3]=10, mask=-1
+#   starts_out = [0, 3, 3,  7, 10],  stops_out = [3, 3, 7, 10, 10],  mask_out = [0, -1, 2, 3, -1]
 def awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
     index_in, offsets_in, mask_out, starts_out, stops_out, length
 ):
@@ -2325,10 +2404,12 @@ def awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
         return
     idx = index_in[:length]
 
-    def is_present(x):
-        return cp.int64(1) if x >= 0 else cp.int64(0)
+    out_dtype = idx.dtype
 
-    scan = cp.empty(length + 1, dtype=idx.dtype)
+    def is_present(x):
+        return out_dtype.type(1) if x >= 0 else out_dtype.type(0)
+
+    scan = cp.empty(length + 1, dtype=out_dtype)
     scan[0] = 0
     inclusive_scan(
         d_in=TransformIterator(idx, is_present),
