@@ -2240,7 +2240,7 @@ def awkward_IndexedArray_getitem_nextcarry_outindex(
     idx = fromindex[:lenindex]
     if cp.any(idx >= lencontent):
         raise ValueError(
-            "index[i] >= len(content) in compiled CUDA code"
+            "index out of range in compiled CUDA code"
             " (awkward_IndexedArray_getitem_nextcarry_outindex)"
         )
 
@@ -2289,7 +2289,7 @@ def awkward_IndexedArray_getitem_nextcarry(tocarry, fromindex, lenindex, lencont
     idx = fromindex[:lenindex]
     if cp.any((idx < 0) | (idx >= lencontent)):
         raise ValueError(
-            "index[i] < 0 or index[i] >= len(content) in compiled CUDA code"
+            "index out of range in compiled CUDA code"
             " (awkward_IndexedArray_getitem_nextcarry)"
         )
     tocarry[:lenindex] = idx.astype(tocarry.dtype, copy=False)
@@ -2315,7 +2315,7 @@ def awkward_IndexedArray_flatten_none2empty(
     idx = outindex[:outindexlength]
     if cp.any((idx >= 0) & (idx + 1 >= offsetslength)):
         raise ValueError(
-            "index[i] + 1 >= len(offsets) in compiled CUDA code"
+            "flattening offset out of range in compiled CUDA code"
             " (awkward_IndexedArray_flatten_none2empty)"
         )
 
