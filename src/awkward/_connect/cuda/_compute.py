@@ -763,7 +763,7 @@ def awkward_reduce_countnonzero_complex(
                 count += 1
 
         return count
-        
+
     segment_ids = CountingIterator(index_dtype(0))
 
     unary_transform(
