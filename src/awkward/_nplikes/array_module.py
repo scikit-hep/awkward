@@ -521,6 +521,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         axis: int | None = 0,
     ) -> ArrayLikeT | VirtualNDArray:
         if any(isinstance(x, VirtualNDArray) and not x.is_materialized for x in arrays):
+            # TODO: switch to np.result_type when we pin numpy >= 1.23
             dtype = self._module.concatenate(
                 [self._module.empty(0, x.dtype) for x in arrays]
             ).dtype

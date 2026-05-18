@@ -1308,6 +1308,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             try_touch_data(x)
 
         inner_shape = None
+        # TODO: switch to np.result_type when we pin numpy >= 1.23
         emptyarrays = []
         for x in arrays:
             assert isinstance(x, TypeTracerArray)
