@@ -27,30 +27,12 @@ ERROR awkward_ListOffsetArray_toRegularArray(
   }
   return success();
 }
-ERROR awkward_ListOffsetArray32_toRegularArray(
-  int64_t* size,
-  const int32_t* fromoffsets,
-  int64_t offsetslength) {
-  return awkward_ListOffsetArray_toRegularArray<int32_t>(
-    size,
-    fromoffsets,
-    offsetslength);
-}
-ERROR awkward_ListOffsetArrayU32_toRegularArray(
-  int64_t* size,
-  const uint32_t* fromoffsets,
-  int64_t offsetslength) {
-  return awkward_ListOffsetArray_toRegularArray<uint32_t>(
-    size,
-    fromoffsets,
-    offsetslength);
-}
-ERROR awkward_ListOffsetArray64_toRegularArray(
-  int64_t* size,
-  const int64_t* fromoffsets,
-  int64_t offsetslength) {
-  return awkward_ListOffsetArray_toRegularArray<int64_t>(
-    size,
-    fromoffsets,
-    offsetslength);
-}
+
+#define WRAPPER(SUFFIX, C) \
+  ERROR awkward_ListOffsetArray##SUFFIX(int64_t* size, const C* fromoffsets, int64_t offsetslength) { \
+    return awkward_ListOffsetArray_toRegularArray<C>(size, fromoffsets, offsetslength); \
+  }
+
+WRAPPER(32_toRegularArray, int32_t)
+WRAPPER(U32_toRegularArray, uint32_t)
+WRAPPER(64_toRegularArray, int64_t)

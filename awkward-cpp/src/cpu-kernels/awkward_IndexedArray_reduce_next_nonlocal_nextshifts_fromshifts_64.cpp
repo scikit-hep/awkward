@@ -23,36 +23,12 @@ ERROR awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
   }
   return success();
 }
-ERROR awkward_IndexedArray32_reduce_next_nonlocal_nextshifts_fromshifts_64(
-  int64_t* nextshifts,
-  const int32_t* index,
-  int64_t length,
-  const int64_t* shifts) {
-  return awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int32_t>(
-    nextshifts,
-    index,
-    length,
-    shifts);
-}
-ERROR awkward_IndexedArrayU32_reduce_next_nonlocal_nextshifts_fromshifts_64(
-  int64_t* nextshifts,
-  const uint32_t* index,
-  int64_t length,
-  const int64_t* shifts) {
-  return awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<uint32_t>(
-    nextshifts,
-    index,
-    length,
-    shifts);
-}
-ERROR awkward_IndexedArray64_reduce_next_nonlocal_nextshifts_fromshifts_64(
-  int64_t* nextshifts,
-  const int64_t* index,
-  int64_t length,
-  const int64_t* shifts) {
-  return awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int64_t>(
-    nextshifts,
-    index,
-    length,
-    shifts);
-}
+
+#define WRAPPER(SUFFIX, T) \
+  ERROR awkward_IndexedArray##SUFFIX(int64_t* nextshifts, const T* index, int64_t length, const int64_t* shifts) { \
+    return awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<T>(nextshifts, index, length, shifts); \
+  }
+
+WRAPPER(32_reduce_next_nonlocal_nextshifts_fromshifts_64, int32_t)
+WRAPPER(U32_reduce_next_nonlocal_nextshifts_fromshifts_64, uint32_t)
+WRAPPER(64_reduce_next_nonlocal_nextshifts_fromshifts_64, int64_t)

@@ -31,42 +31,12 @@ ERROR awkward_IndexedArray_flatten_none2empty(
   }
   return success();
 }
-ERROR awkward_IndexedArray32_flatten_none2empty_64(
-  int64_t* outoffsets,
-  const int32_t* outindex,
-  int64_t outindexlength,
-  const int64_t* offsets,
-  int64_t offsetslength) {
-  return awkward_IndexedArray_flatten_none2empty<int64_t, int32_t>(
-    outoffsets,
-    outindex,
-    outindexlength,
-    offsets,
-    offsetslength);
-}
-ERROR awkward_IndexedArrayU32_flatten_none2empty_64(
-  int64_t* outoffsets,
-  const uint32_t* outindex,
-  int64_t outindexlength,
-  const int64_t* offsets,
-  int64_t offsetslength) {
-  return awkward_IndexedArray_flatten_none2empty<int64_t, uint32_t>(
-    outoffsets,
-    outindex,
-    outindexlength,
-    offsets,
-    offsetslength);
-}
-ERROR awkward_IndexedArray64_flatten_none2empty_64(
-  int64_t* outoffsets,
-  const int64_t* outindex,
-  int64_t outindexlength,
-  const int64_t* offsets,
-  int64_t offsetslength) {
-  return awkward_IndexedArray_flatten_none2empty<int64_t, int64_t>(
-    outoffsets,
-    outindex,
-    outindexlength,
-    offsets,
-    offsetslength);
-}
+
+#define WRAPPER(SUFFIX, T, C) \
+  ERROR awkward_IndexedArray##SUFFIX(T* outoffsets, const C* outindex, int64_t outindexlength, const T* offsets, int64_t offsetslength) { \
+    return awkward_IndexedArray_flatten_none2empty<T, C>(outoffsets, outindex, outindexlength, offsets, offsetslength); \
+  }
+
+WRAPPER(32_flatten_none2empty_64, int64_t, int32_t)
+WRAPPER(U32_flatten_none2empty_64, int64_t, uint32_t)
+WRAPPER(64_flatten_none2empty_64, int64_t, int64_t)

@@ -30,42 +30,12 @@ ERROR awkward_UnionArray_validity(
   }
   return success();
 }
-ERROR awkward_UnionArray8_32_validity(
-  const int8_t* tags,
-  const int32_t* index,
-  int64_t length,
-  int64_t numcontents,
-  const int64_t* lencontents) {
-  return awkward_UnionArray_validity<int8_t, int32_t>(
-    tags,
-    index,
-    length,
-    numcontents,
-    lencontents);
-}
-ERROR awkward_UnionArray8_U32_validity(
-  const int8_t* tags,
-  const uint32_t* index,
-  int64_t length,
-  int64_t numcontents,
-  const int64_t* lencontents) {
-  return awkward_UnionArray_validity<int8_t, uint32_t>(
-    tags,
-    index,
-    length,
-    numcontents,
-    lencontents);
-}
-ERROR awkward_UnionArray8_64_validity(
-  const int8_t* tags,
-  const int64_t* index,
-  int64_t length,
-  int64_t numcontents,
-  const int64_t* lencontents) {
-  return awkward_UnionArray_validity<int8_t, int64_t>(
-    tags,
-    index,
-    length,
-    numcontents,
-    lencontents);
-}
+
+#define WRAPPER(SUFFIX, T, I) \
+  ERROR awkward_UnionArray8_##SUFFIX(const T* tags, const I* index, int64_t length, int64_t numcontents, const int64_t* lencontents) { \
+    return awkward_UnionArray_validity<T, I>(tags, index, length, numcontents, lencontents); \
+  }
+
+WRAPPER(32_validity, int8_t, int32_t)
+WRAPPER(U32_validity, int8_t, uint32_t)
+WRAPPER(64_validity, int8_t, int64_t)

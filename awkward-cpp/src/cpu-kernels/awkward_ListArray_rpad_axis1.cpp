@@ -28,54 +28,12 @@ ERROR awkward_ListArray_rpad_axis1(
   }
   return success();
 }
-ERROR awkward_ListArray32_rpad_axis1_64(
-  int64_t* toindex,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int32_t* tostarts,
-  int32_t* tostops,
-  int64_t target,
-  int64_t length) {
-  return awkward_ListArray_rpad_axis1<int64_t, int32_t>(
-    toindex,
-    fromstarts,
-    fromstops,
-    tostarts,
-    tostops,
-    target,
-    length);
-}
-ERROR awkward_ListArrayU32_rpad_axis1_64(
-  int64_t* toindex,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  uint32_t* tostarts,
-  uint32_t* tostops,
-  int64_t target,
-  int64_t length) {
-  return awkward_ListArray_rpad_axis1<int64_t, uint32_t>(
-    toindex,
-    fromstarts,
-    fromstops,
-    tostarts,
-    tostops,
-    target,
-    length);
-}
-ERROR awkward_ListArray64_rpad_axis1_64(
-  int64_t* toindex,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t* tostarts,
-  int64_t* tostops,
-  int64_t target,
-  int64_t length) {
-  return awkward_ListArray_rpad_axis1<int64_t, int64_t>(
-    toindex,
-    fromstarts,
-    fromstops,
-    tostarts,
-    tostops,
-    target,
-    length);
-}
+
+#define WRAPPER(SUFFIX, T, C) \
+  ERROR awkward_ListArray##SUFFIX(T* toindex, const C* fromstarts, const C* fromstops, C* tostarts, C* tostops, int64_t target, int64_t length) { \
+    return awkward_ListArray_rpad_axis1<T, C>(toindex, fromstarts, fromstops, tostarts, tostops, target, length); \
+  }
+
+WRAPPER(32_rpad_axis1_64, int64_t, int32_t)
+WRAPPER(U32_rpad_axis1_64, int64_t, uint32_t)
+WRAPPER(64_rpad_axis1_64, int64_t, int64_t)

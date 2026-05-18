@@ -1,4 +1,11 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+//
+// DEPRECATED — parents → offsets length helper.
+//
+// Companion to awkward_sorting_ranges. With the offsets-pipeline migration,
+// the caller already knows offsets.length (= outlength + 1), so this lookup
+// is no longer needed. Kept for ABI compatibility; remove once callers are
+// gone.
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_sorting_ranges_length.cpp", line)
 

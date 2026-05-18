@@ -6,13 +6,10 @@
 
 ERROR awkward_reduce_count_64(
   int64_t* toptr,
-  const int64_t* parents,
-  int64_t lenparents,
+  const int64_t* offsets,
   int64_t outlength) {
-  std::memset(toptr, 0, outlength * sizeof(int64_t));
-
-  for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i]]++;
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    toptr[bin] = offsets[bin + 1] - offsets[bin];
   }
   return success();
 }

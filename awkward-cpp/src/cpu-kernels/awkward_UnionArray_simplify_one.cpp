@@ -25,79 +25,13 @@ ERROR awkward_UnionArray_simplify_one(
   }
   return success();
 }
-ERROR awkward_UnionArray8_32_simplify_one_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* fromtags,
-  const int32_t* fromindex,
-  int64_t towhich,
-  int64_t fromwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify_one<int8_t, int32_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    fromtags,
-    fromindex,
-    towhich,
-    fromwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray8_U32_simplify_one_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* fromtags,
-  const uint32_t* fromindex,
-  int64_t towhich,
-  int64_t fromwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify_one<int8_t, uint32_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    fromtags,
-    fromindex,
-    towhich,
-    fromwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray8_64_simplify_one_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int8_t* fromtags,
-  const int64_t* fromindex,
-  int64_t towhich,
-  int64_t fromwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify_one<int8_t, int64_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    fromtags,
-    fromindex,
-    towhich,
-    fromwhich,
-    length,
-    base);
-}
-ERROR awkward_UnionArray64_64_simplify_one_to8_64(
-  int8_t* totags,
-  int64_t* toindex,
-  const int64_t* fromtags,
-  const int64_t* fromindex,
-  int64_t towhich,
-  int64_t fromwhich,
-  int64_t length,
-  int64_t base) {
-  return awkward_UnionArray_simplify_one<int64_t, int64_t, int8_t, int64_t>(
-    totags,
-    toindex,
-    fromtags,
-    fromindex,
-    towhich,
-    fromwhich,
-    length,
-    base);
-}
+
+#define WRAPPER(SUFFIX, FROMTAGS, FROMINDEX, TOTAGS, TOINDEX) \
+  ERROR awkward_UnionArray##SUFFIX(TOTAGS* totags, TOINDEX* toindex, const FROMTAGS* fromtags, const FROMINDEX* fromindex, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base) { \
+    return awkward_UnionArray_simplify_one<FROMTAGS, FROMINDEX, TOTAGS, TOINDEX>(totags, toindex, fromtags, fromindex, towhich, fromwhich, length, base); \
+  }
+
+WRAPPER(8_32_simplify_one_to8_64, int8_t, int32_t, int8_t, int64_t)
+WRAPPER(8_U32_simplify_one_to8_64, int8_t, uint32_t, int8_t, int64_t)
+WRAPPER(8_64_simplify_one_to8_64, int8_t, int64_t, int8_t, int64_t)
+WRAPPER(64_64_simplify_one_to8_64, int64_t, int64_t, int8_t, int64_t)
