@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Collection, Iterator, Sequence, Set
+from collections.abc import Callable, Collection, Iterator, Sequence, Set
 from functools import lru_cache
 from numbers import Number
-from typing import Callable
 
 import numpy
 
@@ -670,7 +669,8 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         resolved_dtypes = ufunc.resolve_dtypes(arg_dtypes)
         # Interpret the arguments under these dtypes
         resolved_args = [
-            self.asarray(arg, dtype=dtype) for arg, dtype in zip(args, resolved_dtypes)
+            self.asarray(arg, dtype=dtype)
+            for arg, dtype in zip(args, resolved_dtypes[: len(args)], strict=True)
         ]
         # Broadcast to ensure all-scalar or all-nd-array
         broadcasted_args = self.broadcast_arrays(*resolved_args)
@@ -707,7 +707,8 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         broadcasted_shape = broadcasted_args[0].shape
         # Choose the broadcasted argument if it wasn't a Python scalar
         non_generic_value_promoted_args = [
-            y if hasattr(x, "ndim") else x for x, y in zip(args, broadcasted_args)
+            y if hasattr(x, "ndim") else x
+            for x, y in zip(args, broadcasted_args, strict=True)
         ]
         # Build proxy (empty) arrays
         proxy_args = [
@@ -1195,7 +1196,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         if len(new_shape) != len(shape):
             raise ValueError
 
-        for result, intended in zip(new_shape, shape):
+        for result, intended in zip(new_shape, shape, strict=True):
             if intended is unknown_length:
                 continue
             if result is unknown_length:
@@ -1417,6 +1418,11 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             out = (item * out[0], *out)
         return out
 
+    def byteswap(self, x: TypeTracerArray) -> TypeTracerArray:
+        assert isinstance(x, TypeTracerArray)
+        try_touch_data(x)
+        return TypeTracerArray._new(x.dtype, shape=x.shape)
+
     ############################ ufuncs
 
     def add(
@@ -1474,6 +1480,26 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         assert not isinstance(x1, PlaceholderArray)
         assert not isinstance(x2, PlaceholderArray)
         return self.apply_ufunc(numpy.divide, "__call__", (x1, x2))  # type: ignore[arg-type,return-value]
+
+    def minimum(
+        self,
+        x1: TypeTracerArray,
+        x2: TypeTracerArray,
+        maybe_out: TypeTracerArray | None = None,
+    ) -> TypeTracerArray:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
+        return self.apply_ufunc(numpy.minimum, "__call__", (x1, x2))  # type: ignore[arg-type,return-value]
+
+    def maximum(
+        self,
+        x1: TypeTracerArray,
+        x2: TypeTracerArray,
+        maybe_out: TypeTracerArray | None = None,
+    ) -> TypeTracerArray:
+        assert not isinstance(x1, PlaceholderArray)
+        assert not isinstance(x2, PlaceholderArray)
+        return self.apply_ufunc(numpy.maximum, "__call__", (x1, x2))  # type: ignore[arg-type,return-value]
 
     ############################ almost-ufuncs
 
@@ -1559,7 +1585,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         if axis is None:
             return self.all(
                 cast(TypeTracerArray, self.reshape(x, (-1,))),
-                axis=axis,
+                axis=0,
                 keepdims=keepdims,
                 maybe_out=maybe_out,
             )
@@ -1676,9 +1702,12 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         return TypeTracerArray._new(np.dtype(dtype), x.shape)
 
     def can_cast(
-        self, from_: DTypeLike | TypeTracerArray, to: DTypeLike | TypeTracerArray
+        self,
+        from_: DTypeLike | TypeTracerArray,
+        to: DTypeLike | TypeTracerArray,
+        casting: Literal["no", "equiv", "safe", "same_kind", "unsafe"] = "same_kind",
     ) -> bool:
-        return numpy.can_cast(from_, to, casting="same_kind")
+        return numpy.can_cast(from_, to, casting=casting)
 
     @classmethod
     def is_own_array_type(cls, type_: type) -> bool:
@@ -1781,7 +1810,7 @@ def _attach_report(
 
     elif isinstance(layout, ak.contents.RecordArray):
         assert isinstance(form, ak.forms.RecordForm)
-        for x, y in zip(layout.contents, form.contents):
+        for x, y in zip(layout.contents, form.contents, strict=True):
             _attach_report(x, y, report, getkey)
 
     elif isinstance(layout, (ak.contents.RegularArray, ak.contents.UnmaskedArray)):
@@ -1794,7 +1823,7 @@ def _attach_report(
         layout.tags.data.report = report  # type: ignore[attr-defined]
         layout.index.data.form_key = getkey(form, "index")  # type: ignore[attr-defined]
         layout.index.data.report = report  # type: ignore[attr-defined]
-        for x, y in zip(layout.contents, form.contents):
+        for x, y in zip(layout.contents, form.contents, strict=True):
             _attach_report(x, y, report, getkey)
 
     else:

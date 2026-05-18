@@ -27,6 +27,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -42,7 +43,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.indexedform import IndexedForm
-from awkward.index import Index
+from awkward.index import Index, resolve_index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -71,7 +72,7 @@ class IndexedArray(IndexedMeta[Content], Content):
     and the array can be converted to and from Arrow/Parquet's dictionary encoding.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class IndexedArray(Content):
             def __init__(self, index, content):
@@ -514,15 +515,22 @@ class IndexedArray(IndexedMeta[Content], Content):
         else:
             return self.project()._offsets_and_flattened(axis, depth)
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
         # Is the other array indexed or optional?
         elif other.is_option or other.is_indexed:
-            return self._content._mergeable_next(other.content, mergebool)
+            return self._content._mergeable_next(
+                other.content, mergebool, mergecastable
+            )
         else:
-            return self._content._mergeable_next(other, mergebool)
+            return self._content._mergeable_next(other, mergebool, mergecastable)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
@@ -787,7 +795,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         if self._index.length is not unknown_length and self._index.length == 0:
             return True
 
@@ -797,13 +805,15 @@ class IndexedArray(IndexedMeta[Content], Content):
             return False
 
         next = self._content._carry(nextindex, False)
-        return next._is_unique(negaxis, starts, parents, outlength)
+        return next._is_unique(negaxis, starts, parents, offsets, outlength)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         if self._index.length is not unknown_length and self._index.length == 0:
             return self
 
         branch, depth = self.branch_depth
+
+        parents = resolve_index(parents, self._backend)
 
         index_length = self._index.length
         parents_length = parents.length
@@ -841,6 +851,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             negaxis,
             starts,
             nextparents,
+            offsets,
             outlength,
         )
 
@@ -925,16 +936,20 @@ class IndexedArray(IndexedMeta[Content], Content):
         raise NotImplementedError
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         next = self._content._carry(self._index, False)
         return next._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         next = self._content._carry(self._index, False)
-        return next._sort_next(negaxis, starts, parents, outlength, ascending, stable)
+        return next._sort_next(
+            negaxis, starts, parents, offsets, outlength, ascending, stable
+        )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
@@ -952,6 +967,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -964,6 +980,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             starts,
             shifts,
             parents,
+            offsets,
             outlength,
             mask,
             keepdims,
@@ -1014,6 +1031,19 @@ class IndexedArray(IndexedMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
+        # Handle empty content FIRST, before categorical path
+        # This prevents creating DictionaryArray with empty dictionary which causes
+        # "Index 0 out of bounds" error and memory corruption during GC
+        if self._content.length is not unknown_length and self._content.length == 0:
+            # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
+            # every masked value is self._content[0], unless self._content.length == 0.
+            # In that case, don't call self._content[index]; it's empty anyway.
+            next = self._content
+            next2 = next.copy(
+                parameters=parameters_union(next._parameters, self._parameters)
+            )
+            return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
         if (
             not options["categorical_as_dictionary"]
             and self.parameter("__array__") == "categorical"
@@ -1049,13 +1079,9 @@ class IndexedArray(IndexedMeta[Content], Content):
                 return out
 
         else:
-            if self._content.length is not unknown_length and self._content.length == 0:
-                # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
-                # every masked value is self._content[0], unless self._content.length == 0.
-                # In that case, don't call self._content[index]; it's empty anyway.
-                next = self._content
-            else:
-                next = self._content._carry(ak.index.Index(index), False)
+            # Original empty content check is now redundant (handled above)
+            # but kept for clarity in non-categorical path
+            next = self._content._carry(ak.index.Index(index), False)
 
             next2 = next.copy(
                 parameters=parameters_union(next._parameters, self._parameters)

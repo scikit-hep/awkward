@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import ctypes
 from abc import abstractmethod
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from packaging.version import parse as parse_version
 
@@ -17,7 +18,8 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import try_touch_data
 from awkward._typing import Protocol, TypeAlias
 
-KernelKeyType: TypeAlias = tuple  # Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
+# Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
+KernelKeyType: TypeAlias = tuple
 
 
 numpy = Numpy.instance()
@@ -94,7 +96,7 @@ class NumpyKernel(BaseKernel):
         args = maybe_materialize(*args)
 
         return self._impl(
-            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
+            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes, strict=True))
         )
 
 
@@ -122,6 +124,11 @@ class JaxKernel(BaseKernel):
                     raise ValueError(msg)
                 assert self._jax.is_c_contiguous(x), "kernel expects contiguous array"
                 if x.ndim > 0:
+                    if x.device.platform != "cpu":
+                        raise RuntimeError(
+                            "The JAX backend requires CPU JAX buffers to be the default. You can make CPU the default backend"
+                            " with jax.config.update('jax_platform_name', 'cpu') or by setting JAX_PLATFORM_NAME=cpu."
+                        )
                     return ctypes.cast(self._jax.memory_ptr(x), t)
                 else:
                     return x
@@ -141,7 +148,7 @@ class JaxKernel(BaseKernel):
         args = maybe_materialize(*args)
 
         return self._impl(
-            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes))
+            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes, strict=True))
         )
 
 
@@ -196,7 +203,7 @@ class CupyKernel(BaseKernel):
             )
         assert len(args) == len(self._impl.is_ptr)
 
-        args = [self._cast(x, t) for x, t in zip(args, self._impl.is_ptr)]
+        args = [self._cast(x, t) for x, t in zip(args, self._impl.is_ptr, strict=True)]
 
         # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
         # The second arg is the error_code.
@@ -213,6 +220,44 @@ class CupyKernel(BaseKernel):
         )
 
         self._impl(grid, blocks, args)
+
+
+class CudaComputeKernel(BaseKernel):
+    """
+    Kernel implementation using cuda.compute library.
+
+    When the CUDA backend is used, this kernel is used for operations
+    that have ``cuda.compute`` implementations. For other operations,
+    the ``CupyKernel`` is used.
+    """
+
+    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
+        super().__init__(impl, key)
+        self._cupy = Cupy.instance()
+
+    def __call__(self, *args) -> None:
+        import awkward._connect.cuda as ak_cuda
+
+        args = maybe_materialize(*args)
+
+        cupy = ak_cuda.import_cupy("Awkward Arrays with CUDA")
+        # initialize `cupy_stream_ptr` which is used in tests-cuda-kernels-explicit
+        # (for example, if we call awkward._connect.cuda.synchronize_cuda())
+        cupy_stream_ptr = cupy.cuda.get_current_stream().ptr
+
+        if cupy_stream_ptr not in ak_cuda.cuda_streamptr_to_contexts:
+            ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr] = (
+                cupy.array(ak_cuda.NO_ERROR),
+                [],
+            )
+        ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
+            ak_cuda.Invocation(
+                name=self.key[0],
+                error_context=ak._errors.ErrorContext.primary(),
+            )
+        )
+
+        return self._impl(*args)
 
 
 class TypeTracerKernelError(KernelError):

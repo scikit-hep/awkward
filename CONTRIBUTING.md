@@ -20,12 +20,29 @@ Feel free to [open pull requests in GitHub](https://github.com/scikit-hep/awkwar
 
 Please [make the pull request a draft](https://github.blog/2019-02-14-introducing-draft-pull-requests/) to indicate that it is in an incomplete state and shouldn't be merged until you click "ready for review."
 
+### AI-assisted contributions
+
+We welcome the use of AI tools as part of the development process. They can be valuable aids for drafting, refactoring, documentation, and exploration. However, contributions to Awkward Array require human judgment, contextual understanding, and familiarity with the project’s structure, goals, and standards.
+
+When using AI tools:
+
+* **You remain the author of the contribution.** Review, understand, and test all AI-assisted code or documentation before submitting it under your name. You should be able to explain and defend the changes on request.
+* **Avoid fully automated submissions.** Issues or pull requests generated end-to-end by automated tools, without meaningful human review or intent, are not appropriate.
+* **Be respectful of reviewers’ time.** Ensure that both the content of the PR and its description reflect your own understanding. Reviewers should not be expected to infer authorship or unknowingly interact with an AI during review.
+* **Disclose significant AI assistance.** If AI tools were used for a substantial portion of the contribution, please note this in the PR description. (This guide is an example of that: we used ChatGPT to help with the writing, and in this comment, we acknowledge that fact.)
+
+Contributors are responsible for the correctness, maintainability, and long-term impact of all submitted changes, regardless of whether AI tools were used.
+
+Pull requests that do not meet these expectations may be closed without review.
+
 ### Getting your pull request reviewed
 
-Currently, we have two regular reviewers of pull requests:
+Currently, we have four regular reviewers of pull requests:
 
   * Ianna Osborne ([ianna](https://github.com/ianna))
   * Peter Fackeldey ([pfackeldey](https://github.com/pfackeldey))
+  * Andres Rios Tascon ([ariostas](https://github.com/ariostas))
+  * Iason Krommydas ([ikrommyd](https://github.com/ikrommyd))
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
 

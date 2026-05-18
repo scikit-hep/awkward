@@ -14,10 +14,11 @@ ERROR awkward_MaskedArray_getitem_next_jagged_project(
   int64_t length) {
   int64_t k = 0;
   for (int64_t i = 0; i < length; ++i) {
-    if (index[i] >= 0) {
-      starts_out[k] = starts_in[i];
-      stops_out[k] = stops_in[i];
-      k++;
+    bool keep = (index[i] >= 0);
+    if (keep) {
+        starts_out[k] = starts_in[i];
+        stops_out[k] = stops_in[i];
+        k++;
     }
   }
   return success();

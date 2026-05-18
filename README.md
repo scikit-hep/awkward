@@ -4,7 +4,7 @@
 
 [![PyPI version](https://badge.fury.io/py/awkward.svg)](https://pypi.org/project/awkward)
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/awkward)](https://github.com/conda-forge/awkward-feedstock)
-[![Python 3.9‒3.14](https://img.shields.io/badge/python-3.9%E2%80%923.14-blue)](https://www.python.org)
+[![Python 3.10‒3.14](https://img.shields.io/badge/python-3.10%E2%80%923.14-blue)](https://www.python.org)
 [![BSD-3 Clause License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Build Test](https://github.com/scikit-hep/awkward/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/test.yml)
 
@@ -253,6 +253,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/T90REAL"><img src="https://avatars.githubusercontent.com/u/88570037?v=4?s=100" width="100px;" alt="Xiao"/><br /><sub><b>Xiao</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=T90REAL" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://shwina.github.io"><img src="https://avatars.githubusercontent.com/u/3190405?v=4?s=100" width="100px;" alt="Ashwin Srinath"/><br /><sub><b>Ashwin Srinath</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=shwina" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/X0708a"><img src="https://avatars.githubusercontent.com/u/148707922?v=4?s=100" width="100px;" alt="aashirvad"/><br /><sub><b>aashirvad</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=X0708a" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

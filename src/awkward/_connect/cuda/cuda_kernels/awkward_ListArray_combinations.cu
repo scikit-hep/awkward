@@ -22,14 +22,15 @@
 //     )
 //     # Inclusive scan (device-only)
 //     scan_in_array_offsets = cupy.cumsum(scan_in_array_offsets)
-//     # Allocate parents/local_indices (device-only), sized to total outputs
+//     # Compute total outputs and allocate local_indices
 //     total = int(scan_in_array_offsets[length])
-//     scan_in_array_parents = cupy.zeros(total, dtype=cupy.int64)
 //     scan_in_array_local_indices = cupy.zeros(total, dtype=cupy.int64)
-//     # Fill parents as a run-length expansion of [0..length-1]
-//     # (pure device write in a trivial loop would be another kernel; your original loop is fine)
-//     for i in range(1, length + 1):
-//         scan_in_array_parents[scan_in_array_offsets[i - 1]:scan_in_array_offsets[i]] = i - 1
+//     # Compute parents as a run-length expansion of [0..length-1]
+//     # using cp.searchsorted
+//     if total > 0:
+//         scan_in_array_parents = cupy.searchsorted(scan_in_array_offsets[1:], cupy.arange(total), side='right').astype(cupy.int64)
+//     else:
+//         scan_in_array_parents = cupy.zeros(0, dtype=cupy.int64)
 //     # Choose launch for passes B and C
 //     block_size = min(1024, total) if total > 0 else 1
 //     grid_size = (total + block_size - 1)//block_size if block_size > 0 else 1

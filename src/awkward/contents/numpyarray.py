@@ -33,6 +33,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -48,7 +49,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
-from awkward.index import Index
+from awkward.index import Index, resolve_index
 from awkward.types.numpytype import primitive_to_dtype
 
 if TYPE_CHECKING:
@@ -95,7 +96,7 @@ class NumpyArray(NumpyMeta, Content):
     Arrow [Primitive array](https://arrow.apache.org/docs/format/Columnar.html#fixed-size-primitive-layout).
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class NumpyArray(Content):
             def __init__(self, data):
@@ -469,19 +470,26 @@ class NumpyArray(NumpyMeta, Content):
         else:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
         # Is the other array indexed or optional?
         elif other.is_indexed or other.is_option:
-            return self._mergeable_next(other.content, mergebool)
+            return self._mergeable_next(other.content, mergebool, mergecastable)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
             return False
         # Simplify *this* branch to be 1D self
         elif len(self.shape) > 1:
-            return self._to_regular_primitive()._mergeable_next(other, mergebool)
+            return self._to_regular_primitive()._mergeable_next(
+                other, mergebool, mergecastable
+            )
 
         elif isinstance(other, ak.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
@@ -510,11 +518,26 @@ class NumpyArray(NumpyMeta, Content):
             ):
                 return False
 
-            # Default merging (can we cast one to the other)
-            else:
+            # Only equivalent dtypes merge (only byte order changes allowed)
+            elif mergecastable == "equiv":
                 return self.backend.nplike.can_cast(
-                    self.dtype, other.dtype
-                ) or self.backend.nplike.can_cast(other.dtype, self.dtype)
+                    self.dtype, other.dtype, "equiv"
+                ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "equiv")
+
+            # Only same family of dtypes merge (integers, floats, complex)
+            elif mergecastable == "family":
+                for family in np.integer, np.floating, np.complexfloating:
+                    if np.issubdtype(self.dtype, family):
+                        return np.issubdtype(other.dtype, family)
+
+            # Default merging (can we cast one to the other)
+            elif mergecastable == "same_kind":
+                return self.backend.nplike.can_cast(
+                    self.dtype, other.dtype, "same_kind"
+                ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "same_kind")
+
+            else:
+                raise TypeError(f"unrecognized mergecastable option: {mergecastable}")
 
         else:
             return False
@@ -588,7 +611,7 @@ class NumpyArray(NumpyMeta, Content):
         return self._backend.nplike.is_c_contiguous(self._data)
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
-        is_equal = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
+        is_equal = self._backend.nplike.zeros(1, dtype=np.bool_)
 
         assert (
             starts.nplike is self._backend.nplike
@@ -609,7 +632,7 @@ class NumpyArray(NumpyMeta, Content):
                     starts.data,
                     stops.data,
                     starts.length,
-                    is_equal.data,
+                    is_equal,
                 )
             )
         else:
@@ -627,7 +650,7 @@ class NumpyArray(NumpyMeta, Content):
                     starts.data,
                     stops.data,
                     starts.length,
-                    is_equal.data,
+                    is_equal,
                 )
             )
 
@@ -700,7 +723,7 @@ class NumpyArray(NumpyMeta, Content):
                 backend=self._backend,
             )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         if self.length is not unknown_length and self.length == 0:
             return True
         elif len(self.shape) != 1:
@@ -708,6 +731,7 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis,
                 starts,
                 parents,
+                offsets,
                 outlength,
             )
         elif not self.is_contiguous:
@@ -715,10 +739,11 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis,
                 starts,
                 parents,
+                offsets,
                 outlength,
             )
         else:
-            out = self._unique(negaxis, starts, parents, outlength)
+            out = self._unique(negaxis, starts, parents, offsets, outlength)
             if isinstance(out, ak.contents.ListOffsetArray):
                 return (
                     out.content.length is not unknown_length
@@ -727,8 +752,8 @@ class NumpyArray(NumpyMeta, Content):
             else:
                 return out.length is not unknown_length and out.length == self.length
 
-    def _unique(self, negaxis, starts, parents, outlength):
-        if self.shape[0] == 0:
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
+        if self.shape[0] is not unknown_length and self.shape[0] == 0:
             return self
 
         elif len(self.shape) == 0:
@@ -780,6 +805,7 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis,
                 starts,
                 parents,
+                offsets,
                 outlength,
             )
         else:
@@ -900,17 +926,19 @@ class NumpyArray(NumpyMeta, Content):
             )
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         if len(self.shape) != 1:
             return self.to_RegularArray()._argsort_next(
-                negaxis, starts, shifts, parents, outlength, ascending, stable
+                negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
             )
         elif not self.is_contiguous:
             return self.to_contiguous()._argsort_next(
-                negaxis, starts, shifts, parents, outlength, ascending, stable
+                negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
             )
         else:
+            parents = resolve_index(parents, self._backend)
+
             parents_length = parents.length
             _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
@@ -1006,17 +1034,21 @@ class NumpyArray(NumpyMeta, Content):
             out = NumpyArray(nextcarry.data, parameters=None, backend=self._backend)
             return out
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         if len(self.shape) != 1:
             return self.to_RegularArray()._sort_next(
-                negaxis, starts, parents, outlength, ascending, stable
+                negaxis, starts, parents, offsets, outlength, ascending, stable
             )
         elif not self.is_contiguous:
             return self.to_contiguous()._sort_next(
-                negaxis, starts, parents, outlength, ascending, stable
+                negaxis, starts, parents, offsets, outlength, ascending, stable
             )
 
         else:
+            parents = resolve_index(parents, self._backend)
+
             parents_length = parents.length
             _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
             assert (
@@ -1105,6 +1137,7 @@ class NumpyArray(NumpyMeta, Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -1117,6 +1150,7 @@ class NumpyArray(NumpyMeta, Content):
                 starts,
                 shifts,
                 parents,
+                offsets,
                 outlength,
                 mask,
                 keepdims,
@@ -1129,6 +1163,7 @@ class NumpyArray(NumpyMeta, Content):
                 starts,
                 shifts,
                 parents,
+                offsets,
                 outlength,
                 mask,
                 keepdims,
@@ -1139,7 +1174,10 @@ class NumpyArray(NumpyMeta, Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        out = reducer.apply(self, parents, starts, shifts, outlength)
+        parents = resolve_index(parents, self._backend)
+        offsets = resolve_index(offsets, self._backend)
+
+        out = reducer.apply(self, parents, offsets, starts, shifts, outlength)
 
         if mask:
             outmask = ak.index.Index8.empty(outlength, self._backend.nplike)
@@ -1170,10 +1208,10 @@ class NumpyArray(NumpyMeta, Content):
         if len(self.shape) == 0:
             return f"at {path} ({type(self)!r}): shape is zero-dimensional"
         for i, dim in enumerate(self.shape):
-            if dim < 0:
+            if dim is not unknown_length and dim < 0:
                 return f"at {path} ({type(self)!r}): shape[{i}] < 0"
         for i, stride in enumerate(self.strides):
-            if stride % self.dtype.itemsize != 0:
+            if stride is not unknown_length and stride % self.dtype.itemsize != 0:
                 return f"at {path} ({type(self)!r}): shape[{i}] % itemsize != 0"
         return ""
 
@@ -1421,7 +1459,7 @@ class NumpyArray(NumpyMeta, Content):
                 # Shapes agree
                 and all(
                     x is unknown_length or y is unknown_length or x == y
-                    for x, y in zip(self.shape, other.shape)
+                    for x, y in zip(self.shape, other.shape, strict=True)
                 )
             )
         )

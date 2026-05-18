@@ -57,7 +57,7 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.forms.form import Form, FormKeyPathT
-from awkward.index import Index, Index64
+from awkward.index import EmptyIndex, Index, Index64, ZeroIndex
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpy import NumpyLike
@@ -846,7 +846,12 @@ class Content(Meta):
             localindex.data, parameters=None, backend=self._backend
         )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         raise NotImplementedError
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
@@ -888,7 +893,8 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index,
+        parents: Index | ZeroIndex,
+        offsets: Index | EmptyIndex,
         outlength: int,
         mask: bool,
         keepdims: bool,
@@ -901,7 +907,8 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index,
+        parents: Index | ZeroIndex,
+        offsets: Index | EmptyIndex,
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -912,7 +919,8 @@ class Content(Meta):
         self,
         negaxis: int,
         starts: Index,
-        parents: Index,
+        parents: Index | ZeroIndex,
+        offsets: Index | EmptyIndex,
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -1034,7 +1042,8 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index,
+        parents: Index | ZeroIndex,
+        offsets: Index | EmptyIndex,
         outlength: int,
     ) -> bool:
         raise NotImplementedError
@@ -1043,7 +1052,8 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index,
+        parents: Index | ZeroIndex,
+        offsets: Index | EmptyIndex,
         outlength: int,
     ):
         raise NotImplementedError
@@ -1295,7 +1305,7 @@ class Content(Meta):
                             outimag[i] = f2(f1(f0(x)))
 
                 if outimag is not None:
-                    for i, (real, imag) in enumerate(zip(out, outimag)):
+                    for i, (real, imag) in enumerate(zip(out, outimag, strict=True)):
                         out[i] = {complex_real_string: real, complex_imag_string: imag}
 
             return out

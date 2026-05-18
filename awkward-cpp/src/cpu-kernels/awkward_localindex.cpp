@@ -3,14 +3,13 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_localindex.cpp", line)
 
 #include "awkward/kernels.h"
+#include <numeric>
 
 template <typename T>
 ERROR awkward_localindex(
   T* toindex,
   int64_t length) {
-  for (int64_t i = 0;  i < length;  i++) {
-    toindex[i] = i;
-  }
+  std::iota(toindex, toindex + length, 0);
   return success();
 }
 ERROR awkward_localindex_64(

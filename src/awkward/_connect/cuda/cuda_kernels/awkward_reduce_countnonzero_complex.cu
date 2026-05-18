@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 // BEGIN PYTHON
 // def f(grid, block, args):
@@ -60,7 +60,9 @@ awkward_reduce_countnonzero_complex_b(
         val = temp[thread_id - stride];
       }
       __syncthreads();
-      temp[thread_id] += val;
+      if (thread_id < lenparents) {
+        temp[thread_id] += val;
+      }
       __syncthreads();
     }
 

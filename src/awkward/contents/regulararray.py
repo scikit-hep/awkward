@@ -25,6 +25,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -39,7 +40,7 @@ from awkward.contents.content import (
 )
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.regularform import RegularForm
-from awkward.index import Index
+from awkward.index import Index, resolve_index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -98,7 +99,7 @@ class RegularArray(RegularMeta[Content], Content):
     [FixedSizeList](https://arrow.apache.org/docs/format/Columnar.html#fixed-size-list-layout).
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class RegularArray(Content):
             def __init__(self, content, size, zeros_length=0):
@@ -140,7 +141,15 @@ class RegularArray(RegularMeta[Content], Content):
                     raise AssertionError(where)
     """
 
-    def __init__(self, content, size, zeros_length=0, *, parameters=None):
+    def __init__(
+        self,
+        content,
+        size,
+        zeros_length=0,
+        zeros_length_generator=None,
+        *,
+        parameters=None,
+    ):
         if not isinstance(content, Content):
             raise TypeError(
                 f"{type(self).__name__} 'content' must be a Content subtype, not {content!r}"
@@ -176,6 +185,7 @@ class RegularArray(RegularMeta[Content], Content):
         self._content = content
         self._size = size
         self._length = _calculate_regulararray_length(content, size, zeros_length)
+        self._zeros_length_generator = zeros_length_generator
         self._init(parameters, content.backend)
 
     @property
@@ -184,11 +194,22 @@ class RegularArray(RegularMeta[Content], Content):
 
     form_cls: Final = RegularForm
 
-    def copy(self, content=UNSET, size=UNSET, zeros_length=UNSET, *, parameters=UNSET):
+    def copy(
+        self,
+        content=UNSET,
+        size=UNSET,
+        zeros_length=UNSET,
+        zeros_length_generator=UNSET,
+        *,
+        parameters=UNSET,
+    ):
         return RegularArray(
             self._content if content is UNSET else content,
             self._size if size is UNSET else size,
             self._length if zeros_length is UNSET else zeros_length,
+            self._zeros_length_generator
+            if zeros_length_generator is UNSET
+            else zeros_length_generator,
             parameters=self._parameters if parameters is UNSET else parameters,
         )
 
@@ -201,9 +222,25 @@ class RegularArray(RegularMeta[Content], Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
+    def __getstate__(self):
+        # Calling .length resolves _length and clears _zeros_length_generator
+        # (a local closure from ak.from_buffers that can't be pickled).
+        _ = self.length
+        return self.__dict__
+
     @classmethod
-    def simplified(cls, content, size, zeros_length=0, *, parameters=None):
-        return cls(content, size, zeros_length, parameters=parameters)
+    def simplified(
+        cls,
+        content,
+        size,
+        zeros_length=0,
+        zeros_length_generator=None,
+        *,
+        parameters=None,
+    ):
+        return cls(
+            content, size, zeros_length, zeros_length_generator, parameters=parameters
+        )
 
     @property
     def offsets(self) -> Index:
@@ -264,12 +301,19 @@ class RegularArray(RegularMeta[Content], Content):
     @property
     def length(self) -> ShapeItem:
         if self._backend.nplike.known_data and self._length is unknown_length:
+            zeros_length = unknown_length
+            if self._zeros_length_generator:
+                zeros_length = self._zeros_length_generator()
             self._length = _calculate_regulararray_length(
-                self._content, self._size, self._length, materialize=True
+                self._content,
+                self._size,
+                zeros_length,
+                materialize=True,
             )
             assert is_integer(self._length), (
                 f"RegularArray length must be an integer for an array with concrete data, not {type(self._length)}"
             )
+        self._zeros_length_generator = None
         return self._length
 
     def __repr__(self):
@@ -349,6 +393,7 @@ class RegularArray(RegularMeta[Content], Content):
             self._content._getitem_field(where, only_fields),
             self._size,
             self._length,
+            self._zeros_length_generator,
             parameters=None,
         )
 
@@ -359,6 +404,7 @@ class RegularArray(RegularMeta[Content], Content):
             self._content._getitem_fields(where, only_fields),
             self._size,
             self._length,
+            self._zeros_length_generator,
             parameters=None,
         )
 
@@ -736,13 +782,18 @@ class RegularArray(RegularMeta[Content], Content):
     def _offsets_and_flattened(self, axis: int, depth: int) -> tuple[Index, Content]:
         return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_union:
             return True
         # Is the other array indexed or optional?
         elif other.is_indexed or other.is_option:
-            return self._mergeable_next(other.content, mergebool)
+            return self._mergeable_next(other.content, mergebool, mergecastable)
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not type_parameters_equal(self._parameters, other._parameters):
             return False
@@ -754,9 +805,13 @@ class RegularArray(RegularMeta[Content], Content):
                 ak.contents.ListOffsetArray,
             ),
         ):
-            return self._content._mergeable_next(other.content, mergebool)
+            return self._content._mergeable_next(
+                other.content, mergebool, mergecastable
+            )
         elif isinstance(other, ak.contents.NumpyArray) and len(other.shape) > 1:
-            return self._mergeable_next(other._to_regular_primitive(), mergebool)
+            return self._mergeable_next(
+                other._to_regular_primitive(), mergebool, mergecastable
+            )
         else:
             return False
 
@@ -831,7 +886,7 @@ class RegularArray(RegularMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         if self.length == 0:
             return True
 
@@ -839,16 +894,18 @@ class RegularArray(RegularMeta[Content], Content):
             negaxis,
             starts,
             parents,
+            offsets,
             outlength,
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         if self.length == 0:
             return self
         out = self.to_ListOffsetArray64(True)._unique(
             negaxis,
             starts,
             parents,
+            offsets,
             outlength,
         )
 
@@ -864,11 +921,11 @@ class RegularArray(RegularMeta[Content], Content):
         return out
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         next = self.to_ListOffsetArray64(True)
         out = next._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
         )
 
         if isinstance(out, ak.contents.RegularArray):
@@ -882,9 +939,11 @@ class RegularArray(RegularMeta[Content], Content):
 
         return out
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         out = self.to_ListOffsetArray64(True)._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis, starts, parents, offsets, outlength, ascending, stable
         )
 
         # FIXME
@@ -999,6 +1058,7 @@ class RegularArray(RegularMeta[Content], Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -1010,6 +1070,8 @@ class RegularArray(RegularMeta[Content], Content):
         if not branch and negaxis == depth:
             nextcarry = ak.index.Index64.empty(nextlen, nplike=nplike)
             nextparents = ak.index.Index64.empty(nextlen, nplike=nplike)
+            parents = resolve_index(parents, self._backend)
+
             assert (
                 parents.nplike is nplike
                 and nextcarry.nplike is nplike
@@ -1064,6 +1126,7 @@ class RegularArray(RegularMeta[Content], Content):
                 nextstarts,
                 nextshifts,
                 nextparents,
+                offsets,
                 # We want a result of length
                 nextoutlength,
                 mask,
@@ -1111,6 +1174,7 @@ class RegularArray(RegularMeta[Content], Content):
                 nextstarts,
                 shifts,
                 nextparents,
+                offsets,
                 self.length,
                 mask,
                 keepdims,
@@ -1174,6 +1238,9 @@ class RegularArray(RegularMeta[Content], Content):
                     assert outcontent.is_regular
 
             outoffsets = ak.index.Index64.empty(outlength + 1, nplike)
+
+            parents = resolve_index(parents, self._backend)
+
             assert outoffsets.nplike is nplike and parents.nplike is nplike
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -1191,7 +1258,7 @@ class RegularArray(RegularMeta[Content], Content):
             return ak.contents.ListOffsetArray(outoffsets, outcontent, parameters=None)
 
     def _validity_error(self, path):
-        if self.size < 0:
+        if self._backend.nplike.known_data and self.size < 0:
             return f"at {path} ({type(self)!r}): size < 0"
 
         return self._content._validity_error(path + ".content")
@@ -1520,7 +1587,11 @@ class RegularArray(RegularMeta[Content], Content):
     def _to_backend(self, backend: Backend) -> Self:
         content = self._content.to_backend(backend)
         return RegularArray(
-            content, self._size, zeros_length=self._length, parameters=self._parameters
+            content,
+            self._size,
+            zeros_length=self._length,
+            zeros_length_generator=self._zeros_length_generator,
+            parameters=self._parameters,
         )
 
     def _materialize(self, type_) -> Self:

@@ -13,16 +13,19 @@ ERROR awkward_ByteMaskedArray_reduce_next_64(
   int64_t length,
   bool validwhen) {
   int64_t k = 0;
-  for (int64_t i = 0;  i < length;  i++) {
-    if ((mask[i] != 0) == validwhen) {
-      nextcarry[k] = i;
-      nextparents[k] = parents[i];
-      outindex[i] = k;
-      k++;
+  for (int64_t i = 0; i < length; i++) {
+    bool is_valid = ((mask[i] != 0) == validwhen);
+
+    if (is_valid) {
+        nextcarry[k] = i;
+        nextparents[k] = parents[i];
+        outindex[i] = k;
+        k++;
     }
     else {
-      outindex[i] = -1;
+        outindex[i] = -1;
     }
   }
+
   return success();
 }

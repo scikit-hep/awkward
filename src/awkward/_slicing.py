@@ -119,7 +119,7 @@ def prepare_advanced_indexing(items, backend: Backend):
 
     # And re-assemble the index with the broadcasted items
     prepared = []
-    for i_broadcast, item in zip(broadcastable_index, items):
+    for i_broadcast, item in zip(broadcastable_index, items, strict=True):
         # Non-broadcasted item
         if i_broadcast is None:
             prepared.append(item)

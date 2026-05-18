@@ -142,7 +142,7 @@ class RecordType(Type):
 
             if not self.is_tuple:
                 pairs = []
-                for k, v in zip(self._fields, children):
+                for k, v in zip(self._fields, children, strict=True):
                     if ak.prettyprint.is_identifier.match(k) is None:
                         key_str = json.dumps(k)
                     else:
@@ -198,7 +198,7 @@ class RecordType(Type):
         if self.is_tuple and other.is_tuple:
             return all(
                 this._is_equal_to(that, all_parameters)
-                for this, that in zip(self._contents, other._contents)
+                for this, that in zip(self._contents, other._contents, strict=True)
             )
         # Both records
         elif not (self.is_tuple or other.is_tuple):
@@ -207,7 +207,7 @@ class RecordType(Type):
 
             return all(
                 content._is_equal_to(other.content(field), all_parameters)
-                for field, content in zip(self._fields, self._contents)
+                for field, content in zip(self._fields, self._contents, strict=True)
             )
 
         # Mixed

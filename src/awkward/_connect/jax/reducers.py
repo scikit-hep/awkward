@@ -71,6 +71,7 @@ def awkward_JAXNumpyArray_reduce_adjust_starts_shifts_64(
 def apply_positional_corrections(
     reduced: ak.contents.NumpyArray,
     parents: ak.index.Index,
+    offsets: ak.index.Index | ak.index.EmptyIndex,
     starts: ak.index.Index,
     shifts: ak.index.Index | None,
 ) -> ak._nplikes.ArrayLike:
@@ -144,6 +145,7 @@ class ArgMin(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -153,7 +155,7 @@ class ArgMin(JAXReducer):
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
         corrected_data = apply_positional_corrections(
-            result_array, parents, starts, shifts
+            result_array, parents, offsets, starts, shifts
         )
         return ak.contents.NumpyArray(corrected_data, backend=array.backend)
 
@@ -204,6 +206,7 @@ class ArgMax(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -213,7 +216,7 @@ class ArgMax(JAXReducer):
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
         corrected_data = apply_positional_corrections(
-            result_array, parents, starts, shifts
+            result_array, parents, offsets, starts, shifts
         )
         return ak.contents.NumpyArray(corrected_data, backend=array.backend)
 
@@ -237,6 +240,7 @@ class Count(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -296,6 +300,7 @@ class CountNonzero(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -320,10 +325,14 @@ class Sum(JAXReducer):
         assert isinstance(reducer, _reducers.Sum)
         return cls()
 
+    def axis_none_reducer(self) -> AxisNoneSum:
+        return AxisNoneSum()
+
     def apply(
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -346,6 +355,52 @@ class Sum(JAXReducer):
             )
         elif np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(result.view(array.dtype))
+        else:
+            return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+@overloads(_reducers.AxisNoneSum)
+class AxisNoneSum(JAXReducer):
+    name: Final = "sum"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.AxisNoneSum)
+        return cls()
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "M":
+            raise TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
+
+        data = maybe_materialize(array.data)[0]
+
+        if array.dtype.kind == "b":
+            data = data.astype(np.int64)
+
+        result_scalar = jax.numpy.sum(data)
+        result = jax.numpy.reshape(result_scalar, (1,))
+
+        if array.dtype.kind == "m":
+            return ak.contents.NumpyArray(
+                array.backend.nplike.asarray(result, dtype=array.dtype),
+                backend=array.backend,
+            )
+        elif np.issubdtype(array.dtype, np.complexfloating):
+            return ak.contents.NumpyArray(
+                array.backend.nplike.asarray(result, dtype=array.dtype),
+                backend=array.backend,
+            )
         else:
             return ak.contents.NumpyArray(result, backend=array.backend)
 
@@ -415,6 +470,7 @@ class Prod(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -471,6 +527,7 @@ class Any(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -506,6 +563,7 @@ class All(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -537,6 +595,9 @@ class Min(JAXReducer):
         assert isinstance(reducer, _reducers.Min)
         return cls(reducer.initial)
 
+    def axis_none_reducer(self) -> AxisNoneMin:
+        return AxisNoneMin(self._initial)
+
     @staticmethod
     def _min_initial(initial, type):
         if initial is None:
@@ -560,6 +621,7 @@ class Min(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -582,6 +644,44 @@ class Min(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
+@overloads(_reducers.AxisNoneMin)
+class AxisNoneMin(JAXReducer):
+    name: Final = "min"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    def __init__(self, initial):
+        self._initial = initial
+
+    @property
+    def initial(self):
+        return self._initial
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.AxisNoneMin)
+        return cls(reducer.initial)
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+
+        data = maybe_materialize(array.data)[0]
+
+        result_scalar = jax.numpy.min(
+            data, initial=Min._min_initial(self.initial, array.dtype)
+        )
+        result = jax.numpy.reshape(result_scalar, (1,))
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
 @overloads(_reducers.Max)
 class Max(JAXReducer):
     name: Final = "max"
@@ -599,6 +699,9 @@ class Max(JAXReducer):
     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
         assert isinstance(reducer, _reducers.Max)
         return cls(reducer.initial)
+
+    def axis_none_reducer(self) -> AxisNoneMax:
+        return AxisNoneMax(self._initial)
 
     @staticmethod
     def _max_initial(initial, type):
@@ -623,6 +726,7 @@ class Max(JAXReducer):
         self,
         array: ak.contents.NumpyArray,
         parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -643,6 +747,44 @@ class Max(JAXReducer):
             )
         else:
             return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+@overloads(_reducers.AxisNoneMax)
+class AxisNoneMax(JAXReducer):
+    name: Final = "max"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    def __init__(self, initial):
+        self._initial = initial
+
+    @property
+    def initial(self):
+        return self._initial
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.AxisNoneMax)
+        return cls(reducer.initial)
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        parents: ak.index.Index,
+        offsets: ak.index.Index | ak.index.EmptyIndex,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+
+        data = maybe_materialize(array.data)[0]
+
+        result_scalar = jax.numpy.max(
+            data, initial=Max._max_initial(self.initial, array.dtype)
+        )
+        result = jax.numpy.reshape(result_scalar, (1,))
+        return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 def get_jax_reducer(reducer: Reducer) -> Reducer:
