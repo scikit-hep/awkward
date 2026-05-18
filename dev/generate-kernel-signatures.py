@@ -15,7 +15,7 @@ cuda_kernels_impl = [
     # "awkward_Index_nones_as_index",
     # "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
-    "awkward_BitMaskedArray_to_ByteMaskedArray",
+    # "awkward_BitMaskedArray_to_ByteMaskedArray",  # cuda.compute
     "awkward_ListArray_broadcast_tooffsets",
     "awkward_ListArray_compact_offsets",
     "awkward_ListOffsetArray_flatten_offsets",
@@ -35,11 +35,11 @@ cuda_kernels_impl = [
     "awkward_localindex",
     # "awkward_IndexedArray_reduce_next_fix_offsets_64",
     # "awkward_RegularArray_getitem_next_array_advanced",
-    "awkward_ByteMaskedArray_toIndexedOptionArray",
+    # "awkward_ByteMaskedArray_toIndexedOptionArray",  # cuda.compute
     "awkward_IndexedArray_simplify",
     "awkward_UnionArray_validity",
     # "awkward_IndexedArray_validity",
-    "awkward_ByteMaskedArray_overlay_mask",
+    # "awkward_ByteMaskedArray_overlay_mask",  # cuda.compute
     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
     # "awkward_RegularArray_getitem_carry",
     # "awkward_RegularArray_localindex",
@@ -78,12 +78,12 @@ cuda_kernels_impl = [
     "awkward_NumpyArray_rearrange_shifted",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     # "awkward_RegularArray_getitem_next_at",
-    "awkward_BitMaskedArray_to_IndexedOptionArray",
+    # "awkward_BitMaskedArray_to_IndexedOptionArray",  # cuda.compute
     "awkward_ByteMaskedArray_getitem_nextcarry",
-    "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+    # "awkward_ByteMaskedArray_getitem_nextcarry_outindex",  # cuda.compute
     "awkward_ByteMaskedArray_reduce_next_64",
-    "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
-    "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+    # "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",  # cuda.compute
+    # "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",  # cuda.compute
     # "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
     # "awkward_index_rpad_and_clip_axis0",
     # "awkward_index_rpad_and_clip_axis1",

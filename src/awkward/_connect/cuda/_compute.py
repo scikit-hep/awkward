@@ -2438,3 +2438,293 @@ def awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
         ),
         num_items=length,
     )
+
+
+# For each i in [0, length): toindex[i] = i if (mask[i] != 0) == validwhen, else -1.
+#
+# Example:
+#   mask = [0, 1, 0, 1, 0],  length = 5,  validwhen = True
+#   toindex = [-1, 1, -1, 3, -1]
+def awkward_ByteMaskedArray_toIndexedOptionArray(toindex, mask, length, validwhen):
+    if length == 0:
+        return
+    msk = mask[:length]
+    out_dtype = toindex.dtype
+
+    def _make_fill(msk, validwhen, out_dtype):
+        def fill(i):
+            return (
+                out_dtype.type(i) if (msk[i] != 0) == validwhen else out_dtype.type(-1)
+            )
+
+        return fill
+
+    unary_transform(
+        d_in=CountingIterator(out_dtype.type(0)),
+        d_out=toindex[:length],
+        op=_make_fill(msk, validwhen, out_dtype),
+        num_items=length,
+    )
+
+
+# For each valid i (where (mask[i] != 0) == valid_when), sets
+# nextshifts[k] = number of null entries before position i,
+# where k is the 0-indexed rank among valid entries.
+# null_count_before[i] = i - k  (since null + valid = total up to i).
+#
+# Example:
+#   mask = [0, 1, 0, 1, 0, 1],  length = 6,  valid_when = True
+#   valid at i=1 (k=0): nextshifts[0] = 1
+#   valid at i=3 (k=1): nextshifts[1] = 2
+#   valid at i=5 (k=2): nextshifts[2] = 3
+def awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+    nextshifts, mask, length, valid_when
+):
+    if length == 0:
+        return
+    out_dtype = nextshifts.dtype
+    msk = mask[:length]
+    scan_k = cp.empty(length, dtype=out_dtype)
+
+    def _make_is_valid(valid_when, out_dtype):
+        def is_valid(x):
+            return out_dtype.type((x != 0) == valid_when)
+
+        return is_valid
+
+    inclusive_scan(
+        d_in=TransformIterator(msk, _make_is_valid(valid_when, out_dtype)),
+        d_out=scan_k,
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=length,
+    )
+
+    def _make_scatter_nextshifts(msk, scan_k, nextshifts, valid_when, out_dtype):
+        def scatter(i):
+            is_v = (msk[i] != 0) == valid_when
+            if is_v:
+                k = scan_k[i] - out_dtype.type(1)
+                nextshifts[k] = out_dtype.type(i) - k
+            return out_dtype.type(0)
+
+        return scatter
+
+    unary_transform(
+        d_in=CountingIterator(out_dtype.type(0)),
+        d_out=DiscardIterator(),
+        op=_make_scatter_nextshifts(msk, scan_k, nextshifts, valid_when, out_dtype),
+        num_items=length,
+    )
+
+
+# Like awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64 but adds shifts[i]:
+# nextshifts[k] = shifts[i] + null_count_before_i.
+#
+# Example:
+#   mask = [0, 1, 0, 1],  length = 4,  valid_when = True,  shifts = [10, 20, 30, 40]
+#   valid at i=1 (k=0): nextshifts[0] = 20 + 1 = 21
+#   valid at i=3 (k=1): nextshifts[1] = 40 + 2 = 42
+def awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+    nextshifts, mask, length, valid_when, shifts
+):
+    if length == 0:
+        return
+    out_dtype = nextshifts.dtype
+    msk = mask[:length]
+    scan_k = cp.empty(length, dtype=out_dtype)
+
+    def _make_is_valid(valid_when, out_dtype):
+        def is_valid(x):
+            return out_dtype.type((x != 0) == valid_when)
+
+        return is_valid
+
+    inclusive_scan(
+        d_in=TransformIterator(msk, _make_is_valid(valid_when, out_dtype)),
+        d_out=scan_k,
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=length,
+    )
+
+    def _make_scatter_nextshifts_fromshifts(
+        msk, scan_k, nextshifts, valid_when, shifts, out_dtype
+    ):
+        def scatter(i):
+            is_v = (msk[i] != 0) == valid_when
+            if is_v:
+                k = scan_k[i] - out_dtype.type(1)
+                null_count = out_dtype.type(i) - k
+                nextshifts[k] = out_dtype.type(shifts[i]) + null_count
+            return out_dtype.type(0)
+
+        return scatter
+
+    unary_transform(
+        d_in=CountingIterator(out_dtype.type(0)),
+        d_out=DiscardIterator(),
+        op=_make_scatter_nextshifts_fromshifts(
+            msk, scan_k, nextshifts, valid_when, shifts, out_dtype
+        ),
+        num_items=length,
+    )
+
+
+# Overlays mymask onto theirmask: tomask[i] = theirmask[i] | mine[i],
+# where mine[i] = 1 if mymask[i] is null (i.e. (mymask[i] != 0) != validwhen).
+# A 1 bit in mine propagates "null" into the output regardless of theirmask.
+#
+# Example:
+#   theirmask = [0, 1, 0, 0],  mymask = [1, 0, 0, 1],  validwhen = True,  length = 4
+#   mine[0] = (1!=0)!=True = 0  (mymask says valid)
+#   mine[1] = (0!=0)!=True = 1  (mymask says null)
+#   mine[2] = (0!=0)!=True = 1  (mymask says null)
+#   mine[3] = (1!=0)!=True = 0  (mymask says valid)
+#   tomask = [0|0, 1|1, 0|1, 0|0] = [0, 1, 1, 0]
+def awkward_ByteMaskedArray_overlay_mask(tomask, theirmask, mymask, length, validwhen):
+    if length == 0:
+        return
+    out_dtype = tomask.dtype
+    their = theirmask[:length]
+    my = mymask[:length]
+
+    def _make_overlay(their, my, validwhen, out_dtype):
+        def overlay(i):
+            mine = out_dtype.type((my[i] != 0) != validwhen)
+            return their[i] | mine
+
+        return overlay
+
+    unary_transform(
+        d_in=CountingIterator(cp.int64(0)),
+        d_out=tomask[:length],
+        op=_make_overlay(their, my, validwhen, out_dtype),
+        num_items=length,
+    )
+
+
+# For each i in [0, length): if (mask[i] != 0) == validwhen → tocarry[k] = i,
+# outindex[i] = k; else outindex[i] = -1. k is the compact rank among valid entries.
+#
+# Example:
+#   mask = [0, 1, 0, 1, 1],  length = 5,  validwhen = True
+#   scan = [0, 1, 1, 2, 3]  (cumulative valid count)
+#   tocarry  = [1, 3, 4]
+#   outindex = [-1, 0, -1, 1, 2]
+def awkward_ByteMaskedArray_getitem_nextcarry_outindex(
+    tocarry, outindex, mask, length, validwhen
+):
+    if length == 0:
+        return
+    msk = mask[:length]
+    out_dtype = tocarry.dtype
+    scan = cp.empty(length, dtype=out_dtype)
+
+    def _make_is_valid(validwhen, out_dtype):
+        def is_valid(x):
+            return out_dtype.type((x != 0) == validwhen)
+
+        return is_valid
+
+    inclusive_scan(
+        d_in=TransformIterator(msk, _make_is_valid(validwhen, out_dtype)),
+        d_out=scan,
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=length,
+    )
+
+    def _make_fill_carry_outindex(msk, scan, tocarry, validwhen, out_dtype):
+        def fill(i):
+            is_v = (msk[i] != 0) == validwhen
+            if is_v:
+                pos = scan[i] - out_dtype.type(1)
+                tocarry[pos] = out_dtype.type(i)
+                return pos
+            return out_dtype.type(-1)
+
+        return fill
+
+    unary_transform(
+        d_in=CountingIterator(out_dtype.type(0)),
+        d_out=outindex[:length],
+        op=_make_fill_carry_outindex(msk, scan, tocarry, validwhen, out_dtype),
+        num_items=length,
+    )
+
+
+# Expands a packed bitmask (bitmasklength bytes) to an indexed option array of
+# n = bitmasklength * 8 entries. toindex[p] = p if valid, -1 if missing.
+#
+# lsb_order=True:  bit j of byte i → entry i*8+j  (bit 0 = LSB).
+# lsb_order=False: bit 7-j of byte i → entry i*8+j  (bit 7 = MSB first).
+# Validity is determined by (bit == validwhen).
+#
+# Example (lsb_order=True, validwhen=True, bitmasklength=1, frombitmask=[0b00001010]):
+#   bits (LSB first): 0,1,0,1,0,0,0,0
+#   toindex = [-1, 1, -1, 3, -1, -1, -1, -1]
+def awkward_BitMaskedArray_to_IndexedOptionArray(
+    toindex, frombitmask, bitmasklength, validwhen, lsb_order
+):
+    if bitmasklength == 0:
+        return
+    n_elements = bitmasklength * 8
+    out_dtype = toindex.dtype
+
+    def _make_fill(frombitmask, validwhen, lsb_order, out_dtype):
+        def fill(p):
+            byte = out_dtype.type(frombitmask[p // 8])
+            bit_idx = p % 8
+            if lsb_order:
+                bit = (byte >> bit_idx) & out_dtype.type(1)
+            else:
+                bit = (byte >> (7 - bit_idx)) & out_dtype.type(1)
+            return p if (bit != out_dtype.type(0)) == validwhen else out_dtype.type(-1)
+
+        return fill
+
+    unary_transform(
+        d_in=CountingIterator(out_dtype.type(0)),
+        d_out=toindex[:n_elements],
+        op=_make_fill(frombitmask, validwhen, lsb_order, out_dtype),
+        num_items=n_elements,
+    )
+
+
+# Expands a packed bitmask (bitmasklength bytes) to a byte mask of
+# n = bitmasklength * 8 entries. tobytemask[p] = 0 if valid, 1 if missing.
+# (bit != validwhen) determines whether a position is missing.
+#
+# lsb_order=True:  bit j of byte i → entry i*8+j.
+# lsb_order=False: bit 7-j of byte i → entry i*8+j.
+#
+# Example (lsb_order=True, validwhen=True, bitmasklength=1, frombitmask=[0b00001010]):
+#   bits (LSB first): 0,1,0,1,0,0,0,0
+#   tobytemask = [1, 0, 1, 0, 1, 1, 1, 1]
+def awkward_BitMaskedArray_to_ByteMaskedArray(
+    tobytemask, frombitmask, bitmasklength, validwhen, lsb_order
+):
+    if bitmasklength == 0:
+        return
+    n_elements = bitmasklength * 8
+    out_dtype = tobytemask.dtype
+
+    def _make_fill(frombitmask, validwhen, lsb_order, out_dtype):
+        def fill(p):
+            byte = frombitmask[p // 8]
+            bit_idx = p % 8
+            if lsb_order:
+                bit = (byte >> bit_idx) & 1
+            else:
+                bit = (byte >> (7 - bit_idx)) & 1
+            return out_dtype.type((bit != 0) != validwhen)
+
+        return fill
+
+    unary_transform(
+        d_in=CountingIterator(cp.int64(0)),
+        d_out=tobytemask[:n_elements],
+        op=_make_fill(frombitmask, validwhen, lsb_order, out_dtype),
+        num_items=n_elements,
+    )

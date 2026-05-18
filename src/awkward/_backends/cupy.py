@@ -127,6 +127,13 @@ class CupyBackend(Backend):
         - awkward_IndexedArray_flatten_none2empty
         - awkward_Index_nones_as_index
         - awkward_Content_getitem_next_missing_jagged_getmaskstartstop
+        - awkward_ByteMaskedArray_toIndexedOptionArray
+        - awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64
+        - awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64
+        - awkward_ByteMaskedArray_overlay_mask
+        - awkward_ByteMaskedArray_getitem_nextcarry_outindex
+        - awkward_BitMaskedArray_to_IndexedOptionArray
+        - awkward_BitMaskedArray_to_ByteMaskedArray
         """
         return kernel_name in (
             "awkward_sort",
@@ -179,6 +186,13 @@ class CupyBackend(Backend):
             "awkward_IndexedArray_flatten_none2empty",
             "awkward_Index_nones_as_index",
             "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+            "awkward_ByteMaskedArray_toIndexedOptionArray",
+            "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+            "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+            "awkward_ByteMaskedArray_overlay_mask",
+            "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+            "awkward_BitMaskedArray_to_IndexedOptionArray",
+            "awkward_BitMaskedArray_to_ByteMaskedArray",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
