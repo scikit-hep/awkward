@@ -17,7 +17,7 @@ np = NumpyMetadata.instance()
 
 
 class AwkwardArrowArray(pyarrow.ExtensionArray):
-    def to_pylist(self):
+    def to_pylist(self, maps_as_pydicts=None):
         out = super().to_pylist()
         if (
             isinstance(self.type, AwkwardArrowType)
@@ -41,6 +41,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
         record_is_tuple,
         record_is_scalar,
         is_nonnullable_nulltype=False,
+        option_type=False,
     ):
         self._mask_type = mask_type
         self._node_type = node_type
@@ -49,6 +50,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
         self._record_is_tuple = record_is_tuple
         self._record_is_scalar = record_is_scalar
         self._is_nonnullable_nulltype = is_nonnullable_nulltype
+        self._option_type = option_type
         super().__init__(storage_type, "awkward")
 
     def __str__(self):
@@ -96,6 +98,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
             "record_is_tuple": self._record_is_tuple,
             "record_is_scalar": self._record_is_scalar,
             "is_nonnullable_nulltype": self._is_nonnullable_nulltype,
+            "option_type": self._option_type,
         }
 
     @classmethod
@@ -115,6 +118,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
             metadata["record_is_tuple"],
             metadata["record_is_scalar"],
             is_nonnullable_nulltype=metadata.get("is_nonnullable_nulltype", False),
+            option_type=metadata.get("option_type", False),
         )
 
     @property
@@ -139,3 +143,25 @@ def to_awkwardarrow_storage_types(arrowtype):
         return arrowtype, arrowtype.storage_type
     else:
         return None, arrowtype
+
+
+def get_field_option(field: pyarrow.Field, key: bytes) -> bool | None:
+    """
+    Retrieves the metadata value for a given key from a field's metadata,
+    interpreting the value as a boolean if it's b'True' or b'False'.
+    Returns None if the key is missing.
+    """
+    meta = field.metadata
+    if not meta:
+        return None
+
+    value = meta.get(key)
+    if value is None:
+        return None
+
+    if value == b"False":
+        return False
+    elif value == b"True":
+        return True
+    else:
+        return None

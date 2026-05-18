@@ -52,7 +52,7 @@ def _impl(array, highlevel, behavior, attrs):
 
     ak._do.recursively_apply(layout, action)
 
-    wrapped_out = ctx.wrap(output, highlevel=highlevel)
+    wrapped_out = ctx.wrap(output, highlevel=highlevel, allow_other=True)
 
     # propagate named axis from input to output,
     #   use strategy "drop all" (see: awkward._namedaxis)

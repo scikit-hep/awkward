@@ -10,7 +10,7 @@ on:
 jobs:
 
   build-wheels:
-    uses: ./.github/workflows/build-wheels.yml
+    uses: ./.github/workflows/reusable-build-wheels.yml
 
   upload-awkward-cpp:
     needs: [build-wheels]
@@ -25,7 +25,7 @@ jobs:
       url: "https://pypi.org/project/awkward-cpp/"
     steps:
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         pattern: "awkward-cpp*"
         path: dist
@@ -35,8 +35,8 @@ jobs:
       run: ls -l dist/
 
     - name: Generate artifact attestation for sdist and wheel
-      uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.4.3
+      uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
       with:
         subject-path: "dist/awkward*cpp-*"
 
-    - uses: pypa/gh-action-pypi-publish@v1.11.0
+    - uses: pypa/gh-action-pypi-publish@v1.14.0

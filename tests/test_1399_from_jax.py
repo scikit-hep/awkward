@@ -8,7 +8,6 @@ import pytest
 import awkward as ak
 
 jax = pytest.importorskip("jax")
-jax.config.update("jax_enable_x64", True)
 
 ak.jax.register_and_check()
 

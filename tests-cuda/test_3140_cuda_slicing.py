@@ -12,8 +12,11 @@ to_list = ak.operations.to_list
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
     yield
+    try:
+        cp.cuda.Device().synchronize()  # wait for all kernels
+    except cp.cuda.runtime.CUDARuntimeError as e:
+        print("GPU error during sync:", e)
     cp._default_memory_pool.free_all_blocks()
-    cp.cuda.Device().synchronize()
 
 
 def test_0315_integerindex_null_more():
@@ -455,6 +458,12 @@ def test_1904_drop_none_RecordArray():
         [{"x": [], "y": []}],
         [{"x": [11], "y": [[None]]}],
     ]
+
+
+def test_simple_slice():
+    arrg = ak.Array([[1, 2, 3], [0], [4, 5]], backend="cuda")
+    out = arrg[:, 0]
+    assert out.tolist() == [1, 0, 4]
 
 
 def test_2246_slice_not_packed():

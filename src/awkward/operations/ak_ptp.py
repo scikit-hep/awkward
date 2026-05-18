@@ -12,6 +12,7 @@ from awkward._layout import (
     maybe_posaxis,
 )
 from awkward._namedaxis import (
+    NAMED_AXIS_KEY,
     _get_named_axis,
     _named_axis_to_positional_axis,
 )
@@ -37,11 +38,15 @@ def ptp(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -137,7 +142,7 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 posaxis = maybe_posaxis(out.layout, axis, 1)
                 out = out[(slice(None, None),) * posaxis + (0,)]
 
-        wrapped = ctx.wrap(
+        wrapped = ctx.without_attr(NAMED_AXIS_KEY).wrap(
             maybe_highlevel_to_lowlevel(out),
             highlevel=highlevel,
             allow_other=True,
@@ -145,7 +150,7 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
         # propagate named axis to output
         return ak.operations.ak_with_named_axis._impl(
             wrapped,
-            named_axis=_get_named_axis(attrs_of_obj(out)),
+            named_axis=_get_named_axis(attrs_of_obj(out), allow_any=True),
             highlevel=highlevel,
             behavior=None,
             attrs=None,

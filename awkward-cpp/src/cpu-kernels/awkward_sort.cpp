@@ -34,44 +34,35 @@ ERROR awkward_sort(
   std::vector<int64_t> index(length);
   std::iota(index.begin(), index.end(), 0);
 
-  if (ascending  &&  stable) {
-    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-      auto start = std::next(index.begin(), offsets[i]);
-      auto stop = std::next(index.begin(), offsets[i + 1]);
-      std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
-      });
-    }
-  }
-  else if (!ascending  &&  stable) {
-    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-      auto start = std::next(index.begin(), offsets[i]);
-      auto stop = std::next(index.begin(), offsets[i + 1]);
-      std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
-      });
-    }
-  }
-  else if (ascending  &&  !stable) {
-    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-      auto start = std::next(index.begin(), offsets[i]);
-      auto stop = std::next(index.begin(), offsets[i + 1]);
-      std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
-      });
-    }
-  }
-  else {
-    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-      auto start = std::next(index.begin(), offsets[i]);
-      auto stop = std::next(index.begin(), offsets[i + 1]);
-      std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
-      });
+  for (int64_t i = 0; i < offsetslength - 1; i++) {
+    auto start = index.begin() + offsets[i];
+    auto stop = index.begin() + offsets[i + 1];
+
+    if (stable) {
+      if (ascending) {
+        std::stable_sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
+          return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+        });
+      } else {
+        std::stable_sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
+          return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
+        });
+      }
+    } else {
+      if (ascending) {
+        std::sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
+          return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+        });
+      } else {
+        std::sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
+          return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
+        });
+      }
     }
   }
 
-  for (int64_t i = 0;  i < parentslength;  i++) {
+  int64_t copy_length = (parentslength < length) ? parentslength : length;
+  for (int64_t i = 0; i < copy_length; i++) {
     toptr[i] = fromptr[index[i]];
   }
 

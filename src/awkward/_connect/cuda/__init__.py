@@ -24,6 +24,8 @@ or
     conda install -c conda-forge cupy
 """
 
+from awkward._connect.cuda.reducers import get_cuda_compute_reducer  # noqa: F401
+
 cuda_streamptr_to_contexts = {}
 kernel_errors = {}
 kernel = None
@@ -119,23 +121,27 @@ def fetch_template_specializations(kernel_dict):
         "awkward_MaskedArray_getitem_next_jagged_project",
         "awkward_NumpyArray_rearrange_shifted",
         "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
-        "awkward_reduce_count_64",
-        "awkward_reduce_sum",
-        "awkward_reduce_sum_bool",
+        # "awkward_reduce_count_64",
+        # "awkward_reduce_sum",
+        # "awkward_reduce_sum_bool",
         "awkward_reduce_sum_bool_complex",
         "awkward_reduce_sum_complex",
-        "awkward_reduce_sum_int32_bool_64",
-        "awkward_reduce_sum_int64_bool_64",
-        "awkward_reduce_prod",
-        "awkward_reduce_prod_bool",
+        # "awkward_reduce_sum_int32_bool_64",
+        # "awkward_reduce_sum_int64_bool_64",
+        # "awkward_reduce_prod",
+        # "awkward_reduce_prod_bool",
         "awkward_reduce_prod_bool_complex",
         "awkward_reduce_prod_complex",
-        "awkward_reduce_countnonzero",
+        # "awkward_reduce_countnonzero",
         "awkward_reduce_countnonzero_complex",
-        "awkward_reduce_max",
+        # "awkward_reduce_max",
         "awkward_reduce_max_complex",
-        "awkward_reduce_min",
+        # "awkward_reduce_min",
         "awkward_reduce_min_complex",
+        # "awkward_reduce_argmin",
+        "awkward_reduce_argmin_complex",
+        # "awkward_reduce_argmax",
+        "awkward_reduce_argmax_complex",
         "awkward_sorting_ranges",
         "awkward_sorting_ranges_length",
         "awkward_UnionArray_flatten_length",
@@ -229,7 +235,10 @@ def initialize_cuda_kernels(cupy):
             )
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
-                options=("--std=c++11",),
+                options=(
+                    "--std=c++11",
+                    "--diag-suppress=186",
+                ),
                 name_expressions=template_specializations,
             )
             kernel = awkward._connect.cuda._kernel_signatures.by_signature(

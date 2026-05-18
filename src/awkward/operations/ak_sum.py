@@ -15,7 +15,7 @@ from awkward._namedaxis import (
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
-__all__ = ("sum", "nansum")
+__all__ = ("nansum", "sum")
 
 np = NumpyMetadata.instance()
 
@@ -34,11 +34,15 @@ def sum(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -102,15 +106,15 @@ def sum(
     left before summing, to the right before summing, or something else.
     As suggested by the way the text has been aligned, we choose the
     left-alignment convention: the first `axis=0` result is the sum of all
-    first elements
+    first elements::
 
         60.4 = 0.1 + 10.1 + 20.1 + 30.1
 
-    the second is the sum of all second elements
+    the second is the sum of all second elements::
 
         50.6 = 0.2 + 20.2 + 30.2
 
-    and the third is the sum of the only third element
+    and the third is the sum of the only third element::
 
         20.3 = 20.3
 
@@ -141,7 +145,7 @@ def sum(
         >>> ak.sum(array, axis=0)
         <Array [20.1, 50.4, 60.8] type='3 * float64'>
 
-    because
+    because::
 
         20.1 = 20.1
         50.4 = 0.1 + 20.2 + 30.1
@@ -166,7 +170,7 @@ def sum(
         >>> ak.sum(array, axis=0)
         <Array [50.3, 50.6, 50.9] type='3 * float64'>
 
-    which is
+    which is::
 
         50.3 = 0.1 + (None) + 20.1 + 30.1
         50.6 = 0.2 + (None) + 20.2 + 30.2
@@ -230,11 +234,15 @@ def nansum(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -251,7 +259,7 @@ def nansum(
 
     Like #ak.sum, but treating NaN ("not a number") values as missing.
 
-    Equivalent to
+    Equivalent to::
 
         ak.sum(ak.nan_to_none(array))
 

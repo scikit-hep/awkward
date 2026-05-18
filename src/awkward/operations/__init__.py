@@ -47,6 +47,8 @@ from awkward.operations.ak_from_parquet import *
 from awkward.operations.ak_from_raggedtensor import *
 from awkward.operations.ak_from_rdataframe import *
 from awkward.operations.ak_from_regular import *
+from awkward.operations.ak_from_safetensors import *
+from awkward.operations.ak_from_tensorflow import *
 from awkward.operations.ak_from_torch import *
 from awkward.operations.ak_full_like import *
 from awkward.operations.ak_imag import *
@@ -58,6 +60,7 @@ from awkward.operations.ak_isclose import *
 from awkward.operations.ak_linear_fit import *
 from awkward.operations.ak_local_index import *
 from awkward.operations.ak_mask import *
+from awkward.operations.ak_materialize import *
 from awkward.operations.ak_max import *
 from awkward.operations.ak_mean import *
 from awkward.operations.ak_merge_option_of_records import *
@@ -103,6 +106,8 @@ from awkward.operations.ak_to_parquet_row_groups import *
 from awkward.operations.ak_to_raggedtensor import *
 from awkward.operations.ak_to_rdataframe import *
 from awkward.operations.ak_to_regular import *
+from awkward.operations.ak_to_safetensors import *
+from awkward.operations.ak_to_tensorflow import *
 from awkward.operations.ak_to_torch import *
 from awkward.operations.ak_transform import *
 from awkward.operations.ak_type import *
@@ -121,3 +126,4 @@ from awkward.operations.ak_without_named_axis import *
 from awkward.operations.ak_without_parameters import *
 from awkward.operations.ak_zeros_like import *
 from awkward.operations.ak_zip import *
+from awkward.operations.ak_zip_no_broadcast import *

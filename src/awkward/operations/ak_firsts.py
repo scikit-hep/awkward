@@ -10,7 +10,9 @@ from awkward._namedaxis import (
     _named_axis_to_positional_axis,
     _remove_named_axis,
 )
+from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
 
@@ -24,10 +26,15 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps to
+            an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -85,7 +92,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
         # and length > 0 cases.
         backend = ak.backend(array)
         slicer = ak.to_backend(ak.from_iter([None, 0]), backend)
-        if layout.length == 0:
+        if layout.length is not unknown_length and layout.length == 0:
             out = layout[slicer[[0]]][0]
         else:
             out = layout[slicer[[1]]][0]
@@ -97,7 +104,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
             if posaxis == depth and layout.is_list:
                 # this is a copy of the raw array
-                index = starts = backend.index_nplike.asarray(
+                index = starts = backend.nplike.asarray(
                     layout.starts.data, dtype=np.int64, copy=True
                 )
 
@@ -105,7 +112,10 @@ def _impl(array, axis, highlevel, behavior, attrs):
                 stops = layout.stops.data
 
                 empties = starts == stops
-                index[empties] = -1
+                if isinstance(layout.backend.nplike, Jax):
+                    index = index.at[empties].set(-1)
+                else:
+                    index[empties] = -1
 
                 return ak.contents.IndexedOptionArray.simplified(
                     ak.index.Index64(index), layout._content

@@ -107,7 +107,7 @@ def _impl(
 
     def is_approx_dtype(left, right) -> bool:
         if not dtype_exact:
-            for family in np.integer, np.floating:
+            for family in np.integer, np.floating, np.complexfloating:
                 if np.issubdtype(left, family):
                     return np.issubdtype(right, family)
         return left == right
@@ -132,6 +132,34 @@ def _impl(
             left = left.to_IndexedOptionArray64()
         if right.is_option:
             right = right.to_IndexedOptionArray64()
+
+        # Simplify union types
+        if left.is_union:
+            left = left.simplified(
+                left.tags,
+                left.index,
+                left.contents,
+                parameters=left.parameters,
+                mergebool=False,
+                mergecastable="equiv" if dtype_exact else "family",
+                dropunused=True,
+            )
+            # UnionArray simplifications can produce IndexedArrays
+            if left.is_indexed and not left.is_option:
+                left = left.project()
+        if right.is_union:
+            right = right.simplified(
+                right.tags,
+                right.index,
+                right.contents,
+                parameters=right.parameters,
+                mergebool=False,
+                mergecastable="equiv" if dtype_exact else "family",
+                dropunused=True,
+            )
+            # UnionArray simplifications can produce IndexedArrays
+            if right.is_indexed and not right.is_option:
+                right = right.project()
 
         # Simplify regular NumPy types
         if left.is_numpy and left.purelist_depth > 1:
@@ -161,6 +189,11 @@ def _impl(
             return (left.size == right.size) and visitor(left.content, right.content)
         # List-list
         elif left.is_list and right.is_list:
+            # Check that indexes are equal
+            left_index = left.to_ListOffsetArray64(True).offsets
+            right_index = right.to_ListOffsetArray64(True).offsets
+            if not backend.nplike.array_equal(left_index.data, right_index.data):
+                return False
             # Mixed regular-var
             if left.is_regular and not right.is_regular:
                 return (not check_regular) and visitor(
@@ -188,7 +221,11 @@ def _impl(
             ):
                 return (
                     (left.dtype == right.dtype)
-                    and backend.nplike.all(left.data == right.data)
+                    and backend.nplike.array_equal(
+                        left.data,
+                        right.data,
+                        equal_nan=equal_nan,
+                    )
                     and left.shape == right.shape
                 )
             elif exact_eq:
@@ -216,29 +253,33 @@ def _impl(
                     and left.shape == right.shape
                 )
         elif left.is_option and right.is_option:
-            return backend.index_nplike.array_equal(
+            return backend.nplike.array_equal(
                 left.mask_as_bool(True), right.mask_as_bool(True)
             ) and visitor(left.project(), right.project())
         elif left.is_union and right.is_union:
+            # After simplification, both unions should have the same number of contents
+            if len(left.contents) != len(right.contents):
+                return False
+
             # For two unions with different content orderings to match, the tags should be equal at each index
             # Therefore, we can order the contents by index appearance
             def ordered_unique_values(values):
                 # First, find unique values and their appearance (from smallest to largest)
                 # unique_index is in ascending order of `unique` value
                 (
-                    unique,
+                    _unique,
                     unique_index,
                     *_,
-                ) = backend.index_nplike.unique_all(values)
+                ) = backend.nplike.unique_all(values)
                 # Now re-order `unique` by order of appearance (`unique_index`)
-                return values[backend.index_nplike.sort(unique_index)]
+                return values[backend.nplike.sort(unique_index)]
 
             # Find order of appearance for each union tags, and assume these are one-to-one maps
             left_tag_order = ordered_unique_values(left.tags.data)
             right_tag_order = ordered_unique_values(right.tags.data)
 
             # Create map from left tags to right tags
-            left_tag_to_right_tag = backend.index_nplike.empty(
+            left_tag_to_right_tag = backend.nplike.empty(
                 left_tag_order.size, dtype=np.int64
             )
             left_tag_to_right_tag[left_tag_order] = right_tag_order
@@ -246,11 +287,11 @@ def _impl(
             # Map left tags onto right, such that the result should equal right.tags
             # if the two tag arrays are equivalent
             new_left_tag = left_tag_to_right_tag[left.tags.data]
-            if not backend.index_nplike.all(new_left_tag == right.tags.data):
+            if not backend.nplike.all(new_left_tag == right.tags.data):
                 return False
 
             # Now project out the contents, and check for equality
-            for i, j in zip(left_tag_order, right_tag_order):
+            for i, j in zip(left_tag_order, right_tag_order, strict=True):
                 if not visitor(left.project(i), right.project(j)):
                     return False
             return True
@@ -263,7 +304,8 @@ def _impl(
                     or not check_parameters
                 )
                 and left.is_tuple == right.is_tuple
-                and (left.is_tuple or (len(left.fields) == len(right.fields)))
+                and len(left.fields) == len(right.fields)
+                and (left.is_tuple or set(left.fields) == set(right.fields))
                 and all(visitor(left.content(f), right.content(f)) for f in left.fields)
             )
         elif left.is_unknown and right.is_unknown:

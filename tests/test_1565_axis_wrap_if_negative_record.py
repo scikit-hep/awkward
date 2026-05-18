@@ -25,7 +25,7 @@ def test_axis_wrap_if_negative_record_v2():
 
     r = ak.Record(dict_cell_chain_field)
 
-    with pytest.raises(TypeError, match="ak.Record objects are not allowed"):
+    with pytest.raises(TypeError, match=r"ak.Record objects are not allowed"):
         ak.operations.to_regular(r, 0)
 
     list_cell_chain_field = [

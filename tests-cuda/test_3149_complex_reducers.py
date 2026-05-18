@@ -13,8 +13,11 @@ to_list = ak.operations.to_list
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
     yield
+    try:
+        cp.cuda.Device().synchronize()  # wait for all kernels
+    except cp.cuda.runtime.CUDARuntimeError as e:
+        print("GPU error during sync:", e)
     cp._default_memory_pool.free_all_blocks()
-    cp.cuda.Device().synchronize()
 
 
 def test_0652_tests_of_complex_numbers_reducers():
@@ -758,7 +761,6 @@ def test_block_boundary_countnonzero_complex_2():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax_complex is not implemented")
 def test_block_boundary_argmax_complex1():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(5, size=6000)
@@ -780,7 +782,6 @@ def test_block_boundary_argmax_complex1():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax_complex is not implemented")
 def test_block_boundary_argmax_complex2():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(6000, size=6000)
@@ -802,7 +803,6 @@ def test_block_boundary_argmax_complex2():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin_complex is not implemented")
 def test_block_boundary_argmin_complex1():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(5, size=6000)
@@ -824,7 +824,6 @@ def test_block_boundary_argmin_complex1():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin_complex is not implemented")
 def test_block_boundary_argmin_complex2():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(6000, size=6000)

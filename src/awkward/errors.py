@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy
 
-__all__ = ("FieldNotFoundError", "AxisError")
+__all__ = ("AxisError", "FieldNotFoundError")
 
 
 class FieldNotFoundError(IndexError):

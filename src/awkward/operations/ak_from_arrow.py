@@ -40,6 +40,10 @@ def from_arrow(
     low-level #ak.forms.Form), even through Parquet, making Parquet a good way to save
     Awkward Arrays for later use.
 
+    Because awkward uses numpy's dtype system, timestamp types do not have timezones.
+    If encountering timestamp types with timezones in the input arrow data, they
+    will be silently dropped.
+
     See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_parquet, #ak.from_arrow_schema.
     """
     return _impl(array, generate_bitmasks, highlevel, behavior, attrs)
@@ -59,7 +63,7 @@ def _impl(array, generate_bitmasks, highlevel, behavior, attrs):
     if isinstance(array, (pyarrow.lib.Array, pyarrow.lib.ChunkedArray)):
         (
             awkwardarrow_type,
-            storage_type,
+            _storage_type,
         ) = awkward._connect.pyarrow.to_awkwardarrow_storage_types(array.type)
 
         if awkwardarrow_type is None:

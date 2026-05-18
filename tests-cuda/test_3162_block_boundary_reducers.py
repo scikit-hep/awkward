@@ -12,8 +12,11 @@ to_list = ak.operations.to_list
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
     yield
+    try:
+        cp.cuda.Device().synchronize()  # wait for all kernels
+    except cp.cuda.runtime.CUDARuntimeError as e:
+        print("GPU error during sync:", e)
     cp._default_memory_pool.free_all_blocks()
-    cp.cuda.Device().synchronize()
 
 
 def test_block_boundary_sum():
@@ -145,7 +148,6 @@ def test_block_boundary_negative_min():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmin is not implemented")
 def test_block_boundary_argmin():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(3000, size=3000)
@@ -164,7 +166,6 @@ def test_block_boundary_argmin():
     del cuda_content, cuda_depth1
 
 
-@pytest.mark.skip(reason="awkward_reduce_argmax is not implemented")
 def test_block_boundary_argmax():
     rng = np.random.default_rng(seed=42)
     array = rng.integers(3000, size=3000)

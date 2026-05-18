@@ -36,13 +36,19 @@ np = NumpyMetadata.instance()
 def concatenate(
     arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None, attrs=None
 ):
-    """
+    """Returns an array with the given arrays concatenated along an axis.
+
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         mergebool (bool): If True, boolean and numeric data can be combined
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with
@@ -54,10 +60,11 @@ def concatenate(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array with `arrays` concatenated. For `axis=0`, this means that
-    one whole array follows another. For `axis=1`, it means that the `arrays`
-    must have the same lengths and nested lists are each concatenated,
-    element for element, and similarly for deeper levels.
+    Returns:
+        An array with `arrays` concatenated. For `axis=0`, this means that
+        one whole array follows another. For `axis=1`, it means that the `arrays`
+        must have the same lengths and nested lists are each concatenated,
+        element for element, and similarly for deeper levels.
     """
     # Dispatch
     if (
@@ -66,6 +73,7 @@ def concatenate(
     ):
         yield (arrays,)
     else:
+        arrays = list(arrays)
         yield arrays
 
     # Implementation
@@ -77,8 +85,8 @@ def _merge_as_union(
 ) -> ak.contents.UnionArray:
     length = sum(c.length for c in contents)
     first = contents[0]
-    tags = ak.index.Index8.empty(length, first.backend.index_nplike)
-    index = ak.index.Index64.empty(length, first.backend.index_nplike)
+    tags = ak.index.Index8.empty(length, first.backend.nplike)
+    index = ak.index.Index64.empty(length, first.backend.nplike)
 
     offset = 0
     for i, content in enumerate(contents):
@@ -256,20 +264,21 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                         )
                     sizes.append(regulararrays[-1].size)
 
-                prototype = backend.index_nplike.empty(sum(sizes), dtype=np.int8)
+                if len(regulararrays) < 2**7:
+                    prototype = backend.nplike.empty(sum(sizes), dtype=np.int8)
+                    tags_cls = ak.index.Index8
+                else:
+                    prototype = backend.nplike.empty(sum(sizes), dtype=np.int64)
+                    tags_cls = ak.index.Index64
+
                 start = 0
                 for tag, size in enumerate(sizes):
                     prototype[start : start + size] = tag
                     start += size
 
-                if len(regulararrays) < 2**7:
-                    tags_cls = ak.index.Index8
-                else:
-                    tags_cls = ak.index.Index64
-
                 tags = tags_cls(
-                    backend.index_nplike.reshape(
-                        backend.index_nplike.broadcast_to(
+                    backend.nplike.reshape(
+                        backend.nplike.broadcast_to(
                             prototype, (length, prototype.size)
                         ),
                         (-1,),
@@ -301,13 +310,11 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                         nextinputs.append(
                             ak.contents.ListOffsetArray(
                                 ak.index.Index64(
-                                    backend.index_nplike.arange(
-                                        backend.index_nplike.shape_item_as_index(
-                                            length + 1
-                                        ),
+                                    backend.nplike.arange(
+                                        backend.nplike.shape_item_as_index(length + 1),
                                         dtype=np.int64,
                                     ),
-                                    nplike=backend.index_nplike,
+                                    nplike=backend.nplike,
                                 ),
                                 ak.contents.NumpyArray(
                                     backend.nplike.broadcast_to(
@@ -317,26 +324,22 @@ def _impl(arrays, axis, mergebool, highlevel, behavior, attrs):
                             )
                         )
 
-                counts = backend.index_nplike.zeros(
-                    nextinputs[0].length, dtype=np.int64
-                )
+                counts = backend.nplike.zeros(nextinputs[0].length, dtype=np.int64)
                 all_counts = []
                 all_flatten = []
 
                 for x in nextinputs:
                     o, f = x._offsets_and_flattened(axis=1, depth=1)
                     c = o.data[1:] - o.data[:-1]
-                    backend.index_nplike.add(counts, c, maybe_out=counts)
+                    backend.nplike.add(counts, c, maybe_out=counts)
                     all_counts.append(c)
                     all_flatten.append(f)
 
-                offsets = backend.index_nplike.empty(
-                    nextinputs[0].length + 1, dtype=np.int64
-                )
+                offsets = backend.nplike.empty(nextinputs[0].length + 1, dtype=np.int64)
                 offsets[0] = 0
-                backend.index_nplike.cumsum(counts, maybe_out=offsets[1:])
+                backend.nplike.cumsum(counts, maybe_out=offsets[1:])
 
-                offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
+                offsets = ak.index.Index64(offsets, nplike=backend.nplike)
 
                 if len(nextinputs) < 2**7:
                     tags_cls = ak.index.Index8
@@ -439,7 +442,8 @@ def _form_has_type(form, type_):
 
         if form.is_tuple:
             return all(
-                _form_has_type(c, t) for c, t in zip(form.contents, type_.contents)
+                _form_has_type(c, t)
+                for c, t in zip(form.contents, type_.contents, strict=True)
             )
         else:
             return (frozenset(form.fields) == frozenset(type_.fields)) and all(
@@ -452,7 +456,7 @@ def _form_has_type(form, type_):
         for contents in permutations(form.contents):
             if all(
                 _form_has_type(form, type_)
-                for form, type_ in zip(contents, type_.contents)
+                for form, type_ in zip(contents, type_.contents, strict=True)
             ):
                 return True
         return False
@@ -497,7 +501,7 @@ def enforce_concatenated_form(layout, form):
         # Otherwise, we move into the contents
         else:
             index = ak.index.Index64(
-                layout.backend.index_nplike.arange(layout.length, dtype=np.int64)
+                layout.backend.nplike.arange(layout.length, dtype=np.int64)
             )
             layout_to_merge = layout
 
@@ -539,9 +543,7 @@ def enforce_concatenated_form(layout, form):
                     )
 
         return ak.contents.UnionArray(
-            ak.index.Index8(
-                layout.backend.index_nplike.zeros(layout.length, dtype=np.int8)
-            ),
+            ak.index.Index8(layout.backend.nplike.zeros(layout.length, dtype=np.int8)),
             index,
             contents,
             parameters=form._parameters,
@@ -564,7 +566,7 @@ def enforce_concatenated_form(layout, form):
         for form_projection_indices in permutations(form_indices, len(layout.contents)):
             if all(
                 mergeable(c, form_contents[i])
-                for c, i in zip(layout.contents, form_projection_indices)
+                for c, i in zip(layout.contents, form_projection_indices, strict=True)
             ):
                 break
         else:
@@ -574,7 +576,7 @@ def enforce_concatenated_form(layout, form):
 
         next_contents = [
             enforce_concatenated_form(c, form.contents[i])
-            for c, i in zip(layout.contents, form_projection_indices)
+            for c, i in zip(layout.contents, form_projection_indices, strict=True)
         ]
         next_contents.extend(
             [
@@ -583,9 +585,7 @@ def enforce_concatenated_form(layout, form):
             ]
         )
         return ak.contents.UnionArray(
-            ak.index.Index8(
-                layout.backend.index_nplike.astype(layout.tags.data, np.int8)
-            ),
+            ak.index.Index8(layout.backend.nplike.astype(layout.tags.data, np.int8)),
             layout.index.to64(),
             next_contents,
             parameters=form._parameters,
@@ -630,7 +630,7 @@ def enforce_concatenated_form(layout, form):
     # Add index
     elif not layout.is_indexed and form.is_indexed:
         return ak.contents.IndexedArray(
-            ak.index.Index64(layout.backend.index_nplike.arange(layout.length)),
+            ak.index.Index64(layout.backend.nplike.arange(layout.length)),
             enforce_concatenated_form(layout, form.content),
             parameters=form._parameters,
         )

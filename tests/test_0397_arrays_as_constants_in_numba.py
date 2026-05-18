@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import sys
 
 import numpy as np  # noqa: F401
@@ -34,6 +35,7 @@ def test_refcount():
     assert sys.getrefcount(array) == 5
 
     del f1
+    gc.collect()
     assert sys.getrefcount(array) == 4
 
 
@@ -115,7 +117,11 @@ def test_Record():
 
 def test_ArrayBuilder():
     builder = ak.highlevel.ArrayBuilder()
-    assert sys.getrefcount(builder._layout) == 3
+
+    if sys.version_info[:2] <= (3, 13):
+        assert sys.getrefcount(builder._layout) == 3
+    else:
+        assert sys.getrefcount(builder._layout) == 2
 
     @numba.njit
     def f():
@@ -135,17 +141,29 @@ def test_ArrayBuilder():
     assert c.snapshot().to_list() == [1, 2, 3]
     assert builder.snapshot().to_list() == [1, 2, 3]
 
-    assert sys.getrefcount(builder._layout) == 5
+    if sys.version_info[:2] <= (3, 13):
+        assert sys.getrefcount(builder._layout) == 5
+    else:
+        assert sys.getrefcount(builder._layout) == 4
 
     g()
     assert b.snapshot().to_list() == [1, 2, 3, 1, 2, 3]
     assert c.snapshot().to_list() == [1, 2, 3, 1, 2, 3]
     assert builder.snapshot().to_list() == [1, 2, 3, 1, 2, 3]
 
-    assert sys.getrefcount(builder._layout) == 5
+    if sys.version_info[:2] <= (3, 13):
+        assert sys.getrefcount(builder._layout) == 5
+    else:
+        assert sys.getrefcount(builder._layout) == 4
 
     del b._layout
-    assert sys.getrefcount(builder._layout) == 4
+    if sys.version_info[:2] <= (3, 13):
+        assert sys.getrefcount(builder._layout) == 4
+    else:
+        assert sys.getrefcount(builder._layout) == 3
 
     del c._layout
-    assert sys.getrefcount(builder._layout) == 3
+    if sys.version_info[:2] <= (3, 13):
+        assert sys.getrefcount(builder._layout) == 3
+    else:
+        assert sys.getrefcount(builder._layout) == 2

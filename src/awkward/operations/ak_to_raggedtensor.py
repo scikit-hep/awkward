@@ -15,9 +15,7 @@ np = NumpyMetadata.instance()
 def to_raggedtensor(array):
     """
     Args:
-        array: Array-like data. May be a high level #ak.Array,
-            or low-level #ak.contents.ListOffsetArray, #ak.contents.ListArray,
-            #ak.contents.RegularArray, #ak.contents.NumpyArray
+        array: Array-like data (anything #ak.to_layout recognizes).
 
     Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
     into a ragged tensor, if possible.
@@ -46,7 +44,12 @@ or
 
     # unwrap the awkward array if it was made with ak.Array function
     # also transforms a python list to awkward array
-    array = ak.to_layout(array, allow_record=False)
+    array = ak.to_layout(
+        ak.operations.materialize(array)
+        if isinstance(array, (ak.highlevel.Array, ak.contents.Content))
+        else array,
+        allow_record=False,
+    )
 
     # keep the same device
     ak_device = ak.backend(array)

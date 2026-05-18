@@ -2,6 +2,11 @@
 
 cmake_minimum_required(VERSION 3.15...3.30)
 
+if(NOT DEFINED SKBUILD)
+  set(SKBUILD_PROJECT_NAME awkward_cpp)
+  set(SKBUILD_PROJECT_VERSION 0.0.0)
+endif()
+
 # Project must be near the top
 project(
   ${SKBUILD_PROJECT_NAME}
@@ -33,12 +38,12 @@ Please check https://github.com/scikit-hep/awkward#installation-for-developers t
 endif()
 
 # Setup the RPATH for built libraries
-set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 if(APPLE)
   set(CMAKE_INSTALL_RPATH "@loader_path")
 else()
   set(CMAKE_INSTALL_RPATH "\$ORIGIN")
 endif()
+set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 
 # Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)],
 # libawkward (C++), and Python modules.
@@ -57,6 +62,18 @@ target_include_directories(awkward-parent INTERFACE rapidjson/include)
 # C++ dependencies (header-only): GrowableBuffer
 add_subdirectory(header-only EXCLUDE_FROM_ALL)
 target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
+
+# WASM needs exceptions enabled
+if(CMAKE_SYSTEM_NAME MATCHES Emscripten)
+  set_property(
+    TARGET awkward-parent
+    APPEND
+    PROPERTY INTERFACE_LINK_OPTIONS -fexceptions)
+  set_property(
+    TARGET awkward-parent
+    APPEND
+    PROPERTY INTERFACE_COMPILE_OPTIONS -fexceptions)
+endif()
 
 # First tier: cpu-kernels
 add_library(awkward-cpu-kernels SHARED ${CPU_KERNEL_SOURCES})
@@ -104,6 +121,11 @@ set_target_properties(
   PROPERTIES CXX_VISIBILITY_PRESET hidden
              VISIBILITY_INLINES_HIDDEN ON
              CXX_EXTENSIONS NO)
+
+# This has to be passed explicitly to make Pyodide 0.28 happy
+if(CMAKE_SYSTEM_NAME MATCHES Emscripten)
+  target_link_options(_ext PRIVATE "-Wl,-rpath=\$ORIGIN")
+endif()
 
 # Install pure-python files
 file(GLOB_RECURSE PYTHON_SOURCES "src/${SKBUILD_PROJECT_NAME}/*.py")

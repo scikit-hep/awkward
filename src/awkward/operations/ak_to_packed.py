@@ -23,7 +23,8 @@ def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array with the same type and values as the input, but with packed inner structures:
+    Returns an array with the same type and values as the input,
+    with all virtual buffers materialized (see #ak.materialize) and inner structures packed:
 
     - #ak.contents.NumpyArray becomes C-contiguous (if it isn't already)
     - #ak.contents.RegularArray trims unreachable content

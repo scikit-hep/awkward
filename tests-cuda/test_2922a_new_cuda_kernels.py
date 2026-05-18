@@ -20,8 +20,11 @@ to_list = ak.operations.to_list
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
     yield
+    try:
+        cp.cuda.Device().synchronize()  # wait for all kernels
+    except cp.cuda.runtime.CUDARuntimeError as e:
+        print("GPU error during sync:", e)
     cp._default_memory_pool.free_all_blocks()
-    cp.cuda.Device().synchronize()
 
 
 def test_0184_concatenate_operation_records():
@@ -446,7 +449,7 @@ def test_2660_expected_container_keys_from_form_UnionArray_NumpyArray():
 
     cuda_array = ak.to_backend(array, "cuda")
 
-    form, length, container = ak.to_buffers(cuda_array)
+    form, _length, container = ak.to_buffers(cuda_array)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -474,7 +477,7 @@ def test_2660_expected_container_keys_from_form_UnionArray_RecordArray_NumpyArra
 
     cuda_array = ak.to_backend(array, "cuda")
 
-    form, length, container = ak.to_buffers(cuda_array)
+    form, _length, container = ak.to_buffers(cuda_array)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -736,7 +739,7 @@ def test_2410_string_broadcast_deep_string_string():
     cuda_a = ak.to_backend(a, "cuda")
     cuda_b = ak.to_backend(b, "cuda")
 
-    left, right = ak.broadcast_arrays(cuda_a, cuda_b)
+    _left, right = ak.broadcast_arrays(cuda_a, cuda_b)
     assert right.to_list() == [["x", "x"], ["y", "y", "y", "y"]]
 
 
@@ -747,7 +750,7 @@ def test_2410_string_broadcast_deep_numbers_string():
     cuda_a = ak.to_backend(a, "cuda")
     cuda_b = ak.to_backend(b, "cuda")
 
-    left, right = ak.broadcast_arrays(cuda_a, cuda_b)
+    _left, right = ak.broadcast_arrays(cuda_a, cuda_b)
     assert right.to_list() == [["x", "x"], ["y", "y", "y", "y"]]
 
 
@@ -1003,7 +1006,8 @@ def test_2064_fill_none_record_axis_last():
 
 
 def test_2064_fill_none_record_option_outside_record():
-    record = ak.zip({"x": [1, 4], "y": [2, 3]}).mask[[True, False]]
+    record = ak.zip({"x": [1, 4], "y": [2, 3]})
+    record = record.mask[[True, False]]
 
     cuda_record = ak.to_backend(record, "cuda")
 

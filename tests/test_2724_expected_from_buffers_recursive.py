@@ -17,7 +17,7 @@ layout = ak.contents.listoffsetarray.ListOffsetArray(
 
 
 def test_recursive():
-    form, length, container = ak.to_buffers(layout)
+    form, _length, _container = ak.to_buffers(layout)
     assert form.expected_from_buffers(recursive=True) == {
         "node0-offsets": np.dtype("int64"),
         "node1-data": np.dtype("float64"),
@@ -25,7 +25,7 @@ def test_recursive():
 
 
 def test_non_recursive():
-    form, length, container = ak.to_buffers(layout)
+    form, _length, _container = ak.to_buffers(layout)
     assert form.expected_from_buffers(recursive=False) == {
         "node0-offsets": np.dtype("int64")
     }

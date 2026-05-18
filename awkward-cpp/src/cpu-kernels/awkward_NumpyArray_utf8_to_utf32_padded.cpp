@@ -6,9 +6,10 @@
 #include "awkward/unicode.h"
 
 
+template <typename T>
 ERROR awkward_NumpyArray_utf8_to_utf32_padded(
   const uint8_t *fromptr,
-  const int64_t *fromoffsets,
+  const T *fromoffsets,
   int64_t offsetslength,
   int64_t maxcodepoints,
   uint32_t *toptr) {
@@ -70,4 +71,46 @@ ERROR awkward_NumpyArray_utf8_to_utf32_padded(
   }
 
   return success();
+}
+
+ERROR awkward_NumpyArray_utf8_to_utf32_padded_int32(
+  const uint8_t *fromptr,
+  const int32_t *fromoffsets,
+  int64_t offsetslength,
+  int64_t maxcodepoints,
+  uint32_t *toptr) {
+  return awkward_NumpyArray_utf8_to_utf32_padded<int32_t>(
+    fromptr,
+    fromoffsets,
+    offsetslength,
+    maxcodepoints,
+    toptr);
+}
+
+ERROR awkward_NumpyArray_utf8_to_utf32_padded_uint32(
+  const uint8_t *fromptr,
+  const uint32_t *fromoffsets,
+  int64_t offsetslength,
+  int64_t maxcodepoints,
+  uint32_t *toptr) {
+  return awkward_NumpyArray_utf8_to_utf32_padded<uint32_t>(
+    fromptr,
+    fromoffsets,
+    offsetslength,
+    maxcodepoints,
+    toptr);
+}
+
+ERROR awkward_NumpyArray_utf8_to_utf32_padded_int64(
+  const uint8_t *fromptr,
+  const int64_t *fromoffsets,
+  int64_t offsetslength,
+  int64_t maxcodepoints,
+  uint32_t *toptr) {
+  return awkward_NumpyArray_utf8_to_utf32_padded<int64_t>(
+    fromptr,
+    fromoffsets,
+    offsetslength,
+    maxcodepoints,
+    toptr);
 }

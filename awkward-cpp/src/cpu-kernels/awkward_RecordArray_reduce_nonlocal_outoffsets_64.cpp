@@ -46,7 +46,7 @@ ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
   }
 
   // Replace unique value with index of appended empty lists
-  for (i = 0; i <= outlength; i++) {
+  for (i = 0; i < outlength; i++) {
     if (outcarry[i] == -1) {
         outcarry[i] = k_sublist++;
     }

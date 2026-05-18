@@ -19,7 +19,7 @@ def test_ArrayBuilder_behavior():
     SOME_ATTRS = {"FOO": "BAR"}
     builder = ak.ArrayBuilder(behavior=SOME_ATTRS)
 
-    assert builder.behavior is SOME_ATTRS
+    assert builder.behavior == SOME_ATTRS
     assert func(builder).behavior == SOME_ATTRS
 
 

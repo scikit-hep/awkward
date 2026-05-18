@@ -265,6 +265,6 @@ def faster_example():
 
 data, mask = faster_example()
 
-array = ak.Array(data).mask[mask]
+array = ak.mask(data, mask)
 array
 ```

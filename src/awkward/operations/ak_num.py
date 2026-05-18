@@ -32,10 +32,15 @@ def num(
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -117,11 +122,11 @@ def _impl(
     axis = regularize_axis(axis, none_allowed=False)
 
     if maybe_posaxis(layout, axis, 1) == 0:
-        index_nplike = layout.backend.index_nplike
+        nplike = layout.backend.nplike
         if isinstance(layout, ak.record.Record):
-            return index_nplike.asarray(index_nplike.shape_item_as_index(1))
+            return nplike.asarray(nplike.shape_item_as_index(1))
         else:
-            return index_nplike.asarray(index_nplike.shape_item_as_index(layout.length))
+            return nplike.asarray(nplike.shape_item_as_index(layout.length))
 
     def action(layout, depth, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)

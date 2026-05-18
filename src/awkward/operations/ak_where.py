@@ -43,7 +43,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs
     function.
 
     In the three-argument form, it acts as a vectorized ternary operator:
-    `condition`, `x`, and `y` must all have the same length and
+    `condition`, `x`, and `y` must all have the same length and::
 
         output[i] = x[i] if condition[i] else y[i]
 
@@ -74,7 +74,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs
 def _impl1(condition, mergebool, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(condition, allow_record=False, primitive_policy="error")
-    out = layout.backend.nplike.nonzero(layout.to_backend_array(allow_missing=False))
+    out = layout.backend.nplike.nonzero(layout.to_backend_array(allow_missing=True))
 
     return tuple(
         ctx.wrap(ak.contents.NumpyArray(x, backend=layout.backend), highlevel=highlevel)
@@ -93,11 +93,11 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
     def action(inputs, backend, **kwargs):
         x, y, condition = inputs
         if isinstance(condition, ak.contents.NumpyArray):
-            npcondition = backend.index_nplike.asarray(condition.data)
+            npcondition = backend.nplike.asarray(condition.data)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
-                backend.index_nplike.arange(tags.length, dtype=np.int64),
-                nplike=backend.index_nplike,
+                backend.nplike.arange(tags.length, dtype=np.int64),
+                nplike=backend.nplike,
             )
             if not isinstance(x, ak.contents.Content):
                 x = ak.contents.NumpyArray(

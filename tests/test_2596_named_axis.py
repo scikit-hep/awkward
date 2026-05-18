@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import sys
-
 import numpy as np
 import pytest
 
@@ -124,6 +122,12 @@ def test_named_axis_indexing():
     assert (
         named_array[()].named_axis == named_array.named_axis == {"x": 0, "y": 1, "z": 2}
     )
+
+    # single int as index slices always only first dim
+    assert named_array[0].named_axis == {"y": 0, "z": 1}
+    assert named_array[1].named_axis == {"y": 0, "z": 1}
+    assert named_array[2].named_axis == {"y": 0, "z": 1}
+    assert named_array[3].named_axis == {"y": 0, "z": 1}
 
     assert named_array[None, :, :, :].named_axis == {"x": 1, "y": 2, "z": 3}
     assert named_array[:, None, :, :].named_axis == {"x": 0, "y": 2, "z": 3}
@@ -375,11 +379,6 @@ def test_negative_named_axis_indexing():
     )
 
 
-@pytest.mark.xfail(
-    sys.platform == "win32",
-    reason="right-broadcasting (NumPy-style) behaves differently for 32-bit windows",
-    strict=False,
-)
 def test_named_axis_right_broadcasting():
     # [NumPy-style] rightbroadcasting: (n, m) -> (1, n, m)
     a = ak.Array([1])  # (1,)
@@ -470,7 +469,7 @@ def test_named_axis_binary_ufuncs():
     b = ak.with_named_axis(array, named_axis=("y", None))
     with pytest.raises(
         ValueError,
-        match="The named axes are incompatible. Got: x and y for positional axis 0",
+        match=r"The named axes are incompatible. Got: x and y for positional axis 0",
     ):
         _ = a + b
 
@@ -478,7 +477,7 @@ def test_named_axis_binary_ufuncs():
     b = ak.with_named_axis(array, named_axis=(None, "y"))
     with pytest.raises(
         ValueError,
-        match="The named axes are incompatible. Got: x and y for positional axis 1",
+        match=r"The named axes are incompatible. Got: x and y for positional axis 1",
     ):
         _ = a + b
 
@@ -1085,6 +1084,7 @@ def test_negative_named_axis_ak_cartesian():
     ).named_axis == {"x": -2, "y": -1}
 
 
+@pytest.mark.filterwarnings("ignore:The global interpreter lock")
 def test_named_axis_ak_categories():
     pyarrow = pytest.importorskip("pyarrow")  # noqa: F841
 
@@ -1143,7 +1143,7 @@ def test_named_axis_ak_concatenate():
 
     with pytest.raises(
         ValueError,
-        match="The named axes are incompatible. Got: x and y for positional axis 0",
+        match=r"The named axes are incompatible. Got: x and y for positional axis 0",
     ):
         ak.concatenate(
             [
@@ -1155,7 +1155,7 @@ def test_named_axis_ak_concatenate():
 
     with pytest.raises(
         ValueError,
-        match="The named axes are incompatible. Got: x and y for positional axis 1",
+        match=r"The named axes are incompatible. Got: x and y for positional axis 1",
     ):
         ak.concatenate(
             [

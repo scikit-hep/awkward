@@ -1401,6 +1401,61 @@ def test_UnionArray():
         == ak._do.combinations(v2_array, 2, axis=-1).form
     )
 
+    v2_array = ak.contents.unionarray.UnionArray(
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
+        [
+            ak.highlevel.Array(
+                [[0, 1, 2, 3], [], [4, 5, 6], [7], [8, 9, 10, 11, 12]]
+            ).layout,
+            ak.highlevel.Array(
+                [
+                    [0.0, 1.1, 2.2, 3.3],
+                    [],
+                    [4.4, 5.5, 6.6],
+                    [7.7],
+                    [8.8, 9.9, 10.0, 11.1, 12.2],
+                ]
+            ).layout,
+        ],
+    )
+
+    assert to_list(ak._do.combinations(v2_array, 2, axis=1)) == [
+        [
+            (8.8, 9.9),
+            (8.8, 10.0),
+            (8.8, 11.1),
+            (8.8, 12.2),
+            (9.9, 10.0),
+            (9.9, 11.1),
+            (9.9, 12.2),
+            (10.0, 11.1),
+            (10.0, 12.2),
+            (11.1, 12.2),
+        ],
+        [],
+        [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)],
+        [],
+        [(4.4, 5.5), (4.4, 6.6), (5.5, 6.6)],
+        [(4, 5), (4, 6), (5, 6)],
+        [
+            (8.8, 9.9),
+            (8.8, 10.0),
+            (8.8, 11.1),
+            (8.8, 12.2),
+            (9.9, 10.0),
+            (9.9, 11.1),
+            (9.9, 12.2),
+            (10.0, 11.1),
+            (10.0, 12.2),
+            (11.1, 12.2),
+        ],
+    ]
+    assert (
+        ak._do.combinations(v2_array.to_typetracer(), 2, axis=1).form
+        == ak._do.combinations(v2_array, 2, axis=1).form
+    )
+
 
 def test_UnmaskedArray():
     v2_array = ak.contents.unmaskedarray.UnmaskedArray(

@@ -3,12 +3,12 @@
 ## Papers
 
    * [Awkward Arrays in Python, C++, and Numba](https://doi.org/10.1051/epjconf/202024505023) (published in EPJ Web of Conferences; [arXiv](https://arxiv.org/abs/2001.06307)) on July 2, 2020.
-   * [AwkwardForth: accelerating Uproot with an internal DSL](https://doi.org/10.1051/epjconf/202125103002) (published in EPJ Web of Conferences; [arXiv](https://arxiv.org/abs/2102.13516) on February 24, 2021.
+   * [AwkwardForth: accelerating Uproot with an internal DSL](https://doi.org/10.1051/epjconf/202125103002) (published in EPJ Web of Conferences; [arXiv](https://arxiv.org/abs/2102.13516)) on February 24, 2021.
    * [An array-oriented Python interface for FastJet](https://doi.org/10.1088/1742-6596/2438/1/012011) (published in ACAT 2021 proceedings; [arXiv](https://arxiv.org/abs/2202.03911)) on February 8, 2022.
-   * [Awkward to RDataFrame and back](https://doi.org/10.48550/arXiv.2302.09860) (to be published in ACAT 2022 proceedings; [arXiv](https://arxiv.org/abs/2302.09860) on February 20, 2023.
-   * [Using a DSL to read ROOT TTrees faster in Uproot](https://doi.org/10.48550/arXiv.2303.02202) (to be published in ACAT 2022 proceedings; [arXiv](https://arxiv.org/abs/2303.02202) on March 3, 2023.
-   * [The Awkward World of Python and C++](https://doi.org/10.48550/arXiv.2303.02205) (to be published in ACAT 2022 proceedings; [arXiv](https://arxiv.org/abs/2303.02205) on March 3, 2023.
-   * [Awkward Just-In-Time (JIT) Compilation: A Developer's Experience](https://doi.org/10.48550/arXiv.2310.01461) (to be published in CHEP 2023 proceedings; [arXiv](https://arxiv.org/abs/2310.01461) on October 2, 2023.
+   * [Awkward to RDataFrame and back](https://doi.org/10.48550/arXiv.2302.09860) (to be published in ACAT 2022 proceedings; [arXiv](https://arxiv.org/abs/2302.09860)) on February 20, 2023.
+   * [Using a DSL to read ROOT TTrees faster in Uproot](https://doi.org/10.48550/arXiv.2303.02202) (to be published in ACAT 2022 proceedings; [arXiv](https://arxiv.org/abs/2303.02202)) on March 3, 2023.
+   * [The Awkward World of Python and C++](https://doi.org/10.48550/arXiv.2303.02205) (to be published in ACAT 2022 proceedings; [arXiv](https://arxiv.org/abs/2303.02205)) on March 3, 2023.
+   * [Awkward Just-In-Time (JIT) Compilation: A Developer's Experience](https://doi.org/10.1051/epjconf/202429506003) (published in EPJ Web of Conferences; [arXiv](https://arxiv.org/abs/2310.01461)) on October 6, 2024.
 
 ## Talks
 
@@ -24,6 +24,7 @@
    * [Awkward Array in Tiled](https://indico.cern.ch/event/1311780/) on October 25, 2023: integration with the Tiled database.
    * [Awkward Array in Julia](https://indico.cern.ch/event/1292759/contributions/5613061/) on November 6, 2023: AwkwardArray.jl.
    * [Awkward family (poster)](https://github.com/jpivarski-talks/2024-03-11-acat2024-awkward-family-poster/blob/main/pivarski-acat2024-poster.pdf) on March 11, 2024: the ecosystem built around Awkward Array.
+   * [MODE workshop talk](https://indi.to/8WZTS) on June 11, 2025: differentiable computation with Awkward Array and JAX.
 
 ## Tutorials
 

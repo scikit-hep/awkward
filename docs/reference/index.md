@@ -36,4 +36,5 @@ Although many of the functions have the same names and interfaces, the `dask-awk
 
 ```{eval-rst}
 .. include:: toctree.txt
+
 ```

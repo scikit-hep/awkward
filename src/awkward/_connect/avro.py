@@ -199,7 +199,7 @@ class ReadAvroFT:
         elif dtype["type"] == "boolean":
             return f"0 node{count}-data <- stack "
         elif dtype["type"] == "bytes":
-            return f"1 node{count}-offsets +<- stack 97 node{count+1}-data <- stack "
+            return f"1 node{count}-offsets +<- stack 97 node{count + 1}-data <- stack "
         elif dtype["type"] == "string":
             return f"0 node{count}-offsets +<- stack "
         elif dtype["type"] == "enum":
@@ -224,18 +224,18 @@ class ReadAvroFT:
         if file["type"] == "null":
             aform = ak.forms.IndexedOptionForm(
                 "i64",
-                ak.forms.EmptyForm(form_key=f"node{form_next_id+1}"),
+                ak.forms.EmptyForm(form_key=f"node{form_next_id + 1}"),
                 form_key=f"node{form_next_id}",
             )
-            declarations.append(f"output node{form_next_id+1}-data uint8 \n")
+            declarations.append(f"output node{form_next_id + 1}-data uint8 \n")
             declarations.append(f"output node{form_next_id}-index int64 \n")
-            form_keys.append(f"node{form_next_id+1}-data")
+            form_keys.append(f"node{form_next_id + 1}-data")
             form_keys.append(f"node{form_next_id}-index")
             exec_code.append(
                 "\n" + "    " * ind + f"-1 node{form_next_id}-index <- stack"
             )
             exec_code.append(
-                "\n" + "    " * ind + f"0 node{form_next_id+1}-data <- stack"
+                "\n" + "    " * ind + f"0 node{form_next_id + 1}-data <- stack"
             )
 
             return (
@@ -292,14 +292,14 @@ class ReadAvroFT:
                 ak.forms.NumpyForm(
                     "uint8",
                     parameters={"__array__": "char"},
-                    form_key=f"node{form_next_id+1}",
+                    form_key=f"node{form_next_id + 1}",
                 ),
                 parameters={"__array__": "string"},
                 form_key=f"node{form_next_id}",
             )
-            declarations.append(f"output node{form_next_id+1}-data uint8 \n")
+            declarations.append(f"output node{form_next_id + 1}-data uint8 \n")
             declarations.append(f"output node{form_next_id}-offsets int64 \n")
-            form_keys.append(f"node{form_next_id+1}-data")
+            form_keys.append(f"node{form_next_id + 1}-data")
             form_keys.append(f"node{form_next_id}-offsets")
             init_code.append(f"0 node{form_next_id}-offsets <- stack\n")
 
@@ -310,7 +310,7 @@ class ReadAvroFT:
                 "\n" + "    " * ind + f"dup node{form_next_id}-offsets +<- stack\n"
             )
             exec_code.append(
-                "\n" + "    " * (ind + 1) + f"stream #B-> node{form_next_id+1}-data"
+                "\n" + "    " * (ind + 1) + f"stream #B-> node{form_next_id + 1}-data"
             )
 
             if self.is_primitive:
@@ -449,15 +449,15 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "bytes":
-            declarations.append(f"output node{form_next_id+1}-data uint8\n")
+            declarations.append(f"output node{form_next_id + 1}-data uint8\n")
             declarations.append(f"output node{form_next_id}-offsets int64\n")
-            form_keys.append(f"node{form_next_id+1}-data")
+            form_keys.append(f"node{form_next_id + 1}-data")
             form_keys.append(f"node{form_next_id}-offsets")
             aform = ak.forms.ListOffsetForm(
                 "i64",
                 ak.forms.NumpyForm(
                     "uint8",
-                    form_key=f"node{form_next_id+1}",
+                    form_key=f"node{form_next_id + 1}",
                     parameters={"__array__": "byte"},
                 ),
                 parameters={"__array__": "bytestring"},
@@ -470,7 +470,7 @@ class ReadAvroFT:
                 "\n" + "    " * ind + f"dup node{form_next_id}-offsets +<- stack\n"
             )
             exec_code.append(
-                "\n" + "    " * (ind + 1) + f"stream #B-> node{form_next_id+1}-data"
+                "\n" + "    " * (ind + 1) + f"stream #B-> node{form_next_id + 1}-data"
             )
 
             return (
@@ -758,12 +758,12 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "fixed":
-            form_keys.append(f"node{form_next_id+1}-data")
-            declarations.append(f"output node{form_next_id+1}-data uint8 \n")
+            form_keys.append(f"node{form_next_id + 1}-data")
+            declarations.append(f"output node{form_next_id + 1}-data uint8 \n")
             aform = ak.forms.RegularForm(
                 ak.forms.NumpyForm(
                     "uint8",
-                    form_key=f"node{form_next_id+1}",
+                    form_key=f"node{form_next_id + 1}",
                     parameters={"__array__": "byte"},
                 ),
                 parameters={"__array__": "bytestring"},
@@ -773,7 +773,7 @@ class ReadAvroFT:
 
             temp = file["size"]
             exec_code.append(
-                "\n" + "    " * ind + f"{temp} stream #B-> node{form_next_id+1}-data"
+                "\n" + "    " * ind + f"{temp} stream #B-> node{form_next_id + 1}-data"
             )
 
             return (
@@ -794,10 +794,10 @@ class ReadAvroFT:
                     ak.forms.NumpyForm(
                         "uint8",
                         parameters={"__array__": "char"},
-                        form_key=f"node{form_next_id+2}",
+                        form_key=f"node{form_next_id + 2}",
                     ),
                     parameters={"__array__": "string"},
-                    form_key=f"node{form_next_id+1}",
+                    form_key=f"node{form_next_id + 1}",
                 ),
                 parameters={"__array__": "categorical"},
                 form_key=f"node{form_next_id}",
@@ -815,10 +815,10 @@ class ReadAvroFT:
                 for elem in x:
                     dat.append(np.uint8(ord(elem)))
 
-            container[f"node{form_next_id+1}-offsets"] = np.array(
+            container[f"node{form_next_id + 1}-offsets"] = np.array(
                 offset, dtype=np.int64
             )
-            container[f"node{form_next_id+2}-data"] = np.array(dat, dtype=np.uint8)
+            container[f"node{form_next_id + 2}-data"] = np.array(dat, dtype=np.uint8)
             exec_code.append(
                 "\n" + "    " * ind + f"stream zigzag-> node{form_next_id}-index"
             )

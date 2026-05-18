@@ -9,29 +9,29 @@ import awkward as ak
 
 def test_EmptyArray():
     a = ak.contents.emptyarray.EmptyArray()
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
 
 def test_NumpyArray_to_RegularArray():
     a = ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(2, 3, 5)).layout
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
     b = a.to_RegularArray()
-    form, length, container = ak.to_buffers(b)
+    form, _length, container = ak.to_buffers(b)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
     a = ak.operations.from_numpy(np.arange(2 * 0 * 5).reshape(2, 0, 5)).layout
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
     b = a.to_RegularArray()
-    form, length, container = ak.to_buffers(b)
+    form, _length, container = ak.to_buffers(b)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -40,14 +40,14 @@ def test_NumpyArray():
     a = ak.contents.numpyarray.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
     b = ak.contents.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
     )
-    form, length, container = ak.to_buffers(b)
+    form, _length, container = ak.to_buffers(b)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -59,14 +59,14 @@ def test_RegularArray_NumpyArray():
         ),
         3,
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
     b = ak.contents.regulararray.RegularArray(
         ak.contents.emptyarray.EmptyArray(), 0, zeros_length=10
     )
-    form, length, container = ak.to_buffers(b)
+    form, _length, container = ak.to_buffers(b)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -81,7 +81,7 @@ def test_ListArray_NumpyArray():
             np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
         ),
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -94,7 +94,7 @@ def test_ListOffsetArray_NumpyArray():
             np.array([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])
         ),
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -108,7 +108,7 @@ def test_RecordArray_NumpyArray():
         ],
         ["x", "y"],
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -120,17 +120,17 @@ def test_RecordArray_NumpyArray():
         ],
         None,
     )
-    form, length, container = ak.to_buffers(b)
+    form, _length, container = ak.to_buffers(b)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
     c = ak.contents.recordarray.RecordArray([], [], 10)
-    form, length, container = ak.to_buffers(c)
+    form, _length, container = ak.to_buffers(c)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
     d = ak.contents.recordarray.RecordArray([], None, 10)
-    form, length, container = ak.to_buffers(d)
+    form, _length, container = ak.to_buffers(d)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -141,7 +141,7 @@ def test_IndexedArray_NumpyArray():
         ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
         ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -152,7 +152,7 @@ def test_IndexedOptionArray_NumpyArray():
         ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
         ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -164,7 +164,7 @@ def test_ByteMaskedArray_NumpyArray():
         ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -174,7 +174,7 @@ def test_ByteMaskedArray_NumpyArray():
         ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=False,
     )
-    form, length, container = ak.to_buffers(b)
+    form, _length, container = ak.to_buffers(b)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -213,7 +213,7 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -250,7 +250,7 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    form, length, container = ak.to_buffers(b)
+    form, _length, container = ak.to_buffers(b)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -290,7 +290,7 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    form, length, container = ak.to_buffers(c)
+    form, _length, container = ak.to_buffers(c)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -330,7 +330,7 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    form, length, container = ak.to_buffers(d)
+    form, _length, container = ak.to_buffers(d)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -341,7 +341,7 @@ def test_UnmaskedArray_NumpyArray():
             np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
         )
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -357,7 +357,7 @@ def test_UnionArray_NumpyArray():
             ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -375,7 +375,7 @@ def test_RegularArray_RecordArray_NumpyArray():
         ),
         3,
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -386,7 +386,7 @@ def test_RegularArray_RecordArray_NumpyArray():
         0,
         zeros_length=10,
     )
-    form, length, container = ak.to_buffers(b)
+    form, _length, container = ak.to_buffers(b)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -406,7 +406,7 @@ def test_ListArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -424,7 +424,7 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -442,7 +442,7 @@ def test_IndexedArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -460,7 +460,7 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -479,7 +479,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ),
         valid_when=True,
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -496,7 +496,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ),
         valid_when=False,
     )
-    form, length, container = ak.to_buffers(b)
+    form, _length, container = ak.to_buffers(b)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -554,7 +554,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -611,7 +611,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    form, length, container = ak.to_buffers(b)
+    form, _length, container = ak.to_buffers(b)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -671,7 +671,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    form, length, container = ak.to_buffers(c)
+    form, _length, container = ak.to_buffers(c)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -731,7 +731,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    form, length, container = ak.to_buffers(d)
+    form, _length, container = ak.to_buffers(d)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -747,7 +747,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
             ["nest"],
         )
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype
 
@@ -772,6 +772,6 @@ def test_UnionArray_RecordArray_NumpyArray():
             ),
         ],
     )
-    form, length, container = ak.to_buffers(a)
+    form, _length, container = ak.to_buffers(a)
     for name, dtype in form.expected_from_buffers().items():
         assert container[name].dtype == dtype

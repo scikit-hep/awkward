@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import io
 import math
 import re
 from collections.abc import Callable
 
 import awkward as ak
 from awkward._layout import wrap_layout
+from awkward._namedaxis import _prettify_named_axes
 from awkward._nplikes.numpy import Numpy, NumpyMetadata
+from awkward._nplikes.shape import unknown_length
 from awkward._typing import TYPE_CHECKING, Any, TypeAlias, TypedDict
 
 if TYPE_CHECKING:
@@ -43,7 +46,7 @@ numpy = Numpy.instance()
 
 
 def half(integer: int) -> int:
-    return int(math.ceil(integer / 2))
+    return math.ceil(integer / 2)
 
 
 def alternate(length: int):
@@ -76,9 +79,16 @@ class PlaceholderValue:
         return "??"
 
 
+class VirtualValue:
+    def __str__(self):
+        return "??"
+
+
 def get_at(data: Content, index: int):
     if data._layout._is_getitem_at_placeholder():
         return PlaceholderValue()
+    elif data._layout._is_getitem_at_virtual():
+        return VirtualValue()
     out = data._layout._getitem_at(index)
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
@@ -93,6 +103,11 @@ def get_at(data: Content, index: int):
 
 
 def get_field(data: Content, field: str):
+    if isinstance(data._layout, ak.record.Record):
+        if data._layout._array.content(field)._is_getitem_at_placeholder():
+            return PlaceholderValue()
+        elif data._layout._array.content(field)._is_getitem_at_virtual():
+            return VirtualValue()
     out = data._layout._getitem_field(field)
     if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
@@ -433,3 +448,71 @@ def valuestr(
 
     else:
         raise AssertionError(type(data))
+
+
+def bytes_repr(nbytes: int) -> str:
+    count, unit = (
+        (f"{nbytes / 1e9:,.1f}", "GB")
+        if nbytes > 1e9
+        else (f"{nbytes / 1e6:,.1f}", "MB")
+        if nbytes > 1e6
+        else (f"{nbytes / 1e3:,.1f}", "kB")
+        if nbytes > 1e3
+        else (f"{nbytes:,}", "B")
+    )
+
+    return f"{count} {unit}"
+
+
+def highlevel_array_show_rows(
+    array,
+    limit_rows=20,
+    limit_cols=80,
+    type=False,
+    named_axis=False,
+    nbytes=False,
+    backend=False,
+    *,
+    formatter=None,
+    precision=3,
+) -> list[str]:
+    rows = []
+    formatter_impl = Formatter(formatter, precision=precision)
+
+    array_line = valuestr(array, limit_rows, limit_cols, formatter=formatter_impl)
+    rows.append(array_line)
+
+    if type:
+        typeio = io.StringIO()
+        array.type.show(stream=typeio)
+        type_line = "type: "
+        type_line += typeio.getvalue().removesuffix("\n")
+        # crop type line if too long
+        if len(type_line) > limit_cols:
+            type_line = type_line[: limit_cols - 3] + "..."
+        rows.append(type_line)
+
+    # other info
+    if named_axis and array.named_axis:
+        named_axis_line = "named axis: "
+        named_axis_line += _prettify_named_axes(
+            array.named_axis, delimiter=", ", maxlen=None
+        )
+        # crop named axis line if too long
+        if len(named_axis_line) > limit_cols:
+            named_axis_line = named_axis_line[: limit_cols - 3] + "..."
+        rows.append(named_axis_line)
+    if nbytes:
+        if array.nbytes is unknown_length:
+            nbytes_line = "nbytes: unknown"
+        else:
+            nbytes_line = f"nbytes: {bytes_repr(array.nbytes)}"
+        rows.append(nbytes_line)
+    if backend:
+        backend_line = f"backend: {array.layout.backend.name}"
+        rows.append(backend_line)
+
+    # make sure the type is always the second row, don't move it
+    if type:
+        assert rows[1].startswith("type: ")
+    return rows

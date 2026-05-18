@@ -35,7 +35,6 @@ def test_alternative_specifiers():
 
 
 def test_columns_with_dots_from_parquet(tmp_path):
-    # ruff: noqa: F841
     _pq = pytest.importorskip("pyarrow.parquet")
     array = array_with_dotted_fields()
     parquet_file = os.path.join(tmp_path, "test_3088_array1.parquet")

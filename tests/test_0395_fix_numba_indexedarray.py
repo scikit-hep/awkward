@@ -137,7 +137,8 @@ def test_zip():
     def f1(array1, array2):
         out = np.zeros(len(array1), np.float64)
         i = 0
-        for a1, a2 in zip(array1, array2):
+        # numba doesn't support strict= on zip
+        for a1, a2 in zip(array1, array2):  # noqa: B905
             out[i] = a1 - a2
             i += 1
         return out

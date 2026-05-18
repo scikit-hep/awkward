@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import enum
 import threading
+import warnings
 import weakref
 
 import awkward as ak
@@ -33,7 +34,10 @@ def register_and_check():
     Register Awkward Array node types with JAX's tree mechanism.
     """
     try:
-        import jax  # noqa: TID251, F401
+        import jax  # noqa: TID251
+
+        jax.config.update("jax_platform_name", "cpu")
+        jax.config.update("jax_enable_x64", True)
 
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
@@ -48,6 +52,28 @@ def register_and_check():
         ) from None
 
     _register()
+    warnings.warn(
+        "The JAX backend is deprecated and will be removed in a future release of Awkward Array. "
+        "Please plan to migrate your code accordingly.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
+
+def ensure_jax_config():
+    import jax  # noqa: TID251
+
+    if not jax.config.read("jax_enable_x64"):
+        raise RuntimeError(
+            "The JAX backend requires 64-bit dtypes. You can enable them with"
+            " jax.config.update('jax_enable_x64', True) or by setting JAX_ENABLE_X64=1."
+        )
+
+    if jax.default_backend() != "cpu":
+        raise RuntimeError(
+            "The JAX backend requires the JAX CPU backend to be the default. You can make it the default"
+            " with jax.config.update('jax_platform_name', 'cpu') or by setting JAX_PLATFORM_NAME=cpu."
+        )
 
 
 HighLevelType = TypeVar(

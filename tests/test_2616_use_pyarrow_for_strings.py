@@ -881,16 +881,15 @@ def test_slice():
         == ak.str.slice(ak.to_backend(bytestring, "typetracer"), 1, 3).layout.form
     )
 
-    # ArrowInvalid: Negative buffer resize: -40 (looks like an Arrow bug)
-    # assert ak.str.slice(string, 1).tolist() == [
-    #     ["αβγ"[1:], ""[1:]],
-    #     [],
-    #     ["→δε←"[1:], "ζz zζ"[1:], "abc"[1:]],
-    # ]
-    # assert (
-    #     ak.str.slice(string, 1).layout.form
-    #     == ak.str.slice(ak.to_backend(string, "typetracer"), 1).layout.form
-    # )
+    assert ak.str.slice(string, 1).tolist() == [
+        ["αβγ"[1:], ""[1:]],
+        [],
+        ["→δε←"[1:], "ζz zζ"[1:], "abc"[1:]],
+    ]
+    assert (
+        ak.str.slice(string, 1).layout.form
+        == ak.str.slice(ak.to_backend(string, "typetracer"), 1).layout.form
+    )
     assert ak.str.slice(bytestring, 1).tolist() == [
         ["αβγ".encode()[1:], b""[1:]],
         [],

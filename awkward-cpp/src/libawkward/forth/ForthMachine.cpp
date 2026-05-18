@@ -1684,13 +1684,11 @@ namespace awkward {
           throw std::invalid_argument(
             std::string("unclosed string after .\" or s\" word") + FILENAME(__LINE__));
         }
-        int64_t nextline = line;
         current = source_[stop];
         start = stop;
         colstart = colstop;
         while (current != '\"'  ||  source_[stop - 1] == '\\') {
           if (current == '\n') {
-            nextline++;
             colstart = 0;
             colstop = 0;
           }

@@ -21,6 +21,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -35,7 +36,7 @@ from awkward.contents.content import (
 )
 from awkward.errors import AxisError
 from awkward.forms.emptyform import EmptyForm
-from awkward.forms.form import Form
+from awkward.forms.form import Form, FormKeyPathT
 from awkward.index import Index
 
 if TYPE_CHECKING:
@@ -59,7 +60,7 @@ class EmptyArray(EmptyMeta, Content):
     EmptyArray has no equivalent in Apache Arrow.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class EmptyArray(Content):
             def __init__(self):
@@ -118,6 +119,9 @@ class EmptyArray(EmptyMeta, Content):
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> EmptyForm:
         return self.form_cls(form_key=getkey(self))
 
+    def _form_with_key_path(self, path: FormKeyPathT) -> EmptyForm:
+        return self.form_cls(form_key=repr(path))
+
     def _to_buffers(
         self,
         form: Form,
@@ -172,6 +176,9 @@ class EmptyArray(EmptyMeta, Content):
         return self
 
     def _is_getitem_at_placeholder(self) -> bool:
+        return False
+
+    def _is_getitem_at_virtual(self) -> bool:
         return False
 
     def _getitem_at(self, where: IndexType):
@@ -258,16 +265,22 @@ class EmptyArray(EmptyMeta, Content):
         if posaxis is not None and posaxis + 1 == depth:
             raise AxisError(self, "axis=0 not allowed for flatten")
         else:
-            offsets = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
+            offsets = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
             return (
                 offsets,
                 EmptyArray(backend=self._backend),
             )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         return True
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
+        others = [other for other in others if not other.is_unknown]
         if len(others) == 0:
             return self
         elif len(others) == 1:
@@ -295,21 +308,23 @@ class EmptyArray(EmptyMeta, Content):
         else:
             return self
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
         return True
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents, offsets, outlength):
         return self
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
     ):
         as_numpy = self.to_NumpyArray(np.float64)
         return as_numpy._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, offsets, outlength, ascending, stable
+    ):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -322,6 +337,7 @@ class EmptyArray(EmptyMeta, Content):
         starts,
         shifts,
         parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -334,6 +350,7 @@ class EmptyArray(EmptyMeta, Content):
             starts,
             shifts,
             parents,
+            offsets,
             outlength,
             mask,
             keepdims,
@@ -446,7 +463,7 @@ class EmptyArray(EmptyMeta, Content):
         else:
             raise AssertionError(result)
 
-    def to_packed(self, recursive: bool = True) -> Self:
+    def _to_packed(self, recursive: bool = True) -> Self:
         return self
 
     def _to_list(self, behavior, json_conversions):
@@ -456,6 +473,17 @@ class EmptyArray(EmptyMeta, Content):
 
     def _to_backend(self, backend: Backend) -> Self:
         return EmptyArray(backend=backend)
+
+    def _materialize(self, type_) -> Self:
+        return self
+
+    @property
+    def _is_all_materialized(self) -> bool:
+        return True
+
+    @property
+    def _is_any_materialized(self) -> bool:
+        return True
 
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool

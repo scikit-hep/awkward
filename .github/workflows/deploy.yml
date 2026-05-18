@@ -18,7 +18,7 @@ jobs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
           fetch-depth: 0
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -50,7 +50,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -74,7 +74,7 @@ jobs:
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         submodules: true
 
@@ -88,11 +88,11 @@ jobs:
       run: pipx run twine check dist/*
 
     - name: Generate artifact attestation for sdist and wheel
-      uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.4.3
+      uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
       with:
         subject-path: "dist/awkward-*"
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: distributions
         path: dist/*
@@ -101,8 +101,8 @@ jobs:
     name: "Bundle header-only libraries"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/upload-artifact@v4
+    - uses: actions/checkout@v6
+    - uses: actions/upload-artifact@v7
       with:
         name: header-only
         path: header-only
@@ -117,7 +117,7 @@ jobs:
       name: "pypi"
       url: "https://pypi.org/project/awkward/"
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: distributions
         path: dist
@@ -135,7 +135,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: gh attestation verify dist/awkward-*.whl --repo ${{ github.repository }}
 
-    - uses: pypa/gh-action-pypi-publish@v1.11.0
+    - uses: pypa/gh-action-pypi-publish@v1.14.0
 
   publish-headers:
     name: "Publish header-only libraries alongside release"
@@ -143,7 +143,7 @@ jobs:
     needs: [bundle-headers]
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: header-only
         path: header-only
@@ -151,6 +151,6 @@ jobs:
       run: |
         # Don't include `header-only` parent directory
         env -C header-only/ zip -r header-only.zip .
-    - uses: softprops/action-gh-release@v2
+    - uses: softprops/action-gh-release@v3
       with:
         files: header-only/header-only.zip

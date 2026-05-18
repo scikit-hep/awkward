@@ -30,59 +30,29 @@ ERROR awkward_argsort(
   int64_t offsetslength,
   bool ascending,
   bool stable) {
-  std::vector<int64_t> result(length);
-  std::iota(result.begin(), result.end(), 0);
+  std::iota(toptr, toptr + length, 0);
 
-  if (ascending  &&  stable) {
-    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-      auto start = std::next(result.begin(), offsets[i]);
-      auto stop = std::next(result.begin(), offsets[i + 1]);
-      std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
-      });
-      std::transform(start, stop, start, [&](int64_t j) -> int64_t {
-        return j - offsets[i];
-      });
+  for (int64_t i = 0; i < offsetslength - 1; i++) {
+    int64_t start_off = offsets[i];
+    int64_t stop_off = offsets[i + 1];
+
+    int64_t* segment_start = toptr + start_off;
+    int64_t* segment_stop = toptr + stop_off;
+
+    auto comparator = [&fromptr, ascending](int64_t i1, int64_t i2) {
+        if (ascending) return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+        else return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
+    };
+
+    if (stable) {
+        std::stable_sort(segment_start, segment_stop, comparator);
+    } else {
+        std::sort(segment_start, segment_stop, comparator);
     }
-  }
-  else if (!ascending  &&  stable) {
-    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-      auto start = std::next(result.begin(), offsets[i]);
-      auto stop = std::next(result.begin(), offsets[i + 1]);
-      std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
-      });
-      std::transform(start, stop, start, [&](int64_t j) -> int64_t {
-        return j - offsets[i];
-      });
-    }
-  }
-  else if (ascending  &&  !stable) {
-    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-      auto start = std::next(result.begin(), offsets[i]);
-      auto stop = std::next(result.begin(), offsets[i + 1]);
-      std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
-      });
-      std::transform(start, stop, start, [&](int64_t j) -> int64_t {
-        return j - offsets[i];
-      });
-    }
-  }
-  else {
-    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-      auto start = std::next(result.begin(), offsets[i]);
-      auto stop = std::next(result.begin(), offsets[i + 1]);
-      std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
-      });
-      std::transform(start, stop, start, [&](int64_t j) -> int64_t {
-        return j - offsets[i];
-      });
-    }
-  }
-  for (int64_t i = 0;  i < length;  i++) {
-    toptr[i] = result[i];
+
+    std::transform(segment_start, segment_stop, segment_start, [start_off](int64_t j) {
+        return j - start_off;
+    });
   }
 
   return success();

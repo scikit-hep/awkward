@@ -23,12 +23,17 @@ def drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None):
     """
     Args:
         array: Data in which to remove Nones.
-        axis (None or int): If None, the operation drops Nones at all levels of
-            nesting, returning an array of the same dimension, but without Nones.
-            Otherwise, it drops Nones at a specified depth.
-            The outermost dimension is `0`, followed by `1`, etc.,
-            and negative values count backward from the innermost: `-1` is the
-            innermost dimension, `-2` is the next level up, etc.
+        axis (None or int or str): If None, the operation drops Nones at all levels
+            of nesting, returning an array of the same dimension, but without Nones.
+            If an int, the depth at which to drop Nones.
+            The outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps to
+            an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -94,11 +99,8 @@ def _impl(array, axis, highlevel, behavior, attrs):
 
         def recompute_offsets(layout, depth, **kwargs):
             posaxis = maybe_posaxis(layout, axis, depth)
-            if (
-                posaxis == 0
-                and posaxis == depth - 1
-                or posaxis == depth
-                and layout.is_list
+            if (posaxis == 0 and posaxis == depth - 1) or (
+                posaxis == depth and layout.is_list
             ):
                 none_indexes = options["none_indexes"].pop(0)
                 out = layout._rebuild_without_nones(none_indexes, layout.content)

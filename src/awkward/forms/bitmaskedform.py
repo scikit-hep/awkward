@@ -170,7 +170,7 @@ class BitMaskedForm(BitMaskedMeta[Form], Form):
 
             # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L155-L163
             (
-                has_identities,
+                _has_identities,
                 parameters,
                 form_key,
                 mask,

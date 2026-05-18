@@ -110,13 +110,13 @@ class RecordForm(RecordMeta[Form], Form):
         )
 
     def _columns(self, path, output, list_indicator):
-        for content, field in zip(self._contents, self.fields):
+        for content, field in zip(self._contents, self.fields, strict=True):
             content._columns((*path, field), output, list_indicator)
 
     def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         contents = []
         fields = []
-        for content, field in zip(self._contents, self.fields):
+        for content, field in zip(self._contents, self.fields, strict=True):
             next_content = content._prune_columns(True)
             if next_content is None:
                 continue
@@ -127,12 +127,14 @@ class RecordForm(RecordMeta[Form], Form):
         if not fields and is_inside_record_or_union:
             return None
         else:
-            return self.copy(contents=contents, fields=fields)
+            return self.copy(
+                contents=contents, fields=None if self.is_tuple else fields
+            )
 
     def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         contents = []
         fields = []
-        for content, field in zip(self._contents, self.fields):
+        for content, field in zip(self._contents, self.fields, strict=True):
             # Try and match this field, allowing derived matcher to match any field if empty
             next_match_specifier = match_specifier(field, next_match_if_empty=True)
             if next_match_specifier is None:
@@ -145,7 +147,7 @@ class RecordForm(RecordMeta[Form], Form):
             contents.append(next_content)
             fields.append(field)
 
-        return self.copy(contents=contents, fields=fields)
+        return self.copy(contents=contents, fields=None if self.is_tuple else fields)
 
     def _column_types(self):
         return sum((x._column_types() for x in self._contents), ())
@@ -158,7 +160,7 @@ class RecordForm(RecordMeta[Form], Form):
             # read data pickled in Awkward 1.x
 
             # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L624-L643
-            has_identities, parameters, form_key, recordlookup, contents = state
+            _has_identities, parameters, form_key, recordlookup, contents = state
 
             if form_key is not None:
                 form_key = "part0-" + form_key  # only the first partition
@@ -184,6 +186,6 @@ class RecordForm(RecordMeta[Form], Form):
             and all(f in computed_fields_set for f in other.fields)
             and all(
                 content._is_equal_to(other.content(field), all_parameters, form_key)
-                for field, content in zip(self.fields, self._contents)
+                for field, content in zip(self.fields, self._contents, strict=True)
             )
         )

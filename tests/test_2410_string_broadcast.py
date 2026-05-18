@@ -6,19 +6,19 @@ import awkward as ak
 
 
 def test_deep_string_string():
-    left, right = ak.broadcast_arrays(
+    _left, right = ak.broadcast_arrays(
         [["x", "yz"], ["hello", "world", "foo", "bar"]], ["x", "y"]
     )
     assert right.to_list() == [["x", "x"], ["y", "y", "y", "y"]]
 
 
 def test_deep_numbers_string():
-    left, right = ak.broadcast_arrays([[1, 2], [3, 4, 5, 6]], ["x", "y"])
+    _left, right = ak.broadcast_arrays([[1, 2], [3, 4, 5, 6]], ["x", "y"])
     assert right.to_list() == [["x", "x"], ["y", "y", "y", "y"]]
 
 
 def test_deep_string_numbers():
-    left, right = ak.broadcast_arrays(
+    _left, right = ak.broadcast_arrays(
         [["x", "yz"], ["hello", "world", "foo", "bar"]], [1, 2]
     )
     assert right.to_list() == [[1, 1], [2, 2, 2, 2]]

@@ -7,19 +7,19 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.6.9"
+version = "2.9.0"
 description = "Manipulate JSON-like data with NumPy-like idioms."
-license = { text = "BSD-3-Clause" }
-requires-python = ">=3.8"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
 authors = [
-    { name = "Jim Pivarski", email = "pivarski@princeton.edu" },
+    { name = "Jim Pivarski", email = "jpivarski@gmail.com" },
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
@@ -27,12 +27,13 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Free Threading",
+    "Programming Language :: Python :: Free Threading :: 3 - Stable",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Scientific/Engineering :: Mathematics",
@@ -41,9 +42,9 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==39",
+    "awkward_cpp==52",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
-    "numpy>=1.18.0",
+    "numpy>=1.21.3",
     "packaging",
     "typing_extensions>=4.1.0; python_version < \"3.11\"",
     "fsspec>=2022.11.0"
@@ -115,6 +116,7 @@ end-before = "<!-- readme-pypi-ignore-after -->"
 [tool.pytest.ini_options]
 minversion = "6.0"
 norecursedirs = [
+    ".hypothesis",
     "src",
     "pybind11",
     "rapidjson",
@@ -134,11 +136,13 @@ filterwarnings = [
     "ignore:.*np\\.MachAr.*:DeprecationWarning",
     "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
     "ignore:Jitify is performing a one-time only warm-up",
+    "ignore:The JAX backend is deprecated:DeprecationWarning",
 ]
-log_cli_level = "info"
+log_level = "INFO"
+testpaths = ["tests", "tests-cuda", "tests-cuda-kernels", "tests-cuda-kernels-explicit"]
 
 [tool.pylint]
-py-version = "3.8"
+py-version = "3.10"
 jobs = "0"
 ignore-paths = [
     "src/awkward/_typeparser/generated_parser.py",
@@ -184,6 +188,7 @@ disable = [
     "no-member",
     "no-name-in-module",
     "no-value-for-parameter",
+    "possibly-used-before-assignment", # TODO
     "property-with-parameters",
     "protected-access",
     "raise-missing-from",
@@ -200,6 +205,7 @@ disable = [
     "too-many-lines",
     "too-many-locals",
     "too-many-nested-blocks",
+    "too-many-positional-arguments",
     "too-many-public-methods",
     "too-many-return-statements",
     "too-many-statements",
@@ -216,18 +222,16 @@ disable = [
     "unused-variable",
     "use-a-generator",
     "use-implicit-booleaness-not-len",
+    "used-before-assignment", # TODO
     "wrong-import-order",
     "wrong-import-position",
 ]
 
 [tool.mypy]
 files = ["src/awkward/**/*.py"]
-plugins = [
-    "numpy.typing.mypy_plugin"
-]
 python_version = "3.11"
 ignore_errors = true
-ignore_missing_imports = true
+enable_error_code = ["ignore-without-code", "truthy-bool"]
 
 [[tool.mypy.overrides]]
 module = [
@@ -259,6 +263,8 @@ extend-exclude = [
     "rapidjson",
     "docs-*",
     "src/awkward/_typeparser/generated_parser.py",
+    "src/awkward/types/_awkward_datashape_parser.py",
+    "src/awkward/_connect/cuda/_kernel_signatures.py",
 ]
 
 [tool.ruff.lint]
@@ -289,6 +295,8 @@ ignore = [
     "PLW0603", # Using the global statement to update is discouraged
     "PLC1901", # x == "" can be simplified to not x (empty string is falsey)
     "ISC001",  # Conflicts with the formatter in 0.1.2
+    "PLC0415", # imports outside top level
+    "PLW1641", # __eq__ without __hash__
 ]
 typing-modules = ["awkward._typing"]
 external = []

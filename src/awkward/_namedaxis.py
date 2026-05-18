@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 from dataclasses import dataclass
 
 import awkward._typing as tp
@@ -24,12 +25,12 @@ NAMED_AXIS_KEY: tp.Literal["__named_axis__"] = (
 )
 
 
-# just a class for inplace mutation
-class NamedAxis:
-    mapping: AxisMapping
+class _NamedAxisLocal(threading.local):
+    def __init__(self):
+        self.mapping = {}
 
 
-NamedAxis.mapping = {}
+NamedAxis = _NamedAxisLocal()
 
 
 def _prettify_named_axes(
@@ -82,7 +83,7 @@ def _prettify_named_axes(
     return delimiter.join(items)
 
 
-def _get_named_axis(ctx: tp.Any) -> AxisMapping:
+def _get_named_axis(ctx: tp.Any, allow_any: bool = False) -> AxisMapping:
     """
     Retrieves the named axis from the provided context.
 
@@ -103,9 +104,14 @@ def _get_named_axis(ctx: tp.Any) -> AxisMapping:
         >>> _get_named_axis({"other_key": "other_value"})
         {}
     """
-    if hasattr(ctx, "attrs"):
-        return _get_named_axis(ctx.attrs)
-    elif isinstance(ctx, tp.Mapping) and NAMED_AXIS_KEY in ctx:
+    from awkward._layout import HighLevelContext
+    from awkward.highlevel import Array, Record
+
+    if hasattr(ctx, "attrs") and (
+        isinstance(ctx, (HighLevelContext, Array, Record)) or allow_any
+    ):
+        return _get_named_axis(ctx.attrs, allow_any=True)
+    elif allow_any and isinstance(ctx, tp.Mapping) and NAMED_AXIS_KEY in ctx:
         return dict(ctx[NAMED_AXIS_KEY])
     else:
         return {}
@@ -652,7 +658,7 @@ class NamedAxesWithDims:
     """
 
     named_axis: list[AxisMapping]
-    ndims: list[int]
+    ndims: list[int | None]
 
     def __post_init__(self):
         if len(self.named_axis) != len(self.ndims):
@@ -660,8 +666,8 @@ class NamedAxesWithDims:
                 "The number of dimensions must match the number of named axis mappings."
             )
 
-    def __iter__(self) -> tp.Iterator[tuple[AxisMapping, int]]:
-        yield from zip(self.named_axis, self.ndims)
+    def __iter__(self) -> tp.Iterator[tuple[AxisMapping, int | None]]:
+        yield from zip(self.named_axis, self.ndims, strict=True)
 
     @classmethod
     def prepare_contexts(
@@ -683,18 +689,20 @@ class NamedAxesWithDims:
             with HighLevelContext() as ctx:
                 layout = ctx.unwrap(array, **_unwrap_kwargs)
             _named_axes.append(_get_named_axis(array))
-            _ndims.append(layout.minmax_depth[1])
+            _ndims.append(getattr(layout, "minmax_depth", (None, None))[1])
 
         depth_context = {NAMED_AXIS_KEY: cls(_named_axes, _ndims)}
         lateral_context = {NAMED_AXIS_KEY: cls(_named_axes, _ndims)}
         return depth_context, lateral_context
 
-    def __setitem__(self, index: int, named_axis_with_ndim: tuple[AxisMapping, int]):
+    def __setitem__(
+        self, index: int, named_axis_with_ndim: tuple[AxisMapping, int | None]
+    ):
         named_axis, ndim = named_axis_with_ndim
         self.named_axis[index] = named_axis
         self.ndims[index] = ndim
 
-    def __getitem__(self, index: int) -> tuple[AxisMapping, int]:
+    def __getitem__(self, index: int) -> tuple[AxisMapping, int | None]:
         return self.named_axis[index], self.ndims[index]
 
     def __len__(self) -> int:
@@ -702,7 +710,7 @@ class NamedAxesWithDims:
 
 
 # Define a type alias for a slice or int (can be a single axis or a sequence of axes)
-AxisSlice: tp.TypeAlias = tp.Union[tuple, slice, int, tp.EllipsisType, None]
+AxisSlice: tp.TypeAlias = tuple | slice | int | tp.EllipsisType | None
 NamedAxisSlice: tp.TypeAlias = tp.Dict[AxisName, AxisSlice]
 
 

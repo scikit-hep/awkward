@@ -20,6 +20,7 @@ def parquet_round_trip(
     akarray, extensionarray, tmp_path, categorical_as_dictionary=False
 ):
     filename = os.path.join(tmp_path, "whatever.parquet")
+
     ak.to_parquet(
         akarray,
         filename,
@@ -76,76 +77,76 @@ def test_listoffsetarray_numpyarray(tmp_path, dtype, list_to32, extensionarray):
     )
     parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
 
-    # akarray = ak.contents.ListOffsetArray(
-    #     ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-    #     ak.contents.ByteMaskedArray(
-    #         ak.index.Index8(
-    #             np.array(
-    #                 [False, True, False, True, True, False, True, True, False, False],
-    #                 dtype=np.int8,
-    #             )
-    #         ),
-    #         ak.contents.NumpyArray(
-    #             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
-    #             parameters={"which": "inner"},
-    #         ),
-    #         valid_when=False,
-    #         parameters={"which": "middle"},
-    #     ),
-    #     parameters={"which": "outer"},
-    # )
-    # parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
+    akarray = ak.contents.ListOffsetArray(
+        ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak.contents.ByteMaskedArray(
+            ak.index.Index8(
+                np.array(
+                    [False, True, False, True, True, False, True, True, False, False],
+                    dtype=np.int8,
+                )
+            ),
+            ak.contents.NumpyArray(
+                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+                parameters={"which": "inner"},
+            ),
+            valid_when=False,
+            parameters={"which": "middle"},
+        ),
+        parameters={"which": "outer"},
+    )
+    parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
 
-    # akarray = ak.contents.ByteMaskedArray(
-    #     ak.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
-    #     ak.contents.ListOffsetArray(
-    #         ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-    #         ak.contents.NumpyArray(
-    #             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
-    #             parameters={"which": "inner"},
-    #         ),
-    #         parameters={"which": "middle"},
-    #     ),
-    #     valid_when=True,
-    #     parameters={"which": "outer"},
-    # )
-    # parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
+    akarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+            ak.contents.NumpyArray(
+                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+                parameters={"which": "inner"},
+            ),
+            parameters={"which": "middle"},
+        ),
+        valid_when=True,
+        parameters={"which": "outer"},
+    )
+    parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
 
-    # akarray = ak.contents.ByteMaskedArray(
-    #     ak.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
-    #     ak.contents.ListOffsetArray(
-    #         ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-    #         ak.contents.ByteMaskedArray(
-    #             ak.index.Index8(
-    #                 np.array(
-    #                     [
-    #                         False,
-    #                         True,
-    #                         False,
-    #                         True,
-    #                         True,
-    #                         False,
-    #                         True,
-    #                         True,
-    #                         False,
-    #                         False,
-    #                     ],
-    #                     dtype=np.int8,
-    #                 )
-    #             ),
-    #             ak.contents.NumpyArray(
-    #                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
-    #                 parameters={"which": "inner"},
-    #             ),
-    #             valid_when=False,
-    #             parameters={"which": "middle-1"},
-    #         ),
-    #         parameters={"which": "middle-2"},
-    #     ),
-    #     valid_when=True,
-    #     parameters={"which": "outer"},
-    # )
-    # parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
+    akarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+            ak.contents.ByteMaskedArray(
+                ak.index.Index8(
+                    np.array(
+                        [
+                            False,
+                            True,
+                            False,
+                            True,
+                            True,
+                            False,
+                            True,
+                            True,
+                            False,
+                            False,
+                        ],
+                        dtype=np.int8,
+                    )
+                ),
+                ak.contents.NumpyArray(
+                    np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+                    parameters={"which": "inner"},
+                ),
+                valid_when=False,
+                parameters={"which": "middle-1"},
+            ),
+            parameters={"which": "middle-2"},
+        ),
+        valid_when=True,
+        parameters={"which": "outer"},
+    )
+    parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
 
 
 @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
@@ -402,6 +403,10 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
     if not is_tuple or extensionarray:
         parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
 
+
+@pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_recordarray_1(tmp_path, is_tuple, extensionarray):
     akarray = ak.contents.RecordArray(
         [
             ak.contents.ByteMaskedArray(
@@ -424,6 +429,10 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
     if not is_tuple or extensionarray:
         parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
 
+
+@pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_recordarray_2(tmp_path, is_tuple, extensionarray):
     akarray = ak.contents.RecordArray(
         [
             ak.contents.ByteMaskedArray(
@@ -449,6 +458,10 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
     if not is_tuple or extensionarray:
         parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
 
+
+@pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_recordarray_3(tmp_path, is_tuple, extensionarray):
     akarray = ak.contents.IndexedOptionArray(
         ak.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
         ak.contents.RecordArray(
@@ -471,6 +484,10 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
     if not is_tuple or extensionarray:
         parquet_round_trip(ak.Array(akarray), extensionarray, tmp_path)
 
+
+@pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_recordarray_4(tmp_path, is_tuple, extensionarray):
     akarray = ak.contents.IndexedOptionArray(
         ak.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
         ak.contents.RecordArray(

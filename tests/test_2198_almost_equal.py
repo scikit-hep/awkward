@@ -23,17 +23,17 @@ def test_dtype():
     assert not ak.almost_equal([1, 2, 3], ["1", "2", "3"], dtype_exact=True)
     assert not ak.almost_equal(
         np.array([1, 2, 3], dtype=np.int64),
-        np.array([1, 2, 3], dtype=np.timedelta64),
+        np.array([1, 2, 3], dtype=np.dtype("timedelta64[s]")),
         dtype_exact=True,
     )
     assert not ak.almost_equal(
-        np.array([1, 2, 3], dtype=np.dtype("<M8[D]")),
-        np.array([1, 2, 3], dtype=np.dtype("<m8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("M8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("m8[D]")),
         dtype_exact=True,
     )
     assert not ak.almost_equal(
-        np.array([1, 2, 3], dtype=np.dtype("<M8[D]")),
-        np.array([1, 2, 3], dtype=np.dtype("<m8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("M8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("m8[D]")),
         dtype_exact=False,
     )
 
@@ -131,6 +131,38 @@ def test_behavior():
     another_array = ak.Array([[1, 2, 3]], behavior=behavior)
     assert not ak.almost_equal(array, another_array)
     assert not ak.almost_equal(other_array, another_array)
+
+
+def test_ragged():
+    # single jagged array
+    a = ak.Array([[1], [2, 3]])
+    b = ak.Array([[1], [2, 3]])
+    assert ak.almost_equal(a, b)
+
+    # double jagged array
+    a = ak.Array([[[1], [2, 3]], [[4, 5], [6]]])
+    b = ak.Array([[[1], [2, 3]], [[4, 5], [6]]])
+    assert ak.almost_equal(a, b)
+
+    # different index same content
+    a = ak.Array([[1], [2, 3]])
+    b = ak.Array([[1, 2], [3]])
+    assert not ak.almost_equal(a, b)
+
+    # different outer index, same inner index
+    a = ak.Array([[[], [1]], [[], [0]]])
+    b = ak.Array([[[], [1], []], [[0]]])
+    assert not ak.almost_equal(a, b)
+
+    # same outer index, different inner index
+    a = ak.Array([[[0, 1], [1]], [[0], []]])
+    b = ak.Array([[[0], [1, 1]], [[], [0]]])
+    assert not ak.almost_equal(a, b)
+
+    # nested
+    a = ak.Array([[[[]], [[0, 1], [1]]], [[[0]], [[]]]])
+    b = ak.Array([[[[0]], [[1], [1]]], [[[]], [[0]]]])
+    assert not ak.almost_equal(a, b)
 
 
 def test_empty_outer_ragged():

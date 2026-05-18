@@ -58,4 +58,5 @@ def from_numpy(
         ),
         highlevel=highlevel,
         behavior=behavior,
+        attrs=attrs,
     )

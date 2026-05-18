@@ -110,7 +110,7 @@ class RegularForm(RegularMeta[Form], Form):
             # read data pickled in Awkward 1.x
 
             # https://github.com/scikit-hep/awkward/blob/main-v1/src/python/forms.cpp#L692-L698
-            has_identities, parameters, form_key, content, size = state
+            _has_identities, parameters, form_key, content, size = state
 
             if form_key is not None:
                 form_key = "part0-" + form_key  # only the first partition

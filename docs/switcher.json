@@ -8,6 +8,14 @@
         "url": "https://awkward-array.org/doc/main/"
     },
     {
+        "version": "2.8",
+        "url": "https://awkward-array.org/doc/2.8/"
+    },
+    {
+        "version": "2.7",
+        "url": "https://awkward-array.org/doc/2.7/"
+    },
+    {
         "version": "2.6",
         "url": "https://awkward-array.org/doc/2.6/"
     },

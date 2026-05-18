@@ -9,6 +9,7 @@ import pyarrow
 from .extn_types import (
     AwkwardArrowArray,
     AwkwardArrowType,
+    get_field_option,
     to_awkwardarrow_storage_types,
 )
 
@@ -35,7 +36,7 @@ def convert_awkward_arrow_table_to_native(aatable: pyarrow.Table) -> pyarrow.Tab
         new_metadata = aatable.schema.metadata.copy()
     new_metadata[AWKWARD_INFO_KEY] = metadata_serial
     new_schema = pyarrow.schema(new_fields, metadata=new_metadata)
-    # return = aatable.cast(new_schema)
+
     return replace_schema(aatable, new_schema)
 
 
@@ -75,11 +76,17 @@ def collect_ak_arr_type_metadata(aafield: pyarrow.Field) -> dict | list | None:
     This recurses down the whole type structure.
     """
     typ = aafield.type
+
+    option_type = get_field_option(aafield, b"option_type")
+
     if not isinstance(typ, AwkwardArrowType):
         return None  # Not expected to reach here
     subfields = _fields_of_strg_type(typ.storage_type)
     metadata = typ._metadata_as_dict()
     metadata["field_name"] = aafield.name
+    if option_type is False:
+        metadata["option_type"] = "False"
+
     if len(subfields) == 0:
         # Simple type
         return metadata
@@ -135,7 +142,9 @@ def native_arrow_field_to_akarraytype(
         if len(sub_meta) == len(fields):
             awkwardized_fields = [
                 native_arrow_field_to_akarraytype(field, meta)  # Recurse
-                for field, meta in zip(fields, metadata["subfield_metadata"])
+                for field, meta in zip(
+                    fields, metadata["subfield_metadata"], strict=True
+                )
             ]
         elif len(fields) < len(sub_meta):
             # If a user has read a partial column, we can have fewer Arrow fields than the original.
@@ -159,7 +168,17 @@ def native_arrow_field_to_akarraytype(
         storage_type = _make_pyarrow_type_like(storage_type, awkwardized_fields)
 
     ak_type = AwkwardArrowType._from_metadata_object(storage_type, metadata)
-    return pyarrow.field(ntv_field.name, type=ak_type, nullable=ntv_field.nullable)
+
+    option_str = metadata.get("option_type") if metadata else None
+
+    # Determine nullability: if option_type is 'False', force nullable to False
+    nullable = False if option_str == "False" else ntv_field.nullable
+
+    return pyarrow.field(
+        ntv_field.name,
+        type=ak_type,
+        nullable=nullable,
+    )
 
 
 def _fields_of_strg_type(typ: pyarrow.Type) -> list[pyarrow.Field]:
@@ -216,7 +235,7 @@ def replace_schema(table: pyarrow.Table, new_schema: pyarrow.Schema) -> pyarrow.
     new_batches = []
     for batch in table.to_batches():
         columns = []
-        for col, new_field in zip(batch.columns, new_schema):
+        for col, new_field in zip(batch.columns, new_schema, strict=True):
             columns.append(array_with_replacement_type(col, new_field.type))
         new_batches.append(
             pyarrow.RecordBatch.from_arrays(arrays=columns, schema=new_schema)
@@ -240,7 +259,7 @@ def array_with_replacement_type(
         )
     children_new = [
         array_with_replacement_type(child, new_child_type.type)
-        for child, new_child_type in zip(children_orig, new_fields)
+        for child, new_child_type in zip(children_orig, new_fields, strict=True)
     ]
     own_buffers = orig_array.buffers()[: orig_array.type.num_buffers]
     if isinstance(native_type, pyarrow.lib.DictionaryType):
