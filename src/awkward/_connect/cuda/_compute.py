@@ -1261,3 +1261,94 @@ def awkward_ListArray_combinations(
         )
 
     toindex[:n] = totallen
+
+
+
+def awkward_index_rpad_and_clip_axis0(toindex, target, length):
+    """
+    Fill ``toindex[0..target)`` with the identity mapping ``[0..shorter)``
+    followed by ``target - shorter`` entries of ``-1``, where
+    ``shorter = min(target, length)``.
+
+    Called from ``Content._pad_none_axis0`` in
+    ``src/awkward/contents/content.py``.
+    """
+    dtype = toindex.dtype.type
+    shorter = min(target, length)
+
+    def fill(i):
+        return dtype(i) if i < shorter else dtype(-1)
+
+    counters = CountingIterator(dtype(0))
+    unary_transform(
+        d_in=counters,
+        d_out=toindex,
+        op=fill,
+        num_items=target,
+    )
+
+
+def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
+    """
+    Fills `tostarts` and `tostops` with rpad/clip offsets for axis=1 lists.
+    Each list is padded or clipped to length `target`.
+    """
+
+    def fill(i):
+        start = i * target
+        end = start + target
+
+        tostarts[i] = tostarts.dtype.type(start)
+        return tostarts.dtype.type(end)
+
+    segment_ids = CountingIterator(tostarts.dtype.type(0))
+
+    unary_transform(
+        d_in=segment_ids,
+        d_out=tostops,
+        op=fill,
+        num_items=length,
+    )
+
+
+def awkward_missing_repeat(
+    outindex,
+    index,
+    indexlength,
+    repetitions,
+    regularsize,
+):
+    """
+    Repeats an index array `repetitions` times, adjusting valid (non-negative)
+    indices by an offset of `regularsize` per repetition.
+    Missing values (-1) are preserved.
+    """
+    index_dtype = outindex.dtype.type
+    output_size = repetitions * indexlength
+
+    reg_size = index_dtype(regularsize)
+    idx_len = index_dtype(indexlength)
+
+    def fill(counter):
+        # Position in the original index array
+        j = counter % idx_len
+        # Which repetition block are we in?
+        i = counter // idx_len
+
+        base = index[j]
+
+        # Awkward convention: -1 and lower are masked/missing
+        if base >= 0:
+            return index_dtype(base + i * reg_size)
+        else:
+            # Preserve the exact missing value (usually -1)
+            return base
+
+    counters = CountingIterator(index_dtype(0))
+
+    unary_transform(
+        d_in=counters,
+        d_out=outindex,
+        num_items=output_size,
+        op=fill,
+    )
