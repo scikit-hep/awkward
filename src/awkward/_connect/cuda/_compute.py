@@ -780,32 +780,71 @@ def awkward_IndexedArray_overlay_mask(toindex, mask, fromindex, length):
         return -1 if mask[i] else fromindex[i]
 
     indices = CountingIterator(cp.int64(0))
-    unary_transform(indices, toindex, transform, length)
+    unary_transform(d_in=indices, d_out=toindex, op=transform, num_items=length)
 
 
-# Skips masked (-1) entries and packs the remaining valid entries into nextcarry and nextparents, tracking where each ended up in outindex.
+# Skips masked (-1) entries and packs remaining valid entries into nextcarry, tracking where
+# each ended up in outindex. Builds nextoffsets[j+1] = cumulative count of valid entries in
+# segments 0..j as defined by the offsets array.
+#
+# Example:
+# index    = [3, -1, 5, -1, 2, -1, 4]
+# offsets  = [0, 4, 7]             (2 segments: positions 0-3 and 4-6)
+# outlength = 2
+#
+# nextcarry   = [3, 5, 2, 4]       (valid index values, compacted)
+# nextoffsets = [0, 2, 4]          (segment 0 has 2 valid, segment 1 has 2 valid)
+# outindex    = [0, -1, 1, -1, 2, -1, 3]  (position in nextcarry, or -1 if masked)
 def awkward_IndexedArray_reduce_next_64(
-    nextcarry, nextparents, outindex, index, parents, length
+    nextcarry, nextoffsets, outindex, index, offsets, outlength
 ):
-    if length == 0:
+    nextoffsets[0] = 0
+    if outlength == 0:
         return
 
-    # Compute cumulative count of valid (non-negative) indices to determine compact output positions
-    # this needs to be done before going through all the indices in parallel later
-    scan = cp.cumsum(index >= 0)
+    index_length = int(offsets[outlength])
+    if index_length == 0:
+        nextoffsets[1 : outlength + 1] = 0
+        return
+
+    idx_dtype = index.dtype
+    valid = (index[:index_length] >= 0).astype(idx_dtype)
+    scan = cp.empty(index_length, dtype=idx_dtype)
+    inclusive_scan(
+        d_in=valid,
+        d_out=scan,
+        op=lambda a, b: a + b,
+        init_value=cp.array([0], dtype=idx_dtype),
+        num_items=index_length,
+    )
 
     def scatter_and_fill(i):
         if index[i] >= 0:
-            # Map valid entry to its compacted position
             k = scan[i] - 1
             nextcarry[k] = index[i]
-            nextparents[k] = parents[i]
             return k
-        # Masked entries get -1 in outindex
         return -1
 
-    indices = CountingIterator(cp.int64(0))
-    unary_transform(indices, outindex, scatter_and_fill, length)
+    unary_transform(
+        d_in=CountingIterator(idx_dtype.type(0)),
+        d_out=outindex,
+        op=scatter_and_fill,
+        num_items=index_length,
+    )
+
+    off_dtype = offsets.dtype.type
+
+    def fill_nextoffsets(j):
+        stop = offsets[j + 1]
+        nextoffsets[j + 1] = idx_dtype.type(0) if stop == 0 else scan[stop - 1]
+        return off_dtype(0)
+
+    unary_transform(
+        d_in=CountingIterator(off_dtype(0)),
+        d_out=DiscardIterator(),
+        op=fill_nextoffsets,
+        num_items=outlength,
+    )
 
 
 # For each valid (non-negative) entry at position i, records the number of null (negative) entries
@@ -830,7 +869,7 @@ def awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64(nextshifts, index, l
         return cp.int64(0)
 
     indices = CountingIterator(cp.int64(0))
-    unary_transform(indices, _, scatter, length)
+    unary_transform(d_in=indices, d_out=_, op=scatter, num_items=length)
 
 
 # Packs valid entries (where (mask[i] != 0) == validwhen) into tocarry in order.
@@ -919,7 +958,10 @@ def awkward_UnionArray_nestedfill_tags_index(
 
     # Scatter segment's ranges and update tmpstarts
     unary_transform(
-        CountingIterator(cp.int64(0)), DiscardIterator(), scatter_and_update, length
+        d_in=CountingIterator(cp.int64(0)),
+        d_out=DiscardIterator(),
+        op=scatter_and_update,
+        num_items=length,
     )
 
     # coverage[j] == 1 if position j falls inside any segment's range, 0 otherwise
@@ -937,7 +979,12 @@ def awkward_UnionArray_nestedfill_tags_index(
             toindex[j] = scan[j] - 1
         return 0
 
-    unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill, total_size)
+    unary_transform(
+        d_in=CountingIterator(cp.int64(0)),
+        d_out=DiscardIterator(),
+        op=fill,
+        num_items=total_size,
+    )
 
 
 # For each position i where fromtags[i] == fromwhich, sets totags[i] = towhich and
@@ -960,7 +1007,7 @@ def awkward_UnionArray_simplify_one(
         return 0  # discarded
 
     indices = CountingIterator(cp.int64(0))
-    unary_transform(indices, DiscardIterator(), transform, length)
+    unary_transform(d_in=indices, d_out=DiscardIterator(), op=transform, num_items=length)
 
 
 # producing a carry index that maps each output element back to its position in the original content
@@ -1001,7 +1048,12 @@ def awkward_ListArray_broadcast_tooffsets(
             tocarry[fromoffsets[i] + j - start] = j
         return 0
 
-    unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill_list, length)
+    unary_transform(
+        d_in=CountingIterator(cp.int64(0)),
+        d_out=DiscardIterator(),
+        op=fill_list,
+        num_items=length,
+    )
 
 
 # For each segment i, it fills toindex with the local position of each element within that segment — i.e. 0, 1, 2, ...
@@ -1022,7 +1074,12 @@ def awkward_ListArray_localindex(toindex, offsets, length):
             toindex[j] = j - start
         return 0
 
-    unary_transform(CountingIterator(cp.int64(0)), DiscardIterator(), fill, length)
+    unary_transform(
+        d_in=CountingIterator(cp.int64(0)),
+        d_out=DiscardIterator(),
+        op=fill,
+        num_items=length,
+    )
 
 
 # Converts a ListArray's (starts, stops) pairs into offsets.
@@ -1047,11 +1104,11 @@ def awkward_ListArray_compact_offsets(tooffsets, fromstarts, fromstops, length):
 
     # the same as `tooffsets[1 : length + 1] = cp.cumsum(sizes)`
     inclusive_scan(
-        sizes,
-        tooffsets[1 : length + 1],
-        lambda a, b: a + b,
-        cp.array([0], dtype=tooffsets.dtype),
-        length,
+        d_in=sizes,
+        d_out=tooffsets[1 : length + 1],
+        op=lambda a, b: a + b,
+        init_value=cp.array([0], dtype=tooffsets.dtype),
+        num_items=length,
     )
 
 
@@ -1098,16 +1155,21 @@ def awkward_ListArray_combinations_length(
 
     # Compute the number of combinations for each list
     counts = cp.empty(length, dtype=tooffsets.dtype)
-    unary_transform(CountingIterator(cp.int64(0)), counts, combinations_len, length)
+    unary_transform(
+        d_in=CountingIterator(cp.int64(0)),
+        d_out=counts,
+        op=combinations_len,
+        num_items=length,
+    )
 
     # Convert counts to offsets:
     # tooffsets[i+1] = sum(counts[0..i])
     inclusive_scan(
-        counts,
-        tooffsets[1 : length + 1],
-        lambda a, b: a + b,
-        cp.array([0], dtype=tooffsets.dtype),
-        length,
+        d_in=counts,
+        d_out=tooffsets[1 : length + 1],
+        op=lambda a, b: a + b,
+        init_value=cp.array([0], dtype=tooffsets.dtype),
+        num_items=length,
     )
 
     # Total number of combinations across all lists
@@ -1155,16 +1217,21 @@ def awkward_ListArray_combinations(
             return result
 
     counts = cp.empty(length, dtype=cp.int64)
-    unary_transform(CountingIterator(cp.int64(0)), counts, combinations_len, length)
+    unary_transform(
+        d_in=CountingIterator(cp.int64(0)),
+        d_out=counts,
+        op=combinations_len,
+        num_items=length,
+    )
 
     offsets = cp.empty(length + 1, dtype=cp.int64)
     offsets[0] = 0
     inclusive_scan(
-        counts,
-        offsets[1:],
-        lambda a, b: a + b,
-        cp.array([0], dtype=cp.int64),
-        length,
+        d_in=counts,
+        d_out=offsets[1:],
+        op=lambda a, b: a + b,
+        init_value=cp.array([0], dtype=cp.int64),
+        num_items=length,
     )
 
     totallen = int(offsets[length])
@@ -1263,10 +1330,10 @@ def awkward_ListArray_combinations(
     # One parallel pass per combination position k
     for k in range(n):
         unary_transform(
-            CountingIterator(cp.int64(0)),
-            DiscardIterator(),
-            make_pass(k, carry_arrays[k]),
-            totallen,
+            d_in=CountingIterator(cp.int64(0)),
+            d_out=DiscardIterator(),
+            op=make_pass(k, carry_arrays[k]),
+            num_items=totallen,
         )
 
     toindex[:n] = totallen
