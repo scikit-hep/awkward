@@ -1007,7 +1007,9 @@ def awkward_UnionArray_simplify_one(
         return 0  # discarded
 
     indices = CountingIterator(cp.int64(0))
-    unary_transform(d_in=indices, d_out=DiscardIterator(), op=transform, num_items=length)
+    unary_transform(
+        d_in=indices, d_out=DiscardIterator(), op=transform, num_items=length
+    )
 
 
 # producing a carry index that maps each output element back to its position in the original content
