@@ -763,6 +763,15 @@ def awkward_reduce_countnonzero_complex(
                 count += 1
 
         return count
+        
+    segment_ids = CountingIterator(index_dtype(0))
+
+    unary_transform(
+        d_in=segment_ids,
+        d_out=result,
+        op=segment_reduce_countnonzero,
+        num_items=outlength,
+    )
 
 
 # Overlays a mask onto an index array: masked positions become -1, unmasked positions keep their original index value.
