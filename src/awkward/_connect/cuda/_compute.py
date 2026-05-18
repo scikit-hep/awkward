@@ -1263,7 +1263,6 @@ def awkward_ListArray_combinations(
     toindex[:n] = totallen
 
 
-
 def awkward_index_rpad_and_clip_axis0(toindex, target, length):
     """
     Fill ``toindex[0..target)`` with the identity mapping ``[0..shorter)``
