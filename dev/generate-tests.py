@@ -1569,13 +1569,18 @@ def gencudaunittests(specdict):
                                 args += ", " + arg.name
                         # Determine if this is a cuda.compute kernel (raises errors eagerly)
                         # or compiled CUDA kernel (raises errors after `ak_cu.synchronize_cuda()`)
-                        CUDA_COPUTE_KERNELS = {
+                        CUDA_COMPUTE_KERNELS = {
                             "awkward_ListArray_compact_offsets",
                             "awkward_ListArray_broadcast_tooffsets",
+                            "awkward_RegularArray_getitem_next_at",
+                            "awkward_IndexedArray_validity",
+                            "awkward_IndexedArray_getitem_nextcarry_outindex",
+                            "awkward_IndexedArray_getitem_nextcarry",
+                            "awkward_IndexedArray_flatten_none2empty",
                         }
 
                         raises_error_eagerly = (
-                            spec.templatized_kernel_name in CUDA_COPUTE_KERNELS
+                            spec.templatized_kernel_name in CUDA_COMPUTE_KERNELS
                         )
 
                         if test["error"]:
