@@ -2,14 +2,17 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, fromstarts, invocation_index, err_code) = args
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_rearrange_shifted_a", toptr.dtype, fromshifts.dtype, fromoffsets.dtype, fromparents.dtype, fromstarts.dtype]))(grid, block, (toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, fromstarts, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_rearrange_shifted_b", toptr.dtype, fromshifts.dtype, fromoffsets.dtype, fromparents.dtype, fromstarts.dtype]))(grid, block, (toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, fromstarts, invocation_index, err_code))
+//     (toptr, fromshifts, length, fromoffsets, outlength, fromparents, fromstarts, invocation_index, err_code) = args
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_rearrange_shifted_a", toptr.dtype, fromshifts.dtype, fromoffsets.dtype, fromparents.dtype, fromstarts.dtype]))(grid, block, (toptr, fromshifts, length, fromoffsets, outlength, fromparents, fromstarts, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(["awkward_NumpyArray_rearrange_shifted_b", toptr.dtype, fromshifts.dtype, fromoffsets.dtype, fromparents.dtype, fromstarts.dtype]))(grid, block, (toptr, fromshifts, length, fromoffsets, outlength, fromparents, fromstarts, invocation_index, err_code))
 // out["awkward_NumpyArray_rearrange_shifted_a", {dtype_specializations}] = None
 // out["awkward_NumpyArray_rearrange_shifted_b", {dtype_specializations}] = None
 // END PYTHON
 
 
+// `length` here is the number of *shifts* (independent of the bin count, so
+// `fromparents` is still required for phase b — see the CPU version's docs).
+// `outlength` is the number of bins (renamed from `offsetslength - 1`).
 template <typename T, typename C, typename U, typename V, typename W>
 __global__ void
 awkward_NumpyArray_rearrange_shifted_a(
@@ -17,7 +20,7 @@ awkward_NumpyArray_rearrange_shifted_a(
     C* fromshifts,
     int64_t length,
     U* fromoffsets,
-    int64_t offsetslength,
+    int64_t outlength,
     V* fromparents,
     W* fromstarts,
     uint64_t invocation_index,
@@ -25,7 +28,7 @@ awkward_NumpyArray_rearrange_shifted_a(
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (thread_id < offsetslength - 1) {
+    if (thread_id < outlength) {
       for (int64_t j = threadIdx.y; j < fromoffsets[thread_id + 1] - fromoffsets[thread_id]; j += blockDim.y) {
         int64_t idx = fromoffsets[thread_id] + j;
         toptr[idx] = toptr[idx] + fromoffsets[thread_id];
@@ -41,7 +44,7 @@ awkward_NumpyArray_rearrange_shifted_b(
     C* fromshifts,
     int64_t length,
     U* fromoffsets,
-    int64_t offsetslength,
+    int64_t outlength,
     V* fromparents,
     W* fromstarts,
     uint64_t invocation_index,

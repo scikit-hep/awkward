@@ -1,4 +1,11 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+//
+// DEPRECATED — offsets → parents converter (local reduction path).
+//
+// In the migrated pipeline, the caller passes `self._offsets` directly as the
+// next-layer offsets (normalized to start at zero), so this expansion into a
+// per-element parents array is no longer needed. The function is preserved
+// for ABI compatibility; remove once all callers have migrated.
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_ListOffsetArray_reduce_local_nextparents_64.cpp", line)
 
@@ -6,7 +13,7 @@
 
 template <typename C>
 ERROR awkward_ListOffsetArray_reduce_local_nextparents_64(
-  int64_t* nextparents,
+  C* nextparents,
   const C* offsets,
   int64_t length,
   int64_t nextparents_length) {
@@ -20,36 +27,12 @@ ERROR awkward_ListOffsetArray_reduce_local_nextparents_64(
   }
   return success();
 }
-ERROR awkward_ListOffsetArray32_reduce_local_nextparents_64(
-  int64_t* nextparents,
-  const int32_t* offsets,
-  int64_t length,
-  int64_t nextparents_length) {
-  return awkward_ListOffsetArray_reduce_local_nextparents_64(
-    nextparents,
-    offsets,
-    length,
-    nextparents_length);
-}
-ERROR awkward_ListOffsetArrayU32_reduce_local_nextparents_64(
-  int64_t* nextparents,
-  const uint32_t* offsets,
-  int64_t length,
-  int64_t nextparents_length) {
-  return awkward_ListOffsetArray_reduce_local_nextparents_64(
-    nextparents,
-    offsets,
-    length,
-    nextparents_length);
-}
-ERROR awkward_ListOffsetArray64_reduce_local_nextparents_64(
-  int64_t* nextparents,
-  const int64_t* offsets,
-  int64_t length,
-  int64_t nextparents_length) {
-  return awkward_ListOffsetArray_reduce_local_nextparents_64(
-    nextparents,
-    offsets,
-    length,
-    nextparents_length);
-}
+
+#define WRAPPER(SUFFIX, C) \
+  ERROR awkward_ListOffsetArray##SUFFIX(C* nextparents, const C* offsets, int64_t length, int64_t nextparents_length) { \
+    return awkward_ListOffsetArray_reduce_local_nextparents_64<C>(nextparents, offsets, length, nextparents_length); \
+  }
+
+WRAPPER(32_reduce_local_nextparents_64,  int32_t)
+WRAPPER(U32_reduce_local_nextparents_64, uint32_t)
+WRAPPER(64_reduce_local_nextparents_64,  int64_t)

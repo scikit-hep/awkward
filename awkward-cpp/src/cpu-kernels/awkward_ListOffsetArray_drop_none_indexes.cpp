@@ -31,29 +31,11 @@ ERROR awkward_ListOffsetArray_drop_none_indexes(
 
   return success();
 }
-ERROR awkward_ListOffsetArray_drop_none_indexes_64(
-  int64_t* tooffsets,
-  const int64_t* noneindexes,
-  const int64_t* fromoffsets,
-  int64_t length_offsets,
-  int64_t length_indexes) {
-  return awkward_ListOffsetArray_drop_none_indexes<int64_t>(
-    tooffsets,
-    noneindexes,
-    fromoffsets,
-    length_offsets,
-    length_indexes);
-}
-ERROR awkward_ListOffsetArray_drop_none_indexes_32(
-  int32_t* tooffsets,
-  const int32_t* noneindexes,
-  const int32_t* fromoffsets,
-  int64_t length_offsets,
-  int64_t length_indexes) {
-  return awkward_ListOffsetArray_drop_none_indexes<int32_t>(
-    tooffsets,
-    noneindexes,
-    fromoffsets,
-    length_offsets,
-    length_indexes);
-}
+
+#define WRAPPER(SUFFIX, T) \
+  ERROR awkward_ListOffsetArray_drop_none_indexes_##SUFFIX(T* tooffsets, const T* noneindexes, const T* fromoffsets, int64_t length_offsets, int64_t length_indexes) { \
+    return awkward_ListOffsetArray_drop_none_indexes<T>(tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes); \
+  }
+
+WRAPPER(64, int64_t)
+WRAPPER(32, int32_t)

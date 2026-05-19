@@ -27,36 +27,12 @@ ERROR awkward_ListArray_validity(
   }
   return success();
 }
-ERROR awkward_ListArray32_validity(
-  const int32_t* starts,
-  const int32_t* stops,
-  int64_t length,
-  int64_t lencontent) {
-  return awkward_ListArray_validity<int32_t>(
-    starts,
-    stops,
-    length,
-    lencontent);
-}
-ERROR awkward_ListArrayU32_validity(
-  const uint32_t* starts,
-  const uint32_t* stops,
-  int64_t length,
-  int64_t lencontent) {
-  return awkward_ListArray_validity<uint32_t>(
-    starts,
-    stops,
-    length,
-    lencontent);
-}
-ERROR awkward_ListArray64_validity(
-  const int64_t* starts,
-  const int64_t* stops,
-  int64_t length,
-  int64_t lencontent) {
-  return awkward_ListArray_validity<int64_t>(
-    starts,
-    stops,
-    length,
-    lencontent);
-}
+
+#define WRAPPER(SUFFIX, C) \
+  ERROR awkward_ListArray##SUFFIX(const C* starts, const C* stops, int64_t length, int64_t lencontent) { \
+    return awkward_ListArray_validity<C>(starts, stops, length, lencontent); \
+  }
+
+WRAPPER(32_validity, int32_t)
+WRAPPER(U32_validity, uint32_t)
+WRAPPER(64_validity, int64_t)

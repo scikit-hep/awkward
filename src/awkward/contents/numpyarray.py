@@ -49,7 +49,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
-from awkward.index import Index, resolve_index
+from awkward.index import Index
 from awkward.types.numpytype import primitive_to_dtype
 
 if TYPE_CHECKING:
@@ -723,14 +723,13 @@ class NumpyArray(NumpyMeta, Content):
                 backend=self._backend,
             )
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         if self.length is not unknown_length and self.length == 0:
             return True
         elif len(self.shape) != 1:
             return self.to_RegularArray()._is_unique(
                 negaxis,
                 starts,
-                parents,
                 offsets,
                 outlength,
             )
@@ -738,12 +737,11 @@ class NumpyArray(NumpyMeta, Content):
             return self.to_contiguous()._is_unique(
                 negaxis,
                 starts,
-                parents,
                 offsets,
                 outlength,
             )
         else:
-            out = self._unique(negaxis, starts, parents, offsets, outlength)
+            out = self._unique(negaxis, starts, offsets, outlength)
             if isinstance(out, ak.contents.ListOffsetArray):
                 return (
                     out.content.length is not unknown_length
@@ -752,7 +750,36 @@ class NumpyArray(NumpyMeta, Content):
             else:
                 return out.length is not unknown_length and out.length == self.length
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    # def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    #     if self.length is not unknown_length and self.length == 0:
+    #         return True
+    #     elif len(self.shape) != 1:
+    #         return self.to_RegularArray()._is_unique(
+    #             negaxis,
+    #             starts,
+    #             parents,
+    #             offsets,
+    #             outlength,
+    #         )
+    #     elif not self.is_contiguous:
+    #         return self.to_contiguous()._is_unique(
+    #             negaxis,
+    #             starts,
+    #             parents,
+    #             offsets,
+    #             outlength,
+    #         )
+    #     else:
+    #         out = self._unique(negaxis, starts, parents, offsets, outlength)
+    #         if isinstance(out, ak.contents.ListOffsetArray):
+    #             return (
+    #                 out.content.length is not unknown_length
+    #                 and out.content.length == self.length
+    #             )
+    #         else:
+    #             return out.length is not unknown_length and out.length == self.length
+
+    def _unique(self, negaxis, starts, offsets, outlength):
         if self.shape[0] is not unknown_length and self.shape[0] == 0:
             return self
 
@@ -762,28 +789,28 @@ class NumpyArray(NumpyMeta, Content):
         elif negaxis is None:
             contiguous_self = self.to_contiguous()
 
-            offsets = ak.index.Index64.zeros(2, self._backend.nplike)
-            offsets[1] = self._data.size
+            offsets_local = ak.index.Index64.zeros(2, self._backend.nplike)
+            offsets_local[1] = self._data.size
             dtype = (
                 np.dtype(np.int64)
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
             out = self._backend.nplike.empty(self._data.size, dtype=dtype)
-            assert offsets.nplike is self._backend.nplike
+            assert offsets_local.nplike is self._backend.nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_sort",
                     dtype.type,
                     dtype.type,
-                    offsets.dtype.type,
+                    offsets_local.dtype.type,
                 ](
                     out,
                     contiguous_self._data,
-                    offsets[1],
-                    offsets.data,
+                    offsets_local[1],
+                    offsets_local.data,
                     2,
-                    offsets[1],
+                    offsets_local[1],
                     True,
                     False,
                 )
@@ -804,70 +831,53 @@ class NumpyArray(NumpyMeta, Content):
             return self.to_RegularArray()._unique(
                 negaxis,
                 starts,
-                parents,
                 offsets,
                 outlength,
             )
         else:
-            parents_length = parents.length
-            offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
-            assert (
-                offsets_length.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_sorting_ranges_length",
-                    offsets_length.dtype.type,
-                    parents.dtype.type,
-                ](
-                    offsets_length.data,
-                    parents.data,
-                    parents_length,
-                )
-            )
+            # The incoming `offsets` is the per-bin offsets-rep of length
+            # outlength + 1, possibly with empty bins represented as
+            # consecutive equal values (e.g. [0, 3, 3, 5, 6, 10, 10]).
+            # `awkward_unique_ranges` and `awkward_unique_offsets` are still
+            # parents-era kernels that expect a *compact* offsets array (one
+            # entry per non-empty bin, like the original `awkward_sorting_ranges`
+            # output). Compact the offsets here, run the unchanged kernels on
+            # the compact form, then let `awkward_unique_offsets` re-expand to
+            # the full outlength+1 outoffsets using `starts`.
+            nplike = self._backend.nplike
+            keep = nplike.empty(offsets.length, dtype=np.bool_)
+            keep[0] = True
+            keep[1:] = offsets.data[1:] != offsets.data[:-1]
+            compact_data = offsets.data[keep]
+            compact_offsets = ak.index.Index64(compact_data, nplike=nplike)
+            compact_offsets_length = compact_offsets.length
+            parents_length = nplike.index_as_shape_item(offsets.data[-1])
 
-            offsets = ak.index.Index64.empty(offsets_length[0], self._backend.nplike)
-            assert (
-                offsets.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_sorting_ranges",
-                    offsets.dtype.type,
-                    parents.dtype.type,
-                ](
-                    offsets.data,
-                    offsets_length[0],
-                    parents.data,
-                    parents_length,
-                )
-            )
-
-            out = self._backend.nplike.empty(self.length, dtype=self.dtype)
-            assert offsets.nplike is self._backend.nplike
+            out = nplike.empty(self.length, dtype=self.dtype)
+            assert compact_offsets.nplike is self._backend.nplike
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_sort",
                     out.dtype.type,
                     self._data.dtype.type,
-                    offsets.dtype.type,
+                    compact_offsets.dtype.type,
                 ](
                     out,
                     self._data,
                     self.shape[0],
-                    offsets.data,
-                    offsets_length[0],
+                    compact_offsets.data,
+                    compact_offsets_length,
                     parents_length,
                     True,
                     False,
                 )
             )
 
-            nextoffsets = ak.index.Index64.empty(offsets.length, self._backend.nplike)
+            nextoffsets = ak.index.Index64.empty(
+                compact_offsets_length, self._backend.nplike
+            )
             assert (
-                offsets.nplike is self._backend.nplike
+                compact_offsets.nplike is self._backend.nplike
                 and nextoffsets.nplike is self._backend.nplike
             )
             if out.dtype == np.bool_:
@@ -875,12 +885,12 @@ class NumpyArray(NumpyMeta, Content):
                     self._backend[
                         "awkward_unique_ranges_bool",
                         out.dtype.type,
-                        offsets.dtype.type,
+                        compact_offsets.dtype.type,
                         nextoffsets.dtype.type,
                     ](
                         out,
-                        offsets.data,
-                        offsets.length,
+                        compact_offsets.data,
+                        compact_offsets_length,
                         nextoffsets.data,
                     )
                 )
@@ -889,18 +899,17 @@ class NumpyArray(NumpyMeta, Content):
                     self._backend[
                         "awkward_unique_ranges",
                         out.dtype.type,
-                        offsets.dtype.type,
+                        compact_offsets.dtype.type,
                         nextoffsets.dtype.type,
                     ](
                         out,
-                        offsets.data,
-                        offsets.length,
+                        compact_offsets.data,
+                        compact_offsets_length,
                         nextoffsets.data,
                     )
                 )
 
             outoffsets = ak.index.Index64.empty(starts.length + 1, self._backend.nplike)
-
             assert (
                 outoffsets.nplike is self._backend.nplike
                 and nextoffsets.nplike is self._backend.nplike
@@ -926,57 +935,18 @@ class NumpyArray(NumpyMeta, Content):
             )
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         if len(self.shape) != 1:
             return self.to_RegularArray()._argsort_next(
-                negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+                negaxis, starts, shifts, offsets, outlength, ascending, stable
             )
         elif not self.is_contiguous:
             return self.to_contiguous()._argsort_next(
-                negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+                negaxis, starts, shifts, offsets, outlength, ascending, stable
             )
         else:
-            parents = resolve_index(parents, self._backend)
-
-            parents_length = parents.length
-            _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
-            assert (
-                _offsets_length.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_sorting_ranges_length",
-                    _offsets_length.dtype.type,
-                    parents.dtype.type,
-                ](
-                    _offsets_length.data,
-                    parents.data,
-                    parents_length,
-                )
-            )
-            offsets_length = self._backend.nplike.index_as_shape_item(
-                _offsets_length[0]
-            )
-
-            offsets = ak.index.Index64.empty(offsets_length, self._backend.nplike)
-            assert (
-                offsets.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_sorting_ranges",
-                    offsets.dtype.type,
-                    parents.dtype.type,
-                ](
-                    offsets.data,
-                    offsets_length,
-                    parents.data,
-                    parents_length,
-                )
-            )
+            offsets_length = offsets.length
 
             dtype = (
                 np.dtype(np.int64)
@@ -1006,6 +976,25 @@ class NumpyArray(NumpyMeta, Content):
             )
 
             if shifts is not None:
+                # awkward_NumpyArray_rearrange_shifted's phase-2 loop walks
+                # `shifts.length` (independent of the bin count), and for each
+                # shift index it reads parents[i] to find the outer bin. We
+                # derive parents from offsets here.
+                nplike = self._backend.nplike
+                # Cast `counts` to np.intp because np.repeat enforces the
+                # 'safe' casting rule on its `repeats` parameter, and on
+                # platforms where np.intp is int32 (Windows 64-bit numpy <2.0,
+                # 32-bit numpy 2.x) an int64 counts array would raise
+                # "Cannot cast array data from dtype('int64') to dtype('int32')
+                # according to the rule 'safe'".
+                counts = offsets.data[1:] - offsets.data[:-1]
+                parents_data = nplike.repeat(
+                    nplike.arange(
+                        nplike.shape_item_as_index(outlength), dtype=np.int64
+                    ),
+                    nplike.astype(counts, np.intp),
+                )
+                parents = ak.index.Index64(parents_data, nplike=nplike)
                 assert (
                     nextcarry.nplike is self._backend.nplike
                     and shifts.nplike is self._backend.nplike
@@ -1026,7 +1015,7 @@ class NumpyArray(NumpyMeta, Content):
                         shifts.data,
                         shifts.length,
                         offsets.data,
-                        offsets_length,
+                        outlength,
                         parents.data,
                         starts.data,
                     )
@@ -1034,60 +1023,19 @@ class NumpyArray(NumpyMeta, Content):
             out = NumpyArray(nextcarry.data, parameters=None, backend=self._backend)
             return out
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         if len(self.shape) != 1:
             return self.to_RegularArray()._sort_next(
-                negaxis, starts, parents, offsets, outlength, ascending, stable
+                negaxis, starts, offsets, outlength, ascending, stable
             )
         elif not self.is_contiguous:
             return self.to_contiguous()._sort_next(
-                negaxis, starts, parents, offsets, outlength, ascending, stable
+                negaxis, starts, offsets, outlength, ascending, stable
             )
 
         else:
-            parents = resolve_index(parents, self._backend)
-
-            parents_length = parents.length
-            _offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
-            assert (
-                _offsets_length.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_sorting_ranges_length",
-                    _offsets_length.dtype.type,
-                    parents.dtype.type,
-                ](
-                    _offsets_length.data,
-                    parents.data,
-                    parents_length,
-                )
-            )
-            offsets_length = self._backend.nplike.index_as_shape_item(
-                _offsets_length[0]
-            )
-
-            offsets = ak.index.Index64.empty(offsets_length, self._backend.nplike)
-
-            assert (
-                offsets.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_sorting_ranges",
-                    offsets.dtype.type,
-                    parents.dtype.type,
-                ](
-                    offsets.data,
-                    offsets_length,
-                    parents.data,
-                    parents_length,
-                )
-            )
+            offsets_length = offsets.length
+            parents_length = self._backend.nplike.index_as_shape_item(offsets[-1])
 
             dtype = (
                 np.dtype(np.int64)
@@ -1136,7 +1084,6 @@ class NumpyArray(NumpyMeta, Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -1149,7 +1096,6 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis,
                 starts,
                 shifts,
-                parents,
                 offsets,
                 outlength,
                 mask,
@@ -1162,7 +1108,6 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis,
                 starts,
                 shifts,
-                parents,
                 offsets,
                 outlength,
                 mask,
@@ -1174,31 +1119,29 @@ class NumpyArray(NumpyMeta, Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        parents = resolve_index(parents, self._backend)
-        offsets = resolve_index(offsets, self._backend)
+        # No more `parents_to_offsets_aligned` round-trip — `offsets` is the
+        # bin descriptor we receive directly.
 
-        out = reducer.apply(self, parents, offsets, starts, shifts, outlength)
+        out = reducer.apply(self, offsets, starts, shifts, outlength)
 
         if mask:
             outmask = ak.index.Index8.empty(outlength, self._backend.nplike)
             assert (
                 outmask.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
+                and offsets.nplike is self._backend.nplike
             )
             self._backend.maybe_kernel_error(
                 self._backend[
                     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
                     outmask.dtype.type,
-                    parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     outmask.data,
-                    parents.data,
-                    parents.length,
+                    offsets.data,
                     outlength,
                 )
             )
             out = ak.contents.ByteMaskedArray(outmask, out, False, parameters=None)
-
         if keepdims:
             out = ak.contents.RegularArray(out, 1, self.length, parameters=None)
 

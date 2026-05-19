@@ -17,42 +17,12 @@ ERROR awkward_IndexedArray_fill(
   }
   return success();
 }
-ERROR awkward_IndexedArray_fill_to64_from32(
-  int64_t* toindex,
-  int64_t toindexoffset,
-  const int32_t* fromindex,
-  int64_t length,
-  int64_t base) {
-  return awkward_IndexedArray_fill<int32_t, int64_t>(
-    toindex,
-    toindexoffset,
-    fromindex,
-    length,
-    base);
-}
-ERROR awkward_IndexedArray_fill_to64_fromU32(
-  int64_t* toindex,
-  int64_t toindexoffset,
-  const uint32_t* fromindex,
-  int64_t length,
-  int64_t base) {
-  return awkward_IndexedArray_fill<uint32_t, int64_t>(
-    toindex,
-    toindexoffset,
-    fromindex,
-    length,
-    base);
-}
-ERROR awkward_IndexedArray_fill_to64_from64(
-  int64_t* toindex,
-  int64_t toindexoffset,
-  const int64_t* fromindex,
-  int64_t length,
-  int64_t base) {
-  return awkward_IndexedArray_fill<int64_t, int64_t>(
-    toindex,
-    toindexoffset,
-    fromindex,
-    length,
-    base);
-}
+
+#define WRAPPER(SUFFIX, FROM, TO) \
+  ERROR awkward_IndexedArray_fill_to64_from##SUFFIX(TO* toindex, int64_t toindexoffset, const FROM* fromindex, int64_t length, int64_t base) { \
+    return awkward_IndexedArray_fill<FROM, TO>(toindex, toindexoffset, fromindex, length, base); \
+  }
+
+WRAPPER(32, int32_t, int64_t)
+WRAPPER(U32, uint32_t, int64_t)
+WRAPPER(64, int64_t, int64_t)

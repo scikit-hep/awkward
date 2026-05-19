@@ -24,42 +24,12 @@ ERROR awkward_ListOffsetArray_rpad_length_axis1(
 
   return success();
 }
-ERROR awkward_ListOffsetArray32_rpad_length_axis1(
-  int32_t* tooffsets,
-  const int32_t* fromoffsets,
-  int64_t fromlength,
-  int64_t target,
-  int64_t* tolength) {
-  return awkward_ListOffsetArray_rpad_length_axis1<int32_t>(
-    tooffsets,
-    fromoffsets,
-    fromlength,
-    target,
-    tolength);
-}
-ERROR awkward_ListOffsetArrayU32_rpad_length_axis1(
-  uint32_t* tooffsets,
-  const uint32_t* fromoffsets,
-  int64_t fromlength,
-  int64_t target,
-  int64_t* tolength) {
-  return awkward_ListOffsetArray_rpad_length_axis1<uint32_t>(
-    tooffsets,
-    fromoffsets,
-    fromlength,
-    target,
-    tolength);
-}
-ERROR awkward_ListOffsetArray64_rpad_length_axis1(
-  int64_t* tooffsets,
-  const int64_t* fromoffsets,
-  int64_t fromlength,
-  int64_t target,
-  int64_t* tolength) {
-  return awkward_ListOffsetArray_rpad_length_axis1<int64_t>(
-    tooffsets,
-    fromoffsets,
-    fromlength,
-    target,
-    tolength);
-}
+
+#define WRAPPER(SUFFIX, C) \
+  ERROR awkward_ListOffsetArray##SUFFIX(C* tooffsets, const C* fromoffsets, int64_t fromlength, int64_t target, int64_t* tolength) { \
+    return awkward_ListOffsetArray_rpad_length_axis1<C>(tooffsets, fromoffsets, fromlength, target, tolength); \
+  }
+
+WRAPPER(32_rpad_length_axis1, int32_t)
+WRAPPER(U32_rpad_length_axis1, uint32_t)
+WRAPPER(64_rpad_length_axis1, int64_t)

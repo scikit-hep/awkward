@@ -29,54 +29,12 @@ ERROR awkward_IndexedArray_ranges_next_64(
 
   return success();
 }
-ERROR awkward_IndexedArray32_ranges_next_64(
-  const int32_t* index,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  int64_t* tostarts,
-  int64_t* tostops,
-  int64_t* tolength) {
-  return awkward_IndexedArray_ranges_next_64<int32_t>(
-    index,
-    fromstarts,
-    fromstops,
-    length,
-    tostarts,
-    tostops,
-    tolength);
-}
-ERROR awkward_IndexedArrayU32_ranges_next_64(
-  const uint32_t* index,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  int64_t* tostarts,
-  int64_t* tostops,
-  int64_t* tolength) {
-  return awkward_IndexedArray_ranges_next_64<uint32_t>(
-    index,
-    fromstarts,
-    fromstops,
-    length,
-    tostarts,
-    tostops,
-    tolength);
-}
-ERROR awkward_IndexedArray64_ranges_next_64(
-  const int64_t* index,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  int64_t* tostarts,
-  int64_t* tostops,
-  int64_t* tolength) {
-  return awkward_IndexedArray_ranges_next_64<int64_t>(
-    index,
-    fromstarts,
-    fromstops,
-    length,
-    tostarts,
-    tostops,
-    tolength);
-}
+
+#define WRAPPER(SUFFIX, T) \
+  ERROR awkward_IndexedArray##SUFFIX(const T* index, const int64_t* fromstarts, const int64_t* fromstops, int64_t length, int64_t* tostarts, int64_t* tostops, int64_t* tolength) { \
+    return awkward_IndexedArray_ranges_next_64<T>(index, fromstarts, fromstops, length, tostarts, tostops, tolength); \
+  }
+
+WRAPPER(32_ranges_next_64, int32_t)
+WRAPPER(U32_ranges_next_64, uint32_t)
+WRAPPER(64_ranges_next_64, int64_t)

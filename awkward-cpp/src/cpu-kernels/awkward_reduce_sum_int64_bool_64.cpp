@@ -7,14 +7,14 @@
 ERROR awkward_reduce_sum_int64_bool_64(
   int64_t* toptr,
   const bool* fromptr,
-  const int64_t* parents,
   const int64_t* offsets,
-  int64_t lenparents,
   int64_t outlength) {
-  std::memset(toptr, 0, outlength * sizeof(int64_t));
-
-  for (int64_t i = 0; i < lenparents; i++) {
-    toptr[parents[i]] += fromptr[i];
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    int64_t acc = 0;
+    for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
+      if (fromptr[i]) acc++;
+    }
+    toptr[bin] = acc;
   }
   return success();
 }

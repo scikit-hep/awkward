@@ -1570,6 +1570,8 @@ def gencudaunittests(specdict):
                         # Determine if this is a cuda.compute kernel (raises errors eagerly)
                         # or compiled CUDA kernel (raises errors after `ak_cu.synchronize_cuda()`)
                         CUDA_COMPUTE_KERNELS = {
+                            "awkward_ListArray_compact_offsets",
+                            "awkward_ListArray_broadcast_tooffsets",
                             "awkward_RegularArray_getitem_next_at",
                             "awkward_IndexedArray_validity",
                             "awkward_IndexedArray_getitem_nextcarry_outindex",
@@ -1584,6 +1586,7 @@ def gencudaunittests(specdict):
                         if test["error"]:
                             error_message_line = f'    error_message = re.escape("{test["message"]} in compiled CUDA code ({spec.templatized_kernel_name})")\n'
                             if raises_error_eagerly:
+                                # call a kernel directly inside `pytest.raises()`
                                 f.write(
                                     "\n"
                                     + error_message_line
@@ -1595,9 +1598,10 @@ def gencudaunittests(specdict):
                                 )
                             else:
                                 f.write(" " * 4 + "funcC(" + args + ")\n")
-                                f.write("\n" + error_message_line)
                                 f.write(
-                                    '    with pytest.raises(ValueError, match=rf"{error_message}"):\n'
+                                    "\n"
+                                    + error_message_line
+                                    + '    with pytest.raises(ValueError, match=rf"{error_message}"):\n'
                                     "        ak_cu.synchronize_cuda()\n"
                                 )
                         else:
