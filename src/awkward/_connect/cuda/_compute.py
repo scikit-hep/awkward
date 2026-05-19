@@ -5,9 +5,9 @@ from __future__ import annotations
 from cuda.compute import (
     CountingIterator,
     DiscardIterator,
+    OpKind,
     TransformIterator,
     ZipIterator,
-    OpKind,
     inclusive_scan,
     reduce_into,
     segmented_reduce,
