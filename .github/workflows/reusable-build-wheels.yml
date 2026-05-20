@@ -132,7 +132,7 @@ jobs:
       run: pipx run nox -s prepare
 
     - name: Build distributions
-      run: pipx run build --installer uv
+      run: uvx --from build pyproject-build --installer uv
 
     - name: Check metadata
       run: pipx run twine check dist/*
