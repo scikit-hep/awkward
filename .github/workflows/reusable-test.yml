@@ -139,6 +139,7 @@ jobs:
         run: >-
           python -m pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
           -r "requirements-test-${MATRIX_DEPENDENCIES_KIND}.txt"
+        shell: bash
         env:
           STEPS_FIND_WHEEL_OUTPUTS_PATHS: ${{ steps.find-wheel.outputs.paths }}
           MATRIX_DEPENDENCIES_KIND: ${{ matrix.dependencies-kind }}

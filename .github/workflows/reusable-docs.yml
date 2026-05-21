@@ -93,11 +93,10 @@ jobs:
 
     - name: Cache wheel
       id: cache-awkward-cpp-x86-64-wheel
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] Reuses a docs-only wheel cache to avoid rebuilding unchanged awkward-cpp docs dependencies.
       with:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-${{ env.X86_64_PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
-        lookup-only: true
 
     - name: Build wheel
       if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
@@ -108,6 +107,7 @@ jobs:
       with:
         name: awkward-cpp-x86-64
         path: awkward-cpp/dist/awkward*.whl
+        if-no-files-found: error
 
   awkward:
     runs-on: ubuntu-24.04
