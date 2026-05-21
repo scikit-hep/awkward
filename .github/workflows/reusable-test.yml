@@ -20,6 +20,9 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: read
+
 concurrency:
   group: 'test-${{ github.head_ref || github.run_id }}'
   cancel-in-progress: true
@@ -134,8 +137,11 @@ jobs:
 
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
-          python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
-          -r "requirements-test-${{ matrix.dependencies-kind }}.txt"
+          python -m pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
+          -r "requirements-test-${MATRIX_DEPENDENCIES_KIND}.txt"
+        env:
+          STEPS_FIND_WHEEL_OUTPUTS_PATHS: ${{ steps.find-wheel.outputs.paths }}
+          MATRIX_DEPENDENCIES_KIND: ${{ matrix.dependencies-kind }}
 
       - name: Print versions
         run: python -m pip list
@@ -269,6 +275,7 @@ jobs:
           python -m pytest -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py
 
   Linux-ROOT:
+    name: Linux ROOT
     runs-on: ubuntu-latest
 
     env:
@@ -328,6 +335,7 @@ jobs:
         run: python -m pytest -vv -rs tests
 
   Linux-cppyy:
+    name: Linux cppyy
     # TODO: remove this part of the workflow
     # cppyy is not yet released. Let's load some pre-built wheels via docker (as a binary store)
     runs-on: ubuntu-22.04

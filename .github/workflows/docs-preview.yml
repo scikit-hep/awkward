@@ -1,9 +1,16 @@
 name: Docs Preview
-on:
+on: # zizmor: ignore[dangerous-triggers] This privileged workflow only deploys artifacts from a completed CI run.
   workflow_run:
     workflows: [CI]
     types:
       - completed
+
+concurrency:
+  group: docs-preview-${{ github.event.workflow_run.id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   branch-preview:
@@ -11,9 +18,9 @@ jobs:
     name: Deploy Branch Preview
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
     permissions:
-      id-token: write
+      id-token: write # Required to assume the AWS deployment role through OIDC.
       contents: read
-      pull-requests: write
+      pull-requests: write # Required to comment with the preview URL.
     env:
       S3_BUCKET: "preview.awkward-array.org"
       DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
@@ -55,7 +62,7 @@ jobs:
           });
           const fs = require('fs');
           const path = require('path');
-          const temp = '${{ runner.temp }}/artifacts';
+          const temp = path.join(process.env.RUNNER_TEMP, 'artifacts');
           if (!fs.existsSync(temp)){
             fs.mkdirSync(temp);
           }
@@ -63,18 +70,18 @@ jobs:
           fs.writeFileSync(path.join(temp, 'pr_number.zip'), Buffer.from(downloadPRNumber.data));
     - name: Unzip artifacts
       run: |
-        unzip "${{ runner.temp }}/artifacts/docs.zip" -d "${{ runner.temp }}/artifacts"
-        unzip "${{ runner.temp }}/artifacts/pr_number.zip" -d "${{ runner.temp }}/artifacts"
+        unzip "${RUNNER_TEMP}/artifacts/docs.zip" -d "${RUNNER_TEMP}/artifacts"
+        unzip "${RUNNER_TEMP}/artifacts/pr_number.zip" -d "${RUNNER_TEMP}/artifacts"
     - name: Read PR number
       id: pr_number
       run: |
-        echo "pr_number=$(cat ${{ runner.temp }}/artifacts/pr_number.txt)" >> $GITHUB_OUTPUT
-        rm "${{ runner.temp }}/artifacts/pr_number.txt"
-        rm "${{ runner.temp }}/artifacts/docs.zip"
-        rm "${{ runner.temp }}/artifacts/pr_number.zip"
+        echo "pr_number=$(cat "${RUNNER_TEMP}/artifacts/pr_number.txt")" >> "${GITHUB_OUTPUT}"
+        rm "${RUNNER_TEMP}/artifacts/pr_number.txt"
+        rm "${RUNNER_TEMP}/artifacts/docs.zip"
+        rm "${RUNNER_TEMP}/artifacts/pr_number.zip"
     - name: Sync artifacts
       run: |
-        aws s3 sync ${{ runner.temp }}/artifacts/ "s3://${S3_BUCKET}/PR${STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER}"
+        aws s3 sync "${RUNNER_TEMP}/artifacts/" "s3://${S3_BUCKET}/PR${STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER}"
       env:
         STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER: ${{ steps.pr_number.outputs.pr_number }}
     - name: Try to find previous bot comment
@@ -86,8 +93,8 @@ jobs:
         body-includes: The documentation preview is ready to be viewed
     - name: Create comment with preview link
       if: steps.fc.outputs.comment-id == ''
-      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
-      with:
-        issue-number: ${{ steps.pr_number.outputs.pr_number }}
-        body: |
-          The documentation preview is ready to be viewed at <${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}>
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PR_NUMBER: ${{ steps.pr_number.outputs.pr_number }}
+        PREVIEW_URL: ${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}
+      run: gh pr comment "${PR_NUMBER}" --body "The documentation preview is ready to be viewed at <${PREVIEW_URL}>"

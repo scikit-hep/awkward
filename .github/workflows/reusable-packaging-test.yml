@@ -5,6 +5,8 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: read
 
 concurrency:
   group: packaging-test-${{ github.head_ref }}

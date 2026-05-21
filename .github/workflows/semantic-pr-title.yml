@@ -8,6 +8,10 @@ on:
       - synchronize
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: read # Required to read PR metadata for title validation.
+
 concurrency:
   group: semantic-pr-title-${{ github.head_ref }}
   cancel-in-progress: true

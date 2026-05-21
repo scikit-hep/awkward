@@ -2,8 +2,14 @@ name: Codecov
 
 on:
   workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
 
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: 'coverage-${{ github.head_ref || github.run_id }}'
@@ -104,13 +110,13 @@ jobs:
           --cov=awkward --cov-report=term --cov-report=xml:cuda-virtual-coverage.xml
 
       - name: Upload Codecov results
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           report_type: test_results

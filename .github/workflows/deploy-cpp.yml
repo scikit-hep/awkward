@@ -7,18 +7,25 @@ on:
             type: boolean
             description: Publish to PyPI
 
-jobs:
+permissions:
+  contents: read
 
+concurrency:
+  group: deploy-cpp-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
   build-wheels:
     uses: ./.github/workflows/reusable-build-wheels.yml
 
   upload-awkward-cpp:
+    name: Upload awkward-cpp
     needs: [build-wheels]
     runs-on: ubuntu-latest
     if: inputs.publish-pypi
     permissions:
-      id-token: write
-      attestations: write
+      id-token: write # Required for trusted publishing to PyPI.
+      attestations: write # Required to sign release artifacts before publishing.
       contents: read
     environment:
       name: "pypi"

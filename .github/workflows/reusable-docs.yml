@@ -1,11 +1,19 @@
 name: Docs
 on:
   workflow_call:
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: false
+      AWS_DEPLOY_ROLE:
+        required: false
 
   workflow_dispatch:
 
   release:
     types: [released]
+
+permissions:
+  contents: read
 
 concurrency:
   group: 'docs-${{ github.head_ref || github.run_id }}'
@@ -295,7 +303,7 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'release'
     name: Deploy
     permissions:
-      id-token: write
+      id-token: write # Required to assume the AWS deployment role through OIDC.
       contents: read
     env:
       S3_BUCKET: "awkward-array.org"

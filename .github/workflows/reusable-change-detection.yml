@@ -16,6 +16,9 @@ on:
         description: Whether or not run the gpu kernel tests
         value: ${{ jobs.change-detection.outputs.run-gpu-kernel-tests || false }}
 
+permissions:
+  contents: read
+
 jobs:
   change-detection:
     name: Identify source changes

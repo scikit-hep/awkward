@@ -7,6 +7,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -34,13 +37,17 @@ jobs:
 
   coverage:
     uses: ./.github/workflows/reusable-coverage.yml
-    secrets: inherit
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   docs:
     uses: ./.github/workflows/reusable-docs.yml
-    secrets: inherit
+    secrets:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_DEPLOY_ROLE: ${{ secrets.AWS_DEPLOY_ROLE }}
 
   pass:
+    name: Check CI result
     if: always()
     needs:
       - change-detection

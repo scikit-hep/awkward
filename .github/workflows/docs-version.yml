@@ -8,6 +8,9 @@ on:
       - docs/switcher.json
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: 'docs-version-${{ github.head_ref || github.run_id }}'
   cancel-in-progress: true
@@ -17,7 +20,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Push version switcher
     permissions:
-      id-token: write
+      id-token: write # Required to assume the AWS deployment role through OIDC.
       contents: read
     env:
       S3_BUCKET: "awkward-array.org"
