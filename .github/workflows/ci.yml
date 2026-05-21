@@ -42,6 +42,9 @@ jobs:
 
   docs:
     uses: ./.github/workflows/reusable-docs.yml
+    permissions:
+      id-token: write # Required by the reusable docs deploy job for AWS OIDC.
+      contents: read
     secrets:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       AWS_DEPLOY_ROLE: ${{ secrets.AWS_DEPLOY_ROLE }}
