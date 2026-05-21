@@ -92,12 +92,13 @@ jobs:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
+          persist-credentials: false
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
@@ -108,7 +109,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: awkward-cpp/dist
           key: ${{ github.job }}-${{ matrix.runs-on }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
@@ -120,7 +121,7 @@ jobs:
           python -m build -w awkward-cpp
 
       - name: Find built wheel
-        uses: tj-actions/glob@v22
+        uses: tj-actions/glob@2deae40528141fc53131606d56b4e4ce2a486b29 # v22.0.2
         id: find-wheel
         with:
           files: |
@@ -192,12 +193,13 @@ jobs:
           rm -rf * .[!.]* || echo "Nothing to clean"
           rm -rf ~/micromamba* || echo "Nothing to clean"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Get micromamba
-        uses: mamba-org/setup-micromamba@v3
+        uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
         with:
           environment-name: test-env
           init-shell: bash
@@ -218,7 +220,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
@@ -230,7 +232,7 @@ jobs:
           python -m build -w awkward-cpp
 
       - name: Find built wheel
-        uses: tj-actions/glob@v22
+        uses: tj-actions/glob@2deae40528141fc53131606d56b4e4ce2a486b29 # v22.0.2
         id: find-wheel
         with:
           files: |
@@ -242,8 +244,10 @@ jobs:
 
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
-          python -m pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
+          python -m pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
           -r requirements-test-gpu.txt
+        env:
+          STEPS_FIND_WHEEL_OUTPUTS_PATHS: ${{ steps.find-wheel.outputs.paths }}
 
       - name: Print versions
         run: python -m pip list
@@ -278,12 +282,13 @@ jobs:
         shell: "bash -l {0}"
 
     steps:
-      - uses: "actions/checkout@v6"
+      - uses: "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd" # v6.0.2
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Setup Python via Conda
-        uses: mamba-org/setup-micromamba@v3
+        uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
         with:
           # Cache invalidates daily by default
           cache-environment: true
@@ -298,7 +303,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}-py3.14
@@ -331,12 +336,13 @@ jobs:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
+          persist-credentials: false
 
       - name: 'Python ${{ matrix.python-version }}'
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.11'
 
@@ -345,7 +351,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
@@ -357,7 +363,7 @@ jobs:
           python -m build -w ./awkward-cpp
 
       - name: Extract pre-built manylinux cppyy wheels
-        uses: shrink/actions-docker-extract@v4
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4.0.0
         with:
           image: "docker.io/agoose77/cppyy-wheels:cp311"
           path: "/wheels/."
@@ -388,16 +394,17 @@ jobs:
 
     name: "Run s390x Tests"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Initialize binfmt_misc for qemu-user-static
         run: |
           docker run --rm --privileged tonistiigi/binfmt:qemu-v9.2.2-52 --install s390x
 
       - name: Cache docker container
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: container-cache
         with:
           path: ~/docker_s390x
@@ -431,7 +438,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: awkward-cpp/dist
           key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
@@ -450,7 +457,7 @@ jobs:
             '
 
       - name: Find built wheel
-        uses: tj-actions/glob@v22
+        uses: tj-actions/glob@2deae40528141fc53131606d56b4e4ce2a486b29 # v22.0.2
         id: find-wheel
         with:
           files: |
@@ -465,10 +472,12 @@ jobs:
               export PATH="/root/.local/bin:$PATH" &&
               source .venv/bin/activate &&
               cd /awkward &&
-              uv pip install -v . ${{ steps.find-wheel.outputs.paths }} pytest-github-actions-annotate-failures
+              uv pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
             '
           docker commit build_container the_container
           docker rm build_container
+        env:
+          STEPS_FIND_WHEEL_OUTPUTS_PATHS: ${{ steps.find-wheel.outputs.paths }}
 
       - name: Print versions
         run: |

@@ -35,12 +35,13 @@ jobs:
           rm -rf * .[!.]* || echo "Nothing to clean"
           rm -rf ~/micromamba* || echo "Nothing to clean"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Get micromamba
-        uses: mamba-org/setup-micromamba@v3
+        uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
         with:
           environment-name: test-env
           init-shell: bash
@@ -63,7 +64,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('awkward-cpp/**') }}
