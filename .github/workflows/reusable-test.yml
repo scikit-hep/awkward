@@ -475,6 +475,7 @@ jobs:
       - name: Install awkward, awkward-cpp, and dependencies
         run: |
           docker run --platform=linux/${ARCH} -e "TERM=${TERM}" \
+            -e STEPS_FIND_WHEEL_OUTPUTS_PATHS \
             --name build_container \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
