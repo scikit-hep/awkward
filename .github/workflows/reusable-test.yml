@@ -7,7 +7,7 @@ on:
   workflow_call:
     inputs:
       run-gpu-kernel-tests:
-        description: Whether or not to run the gpu kernel tests
+        description: Run the gpu kernel tests
         required: false
         default: false
         type: string # The workflow freezes if this is set to boolean for some reason
@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       run-gpu-kernel-tests:
-        description: Whether or not to run the gpu kernel tests
+        description: Run the gpu kernel tests
         required: false
         default: false
         type: boolean
