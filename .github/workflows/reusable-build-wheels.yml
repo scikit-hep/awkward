@@ -19,6 +19,7 @@ concurrency:
 jobs:
   determine-source-date-epoch:
     name: "Determine SOURCE_DATE_EPOCH"
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
     runs-on: ubuntu-latest
     outputs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
@@ -39,6 +40,7 @@ jobs:
 
   make_sdist:
     name: "Build awkward-cpp sdist"
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
     runs-on: ubuntu-latest
     needs: [determine-source-date-epoch]
     env:
@@ -67,6 +69,7 @@ jobs:
   build_wheels:
     needs: [determine-source-date-epoch]
     name: "Wheel awkward-cpp: ${{ matrix.arch }} on ${{ matrix.os }}"
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
     runs-on: ${{ matrix.os }}
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
@@ -122,6 +125,7 @@ jobs:
 
   build_awkward_wheel:
     name: "Build awkward sdist and wheel"
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
     runs-on: ubuntu-latest
     needs: [determine-source-date-epoch]
     env:

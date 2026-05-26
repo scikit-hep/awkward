@@ -36,6 +36,7 @@ env:
 jobs:
   run-tests:
     name: Run Tests
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
     strategy:
       fail-fast: false
       matrix:
@@ -176,6 +177,7 @@ jobs:
 
   run-gpu-tests:
     name: Run GPU Tests
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
 
     runs-on: self-hosted
 
@@ -277,6 +279,7 @@ jobs:
 
   Linux-ROOT:
     name: Linux ROOT
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
     runs-on: ubuntu-latest
 
     env:
@@ -337,6 +340,7 @@ jobs:
 
   Linux-cppyy:
     name: Linux cppyy
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
     # TODO: remove this part of the workflow
     # cppyy is not yet released. Let's load some pre-built wheels via docker (as a binary store)
     runs-on: ubuntu-22.04
@@ -392,7 +396,7 @@ jobs:
 
   run-s390x-tests:
     # Only workflow_dispatch is enabled on forks.
-    if: github.repository == 'scikit-hep/awkward' || github.event_name == 'workflow_dispatch'
+    if: github.repository_owner == 'scikit-hep' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 120
 
