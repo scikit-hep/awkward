@@ -16,6 +16,9 @@ on:
         description: Whether or not run the gpu kernel tests
         value: ${{ jobs.change-detection.outputs.run-gpu-kernel-tests || false }}
 
+permissions:
+  contents: read
+
 jobs:
   change-detection:
     name: Identify source changes
@@ -27,11 +30,13 @@ jobs:
       run-header-only-tests: ${{ steps.header-changes.outputs.run-header-only-tests || false }}
       run-gpu-kernel-tests: ${{ steps.gpu-changes.outputs.run-gpu-kernel-tests || false }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Changed code files
         id: changed-code-files
-        uses: Ana06/get-changed-files@v2.3.0
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
         with:
           format: "json"
           filter: |
@@ -62,7 +67,7 @@ jobs:
 
       - name: Changed C++ files
         id: changed-cpp-files
-        uses: Ana06/get-changed-files@v2.3.0
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
         with:
           format: "json"
           filter: |
@@ -82,7 +87,7 @@ jobs:
 
       - name: Changed header files
         id: changed-header-files
-        uses: Ana06/get-changed-files@v2.3.0
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
         with:
           format: "json"
           filter: |
@@ -98,7 +103,7 @@ jobs:
 
       - name: Changed GPU code files
         id: changed-gpu-files
-        uses: Ana06/get-changed-files@v2.3.0
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
         with:
           format: "json"
           filter: |
