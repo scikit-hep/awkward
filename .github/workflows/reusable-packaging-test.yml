@@ -5,6 +5,8 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: read
 
 concurrency:
   group: packaging-test-${{ github.head_ref }}
@@ -18,9 +20,10 @@ jobs:
     name: "Build awkward"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         submodules: true
+        persist-credentials: false
 
     - name: Prepare build files
       run: pipx run nox -s prepare
@@ -34,17 +37,17 @@ jobs:
     - name: Build awkward-cpp SDist
       run: pipx run build --sdist awkward-cpp
 
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: awkward-sdist
         path: dist/*.tar.gz
 
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: awkward-wheel
         path: dist/*.whl
 
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: awkward-cpp-sdist
         path: awkward-cpp/dist/*.tar.gz
@@ -59,17 +62,18 @@ jobs:
         os: [windows-11-arm, windows-latest, macos-latest, ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         submodules: true
+        persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@v8.1.0
+      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@v3.4
+    - uses: pypa/cibuildwheel@8d2b08b68458a16aeb24b64e68a09ab1c8e82084 # v3.4.1
       env:
         CIBW_ARCHS_MACOS: universal2
         CIBW_ARCHS_WINDOWS: auto64
@@ -78,7 +82,7 @@ jobs:
         package-dir: awkward-cpp
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: awkward-cpp-wheels-${{ matrix.os }}
         path: wheelhouse/*.whl

@@ -322,3 +322,6 @@ isort.required-imports = ["from __future__ import annotations"]
 "numpy".msg = "Use `numpy = ak._nplikes.Numpy.instance()` instead"
 "jax".msg = "Use `jax = ak._nplikes.Jax.instance()` instead"
 "cupy".msg = "Use `cupy = ak._nplikes.Cupy.instance()` instead"
+
+[tool.uv]
+exclude-newer = "7 days"
