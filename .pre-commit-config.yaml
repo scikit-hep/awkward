@@ -28,7 +28,7 @@ repos:
     additional_dependencies: [pyyaml]
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: 5e2fb545eba1ea9dc051f6f962d52fe8f76a9794  # frozen: v0.15.13
+  rev: 0671d8ab202c4ac093b78433ae5baf74f3fc7246  # frozen: v0.15.15
   hooks:
   - id: ruff-check
     args: ["--fix", "--show-fixes"]
@@ -63,7 +63,7 @@ repos:
     files: ^tests/
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: f805888065fdb6162e1f800e50bb9460cbd223d6  # frozen: 0.37.2
+  rev: 943377262562a12b57292fc98fabd7dbf81451fe  # frozen: 0.37.2
   hooks:
     - id: check-github-workflows
       args: ["--verbose"]
@@ -82,7 +82,7 @@ repos:
     - id: validate-pyproject
 
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: a4727cbbcd26d7098e96b9cb738169b59711ae51  # frozen: v1.24.1
+  rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # frozen: v1.25.2
   hooks:
     - id: zizmor
       files: "^\\.github"
