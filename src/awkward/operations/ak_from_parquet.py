@@ -352,7 +352,7 @@ def _read_parquet_file(
         # why is high-level False here?
         False,
         None,
-        None
+        None,
     )
 
     result.attrs = array_attrs
