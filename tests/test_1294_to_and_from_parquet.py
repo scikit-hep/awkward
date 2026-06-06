@@ -924,7 +924,7 @@ def test_select(with_global_metadata):
 
 
 def test_attr_serialisation(generate_datafiles):
-    path, mdlist, fs = generate_datafiles
+    path, _mdlist, _fs = generate_datafiles
     assert ak.from_parquet(f"{path}/data1.parq").attrs == {"property": "value"}
 
     df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})

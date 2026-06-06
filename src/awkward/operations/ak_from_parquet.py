@@ -29,7 +29,7 @@ def from_parquet(
     generate_bitmasks=False,
     highlevel=True,
     behavior=None,
-    attrs={},
+    attrs=None,
 ):
     """
     Args:
@@ -270,7 +270,7 @@ def _load(
         return wrap_layout(
             arrays[0],
             highlevel=highlevel,
-            attrs=attrs | arrays[0].attrs,
+            attrs=(attrs if attrs else {}) | arrays[0].attrs,
             behavior=behavior,
         )
     else:
