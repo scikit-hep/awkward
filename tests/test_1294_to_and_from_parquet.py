@@ -923,7 +923,7 @@ def test_select(with_global_metadata):
         ak.metadata_from_parquet(with_global_metadata, row_groups=[4])
 
 
-def test_read_awkward_attrs(generate_datafiles):
+def test_attr_serialisation(generate_datafiles):
     path, mdlist, fs = generate_datafiles
     assert ak.from_parquet(f"{path}/data1.parq").attrs == {"property":"value"}
 
