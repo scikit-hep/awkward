@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from os import fsdecode
 
+import json
+
 import fsspec
 
 import awkward as ak
@@ -404,6 +406,12 @@ def _impl(
 
     if extensionarray:
         table = convert_awkward_arrow_table_to_native(table)
+
+    if array.attrs:
+        df_metadata = {"AWKWARD_ATTRS": json.dumps(array.attrs.to_dict())}
+        existing_metadata = table.schema.metadata
+        merged_metadata = {**existing_metadata, **df_metadata}
+        table = table.replace_schema_metadata(merged_metadata)
 
     if parquet_extra_options is None:
         parquet_extra_options = {}

@@ -8,6 +8,7 @@ import fsspec
 import numpy as np
 import pytest
 from packaging.version import parse as parse_version
+import pandas as pd
 
 import awkward as ak
 
@@ -852,7 +853,7 @@ def test_unionarray(tmp_path, through, extensionarray):
 @pytest.fixture()
 def generate_datafiles(tmp_path):
     fs = fsspec.filesystem("file")
-    data1 = ak.from_iter([[1, 2, 3], [4, 5]])
+    data1 = ak.from_iter([[1, 2, 3], [4, 5]], attrs = {"property":"value"})
     data2 = data1 + 1
     md1 = ak.to_parquet(data1, os.path.join(tmp_path, "data1.parq"))
     md2 = ak.to_parquet(data2, os.path.join(tmp_path, "data2.parq"))
@@ -920,3 +921,14 @@ def test_select(with_global_metadata):
 
     with pytest.raises(ValueError):
         ak.metadata_from_parquet(with_global_metadata, row_groups=[4])
+
+
+def test_read_awkward_attrs(generate_datafiles):
+    path, mdlist, fs = generate_datafiles
+    assert ak.from_parquet(f"{path}/data1.parq").attrs == {"property":"value"}
+
+    df = pd.DataFrame({"x" : [1, 2, 3], "y" : [4, 5, 6]})
+    df.attrs = {"property" : "value", 1 : 2}
+    df.to_parquet(f"{path}/data3.parq")
+
+    assert ak.from_parquet(f"{path}/data3.parq").attrs == {"property" : "value", "1" : 2}
