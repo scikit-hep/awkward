@@ -268,7 +268,10 @@ def _load(
     assert len(arrays) != 0
     if len(arrays) == 1:
         return wrap_layout(
-            arrays[0], highlevel=highlevel, attrs=attrs | arrays[0].attrs, behavior=behavior
+            arrays[0],
+            highlevel=highlevel,
+            attrs=attrs | arrays[0].attrs,
+            behavior=behavior,
         )
     else:
         # TODO: if each array is a record?
@@ -334,7 +337,7 @@ def _read_parquet_file(
             arrow_table = parquetfile.read_row_groups(row_groups, parquet_columns)
 
     arrow_table = ak._connect.pyarrow.convert_native_arrow_table_to_awkward(arrow_table)
-    
+
     array_attrs = {}
     if arrow_table.schema.metadata:
         if b"PANDAS_ATTRS" in arrow_table.schema.metadata:
@@ -356,7 +359,7 @@ def _read_parquet_file(
     )
 
     result.attrs = array_attrs
-    
+
     return result
 
 
