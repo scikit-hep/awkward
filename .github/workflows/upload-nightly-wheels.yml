@@ -8,7 +8,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  actions: read
+  actions: read # Required to inspect and download artifacts from prior workflow runs.
+
+concurrency:
+  group: upload-nightly-wheels-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   upload_nightly_wheels:

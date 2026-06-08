@@ -1,11 +1,19 @@
 name: Docs
 on:
   workflow_call:
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: false
+      AWS_DEPLOY_ROLE:
+        required: false
 
   workflow_dispatch:
 
   release:
     types: [released]
+
+permissions:
+  contents: read
 
 concurrency:
   group: 'docs-${{ github.head_ref || github.run_id }}'
@@ -20,14 +28,15 @@ jobs:
     name: Build C++ WASM
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         submodules: true
+        persist-credentials: false
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures --tests
 
-    - uses: pypa/cibuildwheel@v3.4
+    - uses: pypa/cibuildwheel@8d2b08b68458a16aeb24b64e68a09ab1c8e82084 # v3.4.1
       with:
         package-dir: awkward-cpp
       env:
@@ -37,7 +46,7 @@ jobs:
         CIBW_ENABLE: "pyodide-prerelease"
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: awkward-cpp-wasm
         path: awkward-cpp/dist/awkward*wasm32.whl
@@ -51,9 +60,10 @@ jobs:
         # Ensure conda env is activated
         shell: "bash -l {0}"
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         submodules: true
+        persist-credentials: false
 
       # TODO: remove this once mamba-org/mamba#1726 is fixed
       #       and replace with `-r requirements.txt` in a
@@ -67,7 +77,7 @@ jobs:
       # solve with different external library versions. By default,
       # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
-      uses: mamba-org/setup-micromamba@v3
+      uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
       with:
         # Cache invalidates daily by default
         cache-environment: true
@@ -83,7 +93,7 @@ jobs:
 
     - name: Cache wheel
       id: cache-awkward-cpp-x86-64-wheel
-      uses: actions/cache@v5
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] Reuses a docs-only wheel cache to avoid rebuilding unchanged awkward-cpp docs dependencies.
       with:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-${{ env.X86_64_PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
@@ -93,18 +103,20 @@ jobs:
       run: python -m build -w ./awkward-cpp
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: awkward-cpp-x86-64
         path: awkward-cpp/dist/awkward*.whl
+        if-no-files-found: error
 
   awkward:
     runs-on: ubuntu-24.04
     name: Build Python
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         submodules: true
+        persist-credentials: false
 
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures
@@ -113,7 +125,7 @@ jobs:
       run: pipx run build -w
 
     - name: Upload wheel
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: awkward
         path: dist/awkward*.whl
@@ -123,30 +135,31 @@ jobs:
     runs-on: ubuntu-24.04
     name: Execute cppyy notebook
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         submodules: true
+        persist-credentials: false
 
     - name: Setup Python
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: "${{ env.X86_64_PYTHON_VERSION }}"
 
     - name: Extract pre-built manylinux cppyy wheels
-      uses: shrink/actions-docker-extract@v4
+      uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4.0.0
       with:
         image: "docker.io/agoose77/cppyy-wheels:cp311"
         path: "/wheels/."
         destination: "/tmp/wheels/"
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: awkward
         path: /tmp/wheels/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: awkward-cpp-x86-64
         path: /tmp/wheels/
@@ -160,7 +173,7 @@ jobs:
       run: jupyter nbconvert --to notebook --execute --inplace user-guide/how-to-use-in-cpp-cppyy.ipynb
 
     - name: Save executed notebook
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide/how-to-use-in-cpp-cppyy.ipynb
@@ -176,7 +189,9 @@ jobs:
     env:
         DOCS_CANONICAL_VERSION: main
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
 
       # TODO: remove this once mamba-org/mamba#1726 is fixed
       #       and replace with `-r requirements.txt` in a
@@ -190,7 +205,7 @@ jobs:
       # solve with different external library versions. By default,
       # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
-      uses: mamba-org/setup-micromamba@v3
+      uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
       with:
         # Cache invalidates daily by default
         cache-environment: true
@@ -201,7 +216,7 @@ jobs:
            doxygen
 
     - name: Download awkward wheel
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: awkward
         path: dist
@@ -212,7 +227,7 @@ jobs:
         cp dist/awkward*.whl docs/lite/pypi/
 
     - name: Download awkward-cpp x86_64 wheel
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: awkward-cpp-x86-64
         path: dist
@@ -242,7 +257,7 @@ jobs:
         echo "DOCS_VERSION=main" >> $GITHUB_ENV
 
     - name: Download cppyy notebook
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide
@@ -252,19 +267,19 @@ jobs:
       working-directory: docs
 
     - name: Upload docs artefact
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: docs
         path: docs/_build/html
 
     - name: Upload Jupyter Book cache
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: doctrees
         path: docs/_build/doctrees
 
     - name: Upload Jupyter Book cache
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: jupyter-cache
         path: docs/_build/.jupyter_cache
@@ -276,7 +291,7 @@ jobs:
         mkdir -p ./pr
         echo $PR_NUMBER > ./pr/pr_number.txt
 
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: pr_number
         path: pr/
@@ -288,7 +303,7 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'release'
     name: Deploy
     permissions:
-      id-token: write
+      id-token: write # Required to assume the AWS deployment role through OIDC.
       contents: read
     env:
       S3_BUCKET: "awkward-array.org"
@@ -298,19 +313,21 @@ jobs:
       name: docs
       url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
         with:
           aws-region: eu-west-2
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
       - name: Download rendered docs
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: docs
           path: built-docs
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.11"
       # Pushes to main trigger latest
