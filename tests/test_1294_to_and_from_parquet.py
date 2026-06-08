@@ -923,9 +923,13 @@ def test_select(with_global_metadata):
         ak.metadata_from_parquet(with_global_metadata, row_groups=[4])
 
 
-def test_attr_serialisation(generate_datafiles):
+def test_awkward_attr_serialisation(generate_datafiles):
     path, _mdlist, _fs = generate_datafiles
     assert ak.from_parquet(f"{path}/data1.parq").attrs == {"property": "value"}
+
+
+def test_pandas_attr_serialisation(generate_datafiles):
+    path, _mdlist, _fs = generate_datafiles
 
     df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
     df.attrs = {"property": "value", 1: 2}
