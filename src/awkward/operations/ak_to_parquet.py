@@ -406,7 +406,7 @@ def _impl(
     if extensionarray:
         table = convert_awkward_arrow_table_to_native(table)
 
-    if array.attrs:
+    if hasattr(array, "attrs") and array.attrs:
         df_metadata = {"AWKWARD_ATTRS": json.dumps(array.attrs.to_dict())}
         existing_metadata = table.schema.metadata
         merged_metadata = {**existing_metadata, **df_metadata}
