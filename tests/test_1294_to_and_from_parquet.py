@@ -6,7 +6,6 @@ import os.path
 
 import fsspec
 import numpy as np
-import pandas as pd
 import pytest
 from packaging.version import parse as parse_version
 
@@ -929,6 +928,9 @@ def test_awkward_attr_serialisation(generate_datafiles):
 
 
 def test_pandas_attr_serialisation(generate_datafiles):
+
+    pd = pytest.importorskip("pandas")
+
     path, _mdlist, _fs = generate_datafiles
 
     df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
