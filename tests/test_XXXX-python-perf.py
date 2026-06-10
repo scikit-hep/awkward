@@ -71,8 +71,7 @@ def test_union_remove_structure_matches_reference_many():
             elif kind == 1:
                 chunks.append(
                     ak.Array(
-                        [rng.integers(0, 100, int(rng.integers(0, 4))).tolist()]
-                        * size
+                        [rng.integers(0, 100, int(rng.integers(0, 4))).tolist()] * size
                     )
                 )
             else:
@@ -178,9 +177,7 @@ def test_is_unique_bool_subranges():
     # Exercises the awkward_NumpyArray_subrange_equal_bool kernel: identical
     # subranges must be detected as non-unique.
     assert (
-        ak._do.is_unique(
-            ak.Array([[True, False], [True, False], [True]]).layout
-        )
+        ak._do.is_unique(ak.Array([[True, False], [True, False], [True]]).layout)
         is False
     )
 
