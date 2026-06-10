@@ -85,8 +85,7 @@ _primitive_to_dtype_dict = {
     "timedelta64": np.dtype(np.timedelta64),
 }
 
-if hasattr(np, "float16"):
-    _primitive_to_dtype_dict["float16"] = np.dtype(np.float16)
+_primitive_to_dtype_dict["float16"] = np.dtype(np.float16)
 if hasattr(np, "float128"):
     _primitive_to_dtype_dict["float128"] = np.dtype(np.float128)
 if hasattr(np, "complex256"):
