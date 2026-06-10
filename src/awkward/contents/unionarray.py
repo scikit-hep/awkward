@@ -1640,6 +1640,69 @@ class UnionArray(UnionMeta[Content], Content):
             return out
 
         # backends with concrete data
+        nplike = self._backend.nplike
+        tags = self._tags.data
+        index = self._index.data[: self._tags.length]
+
+        # Fast path: vectorize per tag instead of looping over every element.
+        #
+        # For each tag we select that tag's elements (preserving their relative
+        # order) with a single boolean selection, then recurse once per content.
+        # We restore the original interleaving of the flattened leaves with a
+        # stable argsort over a "position marker" that is flattened through the
+        # exact same recursion as the values (so that any dropped values, e.g.
+        # ``drop_nones``, are dropped identically).
+        #
+        # This is only valid when every content flattens to a single, mergeable
+        # ``NumpyArray`` part; multi-part contents (records under
+        # ``flatten_records``) and contents that are kept whole (strings) are
+        # order-sensitive in ways the simple reorder cannot reproduce, so we fall
+        # back to the element-wise loop for those.
+        if not options["keepdims"]:
+            value_parts: list[Content] = []
+            position_parts: list[Content] = []
+            fast_path = True
+            for tag in range(len(self._contents)):
+                selection = tags == tag
+                sub = self._contents[tag]._carry(
+                    ak.index.Index(index[selection]), False
+                )
+                sub_parts = sub._remove_structure(backend, options)
+                if len(sub_parts) != 1 or not isinstance(
+                    sub_parts[0], ak.contents.NumpyArray
+                ):
+                    fast_path = False
+                    break
+
+                # Original (global) positions of these elements, broadcast to
+                # every leaf so that, after flattening, each leaf knows where it
+                # came from.
+                positions = nplike.nonzero(selection)[0]
+                marker = ak.operations.broadcast_arrays(
+                    sub,
+                    ak.contents.NumpyArray(positions, backend=backend),
+                    highlevel=False,
+                )[1]
+                marker_parts = marker._remove_structure(backend, options)
+                if len(marker_parts) != 1 or not isinstance(
+                    marker_parts[0], ak.contents.NumpyArray
+                ):
+                    fast_path = False
+                    break
+
+                value_parts.append(sub_parts[0])
+                position_parts.append(marker_parts[0])
+
+            if fast_path:
+                if len(value_parts) == 0:
+                    return out
+                merged_values = ak._do.mergemany(value_parts)
+                merged_positions = nplike.concat([part.data for part in position_parts])
+                order = nplike._module.argsort(merged_positions, kind="stable")
+                out.append(merged_values._carry(ak.index.Index(order), False))
+                return out
+
+        # Fallback: order-sensitive multi-part / string contents.
         for i in range(self._tags.length):
             content = (
                 self._contents[self._tags[i]]
