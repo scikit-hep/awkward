@@ -9,7 +9,6 @@ from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 
 import awkward as ak
 from awkward._backends.backend import Backend
-from awkward._kernels import CudaComputeKernel
 from awkward._layout import maybe_posaxis
 from awkward._meta.unionmeta import UnionMeta
 from awkward._nplikes.array_like import ArrayLike, maybe_materialize
@@ -994,25 +993,19 @@ class UnionArray(UnionMeta[Content], Content):
                         )
                     )
                 elif self._backend.nplike == Cupy.instance():
-                    flatten_length_kernel = self._backend[
-                        "awkward_UnionArray_flatten_length",
-                        total_length.dtype.type,
-                        self._tags.dtype.type,
-                        self._index.dtype.type,
-                        np.int64,
-                    ]
-                    offsets_arg = (
-                        keep_offsets
-                        if isinstance(flatten_length_kernel, CudaComputeKernel)
-                        else offsetsraws
-                    )
                     self._backend.maybe_kernel_error(
-                        flatten_length_kernel(
+                        self._backend[
+                            "awkward_UnionArray_flatten_length",
+                            total_length.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                            np.int64,
+                        ](
                             total_length.data,
                             self._tags.data,
                             self._index.data,
                             self._tags.length,
-                            offsets_arg,
+                            offsetsraws,
                         )
                     )
 
@@ -1056,29 +1049,23 @@ class UnionArray(UnionMeta[Content], Content):
                         )
                     )
                 elif self._backend.nplike == Cupy.instance():
-                    flatten_combine_kernel = self._backend[
-                        "awkward_UnionArray_flatten_combine",
-                        totags.dtype.type,
-                        toindex.dtype.type,
-                        tooffsets.dtype.type,
-                        self._tags.dtype.type,
-                        self._index.dtype.type,
-                        np.int64,
-                    ]
-                    offsets_arg = (
-                        keep_offsets
-                        if isinstance(flatten_combine_kernel, CudaComputeKernel)
-                        else offsetsraws
-                    )
                     self._backend.maybe_kernel_error(
-                        flatten_combine_kernel(
+                        self._backend[
+                            "awkward_UnionArray_flatten_combine",
+                            totags.dtype.type,
+                            toindex.dtype.type,
+                            tooffsets.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                            np.int64,
+                        ](
                             totags.data,
                             toindex.data,
                             tooffsets.data,
                             self._tags.data,
                             self._index.data,
                             self._tags.length,
-                            offsets_arg,
+                            offsetsraws,
                         )
                     )
                 return (
