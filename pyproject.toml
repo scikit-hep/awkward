@@ -325,3 +325,4 @@ isort.required-imports = ["from __future__ import annotations"]
 
 [tool.uv]
 exclude-newer = "7 days"
+exclude-newer-package = { awkward_cpp = false }
