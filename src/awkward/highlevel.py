@@ -379,6 +379,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     def _update_class(self):
         self._numbaview = None
+        # invalidate the cached cppyy type, generator, and lookup: they hold raw
+        # pointers into the old buffers, which are stale after the layout changes
+        self._cpp_type = self._generator = self._lookup = None
         self.__class__ = get_array_class(self._layout, self._behavior)
         if hasattr(self, "__awkward_validation__"):
             self.__awkward_validation__()
@@ -1850,7 +1853,8 @@ class Record(NDArrayOperatorsMixin):
 
         elif isinstance(data, Record):
             layout = data._layout
-            attrs = data.attrs
+            behavior = behavior_of(data, behavior=behavior)
+            attrs = attrs_of(data, attrs=attrs)
 
         elif isinstance(data, str):
             layout = ak.operations.from_json(data, highlevel=False)
@@ -2167,7 +2171,7 @@ class Record(NDArrayOperatorsMixin):
 
             # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
             layout = self.layout
-            layout._array = ak.operations.ak_with_field._impl(
+            new_array = ak.operations.ak_with_field._impl(
                 layout._array,
                 what,
                 where,
@@ -2175,7 +2179,9 @@ class Record(NDArrayOperatorsMixin):
                 behavior=self._behavior,
                 attrs=self._attrs,
             )
-            self.layout = layout
+            # rebind to a fresh record rather than mutating the shared layout
+            # in place (Records constructed from another Record share _layout)
+            self.layout = ak.record.Record(new_array, layout._at)
 
     def __delitem__(self, where):
         """
@@ -3311,10 +3317,12 @@ class ArrayBuilder(Sized):
 
         def __init__(self, arraybuilder, name):
             super().__init__(arraybuilder)
-            self._name = name
+            # stored separately so it does not shadow the class-level ``_name``
+            # display label used by ``_Nested.__repr__``
+            self._record_name = name
 
         def __enter__(self):
-            self._arraybuilder.begin_record(name=self._name)
+            self._arraybuilder.begin_record(name=self._record_name)
 
         def __exit__(self, type, value, traceback):
             self._arraybuilder.end_record()
