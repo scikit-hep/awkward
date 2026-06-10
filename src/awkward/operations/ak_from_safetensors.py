@@ -109,7 +109,7 @@ def _impl(
         from safetensors import _safe_open_handle
     except ImportError as err:
         raise ImportError(
-            """to use ak.from_tensorflow, you must install the 'safetensors' package with:
+            """to use ak.from_safetensors, you must install the 'safetensors' package with:
 
         pip install safetensors
 or

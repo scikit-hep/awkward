@@ -58,7 +58,7 @@ def _impl(directory, filenames, storage_options):
         ) from None
     fs, destination = fsspec.core.url_to_fs(directory, **(storage_options or {}))
     if not fs.isdir(destination):
-        raise ValueError(f"{destination!r} is not a directory" + {__file__})
+        raise ValueError(f"{destination!r} is not a directory")
 
     filepaths = get_filepaths(filenames, fs, destination)
 

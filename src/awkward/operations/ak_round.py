@@ -40,8 +40,9 @@ def round(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns the real components of the given array elements.
-    If the arrays have complex elements, the returned arrays are floats.
+    Rounds the given array elements to the given number of `decimals`.
+    Implements [np.round](https://numpy.org/doc/stable/reference/generated/numpy.round.html)
+    for Awkward Arrays.
     """
     # Dispatch
     yield (array,)
