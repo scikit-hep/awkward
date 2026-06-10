@@ -7,10 +7,11 @@ Tests for fixes in awkward-cpp pybind11 bindings (PR #4089):
 - from_iter sanity: complex, str, bytes, dict, list still work
 """
 
+from __future__ import annotations
+
 import datetime
 
 import numpy as np
-import pytest
 
 import awkward as ak
 
@@ -32,7 +33,11 @@ def test_from_iter_time_midnight():
 
 def test_from_iter_time_multiple():
     """Multiple datetime.time values are stored correctly."""
-    times = [datetime.time(0, 0, 0), datetime.time(12, 30, 45), datetime.time(23, 59, 59)]
+    times = [
+        datetime.time(0, 0, 0),
+        datetime.time(12, 30, 45),
+        datetime.time(23, 59, 59),
+    ]
     arr = ak.from_iter(times)
     assert len(arr) == 3
     expected_strs = [
