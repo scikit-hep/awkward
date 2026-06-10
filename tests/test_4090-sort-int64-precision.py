@@ -10,8 +10,9 @@ values that differ only below the double precision threshold compared as equal,
 breaking strict-weak-ordering and producing wrong sort results.
 """
 
+from __future__ import annotations
+
 import numpy as np
-import pytest
 
 import awkward as ak
 
