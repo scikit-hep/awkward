@@ -3680,7 +3680,7 @@ def awkward_UnionArray_regular_index_getsize(size, fromtags, length):
     if length == 0:
         size[0] = 1
         return
-    size[0] = cp.max(fromtags[:length]) + 1
+    size[0] = cp.maximum(cp.max(fromtags[:length]) + 1, 1)
 
 
 # Merges an outer UnionArray (outertags, outerindex) with an inner one
@@ -3772,10 +3772,18 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
     if cp.any(bad_tag):
         i = int(cp.argmax(bad_tag))
         if int(t[i]) < 0:
-            raise ValueError(f"tags[i] < 0 at i={i}")
-        raise ValueError(f"tags[i] >= len(contents) at i={i}")
+            raise ValueError(
+                "tags[i] < 0 in compiled CUDA code (awkward_UnionArray_validity)"
+            )
+        raise ValueError(
+            "tags[i] >= len(contents) in compiled CUDA code (awkward_UnionArray_validity)"
+        )
     bad_idx = (idx < 0) | (idx >= lc[t])
     i = int(cp.argmax(bad_idx))
     if int(idx[i]) < 0:
-        raise ValueError(f"index[i] < 0 at i={i}")
-    raise ValueError(f"index[i] >= len(content[tags[i]]) at i={i}")
+        raise ValueError(
+            "index[i] < 0 in compiled CUDA code (awkward_UnionArray_validity)"
+        )
+    raise ValueError(
+        "index[i] >= len(content[tags[i]]) in compiled CUDA code (awkward_UnionArray_validity)"
+    )
