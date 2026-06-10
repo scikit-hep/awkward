@@ -3483,6 +3483,7 @@ def awkward_UnionArray_filltags_const(totags, totagsoffset, length, base):
     )
 
 
+# THIS KERNEL IS NOT USED (just for archive)
 # Computes the total number of output elements when flattening a UnionArray.
 # For each element i: adds offsetsraws[fromtags[i]][fromindex[i]+1]
 #                              - offsetsraws[fromtags[i]][fromindex[i]]
@@ -3500,15 +3501,20 @@ def awkward_UnionArray_flatten_length(
         return
     tags = fromtags[:length]
     idxs = fromindex[:length]
-    total = 0
-    for k, offsets_k in enumerate(offsetsraws):
-        pos = cp.where(tags == k)[0]
-        if pos.size > 0:
-            local_idxs = idxs[pos]
-            total += int(cp.sum(offsets_k[local_idxs + 1] - offsets_k[local_idxs]))
-    total_length[0] = total
+
+    type_starts = cp.array(
+        [0]
+        + [sum(len(o) for o in offsetsraws[: k + 1]) for k in range(len(offsetsraws))],
+        dtype=cp.int64,
+    )
+    all_offsets = cp.concatenate(offsetsraws)
+
+    flat_idx = type_starts[tags] + idxs
+    sizes = all_offsets[flat_idx + 1] - all_offsets[flat_idx]
+    total_length[0] = int(cp.sum(sizes))
 
 
+# THIS KERNEL IS NOT USED (just for archive)
 # Flattens a UnionArray, combining all sublists into a flat output.
 # Writes tooffsets (length+1), totags (total_length), and toindex (total_length).
 # offsetsraws is a Python list of per-content offset GPU arrays.
@@ -3634,14 +3640,22 @@ def awkward_UnionArray_project(lenout, tocarry, fromtags, fromindex, length, whi
         )
 
 
-# For each tag value k in [0, size), assigns sequential ranks to elements
-# with fromtags[i] == k, in order of appearance.
-# toindex[i] = rank of element i among all elements sharing its tag.
-# current[k] = total count of elements with tag k after the loop.
+# This implementation uses a for loop.
+# Since the size of Union array is usually small, I hope this implementation is performant enough.
+#
+# For each element i,
+# toindex[i] = how many elements with the same tag appeared before position i
+# current[k] = total count of elements with tag k.
 #
 # Example: fromtags=[0,1,0,2,1], size=3, length=5
-#   toindex = [0, 0, 1, 0, 1]
-#   current = [2, 2, 1]
+#   Imagine you have a mixed list of apples and oranges, tagged by type:
+#   tags: [ apple(0),  orange(1),  apple(0),  banana(2),  orange(1)]
+#   Then for each item, its position within its own type will be:
+#   toindex:  [  0,      0,       1,      0,       2   ]
+#              1st      1st      2nd     1st      2nd
+#              apple   orange   apple   banana   orange
+# toindex = [0, 0, 1, 0, 1]
+# current = [2, 2, 1]
 def awkward_UnionArray_regular_index(toindex, current, size, fromtags, length):
     current[:] = current.dtype.type(0)
     if length == 0:
@@ -3664,7 +3678,7 @@ def awkward_UnionArray_regular_index_getsize(size, fromtags, length):
     if length == 0:
         size[0] = 1
         return
-    size[0] = int(cp.max(fromtags[:length])) + 1
+    size[0] = cp.max(fromtags[:length]) + 1
 
 
 # Merges an outer UnionArray (outertags, outerindex) with an inner one
@@ -3720,6 +3734,7 @@ def awkward_UnionArray_simplify(
 def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
     if length == 0:
         return
+    # operations on bools are not supported now inside numba closures
     err_flags = cp.empty(length, dtype=cp.int8)
 
     def check(i):
