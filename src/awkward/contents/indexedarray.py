@@ -454,7 +454,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         if mask is not None:
             if self._backend.nplike.known_data and self._index.length != mask.length:
                 raise ValueError(
-                    f"mask length ({mask.length()}) is not equal to {type(self).__name__} length ({self._index.length})"
+                    f"mask length ({mask.length}) is not equal to {type(self).__name__} length ({self._index.length})"
                 )
             nextindex = ak.index.Index64.empty(self._index.length, self._backend.nplike)
             assert (
