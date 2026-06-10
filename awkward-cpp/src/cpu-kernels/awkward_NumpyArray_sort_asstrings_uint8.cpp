@@ -27,10 +27,8 @@ ERROR awkward_NumpyArray_sort_asstrings_uint8(
   for (int64_t k = 0;  k < offsetslength - 1;  k++) {
     int64_t start = offsets[k];
     int64_t stop = offsets[k + 1];
-    int64_t slen = start;
     std::string strvar;
-    for (uint8_t i = (uint8_t)start;  slen < stop;  i++) {
-      slen++;
+    for (int64_t i = start;  i < stop;  i++) {
       strvar += (char)fromptr[i];
     }
     words.emplace_back(strvar);
