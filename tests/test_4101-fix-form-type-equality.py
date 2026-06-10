@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-import pytest
-
 import awkward as ak
 from awkward._nplikes.shape import unknown_length
 from awkward.forms.numpyform import NumpyForm
 from awkward.forms.regularform import RegularForm
-from awkward.types.regulartype import RegularType
-from awkward.types.numpytype import NumpyType
 from awkward.types.listtype import ListType
-
+from awkward.types.numpytype import NumpyType
+from awkward.types.regulartype import RegularType
 
 # ---------------------------------------------------------------------------
 # Fix 1: NumpyForm inner_shape inequality
@@ -118,7 +115,9 @@ def test_union_purelist_parameters_second_key():
     # Build a union of two arrays, each with __list__ parameter
     arr1 = ak.with_parameter(ak.Array([[1, 2], [3]]), "__list__", "MyList")
     arr2 = ak.with_parameter(ak.Array([[4, 5], [6]]), "__list__", "MyList")
-    union = ak.concatenate([arr1[np.array([True, False])], arr2[np.array([False, True])]])
+    union = ak.concatenate(
+        [arr1[np.array([True, False])], arr2[np.array([False, True])]]
+    )
     # union is now a UnionArray; both contents have __list__=MyList
     layout = union.layout
     # purelist_parameters("__record__", "__list__") should find __list__
@@ -132,13 +131,17 @@ def test_union_purelist_parameters_first_key_wins():
 
     arr1 = ak.with_parameter(
         ak.with_parameter(ak.Array([[1, 2], [3]]), "__list__", "MyList"),
-        "__record__", "MyRecord",
+        "__record__",
+        "MyRecord",
     )
     arr2 = ak.with_parameter(
         ak.with_parameter(ak.Array([[4, 5], [6]]), "__list__", "MyList"),
-        "__record__", "MyRecord",
+        "__record__",
+        "MyRecord",
     )
-    union = ak.concatenate([arr1[np.array([True, False])], arr2[np.array([False, True])]])
+    union = ak.concatenate(
+        [arr1[np.array([True, False])], arr2[np.array([False, True])]]
+    )
     layout = union.layout
     result = layout.purelist_parameters("__record__", "__list__")
     assert result == "MyRecord"
@@ -150,7 +153,9 @@ def test_union_purelist_parameters_inconsistent_returns_none():
 
     arr1 = ak.with_parameter(ak.Array([[1, 2], [3]]), "__list__", "ListA")
     arr2 = ak.with_parameter(ak.Array([[4, 5], [6]]), "__list__", "ListB")
-    union = ak.concatenate([arr1[np.array([True, False])], arr2[np.array([False, True])]])
+    union = ak.concatenate(
+        [arr1[np.array([True, False])], arr2[np.array([False, True])]]
+    )
     layout = union.layout
     result = layout.purelist_parameters("__list__")
     assert result is None
