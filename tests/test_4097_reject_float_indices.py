@@ -8,8 +8,6 @@ and return 20. Now it raises TypeError, matching NumPy behavior.
 
 from __future__ import annotations
 
-import operator
-
 import numpy as np
 import pytest
 
