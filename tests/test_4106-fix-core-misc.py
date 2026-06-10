@@ -11,7 +11,6 @@ from awkward._do import recursively_apply
 from awkward._errors import OperationErrorContext
 from awkward.prettyprint import Formatter
 
-
 # ---------------------------------------------------------------------------
 # Fix 1: HashableList must recurse through as_hashable
 # ---------------------------------------------------------------------------
