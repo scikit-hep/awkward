@@ -1556,15 +1556,9 @@ class RegularArray(RegularMeta[Content], Content):
 
         elif self.parameter("__array__") == "string":
             data = self._content.data
-            if hasattr(data, "tobytes"):
 
-                def tostring(x):
-                    return x.tobytes().decode(errors="surrogateescape")
-
-            else:
-
-                def tostring(x):
-                    return x.tostring().decode(errors="surrogateescape")
+            def tostring(x):
+                return x.tobytes().decode(errors="surrogateescape")
 
             length, size = self.length, self._size
             out = [None] * length

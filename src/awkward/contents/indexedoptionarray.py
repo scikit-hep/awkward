@@ -1617,7 +1617,6 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
 
     def _to_backend_array(self, allow_missing, backend):
         nplike = backend.nplike
-        nplike = backend.nplike
 
         content = self.project()._to_backend_array(allow_missing, backend)
         shape = (self.length, *content.shape[1:])
@@ -1679,11 +1678,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         lateral_context: Mapping[str, Any] | None,
         options: ApplyActionOptions,
     ) -> Content | None:
-        if (
-            self._backend.nplike.known_data
-            and self._backend.nplike.known_data
-            and self._index.length != 0
-        ):
+        if self._backend.nplike.known_data and self._index.length != 0:
             npindex = self._index.data
             npselect = npindex >= 0
             if self._backend.nplike.any(npselect):

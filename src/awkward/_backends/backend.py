@@ -10,14 +10,14 @@ from awkward._kernels import KernelError
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._singleton import PublicSingleton
-from awkward._typing import Callable, Tuple, TypeAlias, TypeVar
+from awkward._typing import Callable, TypeAlias, TypeVar
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
 T_co = TypeVar("T_co", covariant=True)
-KernelKeyType: TypeAlias = Tuple[Any, ...]
+KernelKeyType: TypeAlias = tuple[Any, ...]
 KernelType: TypeAlias = "Callable[..., KernelError | None]"
 
 

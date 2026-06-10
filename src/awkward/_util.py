@@ -35,10 +35,7 @@ def in_module(obj, modulename: str) -> bool:
 
 
 def tobytes(array):
-    if hasattr(array, "tobytes"):
-        return array.tobytes()
-    else:
-        return array.tostring()
+    return array.tobytes()
 
 
 native_byteorder = "<" if sys.byteorder == "little" else ">"

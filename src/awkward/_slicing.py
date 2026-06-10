@@ -367,27 +367,6 @@ def _normalise_item_nested(item: Content) -> Content:
 
     elif isinstance(
         item,
-        (
-            ak.contents.IndexedArray,
-            ak.contents.IndexedOptionArray,
-            ak.contents.ByteMaskedArray,
-            ak.contents.BitMaskedArray,
-            ak.contents.UnmaskedArray,
-        ),
-    ) and isinstance(
-        item.content,
-        (
-            ak.contents.IndexedArray,
-            ak.contents.IndexedOptionArray,
-            ak.contents.ByteMaskedArray,
-            ak.contents.BitMaskedArray,
-            ak.contents.UnmaskedArray,
-        ),
-    ):
-        return _normalise_item_nested(item)
-
-    elif isinstance(
-        item,
         ak.contents.IndexedArray,
     ):
         next = item.project()
