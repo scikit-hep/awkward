@@ -12,7 +12,6 @@ from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.numpyarray import NumpyArray
 
-
 # -------------------------------------------------------------------
 # Fix 1: to_BitMaskedArray valid_when inversion uses bitwise ~ not logical_not
 # -------------------------------------------------------------------
@@ -129,12 +128,8 @@ def test_unique_bitmasked_vs_bytemasked_flat():
     bm_result = ak._do.unique(bm_layout, axis=-1)
     bym_result = ak._do.unique(bym_layout, axis=-1)
 
-    bm_unique = sorted(
-        (v for v in ak.to_list(ak.Array(bm_result)) if v is not None)
-    )
-    bym_unique = sorted(
-        (v for v in ak.to_list(ak.Array(bym_result)) if v is not None)
-    )
+    bm_unique = sorted(v for v in ak.to_list(ak.Array(bm_result)) if v is not None)
+    bym_unique = sorted(v for v in ak.to_list(ak.Array(bym_result)) if v is not None)
 
     assert bm_unique == bym_unique, (
         f"BitMasked unique={bm_unique}, ByteMasked unique={bym_unique}"
@@ -159,7 +154,9 @@ def test_unique_bitmasked_axis_minus1():
     # Flatten to get the actual unique values
     flat = [v for sub in result for v in (sub if isinstance(sub, list) else [sub])]
     non_none = sorted(v for v in flat if v is not None)
-    assert non_none == [1.0, 2.0, 3.0], f"Expected unique [1.0, 2.0, 3.0], got {non_none}"
+    assert non_none == [1.0, 2.0, 3.0], (
+        f"Expected unique [1.0, 2.0, 3.0], got {non_none}"
+    )
 
 
 def test_unique_bytemasked_axis_minus1():
@@ -172,7 +169,9 @@ def test_unique_bytemasked_axis_minus1():
     assert isinstance(result, list), f"Expected a list, got {type(result)}"
     flat = [v for sub in result for v in (sub if isinstance(sub, list) else [sub])]
     non_none = sorted(v for v in flat if v is not None)
-    assert non_none == [1.0, 2.0, 3.0], f"Expected unique [1.0, 2.0, 3.0], got {non_none}"
+    assert non_none == [1.0, 2.0, 3.0], (
+        f"Expected unique [1.0, 2.0, 3.0], got {non_none}"
+    )
 
 
 # -------------------------------------------------------------------
