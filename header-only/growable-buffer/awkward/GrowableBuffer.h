@@ -116,7 +116,7 @@ namespace awkward {
     append(PRIMITIVE* to_ptr, size_t offset, size_t from, int64_t length) const noexcept {
       memcpy(to_ptr + offset,
              reinterpret_cast<void*>(ptr_.get() + from),
-             length * sizeof(PRIMITIVE) - from);
+             ((size_t)length - from) * sizeof(PRIMITIVE));
     }
 
     /// @brief Copies and concatenates the accumulated data from multiple panels `ptr_` to one
@@ -130,9 +130,9 @@ namespace awkward {
     concatenate_to_from(PRIMITIVE* to_ptr, size_t offset, size_t from) const noexcept {
       memcpy(to_ptr + offset,
              reinterpret_cast<void*>(ptr_.get() + from),
-             length_ * sizeof(PRIMITIVE) - from);
+             (length_ - from) * sizeof(PRIMITIVE));
       if (next_) {
-        next_->concatenate_to(to_ptr, offset + length_);
+        next_->concatenate_to(to_ptr, offset + (length_ - from));
       }
     }
 

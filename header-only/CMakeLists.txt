@@ -41,6 +41,7 @@ target_link_libraries(layout-builder INTERFACE growable-buffer builder-options)
 
 # Build test suite?
 if(BUILD_TESTS)
+  enable_testing()
   add_subdirectory(tests)
 endif(BUILD_TESTS)
 
