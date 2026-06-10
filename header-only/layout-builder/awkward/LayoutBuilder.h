@@ -12,6 +12,7 @@
 #include <tuple>
 #include <string>
 #include <functional>
+#include <sstream>
 
 /// @brief Object of {@link BuilderOptions BuilderOptions} which sets the
 /// values of the default options.
@@ -748,8 +749,8 @@ namespace awkward {
       /// contents in the form of a JSON-like string.
       class ContentsFormFunctor {
       public:
-          // Modify the constructor to accept a std::map instead of a std::vector
-          ContentsFormFunctor(std::stringstream& out, const std::map<size_t, std::string>& content_names)
+          // Constructor accepts any map type compatible with MAP
+          ContentsFormFunctor(std::stringstream& out, const UserDefinedMap& content_names)
               : out_(out), content_names_(content_names) {}
 
           // Template operator() to handle the content
@@ -769,7 +770,7 @@ namespace awkward {
 
       private:
           std::stringstream& out_;
-          const std::map<size_t, std::string>& content_names_;  // Store the map by reference
+          const UserDefinedMap& content_names_;  // Store the map by reference (uses class MAP type)
       };
 
 
@@ -2773,7 +2774,7 @@ namespace awkward {
           form_key << "node" << id_;
           std::string params("");
           if (!parameters_.empty()) {
-              params = ", \"parameters\": { " + parameters_ + " }";
+              params = "\"parameters\": { " + parameters_ + " }, ";
           }
           std::stringstream out;
           out << "{ \"class\": \"UnionArray\", \"tags\": \"" +
