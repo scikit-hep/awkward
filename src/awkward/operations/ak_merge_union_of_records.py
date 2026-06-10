@@ -291,12 +291,12 @@ def _impl(array, axis, highlevel, behavior, attrs):
                     # Rewrite union index of indexed types
                     if content.is_indexed:
                         next_index_data[is_this_tag] = content.index.data[
-                            content.index.data[is_this_tag]
+                            layout.index.data[is_this_tag]
                         ]
                         next_contents.append(content.content)
 
                     else:
-                        next_index_data[is_this_tag] = content.index.data[is_this_tag]
+                        next_index_data[is_this_tag] = layout.index.data[is_this_tag]
                         next_contents.append(content)
 
                 return invert_record_union(

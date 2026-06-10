@@ -487,10 +487,8 @@ def _type_is_enforceable(
     elif layout.is_regular:
         if isinstance(type_, ak.types.RegularType):
             if layout.size == type_.size:
-                return _TypeEnforceableResult(
-                    is_enforceable=False, requires_packing=False
-                )
-            return _type_is_enforceable(layout.content, type_.content)
+                return _type_is_enforceable(layout.content, type_.content)
+            return _TypeEnforceableResult(is_enforceable=False, requires_packing=False)
 
         elif isinstance(type_, ak.types.ListType):
             return _type_is_enforceable(layout.content, type_.content)
