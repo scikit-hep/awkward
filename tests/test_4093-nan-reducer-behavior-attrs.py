@@ -7,8 +7,7 @@ which caused behavior and attrs to be silently dropped during the intermediate
 nan_to_none conversion.
 """
 
-import numpy as np
-import pytest
+from __future__ import annotations
 
 import awkward as ak
 
