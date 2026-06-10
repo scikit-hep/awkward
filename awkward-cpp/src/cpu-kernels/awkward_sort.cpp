@@ -7,18 +7,47 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
+#include <type_traits>
 #include <vector>
+
+// Explicit specializations must appear before implicit instantiations.
+// sort_order_ascending/descending for bool: no NaN, just direct comparison.
+template <typename T>
+bool sort_order_ascending(T l, T r);
+
+template <typename T>
+bool sort_order_descending(T l, T r);
+
+template <>
+bool sort_order_ascending(bool l, bool r)
+{
+  return l < r;
+}
+
+template <>
+bool sort_order_descending(bool l, bool r)
+{
+  return l > r;
+}
 
 template <typename T>
 bool sort_order_ascending(T l, T r)
 {
-  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l < r);
+  if constexpr (std::is_integral_v<T>) {
+    return l < r;
+  } else {
+    return !std::isnan(r) && (std::isnan(l) || l < r);
+  }
 }
 
 template <typename T>
 bool sort_order_descending(T l, T r)
 {
-  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l > r);
+  if constexpr (std::is_integral_v<T>) {
+    return l > r;
+  } else {
+    return !std::isnan(r) && (std::isnan(l) || l > r);
+  }
 }
 
 template <typename T>
@@ -276,16 +305,4 @@ ERROR awkward_sort_float64(
     parentslength,
     ascending,
     stable);
-}
-
-template <>
-bool sort_order_ascending(bool l, bool r)
-{
-  return l < r;
-}
-
-template <>
-bool sort_order_descending(bool l, bool r)
-{
-  return l > r;
 }

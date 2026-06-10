@@ -5,20 +5,49 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
+#include <type_traits>
 #include <vector>
 
 #include "awkward/kernels.h"
 
+// Explicit specializations must appear before implicit instantiations.
+// argsort_order_ascending/descending for bool: no NaN, just direct comparison.
+template <typename T>
+bool argsort_order_ascending(T l, T r);
+
+template <typename T>
+bool argsort_order_descending(T l, T r);
+
+template <>
+bool argsort_order_ascending(bool l, bool r)
+{
+  return l < r;
+}
+
+template <>
+bool argsort_order_descending(bool l, bool r)
+{
+  return l > r;
+}
+
 template <typename T>
 bool argsort_order_ascending(T l, T r)
 {
-  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l < r);
+  if constexpr (std::is_integral_v<T>) {
+    return l < r;
+  } else {
+    return !std::isnan(r) && (std::isnan(l) || l < r);
+  }
 }
 
 template <typename T>
 bool argsort_order_descending(T l, T r)
 {
-  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l > r);
+  if constexpr (std::is_integral_v<T>) {
+    return l > r;
+  } else {
+    return !std::isnan(r) && (std::isnan(l) || l > r);
+  }
 }
 
 template <typename T>
@@ -39,15 +68,28 @@ ERROR awkward_argsort(
     int64_t* segment_start = toptr + start_off;
     int64_t* segment_stop = toptr + stop_off;
 
-    auto comparator = [&fromptr, ascending](int64_t i1, int64_t i2) {
-        if (ascending) return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
-        else return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
-    };
-
+    // Hoist the ascending/stable dispatch outside the per-element comparisons,
+    // mirroring the structure of awkward_sort.cpp.
     if (stable) {
-        std::stable_sort(segment_start, segment_stop, comparator);
+      if (ascending) {
+        std::stable_sort(segment_start, segment_stop, [&fromptr](int64_t i1, int64_t i2) {
+          return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+        });
+      } else {
+        std::stable_sort(segment_start, segment_stop, [&fromptr](int64_t i1, int64_t i2) {
+          return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
+        });
+      }
     } else {
-        std::sort(segment_start, segment_stop, comparator);
+      if (ascending) {
+        std::sort(segment_start, segment_stop, [&fromptr](int64_t i1, int64_t i2) {
+          return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+        });
+      } else {
+        std::sort(segment_start, segment_stop, [&fromptr](int64_t i1, int64_t i2) {
+          return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
+        });
+      }
     }
 
     std::transform(segment_start, segment_stop, segment_start, [start_off](int64_t j) {
@@ -254,16 +296,4 @@ ERROR awkward_argsort_float64(
     offsetslength,
     ascending,
     stable);
-}
-
-template <>
-bool argsort_order_ascending(bool l, bool r)
-{
-  return l < r;
-}
-
-template <>
-bool argsort_order_descending(bool l, bool r)
-{
-  return l > r;
 }
