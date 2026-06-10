@@ -252,8 +252,8 @@ class ArgMax(KernelReducer):
                     result.dtype.type,
                     kernel_array_data.dtype.type,
                     parents.dtype.type,
-                    starts.dtype.type,
                     offsets.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,

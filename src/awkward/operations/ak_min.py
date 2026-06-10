@@ -144,7 +144,7 @@ def nanmin(
 
     # Implementation
     return _impl(
-        ak.operations.ak_nan_to_none._impl(array, False, None, None),
+        ak.operations.ak_nan_to_none._impl(array, True, behavior, attrs),
         axis,
         keepdims,
         initial,
