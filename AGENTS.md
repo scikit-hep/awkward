@@ -42,7 +42,7 @@ Warnings are errors in pytest (`filterwarnings = ["error", ...]`).
 ## Linting
 
 ```bash
-pre-commit run -a    # or: nox -s lint    (user preference: prek -a --quiet)
+prek -a --quiet    # or: nox -s lint (or pre-commit run -a if prek is missing)
 ```
 
 There is also a custom flake8 plugin (`dev/flake8_awkward.py`) and `nox -s pylint`.
