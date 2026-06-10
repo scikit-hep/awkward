@@ -636,6 +636,8 @@ class UnmaskedArray(UnmaskedMeta[Content], Content):
     def _is_equal_to(
         self, other: Self, index_dtype: bool, numpyarray: bool, all_parameters: bool
     ) -> bool:
-        return self._content._is_equal_to(
+        return self._is_equal_to_generic(
+            other, all_parameters
+        ) and self._content._is_equal_to(
             other.content, index_dtype, numpyarray, all_parameters
         )
