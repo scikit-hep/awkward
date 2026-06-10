@@ -1577,6 +1577,7 @@ def gencudaunittests(specdict):
                             "awkward_IndexedArray_getitem_nextcarry_outindex",
                             "awkward_IndexedArray_getitem_nextcarry",
                             "awkward_IndexedArray_flatten_none2empty",
+                            "awkward_UnionArray_validity",
                         }
 
                         raises_error_eagerly = (
