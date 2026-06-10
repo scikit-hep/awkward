@@ -93,18 +93,17 @@ namespace awkward {
 
   void
   RecordBuilder::clear() {
+    // Clear the per-field data recursively but keep the record structure
+    // (contents_, keys_, pointers_, keys_size_) intact: those parallel arrays
+    // must stay consistent or form()/to_buffers() would read keys_ out of
+    // bounds. This mirrors TupleBuilder::clear().
     for (auto x : contents_) {
       x.get()->clear();
     }
-    keys_.clear();
-    pointers_.clear();
-    name_ = "";
-    nameptr_ = nullptr;
-    length_ = -1;
+    length_ = 0;
     begun_ = false;
     nextindex_ = -1;
     nexttotry_ = 0;
-    keys_size_ = 0;
   }
 
   bool
