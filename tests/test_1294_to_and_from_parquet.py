@@ -929,7 +929,7 @@ def test_awkward_attr_serialisation(generate_datafiles):
 
 def test_pandas_attr_serialisation(generate_datafiles):
 
-    pd = pytest.importorskip("pandas")
+    pd = pytest.importorskip("pandas", "2.1.0")
 
     path, _mdlist, _fs = generate_datafiles
 
