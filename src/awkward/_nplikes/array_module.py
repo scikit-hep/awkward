@@ -48,6 +48,11 @@ def _nplike_reshape_has_copy(module: Any) -> bool:
         return True
 
 
+@lru_cache
+def _nplike_unique_has_equal_nan(module: Any) -> bool:
+    return "equal_nan" in inspect.signature(module.unique).parameters
+
+
 ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
 
 
@@ -467,9 +472,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def unique_values(self, x: ArrayLikeT) -> ArrayLikeT:
         (x,) = maybe_materialize(x)
-        np_unique_accepts_equal_nan = (
-            "equal_nan" in inspect.signature(self._module.unique).parameters
-        )
+        np_unique_accepts_equal_nan = _nplike_unique_has_equal_nan(self._module)
 
         if np_unique_accepts_equal_nan:
             return self._module.unique(
