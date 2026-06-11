@@ -770,7 +770,7 @@ namespace awkward {
 
       private:
           std::stringstream& out_;
-          const UserDefinedMap& content_names_;  // Store the map by reference (uses class MAP type)
+          const UserDefinedMap& content_names_;  // Store the map by reference
       };
 
 
