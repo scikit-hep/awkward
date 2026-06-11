@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import types
+
 import numpy as np
 import pytest
 
@@ -48,7 +50,6 @@ def test_enforce_type_regular_size_equal():
     result = _type_is_enforceable(layout, target)
     assert result.is_enforceable
 
-    # The full operation must agree with _type_is_enforceable
     out = ak.enforce_type(ak.Array(layout), "2 * int64")
     assert str(out.type) == "3 * 2 * int64"
 
@@ -66,8 +67,6 @@ def test_enforce_type_regular_size_mismatch():
 
 
 def test_merge_union_of_records_categorical_indexed():
-    # A union where one branch is a categorical (IndexedArray) of records.
-    # Build a categorical (IndexedArray) record array directly.
     index = ak.index.Index64(np.array([1, 0, 1], dtype=np.int64))
     inner_records = ak.contents.RecordArray(
         [ak.contents.NumpyArray(np.array([10.0, 20.0]))], ["c"]
@@ -111,16 +110,14 @@ def test_argcartesian_list_vs_dict_parity_axis1():
 
     # Field names differ ("x"/"y" vs "0"/"1") but the index values must match.
     dict_vals = [[(d["x"], d["y"]) for d in row] for row in as_dict.to_list()]
-    # The list branch produces tuples, indexed positionally.
     list_vals = [[tuple(t) for t in row] for row in as_list.to_list()]
     assert dict_vals == list_vals
 
 
 def test_from_raggedtensor_recursive_deep():
     # Drive _recursive_call directly (no TensorFlow needed) for a structure with
-    # three ragged dimensions (3 offset arrays). Before the fix the recursive
-    # else-branch reused the same `count`, causing a RecursionError for >= 3
-    # ragged dimensions.
+    # three ragged dimensions. Before the fix the recursive else-branch reused
+    # the same `count`, causing a RecursionError for >= 3 ragged dimensions.
     from awkward.operations.ak_from_raggedtensor import _recursive_call
 
     content = ak.contents.NumpyArray(np.arange(8, dtype=np.float64))
@@ -133,20 +130,24 @@ def test_from_raggedtensor_recursive_deep():
     assert result.to_list() == [[[[0.0, 1.0], [2.0, 3.0]], [[4.0, 5.0], [6.0, 7.0]]]]
 
 
-class _Dispatcher:
-    """Dummy array-like recording __awkward_function__ invocations."""
+def _make_dispatch_sentinel():
+    """Array-like that intercepts __awkward_function__ dispatch and records arguments."""
+    captured = []
 
-    def __init__(self):
-        self.captured = None
-
-    def __awkward_function__(self, func, array_likes, args, kwargs):
-        self.captured = list(array_likes)
+    def __awkward_function__(func, array_likes, args, kwargs):
+        captured[:] = list(array_likes)
         return "intercepted"
+
+    sentinel = types.SimpleNamespace(
+        captured=captured,
+        __awkward_function__=__awkward_function__,
+    )
+    return sentinel
 
 
 def test_unflatten_dispatch_sees_counts():
     array = ak.Array([1, 2, 3, 4])
-    sentinel = _Dispatcher()
+    sentinel = _make_dispatch_sentinel()
     # counts is array-like and must be offered to dispatch.
     result = ak.unflatten(array, sentinel)
     assert result == "intercepted"
@@ -154,8 +155,8 @@ def test_unflatten_dispatch_sees_counts():
 
 
 def test_nan_to_num_dispatch_sees_extra_args():
-    sentinel = _Dispatcher()
     array = ak.Array([1.0, 2.0])
+    sentinel = _make_dispatch_sentinel()
     # Pass the dispatcher as posinf; dispatch must offer it.
     result = ak.nan_to_num(array, posinf=sentinel)
     assert result == "intercepted"
