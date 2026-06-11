@@ -781,7 +781,6 @@ class NumpyArray(NumpyMeta, Content):
                     offsets_local[1],
                     offsets_local.data,
                     2,
-                    offsets_local[1],
                     True,
                     False,
                 )
@@ -822,7 +821,6 @@ class NumpyArray(NumpyMeta, Content):
             compact_data = offsets.data[keep]
             compact_offsets = ak.index.Index64(compact_data, nplike=nplike)
             compact_offsets_length = compact_offsets.length
-            parents_length = nplike.index_as_shape_item(offsets.data[-1])
 
             out = nplike.empty(self.length, dtype=self.dtype)
             assert compact_offsets.nplike is self._backend.nplike
@@ -838,7 +836,6 @@ class NumpyArray(NumpyMeta, Content):
                     self.shape[0],
                     compact_offsets.data,
                     compact_offsets_length,
-                    parents_length,
                     True,
                     False,
                 )
@@ -1006,7 +1003,6 @@ class NumpyArray(NumpyMeta, Content):
 
         else:
             offsets_length = offsets.length
-            parents_length = self._backend.nplike.index_as_shape_item(offsets[-1])
 
             dtype = (
                 np.dtype(np.int64)
@@ -1027,7 +1023,6 @@ class NumpyArray(NumpyMeta, Content):
                     self.shape[0],
                     offsets.data,
                     offsets_length,
-                    parents_length,
                     ascending,
                     stable,
                 )
