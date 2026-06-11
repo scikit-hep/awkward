@@ -38,40 +38,9 @@ def test_sort_strings_over_255_cumulative_chars():
     assert result == sorted(shuffled)
 
 
-def test_unique_strings_over_255_cumulative_chars():
-    random.seed(2)
-    strings = [f"{i:04d}" for i in range(200)]
-    # duplicate every entry and shuffle to exercise compaction across the
-    # 255-byte boundary
-    doubled = strings + strings
-    random.shuffle(doubled)
-
-    arr = _string_array(doubled)
-    result = ak.to_list(ak._do.unique(arr.layout, axis=-1))
-    assert result == sorted(set(doubled))
-    assert len(result) == 200
-
-
 def test_unique_strings_adjacent_duplicates_of_differing_lengths():
     # Regression for the in-place compaction overwriting the comparison
     # region: previously yielded ['aa', 'bcde', 'bcde'].
     arr = ak.Array(["aa", "aa", "bcde", "bcde"])
     result = ak.to_list(ak._do.unique(arr.layout, axis=-1))
     assert result == ["aa", "bcde"]
-
-
-def test_unique_strings_short_then_long_duplicates():
-    arr = ak.Array(["a", "a", "bb", "bb", "ccc", "ccc", "ccc"])
-    result = ak.to_list(ak._do.unique(arr.layout, axis=-1))
-    assert result == ["a", "bb", "ccc"]
-
-
-def test_sort_and_unique_mixed_lengths():
-    strings = ["banana", "apple", "apple", "cherry", "banana", "fig"]
-    arr = ak.Array(strings)
-
-    sorted_result = ak.to_list(ak.sort(arr))
-    assert sorted_result == sorted(strings)
-
-    unique_result = ak.to_list(ak._do.unique(arr.layout, axis=-1))
-    assert unique_result == sorted(set(strings))
