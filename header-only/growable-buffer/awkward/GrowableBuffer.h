@@ -86,8 +86,6 @@ namespace awkward {
     /// into the panel.
     ///
     /// The caller must ensure that the panel has at least `size` unused slots.
-    /// Uses `memcpy` when `PRIMITIVE` is trivially copyable, and falls back to
-    /// element-by-element assignment otherwise.
     void
     fill_panel_from(const PRIMITIVE* from_ptr, size_t size) {
       if (std::is_trivially_copyable<PRIMITIVE>::value) {

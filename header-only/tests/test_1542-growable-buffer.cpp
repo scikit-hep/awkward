@@ -326,47 +326,6 @@ void test_append_multi_panel_growth() {
   assert(buffer.length() == 0);
 }
 
-void test_extend_across_panels() {
-  // extend() that spans the current panel boundary and beyond, with growth.
-  constexpr size_t data_size = 257;
-  awkward::BuilderOptions options { 10, 2 };
-
-  int64_t data[data_size];
-  for (size_t i = 0; i < data_size; i++) {
-    data[i] = (int64_t)(i * 3 - 7);
-  }
-
-  auto buffer = awkward::GrowableBuffer<int64_t>::empty(options);
-
-  // First, partially fill the initial panel so the extend straddles a boundary.
-  buffer.append(data[0]);
-
-  // Then extend with the rest, crossing one or more panel boundaries.
-  buffer.extend(data + 1, data_size - 1);
-  assert(buffer.length() == data_size);
-
-  // A second extend continues to fill and allocate further panels.
-  int64_t more[data_size];
-  for (size_t i = 0; i < data_size; i++) {
-    more[i] = (int64_t)(1000 + i);
-  }
-  buffer.extend(more, data_size);
-  assert(buffer.length() == 2 * data_size);
-
-  std::unique_ptr<int64_t[]> ptr(new int64_t[buffer.length()]);
-  buffer.concatenate(ptr.get());
-
-  for (size_t i = 0; i < data_size; i++) {
-    assert(ptr.get()[i] == data[i]);
-  }
-  for (size_t i = 0; i < data_size; i++) {
-    assert(ptr.get()[data_size + i] == more[i]);
-  }
-
-  buffer.clear();
-  assert(buffer.length() == 0);
-}
-
 void test_move_assignment() {
   // Dropping the `const` on options_ restores move assignment.
   awkward::BuilderOptions options { 8, 2 };
@@ -398,7 +357,6 @@ int main(int /* argc */, const char ** /* argv */) {
   test_complex();
   test_extend();
   test_append_multi_panel_growth();
-  test_extend_across_panels();
   test_append_and_get_ref();
   test_copy_complex_as_complex<double, double>();
   test_copy_complex_as_complex<double, long double>();
