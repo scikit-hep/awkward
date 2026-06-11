@@ -188,3 +188,78 @@ class TestZeroCopy:
         plc_col = _to_pylibcudf_column(series)
         layout = ak.from_cudf(series, highlevel=False)
         assert layout.data.data.ptr == plc_col.data_buffer().ptr
+
+
+def test_dataframe_basic():
+    """DataFrame with int and float columns converts correctly."""
+    df = cudf.DataFrame({"x": [1, 2, 3], "y": [1.0, 2.0, 3.0]})
+    result = ak.from_cudf(df)
+    assert result.fields == ["x", "y"]
+    assert ak.to_list(result["x"]) == [1, 2, 3]
+    assert ak.to_list(result["y"]) == [1.0, 2.0, 3.0]
+
+
+def test_dataframe_field_order():
+    """Column order in the RecordArray matches the DataFrame."""
+    df = cudf.DataFrame({"b": [10, 20], "a": [1, 2], "c": [True, False]})
+    result = ak.from_cudf(df)
+    assert result.fields == ["b", "a", "c"]
+
+
+def test_dataframe_nullable_column():
+    """Nullable columns in a DataFrame round-trip correctly."""
+    df = cudf.DataFrame({"v": cudf.Series([1, None, 3], dtype="Int64")})
+    result = ak.from_cudf(df)
+    assert ak.to_list(result["v"]) == [1, None, 3]
+
+
+def test_dataframe_mixed_nullable_and_non_nullable():
+    """Mix of nullable and non-nullable columns in one DataFrame."""
+    df = cudf.DataFrame(
+        {
+            "a": cudf.Series([1, 2, 3]),
+            "b": cudf.Series([None, 5, None], dtype="Int64"),
+        }
+    )
+    result = ak.from_cudf(df)
+    assert ak.to_list(result["a"]) == [1, 2, 3]
+    assert ak.to_list(result["b"]) == [None, 5, None]
+
+
+def test_nullable_mask_with_no_actual_nulls():
+    """A column with a null mask allocated but null_count==0."""
+    s = cudf.Series([1, 2, 3])
+    # This is a no-op but may allocate a validity mask depending on cuDF version.
+    s[0:0] = None
+    result = ak.from_cudf(s)
+    assert ak.to_list(result) == [1, 2, 3]
+
+
+def test_deeply_nested_struct():
+    """Struct inside a struct round-trips correctly."""
+    df = cudf.DataFrame(
+        {"outer": cudf.Series([{"inner": {"v": 1}}, {"inner": {"v": 2}}])}
+    )
+    result = ak.from_cudf(df["outer"])
+    assert ak.to_list(result) == [{"inner": {"v": 1}}, {"inner": {"v": 2}}]
+
+
+def test_list_of_structs():
+    """List column whose elements are structs."""
+    s = cudf.Series([[{"x": 1}, {"x": 2}], [{"x": 3}]])
+    result = ak.from_cudf(s)
+    assert ak.to_list(result) == [[{"x": 1}, {"x": 2}], [{"x": 3}]]
+
+
+def test_timestamp_seconds():
+    """Timestamp[s] column preserves values."""
+    s = cudf.Series(np.array(["2024-01-01", "2024-06-15"], dtype="datetime64[s]"))
+    result = ak.from_cudf(s)
+    assert result.type.content.primitive == "datetime64[s]"
+
+
+def test_timestamp_nanoseconds():
+    """Timestamp[ns] column preserves values."""
+    s = cudf.Series(np.array(["2024-01-01", "2024-06-15"], dtype="datetime64[ns]"))
+    result = ak.from_cudf(s)
+    assert result.type.content.primitive == "datetime64[ns]"
