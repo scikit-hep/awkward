@@ -1406,6 +1406,17 @@ def awkward_ListArray_combinations(
     toindex[:n] = totallen
 
 
+def awkward_localindex(toindex, length):
+    # Fills toindex with [0, 1, 2, ..., length-1]
+    def fill_local_index(i):
+        return i
+
+    segment_ids = CountingIterator(toindex.dtype.type(0))
+    unary_transform(
+        d_in=segment_ids, d_out=toindex, op=fill_local_index, num_items=length
+    )
+
+
 def awkward_index_rpad_and_clip_axis0(toindex, target, length):
     """
     Fill ``toindex[0..target)`` with the identity mapping ``[0..shorter)``
