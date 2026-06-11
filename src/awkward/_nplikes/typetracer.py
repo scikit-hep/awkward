@@ -1152,7 +1152,6 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         if len(arrays) == 0:
             return []
 
-        # Every array is a `TypeTracerArray` (asserted above) and so has a shape.
         shapes = [x.shape for x in arrays]
         shape = self.broadcast_shapes(*shapes)
 
@@ -1361,15 +1360,12 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
             assert isinstance(x, TypeTracerArray)
             try_touch_data(x)
 
-        # `stack` adds a new dimension, so the result has `ndim + 1` dimensions.
         result_ndim = ndim + 1
         if axis < 0:
             axis = result_ndim + axis
         if not 0 <= axis < result_ndim:
             raise ValueError(axis)
 
-        # All stacked arrays are broadcast against one another along the existing
-        # dimensions; build the per-dimension shape symbolically.
         inner_shape = self.broadcast_shapes(*(x.shape for x in arrays))
         result_shape = (*inner_shape[:axis], len(arrays), *inner_shape[axis:])
         result_dtype = numpy.result_type(*(a.dtype for a in arrays))
