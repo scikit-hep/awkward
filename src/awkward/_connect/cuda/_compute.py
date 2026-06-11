@@ -79,7 +79,6 @@ def segmented_sort(
     length,
     offsets,
     offsetslength,
-    parentslength,
     ascending,
     stable,
 ):
