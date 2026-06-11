@@ -1647,20 +1647,14 @@ class UnionArray(UnionMeta[Content], Content):
         tags = self._tags.data
         index = self._index.data[: self._tags.length]
 
-        # Fast path: vectorize per tag instead of looping over every element.
-        #
-        # For each tag we select that tag's elements (preserving their relative
-        # order) with a single boolean selection, then recurse once per content.
-        # We restore the original interleaving of the flattened leaves with a
-        # stable argsort over a "position marker" that is flattened through the
-        # exact same recursion as the values (so that any dropped values, e.g.
-        # ``drop_nones``, are dropped identically).
-        #
-        # This is only valid when every content flattens to a single, mergeable
-        # ``NumpyArray`` part; multi-part contents (records under
-        # ``flatten_records``) and contents that are kept whole (strings) are
-        # order-sensitive in ways the simple reorder cannot reproduce, so we fall
-        # back to the element-wise loop for those.
+        # Fast path: recurse once per content rather than once per element,
+        # restoring the original interleaving with a stable argsort over a
+        # broadcast position marker flattened through the *same* recursion as
+        # the values (so per-leaf dropping, e.g. ``drop_nones``, applies
+        # identically). Only valid when every content flattens to a single
+        # mergeable ``NumpyArray``: multi-part contents (records) and whole-kept
+        # contents (strings) are order-sensitive in ways the reorder cannot
+        # reproduce, so they fall back to the element-wise loop below.
         if not options["keepdims"]:
             value_parts: list[Content] = []
             position_parts: list[Content] = []
@@ -1677,9 +1671,6 @@ class UnionArray(UnionMeta[Content], Content):
                     fast_path = False
                     break
 
-                # Original (global) positions of these elements, broadcast to
-                # every leaf so that, after flattening, each leaf knows where it
-                # came from.
                 positions = nplike.nonzero(selection)[0]
                 marker = ak.operations.broadcast_arrays(
                     sub,

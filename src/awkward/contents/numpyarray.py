@@ -617,11 +617,9 @@ class NumpyArray(NumpyMeta, Content):
             starts.nplike is self._backend.nplike
             and stops.nplike is self._backend.nplike
         )
-        # The `awkward_NumpyArray_subrange_equal*` kernels only ever read from
-        # their `tmpptr` argument (never write to it), so there is no need to
-        # copy the whole buffer. We do still require C-contiguous data because
-        # the kernel indexes it flatly (`tmpptr[fromstarts[i] + j]`);
-        # `ascontiguousarray` is a no-op when the data is already contiguous.
+        # The `awkward_NumpyArray_subrange_equal*` kernels only read from
+        # `tmpptr` (never write), so no buffer copy is needed; they do index it
+        # flatly, so it must be C-contiguous (a no-op when already contiguous).
         data = self._backend.nplike.ascontiguousarray(self._data)
         if self.dtype == np.bool_:
             self._backend.maybe_kernel_error(
