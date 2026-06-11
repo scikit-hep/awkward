@@ -3400,3 +3400,81 @@ def awkward_BitMaskedArray_to_ByteMaskedArray(
         op=_make_fill(frombitmask, validwhen, lsb_order, out_dtype),
         num_items=n_elements,
     )
+
+
+def awkward_ListArray_getitem_jagged_carrylen(
+    carrylen, slicestarts, slicestops, sliceouterlen
+):
+    # sum up the lengths of all slices (stop - start) to get the total carry length
+    carrylen[0] = cp.sum(
+        slicestops[:sliceouterlen] - slicestarts[:sliceouterlen]
+    )  # carrylen: int64
+
+
+# Recomputes a flat offsets array from starts/stops pairs, while validating that the jagged slice shape matches the array shape
+def awkward_ListArray_getitem_jagged_descend(
+    tooffsets, slicestarts, slicestops, sliceouterlen, fromstarts, fromstops
+):
+    # (slicestops[i] - slicestarts[i]) for i in range(sliceouterlen)
+    slicecounts = slicestops[:sliceouterlen] - slicestarts[:sliceouterlen]
+    # (fromstops[i] - fromstarts[i]) for i in range(sliceouterlen)
+    counts = fromstops[:sliceouterlen] - fromstarts[:sliceouterlen]
+
+    if not cp.all(slicecounts == counts):
+        raise ValueError(
+            "jagged slice inner length differs from array inner length in compiled CUDA code (awkward_ListArray_getitem_jagged_descend)"
+        )
+
+    # should check for len(tooffsets) == 0?
+    tooffsets[0] = 0 if sliceouterlen == 0 else slicestarts[0]
+
+    # (tooffsets[i + 1] = tooffsets[i] + count) for i in range(sliceouterlen)
+    tooffsets[1 : sliceouterlen + 1] = tooffsets[0] + cp.cumsum(
+        counts
+    )  # tooffsets: int64
+
+
+# Counts the number of valid entries that are within any of the jagged slices
+def awkward_ListArray_getitem_jagged_numvalid(
+    numvalid, slicestarts, slicestops, length, missing, missinglength
+):
+    optional_message = (
+        "in compiled CUDA code (awkward_ListArray_getitem_jagged_numvalid)"
+    )
+
+    slicestarts_ = slicestarts[:length]
+    slicestops_ = slicestops[:length]
+
+    if cp.any(slicestops_ < slicestarts_):
+        raise ValueError("jagged slice's stops[i] < starts[i] " + optional_message)
+
+    if cp.any(slicestops_ > missinglength):
+        raise ValueError(
+            "jagged slice's offsets extend beyond its content " + optional_message
+        )
+
+    # count the number of valid (non-negative index) entries in missing
+    valid = missing[:missinglength] >= 0
+
+    # create a mask for positions that are within any slice
+    # +1 at starts, -1 at stops
+    counts = cp.zeros(missinglength + 1, dtype=cp.int32)
+    cp.add.at(counts, slicestarts_, 1)
+    cp.add.at(counts, slicestops_, -1)
+    positions = cp.cumsum(counts)[:missinglength] > 0
+
+    # count entries that are not missing and within any slice
+    numvalid[0] = cp.sum(valid & positions)  # numvalid: int64
+
+
+# Counts the number of null (missing) entries in an indexed array.
+def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
+    index_dtype = numnull.dtype
+
+    def is_null(x):
+        return 1 if x < 0 else 0
+
+    null_iter = TransformIterator(fromindex[:lenindex], is_null)
+
+    h_init = np.array([0], dtype=index_dtype)
+    reduce_into(null_iter, numnull, OpKind.PLUS, lenindex, h_init)
