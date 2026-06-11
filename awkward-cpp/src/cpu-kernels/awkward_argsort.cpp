@@ -11,7 +11,6 @@
 #include "awkward/kernels.h"
 
 // Explicit specializations must appear before implicit instantiations.
-// argsort_order_ascending/descending for bool: no NaN, just direct comparison.
 template <typename T>
 bool argsort_order_ascending(T l, T r);
 
@@ -68,8 +67,6 @@ ERROR awkward_argsort(
     int64_t* segment_start = toptr + start_off;
     int64_t* segment_stop = toptr + stop_off;
 
-    // Hoist the ascending/stable dispatch outside the per-element comparisons,
-    // mirroring the structure of awkward_sort.cpp.
     if (stable) {
       if (ascending) {
         std::stable_sort(segment_start, segment_stop, [&fromptr](int64_t i1, int64_t i2) {

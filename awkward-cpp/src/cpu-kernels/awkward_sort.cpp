@@ -11,7 +11,6 @@
 #include <vector>
 
 // Explicit specializations must appear before implicit instantiations.
-// sort_order_ascending/descending for bool: no NaN, just direct comparison.
 template <typename T>
 bool sort_order_ascending(T l, T r);
 
