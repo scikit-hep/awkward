@@ -18,9 +18,6 @@
 #include "awkward/GrowableBuffer.h"
 #include "awkward/LayoutBuilder.h"
 
-template <typename PRIMITIVE, typename BUILDER>
-using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
-
 template <bool VALID_WHEN, bool LSB_ORDER, typename BUILDER>
 using BitMaskedBuilder =
     awkward::LayoutBuilder::BitMasked<VALID_WHEN, LSB_ORDER, BUILDER>;
@@ -55,8 +52,6 @@ test_bitmasked_roundtrip() {
   using Builder = BitMaskedBuilder<VALID_WHEN, true, NumpyLeaf<double>>;
   Builder builder;
 
-  // 10 elements: valid pattern matching the existing test
-  //   [valid, invalid, valid, valid, valid, invalid, invalid, valid, valid, valid]
   bool valid[10] = {true, false, true, true, true, false, false, true, true, true};
   for (size_t i = 0; i < 10; i++) {
     if (valid[i]) {
@@ -74,7 +69,6 @@ test_bitmasked_roundtrip() {
 
   std::map<std::string, size_t> names_nbytes;
   builder.buffer_nbytes(names_nbytes);
-  // ceil(10 / 8) == 2 mask bytes
   assert(names_nbytes["node0-mask"] == 2);
 
   std::map<std::string, std::vector<uint8_t>> storage;
@@ -182,8 +176,6 @@ test_growablebuffer_concatenate_from() {
   }
   assert(buffer.length() == n);
 
-  // concatenate_from with from=2 should skip the first two elements of the
-  // FIRST panel only and copy every remaining element contiguously.
   const size_t from = 2;
   std::vector<int32_t> out(n, int32_t(-999));
   buffer.concatenate_from(out.data(), 0, from);

@@ -2267,16 +2267,16 @@ namespace awkward {
         current_index_ = 0;
       }
 
-      /// @brief Current length of the `mask` buffer.
+      /// @brief Current number of elements (bits) accumulated in the mask.
       ///
-      /// `mask_` holds the completed bytes (8 elements each); the partially
-      /// filled byte being accumulated contributes `current_index_` elements.
+      /// `mask_` holds completed bytes; `current_index_` counts bits in the
+      /// partial trailing byte not yet committed to `mask_`.
       size_t
       length() const noexcept {
         return mask_.length() * 8 + current_index_;
       }
 
-      /// @brief Number of bytes the mask occupies, i.e. `ceil(length() / 8)`.
+      /// @brief Number of bytes the mask occupies.
       size_t
       mask_nbytes() const noexcept {
         return mask_.length() + (current_index_ > 0 ? 1 : 0);
@@ -2363,17 +2363,14 @@ namespace awkward {
       }
 
     private:
-      /// @brief Prepares to accumulate the next mask bit.
-      ///
-      /// No state needs to be flushed here: a completed byte is appended to
-      /// `mask_` by #append_end once eight bits have been written.
+      // Byte is committed in append_end once eight bits are written; nothing
+      // to do at the start of an element.
       void
       append_begin() {
       }
 
-      /// @brief Advances `current_index_`; once a full byte (8 bits) has been
-      /// accumulated, appends it to `mask_` (applying the #valid_when inversion)
-      /// and resets `current_byte_`/`current_index_`.
+      /// @brief Advances `current_index_`; commits a completed byte to `mask_`
+      /// (with #valid_when inversion applied) every 8 elements.
       ///
       /// If #valid_when equals `true`: `0` indicates `null`, `1` indicates `valid`.
       /// If #valid_when equals `false`: `0` indicates `valid`, `1` indicates `null`.
@@ -2387,11 +2384,10 @@ namespace awkward {
         }
       }
 
-      /// @brief Writes the completed mask bytes followed by the partially filled
-      /// trailing byte (if any) into a contiguous user-allocated `buffer`.
+      /// @brief Writes all mask bytes to `buffer`.
       ///
-      /// The completed bytes already have the #valid_when inversion baked in by
-      /// #append_end; the trailing byte is inverted here as needed.
+      /// Completed bytes (held in `mask_`) already carry the #valid_when inversion
+      /// from #append_end; the partial trailing byte is inverted here if needed.
       void
       write_mask(uint8_t* buffer) const noexcept {
         if (buffer == nullptr) {
