@@ -750,35 +750,6 @@ class NumpyArray(NumpyMeta, Content):
             else:
                 return out.length is not unknown_length and out.length == self.length
 
-    # def _is_unique(self, negaxis, starts, parents, offsets, outlength):
-    #     if self.length is not unknown_length and self.length == 0:
-    #         return True
-    #     elif len(self.shape) != 1:
-    #         return self.to_RegularArray()._is_unique(
-    #             negaxis,
-    #             starts,
-    #             parents,
-    #             offsets,
-    #             outlength,
-    #         )
-    #     elif not self.is_contiguous:
-    #         return self.to_contiguous()._is_unique(
-    #             negaxis,
-    #             starts,
-    #             parents,
-    #             offsets,
-    #             outlength,
-    #         )
-    #     else:
-    #         out = self._unique(negaxis, starts, parents, offsets, outlength)
-    #         if isinstance(out, ak.contents.ListOffsetArray):
-    #             return (
-    #                 out.content.length is not unknown_length
-    #                 and out.content.length == self.length
-    #             )
-    #         else:
-    #             return out.length is not unknown_length and out.length == self.length
-
     def _unique(self, negaxis, starts, offsets, outlength):
         if self.shape[0] is not unknown_length and self.shape[0] == 0:
             return self

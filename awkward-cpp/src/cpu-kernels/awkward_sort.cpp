@@ -10,8 +10,10 @@
 #include <type_traits>
 #include <vector>
 
-// Per-segment sort by value. NaNs are pushed to the high end (matching
-// NumPy / the older hand-rolled comparator). Direction and NaN handling
+// Per-segment sort by value. NaNs are pushed to the low end (they compare
+// "less" than everything, regardless of direction — same behavior as the
+// older hand-rolled comparator, but note this differs from NumPy, which
+// sorts NaNs to the high end). Direction and NaN handling
 // fold into a single inline lambda; `if constexpr` lets the bool/integer
 // specialisations skip the floating-point NaN branch entirely (so we
 // never instantiate `std::isnan(bool)` and the explicit bool override
@@ -45,13 +47,19 @@ ERROR awkward_sort(
   #pragma omp parallel for if(offsetslength > 1024) schedule(dynamic, 64)
   #endif
   for (int64_t i = 0; i < offsetslength - 1; i++) {
-    auto first = index.begin() + offsets[i];
-    auto last  = index.begin() + offsets[i + 1];
+    // Clamp against `length` so malformed offsets cannot index past the end
+    // of `index` (well-formed offsets satisfy offsets[last] <= length).
+    int64_t start = (offsets[i] < length) ? offsets[i] : length;
+    int64_t stop = (offsets[i + 1] < length) ? offsets[i + 1] : length;
+    if (start >= stop) continue;
+    auto first = index.begin() + start;
+    auto last  = index.begin() + stop;
     if (stable) std::stable_sort(first, last, less);
     else        std::sort(first, last, less);
   }
 
-  int64_t parentslength_eff = offsets[offsetslength - 1];
+  int64_t parentslength_eff =
+    (offsetslength > 0) ? offsets[offsetslength - 1] : 0;
   int64_t copy_length = (parentslength_eff < length) ? parentslength_eff : length;
   for (int64_t i = 0; i < copy_length; i++) {
     toptr[i] = fromptr[index[i]];

@@ -24,6 +24,12 @@ cp = cupy_nplike._module
 numpy_nplike = Numpy.instance()
 np = numpy_nplike._module
 
+# NOTE: error messages in this module deliberately keep the legacy
+# "... in compiled CUDA code (<kernel name>)" suffix even though these checks
+# run host-side in Python: the generated CUDA unit tests (and downstream
+# users) match on that exact text, so it must stay in sync with the messages
+# raised from compiled kernels.
+
 # Cache for cuda.compute availability
 _cuda_compute_available: bool | None = None
 

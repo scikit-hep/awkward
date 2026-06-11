@@ -1000,8 +1000,66 @@ class RecordArray(RecordMeta[Content], Content):
             # leaf NumpyArray reducer) into row-relative form by subtracting
             # `starts[k]`. Applying that subtraction here would be a second
             # adjustment on already-correct values, producing negatives like
-            # `0 - 3 = -3`. So we skip the adjust step for record reducers —
-            # the override is the authoritative source of position info.
+            # `0 - 3 = -3`. So we skip the `starts` adjustment for record
+            # reducers — the override is the authoritative source of position
+            # info. The `shifts` correction, however, still applies: when an
+            # option-type ancestor dropped missing values *inside* lists,
+            # `shifts[i]` (indexed by absolute position `i` in `self`) restores
+            # positions in the original, with-Nones coordinate system, and the
+            # override cannot know about it.
+            if reducer.needs_position and shifts is not None:
+                assert isinstance(out, ak.contents.NumpyArray)
+                # Under typetracer, overrides use `length_zero_if_typetracer`
+                # and return a length-zero NumPy-backed layout; move it back
+                # onto our backend (where the kernels below are no-ops).
+                if out.backend is not self._backend:
+                    out = out.to_backend(self._backend)
+                assert (
+                    out.backend is self._backend
+                    and offsets.nplike is self._backend.nplike
+                    and starts.nplike is self._backend.nplike
+                    and shifts.nplike is self._backend.nplike
+                )
+                # Step 1: row-relative -> absolute (in the compacted, i.e.
+                # missing-values-projected, coordinate system). The adjust
+                # kernels compute `toptr[k] -= starts[k]` (skipping masked,
+                # negative entries), so passing the *negated* bin starts adds
+                # `offsets[k]` on.
+                negated_bin_starts = ak.index.Index64(-offsets.data)
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_NumpyArray_reduce_adjust_starts_64",
+                        out.data.dtype.type,
+                        offsets.dtype.type,
+                        negated_bin_starts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        offsets.data,
+                        negated_bin_starts.data,
+                    )
+                )
+                # Step 2: the standard correction, identical to the leaf
+                # NumpyArray reducer path: `toptr[k] += shifts[toptr[k]] -
+                # starts[k]`. `shifts[i]` maps absolute compacted positions to
+                # the original (with-Nones) coordinate system and `starts` are
+                # the original row starts, so this also restores row-relative
+                # form.
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                        out.data.dtype.type,
+                        offsets.dtype.type,
+                        starts.dtype.type,
+                        shifts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        offsets.data,
+                        starts.data,
+                        shifts.data,
+                    )
+                )
 
             if mask:
                 outmask = ak.index.Index8.empty(outlength, self._backend.nplike)

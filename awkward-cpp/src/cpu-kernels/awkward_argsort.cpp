@@ -9,8 +9,10 @@
 
 #include "awkward/kernels.h"
 
-// Per-segment argsort. NaNs are pushed to the high end (matching NumPy /
-// the older hand-rolled comparator). The ascending/descending choice and
+// Per-segment argsort. NaNs are pushed to the low end (they compare "less"
+// than everything, regardless of direction — same behavior as the older
+// hand-rolled comparator, but note this differs from NumPy, which sorts
+// NaNs to the high end). The ascending/descending choice and
 // the floating-point NaN handling are folded into a single inline lambda;
 // `if constexpr` lets the bool / integer specialisations compile without
 // an `std::isnan(bool)` instantiation.
