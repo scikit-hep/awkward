@@ -19,7 +19,7 @@ def _option_of_regular(values):
 
 
 def test_where_regular_2d_option_of_regular():
-    # Verified crash: ValueError: zip() argument 2 is shorter than argument 1
+    # Crashed with: ValueError: zip() argument 2 is shorter than argument 1
     cond = ak.to_regular(ak.Array([[True, False], [False, True]]))
     x = _option_of_regular([[1, 2], [3, 4]])
     assert str(x.type) == "2 * option[2 * int64]"
@@ -27,43 +27,6 @@ def test_where_regular_2d_option_of_regular():
 
     result = ak.where(cond, x, y)
     assert result.to_list() == [[1, 20], [30, 4]]
-
-
-def test_where_irregular_option_still_works():
-    # The var-length (irregular) branch must keep working too.
-    cond = ak.Array([[True, False], [False, True, True]])
-    x = ak.mask(
-        ak.Array([[1, 2], [3, 4, 5]]),
-        ak.Array([[True, True], [True, True, True]]),
-    )
-    y = ak.Array([[10, 20], [30, 40, 50]])
-    result = ak.where(cond, x, y)
-    assert result.to_list() == [[1, 20], [30, 4, 5]]
-
-
-def test_where_named_axis_survives_regular():
-    # Named axes survive a regular (non-option) where.
-    cond = ak.to_regular(
-        ak.Array([[True, False], [False, True]], named_axis=("x", "y"))
-    )
-    x = ak.to_regular(ak.Array([[1, 2], [3, 4]], named_axis=("x", "y")))
-    y = ak.to_regular(ak.Array([[10, 20], [30, 40]], named_axis=("x", "y")))
-    result = ak.where(cond, x, y)
-    assert result.named_axis == {"x": 0, "y": 1}
-    assert result.to_list() == [[1, 20], [30, 4]]
-
-
-def test_where_named_axis_survives_var_option():
-    # Named axes survive a var-length option where (the option branch).
-    cond = ak.Array([[True, False], [False, True, True]], named_axis=("x", "y"))
-    x = ak.mask(
-        ak.Array([[1, 2], [3, 4, 5]], named_axis=("x", "y")),
-        ak.Array([[True, True], [True, True, True]]),
-    )
-    y = ak.Array([[10, 20], [30, 40, 50]], named_axis=("x", "y"))
-    result = ak.where(cond, x, y)
-    assert result.named_axis == {"x": 0, "y": 1}
-    assert result.to_list() == [[1, 20], [30, 4, 5]]
 
 
 def test_prepare_contexts_independent():

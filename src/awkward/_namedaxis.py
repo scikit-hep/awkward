@@ -690,9 +690,8 @@ class NamedAxesWithDims:
             _named_axes.append(_get_named_axis(array))
             _ndims.append(getattr(layout, "minmax_depth", (None, None))[1])
 
-        # The depth and lateral contexts must not share storage: apply_step
-        # mutates each independently (and copies the depth context per branch),
-        # so they need their own copies of the lists.
+        # depth and lateral contexts must not share storage: apply_step mutates
+        # each independently, so each needs its own copies of the lists
         depth_context = {NAMED_AXIS_KEY: cls(list(_named_axes), list(_ndims))}
         lateral_context = {NAMED_AXIS_KEY: cls(list(_named_axes), list(_ndims))}
         return depth_context, lateral_context

@@ -451,10 +451,8 @@ def apply_step(
                             _unify_named_axis(named_axis, seen_named_axis),
                             ndim + 1 if ndim is not None else ndim,
                         )
-                        # Mirror the updated depth named axis into the lateral
-                        # ("seen") context. The two contexts have independent
-                        # storage, so this must be done explicitly (it used to
-                        # rely on the contexts sharing storage).
+                        # mirror into the lateral context (independent storage
+                        # now; this used to rely on the two contexts sharing it)
                         lateral_context[NAMED_AXIS_KEY][i] = depth_context[
                             NAMED_AXIS_KEY
                         ][i]
@@ -544,9 +542,8 @@ def apply_step(
             else:
                 assert numoutputs == len(outcontents[-1])
 
-        # When all records have zero fields, the loop above never runs and
-        # numoutputs is left as None. There is no recursion to tell us how many
-        # outputs the action produces, so default to a single output RecordArray.
+        # With zero fields the loop above never runs, so no recursion tells us
+        # the output count; default to a single RecordArray.
         if numoutputs is None:
             numoutputs = 1
 
@@ -642,8 +639,7 @@ def apply_step(
                             _add_named_axis(named_axis, depth, ndim),
                             ndim + 1 if ndim is not None else ndim,
                         )
-                        # Mirror into the lateral ("seen") context. The two
-                        # contexts have independent storage, so do this explicitly.
+                        # mirror into the lateral context (independent storage)
                         lateral_context[NAMED_AXIS_KEY][i] = depth_context[
                             NAMED_AXIS_KEY
                         ][i]
@@ -732,8 +728,7 @@ def apply_step(
                         _add_named_axis(named_axis, depth + 1, ndim),
                         ndim + 1 if ndim is not None else ndim,
                     )
-                    # Mirror into the lateral ("seen") context. The two contexts
-                    # have independent storage, so do this explicitly.
+                    # mirror into the lateral context (independent storage)
                     lateral_context[NAMED_AXIS_KEY][i] = depth_context[NAMED_AXIS_KEY][
                         i
                     ]
@@ -954,10 +949,9 @@ def apply_step(
                 return (out,)
 
         cond_mask = masks[2]
-        # The outer depth/lateral contexts hold one named-axis entry per
-        # original input (x, y, cond), but this internal apply_step only
-        # receives two inputs. Build fresh, correctly-sized contexts so the
-        # named-axis bookkeeping (which zips contexts against inputs) matches.
+        # Build fresh contexts sized to these two inputs: the outer contexts have
+        # one entry per original input (x, y, cond), but the named-axis bookkeeping
+        # zips contexts against inputs, so a 3-entry context here would mismatch.
         or_depth_context, or_lateral_context = NamedAxesWithDims.prepare_contexts(
             [xy_mask, cond_mask]
         )
@@ -989,8 +983,7 @@ def apply_step(
                 )
                 return (out,)
 
-        # As above: build fresh contexts sized to the two inputs of this
-        # internal apply_step rather than reusing the outer 3-input contexts.
+        # fresh contexts sized to these two inputs (as above)
         mask_depth_context, mask_lateral_context = NamedAxesWithDims.prepare_contexts(
             [xy_unmasked, mask]
         )
