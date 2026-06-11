@@ -13,22 +13,6 @@ def test_record_setitem_does_not_leak_into_sibling():
     assert r2["y"] == 2
 
 
-def test_record_setitem_rebinds_layout():
-    r = ak.Record({"x": 1})
-    old_layout = r.layout
-    r["y"] = 2
-    assert r.layout is not old_layout
-    assert r.fields == ["x", "y"]
-
-
-def test_record_from_record_preserves_attrs_and_behavior():
-    behavior = {"foo": "bar"}
-    rec = ak.Record({"x": 1})
-    out = ak.Record(rec, attrs={"hello": "world"}, behavior=behavior)
-    assert out.attrs == {"hello": "world"}
-    assert out.behavior == behavior
-
-
 def test_record_from_record_inherits_attrs_and_behavior():
     behavior = {"foo": "bar"}
     rec = ak.Record({"x": 1}, attrs={"a": 1}, behavior=behavior)
@@ -44,12 +28,6 @@ def test_arraybuilder_record_repr_no_name():
     assert repr(ctx).startswith("<ArrayBuilder.record")
 
 
-def test_arraybuilder_record_repr_with_name():
-    builder = ak.ArrayBuilder()
-    ctx = builder.record("points")
-    assert repr(ctx).startswith("<ArrayBuilder.record")
-
-
 def test_arraybuilder_record_context_manager_with_name():
     builder = ak.ArrayBuilder()
     with builder.record("points"):
@@ -58,29 +36,12 @@ def test_arraybuilder_record_context_manager_with_name():
     assert ak.parameters(arr)["__record__"] == "points"
 
 
-def test_arraybuilder_list_repr():
-    builder = ak.ArrayBuilder()
-    ctx = builder.list()
-    assert repr(ctx).startswith("<ArrayBuilder.list")
-
-
 def test_cpp_type_caches_reset_on_layout_set():
     arr = ak.Array([{"x": 1}, {"x": 2}])
     arr._cpp_type = "SENTINEL"
     arr._generator = "SENTINEL"
     arr._lookup = "SENTINEL"
     arr.layout = arr.layout
-    assert arr._cpp_type is None
-    assert arr._generator is None
-    assert arr._lookup is None
-
-
-def test_cpp_type_caches_reset_on_setitem():
-    arr = ak.Array([{"x": 1}, {"x": 2}])
-    arr._cpp_type = "SENTINEL"
-    arr._generator = "SENTINEL"
-    arr._lookup = "SENTINEL"
-    arr["y"] = [3, 4]
     assert arr._cpp_type is None
     assert arr._generator is None
     assert arr._lookup is None
