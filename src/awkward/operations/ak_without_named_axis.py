@@ -22,7 +22,8 @@ def without_named_axis(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns an array with named axes removed.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -32,9 +33,10 @@ def without_named_axis(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an #ak.Array or #ak.Record (or low-level equivalent, if
-    `highlevel=False`) without named axes. This function does not change the
-    array in-place.
+    Returns:
+        An #ak.Array or #ak.Record (or low-level equivalent, if
+        `highlevel=False`) without named axes. This function does not change the
+        array in-place.
     """
     # Dispatch
     yield (array,)

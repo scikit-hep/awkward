@@ -16,7 +16,8 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def without_field(array, where, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns an array or record with the named field removed.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         where (str or non-empy sequence of str): If str, the name of the field
@@ -29,14 +30,15 @@ def without_field(array, where, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an #ak.Array or #ak.Record (or low-level equivalent, if
-    `highlevel=False`) with an existing field removed. This function does not
-    change the array in-place.
+    Returns:
+        An #ak.Array or #ak.Record (or low-level equivalent, if
+        `highlevel=False`) with an existing field removed. This function does not
+        change the array in-place.
 
-    See #ak.Array.__delitem__ and #ak.Record.__delitem__ for a variant that
-    changes the high-level object in-place. (These methods internally use
-    #ak.without_field, so performance is not a factor in choosing one over the
-    other.)
+        See #ak.Array.__delitem__ and #ak.Record.__delitem__ for a variant that
+        changes the high-level object in-place. (These methods internally use
+        #ak.without_field, so performance is not a factor in choosing one over the
+        other.)
     """
     # Dispatch
     yield (array,)

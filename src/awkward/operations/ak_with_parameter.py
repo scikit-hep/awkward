@@ -15,7 +15,8 @@ np = NumpyMetadata.instance()
 def with_parameter(
     array, parameter, value, *, highlevel=True, behavior=None, attrs=None
 ):
-    """
+    """Returns an array with the given parameter set on the outermost layout node.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         parameter (str): Name of the parameter to set on that array.
@@ -27,14 +28,15 @@ def with_parameter(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    This function returns a new array with a parameter set on the outermost
-    node of its #ak.Array.layout.
+    Returns:
+        This function returns a new array with a parameter set on the outermost
+        node of its #ak.Array.layout.
 
-    Note that a "new array" is a lightweight shallow copy, not a duplication
-    of large data buffers.
+        Note that a "new array" is a lightweight shallow copy, not a duplication
+        of large data buffers.
 
-    You can also remove a single parameter with this function, since setting
-    a parameter to None is equivalent to removing it.
+        You can also remove a single parameter with this function, since setting
+        a parameter to None is equivalent to removing it.
     """
     # Dispatch
     yield (array,)
