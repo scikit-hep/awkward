@@ -25,7 +25,8 @@ def to_safetensors(
     backend=None,
     byteorder=ak._util.native_byteorder,
 ):
-    """
+    """Writes an Awkward Array to a safetensors file.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         destination (path-like): Name of the output file, file path, or
@@ -50,28 +51,26 @@ def to_safetensors(
 
     Returns:
         None
-            This function writes the safetensors file to `destination`. If
+        This function writes the safetensors file to `destination`. If
         `container` is provided, it will be populated with the raw buffer bytes.
 
-    Serialize an Awkward Array to the safetensors format and write it to `destination`.
+        Serialize an Awkward Array to the safetensors format and write it to `destination`.
 
-    Ref: https://huggingface.co/docs/safetensors/.
+        Ref: https://huggingface.co/docs/safetensors/.
 
-    This function converts the provided Awkward Array (or array-like object) into raw
-    buffers via `ak.to_buffers` and stores them in the safetensors format. Buffer names
-    are generated from `buffer_key` and `form_key` templates, allowing downstream
-    compatibility or layout reuse.
-    The resulting safetensors file includes metadata containing the Awkward `form` and
-    array `length`, which are required for `ak.from_safetensors` to reconstruct the array.
+        This function converts the provided Awkward Array (or array-like object) into raw
+        buffers via `ak.to_buffers` and stores them in the safetensors format. Buffer names
+        are generated from `buffer_key` and `form_key` templates, allowing downstream
+        compatibility or layout reuse.
+        The resulting safetensors file includes metadata containing the Awkward `form` and
+        array `length`, which are required for `ak.from_safetensors` to reconstruct the array.
 
-    Example:
-
+    Examples:
         >>> import awkward as ak
         >>> arr = ak.Array([[1, 2, 3], [], [4]])
         >>> ak.to_safetensors(arr, "out.safetensors")
 
-
-    See also #ak.from_safetensors.
+        See also #ak.from_safetensors.
     """
     # Implementation
     return _impl(

@@ -37,7 +37,8 @@ def to_json(
     convert_bytes=None,
     convert_other=None,
 ):
-    """
+    """Converts an Awkward Array into JSON text, as a string or to a file.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         file (None, path-like, or file-like object): If None, this function returns
@@ -74,49 +75,50 @@ def to_json(
             as `default` to convert any other objects that #ak.to_list would return
             but are not JSON serializable.
 
-    Converts `array` (many types supported, including all Awkward Arrays and
-    Records) into JSON text. Returns bytes (encoded JSON) if `file` is None;
-    otherwise, this function returns nothing and writes to a file.
+    Returns:
+        Converts `array` (many types supported, including all Awkward Arrays and
+        Records) into JSON text. Returns bytes (encoded JSON) if `file` is None;
+        otherwise, this function returns nothing and writes to a file.
 
-    This function converts the array into Python objects with #ak.to_list, performs
-    some conversions to make the data JSON serializable (`nan_string`,
-    `posinf_string`, `neginf_string`, `complex_record_fields`, `convert_bytes`,
-    `convert_other`), then uses `json.dumps` to return a string or `json.dump`
-    to write to a file (depending on the value of `file`).
+        This function converts the array into Python objects with #ak.to_list, performs
+        some conversions to make the data JSON serializable (`nan_string`,
+        `posinf_string`, `neginf_string`, `complex_record_fields`, `convert_bytes`,
+        `convert_other`), then uses `json.dumps` to return a string or `json.dump`
+        to write to a file (depending on the value of `file`).
 
-    If `line_delimited` is True or a line-delimiter string like `"\\r\\n"`/`os.linesep`,
-    the output is line-delimited JSON, variously referred to as "ldjson", "ndjson", and
-    "jsonl". (Use an appropriate file extension!)
+        If `line_delimited` is True or a line-delimiter string like `"\\r\\n"`/`os.linesep`,
+        the output is line-delimited JSON, variously referred to as "ldjson", "ndjson", and
+        "jsonl". (Use an appropriate file extension!)
 
-    To pretty-print the JSON, set `num_indent_spaces=4, num_readability_spaces=1` (for
-    example).
+        To pretty-print the JSON, set `num_indent_spaces=4, num_readability_spaces=1` (for
+        example).
 
-    Awkward Array types have the following JSON translations.
+        Awkward Array types have the following JSON translations.
 
-    * #ak.types.OptionType: missing values are converted into None.
-    * #ak.types.ListType: converted into JSON lists.
-    * #ak.types.RegularType: also converted into JSON lists. JSON (and
-      Python) forms lose information about the regularity of list lengths.
-    * #ak.types.ListType or #ak.types.RegularType with parameter `"__array__"`
-      equal to `"string"`: converted into JSON strings.
-    * #ak.types.RecordType without field names: converted into JSON
-      objects with numbers as strings for keys.
-    * #ak.types.RecordType with field names: converted into JSON objects.
-    * #ak.types.UnionType: JSON data are naturally heterogeneous.
+        * #ak.types.OptionType: missing values are converted into None.
+        * #ak.types.ListType: converted into JSON lists.
+        * #ak.types.RegularType: also converted into JSON lists. JSON (and
+          Python) forms lose information about the regularity of list lengths.
+        * #ak.types.ListType or #ak.types.RegularType with parameter `"__array__"`
+          equal to `"string"`: converted into JSON strings.
+        * #ak.types.RecordType without field names: converted into JSON
+          objects with numbers as strings for keys.
+        * #ak.types.RecordType with field names: converted into JSON objects.
+        * #ak.types.UnionType: JSON data are naturally heterogeneous.
 
-    If the array contains any NaN (not a number), infinite values, or
-    imaginary/complex types, `nan_string`, `posinf_string`, and/or `neginf_string`
-    _must_ be supplied.
+        If the array contains any NaN (not a number), infinite values, or
+        imaginary/complex types, `nan_string`, `posinf_string`, and/or `neginf_string`
+        _must_ be supplied.
 
-    If the array contains any raw bytestrings (`"__array__"` equal to `"bytestring"`),
-    `convert_bytes` _must_ be supplied. To interpret as strings, use `bytes.decode`.
-    To Base64-encode, use `lambda x: base64.b64encode(x).decode()`.
+        If the array contains any raw bytestrings (`"__array__"` equal to `"bytestring"`),
+        `convert_bytes` _must_ be supplied. To interpret as strings, use `bytes.decode`.
+        To Base64-encode, use `lambda x: base64.b64encode(x).decode()`.
 
-    Other non-serializable types are only possible through custom behaviors that
-    override `__getitem__` (which might return arbitrary Python objects). Use
-    `convert_other` to detect these types and convert them.
+        Other non-serializable types are only possible through custom behaviors that
+        override `__getitem__` (which might return arbitrary Python objects). Use
+        `convert_other` to detect these types and convert them.
 
-    See also #ak.from_json.
+        See also #ak.from_json.
     """
     # Dispatch
     yield (array,)
