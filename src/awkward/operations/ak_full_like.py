@@ -27,7 +27,8 @@ def full_like(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns an array with the same structure as the input, filled with a given value.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         fill_value: Value to fill the new array with.
@@ -42,10 +43,11 @@ def full_like(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
+    Returns:
+        This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
 
-    Although it's possible to produce an array of `fill_value` with the
-    structure of an `array` using #ak.broadcast_arrays:
+        Although it's possible to produce an array of `fill_value` with the
+        structure of an `array` using #ak.broadcast_arrays:
 
         >>> array = ak.Array([[1, 2, 3], [], [4, 5]])
         >>> ak.broadcast_arrays(array, 1)
@@ -55,11 +57,12 @@ def full_like(
         [<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>,
          <Array [[1, 1, 1], [], [1, 1]] type='3 * var * float64'>]
 
-    Such a technique takes its type from the scalar (`1` or `1.0`), rather than
-    the array. This function gets all types from the array, which might not be
-    the same in all parts of the structure.
+        Such a technique takes its type from the scalar (`1` or `1.0`), rather than
+        the array. This function gets all types from the array, which might not be
+        the same in all parts of the structure.
 
-    Here is an extreme example:
+    Examples:
+        Here is an extreme example:
 
         >>> array = ak.Array([
         ... [{"x": 0.0, "y": []},
@@ -76,16 +79,16 @@ def full_like(
          [],
          [{x: 12.3, y: [12, 12, None, 12]}, True, ..., True, {x: 12.3, y: [12, ...]}]]
 
-    The `"x"` values get filled in with `12.3` because they retain their type
-    (`float64`) and the `"y"` list items get filled in with `12` because they
-    retain their type (`int64`). Booleans get filled with True because `12.3`
-    is not zero. Missing values remain in the same positions as in the original
-    `array`. (To fill them in, use #ak.fill_none.)
+        The `"x"` values get filled in with `12.3` because they retain their type
+        (`float64`) and the `"y"` list items get filled in with `12` because they
+        retain their type (`int64`). Booleans get filled with True because `12.3`
+        is not zero. Missing values remain in the same positions as in the original
+        `array`. (To fill them in, use #ak.fill_none.)
 
-    See also #ak.zeros_like and #ak.ones_like.
+        See also #ak.zeros_like and #ak.ones_like.
 
-    (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
-    are immutable.)
+        (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
+        are immutable.)
     """
     # Dispatch
     yield array, fill_value
