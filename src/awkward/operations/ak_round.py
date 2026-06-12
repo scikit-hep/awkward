@@ -24,7 +24,8 @@ def round(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Rounds each array element to the given number of decimals.
+
     Args:
         array : array_like
             Input array.
@@ -40,8 +41,9 @@ def round(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns the real components of the given array elements.
-    If the arrays have complex elements, the returned arrays are floats.
+    Returns:
+        Returns the real components of the given array elements.
+        If the arrays have complex elements, the returned arrays are floats.
     """
     # Dispatch
     yield (array,)
