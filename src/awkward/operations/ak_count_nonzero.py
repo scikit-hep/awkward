@@ -30,7 +30,8 @@ def count_nonzero(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Counts an array's nonzero elements over one or all levels of nesting.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -56,19 +57,20 @@ def count_nonzero(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Counts nonzero elements of `array` (many types supported, including all
-    Awkward Arrays and Records). The identity of counting is `0` and it is
-    usually not masked. This operation is the same as NumPy's
-    [count_nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.count_nonzero.html)
-    if all lists at a given dimension have the same length and no None values,
-    but it generalizes to cases where they do not.
+    Returns:
+        Counts nonzero elements of `array` (many types supported, including all
+        Awkward Arrays and Records). The identity of counting is `0` and it is
+        usually not masked. This operation is the same as NumPy's
+        [count_nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.count_nonzero.html)
+        if all lists at a given dimension have the same length and no None values,
+        but it generalizes to cases where they do not.
 
-    See #ak.sum for a more complete description of nested list and missing
-    value (None) handling in reducers.
+        See #ak.sum for a more complete description of nested list and missing
+        value (None) handling in reducers.
 
-    Following the same rules as other reducers, #ak.count_nonzero does not
-    count None values. If it is desirable to count them, use #ak.fill_none
-    to turn them into something that would be counted.
+        Following the same rules as other reducers, #ak.count_nonzero does not
+        count None values. If it is desirable to count them, use #ak.fill_none
+        to turn them into something that would be counted.
     """
     # Dispatch
     yield (array,)

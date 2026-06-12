@@ -30,7 +30,8 @@ def count(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Counts an array's elements over one or all levels of nesting.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -56,16 +57,18 @@ def count(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Counts elements of `array` (many types supported, including all
-    Awkward Arrays and Records). The identity of counting is `0` and it is
-    usually not masked.
+    Returns:
+        Counts elements of `array` (many types supported, including all
+        Awkward Arrays and Records). The identity of counting is `0` and it is
+        usually not masked.
 
-    This function has no analog in NumPy because counting values in a
-    rectilinear array would only result in elements of the NumPy array's
-    [shape](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.shape.html).
+    Examples:
+        This function has no analog in NumPy because counting values in a
+        rectilinear array would only result in elements of the NumPy array's
+        [shape](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.shape.html).
 
-    However, for nested lists of variable dimension and missing values, the
-    result of counting is non-trivial. For example, with this
+        However, for nested lists of variable dimension and missing values, the
+        result of counting is non-trivial. For example, with this
 
         >>> array = ak.Array([[ 0.1,  0.2      ],
         ...                   [None, 10.2, None],
@@ -73,43 +76,43 @@ def count(
         ...                   [20.1, 20.2, 20.3],
         ...                   [30.1, 30.2      ]])
 
-    the result of counting over the innermost dimension is
+        the result of counting over the innermost dimension is
 
         >>> ak.count(array, axis=-1)
         <Array [2, 1, None, 3, 2] type='5 * ?int64'>
 
-    the outermost dimension is
+        the outermost dimension is
 
         >>> ak.count(array, axis=0)
         <Array [3, 4, 1] type='3 * int64'>
 
-    and all dimensions is
+        and all dimensions is
 
         >>> ak.count(array, axis=None)
         8
 
-    The gaps and None values are not counted, and if a None value occurs at
-    a higher axis than the one being counted, it is kept as a placeholder
-    so that the outer list length does not change.
+        The gaps and None values are not counted, and if a None value occurs at
+        a higher axis than the one being counted, it is kept as a placeholder
+        so that the outer list length does not change.
 
-    See #ak.sum for a more complete description of nested list and missing
-    value (None) handling in reducers.
+        See #ak.sum for a more complete description of nested list and missing
+        value (None) handling in reducers.
 
-    Note also that this function is different from #ak.num, which counts
-    the number of values at a given depth, maintaining structure: #ak.num
-    never counts across different lists the way that reducers do (#ak.num
-    is not a reducer; #ak.count is). For the same `array`,
+        Note also that this function is different from #ak.num, which counts
+        the number of values at a given depth, maintaining structure: #ak.num
+        never counts across different lists the way that reducers do (#ak.num
+        is not a reducer; #ak.count is). For the same `array`,
 
         >>> ak.num(array, axis=0)
         5
         >>> ak.num(array, axis=1)
         <Array [2, 3, None, 3, 2] type='5 * ?int64'>
 
-    If it is desirable to include None values in #ak.count, use #ak.fill_none
-    to turn the None values into something that would be counted.
+        If it is desirable to include None values in #ak.count, use #ak.fill_none
+        to turn the None values into something that would be counted.
 
-    If it is desirable to exclude NaN ("not a number") values from #ak.count,
-    use #ak.nan_to_none to turn them into None, which are not counted.
+        If it is desirable to exclude NaN ("not a number") values from #ak.count,
+        use #ak.nan_to_none to turn them into None, which are not counted.
     """
     # Dispatch
     yield (array,)

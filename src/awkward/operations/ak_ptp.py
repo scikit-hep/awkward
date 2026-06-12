@@ -35,7 +35,8 @@ def ptp(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns the range of values over one or all levels of nesting.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -55,35 +56,37 @@ def ptp(
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity of 0.
 
-    Returns the range of values in each group of elements from `array` (many
-    types supported, including all Awkward Arrays and Records). The range of
-    an empty list is None, unless `mask_identity=False`, in which case it is 0.
-    This operation is the same as NumPy's
-    [ptp](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ptp.html)
-    if all lists at a given dimension have the same length and no None values,
-    but it generalizes to cases where they do not.
+    Returns:
+        Returns the range of values in each group of elements from `array` (many
+        types supported, including all Awkward Arrays and Records). The range of
+        an empty list is None, unless `mask_identity=False`, in which case it is 0.
+        This operation is the same as NumPy's
+        [ptp](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ptp.html)
+        if all lists at a given dimension have the same length and no None values,
+        but it generalizes to cases where they do not.
 
-    For example, with
+    Examples:
+        For example, with
 
         >>> array = ak.Array([[0, 1, 2, 3],
         ...                   [          ],
         ...                   [4, 5      ]])
 
-    The range of the innermost lists is
+        The range of the innermost lists is
 
         >>> ak.ptp(array, axis=-1)
         <Array [3, None, 1] type='3 * ?int64'>
 
-    because there are three lists, the first has a range of `3`, the second is
-    `None` because the list is empty, and the third has a range of `1`. Similarly,
+        because there are three lists, the first has a range of `3`, the second is
+        `None` because the list is empty, and the third has a range of `1`. Similarly,
 
         >>> ak.ptp(array, axis=-1, mask_identity=False)
         <Array [3, 0, 1] type='3 * float64'>
 
-    The second value is `0` because the list is empty.
+        The second value is `0` because the list is empty.
 
-    See #ak.sum for a more complete description of nested list and missing
-    value (None) handling in reducers.
+        See #ak.sum for a more complete description of nested list and missing
+        value (None) handling in reducers.
     """
     # Dispatch
     yield (array,)
