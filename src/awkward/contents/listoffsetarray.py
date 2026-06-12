@@ -955,9 +955,11 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 raise AxisError("array with strings can only be sorted with axis=-1")
 
             if self._backend.nplike.known_data and offsets.nplike.known_data:
-                # In the offsets representation, "parents.length" is offsets[outlength],
-                # which must equal self._offsets.length - 1 (one entry per row of *this* layout).
-                assert self._offsets.length - 1 == offsets.length - 1
+                # In the offsets representation, "parents.length" is the *value*
+                # offsets[outlength] (the total number of rows covered by the
+                # bins), which must equal self._offsets.length - 1 (one entry
+                # per row of *this* layout).
+                assert self._offsets.length - 1 == offsets[-1]
 
             (
                 _distincts,
@@ -1024,117 +1026,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             return ak.contents.ListOffsetArray(
                 outoffsets, outcontent, parameters=self._parameters
             )
-
-    # def _unique(self, negaxis, starts, parents, offsets, outlength):
-    #     if self._offsets.length - 1 == 0:
-    #         return self
-
-    #     branch, depth = self.branch_depth
-
-    #     if (
-    #         self.parameter("__array__") == "string"
-    #         or self.parameter("__array__") == "bytestring"
-    #     ):
-    #         if branch or (negaxis != depth):
-    #             raise AxisError("array with strings can only be sorted with axis=-1")
-
-    #         # FIXME: check validity error
-
-    #         if isinstance(self._content, ak.contents.NumpyArray):
-    #             out, nextoffsets = self._content._as_unique_strings(self._offsets)
-    #             return ak.contents.ListOffsetArray(
-    #                 nextoffsets, out, parameters=self._parameters
-    #             )
-
-    #     if not branch and (negaxis == depth):
-    #         if (
-    #             self.parameter("__array__") == "string"
-    #             or self.parameter("__array__") == "bytestring"
-    #         ):
-    #             raise AxisError("array with strings can only be sorted with axis=-1")
-
-    #         if self._backend.nplike.known_data and parents.nplike.known_data:
-    #             assert self._offsets.length - 1 == parents.length
-
-    #         (
-    #             _distincts,
-    #             _maxcount,
-    #             maxnextparents,
-    #             nextcarry,
-    #             nextparents,
-    #             nextstarts,
-    #         ) = self._rearrange_prepare_next(outlength, parents)
-
-    #         nextcontent = self._content._carry(nextcarry, False)
-    #         outcontent = nextcontent._unique(
-    #             negaxis - 1,
-    #             nextstarts,
-    #             nextparents,
-    #             maxnextparents[0] + 1,
-    #         )
-
-    #         outcarry = Index64.empty(nextcarry.length, self._backend.nplike)
-    #         assert (
-    #             outcarry.nplike is self._backend.nplike
-    #             and nextcarry.nplike is self._backend.nplike
-    #         )
-    #         self._backend.maybe_kernel_error(
-    #             self._backend[
-    #                 "awkward_ListOffsetArray_local_preparenext_64",
-    #                 outcarry.dtype.type,
-    #                 nextcarry.dtype.type,
-    #             ](
-    #                 outcarry.data,
-    #                 nextcarry.data,
-    #                 nextcarry.length,
-    #             )
-    #         )
-
-    #         return ak.contents.ListOffsetArray(
-    #             outcontent._compact_offsets64(True),
-    #             outcontent._content._carry(outcarry, False),
-    #             parameters=self._parameters,
-    #         )
-
-    #     else:
-    #         nextlen = self._backend.nplike.index_as_shape_item(
-    #             self._offsets[-1] - self._offsets[0]
-    #         )
-    #         nextparents = Index64.empty(nextlen, self._backend.nplike)
-
-    #         assert (
-    #             nextparents.nplike is self._backend.nplike
-    #             and self._offsets.nplike is self._backend.nplike
-    #         )
-    #         self._backend.maybe_kernel_error(
-    #             self._backend[
-    #                 "awkward_ListOffsetArray_reduce_local_nextparents_64",
-    #                 nextparents.dtype.type,
-    #                 self._offsets.dtype.type,
-    #             ](
-    #                 nextparents.data,
-    #                 self._offsets.data,
-    #                 self._offsets.length - 1,
-    #                 nextparents.length,
-    #             )
-    #         )
-
-    #         trimmed = self._content[self._offsets[0] : self._offsets[-1]]
-    #         outcontent = trimmed._unique(
-    #             negaxis,
-    #             self._offsets[:-1],
-    #             nextparents,
-    #             offsets,
-    #             self._offsets.length - 1,
-    #         )
-
-    #         if negaxis is None or negaxis == depth - 1:
-    #             return outcontent
-
-    #         outoffsets = self._compact_offsets64(True)
-    #         return ak.contents.ListOffsetArray(
-    #             outoffsets, outcontent, parameters=self._parameters
-    #         )
 
     def _argsort_next(
         self,
@@ -1825,98 +1716,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             nextoffsets,
             nextstarts,
         )
-
-    # def _rearrange_prepare_next(self, outlength, parents):
-    #     nplike = self._backend.nplike
-    #     nextlen = nplike.index_as_shape_item(self._offsets[-1] - self._offsets[0])
-    #     # Clamp nextlen to actual content length to avoid out-of-bounds access
-    #     if nextlen is not unknown_length and self.content.length is not unknown_length:
-    #         nextlen = min(nextlen, self.content.length)
-    #     lenstarts = self._offsets.length - 1
-    #     _maxcount = Index64.empty(1, nplike)
-    #     offsetscopy = Index64.empty(self.offsets.length, nplike)
-    #     assert (
-    #         _maxcount.nplike is nplike
-    #         and offsetscopy.nplike is nplike
-    #         and self._offsets.nplike is nplike
-    #     )
-    #     self._backend.maybe_kernel_error(
-    #         self._backend[
-    #             "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
-    #             _maxcount.dtype.type,
-    #             offsetscopy.dtype.type,
-    #             self._offsets.dtype.type,
-    #         ](
-    #             _maxcount.data,
-    #             offsetscopy.data,
-    #             self._offsets.data,
-    #             lenstarts,
-    #         )
-    #     )
-    #     maxcount = nplike.index_as_shape_item(_maxcount[0])
-
-    #     nextcarry = Index64.empty(nextlen, nplike=nplike)
-    #     nextparents = Index64.empty(nextlen, nplike=nplike)
-    #     _maxnextparents = Index64.empty(1, nplike)
-    #     if maxcount is unknown_length or outlength is unknown_length:
-    #         distincts = Index64.empty(unknown_length, nplike)
-    #     else:
-    #         distincts = Index64.empty(outlength * maxcount, nplike)
-
-    #     assert (
-    #         _maxnextparents.nplike is nplike
-    #         and distincts.nplike is nplike
-    #         and self._offsets.nplike is nplike
-    #         and offsetscopy.nplike is nplike
-    #         and parents.nplike is nplike
-    #     )
-    #     self._backend.maybe_kernel_error(
-    #         self._backend[
-    #             "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
-    #             nextcarry.dtype.type,
-    #             nextparents.dtype.type,
-    #             _maxnextparents.dtype.type,
-    #             distincts.dtype.type,
-    #             self._offsets.dtype.type,
-    #             offsetscopy.dtype.type,
-    #             parents.dtype.type,
-    #         ](
-    #             nextcarry.data,
-    #             nextparents.data,
-    #             nextlen,
-    #             _maxnextparents.data,
-    #             distincts.data,
-    #             distincts.length,
-    #             offsetscopy.data,
-    #             self._offsets.data,
-    #             lenstarts,
-    #             parents.data,
-    #             maxcount,
-    #         )
-    #     )
-
-    #     maxnextparents = nplike.index_as_shape_item(_maxnextparents[0])
-    #     nextstarts = Index64.empty(maxnextparents + 1, nplike)
-    #     assert nextstarts.nplike is nplike and nextparents.nplike is nplike
-    #     self._backend.maybe_kernel_error(
-    #         self._backend[
-    #             "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
-    #             nextstarts.dtype.type,
-    #             nextparents.dtype.type,
-    #         ](
-    #             nextstarts.data,
-    #             nextparents.data,
-    #             nextlen,
-    #         )
-    #     )
-    #     return (
-    #         distincts,
-    #         maxcount,
-    #         maxnextparents,
-    #         nextcarry,
-    #         nextparents,
-    #         nextstarts,
-    #     )
 
     def _validity_error(self, path):
         if self._backend.nplike.known_data and self.offsets.length < 1:

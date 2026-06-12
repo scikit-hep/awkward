@@ -10,12 +10,54 @@
 #include <type_traits>
 #include <vector>
 
-// Per-segment sort by value. NaNs are pushed to the high end (matching
-// NumPy / the older hand-rolled comparator). Direction and NaN handling
-// fold into a single inline lambda; `if constexpr` lets the bool/integer
-// specialisations skip the floating-point NaN branch entirely (so we
-// never instantiate `std::isnan(bool)` and the explicit bool override
-// helpers are no longer needed).
+// Per-segment sort by value. Integer types compare directly (no isnan, no
+// conversion to double — casting int64/uint64 through double would round
+// values beyond 2^53 and break strict weak ordering). Floating-point types
+// keep the NaN-aware path: NaNs compare "less" than everything, regardless
+// of direction, so they are pushed to the low end (same behavior as the
+// older hand-rolled comparator; note this differs from NumPy, which sorts
+// NaNs to the high end).
+//
+// Explicit specializations must appear before implicit instantiations.
+// sort_order_ascending/descending for bool: no NaN, just direct comparison.
+template <typename T>
+bool sort_order_ascending(T l, T r);
+
+template <typename T>
+bool sort_order_descending(T l, T r);
+
+template <>
+bool sort_order_ascending(bool l, bool r)
+{
+  return l < r;
+}
+
+template <>
+bool sort_order_descending(bool l, bool r)
+{
+  return l > r;
+}
+
+template <typename T>
+bool sort_order_ascending(T l, T r)
+{
+  if constexpr (std::is_integral_v<T>) {
+    return l < r;
+  } else {
+    return !std::isnan(r) && (std::isnan(l) || l < r);
+  }
+}
+
+template <typename T>
+bool sort_order_descending(T l, T r)
+{
+  if constexpr (std::is_integral_v<T>) {
+    return l > r;
+  } else {
+    return !std::isnan(r) && (std::isnan(l) || l > r);
+  }
+}
+
 template <typename T>
 ERROR awkward_sort(
   T* toptr,
@@ -23,21 +65,10 @@ ERROR awkward_sort(
   int64_t length,
   const int64_t* offsets,
   int64_t offsetslength,
-  int64_t /* parentslength */,
   bool ascending,
   bool stable) {
   std::vector<int64_t> index(length);
   std::iota(index.begin(), index.end(), int64_t{0});
-
-  auto less = [&](int64_t a, int64_t b) -> bool {
-    T l = fromptr[a];
-    T r = fromptr[b];
-    if constexpr (std::is_floating_point_v<T>) {
-      if (std::isnan(r)) return false;
-      if (std::isnan(l)) return true;
-    }
-    return ascending ? (l < r) : (l > r);
-  };
 
   // Bin loop is embarrassingly parallel: each segment of `index` is sorted
   // independently. `dynamic` schedule helps when bin sizes are uneven.
@@ -45,14 +76,42 @@ ERROR awkward_sort(
   #pragma omp parallel for if(offsetslength > 1024) schedule(dynamic, 64)
   #endif
   for (int64_t i = 0; i < offsetslength - 1; i++) {
-    auto first = index.begin() + offsets[i];
-    auto last  = index.begin() + offsets[i + 1];
-    if (stable) std::stable_sort(first, last, less);
-    else        std::sort(first, last, less);
+    // Clamp against `length` so malformed offsets cannot index past the end
+    // of `index` (well-formed offsets satisfy offsets[last] <= length).
+    int64_t start_off = (offsets[i] < length) ? offsets[i] : length;
+    int64_t stop_off = (offsets[i + 1] < length) ? offsets[i + 1] : length;
+    if (start_off >= stop_off) continue;
+    auto start = index.begin() + start_off;
+    auto stop = index.begin() + stop_off;
+    // Hoist the ascending/stable dispatch outside the per-element
+    // comparisons (one branch per segment instead of O(n log n)).
+    if (stable) {
+      if (ascending) {
+        std::stable_sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
+          return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+        });
+      } else {
+        std::stable_sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
+          return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
+        });
+      }
+    } else {
+      if (ascending) {
+        std::sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
+          return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+        });
+      } else {
+        std::sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
+          return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
+        });
+      }
+    }
   }
 
-  int64_t parentslength_eff = offsets[offsetslength - 1];
-  int64_t copy_length = (parentslength_eff < length) ? parentslength_eff : length;
+  // In the offsets representation, the number of elements to copy out is
+  // simply the end of the last bin (offsets[0] == 0 by contract).
+  int64_t total = (offsetslength > 0) ? offsets[offsetslength - 1] : 0;
+  int64_t copy_length = (total < length) ? total : length;
   for (int64_t i = 0; i < copy_length; i++) {
     toptr[i] = fromptr[index[i]];
   }
@@ -62,11 +121,11 @@ ERROR awkward_sort(
 #define SORT(T, NAME)                                                      \
   ERROR awkward_sort_##NAME(                                               \
     T* toptr, const T* fromptr, int64_t length,                            \
-    const int64_t* offsets, int64_t offsetslength, int64_t parentslength,  \
+    const int64_t* offsets, int64_t offsetslength,                         \
     bool ascending, bool stable) {                                         \
     return awkward_sort<T>(                                                \
       toptr, fromptr, length, offsets, offsetslength,                      \
-      parentslength, ascending, stable);                                   \
+      ascending, stable);                                                  \
   }
 
 SORT(bool,     bool)

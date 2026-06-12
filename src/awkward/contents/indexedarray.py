@@ -768,7 +768,6 @@ class IndexedArray(IndexedMeta[Content], Content):
                     offsets[1],
                     offsets.data,
                     2,
-                    offsets[1],
                     True,
                     False,
                 )

@@ -18,6 +18,22 @@ from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
+# Kernels dispatched to `cuda.compute` rather than compiled CUDA: these raise
+# errors eagerly (inside the call) instead of after `ak_cu.synchronize_cuda()`.
+# IMPORTANT: whenever an error-raising kernel moves to `cuda.compute` (or back),
+# this set must be updated to match, or the generated CUDA unit tests will
+# wrap `pytest.raises` around the wrong statement.
+CUDA_COMPUTE_KERNELS = {
+    "awkward_ListArray_compact_offsets",
+    "awkward_ListArray_broadcast_tooffsets",
+    "awkward_RegularArray_getitem_next_at",
+    "awkward_IndexedArray_validity",
+    "awkward_IndexedArray_getitem_nextcarry_outindex",
+    "awkward_IndexedArray_getitem_nextcarry",
+    "awkward_IndexedArray_flatten_none2empty",
+    "awkward_UnionArray_validity",
+}
+
 try:
     yaml_loader = yaml.CSafeLoader if sys._is_gil_enabled() else yaml.SafeLoader
 except AttributeError:
@@ -1567,19 +1583,6 @@ def gencudaunittests(specdict):
                                 count += 1
                             else:
                                 args += ", " + arg.name
-                        # Determine if this is a cuda.compute kernel (raises errors eagerly)
-                        # or compiled CUDA kernel (raises errors after `ak_cu.synchronize_cuda()`)
-                        CUDA_COMPUTE_KERNELS = {
-                            "awkward_ListArray_compact_offsets",
-                            "awkward_ListArray_broadcast_tooffsets",
-                            "awkward_RegularArray_getitem_next_at",
-                            "awkward_IndexedArray_validity",
-                            "awkward_IndexedArray_getitem_nextcarry_outindex",
-                            "awkward_IndexedArray_getitem_nextcarry",
-                            "awkward_IndexedArray_flatten_none2empty",
-                            "awkward_UnionArray_validity",
-                        }
-
                         raises_error_eagerly = (
                             spec.templatized_kernel_name in CUDA_COMPUTE_KERNELS
                         )

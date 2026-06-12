@@ -943,80 +943,6 @@ class RegularArray(RegularMeta[Content], Content):
         )
         return out
 
-    # def _is_unique(self, negaxis, starts, parents, offsets, outlength):
-    #     if self.length == 0:
-    #         return True
-
-    #     return self.to_ListOffsetArray64(True)._is_unique(
-    #         negaxis,
-    #         starts,
-    #         parents,
-    #         offsets,
-    #         outlength,
-    #     )
-
-    # def _unique(self, negaxis, starts, parents, offsets, outlength):
-    #     if self.length == 0:
-    #         return self
-    #     out = self.to_ListOffsetArray64(True)._unique(
-    #         negaxis,
-    #         starts,
-    #         parents,
-    #         offsets,
-    #         outlength,
-    #     )
-
-    #     if isinstance(out, ak.contents.RegularArray):
-    #         if isinstance(out._content, ak.contents.ListOffsetArray):
-    #             return ak.contents.RegularArray(
-    #                 out._content.to_RegularArray(),
-    #                 out._size,
-    #                 out.length,
-    #                 parameters=out._parameters,
-    #             )
-
-    #     return out
-
-    # def _argsort_next(
-    #     self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
-    # ):
-    #     next = self.to_ListOffsetArray64(True)
-    #     out = next._argsort_next(
-    #         negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
-    #     )
-
-    #     if isinstance(out, ak.contents.RegularArray):
-    #         if isinstance(out._content, ak.contents.ListOffsetArray):
-    #             return ak.contents.RegularArray(
-    #                 out._content.to_RegularArray(),
-    #                 out._size,
-    #                 out.length,
-    #                 parameters=out._parameters,
-    #             )
-
-    #     return out
-
-    # def _sort_next(
-    #     self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    # ):
-    #     out = self.to_ListOffsetArray64(True)._sort_next(
-    #         negaxis, starts, parents, offsets, outlength, ascending, stable
-    #     )
-
-    #     # FIXME
-    #     # if isinstance(out, ak.contents.RegularArray):
-    #     #     if isinstance(out._content, ak.contents.ListOffsetArray):
-    #     #         return ak.contents.RegularArray(
-    #     #             out._content.to_RegularArray(),
-    #     #             out._size,
-    #     #             out.length,
-    #     #             None,
-    #     #             out._parameters,
-    #     #             self._backend.nplike,
-    #     #         )
-
-    #     return out
-
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         nplike = self._backend.nplike
 
@@ -1230,7 +1156,11 @@ class RegularArray(RegularMeta[Content], Content):
             # `awkward_ListOffsetArray_reduce_local_outoffsets_64(parents, ...)`,
             # which produced the offsets-rep of `parents`. With offsets already in
             # hand, we just use them.
-            assert offsets.length == outlength + 1
+            assert (
+                offsets.length is unknown_length
+                or outlength is unknown_length
+                or offsets.length == outlength + 1
+            )
             outoffsets = offsets
 
             return ak.contents.ListOffsetArray(outoffsets, outcontent, parameters=None)

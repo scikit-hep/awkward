@@ -99,7 +99,7 @@ def awkward_JAXNumpyArray_reduce_adjust_starts_shifts_64(
 
 def apply_positional_corrections(
     reduced: ak.contents.NumpyArray,
-    offsets: ak.index.Index | ak.index.EmptyIndex,
+    offsets: ak.index.Index,
     starts: ak.index.Index,
     shifts: ak.index.Index | None,
 ) -> ak._nplikes.ArrayLike:
@@ -171,7 +171,7 @@ class ArgMin(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -232,7 +232,7 @@ class ArgMax(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -266,7 +266,7 @@ class Count(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -326,7 +326,7 @@ class CountNonzero(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -358,7 +358,7 @@ class Sum(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -400,7 +400,7 @@ class AxisNoneSum(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -495,7 +495,7 @@ class Prod(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -552,7 +552,7 @@ class Any(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -588,7 +588,7 @@ class All(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -646,7 +646,7 @@ class Min(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -691,7 +691,7 @@ class AxisNoneMin(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -750,7 +750,7 @@ class Max(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -795,7 +795,7 @@ class AxisNoneMax(JAXReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,

@@ -9,11 +9,54 @@
 
 #include "awkward/kernels.h"
 
-// Per-segment argsort. NaNs are pushed to the high end (matching NumPy /
-// the older hand-rolled comparator). The ascending/descending choice and
-// the floating-point NaN handling are folded into a single inline lambda;
-// `if constexpr` lets the bool / integer specialisations compile without
-// an `std::isnan(bool)` instantiation.
+// Per-segment argsort. Integer types compare directly (no isnan, no
+// conversion to double — casting int64/uint64 through double would round
+// values beyond 2^53 and break strict weak ordering). Floating-point types
+// keep the NaN-aware path: NaNs compare "less" than everything, regardless
+// of direction, so they are pushed to the low end (same behavior as the
+// older hand-rolled comparator; note this differs from NumPy, which sorts
+// NaNs to the high end).
+//
+// Explicit specializations must appear before implicit instantiations.
+// argsort_order_ascending/descending for bool: no NaN, just direct comparison.
+template <typename T>
+bool argsort_order_ascending(T l, T r);
+
+template <typename T>
+bool argsort_order_descending(T l, T r);
+
+template <>
+bool argsort_order_ascending(bool l, bool r)
+{
+  return l < r;
+}
+
+template <>
+bool argsort_order_descending(bool l, bool r)
+{
+  return l > r;
+}
+
+template <typename T>
+bool argsort_order_ascending(T l, T r)
+{
+  if constexpr (std::is_integral_v<T>) {
+    return l < r;
+  } else {
+    return !std::isnan(r) && (std::isnan(l) || l < r);
+  }
+}
+
+template <typename T>
+bool argsort_order_descending(T l, T r)
+{
+  if constexpr (std::is_integral_v<T>) {
+    return l > r;
+  } else {
+    return !std::isnan(r) && (std::isnan(l) || l > r);
+  }
+}
+
 template <typename T, typename U>
 ERROR awkward_argsort(
   int64_t* toptr,
@@ -25,16 +68,6 @@ ERROR awkward_argsort(
   bool stable) {
   std::iota(toptr, toptr + length, int64_t{0});
 
-  auto less = [&](int64_t a, int64_t b) -> bool {
-    T l = fromptr[a];
-    T r = fromptr[b];
-    if constexpr (std::is_floating_point_v<T>) {
-      if (std::isnan(r)) return false;
-      if (std::isnan(l)) return true;
-    }
-    return ascending ? (l < r) : (l > r);
-  };
-
   // Bin loop is embarrassingly parallel: each segment of `toptr` is sorted
   // independently. The `if(...)` clause keeps the parallel region inert for
   // tiny outputs where thread-startup would dominate.
@@ -42,16 +75,40 @@ ERROR awkward_argsort(
   #pragma omp parallel for if(offsetslength > 1024) schedule(dynamic, 64)
   #endif
   for (int64_t i = 0; i < offsetslength - 1; i++) {
-    int64_t lo = static_cast<int64_t>(offsets[i]);
-    int64_t hi = static_cast<int64_t>(offsets[i + 1]);
-    int64_t* first = toptr + lo;
-    int64_t* last  = toptr + hi;
-
-    if (stable) std::stable_sort(first, last, less);
-    else        std::sort(first, last, less);
-
-    std::transform(first, last, first,
-                   [lo](int64_t j) { return j - lo; });
+    // Clamp against `length` so malformed offsets cannot index past the end
+    // of `toptr` (well-formed offsets satisfy offsets[last] <= length).
+    int64_t start_off = static_cast<int64_t>(offsets[i]);
+    int64_t stop_off = static_cast<int64_t>(offsets[i + 1]);
+    if (start_off > length) start_off = length;
+    if (stop_off > length) stop_off = length;
+    if (start_off >= stop_off) continue;
+    int64_t* segment_start = toptr + start_off;
+    int64_t* segment_stop = toptr + stop_off;
+    // Hoist the ascending/stable dispatch outside the per-element
+    // comparisons (one branch per segment instead of O(n log n)).
+    if (stable) {
+      if (ascending) {
+        std::stable_sort(segment_start, segment_stop, [fromptr](int64_t i1, int64_t i2) {
+          return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+        });
+      } else {
+        std::stable_sort(segment_start, segment_stop, [fromptr](int64_t i1, int64_t i2) {
+          return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
+        });
+      }
+    } else {
+      if (ascending) {
+        std::sort(segment_start, segment_stop, [fromptr](int64_t i1, int64_t i2) {
+          return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+        });
+      } else {
+        std::sort(segment_start, segment_stop, [fromptr](int64_t i1, int64_t i2) {
+          return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
+        });
+      }
+    }
+    std::transform(segment_start, segment_stop, segment_start,
+                   [start_off](int64_t j) { return j - start_off; });
   }
   return success();
 }

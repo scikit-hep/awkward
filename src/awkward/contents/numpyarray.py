@@ -750,35 +750,6 @@ class NumpyArray(NumpyMeta, Content):
             else:
                 return out.length is not unknown_length and out.length == self.length
 
-    # def _is_unique(self, negaxis, starts, parents, offsets, outlength):
-    #     if self.length is not unknown_length and self.length == 0:
-    #         return True
-    #     elif len(self.shape) != 1:
-    #         return self.to_RegularArray()._is_unique(
-    #             negaxis,
-    #             starts,
-    #             parents,
-    #             offsets,
-    #             outlength,
-    #         )
-    #     elif not self.is_contiguous:
-    #         return self.to_contiguous()._is_unique(
-    #             negaxis,
-    #             starts,
-    #             parents,
-    #             offsets,
-    #             outlength,
-    #         )
-    #     else:
-    #         out = self._unique(negaxis, starts, parents, offsets, outlength)
-    #         if isinstance(out, ak.contents.ListOffsetArray):
-    #             return (
-    #                 out.content.length is not unknown_length
-    #                 and out.content.length == self.length
-    #             )
-    #         else:
-    #             return out.length is not unknown_length and out.length == self.length
-
     def _unique(self, negaxis, starts, offsets, outlength):
         if self.shape[0] is not unknown_length and self.shape[0] == 0:
             return self
@@ -810,7 +781,6 @@ class NumpyArray(NumpyMeta, Content):
                     offsets_local[1],
                     offsets_local.data,
                     2,
-                    offsets_local[1],
                     True,
                     False,
                 )
@@ -851,7 +821,6 @@ class NumpyArray(NumpyMeta, Content):
             compact_data = offsets.data[keep]
             compact_offsets = ak.index.Index64(compact_data, nplike=nplike)
             compact_offsets_length = compact_offsets.length
-            parents_length = nplike.index_as_shape_item(offsets.data[-1])
 
             out = nplike.empty(self.length, dtype=self.dtype)
             assert compact_offsets.nplike is self._backend.nplike
@@ -867,7 +836,6 @@ class NumpyArray(NumpyMeta, Content):
                     self.shape[0],
                     compact_offsets.data,
                     compact_offsets_length,
-                    parents_length,
                     True,
                     False,
                 )
@@ -1035,7 +1003,6 @@ class NumpyArray(NumpyMeta, Content):
 
         else:
             offsets_length = offsets.length
-            parents_length = self._backend.nplike.index_as_shape_item(offsets[-1])
 
             dtype = (
                 np.dtype(np.int64)
@@ -1056,7 +1023,6 @@ class NumpyArray(NumpyMeta, Content):
                     self.shape[0],
                     offsets.data,
                     offsets_length,
-                    parents_length,
                     ascending,
                     stable,
                 )
