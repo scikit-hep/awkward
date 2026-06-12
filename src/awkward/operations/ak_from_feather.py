@@ -20,7 +20,8 @@ def from_feather(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Reads a Feather file as an Awkward Array (through pyarrow).
+
     Args:
         path (str or file-like object): Feather file to read as an Awkward Array,
             passed directly to [pyarrow.feather.read_table](https://arrow.apache.org/docs/python/generated/pyarrow.feather.read_table.html).
@@ -40,13 +41,15 @@ def from_feather(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Reads an Feather file as an Awkward Array (through pyarrow).
+    Returns:
+        Reads an Feather file as an Awkward Array (through pyarrow).
 
+    Examples:
         >>> ak.from_feather("file_name.feather")
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
 
-    See also #ak.to_feather.
+        See also #ak.to_feather.
     """
 
     return _impl(

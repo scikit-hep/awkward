@@ -26,7 +26,8 @@ def from_iter(
     initial=1024,
     resize=8,
 ):
-    """
+    """Converts Python data into an Awkward Array.
+
     Args:
         iterable (Python iterable): Data to convert into an Awkward Array.
         allow_record (bool): If True, the outermost element may be a record
@@ -42,30 +43,31 @@ def from_iter(
         resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
             should be strictly greater than 1.
 
-    Converts Python data into an Awkward Array.
+    Returns:
+        Converts Python data into an Awkward Array.
 
-    Any heterogeneous and deeply nested Python data can be converted, but the output
-    will never have regular-typed array lengths. Internally, this function uses
-    `ak::ArrayBuilder` (see the high-level #ak.ArrayBuilder documentation for a
-    more complete description).
+        Any heterogeneous and deeply nested Python data can be converted, but the output
+        will never have regular-typed array lengths. Internally, this function uses
+        `ak::ArrayBuilder` (see the high-level #ak.ArrayBuilder documentation for a
+        more complete description).
 
-    The following Python types are supported.
+        The following Python types are supported.
 
-    * bool, including `np.bool_`: converted into #ak.contents.NumpyArray.
-    * int, including `np.integer`: converted into #ak.contents.NumpyArray.
-    * float, including `np.floating`: converted into #ak.contents.NumpyArray.
-    * bytes: converted into #ak.contents.ListOffsetArray with parameter
-      `"__array__"` equal to `"bytestring"` (unencoded bytes).
-    * str: converted into #ak.contents.ListOffsetArray with parameter
-      `"__array__"` equal to `"string"` (UTF-8 encoded string).
-    * tuple: converted into #ak.contents.RecordArray without field names
-      (i.e. homogeneously typed, uniform sized tuples).
-    * dict: converted into #ak.contents.RecordArray with field names
-      (i.e. homogeneously typed records with the same sets of fields).
-    * iterable, including np.ndarray: converted into
-      #ak.contents.ListOffsetArray.
+        * bool, including `np.bool_`: converted into #ak.contents.NumpyArray.
+        * int, including `np.integer`: converted into #ak.contents.NumpyArray.
+        * float, including `np.floating`: converted into #ak.contents.NumpyArray.
+        * bytes: converted into #ak.contents.ListOffsetArray with parameter
+          `"__array__"` equal to `"bytestring"` (unencoded bytes).
+        * str: converted into #ak.contents.ListOffsetArray with parameter
+          `"__array__"` equal to `"string"` (UTF-8 encoded string).
+        * tuple: converted into #ak.contents.RecordArray without field names
+          (i.e. homogeneously typed, uniform sized tuples).
+        * dict: converted into #ak.contents.RecordArray with field names
+          (i.e. homogeneously typed records with the same sets of fields).
+        * iterable, including np.ndarray: converted into
+          #ak.contents.ListOffsetArray.
 
-    See also #ak.to_list.
+        See also #ak.to_list.
     """
     return _impl(iterable, highlevel, behavior, allow_record, initial, resize, attrs)
 

@@ -41,7 +41,8 @@ def from_buffers(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Reconstitutes an Awkward Array from a Form, length, and memory buffers.
+
     Args:
         form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
             Array to reconstitute from named buffers.
@@ -79,42 +80,44 @@ def from_buffers(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Reconstitutes an Awkward Array from a Form, length, and a collection of memory
-    buffers, so that data can be losslessly read from file formats and storage
-    devices that only map names to binary blobs (such as a filesystem directory).
+    Returns:
+        Reconstitutes an Awkward Array from a Form, length, and a collection of memory
+        buffers, so that data can be losslessly read from file formats and storage
+        devices that only map names to binary blobs (such as a filesystem directory).
 
-    The first three arguments of this function are the return values of
-    #ak.to_buffers, so a full round-trip is
+    Examples:
+        The first three arguments of this function are the return values of
+        #ak.to_buffers, so a full round-trip is
 
         >>> reconstituted = ak.from_buffers(*ak.to_buffers(original))
 
-    The `container` argument lets you specify your own Mapping, which might be
-    an interface to some storage format or device (e.g. h5py). It's okay if
-    the `container` dropped NumPy's `dtype` and `shape` information, leaving
-    raw bytes, since `dtype` and `shape` can be reconstituted from the
-    #ak.forms.NumpyForm.
-    If the values of `container` are recognised as arrays by the given backend,
-    a view over their existing data will be used, where possible.
-    The `container` values are allowed to be callables with no arguments.
-    If that's the case, they will be turned into `VirtualNDArray` buffers whose generator
-    function is the callable and is used to materialize the buffer when required.
+        The `container` argument lets you specify your own Mapping, which might be
+        an interface to some storage format or device (e.g. h5py). It's okay if
+        the `container` dropped NumPy's `dtype` and `shape` information, leaving
+        raw bytes, since `dtype` and `shape` can be reconstituted from the
+        #ak.forms.NumpyForm.
+        If the values of `container` are recognised as arrays by the given backend,
+        a view over their existing data will be used, where possible.
+        The `container` values are allowed to be callables with no arguments.
+        If that's the case, they will be turned into `VirtualNDArray` buffers whose generator
+        function is the callable and is used to materialize the buffer when required.
 
-    The `buffer_key` should be the same as the one used in #ak.to_buffers.
+        The `buffer_key` should be the same as the one used in #ak.to_buffers.
 
-    When `allow_noncanonical_form` is set to True, this function readily accepts
-    non-simplified forms, i.e. forms which will be simplified by Awkward Array
-    into "canonical" representations, e.g. `option[option[...]]` → `option[...]`.
-    Such forms can be produced by the low-level ArrayBuilder `snapshot()` method.
-    Given that Awkward Arrays must have canonical layouts, it follows that
-    invoking this function with `allow_noncanonical_form` may produce arrays
-    whose forms differ to the input form.
+        When `allow_noncanonical_form` is set to True, this function readily accepts
+        non-simplified forms, i.e. forms which will be simplified by Awkward Array
+        into "canonical" representations, e.g. `option[option[...]]` → `option[...]`.
+        Such forms can be produced by the low-level ArrayBuilder `snapshot()` method.
+        Given that Awkward Arrays must have canonical layouts, it follows that
+        invoking this function with `allow_noncanonical_form` may produce arrays
+        whose forms differ to the input form.
 
-    In order for a non-simplified form to be considered valid, it should be one
-    that the #ak.contents.Content layout classes could produce iff. the
-    simplification rules were removed.
+        In order for a non-simplified form to be considered valid, it should be one
+        that the #ak.contents.Content layout classes could produce iff. the
+        simplification rules were removed.
 
 
-    See #ak.to_buffers for examples.
+        See #ak.to_buffers for examples.
     """
     return _impl(
         form,
