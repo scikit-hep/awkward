@@ -12,6 +12,8 @@ from cuda.compute import (
     ZipIterator,
     inclusive_scan,
     reduce_into,
+    segmented_reduce,
+    select,
     unary_transform,
 )
 from cuda.compute import (
@@ -1417,14 +1419,13 @@ def awkward_localindex(toindex, length):
     )
 
 
+# Example: [[1,None,3],[None,5]]: toptr=[1,2,-1], shifts=[0,1,2], starts=[0,3]:
+#   k=0: 1 + shifts[1] - starts[0] = 1+1-0 = 2  (3rd element of list 0)
+#   k=1: 2 + shifts[2] - starts[1] = 2+2-3 = 1  (2nd element of list 1)
+#   k=2: skipped (negative)
 def awkward_NumpyArray_reduce_adjust_starts_shifts_64(
     toptr, outlength, offsets, starts, shifts
 ):
-    # Example: [[1,None,3],[None,5]]: toptr=[1,2,-1], shifts=[0,1,2], starts=[0,3]:
-    #   k=0: 1 + shifts[1] - starts[0] = 1+1-0 = 2  (3rd element of list 0)
-    #   k=1: 2 + shifts[2] - starts[1] = 2+2-3 = 1  (2nd element of list 1)
-    #   k=2: skipped (negative)
-    # offsets is unused (kept for signature symmetry with the no-shifts variant)
     mask = toptr[:outlength] >= 0
     i = toptr[:outlength]
     toptr[:outlength] = cp.where(mask, i + shifts[i] - starts[:outlength], i)
@@ -3498,3 +3499,68 @@ def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
 
     h_init = np.array([0], dtype=index_dtype)
     reduce_into(null_iter, numnull, OpKind.PLUS, lenindex, h_init)
+
+
+# KERNEL IS NOT USED: checking for out of range errors takes too much time if I take it outside the closure
+# composes two index arrays into one by resolving outerindex through innerindex:
+# toindex[i] = innerindex[outerindex[i]], preserving -1 (missing) entries from outerindex
+def awkward_IndexedArray_simplify(
+    toindex, outerindex, outerlength, innerindex, innerlength
+):
+    if outerlength == 0:
+        return
+
+    def simplify_op(j):
+        if j < 0:
+            return -1
+        if j >= innerlength:
+            # raise inside a JIT closure is silently swallowed
+            raise IndexError(
+                "index out of range in compiled CUDA code (awkward_IndexedArray_simplify)"
+            )
+        return innerindex[j]
+
+    # to prevent out-of-bounds error
+    out_buf = (
+        toindex[:outerlength]
+        if len(toindex) >= outerlength
+        else cp.empty(outerlength, dtype=toindex.dtype)
+    )
+    unary_transform(
+        d_in=outerindex[:outerlength],
+        d_out=out_buf,
+        op=simplify_op,
+        num_items=outerlength,
+    )
+
+
+# filters an indexed array by collecting all valid (non-negative) indices into a carry array
+def awkward_IndexedArray_flatten_nextcarry(
+    tocarry: cp.ndarray, fromindex: cp.ndarray, lenindex: int, lencontent: int
+) -> None:
+    fromindex = fromindex[:lenindex]
+    index_dtype = fromindex.dtype
+
+    has_error = cp.zeros(1, index_dtype)
+    num_selected = cp.empty(1, index_dtype)
+
+    def cond(j):
+        if j >= lencontent:
+            # set has_error flag to True
+            has_error[0] = np.int64(1)
+            return False
+        # keep index in tocarry if True
+        return j >= 0
+
+    select(
+        d_in=fromindex,
+        d_out=tocarry,
+        d_num_selected_out=num_selected,
+        cond=cond,
+        num_items=lenindex,
+    )
+
+    if int(has_error[0]) != 0:
+        raise ValueError(
+            "index out of range in compiled CUDA code (awkward_IndexedArray_flatten_nextcarry)"
+        )
