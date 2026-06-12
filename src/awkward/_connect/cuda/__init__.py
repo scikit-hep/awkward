@@ -33,6 +33,13 @@ kernel = None
 ERROR_BITS = 8
 NO_ERROR = numpy.iinfo(numpy.uint64).max
 
+# When the pending-invocation list for a stream reaches this length, the
+# kernel dispatchers in awkward._kernels call synchronize_cuda() to check for
+# errors and drain it. This bounds the memory held by Invocation/ErrorContext
+# objects in workloads that never synchronize explicitly, at the cost of one
+# stream synchronization per MAX_PENDING_INVOCATIONS kernel launches.
+MAX_PENDING_INVOCATIONS = 8192
+
 
 dtype_to_ctype = {
     numpy.bool_: "bool",
@@ -261,7 +268,17 @@ def synchronize_cuda(stream=None):
     invocation_index = cuda_streamptr_to_contexts[stream.ptr][0].get().tolist()
     contexts = cuda_streamptr_to_contexts[stream.ptr][1]
 
-    if invocation_index != NO_ERROR:
+    if invocation_index == NO_ERROR:
+        # All kernels enqueued so far completed without error: drain the
+        # pending-invocation list. Each Invocation holds an ErrorContext,
+        # which (lazily) holds references to operation arguments — without
+        # this reset, a successful workload accumulates Invocations (and
+        # pins their referenced buffers) for the lifetime of the process.
+        cuda_streamptr_to_contexts[stream.ptr] = (
+            cupy.array(NO_ERROR),
+            [],
+        )
+    else:
         invoked_kernel = contexts[int(invocation_index // math.pow(2, ERROR_BITS))]
         cuda_streamptr_to_contexts[stream.ptr] = (
             cupy.array(NO_ERROR),

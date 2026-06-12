@@ -186,7 +186,9 @@ def main():
             run_c = lambda: new_p(out_c, data, offsets, n_bins)  # noqa: E731,B023
 
             # correctness (cumsum-based segmented reference)
-            csum = np.zeros(total + 1, dtype=np.float64 if to_dt(0).dtype.kind == "f" else np.int64)
+            csum = np.zeros(
+                total + 1, dtype=np.float64 if to_dt(0).dtype.kind == "f" else np.int64
+            )
             np.cumsum(data.astype(csum.dtype), out=csum[1:])
             reference = (csum[offsets[1:]] - csum[offsets[:-1]]).astype(to_dt)
             for run, out in ((run_a, out_a), (run_b, out_b), (run_c, out_c)):
