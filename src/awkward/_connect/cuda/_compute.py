@@ -1417,6 +1417,26 @@ def awkward_localindex(toindex, length):
     )
 
 
+def awkward_NumpyArray_reduce_adjust_starts_shifts_64(
+    toptr, outlength, offsets, starts, shifts
+):
+    # Example: [[1,None,3],[None,5]]: toptr=[1,2,-1], shifts=[0,1,2], starts=[0,3]:
+    #   k=0: 1 + shifts[1] - starts[0] = 1+1-0 = 2  (3rd element of list 0)
+    #   k=1: 2 + shifts[2] - starts[1] = 2+2-3 = 1  (2nd element of list 1)
+    #   k=2: skipped (negative)
+    # offsets is unused (kept for signature symmetry with the no-shifts variant)
+    mask = toptr[:outlength] >= 0
+    i = toptr[:outlength]
+    toptr[:outlength] = cp.where(mask, i + shifts[i] - starts[:outlength], i)
+
+
+# toptr.dtype is always initialized as cp.int8
+def awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(toptr, offsets, outlength):
+    # bin i is unmasked (0) if it has content: offsets[i+1] > offsets[i]
+    counts = offsets[1 : outlength + 1] - offsets[:outlength]
+    toptr[:outlength] = cp.where(counts > 0, toptr.dtype.type(0), toptr.dtype.type(1))
+
+
 def awkward_index_rpad_and_clip_axis0(toindex, target, length):
     """
     Fill ``toindex[0..target)`` with the identity mapping ``[0..shorter)``
