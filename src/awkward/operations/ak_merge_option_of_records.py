@@ -22,7 +22,8 @@ np = NumpyMetadata.instance()
 def merge_option_of_records(
     array, axis=-1, *, highlevel=True, behavior=None, attrs=None
 ):
-    """
+    """Simplifies options of records into records of options.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied.
@@ -41,11 +42,12 @@ def merge_option_of_records(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Simplifies options of records, e.g.
+    Returns:
+        Simplifies options of records, e.g.
 
         >>> array = ak.Array([None, {"a": 1}, {"a": 2}])
 
-    into records of options, i.e.
+        into records of options, i.e.
 
         >>> ak.merge_option_of_records(array)
         <Array [{a: None}, {a: 1}, {a: 2}] type='3 * {a: ?int64}'>

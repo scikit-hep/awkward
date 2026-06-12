@@ -42,7 +42,8 @@ def transform(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Applies a transformation function to every node of one or more arrays.
+
     Args:
         transformation (callable): Function to apply to each node of the array.
             See below for details.
@@ -95,14 +96,16 @@ def transform(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Applies a `transformation` function to every node of an Awkward array or arrays
-    to either obtain a transformed copy or extract data from a walk over the arrays'
-    low-level layout nodes.
+    Returns:
+        Applies a `transformation` function to every node of an Awkward array or arrays
+        to either obtain a transformed copy or extract data from a walk over the arrays'
+        low-level layout nodes.
 
-    This is a public interface to the infrastructure that is used to implement most
-    Awkward Array operations. As such, it's very powerful, but low-level.
+        This is a public interface to the infrastructure that is used to implement most
+        Awkward Array operations. As such, it's very powerful, but low-level.
 
-    Here is a "hello world" example:
+    Examples:
+        Here is a "hello world" example:
 
         >>> def say_hello(layout, depth, **kwargs):
         ...     print("Hello", type(layout).__name__, "at", depth)
@@ -116,18 +119,18 @@ def transform(
         Hello ListOffsetArray at 2
         Hello NumpyArray at 3
 
-    In the above, `say_hello` is called on every node of the `array`, which has
-    a lot of nodes because it has nested lists, missing data, and a union of
-    different types. The data types are low-level "layouts," subclasses of
-    #ak.contents.Content, rather than high-level #ak.Array.
+        In the above, `say_hello` is called on every node of the `array`, which has
+        a lot of nodes because it has nested lists, missing data, and a union of
+        different types. The data types are low-level "layouts," subclasses of
+        #ak.contents.Content, rather than high-level #ak.Array.
 
-    The primary purpose of this function is to allow you to edit one level of
-    structure without having to worry about what it's embedded in. Suppose, for
-    instance, you want to apply NumPy's `np.round` function to numerical data,
-    regardless of what lists or other structures they're embedded in.
+        The primary purpose of this function is to allow you to edit one level of
+        structure without having to worry about what it's embedded in. Suppose, for
+        instance, you want to apply NumPy's `np.round` function to numerical data,
+        regardless of what lists or other structures they're embedded in.
 
-    The return value must be a subclass of #ak.contents.Content (to replace the
-    array node) or None (to leave the array node unchanged).
+        The return value must be a subclass of #ak.contents.Content (to replace the
+        array node) or None (to leave the array node unchanged).
 
         >>> def rounder(layout, **kwargs):
         ...     if layout.is_numpy:
@@ -144,11 +147,11 @@ def transform(
         [[[[[1, 2, 3], []], None], []],
          [[[[4, 6]]]]]
 
-    If you pass multiple arrays to this function (`more_arrays`), those arrays
-    will be broadcasted and all inputs, at the same level of depth and structure,
-    will be passed to the `transformation` function as a group.
+        If you pass multiple arrays to this function (`more_arrays`), those arrays
+        will be broadcasted and all inputs, at the same level of depth and structure,
+        will be passed to the `transformation` function as a group.
 
-    Here is an example with broadcasting:
+        Here is an example with broadcasting:
 
         >>> def combine(layouts, **kwargs):
         ...     assert len(layouts) == 2
@@ -162,11 +165,11 @@ def transform(
         >>> ak.transform(combine, array1, array2)
         <Array [[11, 12, 13], [], None, [44, 45]] type='4 * option[var * int64]'>
 
-    The `1` and `4` from `array2` are broadcasted to the `[1, 2, 3]` and the
-    `[4, 5]` of `array1`, and the other elements disappear because they are
-    broadcasted with an empty list and a missing value. Note that the first argument
-    of this `transformation` function is a *list* of layouts, not a single layout.
-    There are always 2 layouts because 2 arrays were passed to #ak.transform.
+        The `1` and `4` from `array2` are broadcasted to the `[1, 2, 3]` and the
+        `[4, 5]` of `array1`, and the other elements disappear because they are
+        broadcasted with an empty list and a missing value. Note that the first argument
+        of this `transformation` function is a *list* of layouts, not a single layout.
+        There are always 2 layouts because 2 arrays were passed to #ak.transform.
 
     Signature of the transformation function
     ========================================

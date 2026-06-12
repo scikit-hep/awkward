@@ -23,7 +23,8 @@ np = NumpyMetadata.instance()
 def merge_union_of_records(
     array, axis=-1, *, highlevel=True, behavior=None, attrs=None
 ):
-    """
+    """Simplifies unions of records into records of options.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied.
@@ -42,18 +43,19 @@ def merge_union_of_records(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Simplifies unions of records, e.g.
+    Returns:
+        Simplifies unions of records, e.g.
 
         >>> array = ak.concatenate(([{"a": 1}], [{"b": 2}]))
         >>> array
         <Array [{a: 1}, {b: 2}] type='2 * union[{a: int64}, {b: int64}]'>
 
-    into records of options, i.e.
+        into records of options, i.e.
 
         >>> ak.merge_union_of_records(array)
         <Array [{a: 1, b: None}, {a: None, ...}] type='2 * {a: ?int64, b: ?int64}'>
 
-    Missing records are preserved in the result, e.g.
+        Missing records are preserved in the result, e.g.
 
         >>> array = ak.concatenate(([{"a": 1}], [{"b": 2}, None]))
         >>> array

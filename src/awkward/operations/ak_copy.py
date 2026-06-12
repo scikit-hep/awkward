@@ -16,21 +16,24 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def copy(array):
-    """
+    """Returns a deep copy of the array (no memory shared with original).
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
-    Returns a deep copy of the array (no memory shared with original).
+    Returns:
+        A deep copy of the array (no memory shared with original).
 
-    This is identical to `np.copy` and `copy.deepcopy`.
+        This is identical to `np.copy` and `copy.deepcopy`.
 
-    It's only useful to explicitly copy an array if you're going to change it
-    in-place. This doesn't come up often because Awkward Arrays are immutable.
-    That is to say, the Awkward Array library doesn't have any operations that
-    change an array in-place, but the data in the array might be owned by another
-    library that can change it in-place.
+        It's only useful to explicitly copy an array if you're going to change it
+        in-place. This doesn't come up often because Awkward Arrays are immutable.
+        That is to say, the Awkward Array library doesn't have any operations that
+        change an array in-place, but the data in the array might be owned by another
+        library that can change it in-place.
 
-    For example, if the array comes from NumPy:
+    Examples:
+        For example, if the array comes from NumPy:
 
         >>> underlying_array = np.array([1.1, 2.2, 3.3, 4.4, 5.5])
         >>> wrapper = ak.Array(underlying_array)
@@ -43,10 +46,10 @@ def copy(array):
         >>> duplicate
         <Array [1.1, 2.2, 3.3, 4.4, 5.5] type='5 * float64'>
 
-    There is an exception to this rule: you can add fields to records in an
-    #ak.Array in-place. However, this changes the #ak.Array wrapper without
-    affecting the underlying layout data (it *replaces* its layout), so a
-    shallow copy will do:
+        There is an exception to this rule: you can add fields to records in an
+        #ak.Array in-place. However, this changes the #ak.Array wrapper without
+        affecting the underlying layout data (it *replaces* its layout), so a
+        shallow copy will do:
 
         >>> import copy
         >>> original = ak.Array([{"x": 1}, {"x": 2}, {"x": 3}])
@@ -57,11 +60,11 @@ def copy(array):
         >>> original
         <Array [{x: 1}, {x: 2}, {x: 3}] type='3 * {x: int64}'>
 
-    This is key to Awkward Array's efficiency (memory and speed): operations that
-    only change part of a structure reuse pieces from the original ("structural
-    sharing"). Changing data in-place would result in many surprising long-distance
-    changes, so we don't support it. However, an #ak.Array's data might come from
-    a mutable third-party library, so this function allows you to make a true copy.
+        This is key to Awkward Array's efficiency (memory and speed): operations that
+        only change part of a structure reuse pieces from the original ("structural
+        sharing"). Changing data in-place would result in many surprising long-distance
+        changes, so we don't support it. However, an #ak.Array's data might come from
+        a mutable third-party library, so this function allows you to make a true copy.
     """
     # Dispatch
     yield (array,)

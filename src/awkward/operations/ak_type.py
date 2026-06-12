@@ -19,31 +19,34 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def type(array, *, behavior=None):
-    """
+    """Returns the high-level type of an array as a Type object.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         behavior (None or dict): Custom #ak.behavior for the output type, if
             high-level.
 
-    The high-level type of an `array` (many types supported, including all
-    Awkward Arrays and Records) as #ak.types.Type objects.
+    Returns:
+        The high-level type of an `array` (many types supported, including all
+        Awkward Arrays and Records) as #ak.types.Type objects.
 
-    The high-level type ignores layout differences like
-    #ak.contents.ListArray versus #ak.contents.ListOffsetArray, but
-    not differences like "regular-sized lists" (i.e.
-    #ak.contents.RegularArray) versus "variable-sized lists" (i.e.
-    #ak.contents.ListArray and similar).
+        The high-level type ignores layout differences like
+        #ak.contents.ListArray versus #ak.contents.ListOffsetArray, but
+        not differences like "regular-sized lists" (i.e.
+        #ak.contents.RegularArray) versus "variable-sized lists" (i.e.
+        #ak.contents.ListArray and similar).
 
-    Types are rendered as [Datashape](https://datashape.readthedocs.io/)
-    strings, which makes the same distinctions.
+        Types are rendered as [Datashape](https://datashape.readthedocs.io/)
+        strings, which makes the same distinctions.
 
-    For example,
+    Examples:
+        For example,
 
         >>> array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
         ...                   [],
         ...                   [{"x": 3.3, "y": [3, 3, 3]}]])
 
-    has type
+        has type
 
         >>> ak.type(array).show()
         3 * var * {
@@ -51,22 +54,22 @@ def type(array, *, behavior=None):
             y: var * int64
         }
 
-    but
+        but
 
         >>> array = ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
 
-    has type
+        has type
 
         >>> ak.type(array).show()
         2 * 3 * 5 * int64
 
-    Some cases, like heterogeneous data, require [extensions beyond the
-    Datashape specification](https://github.com/blaze/datashape/issues/237).
-    For example,
+        Some cases, like heterogeneous data, require [extensions beyond the
+        Datashape specification](https://github.com/blaze/datashape/issues/237).
+        For example,
 
         >>> array = ak.Array([1, "two", [3, 3, 3]])
 
-    has type
+        has type
 
         >>> ak.type(array).show()
         3 * union[
@@ -75,9 +78,9 @@ def type(array, *, behavior=None):
             var * int64
         ]
 
-    but "union" is not a Datashape type-constructor. (Its syntax is
-    similar to existing type-constructors, so it's a plausible addition
-    to the language.)
+        but "union" is not a Datashape type-constructor. (Its syntax is
+        similar to existing type-constructors, so it's a plausible addition
+        to the language.)
     """
     # Dispatch
     yield (array,)

@@ -18,7 +18,8 @@ np = NumpyMetadata.instance()
 @ak._connect.numpy.implements("where")
 @high_level_function()
 def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs=None):
-    """
+    """Selects elements from `x` or `y` by a condition, or finds where it is True.
+
     Args:
         condition: Array-like data (anything #ak.to_layout recognizes) of booleans.
         x: Optional array-like data (anything #ak.to_layout recognizes) with the same
@@ -36,19 +37,20 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    This function has a one-argument form, `condition` without `x` or `y`, and
-    a three-argument form, `condition`, `x`, and `y`. In the one-argument form,
-    it is completely equivalent to NumPy's
-    [nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html)
-    function.
+    Returns:
+        This function has a one-argument form, `condition` without `x` or `y`, and
+        a three-argument form, `condition`, `x`, and `y`. In the one-argument form,
+        it is completely equivalent to NumPy's
+        [nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html)
+        function.
 
-    In the three-argument form, it acts as a vectorized ternary operator:
-    `condition`, `x`, and `y` must all have the same length and::
+        In the three-argument form, it acts as a vectorized ternary operator:
+        `condition`, `x`, and `y` must all have the same length and::
 
-        output[i] = x[i] if condition[i] else y[i]
+            output[i] = x[i] if condition[i] else y[i]
 
-    for all `i`. The structure of `x` and `y` do not need to be the same; if
-    they are incompatible types, the output will have #ak.type.UnionType.
+        for all `i`. The structure of `x` and `y` do not need to be the same; if
+        they are incompatible types, the output will have #ak.type.UnionType.
     """
     # Dispatch
     yield (*args, condition)
