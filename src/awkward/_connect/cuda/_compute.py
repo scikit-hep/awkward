@@ -3498,7 +3498,7 @@ def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
     null_iter = TransformIterator(fromindex[:lenindex], is_null)
 
     h_init = np.array([0], dtype=index_dtype)
-    reduce_into(null_iter, numnull, OpKind.PLUS, lenindex, h_init)
+    reduce_into(d_in=null_iter, d_out=numnull, op=OpKind.PLUS, num_items=lenindex, h_init=h_init)
 
 
 # KERNEL IS NOT USED: checking for out of range errors takes too much time if I take it outside the closure
