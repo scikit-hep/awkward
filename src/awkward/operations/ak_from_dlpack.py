@@ -23,7 +23,8 @@ def from_dlpack(
     primitive_policy="error",
     attrs=None,
 ):
-    """
+    """Converts a DLPack-aware array into an Awkward Array.
+
     Args:
         array (cp.ndarray): The DLPack-supporting array to convert into an
             Awkward Array.
@@ -41,13 +42,14 @@ def from_dlpack(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts a DLPack-aware array into an Awkward Array.
+    Returns:
+        Converts a DLPack-aware array into an Awkward Array.
 
-    The resulting layout may involve the following #ak.contents.Content types
-    (only):
+        The resulting layout may involve the following #ak.contents.Content types
+        (only):
 
-    * #ak.contents.NumpyArray
-    * #ak.contents.RegularArray if `regulararray=True`.
+        * #ak.contents.NumpyArray
+        * #ak.contents.RegularArray if `regulararray=True`.
     """
     try:
         dlpack_info_func = array.__dlpack_device__

@@ -10,14 +10,16 @@ __all__ = ("from_torch",)
 
 @high_level_function()
 def from_torch(array):
-    """
+    """Converts a PyTorch Tensor into an Awkward Array.
+
     Args:
         array: (PyTorch Tensor):
             Tensor to convert into an Awkward Array.
 
-    Converts a PyTorch Tensor into an Awkward Array.
+    Returns:
+        Converts a PyTorch Tensor into an Awkward Array.
 
-    If `array` contains any other data types the function raises an error.
+        If `array` contains any other data types the function raises an error.
     """
 
     # Dispatch

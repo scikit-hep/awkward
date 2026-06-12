@@ -12,14 +12,16 @@ __all__ = ("from_raggedtensor",)
 
 @high_level_function()
 def from_raggedtensor(array):
-    """
+    """Converts a TensorFlow RaggedTensor into an Awkward Array.
+
     Args:
         array: (`tensorflow.RaggedTensor`):
             RaggedTensor to convert into an  Awkward Array.
 
-    Converts a TensorFlow RaggedTensor into an Awkward Array.
+    Returns:
+        Converts a TensorFlow RaggedTensor into an Awkward Array.
 
-    If `array` contains any other data types the function raises an error.
+        If `array` contains any other data types the function raises an error.
     """
 
     # Dispatch
