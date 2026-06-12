@@ -12,17 +12,19 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def from_arrow_schema(schema):
-    """
+    """Converts an Apache Arrow schema into an Awkward Form.
+
     Args:
         schema (`pyarrow.Schema`): Apache Arrow schema to convert into an Awkward Form.
 
-    Converts an Apache Arrow schema into an Awkward Form.
+    Returns:
+        Converts an Apache Arrow schema into an Awkward Form.
 
-    Because awkward uses numpy's dtype system, timestamp types do not have timezones.
-    If encountering timestamp types with timezones in the input arrow data, they
-    will be silently dropped.
+        Because awkward uses numpy's dtype system, timestamp types do not have timezones.
+        If encountering timestamp types with timezones in the input arrow data, they
+        will be silently dropped.
 
-    See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_arrow, #ak.to_parquet, #ak.from_parquet.
+        See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_arrow, #ak.to_parquet, #ak.from_parquet.
     """
     return _impl(schema)
 

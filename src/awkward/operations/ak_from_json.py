@@ -42,7 +42,8 @@ def from_json(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Reads JSON from a string, bytes, file, or URL into an Awkward Array.
+
     Args:
         source (bytes/str, pathlib.Path, or file-like object): Data source of the
             JSON-formatted string(s). If bytes/str, the string is parsed. If a
@@ -81,36 +82,38 @@ def from_json(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts a JSON string into an Awkward Array.
+    Returns:
+        Converts a JSON string into an Awkward Array.
 
-    There are a few different dichotomies in JSON-reading; all of the combinations
-    are supported:
+        There are a few different dichotomies in JSON-reading; all of the combinations
+        are supported:
 
-    * Reading from in-memory str/bytes, on-disk or over-network file, or an
-      arbitrary Python object with a `read(num_bytes)` method.
-    * Reading a single JSON document or a sequence of line-delimited documents.
-    * Unknown schema (slow and general) or with a provided JSONSchema (fast, but
-      not all possible cases are supported).
-    * Conversion of strings representing not-a-number, plus and minus infinity
-      into the appropriate floating-point numbers.
-    * Conversion of records with a real and imaginary part into complex numbers.
+        * Reading from in-memory str/bytes, on-disk or over-network file, or an
+          arbitrary Python object with a `read(num_bytes)` method.
+        * Reading a single JSON document or a sequence of line-delimited documents.
+        * Unknown schema (slow and general) or with a provided JSONSchema (fast, but
+          not all possible cases are supported).
+        * Conversion of strings representing not-a-number, plus and minus infinity
+          into the appropriate floating-point numbers.
+        * Conversion of records with a real and imaginary part into complex numbers.
 
-    Non-JSON features not allowed, including literals for not-a-number or infinite
-    numbers; they must be quoted strings for `nan_string`, `posinf_string`, and
-    `neginf_string` to recognize. The document or line-delimited documents must
-    adhere to the strict [JSON schema](https://www.json.org/).
+        Non-JSON features not allowed, including literals for not-a-number or infinite
+        numbers; they must be quoted strings for `nan_string`, `posinf_string`, and
+        `neginf_string` to recognize. The document or line-delimited documents must
+        adhere to the strict [JSON schema](https://www.json.org/).
 
-    Sources
-    =======
+    Examples:
+        Sources
+        =======
 
-    In-memory strings or bytes are simply passed as the first argument:
+        In-memory strings or bytes are simply passed as the first argument:
 
         >>> ak.from_json("[[1.1, 2.2, 3.3], [], [4.4, 5.5]]")
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
-    File names/paths need to be wrapped in `pathlib.Path`, and remote files are
-    recognized by URI protocol (like `"https://"` or `"s3://"`) and handled by fsspec
-    (which must be installed).
+        File names/paths need to be wrapped in `pathlib.Path`, and remote files are
+        recognized by URI protocol (like `"https://"` or `"s3://"`) and handled by fsspec
+        (which must be installed).
 
         >>> import pathlib
         >>> with open("tmp.json", "w") as file:
@@ -120,7 +123,7 @@ def from_json(
         >>> ak.from_json(pathlib.Path("tmp.json"))
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
-    And any object with a `read(num_bytes)` method can be used as the `source`.
+        And any object with a `read(num_bytes)` method can be used as the `source`.
 
         >>> class HasReadMethod:
         ...     def __init__(self, data):
@@ -135,21 +138,21 @@ def from_json(
         >>> ak.from_json(filelike_obj)
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
-    If this function opens a file or network connection (because it is passed as
-    a `pathlib.Path`), then this function will also close that file or connection.
+        If this function opens a file or network connection (because it is passed as
+        a `pathlib.Path`), then this function will also close that file or connection.
 
-    If this function is provided a file-like object with a `read(num_bytes)` method,
-    this function will not close it. (It might not even have a `close` method.)
+        If this function is provided a file-like object with a `read(num_bytes)` method,
+        this function will not close it. (It might not even have a `close` method.)
 
-    Data structures
-    ===============
+        Data structures
+        ===============
 
-    This function interprets JSON arrays and JSON objects in the same way that
-    #ak.from_iter interprets Python lists and Python dicts. It could be used as a
-    synonym for Python's `json.loads` followed by #ak.from_iter, but the direct
-    JSON-reading is faster (especially with a schema) and uses less memory.
+        This function interprets JSON arrays and JSON objects in the same way that
+        #ak.from_iter interprets Python lists and Python dicts. It could be used as a
+        synonym for Python's `json.loads` followed by #ak.from_iter, but the direct
+        JSON-reading is faster (especially with a schema) and uses less memory.
 
-    Consider
+        Consider
 
         >>> import json
         >>> json_data = "[[1.1, 2.2, 3.3], [], [4.4, 5.5]]"
@@ -158,7 +161,7 @@ def from_json(
         >>> ak.from_json(json_data)
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
-    and
+        and
 
         >>> json_data = '{"x": 1.1, "y": [1, 2]}'
         >>> ak.from_iter(json.loads(json_data))
@@ -166,8 +169,8 @@ def from_json(
         >>> ak.from_json(json_data)
         <Record {x: 1.1, y: [1, 2]} type='{x: float64, y: var * int64}'>
 
-    As shown above, reading JSON may result in #ak.Array or #ak.Record, but line-delimited
-    (`line_delimited=True`) only results in #ak.Array:
+        As shown above, reading JSON may result in #ak.Array or #ak.Record, but line-delimited
+        (`line_delimited=True`) only results in #ak.Array:
 
         >>> ak.from_json(
         ...     '{"x": 1.1, "y": [1]}\\n{"x": 2.2, "y": [1, 2]}\\n{"x": 3.3, "y": [1, 2, 3]}',
@@ -175,21 +178,21 @@ def from_json(
         ... )
         <Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type='3 * {x: float64, y: var...'>
 
-    Even arrays of length zero:
+        Even arrays of length zero:
 
         >>> ak.from_json("", line_delimited=True)
         <Array [] type='0 * unknown'>
 
-    Note that JSON interpreted with `line_delimited` doesn't actually need delimiters
-    between JSON documents or an absence of delimiters within each document. Parsing
-    with `line_delimited=True` continues to the end of a JSON document and starts
-    again with the next JSON document. It may be necessary to require actual delimiters
-    between and never within JSON documents to split a large source for
-    parallel-processing, but that consideration is beyond this function.
+        Note that JSON interpreted with `line_delimited` doesn't actually need delimiters
+        between JSON documents or an absence of delimiters within each document. Parsing
+        with `line_delimited=True` continues to the end of a JSON document and starts
+        again with the next JSON document. It may be necessary to require actual delimiters
+        between and never within JSON documents to split a large source for
+        parallel-processing, but that consideration is beyond this function.
 
-    If a JSONSchema is provided, the schema describes the structure of the JSON
-    document, regardless of whether there's only one of them (may be an #ak.Record)
-    or many of them (must be an #ak.Array).
+        If a JSONSchema is provided, the schema describes the structure of the JSON
+        document, regardless of whether there's only one of them (may be an #ak.Record)
+        or many of them (must be an #ak.Array).
 
         >>> schema = {
         ...     "type": "object",
@@ -213,50 +216,50 @@ def from_json(
         ... )
         <Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type='3 * {x: float64, y: var...'>
 
-    All numbers in the final array are signed 64-bit (integers and floating-point).
+        All numbers in the final array are signed 64-bit (integers and floating-point).
 
-    JSONSchemas
-    ===========
+        JSONSchemas
+        ===========
 
-    This function supports a subset of JSONSchema (see the
-    [JSONSchema specification](https://json-schema.org/)). The schemas may be passed
-    as JSON text or as Python lists and dicts representing JSON, but the following
-    conditions apply:
+        This function supports a subset of JSONSchema (see the
+        [JSONSchema specification](https://json-schema.org/)). The schemas may be passed
+        as JSON text or as Python lists and dicts representing JSON, but the following
+        conditions apply:
 
-    * The root of the schema must be `"type": "array"` or `"type": "object"`.
-    * Every level must have a `"type"`, which can only name one type (as a string
-      or length-1 list) or one type and `"null"` (as a length-2 list).
-    * `"type": "boolean"` \u2192 1-byte boolean values.
-    * `"type": "integer"` \u2192 8-byte integer values. If a part of the schema
-      is declared to have integer type but the JSON numbers are expressed as
-      floating-point, such as `3.14`, `3.0`, or `3e0`, this function raises an
-      error.
-    * `"type": "number"` \u2192 8-byte floating-point values. If used with
-      this function's `nan_string`, `posinf_string`, and/or `neginf_string`, the
-      value in the JSON could be a string, as long as it matches one of these
-      three.
-    * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
-      supported. Remember that the `source` data are ASCII; Unicode is derived from
-      "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
-      as categorical values (#ak.contents.IndexedArray or #ak.contents.IndexedOptionArray).
-    * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
-      `"minItems"` and `"maxItems"` are specified and equal to each other, the
-      list has regular-type (#ak.types.RegularType); otherwise, it has variable-length
-      type (#ak.types.ListType).
-    * `"type": "object"` \u2192 nested records. The `"properties"` must be specified,
-      and any properties in the data not described by `"properties"` will not
-      appear in the output.
+        * The root of the schema must be `"type": "array"` or `"type": "object"`.
+        * Every level must have a `"type"`, which can only name one type (as a string
+          or length-1 list) or one type and `"null"` (as a length-2 list).
+        * `"type": "boolean"` \u2192 1-byte boolean values.
+        * `"type": "integer"` \u2192 8-byte integer values. If a part of the schema
+          is declared to have integer type but the JSON numbers are expressed as
+          floating-point, such as `3.14`, `3.0`, or `3e0`, this function raises an
+          error.
+        * `"type": "number"` \u2192 8-byte floating-point values. If used with
+          this function's `nan_string`, `posinf_string`, and/or `neginf_string`, the
+          value in the JSON could be a string, as long as it matches one of these
+          three.
+        * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
+          supported. Remember that the `source` data are ASCII; Unicode is derived from
+          "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
+          as categorical values (#ak.contents.IndexedArray or #ak.contents.IndexedOptionArray).
+        * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
+          `"minItems"` and `"maxItems"` are specified and equal to each other, the
+          list has regular-type (#ak.types.RegularType); otherwise, it has variable-length
+          type (#ak.types.ListType).
+        * `"type": "object"` \u2192 nested records. The `"properties"` must be specified,
+          and any properties in the data not described by `"properties"` will not
+          appear in the output.
 
-    Substitutions for non-finite and complex numbers
-    ================================================
+        Substitutions for non-finite and complex numbers
+        ================================================
 
-    JSON doesn't support not-a-number values, infinite values, or complex number
-    types (as in numbers with a real and imaginary part). Some work-arounds use
-    non-JSON syntax, but this function converts valid JSON into these numbers with
-    user-specified rules.
+        JSON doesn't support not-a-number values, infinite values, or complex number
+        types (as in numbers with a real and imaginary part). Some work-arounds use
+        non-JSON syntax, but this function converts valid JSON into these numbers with
+        user-specified rules.
 
-    The `nan_string`, `posinf_string`, and `neginf_string` convert quoted strings
-    into floating-point numbers. You can specify what these strings are.
+        The `nan_string`, `posinf_string`, and `neginf_string` convert quoted strings
+        into floating-point numbers. You can specify what these strings are.
 
         >>> ak.from_json(
         ...     '[1, 2, "nan", "inf", "-inf"]',
@@ -266,18 +269,18 @@ def from_json(
         ... )
         <Array [1, 2, nan, inf, -inf] type='5 * float64'>
 
-    Without these rules, the array would be interpreted as a union of numbers and
-    strings:
+        Without these rules, the array would be interpreted as a union of numbers and
+        strings:
 
         >>> ak.from_json(
         ...     '[1, 2, "nan", "inf", "-inf"]',
         ... )
         <Array [1, 2, 'nan', 'inf', '-inf'] type='5 * union[int64, string]'>
 
-    When combined with a JSONSchema, you need to say that these values have type
-    `"number"`, not a union of strings and numbers (i.e. the conversion is performed
-    *before* schema-validation). Note that they can't be `"integer"`, since
-    not-a-number and infinite values are only possible for floating-point numbers.
+        When combined with a JSONSchema, you need to say that these values have type
+        `"number"`, not a union of strings and numbers (i.e. the conversion is performed
+        *before* schema-validation). Note that they can't be `"integer"`, since
+        not-a-number and infinite values are only possible for floating-point numbers.
 
         >>> ak.from_json(
         ...     '[1, 2, "nan", "inf", "-inf"]',
@@ -288,11 +291,11 @@ def from_json(
         ... )
         <Array [1, 2, nan, inf, -inf] type='5 * float64'>
 
-    The `complex_record_fields` is a 2-tuple of field names (strings) of objects
-    to identify as the real and imaginary parts of complex numbers. Complex number
-    representations in JSON vary, though most are JSON objects with real and
-    imaginary parts and possibly other fields. Any other fields will be excluded
-    from the output array.
+        The `complex_record_fields` is a 2-tuple of field names (strings) of objects
+        to identify as the real and imaginary parts of complex numbers. Complex number
+        representations in JSON vary, though most are JSON objects with real and
+        imaginary parts and possibly other fields. Any other fields will be excluded
+        from the output array.
 
         >>> ak.from_json(
         ...     '[{"r": 1, "i": 1.1, "other": ""}, {"r": 2, "i": 2.2, "other": ""}]',
@@ -300,16 +303,16 @@ def from_json(
         ... )
         <Array [1+1.1j, 2+2.2j] type='2 * complex128'>
 
-    Without this rule, the array would be interpreted as an array of records:
+        Without this rule, the array would be interpreted as an array of records:
 
         >>> ak.from_json(
         ...     '[{"r": 1, "i": 1.1, "other": ""}, {"r": 2, "i": 2.2, "other": ""}]',
         ... )
         <Array [{r: 1, i: 1.1, other: ''}, {...}] type='2 * {r: int64, i: float64, ...'>
 
-    When combined with a JSONSchema, you need to specify the object type (i.e. the
-    conversion is performed *after* schema-validation). Note that even the fields
-    that will be ignored by `complex_record_fields` need to be specified.
+        When combined with a JSONSchema, you need to specify the object type (i.e. the
+        conversion is performed *after* schema-validation). Note that even the fields
+        that will be ignored by `complex_record_fields` need to be specified.
 
         >>> ak.from_json(
         ...     '[{"r": 1, "i": 1.1, "other": ""}, {"r": 2, "i": 2.2, "other": ""}]',
@@ -329,7 +332,7 @@ def from_json(
         ... )
         <Array [1+1.1j, 2+2.2j] type='2 * complex128'>
 
-    See also #ak.to_json.
+        See also #ak.to_json.
     """
     if schema is None:
         return _no_schema(

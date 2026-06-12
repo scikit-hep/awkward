@@ -16,7 +16,8 @@ np = NumpyMetadata.instance()
 def from_arrow(
     array, *, generate_bitmasks=False, highlevel=True, behavior=None, attrs=None
 ):
-    """
+    """Converts an Apache Arrow array into an Awkward Array.
+
     Args:
         array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`, or `pyarrow.Table`):
             Apache Arrow array to convert into an  Awkward Array.
@@ -31,20 +32,21 @@ def from_arrow(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts an Apache Arrow array into an Awkward Array.
+    Returns:
+        Converts an Apache Arrow array into an Awkward Array.
 
-    This function always preserves the values of a dataset; i.e. the Python objects
-    returned by #ak.to_list are identical to the Python objects returned by Arrow's
-    `to_pylist` method. If #ak.to_arrow was invoked with `extensionarray=True`, this
-    function also preserves the data type (high-level #ak.types.Type, though not the
-    low-level #ak.forms.Form), even through Parquet, making Parquet a good way to save
-    Awkward Arrays for later use.
+        This function always preserves the values of a dataset; i.e. the Python objects
+        returned by #ak.to_list are identical to the Python objects returned by Arrow's
+        `to_pylist` method. If #ak.to_arrow was invoked with `extensionarray=True`, this
+        function also preserves the data type (high-level #ak.types.Type, though not the
+        low-level #ak.forms.Form), even through Parquet, making Parquet a good way to save
+        Awkward Arrays for later use.
 
-    Because awkward uses numpy's dtype system, timestamp types do not have timezones.
-    If encountering timestamp types with timezones in the input arrow data, they
-    will be silently dropped.
+        Because awkward uses numpy's dtype system, timestamp types do not have timezones.
+        If encountering timestamp types with timezones in the input arrow data, they
+        will be silently dropped.
 
-    See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_parquet, #ak.from_arrow_schema.
+        See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_parquet, #ak.from_arrow_schema.
     """
     return _impl(array, generate_bitmasks, highlevel, behavior, attrs)
 
