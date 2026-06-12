@@ -26,7 +26,8 @@ def linear_fit(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the linear fit of y against x over one or all levels of nesting.
+
     Args:
         x: One coordinate to use in the linear fit (anything #ak.to_layout recognizes).
         y: The other coordinate to use in the linear fit (anything #ak.to_layout recognizes).
@@ -58,35 +59,36 @@ def linear_fit(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the linear fit of `y` with respect to `x` (many types supported,
-    including all Awkward Arrays and Records, must be broadcastable to each
-    other). The grouping is performed the same way as for reducers, though
-    this operation is not a reducer and has no identity.
+    Returns:
+        Computes the linear fit of `y` with respect to `x` (many types supported,
+        including all Awkward Arrays and Records, must be broadcastable to each
+        other). The grouping is performed the same way as for reducers, though
+        this operation is not a reducer and has no identity.
 
-    This function has no NumPy equivalent.
+        This function has no NumPy equivalent.
 
-    Passing all arguments to the reducers, the linear fit is calculated as::
+        Passing all arguments to the reducers, the linear fit is calculated as::
 
-        sumw            = ak.sum(weight)
-        sumwx           = ak.sum(weight * x)
-        sumwy           = ak.sum(weight * y)
-        sumwxx          = ak.sum(weight * x**2)
-        sumwxy          = ak.sum(weight * x * y)
-        delta           = (sumw*sumwxx) - (sumwx*sumwx)
+            sumw            = ak.sum(weight)
+            sumwx           = ak.sum(weight * x)
+            sumwy           = ak.sum(weight * y)
+            sumwxx          = ak.sum(weight * x**2)
+            sumwxy          = ak.sum(weight * x * y)
+            delta           = (sumw*sumwxx) - (sumwx*sumwx)
 
-        intercept       = ((sumwxx*sumwy) - (sumwx*sumwxy)) / delta
-        slope           = ((sumw*sumwxy) - (sumwx*sumwy))   / delta
-        intercept_error = np.sqrt(sumwxx / delta)
-        slope_error     = np.sqrt(sumw   / delta)
+            intercept       = ((sumwxx*sumwy) - (sumwx*sumwxy)) / delta
+            slope           = ((sumw*sumwxy) - (sumwx*sumwy))   / delta
+            intercept_error = np.sqrt(sumwxx / delta)
+            slope_error     = np.sqrt(sumw   / delta)
 
-    The results, `intercept`, `slope`, `intercept_error`, and `slope_error`,
-    are given as an #ak.Record with four fields. The values of these fields
-    might be arrays or even nested arrays; they match the structure of `x` and
-    `y`.
+        The results, `intercept`, `slope`, `intercept_error`, and `slope_error`,
+        are given as an #ak.Record with four fields. The values of these fields
+        might be arrays or even nested arrays; they match the structure of `x` and
+        `y`.
 
-    See #ak.sum for a complete description of handling nested lists and
-    missing values (None) in reducers, and #ak.mean for an example with another
-    non-reducer.
+        See #ak.sum for a complete description of handling nested lists and
+        missing values (None) in reducers, and #ak.mean for an example with another
+        non-reducer.
     """
     # Dispatch
     yield x, y, weight

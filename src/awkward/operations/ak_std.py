@@ -39,7 +39,8 @@ def std(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the standard deviation over one or all levels of nesting.
+
     Args:
         x: The data on which to compute the standard deviation (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
@@ -73,24 +74,25 @@ def std(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the standard deviation in each group of elements from `x`
-    (many types supported, including all Awkward Arrays and Records). The
-    grouping is performed the same way as for reducers, though this operation
-    is not a reducer and has no identity. It is the same as NumPy's
-    [std](https://docs.scipy.org/doc/numpy/reference/generated/numpy.std.html)
-    if all lists at a given dimension have the same length and no None values,
-    but it generalizes to cases where they do not.
+    Returns:
+        Computes the standard deviation in each group of elements from `x`
+        (many types supported, including all Awkward Arrays and Records). The
+        grouping is performed the same way as for reducers, though this operation
+        is not a reducer and has no identity. It is the same as NumPy's
+        [std](https://docs.scipy.org/doc/numpy/reference/generated/numpy.std.html)
+        if all lists at a given dimension have the same length and no None values,
+        but it generalizes to cases where they do not.
 
-    Passing all arguments to the reducers, the standard deviation is
-    calculated as::
+        Passing all arguments to the reducers, the standard deviation is
+        calculated as::
 
-        np.sqrt(ak.var(x, weight))
+            np.sqrt(ak.var(x, weight))
 
-    See #ak.sum for a complete description of handling nested lists and
-    missing values (None) in reducers, and #ak.mean for an example with another
-    non-reducer.
+        See #ak.sum for a complete description of handling nested lists and
+        missing values (None) in reducers, and #ak.mean for an example with another
+        non-reducer.
 
-    See also #ak.nanstd.
+        See also #ak.nanstd.
     """
     # Dispatch
     yield x, weight
@@ -114,7 +116,8 @@ def nanstd(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the standard deviation, treating NaN values as missing.
+
     Args:
         x: The data on which to compute the standard deviation (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
@@ -148,15 +151,16 @@ def nanstd(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Like #ak.std, but treating NaN ("not a number") values as missing.
+    Returns:
+        Like #ak.std, but treating NaN ("not a number") values as missing.
 
-    Equivalent to::
+        Equivalent to::
 
-        ak.std(ak.nan_to_none(array))
+            ak.std(ak.nan_to_none(array))
 
-    with all other arguments unchanged.
+        with all other arguments unchanged.
 
-    See also #ak.std.
+        See also #ak.std.
     """
     # Dispatch
     yield x, weight

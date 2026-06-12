@@ -32,7 +32,8 @@ def covar(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the covariance of x and y over one or all levels of nesting.
+
     Args:
         x: One coordinate to use in the covariance calculation (anything #ak.to_layout recognizes).
         y: The other coordinate to use in the covariance calculation (anything #ak.to_layout recognizes).
@@ -64,20 +65,21 @@ def covar(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the covariance of `x` and `y` (many types supported, including
-    all Awkward Arrays and Records, must be broadcastable to each other).
-    The grouping is performed the same way as for reducers, though this
-    operation is not a reducer and has no identity.
+    Returns:
+        Computes the covariance of `x` and `y` (many types supported, including
+        all Awkward Arrays and Records, must be broadcastable to each other).
+        The grouping is performed the same way as for reducers, though this
+        operation is not a reducer and has no identity.
 
-    This function has no NumPy equivalent.
+        This function has no NumPy equivalent.
 
-    Passing all arguments to the reducers, the covariance is calculated as::
+        Passing all arguments to the reducers, the covariance is calculated as::
 
-        ak.sum((x - ak.mean(x))*(y - ak.mean(y))*weight) / ak.sum(weight)
+            ak.sum((x - ak.mean(x))*(y - ak.mean(y))*weight) / ak.sum(weight)
 
-    See #ak.sum for a complete description of handling nested lists and
-    missing values (None) in reducers, and #ak.mean for an example with another
-    non-reducer.
+        See #ak.sum for a complete description of handling nested lists and
+        missing values (None) in reducers, and #ak.mean for an example with another
+        non-reducer.
     """
     # Dispatch
     yield x, y, weight

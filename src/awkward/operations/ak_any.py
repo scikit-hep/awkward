@@ -31,7 +31,8 @@ def any(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns whether any elements are True over one or all levels of nesting.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -57,17 +58,18 @@ def any(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns True in each group of elements from `array` (many types supported,
-    including all Awkward Arrays and Records) if any values are True; False
-    otherwise. Thus, it represents reduction over the "logical or" operation,
-    whose identity is False (i.e. asking if there are any True values in an
-    empty list results in False). This operation is the same as NumPy's
-    [any](https://docs.scipy.org/doc/numpy/reference/generated/numpy.any.html)
-    if all lists at a given dimension have the same length and no None values,
-    but it generalizes to cases where they do not.
+    Returns:
+        Returns True in each group of elements from `array` (many types supported,
+        including all Awkward Arrays and Records) if any values are True; False
+        otherwise. Thus, it represents reduction over the "logical or" operation,
+        whose identity is False (i.e. asking if there are any True values in an
+        empty list results in False). This operation is the same as NumPy's
+        [any](https://docs.scipy.org/doc/numpy/reference/generated/numpy.any.html)
+        if all lists at a given dimension have the same length and no None values,
+        but it generalizes to cases where they do not.
 
-    See #ak.sum for a more complete description of nested list and missing
-    value (None) handling in reducers.
+        See #ak.sum for a more complete description of nested list and missing
+        value (None) handling in reducers.
     """
     # Dispatch
     yield (array,)
