@@ -22,7 +22,8 @@ def ones_like(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns an array with the same structure as the input, filled with ones.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         dtype (None or NumPy dtype): Overrides the data type of the result.
@@ -36,12 +37,13 @@ def ones_like(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    This is the equivalent of NumPy's `np.ones_like` for Awkward Arrays.
+    Returns:
+        This is the equivalent of NumPy's `np.ones_like` for Awkward Arrays.
 
-    See #ak.full_like for details, and see also #ak.zeros_like.
+        See #ak.full_like for details, and see also #ak.zeros_like.
 
-    (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
-    are immutable.)
+        (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
+        are immutable.)
     """
     # Dispatch
     yield (array,)
