@@ -64,17 +64,6 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
     Subsequent virtual arrays that originate from some virtual array will hit the cache of their parents if there is any.
     """
 
-    __slots__ = (
-        "__enable_caching__",
-        "_array",
-        "_buffer_key",
-        "_dtype",
-        "_generator",
-        "_nplike",
-        "_shape",
-        "_shape_generator",
-    )
-
     def __init__(
         self,
         nplike: NumpyLike,

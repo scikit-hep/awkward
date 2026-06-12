@@ -327,8 +327,6 @@ class Index64(Index):
 
 
 class LazyIndex:
-    __slots__ = ("_dtype", "_factory", "_index", "_length", "_nplike")
-
     def __init__(
         self, factory, length: ShapeItem, nplike: NumpyLike, dtype: DType | None = None
     ):
