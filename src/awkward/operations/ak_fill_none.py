@@ -20,7 +20,8 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Replaces missing values (None) with a given value.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         value: Data with which to replace None.
@@ -42,25 +43,27 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=Non
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Replaces missing values (None) with a given `value`.
+    Returns:
+        Replaces missing values (None) with a given `value`.
 
-    For example, in the following
+    Examples:
+        For example, in the following
 
         >>> array = ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
 
-    The None values could be replaced with `0` by
+        The None values could be replaced with `0` by
 
         >>> ak.fill_none(array, 0)
         <Array [[1.1, 0, 2.2], [], [0, 3.3, 4.4]] type='3 * var * float64'>
 
-    The replacement value doesn't strictly need the same type as the
-    surrounding data. For example, the None values could also be replaced
-    by a string.
+        The replacement value doesn't strictly need the same type as the
+        surrounding data. For example, the None values could also be replaced
+        by a string.
 
         >>> ak.fill_none(array, "hi")
         <Array [[1.1, 'hi', 2.2], [], ['hi', ...]] type='3 * var * union[float64, s...'>
 
-    The list content now has a union type:
+        The list content now has a union type:
 
         >>> ak.fill_none(array, "hi").type.show()
         3 * var * union[
@@ -68,7 +71,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=Non
             string
         ]
 
-    The values could be floating-point numbers or strings.
+        The values could be floating-point numbers or strings.
     """
     # Dispatch
     yield array, value
