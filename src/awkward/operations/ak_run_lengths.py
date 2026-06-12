@@ -16,7 +16,8 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def run_lengths(array, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns the lengths of runs of identical values at the deepest level.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -26,40 +27,42 @@ def run_lengths(array, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the lengths of sequences of identical values at the deepest level
-    of nesting, returning an array with the same structure but with `int64` type.
+    Returns:
+        The lengths of sequences of identical values at the deepest level
+        of nesting, returning an array with the same structure but with `int64` type.
 
-    For example,
+    Examples:
+        For example,
 
         >>> array = ak.Array([1.1, 1.1, 1.1, 2.2, 3.3, 3.3, 4.4, 4.4, 5.5])
         >>> ak.run_lengths(array)
         <Array [3, 1, 2, 2, 1] type='5 * int64'>
 
-    There are 3 instances of 1.1, followed by 1 instance of 2.2, 2 instances of 3.3,
-    2 instances of 4.4, and 1 instance of 5.5.
+        There are 3 instances of 1.1, followed by 1 instance of 2.2, 2 instances of 3.3,
+        2 instances of 4.4, and 1 instance of 5.5.
 
-    The order and uniqueness of the input data doesn't matter,
+        The order and uniqueness of the input data doesn't matter,
 
         >>> array = ak.Array([1.1, 1.1, 1.1, 5.5, 4.4, 4.4, 1.1, 1.1, 5.5])
         >>> ak.run_lengths(array)
         <Array [3, 1, 2, 2, 1] type='5 * int64'>
 
-    just the difference between each value and its neighbors.
+        just the difference between each value and its neighbors.
 
-    The data can be nested, but runs don't cross list boundaries.
+        The data can be nested, but runs don't cross list boundaries.
 
         >>> array = ak.Array([[1.1, 1.1, 1.1, 2.2, 3.3], [3.3, 4.4], [4.4, 5.5]])
         >>> ak.run_lengths(array)
         <Array [[3, 1, 1], [1, 1], [1, 1]] type='3 * var * int64'>
 
-    This function recognizes strings as distinguishable values.
+        This function recognizes strings as distinguishable values.
 
         >>> array = ak.Array([["one", "one"], ["one", "two", "two"], ["three", "two", "two"]])
         >>> ak.run_lengths(array)
         <Array [[2], [1, 2], [1, 2]] type='3 * var * int64'>
 
-    Note that this can be combined with #ak.argsort and #ak.unflatten to compute
-    a "group by" operation:
+        Note that this can be combined with #ak.argsort and #ak.unflatten to compute
+        a "group by" operation:
 
         >>> array = ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 1, "y": 1.1},
         ...                   {"x": 3, "y": 3.3}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}])
@@ -73,9 +76,9 @@ def run_lengths(array, *, highlevel=True, behavior=None, attrs=None):
          [{x: 2, y: 2.2}, {x: 2, y: 2.2}],
          [{x: 3, y: 3.3}]]
 
-    Unlike a database "group by," this operation can be applied in bulk to many sublists
-    (though the run lengths need to be fully flattened to be used as `counts` for
-    #ak.unflatten, and you need to specify `axis=-1` as the depth).
+        Unlike a database "group by," this operation can be applied in bulk to many sublists
+        (though the run lengths need to be fully flattened to be used as `counts` for
+        #ak.unflatten, and you need to specify `axis=-1` as the depth).
 
         >>> array = ak.Array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 1, "y": 1.1}],
         ...                   [{"x": 3, "y": 3.3}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}]])
@@ -89,7 +92,7 @@ def run_lengths(array, *, highlevel=True, behavior=None, attrs=None):
         [[[{x: 1, y: 1.1}, {x: 1, y: 1.1}], [{x: 2, y: 2.2}]],
          [[{x: 1, y: 1.1}], [{x: 2, y: 2.2}], [{x: 3, y: 3.3}]]]
 
-    See also #ak.num, #ak.argsort, #ak.unflatten.
+        See also #ak.num, #ak.argsort, #ak.unflatten.
     """
     # Dispatch
     yield (array,)
