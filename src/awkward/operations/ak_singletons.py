@@ -21,7 +21,8 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def singletons(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Wraps each value in a length-1 list, or an empty list for each missing value.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -40,10 +41,12 @@ def singletons(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns a singleton list (length 1) wrapping each non-missing value and
-    an empty list (length 0) in place of each missing value.
+    Returns:
+        A singleton list (length 1) wrapping each non-missing value and
+        an empty list (length 0) in place of each missing value.
 
-    For example,
+    Examples:
+        For example,
 
         >>> array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
         >>> ak.singletons(array).show()
@@ -56,7 +59,7 @@ def singletons(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
          [4.4],
          [5.5]]
 
-    See #ak.firsts to invert this function.
+        See #ak.firsts to invert this function.
     """
     # Dispatch
     yield (array,)

@@ -23,7 +23,8 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns the first element of each list, or None for each empty list.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -42,10 +43,12 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Selects the first element of each non-empty list and inserts None for each
-    empty list.
+    Returns:
+        Selects the first element of each non-empty list and inserts None for each
+        empty list.
 
-    For example,
+    Examples:
+        For example,
 
         >>> array = ak.Array([[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]])
         >>> ak.firsts(array).show()
@@ -58,7 +61,7 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
          4.4,
          5.5]
 
-    See #ak.singletons to invert this function.
+        See #ak.singletons to invert this function.
     """
     # Dispatch
     yield (array,)
