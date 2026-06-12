@@ -15,7 +15,8 @@ np = NumpyMetadata.instance()
 @ak._connect.numpy.implements("angle")
 @high_level_function()
 def angle(val, deg=False, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns the counterclockwise angle of each complex element in radians or degrees.
+
     Args:
         val : array_like
             Input array.
@@ -28,8 +29,9 @@ def angle(val, deg=False, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns the counterclockwise angle from the positive real axis on the complex
-    plane in the range ``(-pi, pi]``, with dtype as a float.
+    Returns:
+        Returns the counterclockwise angle from the positive real axis on the complex
+        plane in the range ``(-pi, pi]``, with dtype as a float.
     """
     # Dispatch
     yield (val,)

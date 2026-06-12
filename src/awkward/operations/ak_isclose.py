@@ -27,7 +27,8 @@ def isclose(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns a boolean array of element-wise approximate-equality between two arrays.
+
     Args:
         a: Array-like data (anything #ak.to_layout recognizes).
         b: Array-like data (anything #ak.to_layout recognizes).
@@ -42,8 +43,9 @@ def isclose(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
-    for Awkward Arrays.
+    Returns:
+        Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
+        for Awkward Arrays.
     """
     # Dispatch
     yield a, b
