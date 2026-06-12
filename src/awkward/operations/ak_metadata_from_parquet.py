@@ -27,7 +27,8 @@ def metadata_from_parquet(
     ignore_metadata=False,
     scan_files=True,
 ):
-    """
+    """Reads metadata from a Parquet file or dataset without reading the data.
+
     Args:
         path (str): Local filename or remote URL, passed to fsspec for resolution.
             May contain glob patterns. A list of paths is also allowed, but they
@@ -40,26 +41,27 @@ def metadata_from_parquet(
             and instead derive metadata from the first data file.
         scan_files (bool): TODO
 
-    This function differs from ak.from_parquet._metadata as follows:
+    Returns:
+        This function differs from ak.from_parquet._metadata as follows:
 
-    * this function will always use a _metadata file, if present
-    * if there is no _metadata, the schema comes from _common_metadata or
-      the first data file
-    * the total number of rows is always known
+        * this function will always use a _metadata file, if present
+        * if there is no _metadata, the schema comes from _common_metadata or
+          the first data file
+        * the total number of rows is always known
 
-    Returns dict containing
+        A dict containing
 
-    * `form`: an Awkward Form representing the low-level type of the data
-      (use `.type` to get a high-level type),
-    * `fs`: the fsspec filesystem object,
-    * `paths`: a list of matching path names,
-    * `col_counts`: the number of rows in each row group,
-    * `columns`: the columns defined by the schema,
-    * `num_rows`: the length of the array that would be read by #ak.from_parquet,
-    * `num_row_groups`: the units that can be filtered (for the #ak.from_parquet `row_groups`
-      argument).
+        * `form`: an Awkward Form representing the low-level type of the data
+          (use `.type` to get a high-level type),
+        * `fs`: the fsspec filesystem object,
+        * `paths`: a list of matching path names,
+        * `col_counts`: the number of rows in each row group,
+        * `columns`: the columns defined by the schema,
+        * `num_rows`: the length of the array that would be read by #ak.from_parquet,
+        * `num_row_groups`: the units that can be filtered (for the #ak.from_parquet `row_groups`
+          argument).
 
-    See also #ak.from_parquet, #ak.to_parquet.
+        See also #ak.from_parquet, #ak.to_parquet.
     """
     import awkward._connect.pyarrow  # noqa: F401
 

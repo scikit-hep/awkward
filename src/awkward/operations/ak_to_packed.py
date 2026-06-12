@@ -13,7 +13,8 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Packs an array's inner structure and materializes its virtual buffers.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -23,26 +24,26 @@ def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array with the same type and values as the input,
-    with all virtual buffers materialized (see #ak.materialize) and inner structures packed:
+    Returns:
+        Returns an array with the same type and values as the input,
+        with all virtual buffers materialized (see #ak.materialize) and inner structures packed:
 
-    - #ak.contents.NumpyArray becomes C-contiguous (if it isn't already)
-    - #ak.contents.RegularArray trims unreachable content
-    - #ak.contents.ListArray becomes #ak.contents.ListOffsetArray, making all list data contiguous
-    - #ak.contents.ListOffsetArray starts at `offsets[0] == 0`, trimming unreachable content
-    - #ak.contents.RecordArray trims unreachable contents
-    - #ak.contents.IndexedArray gets projected
-    - #ak.contents.IndexedOptionArray remains an #ak.contents.IndexedOptionArray (with simplified `index`)
-      if it contains records, becomes #ak.contents.ByteMaskedArray otherwise
-    - #ak.contents.ByteMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records,
-      stays a #ak.contents.ByteMaskedArray otherwise
-    - #ak.contents.BitMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records,
-      stays a #ak.contents.BitMaskedArray otherwise
-    - #ak.contents.UnionArray gets projected contents
-    - #ak.record.Record becomes a record over a single-item #ak.contents.RecordArray
+        - #ak.contents.NumpyArray becomes C-contiguous (if it isn't already)
+        - #ak.contents.RegularArray trims unreachable content
+        - #ak.contents.ListArray becomes #ak.contents.ListOffsetArray, making all list data contiguous
+        - #ak.contents.ListOffsetArray starts at `offsets[0] == 0`, trimming unreachable content
+        - #ak.contents.RecordArray trims unreachable contents
+        - #ak.contents.IndexedArray gets projected
+        - #ak.contents.IndexedOptionArray remains an #ak.contents.IndexedOptionArray (with simplified `index`)
+          if it contains records, becomes #ak.contents.ByteMaskedArray otherwise
+        - #ak.contents.ByteMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records,
+          stays a #ak.contents.ByteMaskedArray otherwise
+        - #ak.contents.BitMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records,
+          stays a #ak.contents.BitMaskedArray otherwise
+        - #ak.contents.UnionArray gets projected contents
+        - #ak.record.Record becomes a record over a single-item #ak.contents.RecordArray
 
-    Example:
-
+    Examples:
         >>> a = ak.Array([[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]])
         >>> b = a[::-1]
         >>> b.layout
@@ -67,11 +68,11 @@ def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
             </NumpyArray></content>
         </ListOffsetArray>
 
-    Performing these operations will minimize the output size of data sent to
-    #ak.to_buffers (though conversions through Arrow, #ak.to_arrow and
-    #ak.to_parquet, do not need this because packing is part of that conversion).
+        Performing these operations will minimize the output size of data sent to
+        #ak.to_buffers (though conversions through Arrow, #ak.to_arrow and
+        #ak.to_parquet, do not need this because packing is part of that conversion).
 
-    See also #ak.to_buffers.
+        See also #ak.to_buffers.
     """
     # Dispatch
     yield (array,)

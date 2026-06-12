@@ -16,7 +16,8 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Converts one or all variable-length axes into regular ones, if possible.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or None): The dimension at which this operation is applied.
@@ -32,8 +33,10 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts a variable-length axis into a regular one, if possible.
+    Returns:
+        Converts a variable-length axis into a regular one, if possible.
 
+    Examples:
         >>> irregular = ak.from_iter(np.arange(2*3*5).reshape(2, 3, 5))
         >>> irregular.type.show()
         2 * var * var * int64
@@ -44,7 +47,7 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
         >>> ak.to_regular(irregular, axis=-1).type.show()
         2 * var * 5 * int64
 
-    But truly irregular data cannot be converted.
+        But truly irregular data cannot be converted.
 
         >>> ak.to_regular(ak.Array([[1, 2, 3], [], [4, 5]]))
         ValueError: while calling
@@ -56,7 +59,7 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
             )
         Error details: cannot convert to RegularArray because subarray lengths are not regular
 
-    See also #ak.from_regular.
+        See also #ak.from_regular.
     """
     # Dispatch
     yield (array,)

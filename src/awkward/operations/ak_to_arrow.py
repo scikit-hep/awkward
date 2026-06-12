@@ -23,7 +23,8 @@ def to_arrow(
     extensionarray=True,
     count_nulls=True,
 ):
-    """
+    """Converts an Awkward Array into an Apache Arrow array.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists
@@ -53,21 +54,22 @@ def to_arrow(
             and include these in the resulting Arrow array, which makes some downstream
             applications faster. If False, skip the up-front cost of counting them.
 
-    Converts an Awkward Array into an Apache Arrow array.
+    Returns:
+        Converts an Awkward Array into an Apache Arrow array.
 
-    This produces arrays of type `pyarrow.Array`. You might need to further
-    manipulations (using the pyarrow library) to build a `pyarrow.ChunkedArray`,
-    a `pyarrow.RecordBatch`, or a `pyarrow.Table`. For the latter, see #ak.to_arrow_table.
+        This produces arrays of type `pyarrow.Array`. You might need to further
+        manipulations (using the pyarrow library) to build a `pyarrow.ChunkedArray`,
+        a `pyarrow.RecordBatch`, or a `pyarrow.Table`. For the latter, see #ak.to_arrow_table.
 
-    This function always preserves the values of a dataset; i.e. the Python objects
-    returned by #ak.to_list are identical to the Python objects returned by Arrow's
-    `to_pylist` method. With `extensionarray=True`, this function also preserves the
-    data type (high-level #ak.types.Type, though not the low-level #ak.forms.Form),
-    even through Parquet, making Parquet a good way to save Awkward Arrays for later
-    use. If any third-party tools don't recognize Arrow's extension arrays, set this
-    option to False for plain Arrow arrays.
+        This function always preserves the values of a dataset; i.e. the Python objects
+        returned by #ak.to_list are identical to the Python objects returned by Arrow's
+        `to_pylist` method. With `extensionarray=True`, this function also preserves the
+        data type (high-level #ak.types.Type, though not the low-level #ak.forms.Form),
+        even through Parquet, making Parquet a good way to save Awkward Arrays for later
+        use. If any third-party tools don't recognize Arrow's extension arrays, set this
+        option to False for plain Arrow arrays.
 
-    See also #ak.from_arrow, #ak.to_arrow_table, #ak.to_parquet, #ak.from_arrow_schema.
+        See also #ak.from_arrow, #ak.to_arrow_table, #ak.to_parquet, #ak.from_arrow_schema.
     """
     # Dispatch
     yield (array,)
