@@ -10,16 +10,18 @@ __all__ = ("is_categorical",)
 
 @high_level_function()
 def is_categorical(array):
-    """
+    """Returns True if the array is categorical.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
-    If the `array` is categorical (contains #ak.contents.IndexedArray or
-    #ak.contents.IndexedOptionArray labeled with parameter
-    `"__array__" = "categorical"`), then this function returns True;
-    otherwise, it returns False.
+    Returns:
+        If the `array` is categorical (contains #ak.contents.IndexedArray or
+        #ak.contents.IndexedOptionArray labeled with parameter
+        `"__array__" = "categorical"`), then this function returns True;
+        otherwise, it returns False.
 
-    See also #ak.categories, #ak.str.to_categorical, #ak.from_categorical.
+        See also #ak.categories, #ak.str.to_categorical, #ak.from_categorical.
     """
     # Dispatch
     yield (array,)

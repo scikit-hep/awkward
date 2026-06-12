@@ -11,7 +11,8 @@ __all__ = ("categories",)
 
 @high_level_function()
 def categories(array, highlevel=True, *, behavior=None, attrs=None):
-    """
+    """Returns the categories of a categorical array.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -21,11 +22,12 @@ def categories(array, highlevel=True, *, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    If the `array` is categorical (contains #ak.contents.IndexedArray or
-    #ak.contents.IndexedOptionArray labeled with parameter
-    `"__array__" = "categorical"`), then this function returns its categories.
+    Returns:
+        If the `array` is categorical (contains #ak.contents.IndexedArray or
+        #ak.contents.IndexedOptionArray labeled with parameter
+        `"__array__" = "categorical"`), then this function returns its categories.
 
-    See also #ak.is_categorical, #ak.str.to_categorical, #ak.from_categorical.
+        See also #ak.is_categorical, #ak.str.to_categorical, #ak.from_categorical.
     """
     # Dispatch
     yield (array,)

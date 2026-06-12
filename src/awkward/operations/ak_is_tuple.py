@@ -10,12 +10,14 @@ __all__ = ("is_tuple",)
 
 @high_level_function()
 def is_tuple(array):
-    """
+    """Returns True if a record, or the outermost record of an array, is a tuple.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
-    If `array` is a record, this returns True if the record is a tuple.
-    If `array` is an array, this returns True if the outermost record is a tuple.
+    Returns:
+        If `array` is a record, this returns True if the record is a tuple.
+        If `array` is an array, this returns True if the outermost record is a tuple.
     """
     # Dispatch
     yield (array,)
