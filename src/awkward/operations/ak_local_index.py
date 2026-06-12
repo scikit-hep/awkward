@@ -20,7 +20,8 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def local_index(array, axis=-1, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns the within-list index of each element at a given axis depth.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -39,7 +40,8 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    For example,
+    Examples:
+        For example,
 
         >>> array = ak.Array([
         ...     [[0.0, 1.1, 2.2], []],
@@ -53,8 +55,8 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None, attrs=None):
         >>> ak.local_index(array, axis=2)
         <Array [[[0, 1, 2], []], ..., [[0], ..., [...]]] type='4 * var * var * int64'>
 
-    Note that you can make a Pandas-style MultiIndex by calling this function on
-    every axis.
+        Note that you can make a Pandas-style MultiIndex by calling this function on
+        every axis.
 
         >>> multiindex = ak.zip([ak.local_index(array, i) for i in range(array.ndim)])
         >>> multiindex.show()
@@ -74,7 +76,7 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None, attrs=None):
          (3, 2, 2),
          (3, 2, 3)]
 
-    But if you're interested in Pandas, you may want to use #ak.to_dataframe directly.
+        But if you're interested in Pandas, you may want to use #ak.to_dataframe directly.
 
         >>> ak.to_dataframe(array)
                                     values
