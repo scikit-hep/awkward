@@ -13,14 +13,16 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_tensorflow(array):
-    """
+    """Converts an Awkward Array into a TensorFlow Tensor, if possible.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
-    Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
-    into a TensorFlow Tensor, if possible.
+    Returns:
+        Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
+        into a TensorFlow Tensor, if possible.
 
-    If `array` contains any other data types (RecordArray for example) the function raises a TypeError.
+        If `array` contains any other data types (RecordArray for example) the function raises a TypeError.
     """
 
     # Dispatch

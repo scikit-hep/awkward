@@ -39,7 +39,8 @@ def to_layout(
     string_policy="as-characters",
     regulararray=True,
 ):
-    """
+    """Converts data into a low-level layout object.
+
     Args:
         array: Array-like data. May be a high level #ak.Array, #ak.Record (if `allow_record`),
             #ak.ArrayBuilder, or low-level #ak.contents.Content, #ak.record.Record (if `allow_record`),
@@ -65,13 +66,14 @@ def to_layout(
         regulararray (bool): Prefer to create #ak.contents.RegularArray nodes for
             regular array objects.
 
-    Converts `array` (many types supported, including all Awkward Arrays and
-    Records) into a #ak.contents.Content and maybe #ak.record.Record or
-    other types.
+    Returns:
+        Converts `array` (many types supported, including all Awkward Arrays and
+        Records) into a #ak.contents.Content and maybe #ak.record.Record or
+        other types.
 
-    This function is usually used to sanitize inputs for other functions; it
-    would rarely be used in a data analysis because #ak.contents.Content and
-    #ak.record.Record are lower-level than #ak.Array.
+        This function is usually used to sanitize inputs for other functions; it
+        would rarely be used in a data analysis because #ak.contents.Content and
+        #ak.record.Record are lower-level than #ak.Array.
     """
     # Dispatch
     yield (array,)

@@ -24,7 +24,8 @@ def _default_levelname(index: int) -> str:
 def to_dataframe(
     array, *, how="inner", levelname=_default_levelname, anonymous="values"
 ):
-    """
+    """Converts an Awkward Array into a pandas DataFrame.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         how (None or str): Passed to
@@ -36,24 +37,26 @@ def to_dataframe(
         anonymous (str): Column name to use if the `array` does not contain
             records; otherwise, column names are derived from record fields.
 
-    Converts Awkward data structures into Pandas
-    [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
-    rows and columns. The resulting DataFrame(s) contains no Awkward structures.
+    Returns:
+        Converts Awkward data structures into Pandas
+        [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
+        rows and columns. The resulting DataFrame(s) contains no Awkward structures.
 
-    #ak.Array structures can't be losslessly converted into a single DataFrame;
-    different fields in a record structure might have different nested list
-    lengths, but a DataFrame can have only one index.
+        #ak.Array structures can't be losslessly converted into a single DataFrame;
+        different fields in a record structure might have different nested list
+        lengths, but a DataFrame can have only one index.
 
-    If `how` is None, this function always returns a list of DataFrames (even
-    if it contains only one DataFrame); otherwise `how` is passed to
-    [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html)
-    to merge them into a single DataFrame with the associated loss of data.
+        If `how` is None, this function always returns a list of DataFrames (even
+        if it contains only one DataFrame); otherwise `how` is passed to
+        [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html)
+        to merge them into a single DataFrame with the associated loss of data.
 
-    In the following example, nested lists are converted into MultiIndex rows.
-    The index level names `"entry"`, `"subentry"` and `"subsubentry"` can be
-    controlled with the `levelname` parameter. The column name `"values"` is
-    assigned because this array has no fields; it can be controlled with the
-    `anonymous` parameter.
+    Examples:
+        In the following example, nested lists are converted into MultiIndex rows.
+        The index level names `"entry"`, `"subentry"` and `"subsubentry"` can be
+        controlled with the `levelname` parameter. The column name `"values"` is
+        assigned because this array has no fields; it can be controlled with the
+        `anonymous` parameter.
 
         >>> ak.to_dataframe(ak.Array([[[1.1, 2.2], [], [3.3]],
         ...                           [],
@@ -71,9 +74,9 @@ def to_dataframe(
         3     0        0               7.7
         4     0        0               8.8
 
-    In this example, nested records are converted into MultiIndex columns.
-    (MultiIndex rows and columns can be mixed; these examples are deliberately
-    simple.)
+        In this example, nested records are converted into MultiIndex columns.
+        (MultiIndex rows and columns can be mixed; these examples are deliberately
+        simple.)
 
         >>> ak.to_dataframe(ak.Array([
         ...     {"I": {"a": _, "b": {"i": _}}, "II": {"x": {"y": {"z": _}}}}
@@ -89,10 +92,10 @@ def to_dataframe(
         3      30  30  30
         4      40  40  40
 
-    The following two examples show how fields of different length lists are
-    merged. With `how="inner"` (default), only subentries that exist for all
-    fields are preserved; with `how="outer"`, all subentries are preserved at
-    the expense of requiring missing values.
+        The following two examples show how fields of different length lists are
+        merged. With `how="inner"` (default), only subentries that exist for all
+        fields are preserved; with `how="outer"`, all subentries are preserved at
+        the expense of requiring missing values.
 
         >>> ak.to_dataframe(ak.Array([{"x": [], "y": [4.4, 3.3, 2.2, 1.1]},
         ...                           {"x": [1], "y": [3.3, 2.2, 1.1]},
@@ -107,7 +110,7 @@ def to_dataframe(
               1         2  1.1
         3     0         1  1.1
 
-    The same with `how="outer"`:
+        The same with `how="outer"`:
 
         >>> ak.to_dataframe(ak.Array([{"x": [], "y": [4.4, 3.3, 2.2, 1.1]},
         ...                           {"x": [1], "y": [3.3, 2.2, 1.1]},
