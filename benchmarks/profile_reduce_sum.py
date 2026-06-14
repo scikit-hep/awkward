@@ -1,5 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-# ruff: noqa: T201, TID251, B023  # closures are consumed within their own loop iteration
+# ruff: noqa: B023  # closures are consumed within their own loop iteration
 """Profile awkward_reduce_sum: three implementations, head to head.
 
   A. "previous" — the parents-based compiled kernel from `main`

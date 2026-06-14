@@ -67,7 +67,7 @@ except Exception as exc:  # pragma: no cover - environment guard
     raise SystemExit(
         "This reproducer needs a GPU box with `cupy` and `cuda.compute` "
         f"(cuda-cccl) installed. Import failed: {exc!r}"
-    )
+    ) from exc
 
 # ~16 MB per build, matching the buffers in the PR referrer dump.
 TARGET_BYTES = 16_000_000
@@ -114,8 +114,10 @@ def reduce_once(dtype, *, fresh_closure: bool):
     d_in, d_out, start, end, h_init = make_inputs(dtype)
 
     if fresh_closure:
+
         def sum_op(a, b):  # new function object on every invocation
             return a + b
+
         op = sum_op
     else:
         op = OpKind.PLUS
@@ -133,9 +135,11 @@ def reduce_once(dtype, *, fresh_closure: bool):
         cp.cuda.runtime.deviceSynchronize()
         ok = True
     except Exception as exc:
-        print(f"    (build failed for {np.dtype(dtype).name} with "
-              f"{'closure' if fresh_closure else 'OpKind.PLUS'}: "
-              f"{type(exc).__name__}: {str(exc).splitlines()[0]})")
+        print(
+            f"    (build failed for {np.dtype(dtype).name} with "
+            f"{'closure' if fresh_closure else 'OpKind.PLUS'}: "
+            f"{type(exc).__name__}: {str(exc).splitlines()[0]})"
+        )
         ok = False
 
     # Drop every user-facing reference and force a full collection -- the same
@@ -157,9 +161,11 @@ def run_repeated() -> None:
 
     for i in range(N_ITER):
         reduce_once(cp.complex128, fresh_closure=True)
-        print(f"  call {i + 1:>2}: live _SegmentedReduce="
-              f"{count_live('_SegmentedReduce') - base:>3}  "
-              f"device_used={used_device_bytes():>12,} B")
+        print(
+            f"  call {i + 1:>2}: live _SegmentedReduce="
+            f"{count_live('_SegmentedReduce') - base:>3}  "
+            f"device_used={used_device_bytes():>12,} B"
+        )
 
 
 def run_distinct_signatures() -> None:
@@ -186,9 +192,11 @@ def run_distinct_signatures() -> None:
         print(f"  -- pass {pass_no} --")
         for dtype, fresh in plan:
             reduce_once(dtype, fresh_closure=fresh)
-            print(f"    {np.dtype(dtype).name:>10}: live _SegmentedReduce="
-                  f"{count_live('_SegmentedReduce') - base:>3}  "
-                  f"device_used={used_device_bytes():>12,} B")
+            print(
+                f"    {np.dtype(dtype).name:>10}: live _SegmentedReduce="
+                f"{count_live('_SegmentedReduce') - base:>3}  "
+                f"device_used={used_device_bytes():>12,} B"
+            )
 
 
 def main() -> None:

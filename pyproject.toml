@@ -317,6 +317,7 @@ isort.required-imports = ["from __future__ import annotations"]
 "src/awkward/_nplikes/*" = ["TID251"]
 "src/awkward/_operators.py" = ["TID251"]
 "tests*/*" = ["T20", "TID251"]
+"benchmarks/*" = ["T201", "TID251", "EXE001"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "numpy".msg = "Use `numpy = ak._nplikes.Numpy.instance()` instead"
