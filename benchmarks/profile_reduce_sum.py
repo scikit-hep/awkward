@@ -312,16 +312,24 @@ def main():
             if have_compute:
                 impls.append(("C cuda.compute", run_compute))
 
-            # correctness first (cumsum-based segmented sums)
-            csum = cp.zeros(total + 1, dtype=to_dt)
-            cp.cumsum(data.astype(to_dt), out=csum[1:])
+            # correctness first (cumsum-based segmented sums).
+            # Accumulate the reference in float64 even for a float32 output:
+            # a *global* float32 cumsum over millions of elements, then a
+            # difference of two large near-equal partial sums, loses all
+            # precision (catastrophic cancellation) and would flag the
+            # (correct) per-bin kernels as wrong. float64 cumsum is accurate
+            # enough that the per-bin difference is trustworthy.
+            ref_dt = cp.float64 if np.dtype(to_dt).kind == "f" else to_dt
+            csum = cp.zeros(total + 1, dtype=ref_dt)
+            cp.cumsum(data.astype(ref_dt), out=csum[1:])
             reference = csum[offsets[1:]] - csum[offsets[:-1]]
             for name, fn in impls:
                 fn()
                 cp.cuda.Device().synchronize()
                 got = {"A": out_a, "B": out_b, "C": out_c}[name[0]]
                 if np.dtype(to_dt).kind == "f":
-                    ok = bool(cp.allclose(got, reference, rtol=1e-4, atol=1e-6))
+                    # rtol sized for float32 in-bin accumulation over large bins
+                    ok = bool(cp.allclose(got, reference, rtol=1e-3, atol=1e-3))
                 else:
                     ok = bool((got == reference).all())
                 if not ok:
