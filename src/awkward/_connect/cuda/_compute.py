@@ -784,11 +784,15 @@ def awkward_reduce_countnonzero_complex(
 
 # Overlays a mask onto an index array: masked positions become -1, unmasked positions keep their original index value.
 def awkward_IndexedArray_overlay_mask(toindex, mask, fromindex, length):
-    def transform(i):
-        return -1 if mask[i] else fromindex[i]
-
-    indices = CountingIterator(cp.int64(0))
-    unary_transform(d_in=indices, d_out=toindex, op=transform, num_items=length)
+    # Vectorised CuPy: the `transform` closure captured the device arrays
+    # `mask`/`fromindex`, defeating cuda.compute's build-result cache so every
+    # call pinned a fresh `toindex` (see test_4056_cuda_kernel_memory).
+    if length == 0:
+        return
+    dtype = toindex.dtype.type
+    toindex[:length] = cp.where(
+        mask[:length].astype(cp.bool_), dtype(-1), fromindex[:length]
+    )
 
 
 # Skips masked (-1) entries and packs remaining valid entries into nextcarry, tracking where
@@ -1008,16 +1012,12 @@ def awkward_UnionArray_simplify_one(
     if length == 0:
         return
 
-    def transform(i):
-        if fromtags[i] == fromwhich:
-            totags[i] = towhich
-            toindex[i] = fromindex[i] + base
-        return 0  # discarded
-
-    indices = CountingIterator(cp.int64(0))
-    unary_transform(
-        d_in=indices, d_out=DiscardIterator(), op=transform, num_items=length
-    )
+    # Vectorised CuPy: the `transform` closure captured the device arrays
+    # `fromtags`/`fromindex`, defeating cuda.compute's cache and leaking per
+    # call. Positions where the tag does not match are left untouched.
+    sel = cp.nonzero(fromtags[:length] == fromwhich)[0]
+    totags[sel] = towhich
+    toindex[sel] = fromindex[sel] + base
 
 
 # producing a carry index that maps each output element back to its position in the original content
@@ -1051,19 +1051,21 @@ def awkward_ListArray_broadcast_tooffsets(
 
     # For each segment i, write the content indices starts[i], starts[i]+1, ..., stops[i]-1
     # into the contiguous output slice tocarry[fromoffsets[i] : fromoffsets[i+1]].
-    def fill_list(i):
-        start = starts[i]
-        stop = stops[i]
-        for j in range(start, stop):
-            tocarry[fromoffsets[i] + j - start] = j
-        return 0
-
-    unary_transform(
-        d_in=CountingIterator(cp.int64(0)),
-        d_out=DiscardIterator(),
-        op=fill_list,
-        num_items=length,
+    # Vectorised CuPy: the `fill_list` closure captured the device arrays
+    # `starts`/`stops`/`fromoffsets`, defeating cuda.compute's cache and leaking
+    # `tocarry` per call. Output positions are contiguous in
+    # [fromoffsets[0], fromoffsets[length]); for output slot p = fromoffsets[i] + m
+    # the value is starts[i] + m.
+    total = int(counts.sum())
+    if total == 0:
+        return
+    starts_per = cp.repeat(starts, counts)
+    base_per = cp.repeat(fromoffsets[:length], counts)
+    begin = int(fromoffsets[0])
+    within = cp.arange(total, dtype=tocarry.dtype) - (base_per - begin).astype(
+        tocarry.dtype, copy=False
     )
+    tocarry[begin : begin + total] = starts_per.astype(tocarry.dtype, copy=False) + within
 
 
 # For each segment i, it fills toindex with the local position of each element within that segment — i.e. 0, 1, 2, ...
@@ -1074,22 +1076,23 @@ def awkward_ListArray_localindex(toindex, offsets, length):
     if length == 0:
         return
 
+    # Vectorised CuPy: the `fill` closure captured the device arrays
+    # `starts`/`stops`/`toindex`, defeating cuda.compute's cache and leaking per
+    # call. Each contiguous segment [starts[i], stops[i]) is filled with its
+    # local positions 0, 1, ..., counts[i]-1.
     starts = offsets[:length]
     stops = offsets[1 : length + 1]
-
-    def fill(i):
-        start = starts[i]
-        stop = stops[i]
-        for j in range(start, stop):
-            toindex[j] = j - start
-        return 0
-
-    unary_transform(
-        d_in=CountingIterator(cp.int64(0)),
-        d_out=DiscardIterator(),
-        op=fill,
-        num_items=length,
+    counts = stops - starts
+    total = int(counts.sum())
+    if total == 0:
+        return
+    grp = cp.zeros(length, dtype=counts.dtype)
+    grp[1:] = cp.cumsum(counts)[:-1]
+    local = cp.arange(total, dtype=toindex.dtype) - cp.repeat(grp, counts).astype(
+        toindex.dtype, copy=False
     )
+    begin = int(starts[0])
+    toindex[begin : begin + total] = local
 
 
 # Converts a ListArray's (starts, stops) pairs into offsets.
@@ -1379,21 +1382,14 @@ def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
     Each list is padded or clipped to length `target`.
     """
 
-    def fill(i):
-        start = i * target
-        end = start + target
-
-        tostarts[i] = tostarts.dtype.type(start)
-        return tostarts.dtype.type(end)
-
-    segment_ids = CountingIterator(tostarts.dtype.type(0))
-
-    unary_transform(
-        d_in=segment_ids,
-        d_out=tostops,
-        op=fill,
-        num_items=length,
-    )
+    # Vectorised CuPy: the `fill` closure captured the device array `tostarts`,
+    # defeating cuda.compute's cache and leaking per call.
+    if length == 0:
+        return
+    dtype = tostarts.dtype.type
+    i = cp.arange(length, dtype=dtype)
+    tostarts[:length] = i * dtype(target)
+    tostops[:length] = i * dtype(target) + dtype(target)
 
 
 def awkward_missing_repeat(
@@ -1464,17 +1460,9 @@ def awkward_RegularArray_getitem_next_range_spreadadvanced(
     if length == 0 or nextsize == 0:
         return
 
-    dtype = toadvanced.dtype.type
-
-    def fill(k):
-        return fromadvanced[k // nextsize]
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=toadvanced,
-        op=fill,
-        num_items=length * nextsize,
-    )
+    # Vectorised CuPy: the `fill` closure captured the device array
+    # `fromadvanced`, defeating cuda.compute's cache and leaking per call.
+    toadvanced[: length * nextsize] = cp.repeat(fromadvanced[:length], nextsize)
 
 
 # Builds the carry index for slicing a RegularArray with a slice (start:stop:step).
@@ -1516,31 +1504,23 @@ def awkward_RegularArray_getitem_next_range(
 def awkward_RegularArray_getitem_next_array_advanced(
     tocarry, toadvanced, fromadvanced, fromarray, length, size
 ):
+    # Vectorised CuPy rather than a `unary_transform`: the `fill_carry` closure
+    # captures the device arrays `fromarray` and `fromadvanced`, which defeats
+    # cuda.compute's build-result cache so every call pinned a fresh `tocarry`
+    # (one buffer of `length`) through the cached iterators -- linear GPU-memory
+    # growth across repeated advanced/missing slices (see
+    # tests-cuda/test_4056_cuda_kernel_memory.py::test_missing_repeat_memory).
+    # The plain-CuPy form allocates only short-lived temporaries that the pool
+    # reclaims:
+    #   tocarry[i]    = i * size + fromarray[fromadvanced[i]]
+    #   toadvanced[i] = i
     if length == 0:
         return
 
     dtype = tocarry.dtype.type
-
-    def fill_carry(i):
-        return dtype(i * size + fromarray[fromadvanced[i]])
-
-    adtype = toadvanced.dtype.type
-
-    def fill_advanced(i):
-        return adtype(i)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=tocarry,
-        op=fill_carry,
-        num_items=length,
-    )
-    unary_transform(
-        d_in=CountingIterator(adtype(0)),
-        d_out=toadvanced,
-        op=fill_advanced,
-        num_items=length,
-    )
+    i = cp.arange(length, dtype=dtype)
+    tocarry[:] = i * dtype(size) + fromarray[fromadvanced].astype(dtype, copy=False)
+    toadvanced[:] = cp.arange(length, dtype=toadvanced.dtype.type)
 
 
 # Used when a RegularArray is indexed by a 1-D array (fromarray) of intra-row positions.
@@ -1556,21 +1536,17 @@ def awkward_RegularArray_getitem_next_array(
     if length == 0 or lenarray == 0:
         return
 
+    # Vectorised CuPy: the `fill_both` closure captured the device arrays
+    # `fromarray`/`tocarry`/`toadvanced`, defeating cuda.compute's cache and
+    # leaking per call.
     dtype = tocarry.dtype.type
-
-    def fill_both(k):
-        j = k % lenarray
-        i = k // lenarray
-        tocarry[k] = dtype(i * size + fromarray[j])
-        toadvanced[k] = dtype(j)
-        return dtype(0)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=DiscardIterator(),
-        op=fill_both,
-        num_items=length * lenarray,
+    k = cp.arange(length * lenarray, dtype=dtype)
+    j = k % lenarray
+    i = k // lenarray
+    tocarry[: length * lenarray] = i * dtype(size) + fromarray[j].astype(
+        dtype, copy=False
     )
+    toadvanced[: length * lenarray] = j
 
 
 # Expands a carry index over a RegularArray of fixed-size sublists.
@@ -1581,19 +1557,13 @@ def awkward_RegularArray_getitem_carry(tocarry, fromcarry, lencarry, size):
     if lencarry == 0 or size == 0:
         return
 
+    # Vectorised CuPy: the `fill` closure captured the device array `fromcarry`,
+    # defeating cuda.compute's cache and leaking `tocarry` per call.
     dtype = tocarry.dtype.type
-
-    def fill(k):
-        i = k // size
-        j = k % size
-        return dtype(fromcarry[i] * size + j)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=tocarry,
-        op=fill,
-        num_items=lencarry * size,
-    )
+    k = cp.arange(lencarry * size, dtype=dtype)
+    i = k // size
+    j = k % size
+    tocarry[: lencarry * size] = fromcarry[i].astype(dtype, copy=False) * dtype(size) + j
 
 
 # Checks whether any two subranges of tmpptr (defined by fromstarts/fromstops) are equal.
@@ -1659,23 +1629,22 @@ def awkward_NumpyArray_pad_zero_to_length(
     if num_sublists <= 0 or target == 0:
         return
 
+    # Vectorised CuPy: the `fill` closure captured the device arrays
+    # `fromptr`/`fromoffsets`, defeating cuda.compute's cache and leaking
+    # `toptr` per call.
     dtype = toptr.dtype.type
-
-    def fill(q):
-        k = q // target
-        j = q % target
-        start = fromoffsets[k]
-        count = fromoffsets[k + 1] - start
-        if j < count:
-            return dtype(fromptr[start + j])
-        return dtype(0)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=toptr,
-        op=fill,
-        num_items=num_sublists * target,
-    )
+    n_out = num_sublists * target
+    if fromptr.size == 0:
+        toptr[:n_out] = dtype(0)
+        return
+    q = cp.arange(n_out, dtype=cp.int64)
+    k = q // target
+    j = q % target
+    start = fromoffsets[:num_sublists][k]
+    count = fromoffsets[1 : num_sublists + 1][k] - start
+    valid = j < count
+    src = cp.where(valid, start + j, 0)
+    toptr[:n_out] = cp.where(valid, fromptr[src].astype(dtype, copy=False), dtype(0))
 
 
 # Same as awkward_NumpyArray_subrange_equal but for bool arrays.
