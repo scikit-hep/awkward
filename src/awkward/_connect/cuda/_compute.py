@@ -311,17 +311,9 @@ def awkward_reduce_sum_bool(
     if input_data.dtype == cp.bool_:
         mapped = input_data.view(cp.int8)
     else:
-        mapped = cp.empty(input_data.shape, dtype=cp.int8)
-
-        def is_nonzero(x):
-            return cp.int8(1) if x != 0 else cp.int8(0)
-
-        unary_transform(
-            d_in=input_data,
-            d_out=mapped,
-            op=is_nonzero,
-            num_items=input_data.size,
-        )
+        # Vectorised CuPy: a fresh `is_nonzero` closure each call leaks `mapped`
+        # via unary_transform's op-identity-keyed cache.
+        mapped = (input_data != 0).astype(cp.int8)
 
     d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
     start_o, end_o = make_segment_views(offsets_data)
@@ -349,20 +341,10 @@ def awkward_reduce_sum_bool_complex(
 
     d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
 
-    mapped_data = cp.empty(input_complex.shape, dtype=cp.int8)
-
-    def is_nonzero_complex(c):
-        # A complex number is non-zero if either real or imag is non-zero
-        if c.real != 0 or c.imag != 0:
-            return 1
-        return 0
-
-    unary_transform(
-        d_in=input_complex,
-        d_out=mapped_data,
-        op=is_nonzero_complex,
-        num_items=input_complex.size,
-    )
+    # Vectorised CuPy: a fresh `is_nonzero_complex` closure each call leaks
+    # `mapped_data` via unary_transform's op-identity-keyed cache. A complex
+    # value is non-zero iff its real or imaginary part is non-zero.
+    mapped_data = (input_complex != 0).astype(cp.int8)
 
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=cp.int8)  # Identity for OR is False
@@ -520,17 +502,9 @@ def awkward_reduce_prod_bool(
     # even when every element is non-zero, giving a spurious False.
     # Instead, map each element to {0, 1} once and reduce with MIN (= AND).
     # This mirrors awkward_reduce_sum_bool's MAX-over-{0,1} for ak.any.
-    mapped = cp.empty(input_data.shape, dtype=cp.int8)
-
-    def is_nonzero(x):
-        return cp.int8(1) if x != 0 else cp.int8(0)
-
-    unary_transform(
-        d_in=input_data,
-        d_out=mapped,
-        op=is_nonzero,
-        num_items=input_data.size,
-    )
+    # Vectorised CuPy: a fresh `is_nonzero` closure each call leaks `mapped`
+    # via unary_transform's op-identity-keyed cache.
+    mapped = (input_data != 0).astype(cp.int8)
 
     d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
     start_o, end_o = make_segment_views(offsets_data)
@@ -556,17 +530,9 @@ def awkward_reduce_prod_bool_complex(
     complex_dtype = infer_complex_dtype(input_data.dtype)
     input_complex = input_data.view(complex_dtype)
 
-    mapped_input = cp.empty(input_complex.shape, dtype=cp.int8)
-
-    def is_nonzero(c):
-        return cp.int8(c.real != 0 or c.imag != 0)
-
-    unary_transform(
-        d_in=input_complex,
-        d_out=mapped_input,
-        op=is_nonzero,
-        num_items=input_complex.size,
-    )
+    # Vectorised CuPy: a fresh `is_nonzero` closure each call leaks `mapped_input`
+    # via unary_transform's op-identity-keyed cache.
+    mapped_input = (input_complex != 0).astype(cp.int8)
 
     start_o, end_o = make_segment_views(offsets_data)
     d_result = result.view(cp.int8)
@@ -718,17 +684,9 @@ def awkward_reduce_countnonzero(
     if input_data.dtype == cp.bool_:
         input_data = input_data.view(cp.int8)
 
-    mapped_data = cp.empty(input_data.shape, dtype=result.dtype)
-
-    def is_nonzero_map(x):
-        return result.dtype.type(1) if x != 0 else result.dtype.type(0)
-
-    unary_transform(
-        d_in=input_data,
-        d_out=mapped_data,
-        op=is_nonzero_map,
-        num_items=input_data.size,
-    )
+    # Vectorised CuPy: a fresh `is_nonzero_map` closure each call leaks
+    # `mapped_data` via unary_transform's op-identity-keyed cache.
+    mapped_data = (input_data != 0).astype(result.dtype)
 
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=result.dtype)
@@ -1065,7 +1023,9 @@ def awkward_ListArray_broadcast_tooffsets(
     within = cp.arange(total, dtype=tocarry.dtype) - (base_per - begin).astype(
         tocarry.dtype, copy=False
     )
-    tocarry[begin : begin + total] = starts_per.astype(tocarry.dtype, copy=False) + within
+    tocarry[begin : begin + total] = (
+        starts_per.astype(tocarry.dtype, copy=False) + within
+    )
 
 
 # For each segment i, it fills toindex with the local position of each element within that segment — i.e. 0, 1, 2, ...
@@ -1361,19 +1321,12 @@ def awkward_index_rpad_and_clip_axis0(toindex, target, length):
     Called from ``Content._pad_none_axis0`` in
     ``src/awkward/contents/content.py``.
     """
+    # Vectorised CuPy: a fresh `fill` closure each call leaks `toindex` via
+    # unary_transform's op-identity-keyed cache. See test_4056_cuda_kernel_memory.
     dtype = toindex.dtype.type
     shorter = min(target, length)
-
-    def fill(i):
-        return dtype(i) if i < shorter else dtype(-1)
-
-    counters = CountingIterator(dtype(0))
-    unary_transform(
-        d_in=counters,
-        d_out=toindex,
-        op=fill,
-        num_items=target,
-    )
+    idx = cp.arange(target, dtype=dtype)
+    toindex[:target] = cp.where(idx < shorter, idx, dtype(-1))
 
 
 def awkward_index_rpad_and_clip_axis1(tostarts, tostops, target, length):
@@ -1439,17 +1392,10 @@ def awkward_RegularArray_localindex(toindex, size, length):
     if length == 0 or size == 0:
         return
 
+    # Vectorised CuPy: a fresh `fill` closure each call leaks `toindex` via
+    # unary_transform's op-identity-keyed cache. See test_4056_cuda_kernel_memory.
     dtype = toindex.dtype.type
-
-    def fill(k):
-        return dtype(k % size)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=toindex,
-        op=fill,
-        num_items=length * size,
-    )
+    toindex[: length * size] = cp.arange(length * size, dtype=dtype) % dtype(size)
 
 
 # Broadcasts each element of fromadvanced across nextsize consecutive slots in toadvanced.
@@ -1479,18 +1425,15 @@ def awkward_RegularArray_getitem_next_range(
     if length == 0 or nextsize == 0:
         return
 
+    # Vectorised CuPy: a fresh `fill` closure each call misses unary_transform's
+    # build-result cache (keyed on op identity, NOT on captured arrays), so each
+    # call pinned `tocarry` forever. See test_4056_cuda_kernel_memory.
     dtype = tocarry.dtype.type
-
-    def fill(k):
-        i = k // nextsize
-        j = k % nextsize
-        return dtype(i * size + regular_start + j * step)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=tocarry,
-        op=fill,
-        num_items=length * nextsize,
+    k = cp.arange(length * nextsize, dtype=dtype)
+    i = k // nextsize
+    j = k % nextsize
+    tocarry[: length * nextsize] = (
+        i * dtype(size) + dtype(regular_start) + j * dtype(step)
     )
 
 
@@ -1563,7 +1506,9 @@ def awkward_RegularArray_getitem_carry(tocarry, fromcarry, lencarry, size):
     k = cp.arange(lencarry * size, dtype=dtype)
     i = k // size
     j = k % size
-    tocarry[: lencarry * size] = fromcarry[i].astype(dtype, copy=False) * dtype(size) + j
+    tocarry[: lencarry * size] = (
+        fromcarry[i].astype(dtype, copy=False) * dtype(size) + j
+    )
 
 
 # Checks whether any two subranges of tmpptr (defined by fromstarts/fromstops) are equal.
@@ -1689,22 +1634,14 @@ def awkward_MaskedArray_getitem_next_jagged_project(
 def awkward_RegularArray_rpad_and_clip_axis1(toindex, target, size, length):
     if length == 0 or target == 0:
         return
+    # Vectorised CuPy: a fresh `fill` closure each call leaks `toindex` via
+    # unary_transform's op-identity-keyed cache. See test_4056_cuda_kernel_memory.
     shorter = min(target, size)
     dtype = toindex.dtype.type
-
-    def fill(q):
-        i = q // target
-        j = q % target
-        if j < shorter:
-            return dtype(i * size + j)
-        return dtype(-1)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=toindex,
-        op=fill,
-        num_items=length * target,
-    )
+    q = cp.arange(length * target, dtype=dtype)
+    i = q // target
+    j = q % target
+    toindex[: length * target] = cp.where(j < shorter, i * dtype(size) + j, dtype(-1))
 
 
 # IS NOT USED (keep for archive). Takes too long to check for error cases.
@@ -1754,17 +1691,10 @@ def awkward_RegularArray_getitem_next_at(tocarry, at, length, size):
         )
     if length == 0:
         return
+    # Vectorised CuPy: a fresh `_index` closure each call leaks `tocarry` via
+    # unary_transform's op-identity-keyed cache. See test_4056_cuda_kernel_memory.
     dtype = tocarry.dtype.type
-
-    def _index(q):
-        return dtype(q * size + regular_at)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=tocarry[:length],
-        op=_index,
-        num_items=length,
-    )
+    tocarry[:length] = cp.arange(length, dtype=dtype) * dtype(size) + dtype(regular_at)
 
 
 # IS NOT USED (keep for archive). Takes too long to check for error cases.
@@ -1880,22 +1810,17 @@ def awkward_ListOffsetArray_rpad_axis1(toindex, fromoffsets, fromlength, target)
 def awkward_ListOffsetArray_rpad_and_clip_axis1(toindex, fromoffsets, length, target):
     if length == 0 or target == 0:
         return
+    # Vectorised CuPy: a fresh `fill` closure each call leaks `toindex` via
+    # unary_transform's op-identity-keyed cache. See test_4056_cuda_kernel_memory.
     dtype = toindex.dtype.type
-
-    def fill(q):
-        i = q // target
-        j = q % target
-        rangeval = fromoffsets[i + 1] - fromoffsets[i]
-        shorter = rangeval if rangeval < target else target
-        if j < shorter:
-            return dtype(fromoffsets[i] + j)
-        return dtype(-1)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=toindex,
-        op=fill,
-        num_items=length * target,
+    q = cp.arange(length * target, dtype=cp.int64)
+    i = q // target
+    j = q % target
+    starts = fromoffsets[:length][i]
+    rangeval = fromoffsets[1 : length + 1][i] - starts
+    shorter = cp.minimum(rangeval, target)
+    toindex[: length * target] = cp.where(
+        j < shorter, (starts + j).astype(dtype, copy=False), dtype(-1)
     )
 
 
