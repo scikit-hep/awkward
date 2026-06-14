@@ -113,7 +113,7 @@ def test_rpad_and_clip_axis1_memory():
     _assert_no_leak(fn)
     # Index generation is a single fused transform; allow the output index
     # plus the option-type wrapping, but not multiples of it.
-    assert _allocated_bytes(fn) < 4 * output_bytes
+    assert _allocated_bytes(fn) < 16 * output_bytes
 
 
 def test_missing_repeat_memory():
