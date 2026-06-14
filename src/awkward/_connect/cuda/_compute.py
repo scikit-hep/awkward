@@ -1382,7 +1382,7 @@ def awkward_missing_repeat(
     offset *= index_dtype(regularsize)
     offset *= base >= 0
     base += offset
-    outindex[:] = base
+    outindex[:output_size] = base
 
 
 # For each element in a regular array of `length` sublists of fixed `size`,
@@ -1467,10 +1467,14 @@ def awkward_RegularArray_getitem_next_array_advanced(
     if length == 0:
         return
 
+    # Inputs/outputs may be longer than `length` (generated kernel tests pass
+    # oversized buffers); operate only on the first `length` entries.
     dtype = tocarry.dtype.type
     i = cp.arange(length, dtype=dtype)
-    tocarry[:] = i * dtype(size) + fromarray[fromadvanced].astype(dtype, copy=False)
-    toadvanced[:] = cp.arange(length, dtype=toadvanced.dtype.type)
+    tocarry[:length] = i * dtype(size) + fromarray[fromadvanced[:length]].astype(
+        dtype, copy=False
+    )
+    toadvanced[:length] = cp.arange(length, dtype=toadvanced.dtype.type)
 
 
 # Used when a RegularArray is indexed by a 1-D array (fromarray) of intra-row positions.
