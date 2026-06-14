@@ -1373,15 +1373,15 @@ def awkward_missing_repeat(
 
     index_dtype = outindex.dtype.type
 
-    # counter runs over [0, output_size); position within the index is
-    # j = counter % indexlength and the repetition block is i = counter // indexlength.
-    counter = cp.arange(output_size, dtype=index_dtype)
-    base = index[counter % indexlength].astype(index_dtype, copy=False)
-    # Reuse `counter` to hold i * regularsize, zeroed wherever base is missing (< 0).
-    counter //= indexlength
-    counter *= index_dtype(regularsize)
-    counter *= base >= 0
-    base += counter
+    # base[k] = index[k % indexlength] via a tile (no materialised gather index);
+    # offset[k] = (k // indexlength) * regularsize, zeroed where base is missing
+    # (< 0). Minimal-allocation form to stay within the per-call budget.
+    base = cp.tile(index[:indexlength], repetitions).astype(index_dtype, copy=False)
+    offset = cp.arange(output_size, dtype=index_dtype)
+    offset //= indexlength
+    offset *= index_dtype(regularsize)
+    offset *= base >= 0
+    base += offset
     outindex[:] = base
 
 
@@ -1425,16 +1425,23 @@ def awkward_RegularArray_getitem_next_range(
     if length == 0 or nextsize == 0:
         return
 
-    # Vectorised CuPy: a fresh `fill` closure each call misses unary_transform's
-    # build-result cache (keyed on op identity, NOT on captured arrays), so each
-    # call pinned `tocarry` forever. See test_4056_cuda_kernel_memory.
+    # Vectorised CuPy (minimal allocation): a fresh `fill` closure each call
+    # leaked `tocarry` via unary_transform's op-identity-keyed cache. Computes the
+    # carry in place; the common nextsize==1 case needs a single buffer.
     dtype = tocarry.dtype.type
-    k = cp.arange(length * nextsize, dtype=dtype)
-    i = k // nextsize
-    j = k % nextsize
-    tocarry[: length * nextsize] = (
-        i * dtype(size) + dtype(regular_start) + j * dtype(step)
-    )
+    n = length * nextsize
+    out = cp.arange(n, dtype=dtype)
+    if nextsize == 1:
+        out *= dtype(size)
+        out += dtype(regular_start)
+    else:
+        j = out % nextsize
+        out //= nextsize
+        out *= dtype(size)
+        out += dtype(regular_start)
+        j *= dtype(step)
+        out += j
+    tocarry[:n] = out
 
 
 # Used when a RegularArray is indexed by two simultaneous advanced indices.
@@ -1479,17 +1486,18 @@ def awkward_RegularArray_getitem_next_array(
     if length == 0 or lenarray == 0:
         return
 
-    # Vectorised CuPy: the `fill_both` closure captured the device arrays
-    # `fromarray`/`tocarry`/`toadvanced`, defeating cuda.compute's cache and
-    # leaking per call.
+    # Vectorised CuPy (minimal allocation): the per-call `fill_both` closure
+    # leaked via unary_transform's op-identity-keyed cache. Reuses one arange
+    # buffer in place (i = k // lenarray) to stay within the per-call budget.
     dtype = tocarry.dtype.type
-    k = cp.arange(length * lenarray, dtype=dtype)
+    n = length * lenarray
+    k = cp.arange(n, dtype=dtype)
     j = k % lenarray
-    i = k // lenarray
-    tocarry[: length * lenarray] = i * dtype(size) + fromarray[j].astype(
-        dtype, copy=False
-    )
-    toadvanced[: length * lenarray] = j
+    toadvanced[:n] = j
+    k //= lenarray
+    k *= dtype(size)
+    k += fromarray[j].astype(dtype, copy=False)
+    tocarry[:n] = k
 
 
 # Expands a carry index over a RegularArray of fixed-size sublists.
