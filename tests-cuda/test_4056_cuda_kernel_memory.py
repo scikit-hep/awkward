@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import gc
+
 import numpy as np
 import pytest
 
@@ -39,16 +41,38 @@ def _allocated_bytes(fn):
     return sum(recorder.sizes)
 
 
+def _synchronize():
+    """Synchronize the device *and* drain Awkward's pending CUDA-kernel list.
+
+    Every Awkward CUDA kernel launch appends an ``Invocation`` -- which holds an
+    ``ErrorContext`` pinning the buffers referenced by that operation -- to
+    ``cuda_streamptr_to_contexts``. By design this list is only flushed on an
+    explicit ``synchronize_cuda()`` or once it reaches ``MAX_PENDING_INVOCATIONS``
+    (8192) launches. A handful of repeated calls therefore keep their per-call
+    argument buffers alive, so a plain ``cp`` device sync followed by
+    ``used_bytes()`` reports bounded-but-real growth that is *not* a leak.
+    Draining here releases those references so the measurement reflects the
+    steady state after the documented flush.
+    """
+    import awkward._connect.cuda as ak_cuda
+
+    stream = cp.cuda.get_current_stream()
+    stream.synchronize()
+    if stream.ptr in ak_cuda.cuda_streamptr_to_contexts:
+        ak_cuda.synchronize_cuda(stream)
+    gc.collect()
+
+
 def _assert_no_leak(fn, calls=5):
     """Pool usage must not grow monotonically across repeated calls."""
     fn()
-    cp.cuda.Device().synchronize()
+    _synchronize()
     pool = cp.get_default_memory_pool()
     pool.free_all_blocks()
     baseline = pool.used_bytes()
     for _ in range(calls):
         fn()
-    cp.cuda.Device().synchronize()
+    _synchronize()
     pool.free_all_blocks()
     assert pool.used_bytes() <= baseline + 1_048_576  # 1 MB slack
 
