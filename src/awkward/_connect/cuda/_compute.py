@@ -1038,21 +1038,24 @@ def awkward_ListArray_localindex(toindex, offsets, length):
 
     # Vectorised CuPy: the `fill` closure captured the device arrays
     # `starts`/`stops`/`toindex`, defeating cuda.compute's cache and leaking per
-    # call. Each contiguous segment [starts[i], stops[i]) is filled with its
-    # local positions 0, 1, ..., counts[i]-1.
-    starts = offsets[:length]
-    stops = offsets[1 : length + 1]
-    counts = stops - starts
+    # call. This is the GENERIC ListArray kernel: starts/stops are consecutive
+    # slices of `offsets` but are NOT guaranteed monotonic — stops[i] < starts[i]
+    # is an empty list (the original `for j in range(start, stop)` writes
+    # nothing), and ranges may be non-contiguous, so write each segment's local
+    # positions 0..count-1 to absolute positions [start, stop) via a scatter.
+    # Work in signed int64 to avoid unsigned underflow turning empty lists into
+    # ~2**32-long ranges, and clamp empty/negative-length lists to zero.
+    starts = offsets[:length].astype(cp.int64, copy=False)
+    stops = offsets[1 : length + 1].astype(cp.int64, copy=False)
+    counts = cp.maximum(stops - starts, cp.int64(0))
     total = int(counts.sum())
     if total == 0:
         return
-    grp = cp.zeros(length, dtype=counts.dtype)
+    grp = cp.zeros(length, dtype=cp.int64)
     grp[1:] = cp.cumsum(counts)[:-1]
-    local = cp.arange(total, dtype=toindex.dtype) - cp.repeat(grp, counts).astype(
-        toindex.dtype, copy=False
-    )
-    begin = int(starts[0])
-    toindex[begin : begin + total] = local
+    local = cp.arange(total, dtype=cp.int64) - cp.repeat(grp, counts)
+    positions = cp.repeat(starts, counts) + local
+    toindex[positions] = local.astype(toindex.dtype, copy=False)
 
 
 # Converts a ListArray's (starts, stops) pairs into offsets.
