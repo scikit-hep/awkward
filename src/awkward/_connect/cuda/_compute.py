@@ -1405,38 +1405,35 @@ def awkward_missing_repeat(
 ):
     """
     Repeats an index array `repetitions` times, adjusting valid (non-negative)
-    indices by an offset of `regularsize` per repetition.
-    Missing values (-1) are preserved.
+    indices by an offset of `regularsize` per repetition. Missing values (-1)
+    are preserved.
+
+    Implemented with vectorised CuPy rather than a `unary_transform`: the
+    transform's per-call `fill` closure captures `index`, which defeats
+    cuda.compute's build-result cache so that every call pinned a fresh
+    `outindex` through the cached iterators -- linear GPU-memory growth across
+    repeated missing-slices (regression covered by
+    tests-cuda/test_4056_cuda_kernel_memory.py::test_missing_repeat_memory).
+    The plain-CuPy form allocates only short-lived temporaries that the memory
+    pool reclaims, and is bit-for-bit equivalent to awkward_missing_repeat.cu:
+    outindex[i * indexlength + j] = index[j] + (index[j] >= 0 ? i * regularsize : 0).
     """
-    index_dtype = outindex.dtype.type
     output_size = repetitions * indexlength
+    if output_size == 0:
+        return
 
-    reg_size = index_dtype(regularsize)
-    idx_len = index_dtype(indexlength)
+    index_dtype = outindex.dtype.type
 
-    def fill(counter):
-        # Position in the original index array
-        j = counter % idx_len
-        # Which repetition block are we in?
-        i = counter // idx_len
-
-        base = index[j]
-
-        # Awkward convention: -1 and lower are masked/missing
-        if base >= 0:
-            return index_dtype(base + i * reg_size)
-        else:
-            # Preserve the exact missing value (usually -1)
-            return base
-
-    counters = CountingIterator(index_dtype(0))
-
-    unary_transform(
-        d_in=counters,
-        d_out=outindex,
-        num_items=output_size,
-        op=fill,
-    )
+    # counter runs over [0, output_size); position within the index is
+    # j = counter % indexlength and the repetition block is i = counter // indexlength.
+    counter = cp.arange(output_size, dtype=index_dtype)
+    base = index[counter % indexlength].astype(index_dtype, copy=False)
+    # Reuse `counter` to hold i * regularsize, zeroed wherever base is missing (< 0).
+    counter //= indexlength
+    counter *= index_dtype(regularsize)
+    counter *= base >= 0
+    base += counter
+    outindex[:] = base
 
 
 # For each element in a regular array of `length` sublists of fixed `size`,
