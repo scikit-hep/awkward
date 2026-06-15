@@ -269,6 +269,10 @@ jobs:
         if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
         run: python -m pytest -vv -rs tests-cuda-kernels-explicit
 
+      - name: Test kernel property-based tests
+        if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
+        run: python -m pytest -vv -rs tests/properties -m cuda
+
       - name: Test CUDA non-kernel (Python)
         run: >-
           python -m pytest -vv -rs tests-cuda --ignore=tests-cuda/test_3459_virtualarray_with_cuda.py
