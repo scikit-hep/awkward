@@ -114,6 +114,33 @@ def _widen_for_reduce(input_data, out_dtype):
     )
 
 
+@functools.cache
+def _make_is_nonzero(in_type, out_type):
+    """Interned ``x -> 1 if x != 0 else 0`` map op (stable identity per dtype
+    pair, so cuda.compute builds one kernel per pair). The output type is set by
+    the return annotation."""
+
+    def _nz(x):
+        return 1 if x != 0 else 0
+
+    _nz.__annotations__ = {"x": in_type, "return": out_type}
+    return _nz
+
+
+def _nonzero_for_reduce(input_data, out_dtype):
+    """Fuse the ``!= 0`` map into a downstream segmented_reduce: a
+    TransformIterator that maps each element to {0, 1} on the fly, so the
+    reduction never sees (or allocates) a materialised ``mapped`` buffer.
+    Equivalent to ``(input_data != 0).astype(out_dtype)`` without the buffer.
+    (Real/integer inputs only — complex inputs keep the host-side CuPy map,
+    since a complex-valued cuda.compute iterator risks NVRTC failures.)
+    """
+    return TransformIterator(
+        input_data,
+        _make_is_nonzero(input_data.dtype.type, np.dtype(out_dtype).type),
+    )
+
+
 def segmented_sort(
     toptr,
     fromptr,
@@ -349,19 +376,19 @@ def awkward_reduce_sum_bool(
     # truncate to int8 on store, an input like [256, 512, ...] reduces to MAX
     # = 512 which truncates to 0 → spurious False. Map to {0, 1} first, then
     # MAX = OR. Symmetric to awkward_reduce_prod_bool (MIN = AND).
+    # Fuse the {0, 1} map into the reduction (no materialised `mapped` buffer).
+    # A bool array is already {0, 1}, so a free int8 view suffices.
     if input_data.dtype == cp.bool_:
-        mapped = input_data.view(cp.int8)
+        d_in = input_data.view(cp.int8)
     else:
-        # Vectorised CuPy: a fresh `is_nonzero` closure each call leaks `mapped`
-        # via unary_transform's op-identity-keyed cache.
-        mapped = (input_data != 0).astype(cp.int8)
+        d_in = _nonzero_for_reduce(input_data, cp.int8)
 
     d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=cp.int8)  # identity for MAX over {0, 1}
 
     segmented_reduce(
-        d_in=mapped,
+        d_in=d_in,
         d_out=d_out,
         num_segments=outlength,
         start_offsets_in=start_o,
@@ -543,16 +570,18 @@ def awkward_reduce_prod_bool(
     # even when every element is non-zero, giving a spurious False.
     # Instead, map each element to {0, 1} once and reduce with MIN (= AND).
     # This mirrors awkward_reduce_sum_bool's MAX-over-{0,1} for ak.any.
-    # Vectorised CuPy: a fresh `is_nonzero` closure each call leaks `mapped`
-    # via unary_transform's op-identity-keyed cache.
-    mapped = (input_data != 0).astype(cp.int8)
+    # Fuse the {0, 1} map into the reduction (no materialised `mapped` buffer).
+    if input_data.dtype == cp.bool_:
+        d_in = input_data.view(cp.int8)
+    else:
+        d_in = _nonzero_for_reduce(input_data, cp.int8)
 
     d_out = result.view(cp.int8) if result.dtype == cp.bool_ else result
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(1, dtype=cp.int8)  # identity for MIN over {0, 1}
 
     segmented_reduce(
-        d_in=mapped,
+        d_in=d_in,
         d_out=d_out,
         num_segments=outlength,
         start_offsets_in=start_o,
@@ -725,15 +754,15 @@ def awkward_reduce_countnonzero(
     if input_data.dtype == cp.bool_:
         input_data = input_data.view(cp.int8)
 
-    # Vectorised CuPy: a fresh `is_nonzero_map` closure each call leaks
-    # `mapped_data` via unary_transform's op-identity-keyed cache.
-    mapped_data = (input_data != 0).astype(result.dtype)
+    # Fuse the {0, 1} map into the reduction (no materialised `mapped` buffer);
+    # output dtype is the result dtype so PLUS counts the non-zero elements.
+    d_in = _nonzero_for_reduce(input_data, result.dtype)
 
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=result.dtype)
 
     segmented_reduce(
-        d_in=mapped_data,
+        d_in=d_in,
         d_out=result,
         num_segments=outlength,
         start_offsets_in=start_o,
