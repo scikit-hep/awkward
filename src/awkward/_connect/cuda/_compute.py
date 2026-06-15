@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import functools
+
 from cuda.compute import (
     CountingIterator,
     DiscardIterator,
@@ -71,6 +73,45 @@ def infer_complex_dtype(dtype):
     if dt == cp.float64:
         return cp.complex128
     raise TypeError(f"Expected float32/float64 interleaved complex buffer, got {dt}")
+
+
+@functools.cache
+def _make_widening_cast(in_type, out_type):
+    """Interned scalar cast op for a (in_type -> out_type) widening.
+
+    Returned with a stable identity (cached per dtype pair) so cuda.compute
+    builds one kernel per pair instead of recompiling a fresh closure each call.
+    The op only needs to widen; cuda.compute uses the return annotation to pick
+    the output type, so an `int()` / `float()` body suffices.
+    """
+    if np.dtype(out_type).kind == "f":
+
+        def _cast(x):
+            return float(x)
+
+    else:
+
+        def _cast(x):
+            return int(x)
+
+    _cast.__annotations__ = {"x": in_type, "return": out_type}
+    return _cast
+
+
+def _widen_for_reduce(input_data, out_dtype):
+    """Fuse a widening cast into a downstream segmented_reduce.
+
+    Returns ``input_data`` unchanged when no cast is needed; otherwise a
+    ``TransformIterator`` that casts on the fly, so the reduction never sees (or
+    allocates) a materialised ``astype`` copy of the whole input. Equivalent to
+    ``input_data.astype(out_dtype, copy=False)`` but without the buffer.
+    """
+    if input_data.dtype == out_dtype:
+        return input_data
+    return TransformIterator(
+        input_data,
+        _make_widening_cast(input_data.dtype.type, np.dtype(out_dtype).type),
+    )
 
 
 def segmented_sort(
@@ -281,7 +322,7 @@ def awkward_reduce_sum(
     offsets_data,
     outlength,
 ):
-    d_input = input_data.astype(result.dtype, copy=False)
+    d_input = _widen_for_reduce(input_data, result.dtype)
     start_o, end_o = make_segment_views(offsets_data)
 
     h_init = np.asarray(0, dtype=result.dtype)
@@ -366,7 +407,7 @@ def awkward_reduce_sum_int32_bool_64(
     offsets_data,
     outlength,
 ):
-    d_input = input_data.astype(result.dtype, copy=False)
+    d_input = _widen_for_reduce(input_data, result.dtype)
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=result.dtype)
 
@@ -387,7 +428,7 @@ def awkward_reduce_sum_int64_bool_64(
     offsets_data,
     outlength,
 ):
-    d_input = input_data.astype(result.dtype, copy=False)
+    d_input = _widen_for_reduce(input_data, result.dtype)
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(0, dtype=result.dtype)
 
@@ -443,7 +484,7 @@ def awkward_reduce_prod(
     offsets_data,
     outlength,
 ):
-    d_input = input_data.astype(result.dtype, copy=False)
+    d_input = _widen_for_reduce(input_data, result.dtype)
 
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(1, dtype=result.dtype)
