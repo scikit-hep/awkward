@@ -362,6 +362,7 @@ def awkward_reduce_sum(
         end_offsets_in=end_o,
         op=OpKind.PLUS,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -395,6 +396,7 @@ def awkward_reduce_sum_bool(
         end_offsets_in=end_o,
         op=OpKind.MAXIMUM,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -425,6 +427,7 @@ def awkward_reduce_sum_bool_complex(
         end_offsets_in=end_o,
         op=OpKind.MAXIMUM,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -446,6 +449,7 @@ def awkward_reduce_sum_int32_bool_64(
         end_offsets_in=end_o,
         op=OpKind.PLUS,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -467,6 +471,7 @@ def awkward_reduce_sum_int64_bool_64(
         end_offsets_in=end_o,
         op=OpKind.PLUS,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -495,6 +500,7 @@ def awkward_reduce_sum_complex(
         end_offsets_in=end_o,
         op=sum_op,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -527,6 +533,7 @@ def awkward_reduce_prod(
         end_offsets_in=end_o,
         op=prod_op,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -555,6 +562,7 @@ def awkward_reduce_prod_complex(
         end_offsets_in=end_o,
         op=prod_op,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -588,6 +596,7 @@ def awkward_reduce_prod_bool(
         end_offsets_in=end_o,
         op=OpKind.MINIMUM,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -620,6 +629,7 @@ def awkward_reduce_prod_bool_complex(
         end_offsets_in=end_o,
         op=prod_op,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -645,6 +655,7 @@ def awkward_reduce_max(
         end_offsets_in=end_o,
         op=OpKind.MAXIMUM,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -678,6 +689,7 @@ def awkward_reduce_max_complex(
         end_offsets_in=end_o,
         op=lex_max_op,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -700,6 +712,7 @@ def awkward_reduce_min(
         end_offsets_in=end_o,
         op=OpKind.MINIMUM,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -733,6 +746,7 @@ def awkward_reduce_min_complex(
         end_offsets_in=end_o,
         op=lex_min_op,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
@@ -769,6 +783,7 @@ def awkward_reduce_countnonzero(
         end_offsets_in=end_o,
         op=OpKind.PLUS,
         h_init=h_init,
+        max_segment_size=cp.max(end_o - start_o) if outlength else 0,
     )
 
 
