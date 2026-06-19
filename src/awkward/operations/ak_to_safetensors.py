@@ -50,11 +50,9 @@ def to_safetensors(
             system's native byte order.
 
     Returns:
-        None
-        This function writes the safetensors file to `destination`. If
-        `container` is provided, it will be populated with the raw buffer bytes.
-
-        Serialize an Awkward Array to the safetensors format and write it to `destination`.
+        None. The contents of `array` are written to `destination` in the
+        safetensors format. If `container` is provided, it is populated with the
+        raw buffer bytes.
 
         Ref: https://huggingface.co/docs/safetensors/.
 

@@ -42,6 +42,9 @@ def metadata_from_parquet(
         scan_files (bool): TODO
 
     Returns:
+        A dict of metadata describing the Parquet dataset (its form, filesystem,
+        paths, row counts, and columns), read without reading the array data.
+
         This function differs from ak.from_parquet._metadata as follows:
 
         * this function will always use a _metadata file, if present

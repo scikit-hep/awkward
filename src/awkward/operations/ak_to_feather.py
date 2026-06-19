@@ -74,7 +74,8 @@ def to_feather(
             provided, version 2 is used.
 
     Returns:
-        Writes an Awkward Array to a Feather file (through pyarrow).
+        None. The contents of `array` are written to the given Feather file
+        (through pyarrow).
 
         If the `array` does not contain records at top-level, the Arrow table will
         consist of one field whose name is `""` iff. `extensionarray` is False.

@@ -152,9 +152,7 @@ def to_parquet(
             to open a remote file for writing.
 
     Returns:
-        Writes an Awkward Array to a Parquet file (through pyarrow).
-
-        `pyarrow._parquet.FileMetaData` instance
+        A `pyarrow._parquet.FileMetaData` describing the written Parquet file.
 
         If the `array` does not contain records at top-level, the Arrow table will consist
         of one field whose name is `""` iff. `extensionarray` is False.

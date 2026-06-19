@@ -31,8 +31,8 @@ def to_backend(array, backend, *, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     Returns:
-        Converts an array from `"cpu"`, `"cuda"`, `"jax"` kernels to `"cpu"`,
-        `"cuda"`, `"jax"`, or `"typetracer"` .
+        An array with the same data as the input, moved to the requested backend
+        (kernel set).
 
         Any components that are already in the desired backend are viewed,
         rather than copied, so this operation can be an inexpensive way to ensure

@@ -34,7 +34,8 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     Returns:
-        Converts a variable-length axis into a regular one, if possible.
+        An array with one or all variable-length axes converted to regular axes, if
+        possible.
 
     Examples:
         >>> irregular = ak.from_iter(np.arange(2*3*5).reshape(2, 3, 5))

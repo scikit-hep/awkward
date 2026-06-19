@@ -55,7 +55,7 @@ def to_arrow(
             applications faster. If False, skip the up-front cost of counting them.
 
     Returns:
-        Converts an Awkward Array into an Apache Arrow array.
+        An Apache Arrow array (`pyarrow.Array`) with the same data as `array`.
 
         This produces arrays of type `pyarrow.Array`. You might need to further
         manipulations (using the pyarrow library) to build a `pyarrow.ChunkedArray`,
