@@ -23,8 +23,8 @@ def from_categorical(array, *, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     Returns:
-        This function replaces categorical data with non-categorical data (by
-        removing the label that declares it as such).
+        An array with categorical data replaced by the equivalent non-categorical
+        data (by removing the label that declares it as such).
 
         This is a metadata-only operation; the running time does not scale with the
         size of the dataset. (Conversion to categorical is expensive; conversion

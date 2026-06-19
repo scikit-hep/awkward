@@ -33,7 +33,7 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     Returns:
-        Converts a regular axis into an irregular one.
+        An array with one or all regular axes converted to irregular (var) axes.
 
     Examples:
         >>> regular = ak.Array(np.arange(2*3*5).reshape(2, 3, 5))

@@ -60,7 +60,7 @@ def from_parquet(
             high-level.
 
     Returns:
-        Reads data from a local or remote Parquet file or collection of files.
+        An #ak.Array read from the given local or remote Parquet file(s).
 
         The data are eagerly (not lazily) read and must fit into memory. Use `columns`
         and/or `row_groups` to select and filter manageable subsets of the data, and

@@ -18,7 +18,7 @@ def from_arrow_schema(schema):
         schema (`pyarrow.Schema`): Apache Arrow schema to convert into an Awkward Form.
 
     Returns:
-        Converts an Apache Arrow schema into an Awkward Form.
+        An #ak.forms.Form built from the given Apache Arrow schema.
 
         Because awkward uses numpy's dtype system, timestamp types do not have timezones.
         If encountering timestamp types with timezones in the input arrow data, they

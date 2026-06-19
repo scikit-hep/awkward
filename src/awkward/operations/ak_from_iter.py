@@ -44,7 +44,7 @@ def from_iter(
             should be strictly greater than 1.
 
     Returns:
-        Converts Python data into an Awkward Array.
+        An #ak.Array built from the given Python data.
 
         Any heterogeneous and deeply nested Python data can be converted, but the output
         will never have regular-typed array lengths. Internally, this function uses

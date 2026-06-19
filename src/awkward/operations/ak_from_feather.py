@@ -42,7 +42,7 @@ def from_feather(
             high-level.
 
     Returns:
-        Reads an Feather file as an Awkward Array (through pyarrow).
+        An #ak.Array read from the given Feather file (through pyarrow).
 
     Examples:
         >>> ak.from_feather("file_name.feather")
