@@ -40,6 +40,9 @@ def zeros_like(
             high-level.
 
     Returns:
+        An array with the same structure as `array`, with every value replaced
+        by zero.
+
         This is the equivalent of NumPy's `np.zeros_like` for Awkward Arrays.
 
         See #ak.full_like for details, and see also #ak.ones_like.

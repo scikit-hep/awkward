@@ -38,6 +38,9 @@ def ones_like(
             high-level.
 
     Returns:
+        An array with the same structure as `array`, with every value replaced
+        by one.
+
         This is the equivalent of NumPy's `np.ones_like` for Awkward Arrays.
 
         See #ak.full_like for details, and see also #ak.zeros_like.
