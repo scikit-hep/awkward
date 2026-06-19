@@ -32,8 +32,8 @@ def values_astype(
             high-level.
 
     Returns:
-        Converts all numbers in the array to a new type, leaving the structure
-        untouched.
+        An array with every number converted to the given `to` type, leaving the
+        structure untouched.
 
     Examples:
         For example,

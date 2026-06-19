@@ -17,7 +17,7 @@ def is_valid(array, *, exception=False):
         exception (bool): If True, validity errors raise exceptions.
 
     Returns:
-        Returns True if there are no errors and False if there is an error.
+        True if `array` has no structural errors, False otherwise.
 
         Checks for errors in the structure of the array, such as indexes that run
         beyond the length of a node's `content`, etc. Either an error is raised or

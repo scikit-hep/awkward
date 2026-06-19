@@ -29,8 +29,8 @@ def strings_astype(array, to, *, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     Returns:
-        Converts all strings in the array to a new type, leaving the structure
-        untouched.
+        An array with every string converted to the given `to` type, leaving the
+        structure untouched.
 
     Examples:
         For example,
