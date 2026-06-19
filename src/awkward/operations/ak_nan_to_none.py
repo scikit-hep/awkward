@@ -33,7 +33,8 @@ def nan_to_none(
             high-level.
 
     Returns:
-        Converts NaN ("not a number") into None, i.e. missing values with option-type.
+        An array with NaN ("not a number") converted to None, i.e. missing values
+        with option-type.
 
         See also #ak.nan_to_num to convert NaN or infinity to specified values.
     """
