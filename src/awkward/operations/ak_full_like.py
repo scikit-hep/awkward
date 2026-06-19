@@ -44,6 +44,9 @@ def full_like(
             high-level.
 
     Returns:
+        An array with the same structure as `array`, with every value replaced
+        by `fill_value`.
+
         This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
 
         Although it's possible to produce an array of `fill_value` with the
