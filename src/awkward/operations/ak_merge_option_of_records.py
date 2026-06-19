@@ -43,7 +43,8 @@ def merge_option_of_records(
             high-level.
 
     Returns:
-        Simplifies options of records, e.g.
+        An equivalent array with the option pushed inside the record (a record of
+        options), e.g.
 
         >>> array = ak.Array([None, {"a": 1}, {"a": 2}])
 

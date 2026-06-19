@@ -97,8 +97,8 @@ def transform(
             high-level.
 
     Returns:
-        Applies a `transformation` function to every node of an Awkward array or arrays
-        to either obtain a transformed copy or extract data from a walk over the arrays'
+        The array (or arrays) obtained by applying `transformation` to every node —
+        either a transformed copy, or data extracted from a walk over the arrays'
         low-level layout nodes.
 
         This is a public interface to the infrastructure that is used to implement most

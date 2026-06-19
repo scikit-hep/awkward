@@ -38,6 +38,10 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs
             high-level.
 
     Returns:
+        An array with elements taken from `x` where `condition` is true and from `y`
+        otherwise (three-argument form), or the integer indices where `condition` is
+        true (one-argument form).
+
         This function has a one-argument form, `condition` without `x` or `y`, and
         a three-argument form, `condition`, `x`, and `y`. In the one-argument form,
         it is completely equivalent to NumPy's

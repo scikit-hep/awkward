@@ -44,7 +44,8 @@ def merge_union_of_records(
             high-level.
 
     Returns:
-        Simplifies unions of records, e.g.
+        An equivalent array with the union of records merged into a single record of
+        options, e.g.
 
         >>> array = ak.concatenate(([{"a": 1}], [{"b": 2}]))
         >>> array

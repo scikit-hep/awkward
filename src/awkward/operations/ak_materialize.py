@@ -28,7 +28,7 @@ def materialize(
             high-level.
 
     Returns:
-        Traverses the input array and materializes any virtual buffers.
+        An array with the same data as the input and all virtual buffers materialized.
         If the input array is not an #ak.Array or an #ak.contents.Content,
         an error will be raised.
         The buffers of the returned array are no longer `VirtualNDArray` objects even if there were any.
