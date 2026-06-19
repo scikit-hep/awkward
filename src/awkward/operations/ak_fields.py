@@ -19,8 +19,8 @@ def fields(array):
         array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
-        Extracts record fields or tuple slot numbers from `array` (many types
-        supported, including all Awkward Arrays and Records).
+        A list of the field names (or tuple slot numbers) of the outermost record of
+        `array` (many types supported, including all Awkward Arrays and Records).
 
         If the array contains nested records, only the outermost record is
         queried. If it contains tuples instead of records, this function outputs

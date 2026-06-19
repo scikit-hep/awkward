@@ -41,7 +41,7 @@ def with_named_axis(
 
     Returns:
         An #ak.Array or #ak.Record (or low-level equivalent, if
-        `highlevel=False`) with a new name. This function does not change the
+        `highlevel=False`) with named axes attached. This function does not change the
         array in-place. If the new name is None, then the array is returned as it is.
     """
     # Dispatch

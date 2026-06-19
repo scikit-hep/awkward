@@ -29,7 +29,7 @@ def with_parameter(
             high-level.
 
     Returns:
-        This function returns a new array with a parameter set on the outermost
+        An array with a parameter set on the outermost
         node of its #ak.Array.layout.
 
         Note that a "new array" is a lightweight shallow copy, not a duplication

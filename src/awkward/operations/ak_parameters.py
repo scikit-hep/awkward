@@ -24,7 +24,7 @@ def parameters(array):
         array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
-        Extracts parameters from the outermost array node of `array` (many types
+        The parameters dict of the outermost node of `array` (many types
         supported, including all Awkward Arrays and Records).
 
         Parameters are a dict from str to JSON-like objects, usually strings.

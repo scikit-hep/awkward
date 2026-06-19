@@ -26,7 +26,7 @@ def without_parameters(array, *, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     Returns:
-        This function returns a new array without any parameters in its
+        An array without any parameters in its
         #ak.Array.layout, on nodes of any level of depth.
 
         Note that a "new array" is a lightweight shallow copy, not a duplication
