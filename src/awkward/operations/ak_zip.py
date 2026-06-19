@@ -55,8 +55,8 @@ def zip(
             high-level.
 
     Returns:
-        Combines `arrays` into a single structure as the fields of a collection
-        of records or the slots of a collection of tuples. If the `arrays` have
+        An array of records (or tuples) whose fields (or slots) are the `arrays`,
+        combined into a single structure. If the `arrays` have
         nested structure, they are broadcasted with one another to form the
         records or tuples as deeply as possible, though this can be limited by
         `depth_limit`.

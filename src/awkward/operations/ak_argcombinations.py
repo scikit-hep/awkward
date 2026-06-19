@@ -62,9 +62,8 @@ def argcombinations(
             high-level.
 
     Returns:
-        Computes a Cartesian product (i.e. cross product) of `array` with itself
-        that is restricted to combinations sampled without replacement,
-        like #ak.combinations, but returning integer indexes for
+        An array of integer indexes into the combinations of `array` with itself
+        (sampled without replacement), like #ak.combinations but for use with
         #ak.Array.__getitem__.
 
         The motivation and uses of this function are similar to those of

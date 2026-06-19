@@ -73,8 +73,8 @@ def cartesian(
             high-level.
 
     Returns:
-        Computes a Cartesian product (i.e. cross product) of data from a set of
-        `arrays`. This operation creates records (if `arrays` is a dict) or tuples
+        An array holding the Cartesian product (i.e. cross product) of data from a
+        set of `arrays`. This operation creates records (if `arrays` is a dict) or tuples
         (if `arrays` is another kind of iterable) that hold the combinations
         of elements, and it can introduce new levels of nesting.
 

@@ -44,8 +44,8 @@ def zip_no_broadcast(
             high-level.
 
     Returns:
-        Combines `arrays` into a single structure as the fields of a collection
-        of records or the slots of a collection of tuples.
+        An array of records (or tuples) whose fields (or slots) are the `arrays`,
+        combined into a single structure.
 
         Caution: unlike #ak.zip this function will _not_ broadcast the arrays together.
         During typetracing, it assumes that the given arrays have already the same layouts and lengths.

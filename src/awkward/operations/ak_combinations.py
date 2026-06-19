@@ -65,8 +65,8 @@ def combinations(
             high-level.
 
     Returns:
-        Computes a Cartesian product (i.e. cross product) of `array` with itself
-        that is restricted to combinations sampled without replacement. If the
+        An array holding the Cartesian product (i.e. cross product) of `array` with
+        itself, restricted to combinations sampled without replacement. If the
         normal Cartesian product is thought of as an `n` dimensional tensor, these
         represent the "upper triangle" of sets without repetition. If
         `replacement=True`, the diagonal of this "upper triangle" is included.

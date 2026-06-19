@@ -34,8 +34,8 @@ def unzip(
             high-level.
 
     Returns:
-        If the `array` contains tuples or records, this operation splits them
-        into a Python tuple (or dict) of arrays, one for each field.
+        A Python tuple (or dict) of arrays, one for each field of the tuples or
+        records in `array`.
 
         If the `array` does not contain tuples or records, the single `array`
         is placed in a length 1 Python tuple (or dict).
