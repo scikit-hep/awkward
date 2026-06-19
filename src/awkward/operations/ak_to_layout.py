@@ -67,9 +67,7 @@ def to_layout(
             regular array objects.
 
     Returns:
-        Converts `array` (many types supported, including all Awkward Arrays and
-        Records) into a #ak.contents.Content and maybe #ak.record.Record or
-        other types.
+        A low-level #ak.contents.Content (or scalar) holding the data of `array`.
 
         This function is usually used to sanitize inputs for other functions; it
         would rarely be used in a data analysis because #ak.contents.Content and

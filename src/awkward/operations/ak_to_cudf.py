@@ -15,7 +15,7 @@ def to_cudf(array):
         array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
-        Converts an Awkward Array into a cuDF Series.
+        A cuDF Series with the same data as `array`.
 
         Buffers that are not already in GPU memory will be transferred, and some
         structural reformatting may happen to account for differences in architecture.

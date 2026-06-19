@@ -19,8 +19,8 @@ def to_torch(array):
         array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
-        Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
-        into a PyTorch Tensor, if possible.
+        A PyTorch tensor with the same data as `array`, if the conversion is
+        possible.
 
         If `array` contains any other data types (RecordArray for example) the function raises a TypeError.
     """
