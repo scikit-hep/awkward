@@ -70,7 +70,7 @@ def moment(
             high-level.
 
     Returns:
-        Computes the `n`th moment in each group of elements from `x` (many
+        The `n`th moment in each group of elements from `x` (many
         types supported, including all Awkward Arrays and Records). The grouping
         is performed the same way as for reducers, though this operation is not a
         reducer and has no identity.

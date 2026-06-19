@@ -59,7 +59,7 @@ def argmin(
             high-level.
 
     Returns:
-        Returns the index position of the minimum value in each group of elements
+        The index position of the minimum value in each group of elements
         from `array` (many types supported, including all Awkward Arrays and
         Records). The identity of minimization would be infinity, but argmin
         must return the position of the minimum element, which has no value for

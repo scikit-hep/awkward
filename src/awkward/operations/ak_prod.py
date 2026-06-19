@@ -59,7 +59,7 @@ def prod(
             high-level.
 
     Returns:
-        Multiplies elements of `array` (many types supported, including all
+        The product of the elements of `array` (many types supported, including all
         Awkward Arrays and Records). The identity of multiplication is `1` and it
         is usually not masked. This operation is the same as NumPy's
         [prod](https://docs.scipy.org/doc/numpy/reference/generated/numpy.prod.html)

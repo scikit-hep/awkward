@@ -58,7 +58,7 @@ def count(
             high-level.
 
     Returns:
-        Counts elements of `array` (many types supported, including all
+        The number of elements of `array` (many types supported, including all
         Awkward Arrays and Records). The identity of counting is `0` and it is
         usually not masked.
 

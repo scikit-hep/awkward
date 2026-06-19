@@ -64,7 +64,7 @@ def max(
             high-level.
 
     Returns:
-        Returns the maximum value in each group of elements from `array` (many
+        The maximum value in each group of elements from `array` (many
         types supported, including all Awkward Arrays and Records). The identity
         of maximization is `-inf` if floating-point or the smallest integer value
         if applied to integers. This identity is usually masked: the maximum of

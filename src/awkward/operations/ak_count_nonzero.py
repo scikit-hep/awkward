@@ -58,7 +58,7 @@ def count_nonzero(
             high-level.
 
     Returns:
-        Counts nonzero elements of `array` (many types supported, including all
+        The number of nonzero elements of `array` (many types supported, including all
         Awkward Arrays and Records). The identity of counting is `0` and it is
         usually not masked. This operation is the same as NumPy's
         [count_nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.count_nonzero.html)

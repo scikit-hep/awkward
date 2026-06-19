@@ -59,7 +59,7 @@ def any(
             high-level.
 
     Returns:
-        Returns True in each group of elements from `array` (many types supported,
+        True in each group of elements from `array` (many types supported,
         including all Awkward Arrays and Records) if any values are True; False
         otherwise. Thus, it represents reduction over the "logical or" operation,
         whose identity is False (i.e. asking if there are any True values in an

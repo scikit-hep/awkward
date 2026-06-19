@@ -70,7 +70,7 @@ def mean(
             high-level.
 
     Returns:
-        Computes the mean in each group of elements from `x` (many
+        The mean in each group of elements from `x` (many
         types supported, including all Awkward Arrays and Records). The grouping
         is performed the same way as for reducers, though this operation is not a
         reducer and has no identity. It is the same as NumPy's

@@ -59,7 +59,7 @@ def argmax(
             high-level.
 
     Returns:
-        Returns the index position of the maximum value in each group of elements
+        The index position of the maximum value in each group of elements
         from `array` (many types supported, including all Awkward Arrays and
         Records). The identity of maximization would be negative infinity, but
         argmax must return the position of the maximum element, which has no value

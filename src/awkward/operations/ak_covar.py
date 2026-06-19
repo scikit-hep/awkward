@@ -66,7 +66,7 @@ def covar(
             high-level.
 
     Returns:
-        Computes the covariance of `x` and `y` (many types supported, including
+        The covariance of `x` and `y` (many types supported, including
         all Awkward Arrays and Records, must be broadcastable to each other).
         The grouping is performed the same way as for reducers, though this
         operation is not a reducer and has no identity.

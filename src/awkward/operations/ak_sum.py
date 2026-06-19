@@ -59,7 +59,7 @@ def sum(
             high-level.
 
     Returns:
-        Sums over `array` (many types supported, including all Awkward Arrays
+        The sum over `array` (many types supported, including all Awkward Arrays
         and Records). The identity of addition is `0` and it is usually not
         masked. This operation is the same as NumPy's
         [sum](https://docs.scipy.org/doc/numpy/reference/generated/numpy.sum.html)
