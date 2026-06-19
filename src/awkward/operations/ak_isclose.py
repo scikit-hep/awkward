@@ -44,7 +44,8 @@ def isclose(
             high-level.
 
     Returns:
-        Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
+        An array of booleans, True where `a` and `b` are approximately equal within
+        the given tolerances. Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
         for Awkward Arrays.
     """
     # Dispatch

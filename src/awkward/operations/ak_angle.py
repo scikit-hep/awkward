@@ -30,7 +30,7 @@ def angle(val, deg=False, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     Returns:
-        Returns the counterclockwise angle from the positive real axis on the complex
+        The counterclockwise angle from the positive real axis on the complex
         plane in the range ``(-pi, pi]``, with dtype as a float.
     """
     # Dispatch
