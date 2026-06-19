@@ -16,6 +16,8 @@ def is_tuple(array):
         array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
+        True if `array` (or its outermost record) is a tuple, False otherwise.
+
         If `array` is a record, this returns True if the record is a tuple.
         If `array` is an array, this returns True if the outermost record is a tuple.
     """

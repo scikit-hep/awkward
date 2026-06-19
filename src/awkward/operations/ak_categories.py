@@ -23,6 +23,8 @@ def categories(array, highlevel=True, *, behavior=None, attrs=None):
             high-level.
 
     Returns:
+        The distinct category values of `array` (if it is categorical).
+
         If the `array` is categorical (contains #ak.contents.IndexedArray or
         #ak.contents.IndexedOptionArray labeled with parameter
         `"__array__" = "categorical"`), then this function returns its categories.

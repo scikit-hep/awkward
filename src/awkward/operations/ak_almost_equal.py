@@ -45,8 +45,8 @@ def almost_equal(
         check_named_axis: bool (default=True) whether to consider named axes as unequal.
 
     Returns:
-        Return True if the two array-like arguments are considered equal for the
-        given options. Otherwise, return False.
+        True if the two array-like arguments are equal within the given options
+        and tolerances, False otherwise.
 
         The relative difference (`rtol * abs(b)`) and the absolute difference `atol`
         are added together to compare against the absolute difference between `left`
