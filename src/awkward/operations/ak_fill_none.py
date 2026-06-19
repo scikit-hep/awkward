@@ -44,7 +44,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=Non
             high-level.
 
     Returns:
-        Replaces missing values (None) with a given `value`.
+        An array with each missing value (None) replaced by `value`.
 
     Examples:
         For example, in the following

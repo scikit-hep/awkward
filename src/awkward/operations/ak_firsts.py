@@ -44,7 +44,7 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     Returns:
-        Selects the first element of each non-empty list and inserts None for each
+        An array of the first element of each non-empty list, with None for each
         empty list.
 
     Examples:

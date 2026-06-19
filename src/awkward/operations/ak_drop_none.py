@@ -43,7 +43,7 @@ def drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     Returns:
-        Removes missing values (None) from a given array.
+        An array with missing values (None) removed.
 
     Examples:
         For example, in the following `array`,
