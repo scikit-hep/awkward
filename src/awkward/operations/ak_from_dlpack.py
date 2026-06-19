@@ -43,7 +43,7 @@ def from_dlpack(
             high-level.
 
     Returns:
-        Converts a DLPack-aware array into an Awkward Array.
+        An #ak.Array built from the given DLPack-aware array.
 
         The resulting layout may involve the following #ak.contents.Content types
         (only):

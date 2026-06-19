@@ -19,7 +19,7 @@ def from_tensorflow(array):
             Tensor to convert into an Awkward Array.
 
     Returns:
-        Converts a TensorFlow Tensor into an Awkward Array.
+        An #ak.Array built from the given TensorFlow Tensor.
 
         If `array` contains any other data types the function raises an error.
     """

@@ -44,7 +44,7 @@ def from_rdataframe(
             high-level.
 
     Returns:
-        Converts ROOT RDataFrame columns into an Awkward Array.
+        An #ak.Array built from the given ROOT RDataFrame columns.
 
         If `columns` is a string, the return value represents a single RDataFrame column.
 

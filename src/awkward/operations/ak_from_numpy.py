@@ -42,7 +42,7 @@ def from_numpy(
             high-level.
 
     Returns:
-        Converts a NumPy array into an Awkward Array.
+        An #ak.Array built from the given NumPy array.
 
         The resulting layout can only involve the following #ak.contents.Content types:
 

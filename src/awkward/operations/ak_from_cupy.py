@@ -35,7 +35,7 @@ def from_cupy(
             high-level.
 
     Returns:
-        Converts a CuPy array into an Awkward Array.
+        An #ak.Array built from the given CuPy array.
 
         The resulting layout may involve the following #ak.contents.Content types
         (only):

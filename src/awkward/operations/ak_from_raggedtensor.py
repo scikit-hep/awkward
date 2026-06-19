@@ -19,7 +19,7 @@ def from_raggedtensor(array):
             RaggedTensor to convert into an  Awkward Array.
 
     Returns:
-        Converts a TensorFlow RaggedTensor into an Awkward Array.
+        An #ak.Array built from the given TensorFlow RaggedTensor.
 
         If `array` contains any other data types the function raises an error.
     """

@@ -17,7 +17,7 @@ def from_torch(array):
             Tensor to convert into an Awkward Array.
 
     Returns:
-        Converts a PyTorch Tensor into an Awkward Array.
+        An #ak.Array built from the given PyTorch tensor.
 
         If `array` contains any other data types the function raises an error.
     """
