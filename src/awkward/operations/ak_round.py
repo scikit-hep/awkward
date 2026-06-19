@@ -42,8 +42,7 @@ def round(
             high-level.
 
     Returns:
-        Returns the real components of the given array elements.
-        If the arrays have complex elements, the returned arrays are floats.
+        An array with each element rounded to the given number of `decimals`.
     """
     # Dispatch
     yield (array,)
