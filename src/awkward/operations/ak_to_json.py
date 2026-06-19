@@ -76,9 +76,8 @@ def to_json(
             but are not JSON serializable.
 
     Returns:
-        Converts `array` (many types supported, including all Awkward Arrays and
-        Records) into JSON text. Returns bytes (encoded JSON) if `file` is None;
-        otherwise, this function returns nothing and writes to a file.
+        The JSON text as bytes when `file` is None; otherwise None, and the JSON
+        is written to `file`.
 
         This function converts the array into Python objects with #ak.to_list, performs
         some conversions to make the data JSON serializable (`nan_string`,

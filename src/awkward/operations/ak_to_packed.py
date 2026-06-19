@@ -25,7 +25,7 @@ def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
             high-level.
 
     Returns:
-        Returns an array with the same type and values as the input,
+        An array with the same type and values as the input,
         with all virtual buffers materialized (see #ak.materialize) and inner structures packed:
 
         - #ak.contents.NumpyArray becomes C-contiguous (if it isn't already)

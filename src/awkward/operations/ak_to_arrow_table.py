@@ -58,7 +58,7 @@ def to_arrow_table(
             applications faster. If False, skip the up-front cost of counting them.
 
     Returns:
-        Converts an Awkward Array into an Apache Arrow table.
+        An Apache Arrow table (`pyarrow.Table`) with the same data as `array`.
 
         This produces arrays of type `pyarrow.Table`. If you want an Arrow array,
         see #ak.to_arrow.

@@ -27,7 +27,9 @@ def to_parquet_dataset(
             search for files recursively. Ignored if `filenames` is None.
 
     Returns:
-        Creates a `_common_metadata` and a `_metadata` in a directory of Parquet files.
+        A 2-tuple `(common_metadata_path, metadata_path)` with the paths to the
+        `_common_metadata` and `_metadata` files created in the given directory
+        of Parquet files.
 
         The `_common_metadata` contains the schema that all files share. (If the files
         have different schemas, this function raises an exception.)

@@ -58,7 +58,7 @@ def to_buffers(
             arrays will be copied.
 
     Returns:
-        Decomposes an Awkward Array into a Form and a collection of memory buffers,
+        A 3-tuple `(form, length, container)` decomposed from `array`,
         so that data can be losslessly written to file formats and storage devices
         that only map names to binary blobs (such as a filesystem directory).
 
