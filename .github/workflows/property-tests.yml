@@ -75,7 +75,7 @@ jobs:
         run: python -m pip list
 
       - name: Run property-based tests
-        run: python -m pytest -vv -rs tests/properties
+        run: python -m pytest -vv -rs tests/properties --hypothesis-show-statistics
         env:
           HYPOTHESIS_PROFILE: nightly
 
