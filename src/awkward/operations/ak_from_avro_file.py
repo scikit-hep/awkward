@@ -37,7 +37,7 @@ def from_avro_file(
             high-level.
 
     Returns:
-        Reads Avro files as Awkward Arrays.
+        An #ak.Array read from the given Avro file.
 
         Internally this function uses AwkwardForth DSL. The function recursively parses the Avro schema, generates
         Awkward form and Forth code for that specific Avro file and then reads it.

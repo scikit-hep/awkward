@@ -51,8 +51,6 @@ def from_safetensors(
         ak.Array or ak.layout.Content: An Awkward Array (or layout) reconstructed
         from the safetensors buffers.
 
-        Load a safetensors file as an Awkward Array.
-
         Ref: https://huggingface.co/docs/safetensors/.
 
         This function reads data serialized in the safetensors format and reconstructs

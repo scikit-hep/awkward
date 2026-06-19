@@ -81,7 +81,7 @@ def from_buffers(
             high-level.
 
     Returns:
-        Reconstitutes an Awkward Array from a Form, length, and a collection of memory
+        An #ak.Array reconstituted from a Form, length, and a collection of memory
         buffers, so that data can be losslessly read from file formats and storage
         devices that only map names to binary blobs (such as a filesystem directory).
 

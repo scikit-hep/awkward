@@ -83,7 +83,7 @@ def from_json(
             high-level.
 
     Returns:
-        Converts a JSON string into an Awkward Array.
+        An #ak.Array read from the given JSON (string, bytes, file, or URL).
 
         There are a few different dichotomies in JSON-reading; all of the combinations
         are supported:

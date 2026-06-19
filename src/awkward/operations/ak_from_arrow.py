@@ -33,7 +33,7 @@ def from_arrow(
             high-level.
 
     Returns:
-        Converts an Apache Arrow array into an Awkward Array.
+        An #ak.Array built from the given Apache Arrow array.
 
         This function always preserves the values of a dataset; i.e. the Python objects
         returned by #ak.to_list are identical to the Python objects returned by Arrow's
