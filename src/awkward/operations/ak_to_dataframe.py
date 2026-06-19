@@ -38,9 +38,9 @@ def to_dataframe(
             records; otherwise, column names are derived from record fields.
 
     Returns:
-        Converts Awkward data structures into Pandas
-        [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
-        rows and columns. The resulting DataFrame(s) contains no Awkward structures.
+        A Pandas [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
+        DataFrame holding the data of `array`. The resulting DataFrame(s) contains no
+        Awkward structures.
 
         #ak.Array structures can't be losslessly converted into a single DataFrame;
         different fields in a record structure might have different nested list

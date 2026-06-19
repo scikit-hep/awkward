@@ -26,7 +26,7 @@ def to_rdataframe(arrays, *, flatlist_as_rvec=True):
             Awkward Array's custom C++ classes.
 
     Returns:
-        Converts an Awkward Array into ROOT Data Frame columns.
+        A ROOT RDataFrame whose columns are the fields of `array`.
 
     Examples:
         >>> x = ak.Array([

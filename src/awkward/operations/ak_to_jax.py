@@ -17,7 +17,7 @@ def to_jax(array):
         array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
-        Converts `array` (many types supported) into a JAX Device Array, if possible.
+        A JAX array with the same data as `array`, if the conversion is possible.
 
         If the data are numerical and regular (nested lists have equal lengths
         in each dimension, as described by the #ak.Array.type), they can be losslessly

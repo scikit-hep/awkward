@@ -18,8 +18,7 @@ def to_numpy(array, *, allow_missing=True):
         allow_missing (bool): allow missing (None) values.
 
     Returns:
-        Converts `array` (many types supported, including all Awkward Arrays and
-        Records) into a NumPy array, if possible.
+        A NumPy array with the same data as `array`, if the conversion is possible.
 
         If the data are numerical and regular (nested lists have equal lengths
         in each dimension, as described by the #ak.Array.type), they can be losslessly

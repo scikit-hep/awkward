@@ -19,8 +19,8 @@ def to_raggedtensor(array):
         array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
-        Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
-        into a ragged tensor, if possible.
+        A TensorFlow RaggedTensor with the same data as `array`, if the conversion is
+        possible.
 
         If `array` contains any other data types (RecordArray for example) the function raises an error.
     """
