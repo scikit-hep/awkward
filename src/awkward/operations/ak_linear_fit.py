@@ -60,7 +60,7 @@ def linear_fit(
             high-level.
 
     Returns:
-        Computes the linear fit of `y` with respect to `x` (many types supported,
+        The linear fit of `y` with respect to `x` (many types supported,
         including all Awkward Arrays and Records, must be broadcastable to each
         other). The grouping is performed the same way as for reducers, though
         this operation is not a reducer and has no identity.

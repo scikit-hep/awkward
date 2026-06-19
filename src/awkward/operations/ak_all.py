@@ -59,7 +59,7 @@ def all(
             high-level.
 
     Returns:
-        Returns True in each group of elements from `array` (many types supported,
+        True in each group of elements from `array` (many types supported,
         including all Awkward Arrays and Records) if all values are True; False
         otherwise. Thus, it represents reduction over the "logical and" operation,
         whose identity is True (i.e. asking if all the values are True in an

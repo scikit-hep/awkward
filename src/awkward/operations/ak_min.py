@@ -64,7 +64,7 @@ def min(
             high-level.
 
     Returns:
-        Returns the minimum value in each group of elements from `array` (many
+        The minimum value in each group of elements from `array` (many
         types supported, including all Awkward Arrays and Records). The identity
         of minimization is `inf` if floating-point or the largest integer value
         if applied to integers. This identity is usually masked: the minimum of

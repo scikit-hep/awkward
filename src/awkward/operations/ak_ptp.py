@@ -57,7 +57,7 @@ def ptp(
             results in the operation's identity of 0.
 
     Returns:
-        Returns the range of values in each group of elements from `array` (many
+        The range of values in each group of elements from `array` (many
         types supported, including all Awkward Arrays and Records). The range of
         an empty list is None, unless `mask_identity=False`, in which case it is 0.
         This operation is the same as NumPy's
