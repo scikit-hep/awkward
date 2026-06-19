@@ -40,6 +40,10 @@ def local_index(array, axis=-1, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
+    Returns:
+        An array of integers giving the local (within-list) position of each
+        element at the given `axis`.
+
     Examples:
         For example,
 
