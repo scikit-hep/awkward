@@ -71,6 +71,10 @@ There is also a custom flake8 plugin (`dev/flake8_awkward.py`) and `nox -s pylin
 
 The hand-written C++ implementations live in `awkward-cpp/src/cpu-kernels/` (one file per kernel) and must match the spec; `nox -s diagnostics` checks kernel definitions. Adding/changing a kernel means touching the YAML spec, the C++ implementation, and (sometimes) test data, then re-running `nox -s prepare`.
 
+**`kernel-specification.yml` is the single source of truth for all backends** — the canonical signature, semantics, edge-case behavior, and Python reference. CPU C++ and CUDA kernels must conform to it identically: Awkward guarantees cross-backend consistency (NumPy, CuPy, JAX, typetracer, compiled kernels), so any divergence breaks slicing, broadcasting, masking, union, and Dask/JAX typetracer guarantees. Do **not** introduce CUDA-only behavior, reorder arguments, change pointer/buffer types, alter edge cases, add kernels directly in C++/CUDA, or bypass the generation pipeline. GPU optimizations are fine only if semantics stay bit-for-bit identical.
+
+To change a kernel: (1) edit `kernel-specification.yml`; (2) run the generation pipeline (`nox -s prepare -- --signatures --tests`); (3) update **both** the CPU C++ and CUDA implementations to match the reference; (4) confirm `tests-spec`, `tests-cpu-kernels`, and `tests-cuda-kernels` all pass.
+
 ### header-only C++
 
 `header-only/` contains standalone C++ headers (`LayoutBuilder`, `GrowableBuffer`) used by downstream C++ projects; `dev/copy-cpp-headers.py` (part of `prepare`) copies them into `awkward-cpp` and `src/awkward/_connect/header-only`. Never edit the copies.
