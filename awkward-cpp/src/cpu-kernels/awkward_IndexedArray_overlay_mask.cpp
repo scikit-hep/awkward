@@ -17,11 +17,11 @@ ERROR awkward_IndexedArray_overlay_mask(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C, M, TO) \
-  ERROR awkward_IndexedArray##SUFFIX(TO* toindex, const M* mask, const C* fromindex, int64_t length) { \
+#define WRAPPER(FUNC, C, M, TO) \
+  ERROR FUNC(TO* toindex, const M* mask, const C* fromindex, int64_t length) { \
     return awkward_IndexedArray_overlay_mask<C, M, TO>(toindex, mask, fromindex, length); \
   }
 
-WRAPPER(32_overlay_mask8_to64, int32_t, int8_t, int64_t)
-WRAPPER(U32_overlay_mask8_to64, uint32_t, int8_t, int64_t)
-WRAPPER(64_overlay_mask8_to64, int64_t, int8_t, int64_t)
+WRAPPER(awkward_IndexedArray32_overlay_mask8_to64, int32_t, int8_t, int64_t)
+WRAPPER(awkward_IndexedArrayU32_overlay_mask8_to64, uint32_t, int8_t, int64_t)
+WRAPPER(awkward_IndexedArray64_overlay_mask8_to64, int64_t, int8_t, int64_t)

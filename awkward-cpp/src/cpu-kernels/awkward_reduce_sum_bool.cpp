@@ -32,21 +32,21 @@ ERROR awkward_reduce_sum_bool(
   return success();
 }
 
-#define REDUCE_SUM_BOOL(IN_T, IN_N)                                                      \
-  ERROR awkward_reduce_sum_bool_##IN_N##_64(                                             \
+#define REDUCE_SUM_BOOL(FUNC, IN_T)                                                      \
+  ERROR FUNC(                                             \
     bool* toptr, const IN_T* fromptr,                                                    \
     const int64_t* offsets, int64_t outlength) {                                         \
     return awkward_reduce_sum_bool<IN_T>(toptr, fromptr, offsets, outlength);            \
   }
 
-REDUCE_SUM_BOOL(bool,     bool)
-REDUCE_SUM_BOOL(int8_t,   int8)
-REDUCE_SUM_BOOL(uint8_t,  uint8)
-REDUCE_SUM_BOOL(int16_t,  int16)
-REDUCE_SUM_BOOL(uint16_t, uint16)
-REDUCE_SUM_BOOL(int32_t,  int32)
-REDUCE_SUM_BOOL(uint32_t, uint32)
-REDUCE_SUM_BOOL(int64_t,  int64)
-REDUCE_SUM_BOOL(uint64_t, uint64)
-REDUCE_SUM_BOOL(float,    float32)
-REDUCE_SUM_BOOL(double,   float64)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_bool_64, bool)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_int8_64, int8_t)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_uint8_64, uint8_t)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_int16_64, int16_t)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_uint16_64, uint16_t)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_int32_64, int32_t)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_uint32_64, uint32_t)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_int64_64, int64_t)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_uint64_64, uint64_t)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_float32_64, float)
+REDUCE_SUM_BOOL(awkward_reduce_sum_bool_float64_64, double)

@@ -16,11 +16,11 @@ ERROR awkward_UnionArray_fillindex(
   return success();
 }
 
-#define WRAPPER(SUFFIX, FROM, TO) \
-  ERROR awkward_UnionArray_fillindex_to64_from##SUFFIX(TO* toindex, int64_t toindexoffset, const FROM* fromindex, int64_t length) { \
+#define WRAPPER(FUNC, FROM, TO) \
+  ERROR FUNC(TO* toindex, int64_t toindexoffset, const FROM* fromindex, int64_t length) { \
     return awkward_UnionArray_fillindex<FROM, TO>(toindex, toindexoffset, fromindex, length); \
   }
 
-WRAPPER(32, int32_t, int64_t)
-WRAPPER(U32, uint32_t, int64_t)
-WRAPPER(64, int64_t, int64_t)
+WRAPPER(awkward_UnionArray_fillindex_to64_from32, int32_t, int64_t)
+WRAPPER(awkward_UnionArray_fillindex_to64_fromU32, uint32_t, int64_t)
+WRAPPER(awkward_UnionArray_fillindex_to64_from64, int64_t, int64_t)

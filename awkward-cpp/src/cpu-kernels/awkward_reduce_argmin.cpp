@@ -48,21 +48,21 @@ ERROR awkward_reduce_argmin(
   return success();
 }
 
-#define REDUCE_ARGMIN(IN_T, IN_N)                                                       \
-  ERROR awkward_reduce_argmin_##IN_N##_64(                                              \
+#define REDUCE_ARGMIN(FUNC, IN_T)                                                       \
+  ERROR FUNC(                                              \
     int64_t* toptr, const IN_T* fromptr,                                                \
     const int64_t* offsets, const int64_t* starts, int64_t outlength) {                 \
     return awkward_reduce_argmin<int64_t, IN_T>(                                        \
       toptr, fromptr, offsets, starts, outlength);                                      \
   }
 
-REDUCE_ARGMIN(int8_t,   int8)
-REDUCE_ARGMIN(uint8_t,  uint8)
-REDUCE_ARGMIN(int16_t,  int16)
-REDUCE_ARGMIN(uint16_t, uint16)
-REDUCE_ARGMIN(int32_t,  int32)
-REDUCE_ARGMIN(uint32_t, uint32)
-REDUCE_ARGMIN(int64_t,  int64)
-REDUCE_ARGMIN(uint64_t, uint64)
-REDUCE_ARGMIN(float,    float32)
-REDUCE_ARGMIN(double,   float64)
+REDUCE_ARGMIN(awkward_reduce_argmin_int8_64, int8_t)
+REDUCE_ARGMIN(awkward_reduce_argmin_uint8_64, uint8_t)
+REDUCE_ARGMIN(awkward_reduce_argmin_int16_64, int16_t)
+REDUCE_ARGMIN(awkward_reduce_argmin_uint16_64, uint16_t)
+REDUCE_ARGMIN(awkward_reduce_argmin_int32_64, int32_t)
+REDUCE_ARGMIN(awkward_reduce_argmin_uint32_64, uint32_t)
+REDUCE_ARGMIN(awkward_reduce_argmin_int64_64, int64_t)
+REDUCE_ARGMIN(awkward_reduce_argmin_uint64_64, uint64_t)
+REDUCE_ARGMIN(awkward_reduce_argmin_float32_64, float)
+REDUCE_ARGMIN(awkward_reduce_argmin_float64_64, double)

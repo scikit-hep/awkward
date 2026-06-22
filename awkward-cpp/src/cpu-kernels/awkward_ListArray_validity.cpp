@@ -28,11 +28,11 @@ ERROR awkward_ListArray_validity(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C) \
-  ERROR awkward_ListArray##SUFFIX(const C* starts, const C* stops, int64_t length, int64_t lencontent) { \
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(const C* starts, const C* stops, int64_t length, int64_t lencontent) { \
     return awkward_ListArray_validity<C>(starts, stops, length, lencontent); \
   }
 
-WRAPPER(32_validity, int32_t)
-WRAPPER(U32_validity, uint32_t)
-WRAPPER(64_validity, int64_t)
+WRAPPER(awkward_ListArray32_validity, int32_t)
+WRAPPER(awkward_ListArrayU32_validity, uint32_t)
+WRAPPER(awkward_ListArray64_validity, int64_t)

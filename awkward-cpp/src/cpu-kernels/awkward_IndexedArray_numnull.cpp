@@ -18,11 +18,11 @@ ERROR awkward_IndexedArray_numnull(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C) \
-  ERROR awkward_IndexedArray##SUFFIX(int64_t* numnull, const C* fromindex, int64_t lenindex) { \
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(int64_t* numnull, const C* fromindex, int64_t lenindex) { \
     return awkward_IndexedArray_numnull<C>(numnull, fromindex, lenindex); \
   }
 
-WRAPPER(32_numnull, int32_t)
-WRAPPER(U32_numnull, uint32_t)
-WRAPPER(64_numnull, int64_t)
+WRAPPER(awkward_IndexedArray32_numnull, int32_t)
+WRAPPER(awkward_IndexedArrayU32_numnull, uint32_t)
+WRAPPER(awkward_IndexedArray64_numnull, int64_t)

@@ -32,10 +32,10 @@ ERROR awkward_ListOffsetArray_drop_none_indexes(
   return success();
 }
 
-#define WRAPPER(SUFFIX, T) \
-  ERROR awkward_ListOffsetArray_drop_none_indexes_##SUFFIX(T* tooffsets, const T* noneindexes, const T* fromoffsets, int64_t length_offsets, int64_t length_indexes) { \
+#define WRAPPER(FUNC, T) \
+  ERROR FUNC(T* tooffsets, const T* noneindexes, const T* fromoffsets, int64_t length_offsets, int64_t length_indexes) { \
     return awkward_ListOffsetArray_drop_none_indexes<T>(tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes); \
   }
 
-WRAPPER(64, int64_t)
-WRAPPER(32, int32_t)
+WRAPPER(awkward_ListOffsetArray_drop_none_indexes_64, int64_t)
+WRAPPER(awkward_ListOffsetArray_drop_none_indexes_32, int32_t)

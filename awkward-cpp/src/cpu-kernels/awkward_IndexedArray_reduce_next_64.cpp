@@ -30,11 +30,11 @@ ERROR awkward_IndexedArray_reduce_next_64(
   return success();
 }
 
-#define WRAPPER(SUFFIX, T) \
-  ERROR awkward_IndexedArray##SUFFIX(int64_t* nextcarry, int64_t* nextoffsets, int64_t* outindex, const T* index, const int64_t* offsets, int64_t outlength) { \
+#define WRAPPER(FUNC, T) \
+  ERROR FUNC(int64_t* nextcarry, int64_t* nextoffsets, int64_t* outindex, const T* index, const int64_t* offsets, int64_t outlength) { \
     return awkward_IndexedArray_reduce_next_64<T>(nextcarry, nextoffsets, outindex, index, offsets, outlength); \
   }
 
-WRAPPER(32_reduce_next_64, int32_t)
-WRAPPER(U32_reduce_next_64, uint32_t)
-WRAPPER(64_reduce_next_64, int64_t)
+WRAPPER(awkward_IndexedArray32_reduce_next_64, int32_t)
+WRAPPER(awkward_IndexedArrayU32_reduce_next_64, uint32_t)
+WRAPPER(awkward_IndexedArray64_reduce_next_64, int64_t)

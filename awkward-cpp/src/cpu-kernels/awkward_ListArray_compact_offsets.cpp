@@ -22,11 +22,11 @@ ERROR awkward_ListArray_compact_offsets(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C, T) \
-  ERROR awkward_ListArray##SUFFIX(T* tooffsets, const C* fromstarts, const C* fromstops, int64_t length) { \
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* tooffsets, const C* fromstarts, const C* fromstops, int64_t length) { \
     return awkward_ListArray_compact_offsets<C, T>(tooffsets, fromstarts, fromstops, length); \
   }
 
-WRAPPER(32_compact_offsets_64, int32_t, int64_t)
-WRAPPER(U32_compact_offsets_64, uint32_t, int64_t)
-WRAPPER(64_compact_offsets_64, int64_t, int64_t)
+WRAPPER(awkward_ListArray32_compact_offsets_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_compact_offsets_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_compact_offsets_64, int64_t, int64_t)

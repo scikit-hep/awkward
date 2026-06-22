@@ -21,11 +21,11 @@ ERROR awkward_ListArray_fill(
   return success();
 }
 
-#define WRAPPER(SUFFIX, FROM, TO) \
-  ERROR awkward_ListArray_fill_to64_from##SUFFIX(TO* tostarts, int64_t tostartsoffset, TO* tostops, int64_t tostopsoffset, const FROM* fromstarts, const FROM* fromstops, int64_t length, int64_t base) { \
+#define WRAPPER(FUNC, FROM, TO) \
+  ERROR FUNC(TO* tostarts, int64_t tostartsoffset, TO* tostops, int64_t tostopsoffset, const FROM* fromstarts, const FROM* fromstops, int64_t length, int64_t base) { \
     return awkward_ListArray_fill<FROM, TO>(tostarts, tostartsoffset, tostops, tostopsoffset, fromstarts, fromstops, length, base); \
   }
 
-WRAPPER(32, int32_t, int64_t)
-WRAPPER(U32, uint32_t, int64_t)
-WRAPPER(64, int64_t, int64_t)
+WRAPPER(awkward_ListArray_fill_to64_from32, int32_t, int64_t)
+WRAPPER(awkward_ListArray_fill_to64_fromU32, uint32_t, int64_t)
+WRAPPER(awkward_ListArray_fill_to64_from64, int64_t, int64_t)

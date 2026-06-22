@@ -26,12 +26,12 @@ ERROR awkward_UnionArray_nestedfill_tags_index(
   return success();
 }
 
-#define WRAPPER(SUFFIX, T, I, C) \
-  ERROR awkward_UnionArray##SUFFIX(T* totags, I* toindex, C* tmpstarts, T tag, const C* fromcounts, int64_t length) { \
+#define WRAPPER(FUNC, T, I, C) \
+  ERROR FUNC(T* totags, I* toindex, C* tmpstarts, T tag, const C* fromcounts, int64_t length) { \
     return awkward_UnionArray_nestedfill_tags_index<T, I, C>(totags, toindex, tmpstarts, tag, fromcounts, length); \
   }
 
-WRAPPER(8_32_nestedfill_tags_index_64, int8_t, int32_t, int64_t)
-WRAPPER(8_U32_nestedfill_tags_index_64, int8_t, uint32_t, int64_t)
-WRAPPER(8_64_nestedfill_tags_index_64, int8_t, int64_t, int64_t)
-WRAPPER(64_64_nestedfill_tags_index_64, int64_t, int64_t, int64_t)
+WRAPPER(awkward_UnionArray8_32_nestedfill_tags_index_64, int8_t, int32_t, int64_t)
+WRAPPER(awkward_UnionArray8_U32_nestedfill_tags_index_64, int8_t, uint32_t, int64_t)
+WRAPPER(awkward_UnionArray8_64_nestedfill_tags_index_64, int8_t, int64_t, int64_t)
+WRAPPER(awkward_UnionArray64_64_nestedfill_tags_index_64, int64_t, int64_t, int64_t)

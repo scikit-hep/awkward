@@ -114,8 +114,8 @@ ERROR awkward_sort(
   return success();
 }
 
-#define SORT(T, NAME)                                                      \
-  ERROR awkward_sort_##NAME(                                               \
+#define SORT(FUNC, T)                                                      \
+  ERROR FUNC(                                               \
     T* toptr, const T* fromptr, int64_t length,                            \
     const int64_t* offsets, int64_t offsetslength,                         \
     bool ascending, bool stable) {                                         \
@@ -124,14 +124,14 @@ ERROR awkward_sort(
       ascending, stable);                                                  \
   }
 
-SORT(bool,     bool)
-SORT(int8_t,   int8)
-SORT(uint8_t,  uint8)
-SORT(int16_t,  int16)
-SORT(uint16_t, uint16)
-SORT(int32_t,  int32)
-SORT(uint32_t, uint32)
-SORT(int64_t,  int64)
-SORT(uint64_t, uint64)
-SORT(float,    float32)
-SORT(double,   float64)
+SORT(awkward_sort_bool, bool)
+SORT(awkward_sort_int8, int8_t)
+SORT(awkward_sort_uint8, uint8_t)
+SORT(awkward_sort_int16, int16_t)
+SORT(awkward_sort_uint16, uint16_t)
+SORT(awkward_sort_int32, int32_t)
+SORT(awkward_sort_uint32, uint32_t)
+SORT(awkward_sort_int64, int64_t)
+SORT(awkward_sort_uint64, uint64_t)
+SORT(awkward_sort_float32, float)
+SORT(awkward_sort_float64, double)

@@ -29,11 +29,11 @@ ERROR awkward_IndexedArray_getitem_nextcarry_outindex(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C, T) \
-  ERROR awkward_IndexedArray##SUFFIX(T* tocarry, C* toindex, const C* fromindex, int64_t lenindex, int64_t lencontent) { \
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* tocarry, C* toindex, const C* fromindex, int64_t lenindex, int64_t lencontent) { \
     return awkward_IndexedArray_getitem_nextcarry_outindex<C, T>(tocarry, toindex, fromindex, lenindex, lencontent); \
   }
 
-WRAPPER(32_getitem_nextcarry_outindex_64, int32_t, int64_t)
-WRAPPER(U32_getitem_nextcarry_outindex_64, uint32_t, int64_t)
-WRAPPER(64_getitem_nextcarry_outindex_64, int64_t, int64_t)
+WRAPPER(awkward_IndexedArray32_getitem_nextcarry_outindex_64, int32_t, int64_t)
+WRAPPER(awkward_IndexedArrayU32_getitem_nextcarry_outindex_64, uint32_t, int64_t)
+WRAPPER(awkward_IndexedArray64_getitem_nextcarry_outindex_64, int64_t, int64_t)

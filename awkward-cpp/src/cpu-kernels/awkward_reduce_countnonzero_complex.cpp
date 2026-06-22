@@ -20,10 +20,10 @@ ERROR awkward_reduce_countnonzero_complex(
   return success();
 }
 
-#define WRAPPER(SUFFIX, IN) \
-  ERROR awkward_reduce_countnonzero_complex##SUFFIX(int64_t* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
+#define WRAPPER(FUNC, IN) \
+  ERROR FUNC(int64_t* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
     return awkward_reduce_countnonzero_complex<IN>(toptr, fromptr, offsets, outlength); \
   }
 
-WRAPPER(64_64, float)
-WRAPPER(128_64, double)
+WRAPPER(awkward_reduce_countnonzero_complex64_64, float)
+WRAPPER(awkward_reduce_countnonzero_complex128_64, double)

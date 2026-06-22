@@ -34,11 +34,11 @@ ERROR awkward_UnionArray_flatten_combine(
   return success();
 }
 
-#define WRAPPER(SUFFIX, FROMTAGS, FROMINDEX, TOTAGS, TOINDEX, T) \
-  ERROR awkward_UnionArray##SUFFIX(TOTAGS* totags, TOINDEX* toindex, T* tooffsets, const FROMTAGS* fromtags, const FROMINDEX* fromindex, int64_t length, T** offsetsraws) { \
+#define WRAPPER(FUNC, FROMTAGS, FROMINDEX, TOTAGS, TOINDEX, T) \
+  ERROR FUNC(TOTAGS* totags, TOINDEX* toindex, T* tooffsets, const FROMTAGS* fromtags, const FROMINDEX* fromindex, int64_t length, T** offsetsraws) { \
     return awkward_UnionArray_flatten_combine<FROMTAGS, FROMINDEX, TOTAGS, TOINDEX, T>(totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws); \
   }
 
-WRAPPER(32_flatten_combine_64, int8_t, int32_t, int8_t, int64_t, int64_t)
-WRAPPER(U32_flatten_combine_64, int8_t, uint32_t, int8_t, int64_t, int64_t)
-WRAPPER(64_flatten_combine_64, int8_t, int64_t, int8_t, int64_t, int64_t)
+WRAPPER(awkward_UnionArray32_flatten_combine_64, int8_t, int32_t, int8_t, int64_t, int64_t)
+WRAPPER(awkward_UnionArrayU32_flatten_combine_64, int8_t, uint32_t, int8_t, int64_t, int64_t)
+WRAPPER(awkward_UnionArray64_flatten_combine_64, int8_t, int64_t, int8_t, int64_t, int64_t)

@@ -22,14 +22,14 @@ ERROR awkward_UnionArray_regular_index(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C, I) \
-  ERROR awkward_UnionArray##SUFFIX(I* toindex, I* current, int64_t size, const C* fromtags, int64_t length) { \
+#define WRAPPER(FUNC, C, I) \
+  ERROR FUNC(I* toindex, I* current, int64_t size, const C* fromtags, int64_t length) { \
     return awkward_UnionArray_regular_index<C, I>(toindex, current, size, fromtags, length); \
   }
 
-WRAPPER(64_32_regular_index, int64_t, int32_t)
-WRAPPER(64_U32_regular_index, int64_t, uint32_t)
-WRAPPER(64_64_regular_index, int64_t, int64_t)
-WRAPPER(8_32_regular_index, int8_t, int32_t)
-WRAPPER(8_U32_regular_index, int8_t, uint32_t)
-WRAPPER(8_64_regular_index, int8_t, int64_t)
+WRAPPER(awkward_UnionArray64_32_regular_index, int64_t, int32_t)
+WRAPPER(awkward_UnionArray64_U32_regular_index, int64_t, uint32_t)
+WRAPPER(awkward_UnionArray64_64_regular_index, int64_t, int64_t)
+WRAPPER(awkward_UnionArray8_32_regular_index, int8_t, int32_t)
+WRAPPER(awkward_UnionArray8_U32_regular_index, int8_t, uint32_t)
+WRAPPER(awkward_UnionArray8_64_regular_index, int8_t, int64_t)

@@ -30,10 +30,10 @@ ERROR awkward_reduce_min_complex(
   return success();
 }
 
-#define WRAPPER(SUFFIX, OUT, IN) \
-  ERROR awkward_reduce_min_complex##SUFFIX(OUT* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength, OUT identity) { \
+#define WRAPPER(FUNC, OUT, IN) \
+  ERROR FUNC(OUT* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength, OUT identity) { \
     return awkward_reduce_min_complex<OUT, IN>(toptr, fromptr, offsets, outlength, identity); \
   }
 
-WRAPPER(64_complex64_64, float, float)
-WRAPPER(128_complex128_64, double, double)
+WRAPPER(awkward_reduce_min_complex64_complex64_64, float, float)
+WRAPPER(awkward_reduce_min_complex128_complex128_64, double, double)

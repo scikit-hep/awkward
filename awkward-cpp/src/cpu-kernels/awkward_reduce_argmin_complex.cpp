@@ -30,10 +30,10 @@ ERROR awkward_reduce_argmin_complex(
   return success();
 }
 
-#define WRAPPER(SUFFIX, OUT, IN) \
-  ERROR awkward_reduce_argmin_complex##SUFFIX(OUT* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
+#define WRAPPER(FUNC, OUT, IN) \
+  ERROR FUNC(OUT* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
     return awkward_reduce_argmin_complex<OUT, IN>(toptr, fromptr, offsets, outlength); \
   }
 
-WRAPPER(64_64, int64_t, float)
-WRAPPER(128_64, int64_t, double)
+WRAPPER(awkward_reduce_argmin_complex64_64, int64_t, float)
+WRAPPER(awkward_reduce_argmin_complex128_64, int64_t, double)

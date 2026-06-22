@@ -26,17 +26,17 @@ ERROR awkward_IndexedArray_simplify(
   return success();
 }
 
-#define WRAPPER(SUFFIX, OUT, IN, TO) \
-  ERROR awkward_IndexedArray##SUFFIX(TO* toindex, const OUT* outerindex, int64_t outerlength, const IN* innerindex, int64_t innerlength) { \
+#define WRAPPER(FUNC, OUT, IN, TO) \
+  ERROR FUNC(TO* toindex, const OUT* outerindex, int64_t outerlength, const IN* innerindex, int64_t innerlength) { \
     return awkward_IndexedArray_simplify<OUT, IN, TO>(toindex, outerindex, outerlength, innerindex, innerlength); \
   }
 
-WRAPPER(32_simplify32_to64, int32_t, int32_t, int64_t)
-WRAPPER(32_simplifyU32_to64, int32_t, uint32_t, int64_t)
-WRAPPER(32_simplify64_to64, int32_t, int64_t, int64_t)
-WRAPPER(U32_simplify32_to64, uint32_t, int32_t, int64_t)
-WRAPPER(U32_simplifyU32_to64, uint32_t, uint32_t, int64_t)
-WRAPPER(U32_simplify64_to64, uint32_t, int64_t, int64_t)
-WRAPPER(64_simplify32_to64, int64_t, int32_t, int64_t)
-WRAPPER(64_simplifyU32_to64, int64_t, uint32_t, int64_t)
-WRAPPER(64_simplify64_to64, int64_t, int64_t, int64_t)
+WRAPPER(awkward_IndexedArray32_simplify32_to64, int32_t, int32_t, int64_t)
+WRAPPER(awkward_IndexedArray32_simplifyU32_to64, int32_t, uint32_t, int64_t)
+WRAPPER(awkward_IndexedArray32_simplify64_to64, int32_t, int64_t, int64_t)
+WRAPPER(awkward_IndexedArrayU32_simplify32_to64, uint32_t, int32_t, int64_t)
+WRAPPER(awkward_IndexedArrayU32_simplifyU32_to64, uint32_t, uint32_t, int64_t)
+WRAPPER(awkward_IndexedArrayU32_simplify64_to64, uint32_t, int64_t, int64_t)
+WRAPPER(awkward_IndexedArray64_simplify32_to64, int64_t, int32_t, int64_t)
+WRAPPER(awkward_IndexedArray64_simplifyU32_to64, int64_t, uint32_t, int64_t)
+WRAPPER(awkward_IndexedArray64_simplify64_to64, int64_t, int64_t, int64_t)

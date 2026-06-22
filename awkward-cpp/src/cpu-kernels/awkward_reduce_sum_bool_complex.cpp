@@ -20,10 +20,10 @@ ERROR awkward_reduce_sum_bool_complex(
   return success();
 }
 
-#define WRAPPER(SUFFIX, IN) \
-  ERROR awkward_reduce_sum_bool_complex##SUFFIX(bool* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
+#define WRAPPER(FUNC, IN) \
+  ERROR FUNC(bool* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
     return awkward_reduce_sum_bool_complex<IN>(toptr, fromptr, offsets, outlength); \
   }
 
-WRAPPER(64_64, float)
-WRAPPER(128_64, double)
+WRAPPER(awkward_reduce_sum_bool_complex64_64, float)
+WRAPPER(awkward_reduce_sum_bool_complex128_64, double)

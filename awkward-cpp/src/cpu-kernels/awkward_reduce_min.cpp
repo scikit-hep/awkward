@@ -42,20 +42,20 @@ ERROR awkward_reduce_min(
   return success();
 }
 
-#define REDUCE_MIN(T, NAME)                                                          \
-  ERROR awkward_reduce_min_##NAME##_##NAME##_64(                                     \
+#define REDUCE_MIN(FUNC, T)                                                          \
+  ERROR FUNC(                                     \
     T* toptr, const T* fromptr,                                                      \
     const int64_t* offsets, int64_t outlength, T identity) {                         \
     return awkward_reduce_min<T, T>(toptr, fromptr, offsets, outlength, identity);   \
   }
 
-REDUCE_MIN(int8_t,   int8)
-REDUCE_MIN(uint8_t,  uint8)
-REDUCE_MIN(int16_t,  int16)
-REDUCE_MIN(uint16_t, uint16)
-REDUCE_MIN(int32_t,  int32)
-REDUCE_MIN(uint32_t, uint32)
-REDUCE_MIN(int64_t,  int64)
-REDUCE_MIN(uint64_t, uint64)
-REDUCE_MIN(float,    float32)
-REDUCE_MIN(double,   float64)
+REDUCE_MIN(awkward_reduce_min_int8_int8_64, int8_t)
+REDUCE_MIN(awkward_reduce_min_uint8_uint8_64, uint8_t)
+REDUCE_MIN(awkward_reduce_min_int16_int16_64, int16_t)
+REDUCE_MIN(awkward_reduce_min_uint16_uint16_64, uint16_t)
+REDUCE_MIN(awkward_reduce_min_int32_int32_64, int32_t)
+REDUCE_MIN(awkward_reduce_min_uint32_uint32_64, uint32_t)
+REDUCE_MIN(awkward_reduce_min_int64_int64_64, int64_t)
+REDUCE_MIN(awkward_reduce_min_uint64_uint64_64, uint64_t)
+REDUCE_MIN(awkward_reduce_min_float32_float32_64, float)
+REDUCE_MIN(awkward_reduce_min_float64_float64_64, double)

@@ -25,18 +25,18 @@ ERROR awkward_unique_ranges(
   return success();
 }
 
-#define WRAPPER(SUFFIX, T) \
-  ERROR awkward_unique_ranges_##SUFFIX(T* toptr, const int64_t* fromoffsets, int64_t offsetslength, int64_t* tooffsets) { \
+#define WRAPPER(FUNC, T) \
+  ERROR FUNC(T* toptr, const int64_t* fromoffsets, int64_t offsetslength, int64_t* tooffsets) { \
     return awkward_unique_ranges<T>(toptr, fromoffsets, offsetslength, tooffsets); \
   }
 
-WRAPPER(int8, int8_t)
-WRAPPER(uint8, uint8_t)
-WRAPPER(int16, int16_t)
-WRAPPER(uint16, uint16_t)
-WRAPPER(int32, int32_t)
-WRAPPER(uint32, uint32_t)
-WRAPPER(int64, int64_t)
-WRAPPER(uint64, uint64_t)
-WRAPPER(float32, float)
-WRAPPER(float64, double)
+WRAPPER(awkward_unique_ranges_int8, int8_t)
+WRAPPER(awkward_unique_ranges_uint8, uint8_t)
+WRAPPER(awkward_unique_ranges_int16, int16_t)
+WRAPPER(awkward_unique_ranges_uint16, uint16_t)
+WRAPPER(awkward_unique_ranges_int32, int32_t)
+WRAPPER(awkward_unique_ranges_uint32, uint32_t)
+WRAPPER(awkward_unique_ranges_int64, int64_t)
+WRAPPER(awkward_unique_ranges_uint64, uint64_t)
+WRAPPER(awkward_unique_ranges_float32, float)
+WRAPPER(awkward_unique_ranges_float64, double)

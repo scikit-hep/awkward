@@ -25,20 +25,20 @@ ERROR awkward_reduce_max(
   return success();
 }
 
-#define REDUCE_MAX(T, NAME)                                                          \
-  ERROR awkward_reduce_max_##NAME##_##NAME##_64(                                     \
+#define REDUCE_MAX(FUNC, T)                                                          \
+  ERROR FUNC(                                     \
     T* toptr, const T* fromptr,                                                      \
     const int64_t* offsets, int64_t outlength, T identity) {                         \
     return awkward_reduce_max<T, T>(toptr, fromptr, offsets, outlength, identity);   \
   }
 
-REDUCE_MAX(int8_t,   int8)
-REDUCE_MAX(uint8_t,  uint8)
-REDUCE_MAX(int16_t,  int16)
-REDUCE_MAX(uint16_t, uint16)
-REDUCE_MAX(int32_t,  int32)
-REDUCE_MAX(uint32_t, uint32)
-REDUCE_MAX(int64_t,  int64)
-REDUCE_MAX(uint64_t, uint64)
-REDUCE_MAX(float,    float32)
-REDUCE_MAX(double,   float64)
+REDUCE_MAX(awkward_reduce_max_int8_int8_64, int8_t)
+REDUCE_MAX(awkward_reduce_max_uint8_uint8_64, uint8_t)
+REDUCE_MAX(awkward_reduce_max_int16_int16_64, int16_t)
+REDUCE_MAX(awkward_reduce_max_uint16_uint16_64, uint16_t)
+REDUCE_MAX(awkward_reduce_max_int32_int32_64, int32_t)
+REDUCE_MAX(awkward_reduce_max_uint32_uint32_64, uint32_t)
+REDUCE_MAX(awkward_reduce_max_int64_int64_64, int64_t)
+REDUCE_MAX(awkward_reduce_max_uint64_uint64_64, uint64_t)
+REDUCE_MAX(awkward_reduce_max_float32_float32_64, float)
+REDUCE_MAX(awkward_reduce_max_float64_float64_64, double)

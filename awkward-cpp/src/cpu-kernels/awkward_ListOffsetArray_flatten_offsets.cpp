@@ -17,11 +17,11 @@ ERROR awkward_ListOffsetArray_flatten_offsets(
   return success();
 }
 
-#define WRAPPER(SUFFIX, T, C) \
-  ERROR awkward_ListOffsetArray##SUFFIX(T* tooffsets, const C* outeroffsets, int64_t outeroffsetslen, const T* inneroffsets) { \
+#define WRAPPER(FUNC, T, C) \
+  ERROR FUNC(T* tooffsets, const C* outeroffsets, int64_t outeroffsetslen, const T* inneroffsets) { \
     return awkward_ListOffsetArray_flatten_offsets<T, C>(tooffsets, outeroffsets, outeroffsetslen, inneroffsets); \
   }
 
-WRAPPER(32_flatten_offsets_64, int64_t, int32_t)
-WRAPPER(U32_flatten_offsets_64, int64_t, uint32_t)
-WRAPPER(64_flatten_offsets_64, int64_t, int64_t)
+WRAPPER(awkward_ListOffsetArray32_flatten_offsets_64, int64_t, int32_t)
+WRAPPER(awkward_ListOffsetArrayU32_flatten_offsets_64, int64_t, uint32_t)
+WRAPPER(awkward_ListOffsetArray64_flatten_offsets_64, int64_t, int64_t)

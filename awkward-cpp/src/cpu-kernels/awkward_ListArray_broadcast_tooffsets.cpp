@@ -34,11 +34,11 @@ ERROR awkward_ListArray_broadcast_tooffsets(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C, T) \
-  ERROR awkward_ListArray##SUFFIX(T* tocarry, const T* fromoffsets, int64_t offsetslength, const C* fromstarts, const C* fromstops, int64_t lencontent) { \
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* tocarry, const T* fromoffsets, int64_t offsetslength, const C* fromstarts, const C* fromstops, int64_t lencontent) { \
     return awkward_ListArray_broadcast_tooffsets<C, T>(tocarry, fromoffsets, offsetslength, fromstarts, fromstops, lencontent); \
   }
 
-WRAPPER(32_broadcast_tooffsets_64, int32_t, int64_t)
-WRAPPER(U32_broadcast_tooffsets_64, uint32_t, int64_t)
-WRAPPER(64_broadcast_tooffsets_64, int64_t, int64_t)
+WRAPPER(awkward_ListArray32_broadcast_tooffsets_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_broadcast_tooffsets_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_broadcast_tooffsets_64, int64_t, int64_t)

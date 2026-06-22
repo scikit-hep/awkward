@@ -73,11 +73,11 @@ ERROR awkward_NumpyArray_utf8_to_utf32_padded(
   return success();
 }
 
-#define WRAPPER(SUFFIX, T) \
-  ERROR awkward_NumpyArray_utf8_to_utf32_padded_##SUFFIX(const uint8_t *fromptr, const T *fromoffsets, int64_t offsetslength, int64_t maxcodepoints, uint32_t *toptr) { \
+#define WRAPPER(FUNC, T) \
+  ERROR FUNC(const uint8_t *fromptr, const T *fromoffsets, int64_t offsetslength, int64_t maxcodepoints, uint32_t *toptr) { \
     return awkward_NumpyArray_utf8_to_utf32_padded<T>(fromptr, fromoffsets, offsetslength, maxcodepoints, toptr); \
   }
 
-WRAPPER(int32, int32_t)
-WRAPPER(uint32, uint32_t)
-WRAPPER(int64, int64_t)
+WRAPPER(awkward_NumpyArray_utf8_to_utf32_padded_int32, int32_t)
+WRAPPER(awkward_NumpyArray_utf8_to_utf32_padded_uint32, uint32_t)
+WRAPPER(awkward_NumpyArray_utf8_to_utf32_padded_int64, int64_t)

@@ -54,11 +54,11 @@ ERROR awkward_ListArray_getitem_jagged_apply(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C, T) \
-  ERROR awkward_ListArray##SUFFIX(T* tooffsets, T* tocarry, const T* slicestarts, const T* slicestops, int64_t sliceouterlen, const T* sliceindex, int64_t sliceinnerlen, const C* fromstarts, const C* fromstops, int64_t contentlen) { \
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* tooffsets, T* tocarry, const T* slicestarts, const T* slicestops, int64_t sliceouterlen, const T* sliceindex, int64_t sliceinnerlen, const C* fromstarts, const C* fromstops, int64_t contentlen) { \
     return awkward_ListArray_getitem_jagged_apply<C, T>(tooffsets, tocarry, slicestarts, slicestops, sliceouterlen, sliceindex, sliceinnerlen, fromstarts, fromstops, contentlen); \
   }
 
-WRAPPER(32_getitem_jagged_apply_64, int32_t, int64_t)
-WRAPPER(U32_getitem_jagged_apply_64, uint32_t, int64_t)
-WRAPPER(64_getitem_jagged_apply_64, int64_t, int64_t)
+WRAPPER(awkward_ListArray32_getitem_jagged_apply_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_getitem_jagged_apply_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_getitem_jagged_apply_64, int64_t, int64_t)

@@ -20,11 +20,11 @@ ERROR awkward_ListArray_rpad_and_clip_length_axis1(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C) \
-  ERROR awkward_ListArray##SUFFIX(int64_t* tomin, const C* fromstarts, const C* fromstops, int64_t target, int64_t lenstarts) { \
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(int64_t* tomin, const C* fromstarts, const C* fromstops, int64_t target, int64_t lenstarts) { \
     return awkward_ListArray_rpad_and_clip_length_axis1<C>(tomin, fromstarts, fromstops, target, lenstarts); \
   }
 
-WRAPPER(32_rpad_and_clip_length_axis1, int32_t)
-WRAPPER(U32_rpad_and_clip_length_axis1, uint32_t)
-WRAPPER(64_rpad_and_clip_length_axis1, int64_t)
+WRAPPER(awkward_ListArray32_rpad_and_clip_length_axis1, int32_t)
+WRAPPER(awkward_ListArrayU32_rpad_and_clip_length_axis1, uint32_t)
+WRAPPER(awkward_ListArray64_rpad_and_clip_length_axis1, int64_t)

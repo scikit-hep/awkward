@@ -20,10 +20,10 @@ ERROR awkward_UnionArray_regular_index_getsize(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C) \
-  ERROR awkward_UnionArray##SUFFIX(int64_t* size, const C* fromtags, int64_t length) { \
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(int64_t* size, const C* fromtags, int64_t length) { \
     return awkward_UnionArray_regular_index_getsize<C>(size, fromtags, length); \
   }
 
-WRAPPER(64_regular_index_getsize, int64_t)
-WRAPPER(8_regular_index_getsize, int8_t)
+WRAPPER(awkward_UnionArray64_regular_index_getsize, int64_t)
+WRAPPER(awkward_UnionArray8_regular_index_getsize, int8_t)

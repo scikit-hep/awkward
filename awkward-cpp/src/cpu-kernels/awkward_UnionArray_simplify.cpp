@@ -34,8 +34,8 @@ ERROR awkward_UnionArray_simplify(
   return success();
 }
 
-#define UNION_SIMPLIFY(SUFFIX, OUTERTAGS, OUTERINDEX, INNERTAGS, INNERINDEX, TOTAGS, TOINDEX) \
-  ERROR awkward_UnionArray##SUFFIX(                                                           \
+#define UNION_SIMPLIFY(FUNC, OUTERTAGS, OUTERINDEX, INNERTAGS, INNERINDEX, TOTAGS, TOINDEX) \
+  ERROR FUNC(                                                           \
     TOTAGS* totags, TOINDEX* toindex,                                                         \
     const OUTERTAGS* outertags, const OUTERINDEX* outerindex,                                 \
     const INNERTAGS* innertags, const INNERINDEX* innerindex,                                 \
@@ -48,13 +48,13 @@ ERROR awkward_UnionArray_simplify(
 
 // All 10 ABI specialisations. Outer/inner index dtypes vary across
 // {int32, uint32, int64}; tag dtypes are int8 (or int64 in the last row).
-UNION_SIMPLIFY(8_32_simplify8_32_to8_64,    int8_t,  int32_t,  int8_t,  int32_t,  int8_t, int64_t)
-UNION_SIMPLIFY(8_32_simplify8_U32_to8_64,   int8_t,  int32_t,  int8_t,  uint32_t, int8_t, int64_t)
-UNION_SIMPLIFY(8_32_simplify8_64_to8_64,    int8_t,  int32_t,  int8_t,  int64_t,  int8_t, int64_t)
-UNION_SIMPLIFY(8_U32_simplify8_32_to8_64,   int8_t,  uint32_t, int8_t,  int32_t,  int8_t, int64_t)
-UNION_SIMPLIFY(8_U32_simplify8_U32_to8_64,  int8_t,  uint32_t, int8_t,  uint32_t, int8_t, int64_t)
-UNION_SIMPLIFY(8_U32_simplify8_64_to8_64,   int8_t,  uint32_t, int8_t,  int64_t,  int8_t, int64_t)
-UNION_SIMPLIFY(8_64_simplify8_32_to8_64,    int8_t,  int64_t,  int8_t,  int32_t,  int8_t, int64_t)
-UNION_SIMPLIFY(8_64_simplify8_U32_to8_64,   int8_t,  int64_t,  int8_t,  uint32_t, int8_t, int64_t)
-UNION_SIMPLIFY(8_64_simplify8_64_to8_64,    int8_t,  int64_t,  int8_t,  int64_t,  int8_t, int64_t)
-UNION_SIMPLIFY(64_64_simplify8_64_to8_64,   int64_t, int64_t,  int8_t,  int64_t,  int8_t, int64_t)
+UNION_SIMPLIFY(awkward_UnionArray8_32_simplify8_32_to8_64, int8_t, int32_t, int8_t, int32_t, int8_t, int64_t)
+UNION_SIMPLIFY(awkward_UnionArray8_32_simplify8_U32_to8_64, int8_t, int32_t, int8_t, uint32_t, int8_t, int64_t)
+UNION_SIMPLIFY(awkward_UnionArray8_32_simplify8_64_to8_64, int8_t, int32_t, int8_t, int64_t, int8_t, int64_t)
+UNION_SIMPLIFY(awkward_UnionArray8_U32_simplify8_32_to8_64, int8_t, uint32_t, int8_t, int32_t, int8_t, int64_t)
+UNION_SIMPLIFY(awkward_UnionArray8_U32_simplify8_U32_to8_64, int8_t, uint32_t, int8_t, uint32_t, int8_t, int64_t)
+UNION_SIMPLIFY(awkward_UnionArray8_U32_simplify8_64_to8_64, int8_t, uint32_t, int8_t, int64_t, int8_t, int64_t)
+UNION_SIMPLIFY(awkward_UnionArray8_64_simplify8_32_to8_64, int8_t, int64_t, int8_t, int32_t, int8_t, int64_t)
+UNION_SIMPLIFY(awkward_UnionArray8_64_simplify8_U32_to8_64, int8_t, int64_t, int8_t, uint32_t, int8_t, int64_t)
+UNION_SIMPLIFY(awkward_UnionArray8_64_simplify8_64_to8_64, int8_t, int64_t, int8_t, int64_t, int8_t, int64_t)
+UNION_SIMPLIFY(awkward_UnionArray64_64_simplify8_64_to8_64, int64_t, int64_t, int8_t, int64_t, int8_t, int64_t)

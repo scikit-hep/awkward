@@ -18,11 +18,11 @@ ERROR awkward_IndexedArray_fill(
   return success();
 }
 
-#define WRAPPER(SUFFIX, FROM, TO) \
-  ERROR awkward_IndexedArray_fill_to64_from##SUFFIX(TO* toindex, int64_t toindexoffset, const FROM* fromindex, int64_t length, int64_t base) { \
+#define WRAPPER(FUNC, FROM, TO) \
+  ERROR FUNC(TO* toindex, int64_t toindexoffset, const FROM* fromindex, int64_t length, int64_t base) { \
     return awkward_IndexedArray_fill<FROM, TO>(toindex, toindexoffset, fromindex, length, base); \
   }
 
-WRAPPER(32, int32_t, int64_t)
-WRAPPER(U32, uint32_t, int64_t)
-WRAPPER(64, int64_t, int64_t)
+WRAPPER(awkward_IndexedArray_fill_to64_from32, int32_t, int64_t)
+WRAPPER(awkward_IndexedArray_fill_to64_fromU32, uint32_t, int64_t)
+WRAPPER(awkward_IndexedArray_fill_to64_from64, int64_t, int64_t)

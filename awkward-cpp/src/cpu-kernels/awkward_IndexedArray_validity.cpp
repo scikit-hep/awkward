@@ -24,11 +24,11 @@ ERROR awkward_IndexedArray_validity(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C) \
-  ERROR awkward_IndexedArray##SUFFIX(const C* index, int64_t length, int64_t lencontent, bool isoption) { \
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(const C* index, int64_t length, int64_t lencontent, bool isoption) { \
     return awkward_IndexedArray_validity<C>(index, length, lencontent, isoption); \
   }
 
-WRAPPER(32_validity, int32_t)
-WRAPPER(U32_validity, uint32_t)
-WRAPPER(64_validity, int64_t)
+WRAPPER(awkward_IndexedArray32_validity, int32_t)
+WRAPPER(awkward_IndexedArrayU32_validity, uint32_t)
+WRAPPER(awkward_IndexedArray64_validity, int64_t)

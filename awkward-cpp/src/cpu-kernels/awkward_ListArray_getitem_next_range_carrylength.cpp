@@ -36,11 +36,11 @@ ERROR awkward_ListArray_getitem_next_range_carrylength(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C) \
-  ERROR awkward_ListArray##SUFFIX(int64_t* carrylength, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t start, int64_t stop, int64_t step) { \
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(int64_t* carrylength, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t start, int64_t stop, int64_t step) { \
     return awkward_ListArray_getitem_next_range_carrylength<C>(carrylength, fromstarts, fromstops, lenstarts, start, stop, step); \
   }
 
-WRAPPER(32_getitem_next_range_carrylength, int32_t)
-WRAPPER(U32_getitem_next_range_carrylength, uint32_t)
-WRAPPER(64_getitem_next_range_carrylength, int64_t)
+WRAPPER(awkward_ListArray32_getitem_next_range_carrylength, int32_t)
+WRAPPER(awkward_ListArrayU32_getitem_next_range_carrylength, uint32_t)
+WRAPPER(awkward_ListArray64_getitem_next_range_carrylength, int64_t)

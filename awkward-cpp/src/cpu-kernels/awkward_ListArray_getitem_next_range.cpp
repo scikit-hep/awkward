@@ -41,11 +41,11 @@ ERROR awkward_ListArray_getitem_next_range(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C, T) \
-  ERROR awkward_ListArray##SUFFIX(C* tooffsets, T* tocarry, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t start, int64_t stop, int64_t step) { \
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(C* tooffsets, T* tocarry, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t start, int64_t stop, int64_t step) { \
     return awkward_ListArray_getitem_next_range<C, T>(tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step); \
   }
 
-WRAPPER(32_getitem_next_range_64, int32_t, int64_t)
-WRAPPER(U32_getitem_next_range_64, uint32_t, int64_t)
-WRAPPER(64_getitem_next_range_64, int64_t, int64_t)
+WRAPPER(awkward_ListArray32_getitem_next_range_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_getitem_next_range_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_getitem_next_range_64, int64_t, int64_t)

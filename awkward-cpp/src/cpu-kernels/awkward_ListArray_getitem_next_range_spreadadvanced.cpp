@@ -19,11 +19,11 @@ ERROR awkward_ListArray_getitem_next_range_spreadadvanced(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C, T) \
-  ERROR awkward_ListArray##SUFFIX(T* toadvanced, const T* fromadvanced, const C* fromoffsets, int64_t lenstarts) { \
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* toadvanced, const T* fromadvanced, const C* fromoffsets, int64_t lenstarts) { \
     return awkward_ListArray_getitem_next_range_spreadadvanced<C, T>(toadvanced, fromadvanced, fromoffsets, lenstarts); \
   }
 
-WRAPPER(32_getitem_next_range_spreadadvanced_64, int32_t, int64_t)
-WRAPPER(U32_getitem_next_range_spreadadvanced_64, uint32_t, int64_t)
-WRAPPER(64_getitem_next_range_spreadadvanced_64, int64_t, int64_t)
+WRAPPER(awkward_ListArray32_getitem_next_range_spreadadvanced_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_getitem_next_range_spreadadvanced_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_getitem_next_range_spreadadvanced_64, int64_t, int64_t)

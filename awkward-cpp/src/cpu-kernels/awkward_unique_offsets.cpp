@@ -27,12 +27,12 @@ ERROR awkward_unique_offsets(
   return success();
 }
 
-#define WRAPPER(SUFFIX, T) \
-  ERROR awkward_unique_offsets_int##SUFFIX(T* tooffsets, int64_t length, const int64_t* fromoffsets, const int64_t* starts, int64_t startslength) { \
+#define WRAPPER(FUNC, T) \
+  ERROR FUNC(T* tooffsets, int64_t length, const int64_t* fromoffsets, const int64_t* starts, int64_t startslength) { \
     return awkward_unique_offsets<T>(tooffsets, length, fromoffsets, starts, startslength); \
   }
 
-WRAPPER(8, int8_t)
-WRAPPER(16, int16_t)
-WRAPPER(32, int32_t)
-WRAPPER(64, int64_t)
+WRAPPER(awkward_unique_offsets_int8, int8_t)
+WRAPPER(awkward_unique_offsets_int16, int16_t)
+WRAPPER(awkward_unique_offsets_int32, int32_t)
+WRAPPER(awkward_unique_offsets_int64, int64_t)

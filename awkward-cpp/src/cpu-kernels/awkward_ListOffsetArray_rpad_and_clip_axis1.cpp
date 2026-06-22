@@ -23,11 +23,11 @@ ERROR awkward_ListOffsetArray_rpad_and_clip_axis1(
   return success();
 }
 
-#define WRAPPER(SUFFIX, T, C) \
-  ERROR awkward_ListOffsetArray##SUFFIX(T* toindex, const C* fromoffsets, int64_t length, int64_t target) { \
+#define WRAPPER(FUNC, T, C) \
+  ERROR FUNC(T* toindex, const C* fromoffsets, int64_t length, int64_t target) { \
     return awkward_ListOffsetArray_rpad_and_clip_axis1<T, C>(toindex, fromoffsets, length, target); \
   }
 
-WRAPPER(32_rpad_and_clip_axis1_64, int64_t, int32_t)
-WRAPPER(U32_rpad_and_clip_axis1_64, int64_t, uint32_t)
-WRAPPER(64_rpad_and_clip_axis1_64, int64_t, int64_t)
+WRAPPER(awkward_ListOffsetArray32_rpad_and_clip_axis1_64, int64_t, int32_t)
+WRAPPER(awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64, int64_t, uint32_t)
+WRAPPER(awkward_ListOffsetArray64_rpad_and_clip_axis1_64, int64_t, int64_t)

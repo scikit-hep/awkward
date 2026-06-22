@@ -31,11 +31,11 @@ ERROR awkward_ListArray_getitem_jagged_descend(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C, T) \
-  ERROR awkward_ListArray##SUFFIX(T* tooffsets, const T* slicestarts, const T* slicestops, int64_t sliceouterlen, const C* fromstarts, const C* fromstops) { \
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* tooffsets, const T* slicestarts, const T* slicestops, int64_t sliceouterlen, const C* fromstarts, const C* fromstops) { \
     return awkward_ListArray_getitem_jagged_descend<C, T>(tooffsets, slicestarts, slicestops, sliceouterlen, fromstarts, fromstops); \
   }
 
-WRAPPER(32_getitem_jagged_descend_64, int32_t, int64_t)
-WRAPPER(U32_getitem_jagged_descend_64, uint32_t, int64_t)
-WRAPPER(64_getitem_jagged_descend_64, int64_t, int64_t)
+WRAPPER(awkward_ListArray32_getitem_jagged_descend_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_getitem_jagged_descend_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_getitem_jagged_descend_64, int64_t, int64_t)

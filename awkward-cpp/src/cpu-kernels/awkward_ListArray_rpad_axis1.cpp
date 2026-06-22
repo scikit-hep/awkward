@@ -29,11 +29,11 @@ ERROR awkward_ListArray_rpad_axis1(
   return success();
 }
 
-#define WRAPPER(SUFFIX, T, C) \
-  ERROR awkward_ListArray##SUFFIX(T* toindex, const C* fromstarts, const C* fromstops, C* tostarts, C* tostops, int64_t target, int64_t length) { \
+#define WRAPPER(FUNC, T, C) \
+  ERROR FUNC(T* toindex, const C* fromstarts, const C* fromstops, C* tostarts, C* tostops, int64_t target, int64_t length) { \
     return awkward_ListArray_rpad_axis1<T, C>(toindex, fromstarts, fromstops, tostarts, tostops, target, length); \
   }
 
-WRAPPER(32_rpad_axis1_64, int64_t, int32_t)
-WRAPPER(U32_rpad_axis1_64, int64_t, uint32_t)
-WRAPPER(64_rpad_axis1_64, int64_t, int64_t)
+WRAPPER(awkward_ListArray32_rpad_axis1_64, int64_t, int32_t)
+WRAPPER(awkward_ListArrayU32_rpad_axis1_64, int64_t, uint32_t)
+WRAPPER(awkward_ListArray64_rpad_axis1_64, int64_t, int64_t)

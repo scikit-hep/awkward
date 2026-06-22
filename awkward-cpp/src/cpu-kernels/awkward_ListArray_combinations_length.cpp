@@ -44,11 +44,11 @@ ERROR awkward_ListArray_combinations_length(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C, T) \
-  ERROR awkward_ListArray##SUFFIX(int64_t* totallen, T* tooffsets, int64_t n, bool replacement, const C* starts, const C* stops, int64_t length) { \
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(int64_t* totallen, T* tooffsets, int64_t n, bool replacement, const C* starts, const C* stops, int64_t length) { \
     return awkward_ListArray_combinations_length<C, T>(totallen, tooffsets, n, replacement, starts, stops, length); \
   }
 
-WRAPPER(32_combinations_length_64, int32_t, int64_t)
-WRAPPER(U32_combinations_length_64, uint32_t, int64_t)
-WRAPPER(64_combinations_length_64, int64_t, int64_t)
+WRAPPER(awkward_ListArray32_combinations_length_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_combinations_length_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_combinations_length_64, int64_t, int64_t)

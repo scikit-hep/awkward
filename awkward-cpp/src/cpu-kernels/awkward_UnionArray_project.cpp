@@ -22,11 +22,11 @@ ERROR awkward_UnionArray_project(
   return success();
 }
 
-#define WRAPPER(SUFFIX, T, C, I) \
-  ERROR awkward_UnionArray8_##SUFFIX(int64_t* lenout, T* tocarry, const C* fromtags, const I* fromindex, int64_t length, int64_t which) { \
+#define WRAPPER(FUNC, T, C, I) \
+  ERROR FUNC(int64_t* lenout, T* tocarry, const C* fromtags, const I* fromindex, int64_t length, int64_t which) { \
     return awkward_UnionArray_project<T, C, I>(lenout, tocarry, fromtags, fromindex, length, which); \
   }
 
-WRAPPER(32_project_64, int64_t, int8_t, int32_t)
-WRAPPER(U32_project_64, int64_t, int8_t, uint32_t)
-WRAPPER(64_project_64, int64_t, int8_t, int64_t)
+WRAPPER(awkward_UnionArray8_32_project_64, int64_t, int8_t, int32_t)
+WRAPPER(awkward_UnionArray8_U32_project_64, int64_t, int8_t, uint32_t)
+WRAPPER(awkward_UnionArray8_64_project_64, int64_t, int8_t, int64_t)

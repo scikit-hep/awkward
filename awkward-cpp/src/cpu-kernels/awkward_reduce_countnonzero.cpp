@@ -36,21 +36,21 @@ ERROR awkward_reduce_countnonzero(
   return success();
 }
 
-#define REDUCE_COUNTNONZERO(IN_T, IN_N)                                                  \
-  ERROR awkward_reduce_countnonzero_##IN_N##_64(                                         \
+#define REDUCE_COUNTNONZERO(FUNC, IN_T)                                                  \
+  ERROR FUNC(                                         \
     int64_t* toptr, const IN_T* fromptr,                                                 \
     const int64_t* offsets, int64_t outlength) {                                         \
     return awkward_reduce_countnonzero<IN_T>(toptr, fromptr, offsets, outlength);        \
   }
 
-REDUCE_COUNTNONZERO(bool,     bool)
-REDUCE_COUNTNONZERO(int8_t,   int8)
-REDUCE_COUNTNONZERO(uint8_t,  uint8)
-REDUCE_COUNTNONZERO(int16_t,  int16)
-REDUCE_COUNTNONZERO(uint16_t, uint16)
-REDUCE_COUNTNONZERO(int32_t,  int32)
-REDUCE_COUNTNONZERO(uint32_t, uint32)
-REDUCE_COUNTNONZERO(int64_t,  int64)
-REDUCE_COUNTNONZERO(uint64_t, uint64)
-REDUCE_COUNTNONZERO(float,    float32)
-REDUCE_COUNTNONZERO(double,   float64)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_bool_64, bool)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_int8_64, int8_t)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_uint8_64, uint8_t)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_int16_64, int16_t)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_uint16_64, uint16_t)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_int32_64, int32_t)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_uint32_64, uint32_t)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_int64_64, int64_t)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_uint64_64, uint64_t)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_float32_64, float)
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_float64_64, double)

@@ -28,11 +28,11 @@ ERROR awkward_ListOffsetArray_reduce_local_nextparents_64(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C) \
-  ERROR awkward_ListOffsetArray##SUFFIX(C* nextparents, const C* offsets, int64_t length, int64_t nextparents_length) { \
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(C* nextparents, const C* offsets, int64_t length, int64_t nextparents_length) { \
     return awkward_ListOffsetArray_reduce_local_nextparents_64<C>(nextparents, offsets, length, nextparents_length); \
   }
 
-WRAPPER(32_reduce_local_nextparents_64,  int32_t)
-WRAPPER(U32_reduce_local_nextparents_64, uint32_t)
-WRAPPER(64_reduce_local_nextparents_64,  int64_t)
+WRAPPER(awkward_ListOffsetArray32_reduce_local_nextparents_64, int32_t)
+WRAPPER(awkward_ListOffsetArrayU32_reduce_local_nextparents_64, uint32_t)
+WRAPPER(awkward_ListOffsetArray64_reduce_local_nextparents_64, int64_t)

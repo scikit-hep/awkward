@@ -19,11 +19,11 @@ ERROR awkward_ListArray_min_range(
   return success();
 }
 
-#define WRAPPER(SUFFIX, C) \
-  ERROR awkward_ListArray##SUFFIX(int64_t* tomin, const C* fromstarts, const C* fromstops, int64_t lenstarts) { \
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(int64_t* tomin, const C* fromstarts, const C* fromstops, int64_t lenstarts) { \
     return awkward_ListArray_min_range<C>(tomin, fromstarts, fromstops, lenstarts); \
   }
 
-WRAPPER(32_min_range, int32_t)
-WRAPPER(U32_min_range, uint32_t)
-WRAPPER(64_min_range, int64_t)
+WRAPPER(awkward_ListArray32_min_range, int32_t)
+WRAPPER(awkward_ListArrayU32_min_range, uint32_t)
+WRAPPER(awkward_ListArray64_min_range, int64_t)

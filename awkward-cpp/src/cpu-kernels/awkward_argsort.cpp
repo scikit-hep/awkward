@@ -108,29 +108,66 @@ ERROR awkward_argsort(
   return success();
 }
 
-#define ARGSORT_OFF(T, NAME, U, ONAME)                                      \
-  ERROR awkward_argsort_##NAME##_##ONAME(                                   \
-    int64_t* toptr, const T* fromptr, int64_t length,                       \
-    const U* offsets, int64_t offsetslength,                                \
-    bool ascending, bool stable) {                                          \
-    return awkward_argsort<T, U>(                                           \
-      toptr, fromptr, length, offsets, offsetslength, ascending, stable);   \
+#define ARGSORT_OFF(FUNC, T, U)                                            \
+  ERROR FUNC(                                                              \
+    int64_t* toptr, const T* fromptr, int64_t length,                      \
+    const U* offsets, int64_t offsetslength,                               \
+    bool ascending, bool stable) {                                         \
+    return awkward_argsort<T, U>(                                          \
+      toptr, fromptr, length, offsets, offsetslength, ascending, stable);  \
   }
 
-#define ARGSORT(T, NAME)                  \
-  ARGSORT_OFF(T, NAME, int32_t,  int32)   \
-  ARGSORT_OFF(T, NAME, uint32_t, uint32)  \
-  ARGSORT_OFF(T, NAME, uint64_t, uint64)  \
-  ARGSORT_OFF(T, NAME, int64_t,  int64)
+ARGSORT_OFF(awkward_argsort_bool_int32, bool, int32_t)
+ARGSORT_OFF(awkward_argsort_bool_uint32, bool, uint32_t)
+ARGSORT_OFF(awkward_argsort_bool_uint64, bool, uint64_t)
+ARGSORT_OFF(awkward_argsort_bool_int64, bool, int64_t)
 
-ARGSORT(bool,     bool)
-ARGSORT(int8_t,   int8)
-ARGSORT(uint8_t,  uint8)
-ARGSORT(int16_t,  int16)
-ARGSORT(uint16_t, uint16)
-ARGSORT(int32_t,  int32)
-ARGSORT(uint32_t, uint32)
-ARGSORT(int64_t,  int64)
-ARGSORT(uint64_t, uint64)
-ARGSORT(float,    float32)
-ARGSORT(double,   float64)
+ARGSORT_OFF(awkward_argsort_int8_int32, int8_t, int32_t)
+ARGSORT_OFF(awkward_argsort_int8_uint32, int8_t, uint32_t)
+ARGSORT_OFF(awkward_argsort_int8_uint64, int8_t, uint64_t)
+ARGSORT_OFF(awkward_argsort_int8_int64, int8_t, int64_t)
+
+ARGSORT_OFF(awkward_argsort_uint8_int32, uint8_t, int32_t)
+ARGSORT_OFF(awkward_argsort_uint8_uint32, uint8_t, uint32_t)
+ARGSORT_OFF(awkward_argsort_uint8_uint64, uint8_t, uint64_t)
+ARGSORT_OFF(awkward_argsort_uint8_int64, uint8_t, int64_t)
+
+ARGSORT_OFF(awkward_argsort_int16_int32, int16_t, int32_t)
+ARGSORT_OFF(awkward_argsort_int16_uint32, int16_t, uint32_t)
+ARGSORT_OFF(awkward_argsort_int16_uint64, int16_t, uint64_t)
+ARGSORT_OFF(awkward_argsort_int16_int64, int16_t, int64_t)
+
+ARGSORT_OFF(awkward_argsort_uint16_int32, uint16_t, int32_t)
+ARGSORT_OFF(awkward_argsort_uint16_uint32, uint16_t, uint32_t)
+ARGSORT_OFF(awkward_argsort_uint16_uint64, uint16_t, uint64_t)
+ARGSORT_OFF(awkward_argsort_uint16_int64, uint16_t, int64_t)
+
+ARGSORT_OFF(awkward_argsort_int32_int32, int32_t, int32_t)
+ARGSORT_OFF(awkward_argsort_int32_uint32, int32_t, uint32_t)
+ARGSORT_OFF(awkward_argsort_int32_uint64, int32_t, uint64_t)
+ARGSORT_OFF(awkward_argsort_int32_int64, int32_t, int64_t)
+
+ARGSORT_OFF(awkward_argsort_uint32_int32, uint32_t, int32_t)
+ARGSORT_OFF(awkward_argsort_uint32_uint32, uint32_t, uint32_t)
+ARGSORT_OFF(awkward_argsort_uint32_uint64, uint32_t, uint64_t)
+ARGSORT_OFF(awkward_argsort_uint32_int64, uint32_t, int64_t)
+
+ARGSORT_OFF(awkward_argsort_int64_int32, int64_t, int32_t)
+ARGSORT_OFF(awkward_argsort_int64_uint32, int64_t, uint32_t)
+ARGSORT_OFF(awkward_argsort_int64_uint64, int64_t, uint64_t)
+ARGSORT_OFF(awkward_argsort_int64_int64, int64_t, int64_t)
+
+ARGSORT_OFF(awkward_argsort_uint64_int32, uint64_t, int32_t)
+ARGSORT_OFF(awkward_argsort_uint64_uint32, uint64_t, uint32_t)
+ARGSORT_OFF(awkward_argsort_uint64_uint64, uint64_t, uint64_t)
+ARGSORT_OFF(awkward_argsort_uint64_int64, uint64_t, int64_t)
+
+ARGSORT_OFF(awkward_argsort_float32_int32, float, int32_t)
+ARGSORT_OFF(awkward_argsort_float32_uint32, float, uint32_t)
+ARGSORT_OFF(awkward_argsort_float32_uint64, float, uint64_t)
+ARGSORT_OFF(awkward_argsort_float32_int64, float, int64_t)
+
+ARGSORT_OFF(awkward_argsort_float64_int32, double, int32_t)
+ARGSORT_OFF(awkward_argsort_float64_uint32, double, uint32_t)
+ARGSORT_OFF(awkward_argsort_float64_uint64, double, uint64_t)
+ARGSORT_OFF(awkward_argsort_float64_int64, double, int64_t)
