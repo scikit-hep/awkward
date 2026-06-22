@@ -4,12 +4,10 @@
 
 #include "awkward/kernels.h"
 
-// Per-bin product. See `awkward_reduce_sum` for the rationale; the
-// 4-accumulator unroll plus `__restrict__` qualifiers break the serial
-// dependency on `acc *= ...` and let gcc/clang autovectorise the body.
-// Multiplication is associative under integer wrap-around and floating-
-// point reordering at the same precision class as numpy's own reduction
-// (`ak.prod` has never guaranteed strictly-left-to-right order).
+// Per-bin product: serial left-to-right accumulation, matching the
+// kernel-specification.yml reference exactly. `__restrict__` lets the
+// compiler hoist `offsets[bin + 1]` and autovectorise the (associative)
+// integer cases on its own.
 template <typename OUT, typename IN>
 ERROR awkward_reduce_prod(
   OUT* __restrict__ toptr,
@@ -17,19 +15,8 @@ ERROR awkward_reduce_prod(
   const int64_t* __restrict__ offsets,
   int64_t outlength) {
   for (int64_t bin = 0; bin < outlength; bin++) {
-    const int64_t start = offsets[bin];
-    const int64_t stop  = offsets[bin + 1];
-    OUT a0 = static_cast<OUT>(1), a1 = static_cast<OUT>(1),
-        a2 = static_cast<OUT>(1), a3 = static_cast<OUT>(1);
-    int64_t i = start;
-    for (; i + 4 <= stop; i += 4) {
-      a0 *= static_cast<OUT>(fromptr[i + 0]);
-      a1 *= static_cast<OUT>(fromptr[i + 1]);
-      a2 *= static_cast<OUT>(fromptr[i + 2]);
-      a3 *= static_cast<OUT>(fromptr[i + 3]);
-    }
-    OUT acc = (a0 * a1) * (a2 * a3);
-    for (; i < stop; i++) {
+    OUT acc = static_cast<OUT>(1);
+    for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
       acc *= static_cast<OUT>(fromptr[i]);
     }
     toptr[bin] = acc;

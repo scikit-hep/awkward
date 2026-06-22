@@ -4,21 +4,10 @@
 
 #include "awkward/kernels.h"
 
-// Per-bin sum.
-//
-// Speed notes:
-//   * Four independent accumulators break the dependency chain on `acc`
-//     (the original `acc += ...` serialises through FP-add latency / single
-//     integer-add port). Out-of-order CPUs can keep 4 adds in flight, and
-//     once the body's data dependencies are independent the loop matches a
-//     vector-reduction pattern that gcc/clang autovectorise into SSE2 /
-//     AVX2 / AVX-512 (`vaddps`, `vpaddq`, ...).
-//   * `__restrict__` lets the compiler hoist `offsets[bin + 1]` out of the
-//     inner loop. Without it the standard pessimistically reloads it every
-//     iteration in case `fromptr` writes alias `offsets`.
-//   * The 4-way pairwise summation is no less stable than NumPy's own
-//     reduction (NumPy uses a similar pairwise scheme for floats);
-//     `ak.sum` has never guaranteed bit-exact left-to-right summation.
+// Per-bin sum: serial left-to-right accumulation, matching the
+// kernel-specification.yml reference exactly. `__restrict__` lets the
+// compiler hoist `offsets[bin + 1]` and autovectorise the (associative)
+// integer cases on its own.
 template <typename OUT, typename IN>
 ERROR awkward_reduce_sum(
   OUT* __restrict__ toptr,
@@ -26,18 +15,8 @@ ERROR awkward_reduce_sum(
   const int64_t* __restrict__ offsets,
   int64_t outlength) {
   for (int64_t bin = 0; bin < outlength; bin++) {
-    const int64_t start = offsets[bin];
-    const int64_t stop  = offsets[bin + 1];
-    OUT a0 = OUT{}, a1 = OUT{}, a2 = OUT{}, a3 = OUT{};
-    int64_t i = start;
-    for (; i + 4 <= stop; i += 4) {
-      a0 += static_cast<OUT>(fromptr[i + 0]);
-      a1 += static_cast<OUT>(fromptr[i + 1]);
-      a2 += static_cast<OUT>(fromptr[i + 2]);
-      a3 += static_cast<OUT>(fromptr[i + 3]);
-    }
-    OUT acc = (a0 + a1) + (a2 + a3);
-    for (; i < stop; i++) {
+    OUT acc = OUT{};
+    for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
       acc += static_cast<OUT>(fromptr[i]);
     }
     toptr[bin] = acc;
