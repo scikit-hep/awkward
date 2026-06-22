@@ -207,59 +207,10 @@ jobs:
           submodules: true
           persist-credentials: false
 
-      - name: Get micromamba
-        uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
+      - name: Set up GPU test environment
+        uses: ./.github/actions/setup-gpu-env
         with:
-          environment-name: test-env
-          init-shell: bash
-          # TODO: run the tests with cudf again when it supports numba-cuda>=0.23.0
-          create-args: >-
-            python=3.13
-            pandas>=0.24
-            cccl-python
-            cupy>=14
-            cuda-version=${{ matrix.cuda-version }}
-            cxx-compiler
-            numba-cuda
-
-      - name: Generate build files
-        run: |
-          pip install pipx
-          pipx run nox -s prepare -- --headers --signatures --tests
-
-      - name: Cache awkward-cpp wheel
-        id: cache-awkward-cpp-wheel
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: awkward-cpp/dist
-          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
-
-      - name: Build awkward-cpp wheel
-        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: |
-          python -m pip install build
-          python -m build -w awkward-cpp
-
-      - name: Find built wheel
-        uses: tj-actions/glob@2deae40528141fc53131606d56b4e4ce2a486b29 # v22.0.2
-        id: find-wheel
-        with:
-          files: |
-            awkward-cpp/dist/*.whl
-
-      - name: Add workaround for 3.13 + cramjam
-        run: echo 'PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1' >> $GITHUB_ENV
-        shell: bash
-
-      - name: Install awkward, awkward-cpp, and dependencies
-        run: >-
-          python -m pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
-          -r requirements-test-gpu.txt
-        env:
-          STEPS_FIND_WHEEL_OUTPUTS_PATHS: ${{ steps.find-wheel.outputs.paths }}
-
-      - name: Print versions
-        run: python -m pip list
+          cuda-version: ${{ matrix.cuda-version }}
 
       - name: Test CUDA kernels
         if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
